@@ -1,0 +1,29 @@
+---
+description: Electron 源码约定 — src/ 主进程、预加载、IPC
+globs: src/**/*
+alwaysApply: false
+---
+
+# Electron 源码约定
+
+## 架构
+
+- **主进程** `main.js`：窗口、托盘、热键、文件 IO
+- **预加载** `preload.js`：`contextBridge` 暴露最小 API
+- **渲染** `*.html`：无 Node 集成，经 IPC 通信
+
+## 安全
+
+- 渲染进程禁用 `nodeIntegration`
+- 禁止在 preload 外直接使用 `require('fs')`
+- 禁止 `eval()`、`debugger;`
+
+## 数据
+
+- 卡片：`%APPDATA%\sticky-notes\notes\`
+- 产品 OKF：`knowledge/` · 产品 Memory：`memory/`（均在用户数据目录）
+- 设置 → **知识库与记忆** 可导入/导出 OKF 包
+
+## 改后自检
+
+修改 `src/` 后运行 `npm test && npm run lint`。

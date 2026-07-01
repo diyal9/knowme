@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Sticky-Notes</title>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg-card:  #ffffff;
+  --bg-top:   #f8f7f4;
+  --bg-mid:   #f5f3ef;
+  --bg-deep:  #efecea;
+  --div:      rgba(0,0,0,0.07);
+  --text:     #1c1917;
+  --text2:    #6b6560;
+  --text3:    #b0a89e;
+  --accent:   #5558e8;
+  --accent-bg:rgba(85,88,232,0.07);
+  --accent-b: rgba(85,88,232,0.20);
+  --star:     #f59e0b;
+  --green:    #16a34a;
+  --amber:    #d97706;
+  --red:      #dc2626;
+  --r: 16px;
+  --ui:   'Segoe UI Variable','Segoe UI',system-ui,sans-serif;
+  --mono: 'Cascadia Code','JetBrains Mono',Consolas,monospace;
+}
+
+html, body {
+  width:100%; height:100%;
+  background:transparent; overflow:hidden;
+  user-select:none; -webkit-font-smoothing:antialiased;
+}
+
+/* ── 主卡片 ── */
+.card {
+  position:relative; width:100%; height:100%;
+  display:flex; flex-direction:column;
+  background:var(--bg-card);
+  border-radius:var(--r);
+  border:1px solid rgba(0,0,0,0.09);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 1px 3px rgba(0,0,0,0.05),
+    0 6px 20px rgba(0,0,0,0.08),
+    0 28px 64px rgba(0,0,0,0.07);
+  overflow:hidden;
+  animation:appear .18s cubic-bezier(.34,1.15,.64,1);
+}
+
+/* ── 顶栏 ── */
+.topbar {
+  height:34px; display:flex; align-items:center;
+  padding:0 10px;
+  background:var(--bg-top);
+  border-bottom:1px solid var(--div);
+  -webkit-app-region:drag; flex-shrink:0;
+}
+.topbar-logo {
+  font:600 11px var(--ui); letter-spacing:.2px; color:var(--text2);
+  flex:1;
+}
+.win-btns { display:flex; gap:3px; -webkit-app-region:no-drag; }
+.wbtn {
+  width:28px; height:28px; background:transparent; border:none; border-radius:6px;
+  color:#5a544e; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .12s, color .12s; outline:none;
+}
+.wbtn:hover { background:rgba(0,0,0,0.07); color:var(--text); }
+.wbtn.star.on { color:var(--star); }
+.wbtn.star.on .ico-star path { fill:var(--star); stroke:var(--star); stroke-width:1.75; }
+.wbtn.star:hover { color:var(--star); background:rgba(245,158,11,0.10); }
+.wbtn.pin.on { color:var(--accent); background:var(--accent-bg); }
+.wbtn.del:hover { background:rgba(220,38,38,0.10); color:var(--red); }
+
+/* 统一线型图标 — 16px 画布、加粗描边 */
+.ico {
+  display:flex; align-items:center; justify-content:center;
+  width:16px; height:16px; flex-shrink:0; pointer-events:none;
+}
+.ico svg {
+  width:16px; height:16px;
+  stroke:currentColor; fill:none;
+  stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round;
+  shape-rendering:geometricPrecision;
+}
+.ico-sm { width:14px; height:14px; }
+.ico-sm svg { width:14px; height:14px; stroke-width:1.75; }
+.ico-star path { fill:none; }
+.wbtn.star.on .ico-star path { fill:var(--star); stroke:var(--star); }
+
+/* ── 标题行 ── */
+.title-row {
+  padding:11px 13px 9px;
+  background:var(--bg-card);
+  border-bottom:1px solid var(--div);
+  display:flex; align-items:center; gap:8px; flex-shrink:0;
+}
+.title-input {
+  flex:1; background:transparent; border:none; outline:none;
+  font:600 14.5px var(--ui); color:var(--text); letter-spacing:-.1px;
+  cursor:text; user-select:text; -webkit-user-select:text;
+}
+.title-input::placeholder { color:var(--text3); font-weight:400; font-style:italic; }
+.title-input.generating { color:var(--text3); font-style:italic; }
+
+.ver-wrap { flex-shrink:0; display:flex; align-items:center; gap:5px; }
+.ver-display {
+  display:inline-flex; align-items:center;
+  font:600 9.5px/1 var(--ui); letter-spacing:.5px;
+  color:var(--accent); background:var(--accent-bg);
+  border:1px solid var(--accent-b);
+  padding:3px 8px; border-radius:20px; cursor:pointer;
+  transition:background .12s;
+}
+.ver-display:hover { background:rgba(85,88,232,0.13); }
+.ver-display.hidden { display:none; }
+.ver-input {
+  width:56px; background:var(--accent-bg);
+  border:1px solid var(--accent-b); border-radius:20px;
+  padding:3px 8px; font:600 9.5px/1 var(--ui); color:var(--accent);
+  outline:none; display:none;
+}
+.ver-input.visible { display:inline-block; }
+
+/* ── 主工作区（普通 / AI 左右分栏）── */
+.workspace {
+  flex:1; display:flex; flex-direction:column;
+  min-height:0; overflow:hidden;
+}
+.editor-pane {
+  flex:1; display:flex; flex-direction:column;
+  min-height:0; min-width:0;
+}
+.card.ai-open .workspace { flex-direction:row; }
+.card.ai-open .ai-toggle { display:none; }
+
+/* ── AI 左栏（对话）── */
+.ai-pane {
+  display:none; flex-direction:column;
+  flex:0 0 400px; width:400px; max-width:46%;
+  background:var(--bg-mid); border-right:1px solid var(--div);
+}
+.card.ai-open .ai-pane { display:flex; }
+
+.ai-pane-head {
+  display:flex; align-items:center; gap:8px;
+  padding:8px 12px; flex-shrink:0;
+  background:var(--bg-top); border-bottom:1px solid var(--div);
+}
+.ai-pane-title { font:600 11px var(--ui); color:var(--text); flex:1; }
+.ai-pane-close {
+  background:transparent; border:1px solid rgba(0,0,0,0.10);
+  border-radius:6px; padding:3px 8px;
+  font:500 10px var(--ui); color:var(--text2); cursor:pointer;
+}
+.ai-pane-close:hover { background:var(--bg-card); color:var(--text); }
+
+.chat-log {
+  flex:1; overflow-y:auto; padding:10px 12px;
+  display:flex; flex-direction:column; gap:10px;
+  min-height:0;
+}
+.chat-empty {
+  font:11px/1.6 var(--ui); color:var(--text3); text-align:center;
+  padding:24px 8px;
+}
+.chat-bubble {
+  max-width:96%; padding:8px 10px; border-radius:10px;
+  font:12px/1.65 var(--ui); word-break:break-word;
+  user-select:text; -webkit-user-select:text;
+}
+.chat-bubble.user {
+  align-self:flex-end; background:var(--accent); color:#fff;
+  border-bottom-right-radius:4px;
+}
+.chat-bubble.assistant {
+  align-self:flex-start; background:var(--bg-card);
+  border:1px solid var(--div); color:var(--text);
+  border-bottom-left-radius:4px;
+}
+.chat-bubble.loading { color:var(--text3); font-style:italic; border-style:dashed; }
+.chat-bubble.streaming .stream-cursor {
+  display:inline-block; margin-left:1px; color:var(--accent);
+  animation:stream-blink 0.9s step-end infinite;
+}
+@keyframes stream-blink { 50% { opacity:0; } }
+.chat-bubble.err { border-color:rgba(220,38,38,0.25); background:rgba(220,38,38,0.05); color:var(--red); }
+.chat-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+.chat-act {
+  font:500 10px var(--ui); color:var(--accent);
+  background:var(--accent-bg); border:1px solid var(--accent-b);
+  border-radius:6px; padding:3px 8px; cursor:pointer;
+}
+.chat-act:hover { background:rgba(85,88,232,0.14); }
+.chat-act.subtle { color:var(--text2); background:transparent; border-color:rgba(0,0,0,0.10); }
+
+.ai-pane-foot {
+  flex-shrink:0; padding:10px 12px 12px;
+  border-top:1px solid var(--div); background:var(--bg-top);
+  display:flex; flex-direction:column; gap:8px;
+}
+
+.wbtn.expand.on { color:var(--accent); background:var(--accent-bg); }
+
+/* ── 编辑区 ── */
+.editor-wrap { flex:1; position:relative; overflow:hidden; }
+textarea#editor {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  padding:13px 14px 10px;
+  background:transparent; border:none; outline:none; resize:none;
+  font:13px/1.9 var(--mono);
+  color:var(--text); caret-color:var(--accent);
+  user-select:text; -webkit-user-select:text;
+  overflow-y:auto; letter-spacing:.01em;
+}
+textarea#editor::placeholder {
+  font:13px/1.7 var(--ui); font-style:italic; color:var(--text3);
+}
+
+/* ── 变量提示栏 ── */
+.var-bar {
+  display:none;
+  padding:5px 13px;
+  background:rgba(85,88,232,0.05);
+  border-top:1px solid rgba(85,88,232,0.10);
+  flex-shrink:0;
+}
+.var-bar.visible { display:flex; align-items:center; gap:5px; }
+.var-bar-label { font:10px var(--ui); color:var(--text3); flex-shrink:0; }
+.var-chips { display:flex; flex-wrap:wrap; gap:4px; flex:1; min-width:0; }
+.var-chip {
+  font:500 10px var(--ui); color:var(--accent);
+  background:var(--accent-bg); border:1px solid var(--accent-b);
+  padding:2px 7px; border-radius:20px; white-space:nowrap;
+}
+
+/* ── 底栏 ── */
+.footer {
+  display:flex; align-items:center;
+  padding:7px 12px; gap:8px;
+  background:var(--bg-top);
+  border-top:1px solid var(--div);
+  flex-shrink:0;
+}
+.footer-meta { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }
+.save-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:var(--text3); flex-shrink:0; transition:background .3s;
+}
+.save-time { font:11px var(--ui); color:var(--text3); transition:color .3s; white-space:nowrap; }
+.footer-sep { color:var(--text3); font:11px var(--ui); flex-shrink:0; }
+.footer-cnt { font:11px var(--ui); color:var(--text3); flex-shrink:0; }
+.copy-count { font:10px var(--ui); color:var(--text3); flex-shrink:0; margin-left:2px; }
+
+.footer-meta.dirty .save-dot  { background:var(--amber); }
+.footer-meta.dirty .save-time { color:var(--amber); }
+.footer-meta.saved .save-dot  { background:var(--green); }
+.footer-meta.saved .save-time { color:var(--green); }
+
+/* 复制按钮 — 扁平边框风格 */
+.btn-copy-primary {
+  display:flex; align-items:center; gap:4px; flex-shrink:0;
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.13);
+  border-radius:7px; padding:5px 11px;
+  font:500 11.5px var(--ui); color:var(--text2); cursor:pointer;
+  transition:background .12s, border-color .12s, color .12s; outline:none;
+}
+.btn-copy-primary:hover  { background:var(--bg-mid); border-color:rgba(0,0,0,0.18); color:var(--text); }
+.btn-copy-primary:active { transform:scale(.96); }
+.btn-copy-primary.copied { color:var(--green); border-color:rgba(22,163,74,0.30); background:rgba(22,163,74,0.05); }
+
+/* ── AI 折叠条（未展开时）── */
+.ai-toggle {
+  display:flex; align-items:center; gap:6px;
+  padding:7px 13px; border-top:1px solid var(--div);
+  background:var(--bg-mid); cursor:pointer;
+  transition:background .12s; flex-shrink:0; user-select:none;
+}
+.ai-toggle:hover { background:var(--bg-deep); }
+.ai-toggle-label { font:500 11px var(--ui); color:var(--text2); flex:1; }
+.ai-toggle-hint  { font:10px var(--ui); color:var(--text3); }
+.ai-toggle-arrow { color:var(--text3); }
+.ai-toggle-arrow .ico svg { width:12px; height:12px; stroke-width:1.75; }
+
+.quick-row { display:flex; gap:5px; flex-wrap:wrap; }
+.quick-chip {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--bg-card); border:1px solid rgba(0,0,0,0.11);
+  border-radius:20px; padding:5px 11px 5px 9px;
+  font:500 11.5px var(--ui); color:var(--text); cursor:pointer;
+  transition:background .12s, border-color .12s, color .12s; outline:none;
+}
+.quick-chip .ico { color:#5a544e; transition:color .12s; }
+.quick-chip:hover { background:var(--accent-bg); border-color:var(--accent-b); color:var(--accent); }
+.quick-chip:hover .ico { color:var(--accent); }
+.quick-chip:active { transform:scale(.96); }
+
+.ai-input-row { display:flex; align-items:flex-end; gap:6px; }
+textarea#aiInput {
+  flex:1; background:var(--bg-card); border:1px solid rgba(0,0,0,0.10);
+  border-radius:8px; padding:7px 11px; min-height:36px; max-height:88px;
+  font:12px/1.5 var(--ui); color:var(--text); outline:none; caret-color:var(--accent);
+  resize:none; transition:border-color .14s, box-shadow .14s;
+  user-select:text; -webkit-user-select:text;
+}
+textarea#aiInput::placeholder { color:var(--text3); }
+textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px rgba(85,88,232,0.07); }
+
+.ai-go {
+  width:32px; height:32px;
+  background:var(--accent-bg); border:1px solid var(--accent-b);
+  border-radius:8px; color:var(--accent); cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  transition:background .12s; outline:none;
+}
+.ai-go:hover  { background:rgba(85,88,232,0.14); }
+.ai-go:active { transform:scale(.90); }
+.ai-go:disabled { opacity:.4; cursor:default; }
+
+
+.btn-copy-primary .ico { color:#5a544e; transition:color .12s; }
+.btn-copy-primary:hover .ico { color:var(--text); }
+.btn-copy-primary.copied .ico { color:var(--green); }
+
+/* 滚动条 */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.10); border-radius:2px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(85,88,232,0.25); }
+
+@keyframes appear {
+  from { opacity:0; transform:scale(.96) translateY(8px); }
+  to   { opacity:1; transform:scale(1)   translateY(0); }
+}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+
+  <!-- 顶栏 -->
+  <div class="topbar">
+    <span class="topbar-logo">Sticky-Notes</span>
+    <div class="win-btns">
+      <button class="wbtn star" id="btnStar" title="收藏">
+        <span class="ico ico-star" id="icoStar" data-icon="star"></span>
+      </button>
+      <button class="wbtn pin" id="btnPin" title="置顶">
+        <span class="ico" data-icon="pin"></span>
+      </button>
+      <button class="wbtn expand" id="btnExpand" title="放大模式">
+        <span class="ico ico-expand" data-icon="expand"></span>
+        <span class="ico ico-shrink" style="display:none" data-icon="shrink"></span>
+      </button>
+      <button class="wbtn" id="btnHide" title="隐藏  Esc">
+        <span class="ico" data-icon="minimize"></span>
+      </button>
+      <button class="wbtn del" id="btnDel" title="删除">
+        <span class="ico" data-icon="close"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="workspace" id="workspace">
+
+    <!-- AI 左栏：对话 -->
+    <aside class="ai-pane" id="aiPane">
+      <div class="ai-pane-head">
+        <span class="ico ico-sm" style="color:var(--accent)" data-icon="chat"></span>
+        <span class="ai-pane-title">AI 助写</span>
+        <button class="ai-pane-close" id="aiClose" type="button">收起</button>
+      </div>
+      <div class="chat-log" id="chatLog">
+        <div class="chat-empty">描述需求或点快捷指令，AI 会在这里对话<br>生成结果可应用到右侧编辑区</div>
+      </div>
+      <div class="ai-pane-foot">
+        <div class="quick-row">
+          <button class="quick-chip" data-p="优化这段提示词，让它更清晰准确、减少歧义，直接输出优化后的提示词">
+            <span class="ico ico-sm" data-icon="optimize"></span>优化
+          </button>
+          <button class="quick-chip" data-p="在保留原意的前提下扩展这段提示词，补充更多细节和约束条件">
+            <span class="ico ico-sm" data-icon="expandText"></span>扩展
+          </button>
+          <button class="quick-chip" data-p="精简这段提示词，去掉冗余，只保留核心意图，直接输出精简后的提示词">
+            <span class="ico ico-sm" data-icon="simplify"></span>精简
+          </button>
+          <button class="quick-chip" data-p="将下面这段提示词翻译成英文，保持原意">
+            <span class="ico ico-sm" data-icon="en"></span>EN
+          </button>
+        </div>
+        <div class="ai-input-row">
+          <textarea id="aiInput" rows="1" placeholder="描述你的需求… Enter 发送，Shift+Enter 换行" spellcheck="false"></textarea>
+          <button class="ai-go" id="aiSend" title="发送" type="button">
+            <span class="ico ico-sm" data-icon="send"></span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 右栏：编辑区 -->
+    <section class="editor-pane">
+      <div class="title-row">
+        <input class="title-input" id="inpProject"
+               placeholder="Untitled prompt…" maxlength="40" spellcheck="false">
+        <div class="ver-wrap">
+          <span class="ver-display" id="verDisplay">v0.1</span>
+          <input class="ver-input"  id="verInput" maxlength="12" spellcheck="false">
+        </div>
+      </div>
+      <div class="editor-wrap">
+        <textarea id="editor"
+          placeholder="Write your prompt here…&#10;&#10;Tip: use {{variable}} for dynamic placeholders&#10;Open AI assist below for side-by-side editing"></textarea>
+      </div>
+      <div class="var-bar" id="varBar">
+        <span class="var-bar-label">Variables</span>
+        <div class="var-chips" id="varChips"></div>
+      </div>
+      <div class="footer">
+        <div class="footer-meta" id="footerMeta">
+          <span class="save-dot"></span>
+          <span class="save-time" id="saveTime">—</span>
+          <span class="footer-sep">·</span>
+          <span class="footer-cnt" id="cnt">0</span>
+          <span class="copy-count" id="copyCountEl"></span>
+        </div>
+        <button class="btn-copy-primary" id="btnCopy">
+          <span class="ico ico-sm" id="copyIcon" data-icon="copy"></span>
+          <span id="copyText">Copy</span>
+        </button>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 底部 AI 入口（未展开时） -->
+  <div class="ai-toggle" id="aiToggle">
+    <span class="ico ico-sm" style="color:var(--accent)" data-icon="chat"></span>
+    <span class="ai-toggle-label">AI 助写</span>
+    <span class="ai-toggle-hint">左右分栏 · 对话编写</span>
+    <span class="ai-toggle-arrow"><span class="ico" data-icon="chevronRight"></span></span>
+  </div>
+
+</div>
+
+<script src="ui-icons.js"></script>
+<script>
+StickyIcons.mount()
+let note=null, saveTimer=null, aiOpen=false, chatHistory=[], expanded=false
+let titleManual=false, titleTimer=null, titleReq=0
+
+const card      = document.getElementById('card')
+const editor    = document.getElementById('editor')
+const inpProj   = document.getElementById('inpProject')
+const verDisp   = document.getElementById('verDisplay')
+const verInput  = document.getElementById('verInput')
+const btnPin    = document.getElementById('btnPin')
+const btnStar   = document.getElementById('btnStar')
+const cntEl     = document.getElementById('cnt')
+const ccEl      = document.getElementById('copyCountEl')
+const footerM   = document.getElementById('footerMeta')
+const saveTime  = document.getElementById('saveTime')
+const btnCopy   = document.getElementById('btnCopy')
+const copyIcon  = document.getElementById('copyIcon')
+const copyText  = document.getElementById('copyText')
+const varBar    = document.getElementById('varBar')
+const varChips  = document.getElementById('varChips')
+const aiToggle  = document.getElementById('aiToggle')
+const aiClose   = document.getElementById('aiClose')
+const chatLog   = document.getElementById('chatLog')
+const aiInput   = document.getElementById('aiInput')
+const aiSend    = document.getElementById('aiSend')
+const btnExpand = document.getElementById('btnExpand')
+
+// ── 工具 ──────────────────────────────────────────────────────────────────────
+function relTime(iso) {
+  if (!iso) return '—'
+  const s = (Date.now()-new Date(iso))/1000
+  if (s<5)    return '刚刚'
+  if (s<60)   return `${Math.floor(s)}s 前`
+  if (s<3600) return `${Math.floor(s/60)}m 前`
+  if (s<86400)return `${Math.floor(s/3600)}h 前`
+  return `${Math.floor(s/86400)}d 前`
+}
+
+// ── 变量检测 {{...}} ─────────────────────────────────────────────────────────
+function detectVars(text) {
+  const matches = [...text.matchAll(/\{\{([^}]+)\}\}/g)]
+  return [...new Set(matches.map(m => m[1].trim()))].filter(Boolean)
+}
+function updateVarBar(text) {
+  const vars = detectVars(text)
+  if (vars.length === 0) { varBar.classList.remove('visible'); return }
+  varBar.classList.add('visible')
+  varChips.innerHTML = vars.map(v => `<span class="var-chip">{{${v}}}</span>`).join('')
+}
+
+// ── 存档状态 ──────────────────────────────────────────────────────────────────
+function markDirty() { footerM.className='footer-meta dirty'; saveTime.textContent='编辑中…' }
+function markSaved() {
+  footerM.className='footer-meta saved'; saveTime.textContent='已保存'
+  setTimeout(()=>{ footerM.className='footer-meta'; saveTime.textContent=relTime(note?.updatedAt) }, 1800)
+}
+function schedSave() {
+  markDirty(); clearTimeout(saveTimer)
+  saveTimer = setTimeout(()=>{
+    if (!note) return
+    window.api.updateNote({
+      id: note.id,
+      content: editor.value,
+      project: inpProj.value.trim(),
+      projectManual: titleManual,
+      version: note.version || '0.1',
+    })
+    markSaved()
+  }, 700)
+}
+
+// ── 标题自动提炼 ──────────────────────────────────────────────────────────────
+function getFirstParagraph(text) {
+  const trimmed = (text || '').trim()
+  if (!trimmed) return ''
+  const blank = trimmed.search(/\n\s*\n/)
+  return (blank >= 0 ? trimmed.slice(0, blank) : trimmed).trim()
+}
+
+function shouldAutoTitle() {
+  return !titleManual && !inpProj.value.trim()
+}
+
+function applyAutoTitle(title) {
+  const t = (title || '').trim().slice(0, 40)
+  if (!t || !shouldAutoTitle()) return
+  inpProj.value = t
+  if (note) note.project = t
+  schedSave()
+}
+
+function scheduleAutoTitle(delay = 1500) {
+  if (!shouldAutoTitle()) return
+  clearTimeout(titleTimer)
+  titleTimer = setTimeout(maybeAutoTitle, delay)
+}
+
+async function maybeAutoTitle() {
+  if (!note || !shouldAutoTitle()) return
+  const para = getFirstParagraph(editor.value)
+  if (para.length < 10) return
+
+  const req = ++titleReq
+  inpProj.classList.add('generating')
+  const prevPh = inpProj.placeholder
+  inpProj.placeholder = '提炼标题中…'
+
+  try {
+    const result = await window.api.aiSuggestTitle({ content: editor.value })
+    if (req !== titleReq || !shouldAutoTitle()) return
+    if (result.title) applyAutoTitle(result.title)
+  } finally {
+    if (req === titleReq) {
+      inpProj.classList.remove('generating')
+      inpProj.placeholder = prevPh
+    }
+  }
+}
+
+// ── 版本 ──────────────────────────────────────────────────────────────────────
+function setVersion(v) { if(note)note.version=v; verDisp.textContent=`v${v}` }
+verDisp.addEventListener('click', ()=>{
+  verInput.value = note?.version||'0.1'
+  verDisp.classList.add('hidden'); verInput.classList.add('visible')
+  verInput.focus(); verInput.select()
+})
+function commitVer() {
+  const v = verInput.value.trim()||'0.1'; setVersion(v)
+  verDisp.classList.remove('hidden'); verInput.classList.remove('visible'); schedSave()
+}
+verInput.addEventListener('blur', commitVer)
+verInput.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){e.preventDefault();commitVer()}
+  if(e.key==='Escape'){verDisp.classList.remove('hidden');verInput.classList.remove('visible')}
+})
+
+// ── 编辑器 ────────────────────────────────────────────────────────────────────
+editor.addEventListener('input', ()=>{
+  cntEl.textContent = editor.value.length
+  updateVarBar(editor.value)
+  if(note){ note.content=editor.value; schedSave() }
+  scheduleAutoTitle()
+})
+inpProj.addEventListener('input', ()=>{
+  const v = inpProj.value.trim()
+  titleManual = v.length > 0
+  if (note) { note.project = v; note.projectManual = titleManual; schedSave() }
+})
+editor.addEventListener('keydown', e=>{
+  if(e.key==='Tab'){ e.preventDefault(); const s=editor.selectionStart; editor.value=editor.value.slice(0,s)+'  '+editor.value.slice(editor.selectionEnd); editor.selectionStart=editor.selectionEnd=s+2; schedSave() }
+  if(e.key==='Escape') window.api.hideNote(note?.id)
+  if(e.ctrlKey&&e.key==='s'){ e.preventDefault(); clearTimeout(saveTimer); if(note){window.api.updateNote({id:note.id,content:editor.value,project:inpProj.value.trim(),projectManual:titleManual,version:note.version||'0.1'});markSaved()} }
+  if(e.ctrlKey&&e.shiftKey&&e.key==='C'){ e.preventDefault(); copyContent() }
+})
+
+// ── 复制 ──────────────────────────────────────────────────────────────────────
+function copyContent() {
+  const text = editor.value.trim(); if (!text) return
+  const doCopy = () => {
+    btnCopy.classList.add('copied')
+    copyIcon.innerHTML = StickyIcons.svg('check')
+    copyText.textContent = 'Copied!'
+    if(note){ window.api.incrementCopy(note.id); note.copyCount=(note.copyCount||0)+1; updateCopyCount() }
+    setTimeout(()=>{ btnCopy.classList.remove('copied'); copyIcon.innerHTML = StickyIcons.svg('copy'); copyText.textContent='Copy' }, 1600)
+  }
+  navigator.clipboard.writeText(text).then(doCopy).catch(()=>{ window.api.copyToClipboard(text); doCopy() })
+}
+function updateCopyCount() {
+  const c = note?.copyCount || 0
+  ccEl.textContent = c > 0 ? `· 已复制 ${c}×` : ''
+}
+
+btnCopy.addEventListener('click', copyContent)
+
+// ── 收藏 ──────────────────────────────────────────────────────────────────────
+function setFavorite(v) {
+  if(note) note.favorite = v
+  btnStar.classList.toggle('on', v)
+}
+btnStar.addEventListener('click', ()=>{ if(note) window.api.toggleFavorite(note.id) })
+window.api.favoriteChanged(v => setFavorite(v))
+
+// ── 右键 + 远程命令 ──────────────────────────────────────────────────────────
+document.getElementById('card').addEventListener('contextmenu', e=>{ e.preventDefault(); if(note)window.api.showContextMenu(note.id) })
+window.api.onCopy(copyContent)
+window.api.onDelete(()=>note&&window.api.deleteNote(note.id))
+
+// ── 窗口控制 ─────────────────────────────────────────────────────────────────
+btnPin.addEventListener('click',  ()=>note&&window.api.togglePin(note.id))
+btnExpand.addEventListener('click', async () => {
+  if (!note) return
+  const r = await window.api.toggleExpand(note.id, aiOpen)
+  if (r?.ok) syncLayoutState(r)
+})
+document.getElementById('btnHide').addEventListener('click', ()=>note&&window.api.hideNote(note.id))
+document.getElementById('btnDel') .addEventListener('click', ()=>note&&window.api.deleteNote(note.id))
+window.api.pinChanged(p=>{ if(note)note.pinned=p; btnPin.classList.toggle('on',!!p) })
+
+function setExpandUI(on) {
+  expanded = on
+  btnExpand.classList.toggle('on', on)
+  btnExpand.title = on ? '还原精简尺寸' : (aiOpen ? '放大分栏' : '放大编辑区')
+  btnExpand.querySelector('.ico-expand').style.display = on ? 'none' : ''
+  btnExpand.querySelector('.ico-shrink').style.display = on ? '' : 'none'
+}
+
+function syncLayoutState(state) {
+  if (!state) return
+  if (state.aiOpen !== undefined && state.aiOpen !== aiOpen) {
+    aiOpen = state.aiOpen
+    card.classList.toggle('ai-open', aiOpen)
+  }
+  if (state.expanded !== undefined) setExpandUI(state.expanded)
+}
+
+window.api.onLayoutChanged(syncLayoutState)
+
+// ── AI 左右分栏 ─────────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+}
+
+function renderChat() {
+  if (!chatHistory.length) {
+    chatLog.innerHTML = '<div class="chat-empty">描述需求或点快捷指令，AI 会在这里对话<br>生成结果可应用到右侧编辑区</div>'
+    return
+  }
+  chatLog.innerHTML = chatHistory.map((m, i) => {
+    if (m.role === 'loading') return `<div class="chat-bubble assistant loading">${escHtml(m.text)}</div>`
+    if (m.role === 'error') return `<div class="chat-bubble assistant err">${escHtml(m.text)}</div>`
+    if (m.role === 'user') return `<div class="chat-bubble user">${escHtml(m.text)}</div>`
+    const streamCls = m.streaming ? ' streaming' : ''
+    const cursor = m.streaming ? '<span class="stream-cursor">▍</span>' : ''
+    const actions = (!m.streaming && m.text) ? `<div class="chat-actions">
+      <button class="chat-act" data-act="replace" data-idx="${i}">替换正文</button>
+      <button class="chat-act subtle" data-act="append" data-idx="${i}">追加到文末</button>
+    </div>` : ''
+    return `<div class="chat-bubble assistant${streamCls}" data-idx="${i}"><span class="chat-text">${escHtml(m.text)}</span>${cursor}${actions}</div>`
+  }).join('')
+  chatLog.scrollTop = chatLog.scrollHeight
+}
+
+function updateStreamText(idx) {
+  const bubble = chatLog.querySelector(`[data-idx="${idx}"]`)
+  const m = chatHistory[idx]
+  if (!bubble || !m) { renderChat(); return }
+  const textEl = bubble.querySelector('.chat-text')
+  if (textEl) textEl.textContent = m.text
+  chatLog.scrollTop = chatLog.scrollHeight
+}
+
+const TYPEWRITER_MS = 12
+
+async function revealTypewriter(idx, fullText) {
+  chatHistory[idx].streaming = true
+  chatHistory[idx].text = ''
+  renderChat()
+  for (const ch of Array.from(fullText)) {
+    chatHistory[idx].text += ch
+    updateStreamText(idx)
+    await new Promise(r => setTimeout(r, TYPEWRITER_MS))
+  }
+}
+
+function applyAssistantText(text, mode) {
+  if (!text) return
+  if (mode === 'replace') {
+    editor.value = text
+  } else {
+    const sep = editor.value.trim() ? '\n\n---\n' : ''
+    editor.value += sep + text
+  }
+  cntEl.textContent = editor.value.length
+  updateVarBar(editor.value)
+  if (note) { note.content = editor.value; schedSave() }
+  scheduleAutoTitle(400)
+}
+
+chatLog.addEventListener('click', e => {
+  const btn = e.target.closest('[data-act]')
+  if (!btn) return
+  const m = chatHistory[+btn.dataset.idx]
+  if (!m || m.role !== 'assistant') return
+  applyAssistantText(m.text, btn.dataset.act)
+})
+
+async function setAiOpen(open) {
+  aiOpen = open
+  card.classList.toggle('ai-open', open)
+  if (note) {
+    const r = await window.api.setAiMode(note.id, open)
+    if (r?.ok) syncLayoutState(r)
+  }
+  if (open) setTimeout(() => aiInput.focus(), 200)
+}
+
+aiToggle.addEventListener('click', () => setAiOpen(true))
+aiClose.addEventListener('click', () => setAiOpen(false))
+
+document.querySelectorAll('.quick-chip').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation()
+    aiInput.value = btn.dataset.p
+    if (!aiOpen) setAiOpen(true)
+    setTimeout(runAI, 40)
+  })
+})
+
+aiInput.addEventListener('input', () => {
+  aiInput.style.height = 'auto'
+  aiInput.style.height = Math.min(aiInput.scrollHeight, 88) + 'px'
+})
+
+async function runAI() {
+  const prompt = aiInput.value.trim()
+  if (!prompt || !note) return
+  if (!aiOpen) await setAiOpen(true)
+
+  chatHistory.push({ role: 'user', text: prompt })
+  chatHistory.push({ role: 'assistant', text: '', streaming: true })
+  const assistantIdx = chatHistory.length - 1
+  renderChat()
+
+  aiSend.disabled = true
+  aiInput.value = ''
+  aiInput.style.height = 'auto'
+
+  let gotStream = false
+  const offChunk = window.api.onAiStreamChunk(({ text }) => {
+    gotStream = true
+    chatHistory[assistantIdx].text = text
+    updateStreamText(assistantIdx)
+  })
+
+  try {
+    const result = await window.api.aiGenerate({ prompt, context: editor.value.trim() || null })
+    offChunk()
+
+    if (result.error) {
+      chatHistory.splice(assistantIdx, 1)
+      chatHistory.push({ role: 'error', text: result.error })
+      renderChat()
+      return
+    }
+
+    const finalText = (result.text || '').trim()
+    if (!gotStream && finalText) {
+      await revealTypewriter(assistantIdx, finalText)
+    } else {
+      chatHistory[assistantIdx].text = finalText
+    }
+    chatHistory[assistantIdx].streaming = false
+    renderChat()
+  } catch (err) {
+    offChunk()
+    chatHistory.splice(assistantIdx, 1)
+    chatHistory.push({ role: 'error', text: err.message || '生成失败' })
+    renderChat()
+  } finally {
+    aiSend.disabled = false
+  }
+}
+
+aiSend.addEventListener('click', runAI)
+aiInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runAI() }
+})
+
+// ── 初始化 ────────────────────────────────────────────────────────────────────
+window.api.initNote(n=>{
+  note=n
+  editor.value   = n.content  || ''
+  inpProj.value  = n.project  || ''
+  titleManual    = n.projectManual ?? !!n.project?.trim()
+  setVersion(n.version || '0.1')
+  setFavorite(n.favorite || false)
+  cntEl.textContent = (n.content||'').length
+  saveTime.textContent = relTime(n.updatedAt||n.createdAt)
+  btnPin.classList.toggle('on', n.pinned!==false)
+  if (n.aiOpen) {
+    aiOpen = true
+    card.classList.add('ai-open')
+  }
+  setExpandUI(!!n.expanded)
+  updateCopyCount()
+  updateVarBar(editor.value)
+  const empty=!n.content?.trim(), noName=!n.project?.trim()
+  if (n.content?.trim() && !n.project?.trim()) scheduleAutoTitle(600)
+  if(empty&&noName) setTimeout(()=>inpProj.focus(),80)
+  else if(empty)    setTimeout(()=>editor.focus(),80)
+})
+setInterval(()=>{ if(note&&footerM.className==='footer-meta') saveTime.textContent=relTime(note.updatedAt||note.createdAt) }, 20000)
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+---
+description: Agent Harness — 会话 preflight、门禁脚本、Script > Prompt
+alwaysApply: true
+---
+
+# Agent Harness
+
+## 1. 会话前 Preflight（MUST）
+
+首次执行 Shell / 宣称 Story 完成前：
+
+```bash
+node .cursor/scripts/harness.js preflight --json
+# 或
+npm run harness:preflight
+```
+
+若 `needs_fix=true` 或 `missing_files` 非空，先修复再开发。
+
+## 2. Story 完成门禁（MUST）
+
+`/story-done` 或 git commit 前：
+
+```bash
+node .cursor/scripts/harness.js gate --json
+# 或
+npm run harness:gate
+```
+
+| 级别 | 检查项 | 失败处理 |
+|------|--------|----------|
+| 硬 | `npm test` | BLOCKING |
+| 硬 | `npm run lint` | BLOCKING |
+| 软 | qa-plan + Smoke Scope | ADVISORY |
+| 软 | code-review.md | ADVISORY |
+
+## 3. Script > Prompt
+
+- 门禁 **MUST** 用 harness 脚本验证，**MUST NOT** 仅凭 Agent 自述「测试通过」
+- 证据路径：`openspec/changes/<name>/evidence/`
+
+## 4. 诊断
+
+```bash
+node .cursor/scripts/harness.js doctor --json
+```
+
+## 5. 导航
+
+- 总纲：`AGENTS.md`
+- 宪章：`team/charter.md`
+- Hooks：`.cursor/hooks.json`

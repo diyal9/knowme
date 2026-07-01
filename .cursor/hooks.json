@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py sessionStart"
+      },
+      {
+        "command": "node .cursor/hooks/session-start.js"
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py sessionEnd"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py beforeSubmitPrompt"
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py afterAgentResponse"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py postToolUse"
+      }
+    ],
+    "afterMCPExecution": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py afterMCPExecution"
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py preCompact"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/dangerous-command-guard.js",
+        "failClosed": false
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/after-src-edit.js",
+        "matcher": "Write|StrReplace|EditNotebook"
+      }
+    ],
+    "stop": [
+      {
+        "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py stop"
+      },
+      {
+        "command": "node .cursor/hooks/stop-gate-reminder.js",
+        "loop_limit": 1
+      }
+    ]
+  }
+}

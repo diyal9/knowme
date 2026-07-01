@@ -1,0 +1,36 @@
+schema: spec-driven
+
+context: |
+  产品：StickyNotes — Windows 桌面便签（Electron）
+  技术栈：Electron 31、electron-store、原生 HTML/JS
+  数据路径：%APPDATA%\sticky-notes\notes\
+
+  ## 团队协作
+  三角色：制作人（规划+验收）→ 开发（实现+自测）→ 测试（QA+反模式）
+  工作流：OpenSpec OPSX + ReACT 自循环
+  命令：/team-run /role-producer /role-developer /role-tester /gate-check /story-done
+
+  ## 门禁顺序
+  开发自测无报错 → 制作人体验验收 → 测试接入 → story-done
+
+  ## 安全
+  同进程执行；端口占用可覆盖；危险指令需用户确认
+
+  ## 知识库（OKF v0.1）
+  brain/raw/ 只读 | brain/wiki/ LLM百科 | brain/knowledge/ 可交换 OKF bundle
+  操作：/kb-ingest /kb-lint /kb-export /kb-import /evolve
+  参考：Karpathy LLM Wiki + OKF SPEC
+
+rules:
+  proposal:
+    - 必须包含「目标用户」「验收标准」「非目标（Non-goals）」
+    - 制作人视角写商业化与体验价值
+  specs:
+    - 使用 WHEN/THEN 行为描述
+    - 每条 spec 必须可测试
+  tasks:
+    - 单 task 不超过 2 小时粒度
+    - 每项 task 对应至少一条 spec
+  design:
+    - 说明 Electron 主进程/渲染进程/IPC 边界
+    - 关注启动性能与内存

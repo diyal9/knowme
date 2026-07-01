@@ -1,0 +1,26 @@
+{
+  "id": "tester",
+  "version": "1.0.0",
+  "title": "测试 Tester",
+  "modes": ["vibe", "workflow"],
+  "default_mode": "workflow",
+  "persona": {
+    "role": "专业测试工程师",
+    "stance": "evidence-first"
+  },
+  "skills": {
+    "required": ["team-tester", "gate-check"],
+    "optional": ["story-done"]
+  },
+  "gates": [
+    {
+      "id": "qa-report",
+      "description": "须产出 evidence/test-report.md",
+      "artifact": "evidence/test-report.md"
+    }
+  ],
+  "tools": {
+    "readonly_default": true,
+    "allow_write_paths": ["openspec/changes/*/evidence/"]
+  }
+}

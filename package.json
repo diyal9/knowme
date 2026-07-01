@@ -1,0 +1,41 @@
+{
+  "name": "sticky-notes",
+  "version": "0.1.0",
+  "description": "桌面便签工具",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "test": "node --test tests/*.test.js",
+    "lint": "node scripts/lint.js",
+    "harness:check": "node .cursor/scripts/harness.js check",
+    "harness:preflight": "node .cursor/scripts/harness.js preflight",
+    "harness:gate": "node .cursor/scripts/harness.js gate",
+    "harness:doctor": "node .cursor/scripts/harness.js doctor",
+    "kb:lint": "node scripts/okf-lint.js",
+    "kb:export": "node scripts/okf-export.js",
+    "kb:import": "node scripts/okf-import.js",
+    "memory:path": "python -X utf8 -c \"import sys; sys.path.insert(0,'.cursor/hooks'); import memory_paths as m; print(m.memory_root())\"",
+    "memory:bootstrap": "python -X utf8 .cursor/hooks/memory_rollup_llm.py bootstrap"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "build": {
+    "appId": "com.aispace.sticky-notes",
+    "productName": "StickyNotes",
+    "win": {
+      "target": "nsis",
+      "icon": "src/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

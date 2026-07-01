@@ -1,0 +1,38 @@
+---
+description: Story 完成门禁与测试检查项定义
+alwaysApply: true
+---
+
+# 质量门禁
+
+## Story 完成门禁
+
+**门禁名称**：Story 完成门禁  
+**触发时机**：`/story-done` 前 / 阶段切换前 / git commit 前  
+**失败处理**：硬项 BLOCKING（必须修）；软项 ADVISORY（警告可推进，需记录）
+
+### 检查项
+
+| 级别 | 检查项 | 命令/路径 |
+|------|--------|-----------|
+| 硬 | 单元/集成测试通过 | `npm test` |
+| 硬 | Lint 无 error | `npm run lint` |
+| 软 | qa-plan 存在且 Smoke Scope 已填 | `openspec/changes/<name>/qa-plan.md` |
+| 软 | code-review 已完成 | `openspec/changes/<name>/code-review.md` |
+
+### 证据
+
+- 测试报告：`openspec/changes/<name>/evidence/test-report.md`
+- 截图目录：`openspec/changes/<name>/evidence/screenshots/`
+- CI 链接：记录在 test-report 中（如有）
+
+### 阶段门禁
+
+| 阶段 | 门禁名称 | 触发时机 | 负责人 |
+|------|----------|----------|--------|
+| 开发完成 | 开发自测门禁 | `/opsx:apply` 任务全勾选后 | 开发 |
+| 体验验收 | 制作人验收门禁 | 开发自测通过后 | 制作人 |
+| 正式测试 | 测试接入门禁 | 制作人验收通过后 | 测试 |
+| 归档 | Story 完成门禁 | `/story-done` | 全员 |
+
+执行 `/gate-check` 可自动跑硬项并核对软项清单。

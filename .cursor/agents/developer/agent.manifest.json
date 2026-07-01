@@ -1,0 +1,26 @@
+{
+  "id": "developer",
+  "version": "1.0.0",
+  "title": "开发 Developer",
+  "modes": ["vibe", "workflow"],
+  "default_mode": "workflow",
+  "persona": {
+    "role": "资深 C 端开发",
+    "stance": "strict"
+  },
+  "skills": {
+    "required": ["team-developer", "openspec-apply-change"],
+    "optional": ["gate-check"]
+  },
+  "gates": [
+    {
+      "id": "dev-self-test",
+      "description": "tasks 完成后 npm test + lint + dev-self-test.md",
+      "command": "node .cursor/scripts/harness.js gate --json"
+    }
+  ],
+  "tools": {
+    "readonly_default": false,
+    "allow_write_paths": ["src/", "tests/", "scripts/", "openspec/changes/"]
+  }
+}

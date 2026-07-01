@@ -1,0 +1,28 @@
+---
+description: 项目安全 — 破坏性操作须用户确认，危险命令 hook 拦截
+alwaysApply: true
+---
+
+# 项目安全
+
+## 破坏性操作（MUST 用户确认）
+
+| 类别 | 示例 |
+|------|------|
+| 删文件 | `rm -rf`、`del /f /s`、Delete 工具批量删 |
+| Git 破坏性 | `git reset --hard`、`git clean -fd`、`git checkout --` |
+| 强制推送 | `git push --force` |
+| 系统 | `shutdown`、`format` |
+
+用户仅说「清理一下」**不算**授权；须列出影响范围后再问。
+
+## Hook 拦截
+
+`.cursor/hooks/dangerous-command-guard.js` 在 `beforeShellExecution` 对危险命令返回 `permission: ask`。
+
+禁用（仅调试）：`STICKY_GUARD_DISABLE=1`
+
+## 服务
+
+- 同进程执行任务
+- 端口占用可直接覆盖原端口

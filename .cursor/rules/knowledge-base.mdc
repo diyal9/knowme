@@ -1,0 +1,52 @@
+---
+description: 知识库三层架构 — raw/wiki/knowledge/memory，OKF ingest/query/lint/export
+alwaysApply: true
+---
+
+# 知识库与自我进化
+
+> **产品 vs 仓库**：终端用户的 OKF/Memory 在 `%APPDATA%\sticky-notes\knowledge\` 与 `memory\`（`src/lib/product-*.js`，设置页管理）。本节 `brain/` 与 `/kb-*` 命令仅服务 **Cursor 智能体开发**。
+
+## 架构（Karpathy LLM Wiki + OKF）
+
+| 层 | 开发仓库路径 | 产品用户数据 |
+|----|--------------|--------------|
+| Raw | `brain/raw/` | — |
+| Wiki | `brain/wiki/` | — |
+| Knowledge | `brain/knowledge/` | `%APPDATA%\sticky-notes\knowledge\` |
+| Memory | `brain/memory/` | `%APPDATA%\sticky-notes\memory\` |
+
+参考：[Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)、[OKF SPEC](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
+
+## 操作
+
+| 命令 | 作用 |
+|------|------|
+| `/kb-ingest` | 吸收 raw → 更新 wiki + knowledge |
+| `/kb-lint` | OKF 健康检查 |
+| `/kb-export` | 导出 bundle 给其他用户 |
+| `/kb-import` | 导入外部 OKF bundle |
+| `/evolve` | 自我进化：复盘 → 升格 Skill |
+
+## 双层记忆
+
+| 层 | 路径 | 写入 |
+|----|------|------|
+| **Agent episodic** | `%LOCALAPPDATA%\sticky-notes\memory\<ws_id>\` | Hook 自动（`sticky-agent-memory`） |
+| **产品 episodic** | `%APPDATA%\sticky-notes\memory\` | 复制/收藏/AI 等（`product-memory.js`） |
+| **团队 OKF** | `brain/knowledge/` | 用户确认后 `/kb-ingest` |
+
+个人记忆 **禁止** 未经确认当作团队事实。≥3 次重复见 `sticky-agent-memory` references/promotion.md
+
+## Story 后沉淀
+
+`/story-done` 后 **SHOULD**：
+1. 写 `brain/memory/working/<change>-retro.md`
+2. 有价值则 `/kb-ingest` 升格
+3. 复发 ≥3 → `/evolve`
+
+## OKF 约束
+
+- concept 必填 frontmatter `type`
+- 更新 `index.md` + `log.md`
+- 导出前 `npm run kb:lint`

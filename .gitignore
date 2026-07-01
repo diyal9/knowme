@@ -1,0 +1,30 @@
+node_modules/
+dist/
+out/
+*.log
+
+# Electron build
+*.exe
+*.dmg
+*.AppImage
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Agent / local
+.cursor/env.*
+brain/.knowledge-backup/
+openspec/changes/**/evidence/screenshots/*.png
+openspec/changes/**/evidence/screenshots/*.jpg
+
+# KB export artifacts (regenerate via npm run kb:export)
+dist/kb-export/
+
+# Keep structure
+!openspec/changes/.gitkeep
+!openspec/changes/archive/.gitkeep
+!brain/memory/working/.gitkeep
+!brain/memory/issues/.gitkeep
+!brain/memory/sessions/.gitkeep
+!brain/raw/ingest/.gitkeep

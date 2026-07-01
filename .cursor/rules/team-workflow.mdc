@@ -1,0 +1,59 @@
+---
+description: StickyNotes 三角色团队协作工作流（制作人→开发→测试）
+alwaysApply: true
+---
+
+# 团队协作工作流
+
+本项目采用 **制作人 / 开发 / 测试** 三角色协作，严格遵循 **OpenSpec** 范式与 **ReACT** 自循环。
+
+## 角色
+
+| 角色 | 职责 | 触发 |
+|------|------|------|
+| **制作人** | 测试驱动规划版本、商业化与产品验收 | `/role-producer` 或 `/team-run` |
+| **开发** | 架构实现、性能优化、自测无报错 | `/role-developer` 或 `/opsx:apply` |
+| **测试** | 专业 QA、反模式体验审查 | `/role-tester` |
+
+## 标准循环（每版本/Story）
+
+```
+制作人规划(OpenSpec) → 开发实现+自测 → 制作人体验验收 → 测试正式 QA → /story-done
+```
+
+1. **制作人**：用 `/opsx:propose` 或 `/opsx:explore` 产出 proposal / specs / tasks / qa-plan
+2. **开发**：用 `/opsx:apply` 按 tasks 实现；本地 `npm start` 自测，确保无控制台报错
+3. **制作人**：从 C 端用户视角体验验收（可用性、商业化路径、产品一致性）
+4. **测试**：按 qa-plan 执行；主动用反模式挑体验问题（见 `team-tester` skill）
+5. 全部通过后执行 `/story-done` 归档
+
+## ReACT 模式
+
+每个角色在循环中执行 **Reason → Act → Observe → Reflect**：
+
+- **Reason**：读取 OpenSpec 工件与当前门禁状态
+- **Act**：执行本角色动作（规划/编码/测试）
+- **Observe**：收集证据（日志、截图、测试报告）
+- **Reflect**：发现 Bug 则修复后重新过门禁，不跳过
+
+## OpenSpec 约束
+
+- 每次功能变更必须有 OpenSpec change（`openspec/changes/`）
+- 不得在无 proposal/tasks 的情况下直接改代码
+- 实现与 spec 冲突时，先更新 artifact 再继续
+- 完成后 `/opsx:archive` 或 `/story-done`
+
+## 交互门禁（顺序不可跳）
+
+开发完毕 → **开发自测无报错** → **制作人体验验收** → **测试接入** → 结束
+
+## 安全与服务
+
+- 在同一进程/会话内完成任务；端口占用可直接覆盖原端口
+- 危险指令（`rm -rf`、强制 push、删库、改系统配置等）**必须经用户确认**
+
+## 项目上下文
+
+- 产品：Windows 桌面便签（Electron）
+- 技术栈：Electron 31、electron-store、原生 HTML/JS
+- 数据：`%APPDATA%\sticky-notes\notes\`
