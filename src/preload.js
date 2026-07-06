@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('api', {
 
   // 设置
   initSettings: cb => ipcRenderer.on('init-settings', (_e, s) => cb(s)),
-  saveSettings: s  => ipcRenderer.send('save-settings', s),
+  saveSettings: s  => ipcRenderer.invoke('save-settings', s),
   getSettings:  ()  => ipcRenderer.sendSync('get-settings'),
 
   // 总览列表
@@ -50,6 +50,11 @@ contextBridge.exposeInMainWorld('api', {
   setAutostart: v   => ipcRenderer.send('set-autostart', v),
   getAutostart: ()  => ipcRenderer.sendSync('get-autostart'),
   importPromptSpace: () => ipcRenderer.invoke('import-prompt-space'),
+
+  notesExport: () => ipcRenderer.invoke('notes-export'),
+  notesImport: () => ipcRenderer.invoke('notes-import'),
+  appInfo: () => ipcRenderer.invoke('app-info'),
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
 
   // 产品知识库 OKF + Memory（用户数据目录）
   knowledgeStatus: () => ipcRenderer.invoke('knowledge-status'),

@@ -31,6 +31,34 @@ describe('preload security', () => {
   });
 });
 
+describe('release materials', () => {
+  it('LICENSE exists', () => {
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'LICENSE')));
+  });
+
+  it('PRIVACY.md exists', () => {
+    const privacy = path.join(__dirname, '..', 'PRIVACY.md');
+    assert.ok(fs.existsSync(privacy));
+    const content = fs.readFileSync(privacy, 'utf8');
+    assert.ok(content.includes('API Key'), 'privacy should cover API Key');
+    assert.ok(content.includes('便签'), 'privacy should cover notes');
+  });
+
+  it('package version matches release target', () => {
+    const pkg = require('../package.json');
+    assert.equal(pkg.version, '0.1.1');
+  });
+
+  it('release workflow runs test and lint', () => {
+    const wf = fs.readFileSync(
+      path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),
+      'utf8'
+    );
+    assert.ok(wf.includes('npm test'));
+    assert.ok(wf.includes('npm run lint'));
+    assert.ok(wf.includes('needs: test'));
+  });
+});
 describe('OKF knowledge bundle', () => {
   it('knowledge index exists with okf_version', () => {
     const index = path.join(__dirname, '..', 'brain', 'knowledge', 'index.md');
@@ -40,7 +68,7 @@ describe('OKF knowledge bundle', () => {
   });
 
   it('kb:lint passes on default bundle', () => {
-    const { lintBundle } = require('../scripts/okf-lib.js');
+    const { lintBundle } = require('../src/lib/okf-lib.js');
     const report = lintBundle(path.join(__dirname, '..', 'brain', 'knowledge'));
     assert.ok(report.ok, `OKF lint errors: ${JSON.stringify(report.errors)}`);
   });

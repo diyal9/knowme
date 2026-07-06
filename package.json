@@ -1,12 +1,21 @@
 {
   "name": "sticky-notes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "桌面便签工具",
+  "license": "MIT",
+  "author": "aispace",
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "build": "electron-builder",
+    "prebuild": "node scripts/prebuild.js",
+    "build": "npm run prebuild && electron-builder",
+    "build:win": "npm run prebuild && electron-builder --win --x64",
+    "build:mac": "npm run prebuild && electron-builder --mac --x64 --arm64",
+    "build:dir": "npm run prebuild && electron-builder --dir",
+    "publish:win": "npm run prebuild && electron-builder --win --x64 --publish always",
+    "publish:mac": "npm run prebuild && electron-builder --mac --x64 --arm64 --publish always",
+    "smoke:release": "node scripts/release-smoke.js dist-release",
     "test": "node --test tests/*.test.js",
     "lint": "node scripts/lint.js",
     "harness:check": "node .cursor/scripts/harness.js check",
@@ -24,18 +33,7 @@
     "electron-builder": "^24.0.0"
   },
   "dependencies": {
-    "electron-store": "^8.2.0"
-  },
-  "build": {
-    "appId": "com.aispace.sticky-notes",
-    "productName": "StickyNotes",
-    "win": {
-      "target": "nsis",
-      "icon": "src/assets/icon.png"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    }
+    "electron-store": "^8.2.0",
+    "electron-updater": "^6.3.0"
   }
 }

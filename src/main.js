@@ -8,7 +8,10 @@ const https = require('https')
 const http  = require('http')
 const productKnowledge = require('./lib/product-knowledge')
 const productMemory = require('./lib/product-memory')
+const settingsSecure = require('./lib/settings-secure')
+const notesBackup = require('./lib/notes-backup')
 const { createAppIconPng, createTrayIconPng } = require('./lib/app-icon')
+const { initAutoUpdate, checkForUpdatesManual } = require('./lib/auto-update')
 
 // ── 路径 ─────────────────────────────────────────────────────────────────────
 const DATA_DIR      = path.join(app.getPath('userData'), 'notes')
@@ -16,13 +19,13 @@ const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json')
 const KNOWLEDGE_DIR = path.join(app.getPath('userData'), 'knowledge')
 const MEMORY_DIR    = path.join(app.getPath('userData'), 'memory')
 const KNOWLEDGE_SEED = path.join(__dirname, 'assets', 'knowledge-seed')
-const PROMPT_SPACE_DIR = 'd:\\aispace\\prompt_space'
+const PROMPT_SPACE_DIR = process.env.STICKY_PROMPT_SPACE_DIR || ''
 const PROMPT_SPACE_IMPORT_FLAG = path.join(app.getPath('userData'), 'prompt_space_imported.flag')
 const RECENT_FILE = path.join(app.getPath('userData'), 'recent-notes.json')
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true })
 
 if (process.platform === 'win32') {
-  app.setAppUserModelId('com.stickynotes.app')
+  app.setAppUserModelId('com.aispace.sticky-notes')
 }
 
 const gotSingleInstanceLock = app.requestSingleInstanceLock()
@@ -31,15 +34,8 @@ if (!gotSingleInstanceLock) {
 }
 
 // ── 默认设置 ──────────────────────────────────────────────────────────────────
-const DEFAULT_SETTINGS = {
-  apiEndpoint: 'https://api.openai.com/v1/chat/completions',
-  apiKey: '', model: 'gpt-4o-mini',
-  systemPrompt: `你是一个专业的 AI 提示词工程师。帮助用户生成结构化、高质量的 AI 提示词。
-提示词要包含：角色定义、背景约束、工作流程、待产出内容、成功标准。
-输出直接可用的提示词正文，不要额外解释。`
-}
-const loadSettings  = () => { try { return { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) } } catch { return { ...DEFAULT_SETTINGS } } }
-const saveSettings_ = s  => fs.writeFileSync(SETTINGS_FILE, JSON.stringify(s, null, 2), 'utf8')
+const loadSettings  = () => settingsSecure.load(SETTINGS_FILE)
+const saveSettings_ = s  => settingsSecure.save(SETTINGS_FILE, s)
 
 // ── 应用图标（任务栏 / 托盘 / 跳转列表统一便签造型）────────────────────────
 const ICON_DIR = path.join(__dirname, 'assets')
@@ -277,8 +273,10 @@ function getImportedPromptMeta(file) {
 }
 
 function importPromptSpace() {
-  if (!fs.existsSync(PROMPT_SPACE_DIR)) {
-    return { ok: false, error: `目录不存在：${PROMPT_SPACE_DIR}` }
+  if (!PROMPT_SPACE_DIR || !fs.existsSync(PROMPT_SPACE_DIR)) {
+    return { ok: false, error: PROMPT_SPACE_DIR
+      ? `目录不存在：${PROMPT_SPACE_DIR}`
+      : '未配置 STICKY_PROMPT_SPACE_DIR 环境变量' }
   }
 
   const existing = new Set(loadAllNotes().map(n => n.sourcePath).filter(Boolean).map(p => path.normalize(p).toLowerCase()))
@@ -540,6 +538,20 @@ ipcMain.on('note-update', (_e, data) => {
   if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
 })
 ipcMain.on('note-delete', (_e, id) => {
+  const n = readNote(id)
+  const label = ((n?.project ? `[${n.project}] ` : '') + (n?.content?.split('\n')[0]?.trim() || '便签')).substring(0, 48)
+  const parent = BrowserWindow.getFocusedWindow() || [...noteWins.values()].find(w => w && !w.isDestroyed()) || null
+  const choice = dialog.showMessageBoxSync(parent, {
+    type: 'warning',
+    title: '删除便签',
+    message: `确定删除「${label}」？`,
+    detail: '此操作不可恢复。可在设置 → 系统 中先导出便签备份。',
+    buttons: ['删除', '取消'],
+    defaultId: 1,
+    cancelId: 1,
+    noLink: true,
+  })
+  if (choice !== 0) return
   delPending.add(id); deleteNoteF(id)
   const w = noteWins.get(id)
   if (w && !w.isDestroyed()) w.close()
@@ -560,12 +572,14 @@ ipcMain.on('focus-note', (_e, id) => {
   updateTaskbarAnchor()
 })
 ipcMain.on('close-list',      () => { if(listWin&&!listWin.isDestroyed())listWin.hide() })
-ipcMain.on('save-settings',   (_e, s) => saveSettings_(s))
+ipcMain.handle('save-settings', (_e, s) => saveSettings_(s))
 ipcMain.on('get-settings',    e => { e.returnValue = loadSettings() })
 
 ipcMain.on('copy-to-clipboard', (_e, text) => clipboard.writeText(text))
 ipcMain.on('open-data-dir',    ()  => shell.openPath(DATA_DIR))
-ipcMain.on('open-prompt-space', ()  => shell.openPath(PROMPT_SPACE_DIR))
+ipcMain.on('open-prompt-space', () => {
+  if (PROMPT_SPACE_DIR) shell.openPath(PROMPT_SPACE_DIR)
+})
 ipcMain.on('set-autostart',    (_e, v) => app.setLoginItemSettings({ openAtLogin: !!v }))
 ipcMain.on('get-autostart',    e  => { e.returnValue = app.getLoginItemSettings().openAtLogin })
 ipcMain.handle('import-prompt-space', () => importPromptSpace())
@@ -887,6 +901,45 @@ ipcMain.handle('ai-generate', async (e, { prompt, context }) => {
 })
 
 // ── 产品知识库 OKF / Memory（用户数据目录，非仓库 brain/）────────────────────
+ipcMain.handle('notes-export', async () => {
+  const parent = BrowserWindow.getFocusedWindow() || settingsWin
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: '选择便签备份导出目录',
+    defaultPath: app.getPath('documents'),
+    properties: ['openDirectory', 'createDirectory'],
+    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
+  })
+  if (canceled || !filePaths?.length) return { ok: false, canceled: true }
+  const dest = path.join(filePaths[0], `sticky-notes-backup-${new Date().toISOString().slice(0, 10)}`)
+  const result = notesBackup.exportBundle(DATA_DIR, dest)
+  if (result.ok) shell.showItemInFolder(dest)
+  return result
+})
+
+ipcMain.handle('notes-import', async () => {
+  const parent = BrowserWindow.getFocusedWindow() || settingsWin
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title: '选择便签备份文件夹',
+    properties: ['openDirectory'],
+    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
+  })
+  if (canceled || !filePaths?.length) return { ok: false, canceled: true }
+  const result = notesBackup.importBundle(DATA_DIR, filePaths[0])
+  if (result.ok) updateTray()
+  return result
+})
+
+ipcMain.handle('app-info', () => {
+  const pkg = require('../package.json')
+  return {
+    version: app.getVersion() || pkg.version,
+    isPackaged: app.isPackaged,
+    name: pkg.productName || pkg.name,
+  }
+})
+
+ipcMain.handle('check-for-updates', () => checkForUpdatesManual())
+
 ipcMain.handle('knowledge-status', () => {
   const lint = productKnowledge.lint(KNOWLEDGE_DIR)
   return {
@@ -956,7 +1009,8 @@ if (gotSingleInstanceLock) {
     updateTray()
     globalShortcut.register('CmdOrCtrl+Alt+N', newNote)
     globalShortcut.register('CmdOrCtrl+Alt+L', toggleListWin)
-    if (!fs.existsSync(PROMPT_SPACE_IMPORT_FLAG)) {
+    settingsSecure.stripPlaintextApiKey(SETTINGS_FILE)
+    if (process.argv.includes('--dev') && PROMPT_SPACE_DIR && !fs.existsSync(PROMPT_SPACE_IMPORT_FLAG)) {
       const result = importPromptSpace()
       try { fs.writeFileSync(PROMPT_SPACE_IMPORT_FLAG, JSON.stringify(result, null, 2), 'utf8') } catch {}
     }
@@ -968,7 +1022,15 @@ if (gotSingleInstanceLock) {
     }
     updateTaskbarAnchor()
     updateJumpList()
+    initAutoUpdate()
   })
 }
 app.on('window-all-closed', () => {})
 app.on('will-quit', () => globalShortcut.unregisterAll())
+
+process.on('uncaughtException', err => {
+  console.error('[fatal]', err?.stack || err)
+})
+process.on('unhandledRejection', err => {
+  console.error('[unhandled]', err?.stack || err)
+})

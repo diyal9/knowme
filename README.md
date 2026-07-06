@@ -2,12 +2,59 @@
 
 轻量、有设计感的 Windows 桌面便签工具，基于 Electron 构建。
 
-## 快速启动
+## 下载与安装
+
+**推荐从 GitHub Release 获取安装包**（勿使用开发者本地 `dist/` 路径）：
+
+| 平台 | 状态 | 下载 |
+|------|------|------|
+| Windows x64 | **正式支持** | [Releases](https://github.com/diyal9/sticky-notes/releases/latest) |
+| macOS | 实验构建，需自行评估风险 | 同上（见 Release notes 中的 Mac 说明） |
+
+### Windows 安装步骤
+
+1. 下载 `StickyNotes-<version>-setup-win-x64.exe`（安装版）或 `StickyNotes-<version>-portable-win-x64.exe`（便携版）。
+2. （可选）用 Release 附带的 `SHA256SUMS.txt` 校验安装包哈希。
+3. 运行安装程序；便携版解压后直接运行 exe。
+4. 首次启动后可在系统托盘找到 StickyNotes；`Ctrl+Alt+N` 新建便签。
+
+### 未签名安装包提示
+
+当前 Release 可能**未进行代码签名**。Windows SmartScreen 可能显示「未知发布者」——这是未签名开源软件的常见提示，不代表文件被篡改。请从上述 GitHub Releases 官方页面下载，并可用 SHA256 校验完整性。有签名证书的版本会在 Release notes 中注明。
+
+## 数据存储与备份
+
+| 数据 | 路径（Windows） |
+|------|-----------------|
+| 便签卡片 | `%APPDATA%\sticky-notes\notes\*.json` |
+| 应用设置 | `%APPDATA%\sticky-notes\settings.json` |
+| **产品 OKF 知识库** | `%APPDATA%\sticky-notes\knowledge\` |
+| **产品使用记忆** | `%APPDATA%\sticky-notes\memory\` |
+
+- **便签备份**：设置 → 导出便签备份，可迁移到其他机器。
+- **知识库**：设置 → 知识库与记忆 → 导入/导出 OKF 包。
+- 卸载应用**不会**自动删除上述数据；换机前请先备份。
+
+仓库内 `brain/` 仅用于 Cursor 智能体开发，**不是**用户数据目录。
+
+## 隐私
+
+本地优先、默认无云同步。详见 [PRIVACY.md](PRIVACY.md)。
+
+## 检查更新
+
+正式安装版：设置 → **检查更新**（对接 GitHub Release）。开发模式（`npm start`）不支持检查更新。
+
+## 开发者快速启动
 
 ```bash
-cd d:/aispace/sticky-notes
+git clone https://github.com/diyal9/sticky-notes.git
+cd sticky-notes
+npm install
 npm start
 ```
+
+构建 Windows 安装包：`npm run build:win`（产物在 `dist/`）。
 
 ## 功能
 
@@ -18,18 +65,8 @@ npm start
 - **缩放大小**：拖动边角缩放
 - **自动保存**：输入后 500ms 自动存盘，位置也会实时记录
 - **启动恢复**：下次打开自动还原所有便签
-- **系统托盘**：关闭按钮删除单张便签；应用驻托盘，右键菜单管理
+- **系统托盘**：关闭窗口仅隐藏便签；删除需点 🗑 并确认；应用驻托盘，右键菜单管理
 - **全局热键**：`Ctrl+Alt+N` 随时新建便签
-
-## 数据存储
-
-| 数据 | 路径 |
-|------|------|
-| 便签卡片 | `%APPDATA%\sticky-notes\notes\*.json` |
-| **产品 OKF 知识库** | `%APPDATA%\sticky-notes\knowledge\` |
-| **产品使用记忆** | `%APPDATA%\sticky-notes\memory\` |
-
-在 **设置 → 知识库与记忆** 可导入/导出 OKF 包。仓库内 `brain/` 仅用于 Cursor 智能体开发，不是用户数据。
 
 ## 目录结构
 
@@ -44,6 +81,8 @@ src/
   preload.js       # 安全桥接层
   note.html        # 便签窗口 UI
 tests/             # 冒烟测试
+LICENSE            # MIT
+PRIVACY.md         # 隐私说明
 ```
 
 ## 智能体团队协作

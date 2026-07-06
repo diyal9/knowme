@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const okf = require('../../scripts/okf-lib.js');
+const okf = require('./okf-lib.js');
 
 function copyDir(src, dest) {
   okf.copyDir(src, dest);

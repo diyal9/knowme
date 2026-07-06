@@ -206,6 +206,22 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 
   <div class="section">
     <div class="section-head">
+      <div class="section-title">关于</div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card wide">
+        <div class="stat-label">版本</div>
+        <div class="stat-value" id="appVersion">—</div>
+        <div class="stat-meta" id="appBuildMeta">加载中…</div>
+      </div>
+    </div>
+    <div class="kb-actions">
+      <button class="btn-sm" id="btnCheckUpdate">检查更新</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
       <div class="section-title">系统</div>
     </div>
     <div class="toggle-row">
@@ -220,11 +236,20 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
     </div>
     <div class="action-row">
       <div class="action-body">
+        <div class="action-label">便签备份</div>
+        <div class="action-sub">导出/导入全部提示词卡片 JSON</div>
+      </div>
+      <button class="btn-sm primary" id="btnNotesExport">导出</button>
+      <button class="btn-sm" id="btnNotesImport">导入</button>
+    </div>
+    <div class="action-row">
+      <div class="action-body">
         <div class="action-label">数据目录</div>
         <div class="action-sub">提示词卡片 JSON 存储位置</div>
       </div>
       <button class="btn-sm ghost" id="btnDataDir">打开</button>
     </div>
+    <p class="kb-intro" style="padding-top:0">关闭便签窗口仅<strong>隐藏</strong>，不会删除；删除请在便签内点 🗑 并确认。</p>
   </div>
 
   <div class="section" id="kbSection">
@@ -370,6 +395,64 @@ window.api.initSettings(s => {
 $('autostart').checked = window.api.getAutostart()
 refreshKbMemStatus()
 
+async function refreshAppInfo() {
+  try {
+    const info = await window.api.appInfo()
+    $('appVersion').textContent = `v${info.version || '?'}`
+    $('appBuildMeta').textContent = info.isPackaged ? '正式安装版 · 支持自动更新' : '开发模式'
+  } catch {
+    $('appVersion').textContent = '—'
+    $('appBuildMeta').textContent = '无法读取版本'
+  }
+}
+refreshAppInfo()
+
+$('btnCheckUpdate').addEventListener('click', async () => {
+  const btn = $('btnCheckUpdate')
+  setLoading(btn, true, '检查中…')
+  try {
+    const r = await window.api.checkForUpdates()
+    toast(r.message || (r.ok ? '检查完成' : '检查失败'), r.ok ? 'success' : 'error', 5000)
+  } catch (e) {
+    toast(e.message || '检查更新失败', 'error')
+  } finally {
+    setLoading(btn, false)
+  }
+})
+
+$('btnNotesExport').addEventListener('click', async () => {
+  const btn = $('btnNotesExport')
+  setLoading(btn, true, '选择目录…')
+  try {
+    const r = await window.api.notesExport()
+    if (r.canceled) return
+    if (r.ok) toast(`已备份 ${r.count} 张便签`, 'success')
+    else toast(r.error || '导出失败', 'error')
+  } catch (e) {
+    toast(e.message || '导出异常', 'error')
+  } finally {
+    setLoading(btn, false)
+  }
+})
+
+$('btnNotesImport').addEventListener('click', async () => {
+  const btn = $('btnNotesImport')
+  setLoading(btn, true, '选择备份…')
+  try {
+    const r = await window.api.notesImport()
+    if (r.canceled) return
+    if (r.ok) {
+      toast(`导入 ${r.imported} 张${r.skipped ? `，跳过 ${r.skipped} 张已存在` : ''}`, 'success')
+    } else {
+      toast(r.error || '导入失败', 'error', 6000)
+    }
+  } catch (e) {
+    toast(e.message || '导入异常', 'error')
+  } finally {
+    setLoading(btn, false)
+  }
+})
+
 $('autostart').addEventListener('change', e => window.api.setAutostart(e.target.checked))
 $('btnDataDir').addEventListener('click', () => window.api.openDataDir())
 $('btnKnowledgeDir').addEventListener('click', () => window.api.openKnowledgeDir())
@@ -416,14 +499,19 @@ $('btnKnowledgeImport').addEventListener('click', async () => {
   }
 })
 
-$('btnSave').addEventListener('click', () => {
-  window.api.saveSettings({
+$('btnSave').addEventListener('click', async () => {
+  const r = await window.api.saveSettings({
     apiEndpoint:  $('endpoint').value.trim(),
     apiKey:       $('apikey').value.trim(),
     model:        $('model').value.trim() || 'gpt-4o-mini',
     systemPrompt: $('sysPrompt').value.trim()
   })
   const st = $('status')
+  if (r?.warning) {
+    st.textContent = ''
+    toast(r.warning, 'error', 6000)
+    return
+  }
   st.textContent = '✓ 已保存'
   toast('设置已保存', 'success', 2200)
   setTimeout(() => { st.textContent = '' }, 2500)

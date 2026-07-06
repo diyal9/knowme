@@ -1,0 +1,72 @@
+appId: com.aispace.sticky-notes
+productName: StickyNotes
+copyright: Copyright © 2026 aispace
+directories:
+  output: dist
+  buildResources: build
+files:
+  - src/**/*
+  - package.json
+  - "!**/*.map"
+asar: true
+compression: maximum
+
+publish:
+  provider: github
+  owner: diyal9
+  repo: sticky-notes
+
+releaseInfo:
+  releaseNotesFile: build/release-notes.md
+
+# SHA256 校验文件在打包后生成，随 Release assets 上传
+afterAllArtifactBuild: scripts/checksums.js
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  icon: src/assets/icon.png
+  artifactName: ${productName}-${version}-win-${arch}.${ext}
+  # 证书通过 CI Secrets 注入：WIN_CSC_LINK / WIN_CSC_KEY_PASSWORD（或 CSC_LINK / CSC_KEY_PASSWORD）
+  # 无证书时不阻塞构建，未签名说明见 build/release-notes.md
+  verifyUpdateCodeSignature: false
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: StickyNotes
+  uninstallDisplayName: StickyNotes
+  artifactName: ${productName}-${version}-setup-win-${arch}.${ext}
+
+portable:
+  artifactName: ${productName}-${version}-portable-win-${arch}.${ext}
+
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+  icon: src/assets/icon.png
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  artifactName: ${productName}-${version}-mac-${arch}.${ext}
+
+dmg:
+  title: StickyNotes ${version}
+  writeUpdateInfo: false
