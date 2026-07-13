@@ -1,8 +1,8 @@
 ---
 type: Concept
-title: Prompt Studio 简介
+title: Sticky-Notes 简介
 description: 桌面提示词卡片管理工具，支持版本迭代与 AI 辅助生成。
-tags: [product, prompt-studio]
+tags: [product, sticky-notes]
 timestamp: 2026-07-01T00:00:00Z
 ---
 

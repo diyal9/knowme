@@ -43,7 +43,7 @@ function exportBundle(knowledgeDir, destDir) {
   const manifest = {
     okf_version: '0.1',
     exported_at: new Date().toISOString(),
-    source: 'prompt-studio',
+    source: 'sticky-notes',
     concepts: report.concepts,
   };
   fs.writeFileSync(
@@ -100,21 +100,84 @@ function importBundle(knowledgeDir, srcDir) {
   return { ok: post.ok, stats, lint: { errors: post.errors.length, warnings: post.warnings.length } };
 }
 
+const CATEGORY_LABELS = {
+  concepts: '概念',
+  processes: '流程',
+  decisions: '决策',
+  references: '参考',
+  templates: '模板',
+};
+
+function conceptMeta(f) {
+  const content = fs.readFileSync(f.abs, 'utf8');
+  const { frontmatter } = okf.parseFrontmatter(content);
+  const parts = f.rel.split('/');
+  const category = parts.length > 1 ? parts[0] : '_root';
+  return {
+    id: okf.conceptId(f.rel),
+    title: frontmatter?.title || f.rel,
+    type: frontmatter?.type || 'Concept',
+    category,
+    rel: f.rel,
+  };
+}
+
 function listConcepts(knowledgeDir, limit = 50) {
   if (!fs.existsSync(knowledgeDir)) return [];
   return okf
     .walkMdFiles(knowledgeDir, knowledgeDir)
     .filter((f) => okf.isConceptFile(f.rel))
     .slice(0, limit)
-    .map((f) => {
-      const content = fs.readFileSync(f.abs, 'utf8');
-      const { frontmatter } = okf.parseFrontmatter(content);
-      return {
-        id: okf.conceptId(f.rel),
-        title: frontmatter?.title || f.rel,
-        type: frontmatter?.type || 'Concept',
-      };
-    });
+    .map(conceptMeta);
+}
+
+/** 按顶层目录汇总知识分类（concepts / processes 等） */
+function listCategories(knowledgeDir) {
+  if (!fs.existsSync(knowledgeDir)) return [];
+  const concepts = okf
+    .walkMdFiles(knowledgeDir, knowledgeDir)
+    .filter((f) => okf.isConceptFile(f.rel))
+    .map(conceptMeta);
+
+  const map = new Map();
+  for (const c of concepts) {
+    if (!map.has(c.category)) {
+      map.set(c.category, {
+        id: c.category,
+        label: CATEGORY_LABELS[c.category] || (c.category === '_root' ? '根目录' : c.category),
+        count: 0,
+        items: [],
+      });
+    }
+    const cat = map.get(c.category);
+    cat.count += 1;
+    cat.items.push({ id: c.id, title: c.title, type: c.type });
+  }
+
+  // 空目录也展示（用户可看到分类骨架）
+  try {
+    for (const name of fs.readdirSync(knowledgeDir)) {
+      const full = path.join(knowledgeDir, name);
+      if (!fs.statSync(full).isDirectory()) continue;
+      if (name.startsWith('.')) continue;
+      if (!map.has(name)) {
+        map.set(name, {
+          id: name,
+          label: CATEGORY_LABELS[name] || name,
+          count: 0,
+          items: [],
+        });
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+
+  return [...map.values()].sort((a, b) => {
+    if (a.id === '_root') return 1;
+    if (b.id === '_root') return -1;
+    return a.label.localeCompare(b.label, 'zh-CN');
+  });
 }
 
 function getContextSnippet(knowledgeDir, maxChars = 2000) {
@@ -130,5 +193,6 @@ module.exports = {
   exportBundle,
   importBundle,
   listConcepts,
+  listCategories,
   getContextSnippet,
 };

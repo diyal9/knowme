@@ -1,8 +1,8 @@
-# StickyNotes 隐私说明
+# Sticky-Notes 隐私说明
 
 最后更新：2026-07-02 · 适用版本：v0.1.1 及之后
 
-StickyNotes 是一款**本地优先**的桌面便签应用。默认情况下，你的便签与知识库数据保存在本机，我们不会运营云端账号或后台同步服务。
+Sticky-Notes 是一款**本地优先**的桌面提示词管理应用。默认情况下，你的便签与知识库数据保存在本机，我们不会运营云端账号或后台同步服务。
 
 ## 我们收集什么
 
@@ -37,7 +37,7 @@ macOS 路径位于 `~/Library/Application Support/sticky-notes/` 下同名子目
 
 - 在支持的操作系统加密能力（Electron `safeStorage`）可用时，Key 以加密形式保存在 `settings.json` 中，不以明文写入。
 - 若系统加密不可用，应用**不会**把 API Key 以明文持久化，并会提示你无法安全保存。
-- 调用 AI 接口时，请求会按你填写的 Endpoint 发往对应服务商（如 OpenAI 兼容 API）；该传输由你与服务商之间的网络完成，不由 StickyNotes 中转存储。
+- 调用 AI 接口时，请求会按你填写的 Endpoint 发往对应服务商（如 OpenAI 兼容 API）；该传输由你与服务商之间的网络完成，不由 Sticky-Notes 中转存储。
 
 ## 自动更新
 

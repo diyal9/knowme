@@ -1,5 +1,5 @@
 appId: com.aispace.sticky-notes
-productName: StickyNotes
+productName: Sticky-Notes
 copyright: Copyright © 2026 aispace
 directories:
   output: dist
@@ -42,8 +42,8 @@ nsis:
   allowElevation: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: StickyNotes
-  uninstallDisplayName: StickyNotes
+  shortcutName: Sticky-Notes
+  uninstallDisplayName: Sticky-Notes
   artifactName: ${productName}-${version}-setup-win-${arch}.${ext}
 
 portable:
@@ -68,5 +68,5 @@ mac:
   artifactName: ${productName}-${version}-mac-${arch}.${ext}
 
 dmg:
-  title: StickyNotes ${version}
+  title: Sticky-Notes ${version}
   writeUpdateInfo: false

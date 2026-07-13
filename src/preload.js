@@ -14,7 +14,6 @@ contextBridge.exposeInMainWorld('api', {
   togglePin:      id => ipcRenderer.send('note-pin-toggle',      id),
   toggleFavorite: id => ipcRenderer.send('note-toggle-favorite', id),
   incrementCopy:  id => ipcRenderer.send('note-increment-copy',  id),
-  toggleExpand:   (id, aiOpen) => ipcRenderer.invoke('note-toggle-expand', id, !!aiOpen),
   setAiMode:      (id, aiOpen) => ipcRenderer.invoke('note-set-ai-mode', id, !!aiOpen),
   onLayoutChanged: cb => ipcRenderer.on('layout-changed', (_e, s) => cb(s)),
   newNote:        ()  => ipcRenderer.send('new-note'),
@@ -63,4 +62,15 @@ contextBridge.exposeInMainWorld('api', {
   openKnowledgeDir: () => ipcRenderer.send('open-knowledge-dir'),
   memoryStatus: () => ipcRenderer.invoke('memory-status'),
   openMemoryDir: () => ipcRenderer.send('open-memory-dir'),
+  openMemoryPanel: () => ipcRenderer.send('open-memory-panel'),
+  memoryRecent: (limit) => ipcRenderer.invoke('memory-recent', limit),
+  initMemory: cb => ipcRenderer.on('init-memory', (_e, items) => cb(items)),
+
+  getNoteVersions: id => ipcRenderer.invoke('get-note-versions', id),
+  getNoteDiff: (a, b) => ipcRenderer.invoke('get-note-diff', a, b),
+  promoteToOkf: id => ipcRenderer.invoke('promote-to-okf', id),
+  instantiateFromOkf: conceptId => ipcRenderer.invoke('instantiate-from-okf', conceptId),
+  listOkfConcepts: () => ipcRenderer.invoke('list-okf-concepts'),
+  notesBatchClassify: (opts) => ipcRenderer.invoke('notes-batch-classify', opts || {}),
+  suggestClassification: p => ipcRenderer.invoke('suggest-classification', p),
 })

@@ -1,6 +1,6 @@
-# StickyNotes — 桌面便签
+# Sticky-Notes — AI 驱动提示词工作台
 
-轻量、有设计感的 Windows 桌面便签工具，基于 Electron 构建。
+轻量、本地私有的 **提示词管理工具**，基于 Electron 构建：结构化编辑、版本迭代、OKF 知识库与使用记忆。
 
 ## 下载与安装
 
@@ -13,10 +13,10 @@
 
 ### Windows 安装步骤
 
-1. 下载 `StickyNotes-<version>-setup-win-x64.exe`（安装版）或 `StickyNotes-<version>-portable-win-x64.exe`（便携版）。
+1. 下载 `Sticky-Notes-<version>-setup-win-x64.exe`（安装版）或 `Sticky-Notes-<version>-portable-win-x64.exe`（便携版）。
 2. （可选）用 Release 附带的 `SHA256SUMS.txt` 校验安装包哈希。
 3. 运行安装程序；便携版解压后直接运行 exe。
-4. 首次启动后可在系统托盘找到 StickyNotes；`Ctrl+Alt+N` 新建便签。
+4. 首次启动后可在系统托盘找到 Sticky-Notes；`Ctrl+Alt+N` 新建便签。
 
 ### 未签名安装包提示
 

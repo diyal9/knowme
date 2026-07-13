@@ -20,19 +20,33 @@
 html,body{height:100%;overflow:hidden;}
 body{background:var(--bg-page);color:var(--text);font:13px var(--ui);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;}
 
-/* 顶栏 */
 .titlebar{
-  flex-shrink:0;padding:18px 22px 16px;background:var(--bg-card);
+  flex-shrink:0;padding:16px 20px 0;background:var(--bg-card);
   border-bottom:1px solid var(--div);
 }
-.titlebar-brand{font:600 11px var(--ui);color:var(--text2);letter-spacing:.2px;margin-bottom:5px;}
+.titlebar-brand{font:600 11px var(--ui);color:var(--text2);letter-spacing:.2px;margin-bottom:4px;}
 .titlebar h1{font:600 17px/1.2 var(--ui);color:var(--text);letter-spacing:-.2px;}
-.titlebar p{font:12px var(--ui);color:var(--text3);margin-top:4px;}
+.titlebar p{font:12px var(--ui);color:var(--text3);margin-top:3px;margin-bottom:12px;}
 
-/* 可滚动主体 */
+/* Tabs */
+.tabs{
+  display:flex;gap:2px;margin:0 -4px;
+}
+.tab{
+  flex:1;padding:10px 6px 11px;border:none;background:transparent;
+  font:500 12px var(--ui);color:var(--text3);cursor:pointer;
+  border-bottom:2px solid transparent;transition:color .14s,border-color .14s;
+  outline:none;white-space:nowrap;
+}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
 .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 16px 8px;}
 .scroll::-webkit-scrollbar{width:6px;}
 .scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:3px;}
+
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
 
 .section{
   background:var(--bg-card);margin-bottom:12px;border-radius:12px;
@@ -62,7 +76,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .hint{font:11px/1.65 var(--ui);color:var(--text3);margin-top:6px;}
 .hint code{font:10px var(--mono);background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:4px;color:var(--text2);}
 
-/* 开关 */
 .toggle-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--div2);}
 .toggle-row:last-child{border-bottom:none;}
 .toggle-label{font:13px var(--ui);color:var(--text);}
@@ -80,7 +93,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .toggle input:checked+.toggle-slider{background:var(--accent);}
 .toggle input:checked+.toggle-slider::before{transform:translateX(16px);}
 
-/* 操作行 */
 .action-row{
   display:flex;align-items:center;gap:12px;padding:11px 16px;
   border-top:1px solid var(--div2);
@@ -90,7 +102,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .action-label{font:13px var(--ui);color:var(--text);}
 .action-sub{font:11px var(--ui);color:var(--text3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-/* 按钮 */
 .btn-sm{
   flex-shrink:0;background:var(--bg-soft);border:1px solid rgba(0,0,0,0.11);
   border-radius:8px;padding:6px 13px;font:500 11px var(--ui);color:var(--text2);
@@ -102,7 +113,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .btn-sm.primary:hover:not(:disabled){background:#484bcc;border-color:#484bcc;color:#fff;}
 .btn-sm.ghost{background:transparent;}
 
-/* 知识库区块 */
 .kb-intro{padding:0 16px 10px;font:11px/1.7 var(--ui);color:var(--text3);}
 .kb-intro strong{color:var(--text2);font-weight:500;}
 
@@ -129,16 +139,43 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .concept-chip{
   font:11px var(--ui);color:var(--text2);background:var(--bg-mid);
   border:1px solid var(--div2);border-radius:20px;padding:4px 10px;max-width:100%;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
 }
+.concept-chip:hover{border-color:var(--accent-b);color:var(--accent);background:var(--accent-bg);}
 .concept-empty{font:11px var(--ui);color:var(--text3);font-style:italic;}
+
+/* 知识分类 */
+.cat-list{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;}
+.cat-card{
+  border:1px solid var(--div2);border-radius:10px;background:var(--bg-soft);overflow:hidden;
+}
+.cat-head{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;
+}
+.cat-head:hover{background:rgba(0,0,0,0.02);}
+.cat-icon{
+  width:28px;height:28px;border-radius:8px;background:var(--accent-bg);color:var(--accent);
+  display:flex;align-items:center;justify-content:center;font:600 11px var(--mono);flex-shrink:0;
+}
+.cat-meta{flex:1;min-width:0;}
+.cat-name{font:600 13px var(--ui);color:var(--text);}
+.cat-id{font:10px var(--mono);color:var(--text3);margin-top:1px;}
+.cat-count{
+  font:600 12px var(--ui);color:var(--text2);background:var(--bg-card);
+  border:1px solid var(--div2);border-radius:20px;padding:2px 9px;flex-shrink:0;
+}
+.cat-chevron{font:12px var(--ui);color:var(--text3);transition:transform .15s;flex-shrink:0;}
+.cat-card.open .cat-chevron{transform:rotate(90deg);}
+.cat-body{display:none;padding:0 12px 10px;border-top:1px solid var(--div2);}
+.cat-card.open .cat-body{display:block;}
+.cat-body .concept-list{padding-top:10px;}
+.cat-empty{font:11px var(--ui);color:var(--text3);padding:10px 0 2px;font-style:italic;}
 
 .kb-actions{
   display:flex;gap:8px;padding:0 16px 14px;
 }
 .kb-actions .btn-sm{flex:1;text-align:center;padding:9px 12px;}
 
-/* 底部保存栏 */
 .footer{
   flex-shrink:0;padding:12px 16px 14px;background:var(--bg-card);
   border-top:1px solid var(--div);display:flex;align-items:center;gap:8px;
@@ -152,8 +189,8 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .btn-save{background:var(--accent);border:1px solid var(--accent);color:#fff;}
 .btn-save:hover{background:#484bcc;border-color:#484bcc;}
 .footer-status{font:11px var(--ui);color:var(--green);min-width:72px;text-align:right;}
+.footer.kb-only .btn-save{display:none;}
 
-/* Toast */
 .toast-wrap{
   position:fixed;left:50%;bottom:72px;transform:translateX(-50%) translateY(12px);
   z-index:100;pointer-events:none;opacity:0;transition:opacity .2s,transform .2s;
@@ -173,141 +210,174 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 <div class="titlebar">
   <div class="titlebar-brand">Sticky-Notes</div>
   <h1>设置</h1>
-  <p>配置 AI 接口、知识库与应用偏好</p>
+  <p>配置 AI 接口、系统偏好与知识库</p>
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab active" role="tab" data-tab="ai" aria-selected="true">AI 接口</button>
+    <button type="button" class="tab" role="tab" data-tab="system" aria-selected="false">系统配置</button>
+    <button type="button" class="tab" role="tab" data-tab="knowledge" aria-selected="false">知识库</button>
+    <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false">关于</button>
+  </div>
 </div>
 
 <div class="scroll">
 
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">AI 接口</div>
-    </div>
-    <div class="field">
-      <label>API Endpoint</label>
-      <input id="endpoint" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false">
-      <div class="hint">
-        需含完整路径 · 通常以 <code>/chat/completions</code> 结尾<br>
-        DashScope: <code>https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions</code>
+  <!-- AI -->
+  <div class="tab-panel active" id="panel-ai" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">AI 接口</div>
       </div>
-    </div>
-    <div class="field">
-      <label>API Key</label>
-      <input id="apikey" type="password" placeholder="sk-…" spellcheck="false" autocomplete="off">
-    </div>
-    <div class="field">
-      <label>Model</label>
-      <input id="model" placeholder="gpt-4o-mini" spellcheck="false">
-    </div>
-    <div class="field">
-      <label>System Prompt</label>
-      <textarea id="sysPrompt" placeholder="AI 生成提示词时的系统指令…"></textarea>
+      <div class="field">
+        <label>API Endpoint</label>
+        <input id="endpoint" placeholder="https://api.openai.com/v1/chat/completions" spellcheck="false">
+        <div class="hint">
+          需含完整路径 · 通常以 <code>/chat/completions</code> 结尾<br>
+          DashScope: <code>https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions</code>
+        </div>
+      </div>
+      <div class="field">
+        <label>API Key</label>
+        <input id="apikey" type="password" placeholder="sk-…" spellcheck="false" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Model</label>
+        <input id="model" placeholder="gpt-4o-mini" spellcheck="false">
+      </div>
+      <div class="field">
+        <label>System Prompt</label>
+        <textarea id="sysPrompt" placeholder="AI 生成提示词时的系统指令…"></textarea>
+      </div>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">关于</div>
-    </div>
-    <div class="stat-grid">
-      <div class="stat-card wide">
-        <div class="stat-label">版本</div>
-        <div class="stat-value" id="appVersion">—</div>
-        <div class="stat-meta" id="appBuildMeta">加载中…</div>
+  <!-- 系统 -->
+  <div class="tab-panel" id="panel-system" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">系统</div>
       </div>
-    </div>
-    <div class="kb-actions">
-      <button class="btn-sm" id="btnCheckUpdate">检查更新</button>
+      <div class="toggle-row">
+        <div class="toggle-label-wrap">
+          <div class="toggle-label">开机自动启动</div>
+          <div class="toggle-sub">登录后自动在后台运行</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="autostart">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">便签备份</div>
+          <div class="action-sub">导出/导入全部提示词卡片 JSON</div>
+        </div>
+        <button class="btn-sm primary" id="btnNotesExport">导出</button>
+        <button class="btn-sm" id="btnNotesImport">导入</button>
+      </div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">整理旧数据分类</div>
+          <div class="action-sub">按路径/名称补全空的 category 与标签（不覆盖已有）</div>
+        </div>
+        <button class="btn-sm primary" id="btnClassifyLocal">本地整理</button>
+        <button class="btn-sm" id="btnClassifyAi">AI 整理</button>
+      </div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">数据目录</div>
+          <div class="action-sub">提示词卡片 JSON 存储位置</div>
+        </div>
+        <button class="btn-sm ghost" id="btnDataDir">打开</button>
+      </div>
+      <p class="kb-intro" style="padding-top:0">右上角 <strong>✕ 关闭</strong>仅隐藏窗口，内容仍保留；删除请点垃圾桶图标并确认。</p>
     </div>
   </div>
 
-  <div class="section">
-    <div class="section-head">
-      <div class="section-title">系统</div>
-    </div>
-    <div class="toggle-row">
-      <div class="toggle-label-wrap">
-        <div class="toggle-label">开机自动启动</div>
-        <div class="toggle-sub">登录后自动在后台运行</div>
+  <!-- 知识库 -->
+  <div class="tab-panel" id="panel-knowledge" role="tabpanel">
+    <div class="section" id="kbSection">
+      <div class="section-head">
+        <div class="section-title">知识库与记忆</div>
+        <span class="section-badge">OKF v0.1</span>
       </div>
-      <label class="toggle">
-        <input type="checkbox" id="autostart">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <div class="action-row">
-      <div class="action-body">
-        <div class="action-label">便签备份</div>
-        <div class="action-sub">导出/导入全部提示词卡片 JSON</div>
-      </div>
-      <button class="btn-sm primary" id="btnNotesExport">导出</button>
-      <button class="btn-sm" id="btnNotesImport">导入</button>
-    </div>
-    <div class="action-row">
-      <div class="action-body">
-        <div class="action-label">数据目录</div>
-        <div class="action-sub">提示词卡片 JSON 存储位置</div>
-      </div>
-      <button class="btn-sm ghost" id="btnDataDir">打开</button>
-    </div>
-    <p class="kb-intro" style="padding-top:0">关闭便签窗口仅<strong>隐藏</strong>，不会删除；删除请在便签内点 🗑 并确认。</p>
-  </div>
+      <p class="kb-intro">
+        知识包与使用记忆保存在本机应用数据目录，<strong>可导入导出</strong>与他人交换。
+        AI 生成时会自动引用知识摘要与近期使用习惯。
+      </p>
 
-  <div class="section" id="kbSection">
-    <div class="section-head">
-      <div class="section-title">知识库与记忆</div>
-      <span class="section-badge">OKF v0.1</span>
-    </div>
-    <p class="kb-intro">
-      知识包与使用记忆保存在本机应用数据目录，<strong>可导入导出</strong>与他人交换。
-      AI 生成时会自动引用知识摘要与近期使用习惯。
-    </p>
-
-    <div class="stat-grid">
-      <div class="stat-card">
-        <div class="stat-label">知识概念</div>
-        <div class="stat-value" id="statConcepts">—</div>
-        <div class="stat-meta" id="statKbLint">校验中…</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">知识概念</div>
+          <div class="stat-value" id="statConcepts">—</div>
+          <div class="stat-meta" id="statKbLint">校验中…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">使用记忆</div>
+          <div class="stat-value" id="statMemory">—</div>
+          <div class="stat-meta" id="statMemMeta">加载中…</div>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">使用记忆</div>
-        <div class="stat-value" id="statMemory">—</div>
-        <div class="stat-meta" id="statMemMeta">加载中…</div>
+
+      <div class="path-row" id="kbPath" title="">知识库路径加载中…</div>
+
+      <div class="concept-wrap">
+        <div class="concept-label">知识分类</div>
       </div>
-    </div>
-
-    <div class="path-row" id="kbPath" title="">知识库路径加载中…</div>
-
-    <div class="concept-wrap">
-      <div class="concept-label">已收录概念</div>
-      <div class="concept-list" id="conceptList">
+      <div class="cat-list" id="categoryList">
         <span class="concept-empty">加载中…</span>
       </div>
-    </div>
 
-    <div class="kb-actions">
-      <button class="btn-sm primary" id="btnKnowledgeExport">导出 OKF 包</button>
-      <button class="btn-sm" id="btnKnowledgeImport">导入 OKF 包</button>
-    </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" id="btnKnowledgeExport">导出 OKF 包</button>
+        <button class="btn-sm" id="btnKnowledgeImport">导入 OKF 包</button>
+      </div>
 
-    <div class="action-row">
-      <div class="action-body">
-        <div class="action-label">打开知识库目录</div>
-        <div class="action-sub">直接编辑 Markdown 概念文件</div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">打开知识库目录</div>
+          <div class="action-sub">直接编辑 Markdown 概念文件</div>
+        </div>
+        <button class="btn-sm ghost" id="btnKnowledgeDir">打开</button>
       </div>
-      <button class="btn-sm ghost" id="btnKnowledgeDir">打开</button>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">使用记忆面板</div>
+          <div class="action-sub">查看近期打开、复制、AI 生成记录</div>
+        </div>
+        <button class="btn-sm" id="btnMemoryPanel">打开</button>
+      </div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">打开记忆目录</div>
+          <div class="action-sub" id="memPathHint">episodes / patterns / working</div>
+        </div>
+        <button class="btn-sm ghost" id="btnMemoryDir">打开</button>
+      </div>
     </div>
-    <div class="action-row">
-      <div class="action-body">
-        <div class="action-label">打开记忆目录</div>
-        <div class="action-sub" id="memPathHint">episodes / patterns / working</div>
+  </div>
+
+  <!-- 关于 -->
+  <div class="tab-panel" id="panel-about" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">关于</div>
       </div>
-      <button class="btn-sm ghost" id="btnMemoryDir">打开</button>
+      <div class="stat-grid">
+        <div class="stat-card wide">
+          <div class="stat-label">版本</div>
+          <div class="stat-value" id="appVersion">—</div>
+          <div class="stat-meta" id="appBuildMeta">加载中…</div>
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm" id="btnCheckUpdate">检查更新</button>
+      </div>
     </div>
   </div>
 
 </div>
 
-<div class="footer">
+<div class="footer" id="footerBar">
   <button class="btn btn-cancel" id="btnCancel">关闭</button>
   <button class="btn btn-save" id="btnSave">保存设置</button>
   <span class="footer-status" id="status"></span>
@@ -347,8 +417,56 @@ function shortPath(p) {
   return p.length > 58 ? '…' + p.slice(-55) : p
 }
 
+function bindConceptChips(root) {
+  root.querySelectorAll('[data-concept]').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation()
+      const r = await window.api.instantiateFromOkf(btn.dataset.concept)
+      if (r.ok) toast('已实例化为新卡片', 'success')
+      else toast(r.error || '实例化失败', 'error')
+    })
+  })
+}
+
+function renderCategories(categories) {
+  const list = $('categoryList')
+  if (!categories?.length) {
+    list.innerHTML = '<span class="concept-empty">暂无分类，可导入 OKF 包或在知识库目录下新建文件夹</span>'
+    return
+  }
+
+  list.innerHTML = categories.map((cat, i) => {
+    const initial = (cat.label || cat.id || '?').slice(0, 1).toUpperCase()
+    const chips = cat.items?.length
+      ? cat.items.map(c =>
+          `<button type="button" class="concept-chip" data-concept="${c.id}" title="点击实例化为提示词卡片">${c.title || c.id}</button>`
+        ).join('')
+      : '<div class="cat-empty">该分类下暂无概念</div>'
+    const open = i === 0 ? ' open' : ''
+    return `<div class="cat-card${open}" data-cat="${cat.id}">
+      <div class="cat-head">
+        <div class="cat-icon">${initial}</div>
+        <div class="cat-meta">
+          <div class="cat-name">${cat.label || cat.id}</div>
+          <div class="cat-id">${cat.id === '_root' ? '根目录' : cat.id + '/'}</div>
+        </div>
+        <span class="cat-count">${cat.count}</span>
+        <span class="cat-chevron">›</span>
+      </div>
+      <div class="cat-body"><div class="concept-list">${chips}</div></div>
+    </div>`
+  }).join('')
+
+  list.querySelectorAll('.cat-head').forEach(head => {
+    head.addEventListener('click', () => {
+      head.closest('.cat-card').classList.toggle('open')
+    })
+  })
+  bindConceptChips(list)
+}
+
 async function refreshKbMemStatus() {
-  const list = $('conceptList')
+  const list = $('categoryList')
   try {
     const kb = await window.api.knowledgeStatus()
     $('statConcepts').textContent = kb.concepts ?? 0
@@ -363,13 +481,7 @@ async function refreshKbMemStatus() {
     $('kbPath').textContent = shortPath(kb.path)
     $('kbPath').title = kb.path || ''
 
-    if (kb.items?.length) {
-      list.innerHTML = kb.items.map(c =>
-        `<span class="concept-chip" title="${c.id}">${c.title || c.id}</span>`
-      ).join('')
-    } else {
-      list.innerHTML = '<span class="concept-empty">暂无概念，可导入 OKF 包或编辑目录</span>'
-    }
+    renderCategories(kb.categories)
 
     const mem = await window.api.memoryStatus()
     $('statMemory').textContent = mem.recentCount ?? 0
@@ -385,6 +497,23 @@ async function refreshKbMemStatus() {
     list.innerHTML = '<span class="concept-empty">知识库 API 不可用，请重启应用</span>'
   }
 }
+
+/* Tab 切换 */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const id = tab.dataset.tab
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.toggle('active', t === tab)
+      t.setAttribute('aria-selected', t === tab ? 'true' : 'false')
+    })
+    document.querySelectorAll('.tab-panel').forEach(p => {
+      p.classList.toggle('active', p.id === `panel-${id}`)
+    })
+    // AI / 系统 需要保存；知识库与关于隐藏保存按钮
+    $('footerBar').classList.toggle('kb-only', id === 'knowledge' || id === 'about')
+    if (id === 'knowledge') refreshKbMemStatus()
+  })
+})
 
 window.api.initSettings(s => {
   $('endpoint').value  = s.apiEndpoint  || ''
@@ -453,10 +582,29 @@ $('btnNotesImport').addEventListener('click', async () => {
   }
 })
 
+async function runBatchClassify(mode, btn, loadingLabel) {
+  setLoading(btn, true, loadingLabel)
+  try {
+    const r = await window.api.notesBatchClassify({ mode })
+    if (r.ok) toast(r.message || `已更新 ${r.updated} 张`, 'success', 5000)
+    else toast(r.error || '整理失败', 'error', 6000)
+  } catch (e) {
+    toast(e.message || '整理异常', 'error')
+  } finally {
+    setLoading(btn, false)
+  }
+}
+
+$('btnClassifyLocal').addEventListener('click', () =>
+  runBatchClassify('heuristic', $('btnClassifyLocal'), '整理中…'))
+$('btnClassifyAi').addEventListener('click', () =>
+  runBatchClassify('ai', $('btnClassifyAi'), 'AI 分类中…'))
+
 $('autostart').addEventListener('change', e => window.api.setAutostart(e.target.checked))
 $('btnDataDir').addEventListener('click', () => window.api.openDataDir())
 $('btnKnowledgeDir').addEventListener('click', () => window.api.openKnowledgeDir())
 $('btnMemoryDir').addEventListener('click', () => window.api.openMemoryDir())
+$('btnMemoryPanel').addEventListener('click', () => window.api.openMemoryPanel())
 
 $('btnKnowledgeExport').addEventListener('click', async () => {
   const btn = $('btnKnowledgeExport')

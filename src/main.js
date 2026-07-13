@@ -10,6 +10,11 @@ const productKnowledge = require('./lib/product-knowledge')
 const productMemory = require('./lib/product-memory')
 const settingsSecure = require('./lib/settings-secure')
 const notesBackup = require('./lib/notes-backup')
+const promptSections = require('./lib/prompt-sections')
+const promptOkf = require('./lib/prompt-okf')
+const noteDiff = require('./lib/note-diff')
+const noteVersions = require('./lib/note-versions')
+const noteClassify = require('./lib/note-classify')
 const { createAppIconPng, createTrayIconPng } = require('./lib/app-icon')
 const { initAutoUpdate, checkForUpdatesManual } = require('./lib/auto-update')
 
@@ -67,8 +72,10 @@ const makeTrayIcon = () => nativeImage.createFromBuffer(createTrayIconPng(32))
 // ── 状态 ─────────────────────────────────────────────────────────────────────
 const noteWins   = new Map()
 const delPending = new Set()
-let tray = null, settingsWin = null, listWin = null
+let tray = null, settingsWin = null, listWin = null, memoryWin = null
 const taskbarHooked = new WeakSet()
+const APP_DISPLAY_NAME = 'Sticky-Notes'
+let isQuitting = false
 
 function isAnyWindowVisible() {
   const wins = [settingsWin, listWin, ...noteWins.values()]
@@ -109,12 +116,18 @@ function hideAllWindows() {
   noteWins.forEach(w => { if (!w.isDestroyed()) w.hide() })
   if (listWin && !listWin.isDestroyed()) listWin.hide()
   if (settingsWin && !settingsWin.isDestroyed()) settingsWin.hide()
+  if (memoryWin && !memoryWin.isDestroyed()) memoryWin.hide()
   updateTray()
 }
 
 function toggleAppVisibility() {
   if (isAnyWindowVisible()) hideAllWindows()
   else restoreAppWindows()
+}
+
+function requestAppQuit() {
+  isQuitting = true
+  app.quit()
 }
 
 function hookTaskbarRestore(win) {
@@ -141,6 +154,33 @@ function updateTaskbarAnchor() {
   noteWins.forEach(w => { if (!w.isDestroyed()) w.setSkipTaskbar(w !== anchor) })
   if (listWin && !listWin.isDestroyed()) listWin.setSkipTaskbar(listWin !== anchor)
   if (anchor && !anchor.isDestroyed()) hookTaskbarRestore(anchor)
+}
+
+function clampNoteToWorkArea(note) {
+  const displays = screen.getAllDisplays()
+  const primary = screen.getPrimaryDisplay()
+  const fallback = {
+    x: primary.workArea.x + Math.round(primary.workArea.width * 0.18),
+    y: primary.workArea.y + Math.round(primary.workArea.height * 0.14),
+  }
+  let x = Number.isFinite(note?.x) ? note.x : fallback.x
+  let y = Number.isFinite(note?.y) ? note.y : fallback.y
+  const w = Number.isFinite(note?.w) ? note.w : 360
+  const h = Number.isFinite(note?.h) ? note.h : 490
+  const target = displays.find(d => {
+    const wa = d.workArea
+    return x >= wa.x && x <= wa.x + wa.width && y >= wa.y && y <= wa.y + wa.height
+  }) || primary
+  const wa = target.workArea
+  const maxX = wa.x + Math.max(0, wa.width - Math.min(w, wa.width))
+  const maxY = wa.y + Math.max(0, wa.height - Math.min(h, wa.height))
+  const clampedX = Math.min(Math.max(x, wa.x), maxX)
+  const clampedY = Math.min(Math.max(y, wa.y), maxY)
+  return {
+    x: Math.round(clampedX),
+    y: Math.round(clampedY),
+    changed: Math.round(clampedX) !== x || Math.round(clampedY) !== y,
+  }
 }
 
 function loadRecentIds() {
@@ -235,6 +275,7 @@ const loadAllNotes = () => {
       if (n.tags      === undefined) { n.tags      = [];    dirty = true }
       if (n.copyCount === undefined) { n.copyCount = 0;     dirty = true }
       if (n.projectManual === undefined) { n.projectManual = !!n.project?.trim(); dirty = true }
+      if (promptSections.migrateNoteFields(n)) dirty = true
       if (dirty) saveNote(n)
       return n
     } catch { return null }
@@ -303,8 +344,8 @@ function importPromptSpace() {
         sourceRelPath: meta.rel,
         copyCount: 0,
         ...pos,
-        w: 360,
-        h: 490,
+        w: 440,
+        h: 580,
         pinned: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -353,6 +394,7 @@ function updateTray() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: '新建提示词',  accelerator: 'CmdOrCtrl+Alt+N', click: newNote },
     { label: '总览…',       accelerator: 'CmdOrCtrl+Alt+L', click: toggleListWin },
+    { label: '使用记忆…',   click: openMemoryPanel },
     { type: 'separator' },
     ...noteItems,
     { type: 'separator' },
@@ -361,16 +403,22 @@ function updateTray() {
     { type: 'separator' },
     { label: '设置…', click: openSettings },
     { type: 'separator' },
-    { label: '退出', click: () => app.quit() }
+    { label: '退出', click: requestAppQuit }
   ]))
   updateJumpList()
 }
 
 // ── 便签窗口 ──────────────────────────────────────────────────────────────────
 function createNoteWindow(note) {
+  const pos = clampNoteToWorkArea(note)
+  if (pos.changed) {
+    note.x = pos.x
+    note.y = pos.y
+    saveNote(note)
+  }
   const win = new BrowserWindow({
-    x: Math.max(0, note.x ?? 240), y: Math.max(0, note.y ?? 160),
-    width: note.w ?? 360, height: note.h ?? 490,
+    x: pos.x, y: pos.y,
+    width: note.w ?? 440, height: note.h ?? 580,
     minWidth: 280, minHeight: 260,
     frame: false, transparent: true,
     alwaysOnTop: note.pinned !== false,
@@ -396,7 +444,14 @@ function createNoteWindow(note) {
     const n = readNote(note.id)
     if (n) applyNoteLayout(win, n)
   })
-  win.on('close', e => { if (!delPending.has(note.id)) { e.preventDefault(); win.hide(); updateTray() } })
+  win.on('close', e => {
+    if (isQuitting) return
+    if (!delPending.has(note.id)) {
+      e.preventDefault()
+      win.hide()
+      updateTray()
+    }
+  })
   win.on('closed', () => { noteWins.delete(note.id); delPending.delete(note.id); updateTray() })
   noteWins.set(note.id, win)
   updateTaskbarAnchor()
@@ -406,41 +461,29 @@ function createNoteWindow(note) {
 const layoutApplying = new WeakSet()
 
 const LAYOUT = {
-  compact:      { w: 360, h: 490 },
-  compactLarge: { w: 440, h: 580 },
-  aiSplit:      { w: 1000, h: 620 },
-  aiSplitLarge: { w: 1200, h: 680 },
+  note:    { w: 440, h: 580 },
+  aiSplit: { w: 1200, h: 680 },
 }
 
-function layoutSize(aiOpen, expanded) {
-  if (aiOpen) return expanded ? LAYOUT.aiSplitLarge : LAYOUT.aiSplit
-  return expanded ? LAYOUT.compactLarge : LAYOUT.compact
+function layoutSize(aiOpen) {
+  return aiOpen ? LAYOUT.aiSplit : LAYOUT.note
 }
 
 function applyNoteLayout(win, n) {
-  const size = layoutSize(!!n.aiOpen, !!n.expanded)
-  if (win.isDestroyed()) return { ...size, expanded: !!n.expanded, aiOpen: !!n.aiOpen }
+  const size = layoutSize(!!n.aiOpen)
+  if (win.isDestroyed()) return { ...size, aiOpen: !!n.aiOpen }
   layoutApplying.add(win)
   win.setMinimumSize(n.aiOpen ? 800 : 280, n.aiOpen ? 500 : 260)
   win.setSize(size.w, size.h, false)
   n.w = size.w
   n.h = size.h
+  n.expanded = true
   saveNote(n)
   setImmediate(() => layoutApplying.delete(win))
-  const state = { expanded: !!n.expanded, aiOpen: !!n.aiOpen, w: size.w, h: size.h }
+  const state = { aiOpen: !!n.aiOpen, w: size.w, h: size.h }
   win.webContents.send('layout-changed', state)
   return state
 }
-
-ipcMain.handle('note-toggle-expand', (e, id, aiOpen) => {
-  const win = BrowserWindow.fromWebContents(e.sender)
-  const n = readNote(id)
-  if (!win || !n || win.isDestroyed()) return { ok: false }
-  n.aiOpen = !!aiOpen
-  n.expanded = !n.expanded
-  const state = applyNoteLayout(win, n)
-  return { ok: true, ...state }
-})
 
 ipcMain.handle('note-set-ai-mode', (e, id, aiOpen) => {
   const win = BrowserWindow.fromWebContents(e.sender)
@@ -454,7 +497,13 @@ ipcMain.handle('note-set-ai-mode', (e, id, aiOpen) => {
 function newNote() {
   const id = `n_${Date.now()}`
   const pos = getNewNotePos(noteWins.size)
-  const note = { id, content:'', project:'', version:'0.1', favorite:false, tags:[], copyCount:0, ...pos, w:360, h:490, pinned:true, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() }
+  const note = {
+    id, content:'', project:'', version:'0.1', favorite:false, tags:[], copyCount:0,
+    category:'', okfTags:[], okfConceptId:null, parentNoteId:null,
+    sections:null, editorMode:'free',
+    ...pos, w:440, h:580, pinned:true,
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+  }
   saveNote(note); const win = createNoteWindow(note); win.focus(); updateTray()
 }
 
@@ -464,7 +513,13 @@ function newVersion(noteId) {
   parts[parts.length - 1] += 1
   const id = `n_${Date.now()}`
   const pos = getNewNotePos(noteWins.size)
-  const note = { ...orig, id, version: parts.join('.'), ...pos, x: orig.x+24, y: orig.y+24, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() }
+  const note = {
+    ...orig, id,
+    version: parts.join('.'),
+    parentNoteId: orig.id,
+    ...pos, x: orig.x+24, y: orig.y+24,
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+  }
   saveNote(note); const win = createNoteWindow(note); win.focus(); updateTray()
 }
 
@@ -475,16 +530,46 @@ function duplicateNote(noteId) {
   saveNote(note); const win = createNoteWindow(note); win.focus(); updateTray()
 }
 
+function bringNoteToFront(win, pinned) {
+  if (!win || win.isDestroyed()) return
+  if (win.isMinimized()) win.restore()
+  // 从总览打开时强制置顶一瞬，避免被其它窗口挡住
+  win.setAlwaysOnTop(true)
+  win.show()
+  win.focus()
+  win.moveTop()
+  // 恢复用户置顶偏好（未置顶则稍后取消 alwaysOnTop）
+  const keepPinned = pinned !== false
+  if (!keepPinned) {
+    setTimeout(() => {
+      if (!win.isDestroyed()) win.setAlwaysOnTop(false)
+    }, 120)
+  }
+}
+
 function showNote(id) {
   const n = readNote(id)
   if (!n) return
+  const pos = clampNoteToWorkArea(n)
+  if (pos.changed) {
+    n.x = pos.x
+    n.y = pos.y
+    saveNote(n)
+  }
   touchRecentNote(id)
+  productMemory.capture(MEMORY_DIR, {
+    kind: 'habit',
+    summary: `打开提示词：${n.project || '未命名'} v${n.version || '0.1'}`,
+    meta: { noteId: id, action: 'open' },
+  })
   const win = noteWins.get(id)
-  if (win && !win.isDestroyed()) { win.show(); win.focus() }
+  if (win && !win.isDestroyed()) {
+    win.setPosition(n.x, n.y, false)
+    bringNoteToFront(win, n.pinned)
+  }
   else {
     const created = createNoteWindow(n)
-    created.show()
-    created.focus()
+    bringNoteToFront(created, n.pinned)
   }
   updateTaskbarAnchor()
   updateJumpList()
@@ -516,8 +601,9 @@ function toggleListWin(forceShow = false) {
   const d = screen.getPrimaryDisplay()
   const { x:wx, y:wy, width:ww, height:wh } = d.workArea
   listWin = new BrowserWindow({
-    x: wx + ww - 430, y: wy + 60,
-    width:410, height:580,
+    x: wx + ww - 580, y: wy + 50,
+    width:560, height:600,
+    minWidth:480, minHeight:420,
     frame:false, transparent:true,
     alwaysOnTop:true, skipTaskbar:false, resizable:true,
     icon: getAppIconImage(),
@@ -525,38 +611,88 @@ function toggleListWin(forceShow = false) {
   })
   listWin.loadFile(path.join(__dirname,'list.html'))
   listWin.webContents.on('did-finish-load', () => listWin.webContents.send('init-list', loadAllNotes()))
-  listWin.on('close', e => { e.preventDefault(); listWin.hide(); updateTray() })
+  listWin.on('close', e => {
+    if (isQuitting) return
+    e.preventDefault()
+    listWin.hide()
+    updateTray()
+  })
   listWin.on('closed', () => { listWin = null; updateTaskbarAnchor() })
   updateTaskbarAnchor()
+}
+
+// ── 记忆面板 ──────────────────────────────────────────────────────────────────
+function openMemoryPanel() {
+  if (memoryWin && !memoryWin.isDestroyed()) {
+    memoryWin.show()
+    memoryWin.focus()
+    memoryWin.webContents.send('init-memory', productMemory.getRecent(MEMORY_DIR, 50))
+    return
+  }
+  const d = screen.getPrimaryDisplay()
+  const { x:wx, y:wy, width:ww } = d.workArea
+  memoryWin = new BrowserWindow({
+    x: wx + ww - 440, y: wy + 80,
+    width:400, height:520,
+    frame:false, transparent:true,
+    alwaysOnTop:true, skipTaskbar:false, resizable:true,
+    icon: getAppIconImage(),
+    webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true },
+  })
+  memoryWin.loadFile(path.join(__dirname,'memory.html'))
+  memoryWin.webContents.on('did-finish-load', () => {
+    memoryWin.webContents.send('init-memory', productMemory.getRecent(MEMORY_DIR, 50))
+  })
+  memoryWin.on('close', e => {
+    if (isQuitting) return
+    e.preventDefault()
+    memoryWin.hide()
+  })
+  memoryWin.on('closed', () => { memoryWin = null })
 }
 
 // ── IPC ───────────────────────────────────────────────────────────────────────
 ipcMain.on('note-update', (_e, data) => {
   const n = readNote(data.id); if (!n) return
+  if (data.editorMode === 'structured' && data.sections) {
+    data.content = promptSections.assembleContent(data.sections)
+  }
   Object.assign(n, data); saveNote(n); updateTray()
-  // 通知总览更新
   if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
 })
 ipcMain.on('note-delete', (_e, id) => {
   const n = readNote(id)
-  const label = ((n?.project ? `[${n.project}] ` : '') + (n?.content?.split('\n')[0]?.trim() || '便签')).substring(0, 48)
-  const parent = BrowserWindow.getFocusedWindow() || [...noteWins.values()].find(w => w && !w.isDestroyed()) || null
+  const title = (n?.project || '').trim()
+  const preview = (n?.content?.split('\n')[0]?.trim() || '').substring(0, 40)
+  const label = title || preview || '未命名便签'
+  const parent = noteWins.get(id) || BrowserWindow.getFocusedWindow() || null
+  // Windows 下按钮横向排列：明确区分「仅关闭」与「永久删除」
   const choice = dialog.showMessageBoxSync(parent, {
     type: 'warning',
-    title: '删除便签',
-    message: `确定删除「${label}」？`,
-    detail: '此操作不可恢复。可在设置 → 系统 中先导出便签备份。',
-    buttons: ['删除', '取消'],
-    defaultId: 1,
-    cancelId: 1,
-    noLink: true,
+    title: '删除便签？',
+    message: `永久删除「${label}」？`,
+    detail:
+      '关闭窗口（右上角 ✕）只会隐藏，内容仍保留。\n' +
+      '删除将从本机移除该便签，不可恢复。\n' +
+      '建议先在「设置 → 系统配置」导出备份。',
+    buttons: ['永久删除', '仅关闭窗口', '取消'],
+    defaultId: 2,
+    cancelId: 2,
+    noLink: false,
   })
+  if (choice === 1) {
+    const w = noteWins.get(id)
+    if (w && !w.isDestroyed()) w.hide()
+    updateTray()
+    return
+  }
   if (choice !== 0) return
   delPending.add(id); deleteNoteF(id)
   const w = noteWins.get(id)
   if (w && !w.isDestroyed()) w.close()
   else { noteWins.delete(id); delPending.delete(id) }
   updateTray()
+  if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
 })
 ipcMain.on('note-hide',       (_e, id) => { const w=noteWins.get(id); if(w&&!w.isDestroyed())w.hide(); updateTray() })
 ipcMain.on('note-pin-toggle', (_e, id) => {
@@ -567,11 +703,202 @@ ipcMain.on('new-note',        newNote)
 ipcMain.on('new-version',     (_e, id) => newVersion(id))
 ipcMain.on('duplicate-note',  (_e, id) => duplicateNote(id))
 ipcMain.on('focus-note', (_e, id) => {
+  // 先打开便签并置顶，再收起总览，避免列表 alwaysOnTop 抢走焦点导致「关掉了却看不到便签」
   showNote(id)
-  if (listWin && !listWin.isDestroyed()) listWin.hide()
-  updateTaskbarAnchor()
+  setImmediate(() => {
+    if (listWin && !listWin.isDestroyed() && listWin.isVisible()) listWin.hide()
+    const win = noteWins.get(id)
+    if (win && !win.isDestroyed()) {
+      win.show()
+      win.focus()
+      win.moveTop()
+    }
+    updateTaskbarAnchor()
+  })
 })
 ipcMain.on('close-list',      () => { if(listWin&&!listWin.isDestroyed())listWin.hide() })
+ipcMain.on('open-memory-panel', () => openMemoryPanel())
+ipcMain.handle('memory-recent', (_e, limit) => productMemory.getRecent(MEMORY_DIR, limit || 50))
+ipcMain.handle('get-note-versions', (_e, noteId) => {
+  const all = loadAllNotes()
+  return noteVersions.getNoteVersions(noteId, all, readNote).map(n => ({
+    id: n.id, project: n.project, version: n.version,
+    updatedAt: n.updatedAt, parentNoteId: n.parentNoteId,
+  }))
+})
+ipcMain.handle('get-note-diff', (_e, idA, idB) => {
+  const a = readNote(idA)
+  const b = readNote(idB)
+  if (!a || !b) return { ok: false, error: '卡片不存在' }
+  const hunks = noteDiff.diffLines(a.content || '', b.content || '')
+  return { ok: true, hunks, html: noteDiff.diffToHtml(hunks) }
+})
+ipcMain.handle('promote-to-okf', (_e, noteId) => {
+  const n = readNote(noteId)
+  if (!n) return { ok: false, error: '卡片不存在' }
+  const result = promptOkf.promoteNoteToConcept(KNOWLEDGE_DIR, n)
+  if (result.ok) {
+    n.okfConceptId = result.conceptId
+    saveNote(n)
+    productMemory.capture(MEMORY_DIR, {
+      kind: 'workflow',
+      summary: `收录到知识库：${n.project || '未命名'}`,
+      meta: { noteId, action: 'promote-okf', conceptId: result.conceptId },
+    })
+  }
+  return result
+})
+ipcMain.handle('instantiate-from-okf', async (_e, conceptId) => {
+  const result = promptOkf.instantiateConcept(KNOWLEDGE_DIR, conceptId)
+  if (!result.ok) return result
+  const id = `n_${Date.now()}`
+  const pos = getNewNotePos(noteWins.size)
+  const note = {
+    id, ...result.note, ...pos, w:440, h:580, pinned:true, favorite:false, copyCount:0,
+    createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+  }
+  saveNote(note)
+  const win = createNoteWindow(note)
+  win.focus()
+  updateTray()
+  productMemory.capture(MEMORY_DIR, {
+    kind: 'workflow',
+    summary: `从知识库实例化：${note.project || '未命名'}`,
+    meta: { noteId: id, action: 'instantiate-okf', conceptId },
+  })
+  return { ok: true, noteId: id }
+})
+ipcMain.handle('list-okf-concepts', () => productKnowledge.listConcepts(KNOWLEDGE_DIR, 100))
+ipcMain.handle('notes-batch-classify', async (_e, opts = {}) => {
+  const mode = opts.mode === 'ai' ? 'ai' : 'heuristic'
+  const notes = loadAllNotes()
+  const targets = notes.filter((n) => noteClassify.needsClassify(n))
+  if (!targets.length) {
+    return {
+      ok: true, updated: 0, skipped: notes.length, failed: 0, mode, samples: [],
+      message: '没有需要分类的旧数据',
+    }
+  }
+
+  if (mode === 'heuristic') {
+    const report = noteClassify.batchHeuristic(notes)
+    const byId = new Map(notes.map((n) => [n.id, n]))
+    for (const id of report.changedIds) {
+      const n = byId.get(id)
+      if (n) saveNote(n)
+    }
+    if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+    productMemory.capture(MEMORY_DIR, {
+      kind: 'workflow',
+      summary: `本地整理旧数据分类：更新 ${report.updated} 张`,
+      meta: { action: 'batch-classify', mode, updated: report.updated },
+    })
+    return {
+      ok: true,
+      mode,
+      updated: report.updated,
+      skipped: report.skipped,
+      failed: 0,
+      samples: report.samples,
+      message: `已整理 ${report.updated} 张（跳过 ${report.skipped}）`,
+    }
+  }
+
+  const s = loadSettings()
+  if (!s.apiKey || !s.apiEndpoint) {
+    return { ok: false, error: '未配置 API Key，请改用「智能整理（本地）」或先配置 AI', mode }
+  }
+  let updated = 0
+  let skipped = 0
+  let failed = 0
+  const samples = []
+  for (const n of targets) {
+    const beforeCat = (n.category || '').trim()
+    const beforeTags = JSON.stringify(n.okfTags || [])
+    const h = noteClassify.heuristicClassify(n)
+    if (noteClassify.needsCategory(n) && h.category) n.category = h.category
+    if (noteClassify.needsTags(n) && h.okfTags.length) n.okfTags = h.okfTags
+
+    if ((noteClassify.needsCategory(n) || noteClassify.needsTags(n)) && (n.content || '').trim().length >= 20) {
+      try {
+        const result = await chatCompletionOnce(s, [
+          {
+            role: 'system',
+            content: '根据提示词内容，建议一个 category（英文小写单词，如 coding/writing/review）和 1-3 个 okfTags（英文小写）。只输出 JSON：{"category":"...","okfTags":["..."]}',
+          },
+          {
+            role: 'user',
+            content: `项目名：${n.project || '未命名'}\n路径：${n.promptGroup || ''}\n\n${String(n.content || '').slice(0, 1500)}`,
+          },
+        ], 120)
+        if (result.text) {
+          const m = result.text.match(/\{[\s\S]*\}/)
+          const parsed = JSON.parse(m ? m[0] : result.text)
+          if (noteClassify.needsCategory(n) && parsed.category) {
+            n.category = String(parsed.category).slice(0, 32)
+          }
+          if (noteClassify.needsTags(n) && Array.isArray(parsed.okfTags) && parsed.okfTags.length) {
+            n.okfTags = parsed.okfTags.map((t) => String(t).slice(0, 24)).slice(0, 5)
+          }
+        }
+      } catch {
+        failed++
+      }
+    }
+
+    const changed =
+      (n.category || '').trim() !== beforeCat || JSON.stringify(n.okfTags || []) !== beforeTags
+    if (changed) {
+      if (!Array.isArray(n.tags) || !n.tags.length) n.tags = [...(n.okfTags || [])]
+      saveNote(n)
+      updated++
+      if (samples.length < 8) {
+        samples.push({ id: n.id, project: n.project || '', category: n.category, okfTags: n.okfTags })
+      }
+    } else {
+      skipped++
+    }
+  }
+  if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+  return {
+    ok: true,
+    mode,
+    updated,
+    skipped,
+    failed,
+    samples,
+    message: `AI 整理完成：更新 ${updated}，跳过 ${skipped}，失败 ${failed}`,
+  }
+})
+ipcMain.handle('suggest-classification', async (_e, { content, project }) => {
+  const text = (content || '').trim()
+  if (text.length < 20) return { ok: false, error: '内容太短，无法建议分类' }
+  const s = loadSettings()
+  if (!s.apiKey || !s.apiEndpoint) {
+    return { ok: false, error: '未配置 API Key，请手动设置分类', local: true }
+  }
+  const result = await chatCompletionOnce(s, [
+    {
+      role: 'system',
+      content: '根据提示词内容，建议一个 category（英文小写单词，如 coding/writing/review）和 1-3 个 okfTags（英文小写）。只输出 JSON：{"category":"...","okfTags":["..."]}',
+    },
+    { role: 'user', content: `项目名：${project || '未命名'}\n\n${text.slice(0, 1500)}` },
+  ], 120)
+  if (result.error || !result.text) {
+    return { ok: false, error: result.error || '建议失败', local: true }
+  }
+  try {
+    const m = result.text.match(/\{[\s\S]*\}/)
+    const parsed = JSON.parse(m ? m[0] : result.text)
+    return {
+      ok: true,
+      category: String(parsed.category || '').slice(0, 32),
+      okfTags: Array.isArray(parsed.okfTags) ? parsed.okfTags.map(t => String(t).slice(0, 24)).slice(0, 5) : [],
+    }
+  } catch {
+    return { ok: false, error: '无法解析 AI 返回', local: true }
+  }
+})
 ipcMain.handle('save-settings', (_e, s) => saveSettings_(s))
 ipcMain.on('get-settings',    e => { e.returnValue = loadSettings() })
 
@@ -626,7 +953,36 @@ ipcMain.on('show-context-menu', (event, noteId) => {
     { label: '迭代新版本  ↑',  click: () => newVersion(noteId) },
     { label: '复制卡片',       click: () => duplicateNote(noteId) },
     { type: 'separator' },
-    { label: '删除',           click: () => event.sender.send('cmd-delete') }
+    { label: '收录到知识库',   click: async () => {
+        const r = await promptOkf.promoteNoteToConcept(KNOWLEDGE_DIR, n)
+        if (r.ok) {
+          n.okfConceptId = r.conceptId
+          saveNote(n)
+          productMemory.capture(MEMORY_DIR, {
+            kind: 'workflow',
+            summary: `收录到知识库：${n.project || '未命名'}`,
+            meta: { noteId, action: 'promote-okf', conceptId: r.conceptId },
+          })
+          dialog.showMessageBoxSync({
+            type: 'info', title: '已收录',
+            message: `已收录为 OKF Concept：${r.conceptId}`,
+          })
+        } else {
+          dialog.showMessageBoxSync({
+            type: 'error', title: '收录失败',
+            message: r.error || 'OKF lint 未通过',
+          })
+        }
+      }
+    },
+    { type: 'separator' },
+    { label: '关闭窗口（隐藏）', click: () => {
+        const w = noteWins.get(noteId)
+        if (w && !w.isDestroyed()) w.hide()
+        updateTray()
+      }
+    },
+    { label: '删除便签…',       click: () => event.sender.send('cmd-delete') }
   ])
   menu.popup({ window: BrowserWindow.fromWebContents(event.sender) })
 })
@@ -942,12 +1298,14 @@ ipcMain.handle('check-for-updates', () => checkForUpdatesManual())
 
 ipcMain.handle('knowledge-status', () => {
   const lint = productKnowledge.lint(KNOWLEDGE_DIR)
+  const categories = productKnowledge.listCategories(KNOWLEDGE_DIR)
   return {
     path: KNOWLEDGE_DIR,
     concepts: lint.concepts,
     ok: lint.ok,
     errors: lint.errors.length,
-    items: productKnowledge.listConcepts(KNOWLEDGE_DIR, 20),
+    categories,
+    items: productKnowledge.listConcepts(KNOWLEDGE_DIR, 100),
   }
 })
 
@@ -997,13 +1355,14 @@ if (gotSingleInstanceLock) {
   app.on('activate', () => restoreAppWindows())
 
   app.whenReady().then(() => {
+    app.setName(APP_DISPLAY_NAME)
     if (process.platform !== 'darwin') Menu.setApplicationMenu(null)
     ensureBrandIcons()
     if (process.platform === 'darwin' && app.dock) app.dock.setIcon(getAppIconImage())
     productKnowledge.ensureKnowledge(KNOWLEDGE_DIR, KNOWLEDGE_SEED)
     productMemory.ensureMemory(MEMORY_DIR)
     tray = new Tray(makeTrayIcon())
-    tray.setToolTip('Sticky-Notes  左键显示/隐藏 · 右键菜单')
+    tray.setToolTip(`${APP_DISPLAY_NAME}  左键显示/隐藏 · 右键菜单`)
     tray.on('click', toggleAppVisibility)
     tray.on('double-click', () => restoreAppWindows())
     updateTray()
@@ -1026,6 +1385,7 @@ if (gotSingleInstanceLock) {
   })
 }
 app.on('window-all-closed', () => {})
+app.on('before-quit', () => { isQuitting = true })
 app.on('will-quit', () => globalShortcut.unregisterAll())
 
 process.on('uncaughtException', err => {

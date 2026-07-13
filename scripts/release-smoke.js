@@ -15,9 +15,10 @@ const notesBackup = require('../src/lib/notes-backup');
 const ROOT = path.join(__dirname, '..');
 const DIST = path.resolve(ROOT, process.argv[2] || 'dist-release');
 const EXPECT_VERSION = require('../package.json').version;
-const EXE = path.join(DIST, 'win-unpacked', 'StickyNotes.exe');
-const SETUP = path.join(DIST, `StickyNotes-${EXPECT_VERSION}-setup-win-x64.exe`);
-const PORTABLE = path.join(DIST, `StickyNotes-${EXPECT_VERSION}-portable-win-x64.exe`);
+const PRODUCT = 'Sticky-Notes';
+const EXE = path.join(DIST, 'win-unpacked', `${PRODUCT}.exe`);
+const SETUP = path.join(DIST, `${PRODUCT}-${EXPECT_VERSION}-setup-win-x64.exe`);
+const PORTABLE = path.join(DIST, `${PRODUCT}-${EXPECT_VERSION}-portable-win-x64.exe`);
 const CHECKSUMS = path.join(DIST, 'SHA256SUMS.txt');
 
 const results = [];
@@ -61,7 +62,7 @@ function waitForNote(notesDir, timeoutMs = 20000) {
 function killSticky() {
   try {
     if (process.platform === 'win32') {
-      execFileSync('taskkill', ['/F', '/IM', 'StickyNotes.exe'], { stdio: 'ignore' });
+      execFileSync('taskkill', ['/F', '/IM', `${PRODUCT}.exe`], { stdio: 'ignore' });
     }
   } catch { /* none running */ }
 }
@@ -202,7 +203,7 @@ async function main() {
     try {
       execFileSync(SETUP, ['/S', `/D=${installDir}`], { timeout: 120000, stdio: 'pipe' });
       await sleep(3000);
-      const installedExe = path.join(installDir, 'StickyNotes.exe');
+      const installedExe = path.join(installDir, `${PRODUCT}.exe`);
       if (fs.existsSync(installedExe)) {
         pass('nsis-install', `silent install → ${installDir}`);
         const ud = fs.mkdtempSync(path.join(os.tmpdir(), 'sticky-install-run-'));
@@ -212,7 +213,7 @@ async function main() {
         pass('nsis-launch', 'installed exe started');
         fs.rmSync(ud, { recursive: true, force: true });
       } else {
-        fail('nsis-install', `StickyNotes.exe not at ${installedExe}`);
+        fail('nsis-install', `${PRODUCT}.exe not at ${installedExe}`);
       }
     } catch (e) {
       fail('nsis-install', e.message || 'silent install failed');

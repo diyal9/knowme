@@ -1,7 +1,7 @@
 ---
 type: Playbook
 title: OKF 知识库导入导出
-description: 在 Prompt Studio 设置中交换 OKF v0.1 知识包。
+description: 在 Sticky-Notes 设置中交换 OKF v0.1 知识包。
 tags: [process, okf, import, export]
 timestamp: 2026-07-01T00:00:00Z
 ---

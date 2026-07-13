@@ -1,5 +1,5 @@
 /**
- * StickyNotes smoke tests — 门禁硬项 npm test
+ * Sticky-Notes smoke tests — 门禁硬项 npm test
  */
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
@@ -46,7 +46,7 @@ describe('release materials', () => {
 
   it('package version matches release target', () => {
     const pkg = require('../package.json');
-    assert.equal(pkg.version, '0.1.1');
+    assert.equal(pkg.version, '0.3.0');
   });
 
   it('release workflow runs test and lint', () => {
@@ -57,6 +57,25 @@ describe('release materials', () => {
     assert.ok(wf.includes('npm test'));
     assert.ok(wf.includes('npm run lint'));
     assert.ok(wf.includes('needs: test'));
+  });
+});
+describe('sticky-notes v0.2', () => {
+  it('prompt-sections module exists', () => {
+    const mod = require('../src/lib/prompt-sections');
+    assert.ok(typeof mod.assembleContent === 'function');
+    assert.ok(typeof mod.migrateNoteFields === 'function');
+  });
+
+  it('preload exposes v0.2 IPC', () => {
+    const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8');
+    assert.ok(preload.includes('getNoteVersions'));
+    assert.ok(preload.includes('promoteToOkf'));
+    assert.ok(preload.includes('memoryRecent'));
+    assert.ok(preload.includes('suggestClassification'));
+  });
+
+  it('memory.html exists', () => {
+    assert.ok(fs.existsSync(path.join(__dirname, '..', 'src', 'memory.html')));
   });
 });
 describe('OKF knowledge bundle', () => {

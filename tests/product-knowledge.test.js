@@ -39,6 +39,19 @@ describe('product knowledge OKF', () => {
     const im = productKnowledge.importBundle(importDir, exportDir);
     assert.ok(im.ok, im.error);
   });
+
+  it('lists knowledge categories from seed', () => {
+    productKnowledge.ensureKnowledge(knowledgeDir, seedDir);
+    const cats = productKnowledge.listCategories(knowledgeDir);
+    assert.ok(cats.length >= 2, 'should have concepts + processes');
+    const ids = cats.map((c) => c.id);
+    assert.ok(ids.includes('concepts'));
+    assert.ok(ids.includes('processes'));
+    const concepts = cats.find((c) => c.id === 'concepts');
+    assert.ok(concepts.count >= 1);
+    assert.ok(concepts.items.some((i) => i.title));
+    assert.equal(concepts.label, '概念');
+  });
 });
 
 describe('product memory', () => {

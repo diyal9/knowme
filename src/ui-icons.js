@@ -1,25 +1,78 @@
-/** Sticky-Notes 统一线型图标（16×16） */
+/** Sticky-Notes 图标 — Cursor / VS Code Codicon（16×16 · stroke 1.5 · 纯线型为主） */
 ;(function () {
-  const BASE = 'viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"'
+  const BASE =
+    'viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"'
+
+  const tint = 'fill="currentColor" fill-opacity="0.35" stroke="none"'
 
   const paths = {
-    star: '<path d="M8 2.5 9.7 6l4 .6-2.9 2.8.7 4L8 11.2 4.5 13.4l.7-4L2.3 6.6l4-.6z"/>',
-    pin: '<circle cx="8" cy="5.2" r="2"/><path d="M8 7.2v4.2"/><path d="M6 11.4h4"/>',
-    expand: '<path d="M2.5 6.5V2.5H6.5"/><path d="M9.5 2.5H13.5V6.5"/><path d="M13.5 9.5V13.5H9.5"/><path d="M6.5 13.5H2.5V9.5"/>',
-    shrink: '<path d="M6.5 2.5H2.5V6.5"/><path d="M13.5 9.5V13.5H9.5"/><path d="M2.5 9.5V13.5H6.5"/><path d="M13.5 2.5V6.5H9.5"/>',
+    star: '<path d="M8 2.35 9.6 5.75l3.7.5-2.7 2.6.65 3.7L8 10.9l-3.25 1.65.65-3.7-2.7-2.6 3.7-.5z"/>',
+
+    // 地图钉（线型，避免被看成钢笔）
+    pin:
+      '<path d="M8 1.8c-2.15 0-3.9 1.7-3.9 3.8 0 2.85 3.9 7.4 3.9 7.4s3.9-4.55 3.9-7.4c0-2.1-1.75-3.8-3.9-3.8z"/>' +
+      '<circle cx="8" cy="5.6" r="1.35"/>',
+
+    // Cursor 布局：右侧栏（放大/分栏）
+    expand:
+      '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="2"/>' +
+      '<path d="M10.15 2.25v11.5"/>' +
+      `<rect ${tint} x="10.15" y="2.25" width="3.6" height="11.5" rx="0 2 2 0"/>`,
+
+    // Cursor 布局：底栏（还原）
+    shrink:
+      '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="2"/>' +
+      '<path d="M2.25 10.15h11.5"/>' +
+      `<rect ${tint} x="2.25" y="10.15" width="11.5" height="3.6" rx="0 0 2 2"/>`,
+
     minimize: '<path d="M3 8h10"/>',
-    close: '<path d="M4 4l8 8"/><path d="M12 4 4 12"/>',
-    chat: '<path d="M3.5 4.5h9A1.5 1.5 0 0 1 14 6v4a1.5 1.5 0 0 1-1.5 1.5H7.5L5 13v-2H3.5A1.5 1.5 0 0 1 2 9.5V6a1.5 1.5 0 0 1 1.5-1.5z"/>',
-    send: '<path d="M8 4v7.5"/><path d="M5.5 7.5 8 5l2.5 2.5"/>',
-    copy: '<rect x="5.5" y="5.5" width="7" height="8" rx="1.2"/><path d="M4 10V4.5A1 1 0 0 1 5 3.5h5.5"/>',
-    check: '<path d="M3.2 8.5l3 3 6.5-7"/>',
-    chevronRight: '<path d="M6 4l4 4-4 4"/>',
-    optimize: '<path d="M3 5h7"/><circle cx="5.5" cy="5" r="1.2"/><path d="M3 8.5h10"/><circle cx="10.5" cy="8.5" r="1.2"/><path d="M3 12h6"/><circle cx="7" cy="12" r="1.2"/>',
-    expandText: '<path d="M8 2.5v11"/><path d="M5.5 5.5 8 3l2.5 2.5"/><path d="M5.5 10.5 8 13l2.5-2.5"/>',
-    simplify: '<path d="M3.5 5h9"/><path d="M4.5 8h7"/><path d="M5.5 11h5"/>',
-    en: '<path d="M5 12 8 4l3 8"/><path d="M6.2 9.5h3.6"/>',
-    note: '<path d="M4.5 3.5h7A1.5 1.5 0 0 1 13 5v8a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13V5a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M6 7h4"/><path d="M6 9.5h4"/><path d="M6 12h2.5"/>',
-    list: '<path d="M4 5h8"/><path d="M4 8h8"/><path d="M4 11h5"/>',
+    close: '<path d="M4.2 4.2l7.6 7.6"/><path d="M11.8 4.2 4.2 11.8"/>',
+
+    trash:
+      '<path d="M3.5 4.5h9"/><path d="M6.25 4.5V3.4h3.5v1.1"/><path d="M5.25 4.5l.5 8h4.5l.5-8"/><path d="M7 7v3.6"/><path d="M9 7v3.6"/>',
+
+    // 对话气泡：纯描边（无实心填色）
+    chat:
+      '<path d="M2.4 3.4h11.2a1.3 1.3 0 0 1 1.3 1.3v5a1.3 1.3 0 0 1-1.3 1.3H7.1L4.4 13.4v-2.4H2.4A1.3 1.3 0 0 1 1.1 9.7v-5A1.3 1.3 0 0 1 2.4 3.4z"/>',
+
+    send: '<path d="M2.6 8.1 13.4 3.3"/><path d="M13.4 3.3 9.1 9l3.1 5.5-2.6-3-5 1.3z"/>',
+
+    copy:
+      '<rect x="5.6" y="5.4" width="6.8" height="7.6" rx="1.3"/>' +
+      '<path d="M4.3 10.4V4.5A1.3 1.3 0 0 1 5.6 3.2h5.1"/>',
+
+    check: '<path d="M3.3 8.2 6.5 11.3 12.7 4.7"/>',
+
+    history: '<circle cx="8" cy="8" r="5.2"/><path d="M8 5.15V8.05l2 1.35"/>',
+
+    chevronRight: '<path d="M6.1 3.9 10 8 6.1 12.1"/>',
+
+    // AI 优化：四角星芒（Cursor sparkle）
+    optimize:
+      '<path d="M8 2.2 8.85 6.15 12.8 7 8.85 7.85 8 11.8 7.15 7.85 3.2 7 7.15 6.15z"/>' +
+      '<path d="M12.4 3.1l.35 1.35 1.35.35-1.35.35-.35 1.35-.35-1.35-1.35-.35 1.35-.35z"/>',
+
+    expandText: '<path d="M8 2.5v11"/><path d="M5.5 5.3 8 2.9l2.5 2.4"/><path d="M5.5 10.7 8 13.1l2.5-2.4"/>',
+
+    simplify: '<path d="M3.3 5h9.4"/><path d="M4.5 8.5h7"/><path d="M5.7 12h4.6"/>',
+
+    en: '<path d="M5.1 12.1 8 3.9l2.9 8.2"/><path d="M6.2 9.35h3.6"/>',
+
+    note:
+      '<rect x="3.6" y="2.4" width="8.8" height="11.2" rx="1.5"/>' +
+      '<path d="M5.8 5.3h4.4"/><path d="M5.8 7.5h4.4"/><path d="M5.8 9.7h2.8"/>',
+
+    list: '<path d="M3.5 4.8h9"/><path d="M3.5 8h9"/><path d="M3.5 11.2h5.8"/>',
+
+    panelBottom:
+      '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="2"/>' +
+      '<path d="M2.25 10.15h11.5"/>' +
+      `<rect ${tint} x="2.25" y="10.15" width="11.5" height="3.6" rx="0 0 2 2"/>`,
+
+    panelRight:
+      '<rect x="2.25" y="2.25" width="11.5" height="11.5" rx="2"/>' +
+      '<path d="M10.15 2.25v11.5"/>' +
+      `<rect ${tint} x="10.15" y="2.25" width="3.6" height="11.5" rx="0 2 2 0"/>`,
   }
 
   function svg(name) {

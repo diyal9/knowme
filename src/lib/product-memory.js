@@ -23,7 +23,7 @@ function ensureMemory(memoryDir) {
   if (!fs.existsSync(index)) {
     fs.writeFileSync(
       index,
-      '# Prompt Studio Memory\n\n本地使用记忆（不入云、可随应用数据目录备份）。\n',
+      '# Sticky-Notes Memory\n\n本地使用记忆（不入云、可随应用数据目录备份）。\n',
       'utf8'
     );
   }
