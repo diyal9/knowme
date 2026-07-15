@@ -33,7 +33,7 @@ html,body{width:100%;height:100%;background:transparent;overflow:hidden;user-sel
     <button class="hbtn" id="btnClose" title="关闭">✕</button>
   </div>
   <div class="list-wrap" id="listWrap"></div>
-  <div class="footer">本地记忆，不入云 · 点击可跳转到对应提示词</div>
+  <div class="footer">本地记忆，不入云 · 点击可跳转到对应笔记</div>
 </div>
 <script>
 function relTime(iso){if(!iso)return'—';const s=(Date.now()-new Date(iso))/1000;if(s<60)return`${Math.floor(s)}s前`;if(s<3600)return`${Math.floor(s/60)}m前`;if(s<86400)return`${Math.floor(s/3600)}h前`;return`${Math.floor(s/86400)}d前`}

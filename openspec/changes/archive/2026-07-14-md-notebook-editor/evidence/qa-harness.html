@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>md-notebook-editor QA harness</title>
+<style>
+body { font: 13px/1.5 system-ui, sans-serif; margin: 16px; }
+#editor { width: 100%; height: 120px; }
+#results { margin-top: 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<h1>QA Harness</h1>
+<textarea id="editor" placeholder="在此编写…  支持 Markdown，可用 {{变量名}} 占位"></textarea>
+<div id="results"></div>
+<script src="/src/assets/vendor/marked.umd.js"></script>
+<script src="/src/assets/vendor/purify.min.js"></script>
+<script src="/src/ui-icons.js"></script>
+<script>
+const results = [];
+function log(name, ok, detail) {
+  results.push({ name, ok, detail });
+  document.getElementById('results').textContent = results.map(r => `${r.ok ? 'PASS' : 'FAIL'} ${r.name}: ${r.detail || ''}`).join('\n');
+}
+function renderPreview(raw) {
+  const html = marked.parse(raw, { breaks: true, gfm: true });
+  return DOMPurify.sanitize(html);
+}
+(function() {
+  const raw = '<scr' + 'ipt>alert(1)</scr' + 'ipt>\n<img src=x onerror=alert(1)>';
+  const clean = renderPreview(raw);
+  const bad = /<script/i.test(clean) || /onerror/i.test(clean);
+  log('XSS script/onerror stripped', !bad, clean.slice(0, 80));
+})();
+(function() {
+  const raw = '## 标题\n\n- 列表项\n\n```js\ncode\n```';
+  const clean = renderPreview(raw);
+  const ok = clean.includes('<h2') && clean.includes('<li') && clean.includes('<code');
+  log('Preview renders h2/list/code', ok, clean.slice(0, 120));
+})();
+(function() {
+  const div = document.createElement('div');
+  div.innerHTML = '<span class="ico" data-icon="note"></span><span class="ico" data-icon="eye"></span><span class="ico" data-icon="star"></span>';
+  document.body.appendChild(div);
+  StickyIcons.mount(div);
+  const svgs = div.querySelectorAll('svg');
+  log('Footer icons mount SVG', svgs.length === 3, `count=${svgs.length}`);
+})();
+window.runUndoTest = function() {
+  const ed = document.getElementById('editor');
+  ed.focus();
+  ed.value = 'hello';
+  ed.setSelectionRange(5, 5);
+  document.execCommand('insertText', false, ' world');
+  const after = ed.value;
+  document.execCommand('undo');
+  const undone = ed.value;
+  const ok = after === 'hello world' && undone === 'hello';
+  log('Ctrl+Z undoes insertText', ok, `after=${after} undone=${undone}`);
+  return ok;
+};
+window.runSlashSim = function() {
+  const ed = document.getElementById('editor');
+  ed.value = '/';
+  ed.setSelectionRange(1, 1);
+  const line = ed.value.slice(0, ed.selectionStart);
+  const m = line.match(/^(\s*)(\/(.*))$/);
+  log('Slash trigger regex', !!m, JSON.stringify(m));
+  return !!m;
+};
+window.summary = function() { return results; };
+</script>
+</body>
+</html>

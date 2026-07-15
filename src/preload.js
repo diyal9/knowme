@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld('api', {
   updateNote:     d  => ipcRenderer.send('note-update',          d),
   deleteNote:     id => ipcRenderer.send('note-delete',          id),
   hideNote:       id => ipcRenderer.send('note-hide',            id),
+  minimizeToTray: id => ipcRenderer.send('note-minimize-tray',   id),
   togglePin:      id => ipcRenderer.send('note-pin-toggle',      id),
   toggleFavorite: id => ipcRenderer.send('note-toggle-favorite', id),
   incrementCopy:  id => ipcRenderer.send('note-increment-copy',  id),
@@ -40,8 +41,19 @@ contextBridge.exposeInMainWorld('api', {
 
   // 总览列表
   initList:  cb => ipcRenderer.on('init-list', (_e, notes) => cb(notes)),
+  onListHighlight: cb => {
+    const fn = (_e, id) => cb(id)
+    ipcRenderer.on('list-highlight', fn)
+    return () => ipcRenderer.removeListener('list-highlight', fn)
+  },
   focusNote: id  => ipcRenderer.send('focus-note', id),
   closeList: ()  => ipcRenderer.send('close-list'),
+  showListContextMenu: opts => ipcRenderer.send('show-list-context-menu', opts),
+  onListOpenGroup: cb => {
+    const fn = (_e, groupKey) => cb(groupKey)
+    ipcRenderer.on('list-open-group', fn)
+    return () => ipcRenderer.removeListener('list-open-group', fn)
+  },
 
   // 系统设置
   openDataDir:  ()  => ipcRenderer.send('open-data-dir'),
@@ -57,14 +69,27 @@ contextBridge.exposeInMainWorld('api', {
 
   // 产品知识库 OKF + Memory（用户数据目录）
   knowledgeStatus: () => ipcRenderer.invoke('knowledge-status'),
-  knowledgeExport: () => ipcRenderer.invoke('knowledge-export'),
+  knowledgeExport: (opts) => ipcRenderer.invoke('knowledge-export', opts || {}),
   knowledgeImport: () => ipcRenderer.invoke('knowledge-import'),
+  knowledgeReadConcept: (id) => ipcRenderer.invoke('knowledge-read-concept', id),
+  knowledgeWriteConcept: (payload) => ipcRenderer.invoke('knowledge-write-concept', payload),
   openKnowledgeDir: () => ipcRenderer.send('open-knowledge-dir'),
   memoryStatus: () => ipcRenderer.invoke('memory-status'),
   openMemoryDir: () => ipcRenderer.send('open-memory-dir'),
   openMemoryPanel: () => ipcRenderer.send('open-memory-panel'),
   memoryRecent: (limit) => ipcRenderer.invoke('memory-recent', limit),
   initMemory: cb => ipcRenderer.on('init-memory', (_e, items) => cb(items)),
+
+  skillPackCheck: () => ipcRenderer.invoke('skill-pack-check'),
+  skillPackGenerate: (payload) => ipcRenderer.invoke('skill-pack-generate', payload || {}),
+  skillPackDismiss: (theme) => ipcRenderer.invoke('skill-pack-dismiss', theme),
+  listSkills: () => ipcRenderer.invoke('list-skills'),
+  createSkill: (payload) => ipcRenderer.invoke('create-skill', payload || {}),
+  onSkillPackSuggest: (cb) => {
+    const handler = (_e, payload) => cb(payload)
+    ipcRenderer.on('skill-pack-suggest', handler)
+    return () => ipcRenderer.removeListener('skill-pack-suggest', handler)
+  },
 
   getNoteVersions: id => ipcRenderer.invoke('get-note-versions', id),
   getNoteDiff: (a, b) => ipcRenderer.invoke('get-note-diff', a, b),

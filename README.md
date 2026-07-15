@@ -1,6 +1,6 @@
-# Sticky-Notes — AI 驱动提示词工作台
+# Sticky-Notes — AI 驱动的本地 Markdown 笔记本
 
-轻量、本地私有的 **提示词管理工具**，基于 Electron 构建：结构化编辑、版本迭代、OKF 知识库与使用记忆。
+轻量、本地私有的 **Markdown 笔记应用**，基于 Electron 构建：Markdown 为核心文档格式，内置版本迭代、OKF 知识库、AI 助写与使用记忆；提示词优化与管理是其中一项能力。
 
 ## 下载与安装
 

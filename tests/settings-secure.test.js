@@ -58,7 +58,7 @@ describe('settings-secure', () => {
       apiEndpoint: 'https://api.example.com',
       apiKey: 'sk-test',
       model: 'gpt-4o-mini',
-      systemPrompt: 'hi',
+      userPrompt: 'hi',
     });
     assert.equal(result.ok, true);
     assert.equal(result.warning, undefined);
@@ -75,7 +75,7 @@ describe('settings-secure', () => {
       apiEndpoint: 'https://api.example.com',
       apiKey: 'sk-secret',
       model: 'gpt-4o-mini',
-      systemPrompt: 'hi',
+      userPrompt: 'hi',
     });
     assert.equal(result.ok, false);
     assert.ok(result.warning);
@@ -91,7 +91,7 @@ describe('settings-secure', () => {
       apiEndpoint: 'https://api.example.com',
       apiKey: 'sk-keep',
       model: 'gpt-4o-mini',
-      systemPrompt: 'hi',
+      userPrompt: 'hi',
     });
     restoreLoad();
 
@@ -100,10 +100,49 @@ describe('settings-secure', () => {
       apiEndpoint: 'https://api.example.com',
       apiKey: '',
       model: 'gpt-4o-mini',
-      systemPrompt: 'updated',
+      userPrompt: 'updated',
     });
     assert.equal(result.ok, true);
     assert.equal(mod2.load(settingsFile).apiKey, 'sk-keep');
+    assert.equal(mod2.load(settingsFile).userPrompt, 'updated');
+    restoreLoad();
+  });
+
+  it('migrates legacy default systemPrompt to empty userPrompt', () => {
+    const { LEGACY_DEFAULT_SYSTEM_PROMPT } = require('../src/lib/ai-assistant-context');
+    fs.writeFileSync(
+      settingsFile,
+      JSON.stringify({
+        apiEndpoint: 'https://api.example.com',
+        model: 'gpt-4o-mini',
+        systemPrompt: LEGACY_DEFAULT_SYSTEM_PROMPT,
+      }),
+      'utf8'
+    );
+    const { load } = loadSettingsSecure(true);
+    const s = load(settingsFile);
+    assert.equal(s.userPrompt, '');
+    assert.equal(s.systemPrompt, undefined);
+    restoreLoad();
+  });
+
+  it('migrates custom legacy systemPrompt into userPrompt', () => {
+    fs.writeFileSync(
+      settingsFile,
+      JSON.stringify({
+        apiEndpoint: 'https://api.example.com',
+        model: 'gpt-4o-mini',
+        systemPrompt: '专业领域：提示词工程',
+      }),
+      'utf8'
+    );
+    const { load, save } = loadSettingsSecure(true);
+    const s = load(settingsFile);
+    assert.equal(s.userPrompt, '专业领域：提示词工程');
+    save(settingsFile, { ...s, apiKey: '' });
+    const raw = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    assert.equal(raw.userPrompt, '专业领域：提示词工程');
+    assert.equal(raw.systemPrompt, undefined);
     restoreLoad();
   });
 });

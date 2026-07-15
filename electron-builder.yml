@@ -30,7 +30,7 @@ win:
     - target: portable
       arch:
         - x64
-  icon: src/assets/icon.png
+  icon: src/assets/icon.ico
   artifactName: ${productName}-${version}-win-${arch}.${ext}
   # 证书通过 CI Secrets 注入：WIN_CSC_LINK / WIN_CSC_KEY_PASSWORD（或 CSC_LINK / CSC_KEY_PASSWORD）
   # 无证书时不阻塞构建，未签名说明见 build/release-notes.md

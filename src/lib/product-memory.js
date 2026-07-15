@@ -148,12 +148,15 @@ function getRecent(memoryDir, n = 15) {
 function getContextForAI(memoryDir, knowledgeSnippet = '') {
   const recent = getRecent(memoryDir, 10);
   const parts = [];
-  if (knowledgeSnippet) {
-    parts.push('## 用户知识库摘要\n' + knowledgeSnippet);
-  }
+  parts.push(
+    '## 用户知识库摘要\n' +
+      (knowledgeSnippet
+        ? knowledgeSnippet
+        : '（知识库为空，暂无任何条目。若用户询问知识库相关内容，请如实告知"知识库暂无相关内容"，不要编造任何条目。）')
+  );
   if (recent.length) {
     parts.push(
-      '## 近期使用记忆\n' +
+      '## 近期使用记忆（仅为软件使用统计，非笔记内容，禁止当作事实引用或据此编造笔记）\n' +
         recent.map((r) => `- [${r.kind}] ${r.summary}`).join('\n')
     );
   }
@@ -162,7 +165,7 @@ function getContextForAI(memoryDir, knowledgeSnippet = '') {
     const last = fs.readFileSync(pending, 'utf8').split('\n').filter(Boolean).slice(-3);
     if (last.length) {
       parts.push(
-        '## 重复模式（可考虑写入知识库）\n' +
+        '## 重复模式（仅为使用频率统计，非笔记内容，禁止引用为事实）\n' +
           last
             .map((l) => {
               try {

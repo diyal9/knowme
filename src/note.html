@@ -61,22 +61,22 @@ html, body {
   font:500 11px var(--ui); letter-spacing:.2px; color:var(--text3);
   flex:1;
 }
-.win-btns { display:flex; gap:3px; -webkit-app-region:no-drag; }
+.win-btns { display:flex; gap:2px; -webkit-app-region:no-drag; }
 .wbtn {
-  width:28px; height:28px; background:transparent; border:none; border-radius:6px;
+  width:24px; height:24px; background:transparent; border:none; border-radius:5px;
   color:var(--text2); cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   transition:background .12s, color .12s; outline:none;
 }
 .wbtn:hover { background:rgba(0,0,0,0.07); color:var(--text); }
-.wbtn.star.on { color:var(--star); }
-.wbtn.star.on .ico-star path { fill:var(--star); stroke:var(--star); }
-.wbtn.star:hover { color:var(--star); background:rgba(245,158,11,0.10); }
 .wbtn.pin.on { color:var(--accent); background:var(--accent-bg); }
-.wbtn.del:hover { background:rgba(220,38,38,0.10); color:var(--red); }
+.wbtn.min:hover { background:rgba(0,0,0,0.07); color:var(--text); }
 .wbtn.close:hover { background:rgba(0,0,0,0.08); color:var(--text); }
+/* 顶栏控件：字形 16 · 热区 24，避免压过品牌字与内容标题 */
+.wbtn .ico { width:16px; height:16px; }
+.wbtn .ico svg { width:16px; height:16px; }
 
-/* 统一图标 — Cursor Codicon：16–18px · stroke 1.5 */
+/* 统一图标 — Cursor Codicon：内容区 18 / 顶栏与小号 16 · stroke 1.5 */
 .ico {
   display:flex; align-items:center; justify-content:center;
   width:18px; height:18px; flex-shrink:0; pointer-events:none;
@@ -89,8 +89,9 @@ html, body {
 }
 .ico-sm { width:16px; height:16px; }
 .ico-sm svg { width:16px; height:16px; stroke-width:1.5; }
-.ico-star path { fill:none; }
-.wbtn.star.on .ico-star path { fill:var(--star); stroke:var(--star); }
+.ico-star .s-f { display:none; }
+#btnStar.on .ico-star .s-o { display:none; }
+#btnStar.on .ico-star .s-f { display:inline; fill:var(--star); }
 
 /* ── 编辑区头（标题+元信息，两行压紧）── */
 .head-block {
@@ -111,7 +112,7 @@ html, body {
 .title-input::placeholder { color:var(--text3); font-weight:400; font-style:italic; }
 .title-input.generating { color:var(--text3); font-style:italic; }
 
-.ver-wrap { flex-shrink:0; display:flex; align-items:center; gap:2px; }
+.ver-wrap { flex-shrink:0; display:flex; align-items:center; gap:2px; margin-left:auto; }
 .ver-display {
   display:inline-flex; align-items:center;
   font:500 10px/1 var(--ui); letter-spacing:.2px;
@@ -129,14 +130,6 @@ html, body {
   outline:none; display:none;
 }
 .ver-input.visible { display:inline-block; }
-.ver-hist {
-  width:22px; height:22px; border:none; background:transparent;
-  border-radius:5px; color:var(--text3); cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  transition:background .12s, color .12s; outline:none; padding:0;
-}
-.ver-hist:hover { background:var(--accent-bg); color:var(--accent); }
-
 .meta-field {
   display:flex; align-items:center; gap:4px; min-width:0;
 }
@@ -147,34 +140,55 @@ html, body {
   letter-spacing:.2px; user-select:none;
 }
 .meta-input {
-  background:var(--bg-top); border:1px solid rgba(0,0,0,0.08); border-radius:5px;
+  background:transparent; border:1px solid transparent; border-radius:5px;
   padding:3px 7px; font:11px var(--ui); color:var(--text); outline:none; min-width:0;
   flex:1; height:24px; user-select:text; -webkit-user-select:text;
-  transition:border-color .2s, box-shadow .2s;
+  transition:background .15s, border-color .15s, box-shadow .15s;
 }
+.meta-input:hover { background:rgba(0,0,0,0.03); }
+.meta-input:focus { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(85,88,232,0.10); }
 .meta-input.cat { width:72px; flex:0 0 72px; }
-.meta-input.flash { border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(85,88,232,0.12); }
+.meta-input.flash { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(85,88,232,0.12); }
 .mode-seg {
-  display:inline-flex; border:1px solid rgba(0,0,0,0.10); border-radius:5px;
+  display:inline-flex; align-items:center; height:28px;
+  border:1px solid rgba(0,0,0,0.10); border-radius:6px;
   overflow:hidden; flex-shrink:0;
 }
 .mode-btn {
-  background:transparent; border:none; border-radius:0; padding:3px 8px;
-  font:500 11px var(--ui); color:var(--text3); cursor:pointer; outline:none; white-space:nowrap;
+  display:inline-flex; align-items:center; justify-content:center;
+  height:28px; min-width:28px;
+  background:transparent; border:none; border-radius:0; padding:0 8px;
+  color:var(--text3); cursor:pointer; outline:none;
 }
+.mode-btn .ico svg { width:15px; height:15px; }
+.mode-btn .ico svg path { fill: currentColor; stroke: none; }
 .mode-btn + .mode-btn { border-left:1px solid rgba(0,0,0,0.08); }
 .mode-btn.active { background:var(--accent-bg); color:var(--accent); }
 .mode-btn:hover:not(.active) { background:rgba(0,0,0,0.03); color:var(--text2); }
-.tool-ghost {
-  background:transparent; border:none; border-radius:5px; padding:3px 6px;
-  font:500 11px var(--ui); color:var(--text2); cursor:pointer; outline:none; white-space:nowrap;
-  transition:background .12s, color .12s; flex-shrink:0;
+.mode-btn:disabled { opacity:.45; cursor:default; }
+
+/* 底栏中间紧凑工具组 */
+.foot-tools {
+  display:inline-flex; align-items:center; gap:1px;
+  height:28px; flex-shrink:0; margin-left:2px;
 }
-.tool-ghost:hover { background:var(--accent-bg); color:var(--accent); }
-.tool-ghost:disabled { opacity:.55; cursor:wait; }
-.tool-ghost.done { color:var(--green); }
-.tool-ghost.done:hover { background:rgba(22,163,74,0.08); color:var(--green); }
-.head-spacer { flex:1; min-width:2px; }
+.foot-tool {
+  width:26px; height:26px; flex-shrink:0; padding:0;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:transparent; border:none; border-radius:5px;
+  color:var(--text2); cursor:pointer; outline:none;
+  transition:background .12s, color .12s;
+}
+.foot-tool .ico svg { width:14px; height:14px; }
+.foot-tool .ico svg path { fill: currentColor; stroke: none; }
+.foot-tool:hover { background:var(--accent-bg); color:var(--accent); }
+.foot-tool.active { background:var(--accent-bg); color:var(--accent); }
+.foot-tool:disabled { opacity:.45; cursor:default; }
+.foot-tool:disabled:hover { background:transparent; color:var(--text2); }
+.foot-tool.done { color:var(--green); }
+.foot-tool.done:hover { background:rgba(22,163,74,0.08); color:var(--green); }
+.foot-tool.on { color:var(--star); background:rgba(245,158,11,0.10); }
+.foot-tool.on:hover { background:rgba(245,158,11,0.16); color:var(--star); }
 
 /* ── 主工作区（普通 / AI 左右分栏）── */
 .workspace {
@@ -191,7 +205,7 @@ html, body {
 /* ── AI 左栏（对话）── */
 .ai-pane {
   display:none; flex-direction:column;
-  flex:0 0 400px; width:400px; max-width:46%;
+  flex:0 0 560px; width:560px; min-width:500px; max-width:68%;
   background:var(--bg-mid); border-right:1px solid var(--div);
 }
 .card.ai-open .ai-pane { display:flex; }
@@ -204,9 +218,10 @@ html, body {
 .ai-pane-title { font:600 12px var(--ui); color:var(--text); flex:1; }
 .ai-pane-head .ico { color:var(--text2); }
 .ai-pane-close {
-  background:transparent; border:1px solid rgba(0,0,0,0.10);
-  border-radius:6px; padding:4px 9px;
-  font:500 11px var(--ui); color:var(--text2); cursor:pointer;
+  background:transparent; border:none;
+  border-radius:6px; width:26px; height:26px; padding:0;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--text2); cursor:pointer; transition:background .12s, color .12s;
 }
 .ai-pane-close:hover { background:var(--bg-card); color:var(--text); }
 
@@ -234,20 +249,55 @@ html, body {
   border-bottom-left-radius:4px;
 }
 .chat-bubble.loading { color:var(--text3); font-style:italic; border-style:dashed; }
+
+/* Markdown 排版（对话气泡内） */
+.chat-text.md { display:block; }
+.chat-text.md > *:first-child { margin-top:0; }
+.chat-text.md > *:last-child { margin-bottom:0; }
+.chat-text.md p { margin:0 0 7px; }
+.chat-text.md .md-h { font-weight:600; line-height:1.4; margin:10px 0 5px; color:var(--text); }
+.chat-text.md h1.md-h { font-size:14px; }
+.chat-text.md h2.md-h { font-size:13px; }
+.chat-text.md h3.md-h, .chat-text.md h4.md-h { font-size:12px; }
+.chat-text.md ul, .chat-text.md ol { margin:0 0 7px; padding-left:18px; }
+.chat-text.md li { margin:2px 0; }
+.chat-text.md strong { font-weight:600; color:var(--text); }
+.chat-text.md em { font-style:italic; }
+.chat-text.md code {
+  font:11px var(--mono); background:rgba(0,0,0,0.06);
+  padding:1px 4px; border-radius:4px; word-break:break-word;
+}
+.chat-text.md pre {
+  margin:0 0 7px; padding:8px 10px; border-radius:6px;
+  background:var(--bg-mid); border:1px solid var(--div);
+  overflow-x:auto;
+}
+.chat-text.md pre code {
+  display:block; background:none; padding:0;
+  font:11px/1.6 var(--mono); white-space:pre;
+}
 .chat-bubble.streaming .stream-cursor {
   display:inline-block; margin-left:1px; color:var(--accent);
   animation:stream-blink 0.9s step-end infinite;
 }
 @keyframes stream-blink { 50% { opacity:0; } }
 .chat-bubble.err { border-color:rgba(220,38,38,0.25); background:rgba(220,38,38,0.05); color:var(--red); }
-.chat-actions { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
-.chat-act {
-  font:500 11px var(--ui); color:var(--accent);
-  background:var(--accent-bg); border:1px solid var(--accent-b);
-  border-radius:6px; padding:3px 8px; cursor:pointer;
+.chat-actions {
+  display:flex; gap:6px; margin-top:10px; padding-top:8px;
+  border-top:1px solid rgba(0,0,0,0.06); flex-wrap:wrap;
 }
-.chat-act:hover { background:rgba(85,88,232,0.14); }
-.chat-act.subtle { color:var(--text2); background:transparent; border-color:rgba(0,0,0,0.10); }
+.chat-act {
+  display:inline-flex; align-items:center; gap:4px;
+  font:500 11px var(--ui); color:var(--accent);
+  background:transparent; border:1px solid var(--accent-b);
+  border-radius:999px; padding:4px 11px; cursor:pointer;
+  transition:background .12s, border-color .12s, color .12s, transform .1s;
+  outline:none; user-select:none;
+}
+.chat-act:hover { background:var(--accent-bg); border-color:var(--accent); }
+.chat-act:active { transform:scale(.97); }
+.chat-act.subtle { color:var(--text2); border-color:rgba(0,0,0,0.12); }
+.chat-act.subtle:hover { color:var(--accent); border-color:var(--accent-b); background:var(--accent-bg); }
 
 .ai-pane-foot {
   flex-shrink:0; padding:10px 12px 12px;
@@ -270,6 +320,78 @@ textarea#editor {
 textarea#editor::placeholder {
   font:13px/1.7 var(--ui); font-style:italic; color:var(--text3);
 }
+.editor-wrap.preview-mode textarea#editor { visibility:hidden; pointer-events:none; }
+.md-preview {
+  display:none; position:absolute; inset:0;
+  padding:13px 14px 10px; overflow-y:auto;
+  font:13px/1.75 var(--ui); color:var(--text);
+  user-select:text; -webkit-user-select:text;
+}
+.editor-wrap.preview-mode .md-preview { display:block; }
+.md-preview h1,.md-preview h2,.md-preview h3 { font-weight:600; color:var(--text); margin:.6em 0 .35em; line-height:1.3; }
+.md-preview h1 { font-size:1.35em; }
+.md-preview h2 { font-size:1.15em; }
+.md-preview h3 { font-size:1.05em; }
+.md-preview p { margin:.45em 0; }
+.md-preview strong { font-weight:600; color:var(--text); }
+.md-preview em { font-style:italic; }
+.md-preview a { color:var(--accent); text-decoration:none; }
+.md-preview a:hover { text-decoration:underline; }
+.md-preview code { font:12px/1.5 var(--mono); background:var(--bg-top); padding:1px 5px; border-radius:4px; color:var(--text); }
+.md-preview pre { background:var(--bg-top); border:1px solid var(--div); border-radius:8px; padding:10px 12px; margin:.5em 0; overflow-x:auto; }
+.md-preview pre code { background:transparent; padding:0; font-size:12px; }
+.md-preview blockquote { margin:.5em 0; padding:2px 0 2px 12px; border-left:3px solid var(--accent-b); color:var(--text2); }
+.md-preview ul,.md-preview ol { margin:.45em 0; padding-left:1.4em; }
+.md-preview li { margin:.2em 0; }
+.md-preview hr { border:none; border-top:1px solid var(--div); margin:1em 0; }
+.md-preview table { border-collapse:collapse; width:100%; margin:.5em 0; font-size:12px; }
+.md-preview th,.md-preview td { border:1px solid var(--div); padding:5px 8px; text-align:left; }
+.md-preview th { background:var(--bg-top); font-weight:600; }
+.caret-mirror {
+  position:absolute; visibility:hidden; white-space:pre-wrap; word-wrap:break-word;
+  overflow:hidden; pointer-events:none; z-index:-1;
+  font:13px/1.9 var(--mono); padding:13px 14px 10px;
+}
+.md-slash-menu {
+  position:fixed; z-index:120; display:none; min-width:220px; max-width:260px;
+  max-height:320px; overflow-y:auto; padding:6px;
+  background:var(--bg-card); border:1px solid var(--div); border-radius:10px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.16);
+}
+.md-slash-menu.show { display:block; }
+.md-slash-menu .slash-group {
+  padding:5px 8px 3px;
+  font:600 10px var(--ui); color:var(--text3);
+}
+.md-slash-menu .slash-item {
+  width:100%; border:none; background:transparent; border-radius:7px;
+  display:flex; flex-direction:row; align-items:center; gap:8px; text-align:left;
+  justify-content:flex-start;
+  padding:6px 8px; cursor:pointer; font:500 11px var(--ui); color:var(--text2);
+  border-bottom:none; line-height:1.25;
+}
+.md-slash-menu .slash-item:hover,.md-slash-menu .slash-item.active { background:var(--accent-bg); color:var(--text); }
+.md-slash-menu .slash-item .ico { color:#4f6ef7; }
+.md-slash-menu .slash-item .ico svg { width:14px; height:14px; }
+.md-slash-menu .slash-tag {
+  flex-shrink:0; min-width:24px; font:600 10px var(--ui); color:var(--accent);
+  text-align:left;
+}
+.md-slash-menu .slash-label { flex:1; text-align:left; }
+.sel-bubble {
+  position:fixed; z-index:130; display:none;
+  padding:3px 4px; gap:2px;
+  background:var(--bg-card); border:1px solid var(--div); border-radius:8px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.14);
+}
+.sel-bubble.show { display:flex; }
+.sel-bubble button {
+  width:26px; height:26px; border:none; background:transparent; border-radius:5px;
+  color:var(--text2); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .12s, color .12s; outline:none;
+}
+.sel-bubble button:hover { background:var(--accent-bg); color:var(--accent); }
+.sel-bubble button .ico svg { width:14px; height:14px; }
 
 /* ── 变量提示栏 ── */
 .var-bar {
@@ -291,12 +413,13 @@ textarea#editor::placeholder {
 /* ── 底栏 ── */
 .footer {
   display:flex; align-items:center;
-  padding:9px 14px; gap:8px;
+  padding:6px 10px; gap:6px;
   background:var(--bg-top);
   border-top:1px solid var(--div);
   flex-shrink:0;
 }
-.footer-meta { flex:1; display:flex; align-items:center; gap:6px; min-width:0; }
+.footer-meta { flex:1; display:flex; align-items:center; gap:6px; min-width:0; overflow:hidden; }
+.footer-meta .save-time { overflow:hidden; text-overflow:ellipsis; }
 .save-dot {
   width:5px; height:5px; border-radius:50%;
   background:var(--text3); flex-shrink:0; transition:background .3s;
@@ -311,72 +434,104 @@ textarea#editor::placeholder {
 .footer-meta.saved .save-dot  { background:var(--green); }
 .footer-meta.saved .save-time { color:var(--green); }
 
-/* 复制 — Cursor 工具栏：描边按钮，非实心色块 */
-.btn-copy-primary {
-  display:flex; align-items:center; gap:5px; flex-shrink:0;
-  background:transparent;
-  border:1px solid rgba(0,0,0,0.14);
-  border-radius:6px; padding:5px 11px;
-  font:500 12px var(--ui); color:var(--text2); cursor:pointer;
-  transition:background .12s, border-color .12s, color .12s; outline:none;
+/* 底栏右侧操作：AI / 复制统一轻量样式 */
+.foot-actions {
+  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
 }
-.btn-copy-primary:hover  { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.20); color:var(--text); }
-.btn-copy-primary:active { transform:scale(.97); }
-.btn-copy-primary.copied { color:var(--green); border-color:rgba(22,163,74,0.35); background:rgba(22,163,74,0.06); }
-
-.btn-copy-primary .ico { color:currentColor; }
+.foot-action {
+  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
+  height:28px; padding:0 9px;
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.09);
+  border-radius:6px;
+  font:500 11px var(--ui); color:var(--text2); cursor:pointer;
+  transition:background .12s, border-color .12s, color .12s;
+  outline:none; user-select:none;
+}
+.foot-action .ico { color:currentColor; }
+.foot-action .ico svg { width:13px; height:13px; }
+.foot-action:hover { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.16); color:var(--text); }
+.foot-action:active { transform:scale(.97); }
+.ai-toggle:hover { background:var(--accent-bg); border-color:var(--accent-b); color:var(--accent); }
+.ai-toggle-label { font:inherit; color:inherit; white-space:nowrap; }
+.btn-copy-primary.copied {
+  color:var(--green); border-color:rgba(22,163,74,0.35); background:rgba(22,163,74,0.06);
+}
 .btn-copy-primary.copied .ico { color:var(--green); }
 
-/* ── AI 折叠条（未展开时）── */
-.ai-toggle {
-  display:flex; align-items:center; gap:8px;
-  padding:9px 14px; border-top:1px solid var(--div);
-  background:var(--bg-mid); cursor:pointer;
-  transition:background .12s; flex-shrink:0; user-select:none;
-}
-.ai-toggle:hover { background:var(--bg-deep); }
-.ai-toggle-label { font:500 12px var(--ui); color:var(--text); flex:1; }
-.ai-toggle .ico { color:var(--text2); }
-.ai-toggle-hint  { font:11px var(--ui); color:var(--text3); }
-.ai-toggle-arrow { color:var(--text3); }
-.ai-toggle-arrow .ico svg { width:14px; height:14px; stroke-width:1.5; }
-
-.quick-row { display:flex; gap:5px; flex-wrap:wrap; }
-.quick-chip {
-  display:inline-flex; align-items:center; gap:5px;
+.ai-composer-shell {
+  position:relative; display:flex; flex-direction:column; gap:4px;
   background:var(--bg-card); border:1px solid rgba(0,0,0,0.10);
-  border-radius:6px; padding:5px 10px;
-  font:500 11px var(--ui); color:var(--text2); cursor:pointer;
-  transition:background .12s, border-color .12s, color .12s; outline:none;
+  border-radius:12px; padding:6px 6px 5px; min-height:72px;
+  transition:border-color .14s, box-shadow .14s;
 }
-.quick-chip .ico { color:var(--text2); transition:color .12s; }
-.quick-chip:hover { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.16); color:var(--text); }
-.quick-chip:hover .ico { color:var(--text); }
-.quick-chip:active { transform:scale(.97); }
+.ai-composer-shell:focus-within {
+  border-color:rgba(85,88,232,0.34);
+  box-shadow:0 0 0 3px rgba(85,88,232,0.07);
+}
+.ai-toolbar {
+  display:flex; align-items:center; gap:4px;
+}
+.ai-menu-wrap { position:relative; flex-shrink:0; }
+.ai-action-btn {
+  height:24px; display:inline-flex; align-items:center; gap:5px;
+  background:transparent; border:none;
+  border-radius:7px; padding:0 8px; color:var(--text2); cursor:pointer;
+  font:500 10px var(--ui); white-space:nowrap;
+  transition:background .12s, color .12s;
+}
+.ai-action-btn:hover { background:rgba(0,0,0,0.05); color:var(--text); }
+.ai-action-btn:active { transform:scale(.98); }
+.ai-action-btn .chev { transform:rotate(90deg); opacity:.9; }
+.ai-menu {
+  position:absolute; left:0; bottom:36px; z-index:45; min-width:184px;
+  display:none; padding:5px;
+  background:var(--bg-card); border:1px solid var(--div); border-radius:10px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.16);
+}
+.ai-menu.quick-menu {
+  min-width:0; width:100%; padding:3px;
+}
+.ai-menu.show { display:block; }
+.ai-menu-item {
+  width:100%; border:none; background:transparent; border-radius:7px;
+  display:flex; align-items:center; gap:6px;
+  text-align:left; padding:7px 9px; cursor:pointer;
+  font:500 11px var(--ui); color:var(--text2);
+}
+.ai-menu-item:hover { background:var(--accent-bg); color:var(--text); }
+.ai-menu-item.active { background:var(--accent-bg); color:var(--text); }
+.ai-menu-item.danger:hover { background:rgba(220,38,38,0.08); color:var(--red); }
+.ai-menu-item .ico { color:inherit; }
+.ai-menu.quick-menu .ai-menu-item {
+  padding:5px 6px; font-size:10px; gap:5px;
+}
+.ai-menu.quick-menu .ai-menu-item .ico { width:12px; height:12px; }
+.ai-menu.quick-menu .ai-menu-item .ico svg { width:12px; height:12px; }
 
-.ai-input-row { display:flex; align-items:flex-end; gap:6px; }
+.ai-input-wrap { position:relative; width:100%; min-width:0; display:flex; align-items:flex-end; }
 textarea#aiInput {
-  flex:1; background:var(--bg-card); border:1px solid rgba(0,0,0,0.10);
-  border-radius:8px; padding:7px 11px; min-height:36px; max-height:88px;
-  font:12px/1.5 var(--ui); color:var(--text); outline:none; caret-color:var(--accent);
-  resize:none; transition:border-color .14s, box-shadow .14s;
+  flex:1; width:100%; background:transparent; border:none;
+  border-radius:8px; padding:4px 8px 2px; min-height:34px; max-height:96px;
+  font:12px/1.45 var(--ui); color:var(--text); outline:none; caret-color:var(--accent);
+  resize:none;
   user-select:text; -webkit-user-select:text;
 }
 textarea#aiInput::placeholder { color:var(--text3); }
-textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px rgba(85,88,232,0.07); }
+textarea#aiInput:focus { box-shadow:none; }
 
 .ai-go {
-  width:32px; height:32px;
-  background:transparent; border:1px solid rgba(0,0,0,0.14);
+  width:24px; height:24px;
+  background:transparent; border:none;
   border-radius:6px; color:var(--text2); cursor:pointer; flex-shrink:0;
   display:flex; align-items:center; justify-content:center;
-  transition:background .12s, border-color .12s, color .12s; outline:none;
+  transition:background .12s, color .12s; outline:none;
 }
-.ai-go:hover  { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.22); color:var(--text); }
+.ai-go:hover  { background:rgba(0,0,0,0.05); color:var(--text); }
 .ai-go:active { transform:scale(.92); }
 .ai-go:disabled { opacity:.4; cursor:default; }
-.ai-go .ico { width:16px; height:16px; }
-.ai-go .ico svg { width:16px; height:16px; stroke-width:1.5; }
+.ai-go .ico { width:14px; height:14px; }
+.ai-go .ico svg { width:14px; height:14px; stroke-width:1.5; }
 
 /* 滚动条 */
 ::-webkit-scrollbar { width:4px; }
@@ -388,10 +543,7 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
   to   { opacity:1; transform:scale(1)   translateY(0); }
 }
 
-.sections-wrap { display:none; flex:1; flex-direction:column; min-height:0; overflow-y:auto; padding:8px 14px; gap:8px; }.sections-wrap.visible { display:flex; }
-.section-field label { display:block; font:600 10px var(--ui); color:var(--text3); letter-spacing:.3px; margin-bottom:4px; }
-.section-field textarea { width:100%; min-height:48px; max-height:100px; background:var(--bg-top); border:1px solid rgba(0,0,0,0.08); border-radius:8px; padding:8px 10px; font:12px/1.5 var(--mono); color:var(--text); outline:none; resize:vertical; user-select:text; -webkit-user-select:text; }
-.editor-wrap.hidden-mode { display:none; }
+.sections-wrap { display:none !important; }
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:200; align-items:center; justify-content:center; }
 .modal-overlay.open { display:flex; }
 .modal { width:min(92%,500px); max-height:78%; background:var(--bg-card); border-radius:12px; border:1px solid var(--div); box-shadow:0 20px 60px rgba(0,0,0,0.2); display:flex; flex-direction:column; overflow:hidden; }
@@ -417,13 +569,56 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
   opacity:0; pointer-events:none; z-index:300; transition:opacity .18s, transform .18s;
 }
 .toast-wrap.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast-wrap.actionable { pointer-events:auto; }
 .toast {
   background:#1c1917; color:#fff; font:500 12px var(--ui);
   padding:8px 14px; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  max-width:min(90vw, 320px); text-align:center;
+  max-width:min(92vw, 360px); text-align:center;
 }
 .toast-wrap.error .toast { background:#7f1d1d; }
 .toast-wrap.success .toast { background:#14532d; }
+.toast-actions {
+  display:flex; gap:8px; justify-content:center; margin-top:8px;
+}
+.toast-actions button {
+  border:none; border-radius:6px; padding:5px 10px; font:500 11px var(--ui);
+  cursor:pointer; background:rgba(255,255,255,0.14); color:#fff;
+}
+.toast-actions button.primary { background:var(--accent); }
+.toast-actions button:hover { filter:brightness(1.08); }
+
+.skill-banner {
+  display:none; flex-shrink:0; align-items:center; gap:8px;
+  padding:7px 12px; background:var(--accent-bg); border-bottom:1px solid var(--accent-b);
+  font:12px var(--ui); color:var(--text);
+}
+.skill-banner.show { display:flex; }
+.skill-banner span { flex:1; min-width:0; line-height:1.35; }
+.skill-banner button {
+  flex-shrink:0; border:none; border-radius:6px; padding:4px 10px;
+  font:500 11px var(--ui); cursor:pointer;
+}
+.skill-banner .skill-go { background:var(--accent); color:#fff; }
+.skill-banner .skill-later { background:transparent; color:var(--text2); border:1px solid var(--div); }
+
+.ai-input-wrap { position:relative; flex:1; min-width:0; }
+.slash-menu {
+  display:none; position:absolute; left:0; right:36px; bottom:100%;
+  margin-bottom:6px; max-height:200px; overflow:auto; z-index:40;
+  background:var(--bg-card); border:1px solid var(--div); border-radius:10px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.12);
+}
+.slash-menu.show { display:block; }
+.slash-item {
+  display:flex; flex-direction:column; gap:2px; width:100%; text-align:left;
+  padding:8px 10px; border:none; background:transparent; cursor:pointer;
+  font:12px var(--ui); color:var(--text); border-bottom:1px solid var(--div);
+}
+.slash-item:last-child { border-bottom:none; }
+.slash-item:hover, .slash-item.active { background:var(--accent-bg); }
+.slash-item .slash-cmd { font:600 12px var(--mono); color:var(--accent); }
+.slash-item .slash-title { font:11px var(--ui); color:var(--text2); }
+.slash-empty { padding:10px 12px; font:11px var(--ui); color:var(--text3); }
 </style>
 </head>
 <body>
@@ -433,19 +628,22 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
   <div class="topbar">
     <span class="topbar-logo">Sticky-Notes</span>
     <div class="win-btns">
-      <button class="wbtn star" id="btnStar" title="收藏">
-        <span class="ico ico-star" id="icoStar" data-icon="star"></span>
-      </button>
       <button class="wbtn pin" id="btnPin" title="窗口置顶">
         <span class="ico" data-icon="pin"></span>
       </button>
-      <button class="wbtn del" id="btnDel" title="删除便签（不可恢复）">
-        <span class="ico" data-icon="trash"></span>
+      <button class="wbtn min" id="btnMin" title="最小化到托盘（内容保留，任务栏可恢复）">
+        <span class="ico" data-icon="minimize"></span>
       </button>
-      <button class="wbtn close" id="btnHide" title="关闭窗口（仅隐藏，不删除） Esc">
+      <button class="wbtn close" id="btnHide" title="关闭窗口（隐藏；无其它便签时回总览） Esc">
         <span class="ico" data-icon="close"></span>
       </button>
     </div>
+  </div>
+
+  <div class="skill-banner" id="skillBanner" role="status">
+    <span id="skillBannerText"></span>
+    <button type="button" class="skill-go" id="skillBannerGo">封装为技能包</button>
+    <button type="button" class="skill-later" id="skillBannerLater">暂不</button>
   </div>
 
   <div class="workspace" id="workspace">
@@ -455,31 +653,44 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
       <div class="ai-pane-head">
         <span class="ico" data-icon="chat"></span>
         <span class="ai-pane-title">AI 助写</span>
-        <button class="ai-pane-close" id="aiClose" type="button">收起</button>
+        <button class="ai-pane-close" id="aiClose" type="button" title="收起 AI 助写"><span class="ico ico-sm" data-icon="chevronLeft"></span></button>
       </div>
       <div class="chat-log" id="chatLog">
-        <div class="chat-empty">描述需求或点快捷指令，AI 会在这里对话<br>生成结果可应用到右侧编辑区</div>
+        <div class="chat-empty">描述需求，AI 帮你写</div>
       </div>
       <div class="ai-pane-foot">
-        <div class="quick-row">
-          <button class="quick-chip" data-p="优化这段提示词，让它更清晰准确、减少歧义，直接输出优化后的提示词">
-            <span class="ico ico-sm" data-icon="optimize"></span>优化
-          </button>
-          <button class="quick-chip" data-p="在保留原意的前提下扩展这段提示词，补充更多细节和约束条件">
-            <span class="ico ico-sm" data-icon="expandText"></span>扩展
-          </button>
-          <button class="quick-chip" data-p="精简这段提示词，去掉冗余，只保留核心意图，直接输出精简后的提示词">
-            <span class="ico ico-sm" data-icon="simplify"></span>精简
-          </button>
-          <button class="quick-chip" data-p="将下面这段提示词翻译成英文，保持原意">
-            <span class="ico ico-sm" data-icon="en"></span>EN
-          </button>
-        </div>
-        <div class="ai-input-row">
-          <textarea id="aiInput" rows="1" placeholder="描述你的需求… Enter 发送，Shift+Enter 换行" spellcheck="false"></textarea>
-          <button class="ai-go" id="aiSend" title="发送" type="button">
-            <span class="ico ico-sm" data-icon="send"></span>
-          </button>
+        <div class="ai-composer-shell" id="aiComposer">
+          <div class="ai-input-wrap">
+            <div class="slash-menu" id="slashMenu" role="listbox" aria-label="技能快捷引用"></div>
+            <textarea id="aiInput" rows="2" placeholder="描述需求… 输入 / 引用技能" spellcheck="false"></textarea>
+          </div>
+          <div class="ai-toolbar">
+            <div class="ai-menu-wrap">
+              <button class="ai-action-btn" id="aiQuickBtn" type="button" title="快捷（Ctrl+K）">
+                <span class="ico ico-sm" data-icon="optimize"></span>
+                <span>快捷</span>
+                <span class="ico ico-sm chev" data-icon="chevronRight"></span>
+              </button>
+              <div class="ai-menu quick-menu" id="aiQuickMenu">
+                <button class="ai-menu-item" type="button" data-p="优化这段提示词，让它更清晰准确、减少歧义，直接输出优化后的提示词"><span class="ico ico-sm" data-icon="optimize"></span><span>优化</span></button>
+                <button class="ai-menu-item" type="button" data-p="在保留原意的前提下扩展这段提示词，补充更多细节和约束条件"><span class="ico ico-sm" data-icon="expandText"></span><span>扩展</span></button>
+                <button class="ai-menu-item" type="button" data-p="精简这段提示词，去掉冗余，只保留核心意图，直接输出精简后的提示词"><span class="ico ico-sm" data-icon="simplify"></span><span>精简</span></button>
+                <button class="ai-menu-item" type="button" data-p="将下面这段提示词翻译成英文，保持原意"><span class="ico ico-sm" data-icon="en"></span><span>翻译</span></button>
+              </div>
+            </div>
+            <div style="flex:1"></div>
+            <button class="ai-go in-shell" id="aiSend" title="发送" type="button">
+              <span class="ico ico-sm" data-icon="send"></span>
+            </button>
+            <div class="ai-menu-wrap">
+              <button class="ai-go" id="aiMoreBtn" title="更多操作" type="button" aria-label="更多操作">
+                <span class="ico ico-sm" data-icon="list"></span>
+              </button>
+              <div class="ai-menu" id="aiMoreMenu" style="left:auto; right:0;">
+                <button class="ai-menu-item danger" type="button" id="aiClearChat">清空对话</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -489,18 +700,7 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
       <div class="head-block">
         <div class="head-line">
           <input class="title-input" id="inpProject"
-                 placeholder="提示词名称…" maxlength="40" spellcheck="false" title="名称，显示在总览列表">
-          <div class="ver-wrap">
-            <span class="ver-display" id="verDisplay" title="点击修改版本号">v0.1</span>
-            <input class="ver-input"  id="verInput" maxlength="12" spellcheck="false">
-            <button class="ver-hist" id="btnVersions" type="button" title="查看历史版本与差异">
-              <span class="ico ico-sm" data-icon="history"></span>
-            </button>
-          </div>
-          <div class="mode-seg" role="group" aria-label="编辑方式">
-            <button class="mode-btn active" id="modeFree" type="button" title="一整段自由编写">全文</button>
-            <button class="mode-btn" id="modeStruct" type="button" title="按角色/任务等分段填写">分段</button>
-          </div>
+                 placeholder="笔记标题…" maxlength="40" spellcheck="false" title="名称，显示在总览列表">
         </div>
         <div class="head-line">
           <label class="meta-field theme">
@@ -511,27 +711,48 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
             <span class="meta-label">标签</span>
             <input class="meta-input" id="inpOkfTags" placeholder="逗号分隔，便于检索" spellcheck="false" title="知识库标签，勿与名称重复">
           </label>
-          <span class="head-spacer" aria-hidden="true"></span>
-          <button class="tool-ghost" id="btnPromote" type="button" title="保存到本机知识库，便于复用">收入库</button>
-          <button class="tool-ghost" id="btnSuggest" type="button" title="用 AI 建议主题与标签">智能分类</button>
+          <div class="ver-wrap">
+            <span class="ver-display" id="verDisplay" title="点击修改版本号">v0.1</span>
+            <input class="ver-input"  id="verInput" maxlength="12" spellcheck="false">
+          </div>
         </div>
-      </div>
-      <div class="sections-wrap" id="sectionsWrap">
-        <div class="section-field"><label>角色</label><textarea id="secRole" spellcheck="false" placeholder="你是什么样的专家…"></textarea></div>
-        <div class="section-field"><label>背景</label><textarea id="secContext" spellcheck="false" placeholder="场景与已知信息…"></textarea></div>
-        <div class="section-field"><label>任务</label><textarea id="secTask" spellcheck="false" placeholder="要完成什么…"></textarea></div>
-        <div class="section-field"><label>输出格式</label><textarea id="secOutput" spellcheck="false" placeholder="期望的结构与格式…"></textarea></div>
-        <div class="section-field"><label>成功标准</label><textarea id="secCriteria" spellcheck="false" placeholder="怎样算写好了…"></textarea></div>
       </div>
       <div class="editor-wrap" id="editorWrap">
         <textarea id="editor"
-          placeholder="在此编写提示词…&#10;&#10;可用 {{变量名}} 作为占位符&#10;点底部「AI 助写」可边聊边改"></textarea>
+          placeholder="在此编写…  支持 Markdown，可用 {{变量名}} 占位"></textarea>
+        <div class="md-preview" id="previewPane"></div>
+        <div class="caret-mirror" id="caretMirror" aria-hidden="true"></div>
       </div>
       <div class="var-bar" id="varBar">
         <span class="var-bar-label">变量</span>
         <div class="var-chips" id="varChips"></div>
       </div>
       <div class="footer">
+        <div class="mode-seg" role="group" aria-label="编辑模式">
+          <button class="mode-btn active" id="modePlain" type="button" title="文本 — 保持纯文本编辑" aria-label="文本">
+            <span class="ico ico-sm" data-icon="note"></span>
+          </button>
+          <button class="mode-btn" id="modeMd" type="button" title="MD — 启用 Markdown 编辑能力" aria-label="MD">
+            <span class="ico ico-sm" data-icon="code"></span>
+          </button>
+        </div>
+        <div class="foot-tools" role="group" aria-label="工具">
+          <button class="foot-tool" id="modeMdPreview" type="button" title="预览 — 渲染 Markdown（仅 MD）" aria-label="预览" disabled>
+            <span class="ico ico-sm" data-icon="eye"></span>
+          </button>
+          <button class="foot-tool" id="btnStar" type="button" title="收藏" aria-label="收藏">
+            <span class="ico ico-sm ico-star" id="icoStar" data-icon="star"></span>
+          </button>
+          <button class="foot-tool" id="btnPromote" type="button" title="收入库 — 保存到本机知识库，便于复用" aria-label="收入库">
+            <span class="ico ico-sm" data-icon="classify"></span>
+          </button>
+          <button class="foot-tool" id="btnSuggest" type="button" title="智能分类 — 用 AI 建议主题与标签" aria-label="智能分类">
+            <span class="ico ico-sm" data-icon="optimize"></span>
+          </button>
+          <button class="foot-tool" id="btnVersions" type="button" title="查看历史版本与差异" aria-label="历史版本">
+            <span class="ico ico-sm" data-icon="history"></span>
+          </button>
+        </div>
         <div class="footer-meta" id="footerMeta">
           <span class="save-dot"></span>
           <span class="save-time" id="saveTime">—</span>
@@ -540,21 +761,19 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
           <span class="token-est" id="tokenEst"></span>
           <span class="copy-count" id="copyCountEl"></span>
         </div>
-        <button class="btn-copy-primary" id="btnCopy" title="复制提示词到剪贴板">
-          <span class="ico ico-sm" id="copyIcon" data-icon="copy"></span>
-          <span id="copyText">复制</span>
-        </button>
+        <div class="foot-actions">
+          <button class="foot-action ai-toggle" id="aiToggle" type="button" title="AI 助写 · 打开侧栏对话">
+            <span class="ico ico-sm" data-icon="chat"></span>
+            <span class="ai-toggle-label">AI 助写</span>
+          </button>
+          <button class="foot-action btn-copy-primary" id="btnCopy" type="button" title="复制内容到剪贴板">
+            <span class="ico ico-sm" id="copyIcon" data-icon="copy"></span>
+            <span id="copyText">复制</span>
+          </button>
+        </div>
       </div>
     </section>
 
-  </div>
-
-  <!-- 底部 AI 入口（未展开时） -->
-  <div class="ai-toggle" id="aiToggle" title="打开左侧 AI 对话，边聊边改提示词">
-    <span class="ico" data-icon="chat"></span>
-    <span class="ai-toggle-label">AI 助写</span>
-    <span class="ai-toggle-hint">打开侧栏对话</span>
-    <span class="ai-toggle-arrow"><span class="ico" data-icon="chevronRight"></span></span>
   </div>
 
 </div>
@@ -572,13 +791,25 @@ textarea#aiInput:focus { border-color:rgba(85,88,232,0.38); box-shadow:0 0 0 3px
 </div>
 
 <div class="toast-wrap" id="toastWrap"><div class="toast" id="toast"></div></div>
+<div class="md-slash-menu" id="mdSlashMenu"></div>
+<div class="sel-bubble" id="selBubble">
+  <button type="button" data-md="bold" title="加粗"><span class="ico ico-sm" data-icon="bold"></span></button>
+  <button type="button" data-md="italic" title="斜体"><span class="ico ico-sm" data-icon="italic"></span></button>
+  <button type="button" data-md="code" title="行内代码"><span class="ico ico-sm" data-icon="code"></span></button>
+  <button type="button" data-md="strike" title="删除线"><span class="ico ico-sm" data-icon="strikethrough"></span></button>
+  <button type="button" data-md="link" title="链接"><span class="ico ico-sm" data-icon="link"></span></button>
+</div>
 
-<script src="ui-icons.js?v=codicon3"></script>
+<script src="ui-icons.js?v=codicon10"></script>
+<script src="assets/vendor/marked.umd.js"></script>
+<script src="assets/vendor/purify.min.js"></script>
 <script>
-StickyIcons.mount()
+function mountAllIcons(root) { if (window.StickyIcons) StickyIcons.mount(root || document) }
+mountAllIcons()
 let note=null, saveTimer=null, aiOpen=false, chatHistory=[]
 let titleManual=false, titleTimer=null, titleReq=0
-let editorMode='free'
+let editorMode='plain'
+let mdView='edit'
 
 const THEME_LABELS = {
   nine_center: '活动中心',
@@ -595,17 +826,16 @@ const THEME_LABELS = {
 const card      = document.getElementById('card')
 const editor    = document.getElementById('editor')
 const editorWrap= document.getElementById('editorWrap')
-const sectionsWrap = document.getElementById('sectionsWrap')
+const previewPane = document.getElementById('previewPane')
+const caretMirror = document.getElementById('caretMirror')
+const mdSlashMenu = document.getElementById('mdSlashMenu')
+const selBubble = document.getElementById('selBubble')
 const inpProj   = document.getElementById('inpProject')
 const inpCategory = document.getElementById('inpCategory')
 const inpOkfTags  = document.getElementById('inpOkfTags')
-const secRole   = document.getElementById('secRole')
-const secContext= document.getElementById('secContext')
-const secTask   = document.getElementById('secTask')
-const secOutput = document.getElementById('secOutput')
-const secCriteria=document.getElementById('secCriteria')
-const modeFree  = document.getElementById('modeFree')
-const modeStruct= document.getElementById('modeStruct')
+const modePlain  = document.getElementById('modePlain')
+const modeMd = document.getElementById('modeMd')
+const modeMdPreview = document.getElementById('modeMdPreview')
 const btnVersions=document.getElementById('btnVersions')
 const btnPromote = document.getElementById('btnPromote')
 const btnSuggest = document.getElementById('btnSuggest')
@@ -615,6 +845,10 @@ const modalTitle= document.getElementById('modalTitle')
 const modalClose= document.getElementById('modalClose')
 const toastWrap = document.getElementById('toastWrap')
 const toastEl   = document.getElementById('toast')
+const skillBanner = document.getElementById('skillBanner')
+const skillBannerText = document.getElementById('skillBannerText')
+const skillBannerGo = document.getElementById('skillBannerGo')
+const skillBannerLater = document.getElementById('skillBannerLater')
 const tokenEst  = document.getElementById('tokenEst')
 const verDisp   = document.getElementById('verDisplay')
 const verInput  = document.getElementById('verInput')
@@ -634,12 +868,67 @@ const aiClose   = document.getElementById('aiClose')
 const chatLog   = document.getElementById('chatLog')
 const aiInput   = document.getElementById('aiInput')
 const aiSend    = document.getElementById('aiSend')
+const aiComposer = document.getElementById('aiComposer')
+const aiQuickBtn = document.getElementById('aiQuickBtn')
+const aiQuickMenu = document.getElementById('aiQuickMenu')
+const aiMoreBtn = document.getElementById('aiMoreBtn')
+const aiMoreMenu = document.getElementById('aiMoreMenu')
+
+let pendingSkillTheme = null
 
 function toast(msg, type = 'info', ms = 3200) {
   toastEl.textContent = msg
   toastWrap.className = 'toast-wrap show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '')
   clearTimeout(toast._t)
   toast._t = setTimeout(() => { toastWrap.className = 'toast-wrap' }, ms)
+}
+
+function hideSkillBanner() {
+  skillBanner.classList.remove('show')
+  pendingSkillTheme = null
+}
+
+function showSkillSuggest(payload) {
+  if (!payload?.theme) return
+  if (note?.category && payload.theme !== String(note.category || '').trim()) return
+  pendingSkillTheme = payload.theme
+  const label = payload.label || THEME_LABELS[payload.theme] || payload.theme
+  skillBannerText.textContent =
+    `「${label}」已有 ${payload.count} 条同类提示词，可封装为技能包（每条对应一份知识库文档）`
+  skillBanner.classList.add('show')
+}
+
+async function runSkillPackGenerate() {
+  if (!pendingSkillTheme) return
+  const theme = pendingSkillTheme
+  skillBannerGo.disabled = true
+  skillBannerGo.textContent = '生成中…'
+  try {
+    const r = await window.api.skillPackGenerate({ theme })
+    if (r.ok) {
+      hideSkillBanner()
+      toast(r.message || `已生成 ${r.created?.length || 0} 个技能文档`, 'success', 4200)
+    } else {
+      toast(r.error || '封装失败', 'error')
+    }
+  } catch (e) {
+    toast(e.message || '封装异常', 'error')
+  } finally {
+    skillBannerGo.disabled = false
+    skillBannerGo.textContent = '封装为技能包'
+  }
+}
+
+skillBannerGo.addEventListener('click', () => runSkillPackGenerate())
+skillBannerLater.addEventListener('click', async () => {
+  if (!pendingSkillTheme) { hideSkillBanner(); return }
+  await window.api.skillPackDismiss(pendingSkillTheme)
+  hideSkillBanner()
+  toast('已忽略，有新增卡片时再提醒', 'info')
+})
+
+if (window.api.onSkillPackSuggest) {
+  window.api.onSkillPackSuggest(showSkillSuggest)
 }
 
 function syncCategoryHint() {
@@ -664,77 +953,301 @@ function estimateTokens(text) {
   return Math.max(1, Math.ceil(len / 3))
 }
 
-function getSectionsFromUI() {
-  return {
-    role: secRole.value,
-    context: secContext.value,
-    task: secTask.value,
-    output: secOutput.value,
-    criteria: secCriteria.value,
-  }
-}
-
-function assembleSectionsContent(sections) {
-  const labels = { role:'角色', context:'背景', task:'任务', output:'输出格式', criteria:'成功标准' }
-  const parts = []
-  for (const [k, label] of Object.entries(labels)) {
-    const v = (sections[k] || '').trim()
-    if (v) parts.push(`## ${label}\n${v}`)
-  }
-  return parts.join('\n\n')
-}
-
-function parseSectionsToUI(content) {
-  const labels = { '角色':'role', '背景':'context', '任务':'task', '输出格式':'output', '成功标准':'criteria' }
-  const fields = { role:'', context:'', task:'', output:'', criteria:'' }
-  const text = (content || '').trim()
-  if (!text) return fields
-  for (const block of text.split(/^##\s*/m).filter(Boolean)) {
-    const nl = block.indexOf('\n')
-    const title = (nl >= 0 ? block.slice(0, nl) : block).trim()
-    const body = nl >= 0 ? block.slice(nl + 1).trim() : ''
-    const key = labels[title]
-    if (key) fields[key] = body
-  }
-  return fields
-}
-
-function setSectionsUI(sections) {
-  secRole.value = sections?.role || ''
-  secContext.value = sections?.context || ''
-  secTask.value = sections?.task || ''
-  secOutput.value = sections?.output || ''
-  secCriteria.value = sections?.criteria || ''
-}
-
 function getActiveContent() {
-  if (editorMode === 'structured') return assembleSectionsContent(getSectionsFromUI())
   return editor.value
+}
+
+function renderPreview() {
+  const raw = editor.value || ''
+  const html = marked.parse(raw, { breaks: true, gfm: true })
+  previewPane.innerHTML = DOMPurify.sanitize(html)
+}
+
+function isMdEditMode() {
+  return editorMode === 'md' && mdView === 'edit'
+}
+
+function applyEditorModeUI() {
+  const inMd = editorMode === 'md'
+  const preview = inMd && mdView === 'preview'
+  modePlain.classList.toggle('active', !inMd)
+  modeMd.classList.toggle('active', inMd)
+  modeMdPreview.disabled = !inMd
+  modeMdPreview.classList.toggle('active', preview)
+  editorWrap.classList.toggle('preview-mode', preview)
+  if (preview) renderPreview()
+  hideSelBubble()
+  hideMdSlashMenu()
+}
+
+function setEditorMode(mode) {
+  editorMode = mode === 'md' ? 'md' : 'plain'
+  if (editorMode !== 'md') mdView = 'edit'
+  applyEditorModeUI()
+  if (note) {
+    note.editorMode = editorMode
+    note.mdView = mdView
+    schedSave()
+  }
+}
+
+function setMdView(mode) {
+  if (editorMode !== 'md') return
+  mdView = mode === 'preview' ? 'preview' : 'edit'
+  applyEditorModeUI()
+  if (note) {
+    note.editorMode = editorMode
+    note.mdView = mdView
+    schedSave()
+  }
+}
+
+function syncCaretMirrorStyles() {
+  const cs = getComputedStyle(editor)
+  caretMirror.style.width = editor.clientWidth + 'px'
+  caretMirror.style.font = cs.font
+  caretMirror.style.lineHeight = cs.lineHeight
+  caretMirror.style.letterSpacing = cs.letterSpacing
+  caretMirror.style.padding = cs.padding
+  caretMirror.style.border = cs.border
+  caretMirror.style.boxSizing = cs.boxSizing
+  caretMirror.style.whiteSpace = 'pre-wrap'
+  caretMirror.style.wordWrap = 'break-word'
+}
+
+function getCaretCoords() {
+  syncCaretMirrorStyles()
+  const pos = editor.selectionStart
+  const textBefore = editor.value.substring(0, pos)
+  caretMirror.textContent = textBefore
+  const marker = document.createElement('span')
+  marker.textContent = '\u200b'
+  caretMirror.appendChild(marker)
+  const editorRect = editor.getBoundingClientRect()
+  const markerRect = marker.getBoundingClientRect()
+  const mirrorRect = caretMirror.getBoundingClientRect()
+  caretMirror.textContent = ''
+  return {
+    left: editorRect.left + (markerRect.left - mirrorRect.left) - editor.scrollLeft,
+    top: editorRect.top + (markerRect.top - mirrorRect.top) - editor.scrollTop,
+  }
+}
+
+const SLASH_ITEMS = [
+  { id: 'h1', group: '基础', icon: 'note', label: '一级标题', keywords: '标题 h1 heading', insert: '# ' },
+  { id: 'h2', group: '基础', icon: 'note', label: '二级标题', keywords: '标题 h2 heading', insert: '## ' },
+  { id: 'h3', group: '基础', icon: 'note', label: '三级标题', keywords: '标题 h3 heading', insert: '### ' },
+  { id: 'ol', group: '基础', icon: 'listOrdered', label: '有序列表', keywords: '列表 numbered ol', insert: '1. ' },
+  { id: 'ul', group: '基础', icon: 'list', label: '无序列表', keywords: '列表 bullet ul', insert: '- ' },
+  { id: 'code', group: '基础', icon: 'code', label: '代码块', keywords: '代码 code block', insert: '```\n\n```\n', cursorOffset: -4 },
+  { id: 'quote', group: '基础', icon: 'quote', label: '引用', keywords: '引用 quote block', insert: '> ' },
+  { id: 'hr', group: '基础', icon: 'hr', label: '分割线', keywords: '分割 横线 hr', insert: '---\n' },
+  { id: 'link', group: '常用', icon: 'link', label: '链接', keywords: '链接 link', insert: '[文字](url)' },
+  { id: 'task', group: '常用', icon: 'check', label: '任务列表', keywords: '任务 todo checkbox', insert: '- [ ] ' },
+  { id: 'table', group: '常用', icon: 'table', label: '表格 3×2', keywords: '表格 table', insert: '| 列1 | 列2 | 列3 |\n| --- | --- | --- |\n|  |  |  |\n' },
+]
+
+let mdSlashOpen = false
+let mdSlashStart = 0
+let mdSlashQuery = ''
+let mdSlashActiveIdx = 0
+let mdSlashFiltered = []
+
+function hideMdSlashMenu() {
+  mdSlashOpen = false
+  mdSlashMenu.classList.remove('show')
+}
+
+function getMdSlashLineInfo() {
+  const pos = editor.selectionStart
+  const val = editor.value
+  const beforeCaret = val.slice(0, pos)
+  const m = beforeCaret.match(/\/([^\s/]*)$/)
+  if (!m) return null
+  const query = m[1] || ''
+  return { slashStart: pos - query.length - 1, query }
+}
+
+function filterMdSlashItems(q) {
+  const qq = (q || '').toLowerCase().trim()
+  if (!qq) return SLASH_ITEMS.slice()
+  return SLASH_ITEMS.filter(it => {
+    const hay = (it.label + ' ' + (it.keywords || '')).toLowerCase()
+    return hay.includes(qq) || it.id.includes(qq)
+  })
+}
+
+function renderMdSlashMenu(items) {
+  mdSlashFiltered = items
+  mdSlashActiveIdx = Math.min(mdSlashActiveIdx, Math.max(0, items.length - 1))
+  let lastGroup = ''
+  mdSlashMenu.innerHTML = items.map((it, i) => {
+    const groupHtml = it.group && it.group !== lastGroup
+      ? `<div class="slash-group">${it.group}</div>`
+      : ''
+    lastGroup = it.group || lastGroup
+    const iconHtml = it.tag
+      ? `<span class="slash-tag">${it.tag}</span>`
+      : `<span class="ico ico-sm" data-icon="${it.icon}"></span>`
+    return `${groupHtml}<button type="button" class="slash-item${i === mdSlashActiveIdx ? ' active' : ''}" data-idx="${i}">${iconHtml}<span class="slash-label">${it.label}</span></button>`
+  }).join('')
+  StickyIcons.mount(mdSlashMenu)
+}
+
+function positionMdSlashMenu() {
+  const coords = getCaretCoords()
+  const menuH = mdSlashMenu.offsetHeight || 200
+  let top = coords.top + 22
+  let left = coords.left
+  if (top + menuH > window.innerHeight - 8) top = coords.top - menuH - 6
+  if (left + 260 > window.innerWidth - 8) left = window.innerWidth - 268
+  mdSlashMenu.style.left = Math.max(8, left) + 'px'
+  mdSlashMenu.style.top = Math.max(8, top) + 'px'
+}
+
+function showMdSlashMenu(info) {
+  mdSlashOpen = true
+  mdSlashStart = info.slashStart
+  mdSlashQuery = info.query
+  mdSlashActiveIdx = 0
+  const items = filterMdSlashItems(mdSlashQuery)
+  if (!items.length) { hideMdSlashMenu(); return }
+  renderMdSlashMenu(items)
+  mdSlashMenu.classList.add('show')
+  requestAnimationFrame(positionMdSlashMenu)
+}
+
+function applyMdSlashItem(item) {
+  const end = editor.selectionStart
+  const replacement = item.insert
+  editor.focus()
+  editor.setSelectionRange(mdSlashStart, end)
+  document.execCommand('insertText', false, replacement)
+  if (item.cursorOffset) {
+    const p = editor.selectionStart + item.cursorOffset
+    editor.setSelectionRange(p, p)
+  }
+  hideMdSlashMenu()
+  updateCounts()
+  updateVarBar(editor.value)
+  if (note) { note.content = editor.value; schedSave() }
+}
+
+function insertTextAtSelection(text, selStart, selEnd) {
+  editor.focus()
+  editor.setSelectionRange(selStart, selEnd)
+  document.execCommand('insertText', false, text)
+}
+
+function wrapSelection(before, after, placeholder) {
+  const start = editor.selectionStart
+  const end = editor.selectionEnd
+  const selected = editor.value.slice(start, end)
+  const inner = selected || placeholder || '文字'
+  const replacement = before + inner + after
+  insertTextAtSelection(replacement, start, end)
+  if (!selected && placeholder) {
+    const p = start + before.length
+    editor.setSelectionRange(p, p + inner.length)
+  }
+}
+
+function applyMdAction(action) {
+  switch (action) {
+    case 'bold': wrapSelection('**', '**', '文字'); break
+    case 'italic': wrapSelection('*', '*', '文字'); break
+    case 'code': wrapSelection('`', '`', 'code'); break
+    case 'strike': wrapSelection('~~', '~~', '文字'); break
+    case 'link': wrapSelection('[', '](url)', '文字'); break
+  }
+  updateCounts()
+  updateVarBar(editor.value)
+  if (note) { note.content = editor.value; schedSave() }
+  hideSelBubble()
+}
+
+function hideSelBubble() {
+  selBubble.classList.remove('show')
+}
+
+function updateSelBubble() {
+  if (!isMdEditMode()) { hideSelBubble(); return }
+  const start = editor.selectionStart
+  const end = editor.selectionEnd
+  if (start === end || document.activeElement !== editor) { hideSelBubble(); return }
+  const rect = editor.getBoundingClientRect()
+  const selStart = editor.selectionStart
+  const savedEnd = editor.selectionEnd
+  const coords = getCaretCoords()
+  editor.setSelectionRange(selStart, savedEnd)
+  const bubbleW = selBubble.offsetWidth || 160
+  let left = coords.left - bubbleW / 2
+  let top = coords.top - 36
+  if (top < rect.top) top = coords.top + 20
+  if (left < 8) left = 8
+  if (left + bubbleW > window.innerWidth - 8) left = window.innerWidth - bubbleW - 8
+  selBubble.style.left = left + 'px'
+  selBubble.style.top = top + 'px'
+  selBubble.classList.add('show')
+}
+
+function handleSmartEnter(e) {
+  const start = editor.selectionStart
+  const val = editor.value
+  const lineStart = val.lastIndexOf('\n', start - 1) + 1
+  const line = val.slice(lineStart, start)
+  const taskM = line.match(/^(\s*)- \[([ xX])\] (.*)$/)
+  if (taskM && !taskM[3].trim()) {
+    e.preventDefault()
+    insertTextAtSelection('\n', start - line.length + taskM[1].length, start)
+    return true
+  }
+  if (taskM) {
+    e.preventDefault()
+    insertTextAtSelection('\n' + taskM[1] + '- [ ] ', start, start)
+    return true
+  }
+  const bulletM = line.match(/^(\s*)([-*+]|\d+\.) (.*)$/)
+  if (bulletM && !bulletM[3].trim()) {
+    e.preventDefault()
+    insertTextAtSelection('\n', start - line.length + bulletM[1].length, start)
+    return true
+  }
+  if (bulletM) {
+    e.preventDefault()
+    const marker = /^\d+\./.test(bulletM[2]) ? `${parseInt(bulletM[2], 10) + 1}. ` : '- '
+    insertTextAtSelection('\n' + bulletM[1] + marker, start, start)
+    return true
+  }
+  return false
+}
+
+function handleListTab(e, outdent) {
+  const start = editor.selectionStart
+  const val = editor.value
+  const lineStart = val.lastIndexOf('\n', start - 1) + 1
+  const lineEnd = val.indexOf('\n', start)
+  const end = lineEnd === -1 ? val.length : lineEnd
+  const line = val.slice(lineStart, end)
+  if (outdent) {
+    if (line.startsWith('  ')) {
+      e.preventDefault()
+      insertTextAtSelection(line.slice(2), lineStart, end)
+    } else if (line.startsWith('\t')) {
+      e.preventDefault()
+      insertTextAtSelection(line.slice(1), lineStart, end)
+    }
+  } else if (/^(\s*)([-*+]|\d+\.|- \[ \]) /.test(line) || line.match(/^\s/)) {
+    e.preventDefault()
+    insertTextAtSelection('  ' + line, lineStart, end)
+    editor.setSelectionRange(start + 2, start + 2)
+  }
 }
 
 function updateCounts() {
   const text = getActiveContent()
   cntEl.textContent = text.length
   tokenEst.textContent = text.length ? `~${estimateTokens(text)} tok` : ''
-}
-
-function setEditorMode(mode) {
-  editorMode = mode
-  const structured = mode === 'structured'
-  modeFree.classList.toggle('active', !structured)
-  modeStruct.classList.toggle('active', structured)
-  sectionsWrap.classList.toggle('visible', structured)
-  editorWrap.classList.toggle('hidden-mode', structured)
-  if (structured) {
-    const secs = note?.sections || parseSectionsToUI(editor.value)
-    setSectionsUI(secs)
-    if (note) note.sections = secs
-  } else if (note?.sections) {
-    editor.value = assembleSectionsContent(note.sections) || editor.value
-  }
-  updateCounts()
-  updateVarBar(getActiveContent())
-  if (note) { note.editorMode = mode; schedSave() }
 }
 
 // ── 工具 ──────────────────────────────────────────────────────────────────────
@@ -770,10 +1283,7 @@ function schedSave() {
   markDirty(); clearTimeout(saveTimer)
   saveTimer = setTimeout(()=>{
     if (!note) return
-    const sections = editorMode === 'structured' ? getSectionsFromUI() : null
-    const content = editorMode === 'structured'
-      ? assembleSectionsContent(sections)
-      : editor.value
+    const content = editor.value
     const okfTags = inpOkfTags.value.split(/[,，]/).map(s=>s.trim()).filter(Boolean)
     window.api.updateNote({
       id: note.id,
@@ -783,14 +1293,16 @@ function schedSave() {
       version: note.version || '0.1',
       category: inpCategory.value.trim(),
       okfTags,
-      sections,
+      sections: null,
       editorMode,
+      mdView,
     })
     note.content = content
     note.category = inpCategory.value.trim()
     note.okfTags = okfTags
-    note.sections = sections
+    note.sections = null
     note.editorMode = editorMode
+    note.mdView = mdView
     markSaved()
   }, 700)
 }
@@ -866,19 +1378,76 @@ editor.addEventListener('input', ()=>{
   updateVarBar(editor.value)
   if(note){ note.content=editor.value; schedSave() }
   scheduleAutoTitle()
+  if (isMdEditMode()) {
+    const slashInfo = getMdSlashLineInfo()
+    if (slashInfo) showMdSlashMenu(slashInfo)
+    else hideMdSlashMenu()
+  } else {
+    hideMdSlashMenu()
+  }
+  if (editorMode === 'md' && mdView === 'preview') renderPreview()
 })
-;[secRole, secContext, secTask, secOutput, secCriteria].forEach(el => {
-  el.addEventListener('input', () => {
-    if (note) note.sections = getSectionsFromUI()
-    updateCounts()
-    updateVarBar(getActiveContent())
-    schedSave()
-  })
+editor.addEventListener('keyup', () => { requestAnimationFrame(updateSelBubble) })
+editor.addEventListener('mouseup', () => { requestAnimationFrame(updateSelBubble) })
+editor.addEventListener('scroll', () => { hideSelBubble(); if (mdSlashOpen) positionMdSlashMenu() })
+editor.addEventListener('blur', () => { setTimeout(hideSelBubble, 120) })
+editor.addEventListener('keydown', e => {
+  if (!isMdEditMode()) return
+  if (mdSlashOpen) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      mdSlashActiveIdx = Math.min(mdSlashActiveIdx + 1, mdSlashFiltered.length - 1)
+      renderMdSlashMenu(mdSlashFiltered)
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      mdSlashActiveIdx = Math.max(mdSlashActiveIdx - 1, 0)
+      renderMdSlashMenu(mdSlashFiltered)
+      return
+    }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault()
+      if (mdSlashFiltered[mdSlashActiveIdx]) applyMdSlashItem(mdSlashFiltered[mdSlashActiveIdx])
+      return
+    }
+    if (e.key === 'Escape') { e.preventDefault(); hideMdSlashMenu(); return }
+  }
+  if (e.key === 'Escape') { hideSelBubble(); return }
+  if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+    if (handleSmartEnter(e)) return
+  }
+  if (e.key === 'Tab') {
+    handleListTab(e, e.shiftKey)
+    return
+  }
+  if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+    const k = e.key.toLowerCase()
+    if (k === 'b') { e.preventDefault(); applyMdAction('bold'); return }
+    if (k === 'i') { e.preventDefault(); applyMdAction('italic'); return }
+    if (k === 'k') { e.preventDefault(); applyMdAction('link'); return }
+  }
 })
 inpCategory.addEventListener('input', () => { if (note) schedSave(); syncCategoryHint() })
 inpOkfTags.addEventListener('input', () => { if (note) schedSave() })
-modeFree.addEventListener('click', () => setEditorMode('free'))
-modeStruct.addEventListener('click', () => setEditorMode('structured'))
+modePlain.addEventListener('click', () => setEditorMode('plain'))
+modeMd.addEventListener('click', () => setEditorMode('md'))
+modeMdPreview.addEventListener('click', () => {
+  if (editorMode !== 'md') return
+  setMdView(mdView === 'preview' ? 'edit' : 'preview')
+})
+mdSlashMenu.addEventListener('mousedown', e => e.preventDefault())
+mdSlashMenu.addEventListener('click', e => {
+  const btn = e.target.closest('.slash-item')
+  if (!btn) return
+  const idx = parseInt(btn.dataset.idx, 10)
+  if (mdSlashFiltered[idx]) applyMdSlashItem(mdSlashFiltered[idx])
+})
+selBubble.querySelectorAll('button[data-md]').forEach(btn => {
+  btn.addEventListener('mousedown', e => e.preventDefault())
+  btn.addEventListener('click', () => applyMdAction(btn.dataset.md))
+})
+StickyIcons.mount(selBubble)
 
 btnPromote.addEventListener('click', async () => {
   if (!note) return
@@ -887,8 +1456,10 @@ btnPromote.addEventListener('click', async () => {
     const r = await window.api.promoteToOkf(note.id)
     if (r.ok) {
       toast(`已收录：${r.conceptId}`, 'success')
-      btnPromote.textContent = '已收录'
       btnPromote.classList.add('done')
+      btnPromote.title = '已收录到本机知识库'
+      const doneIco = btnPromote.querySelector('.ico')
+      if (doneIco) doneIco.innerHTML = StickyIcons.svg('check')
     } else {
       toast(r.error || '收录失败', 'error')
     }
@@ -901,9 +1472,7 @@ btnPromote.addEventListener('click', async () => {
 
 btnSuggest.addEventListener('click', async () => {
   if (!note) return
-  const prev = btnSuggest.textContent
   btnSuggest.disabled = true
-  btnSuggest.textContent = '分类中…'
   try {
     const r = await window.api.suggestClassification({
       content: getActiveContent(),
@@ -930,7 +1499,6 @@ btnSuggest.addEventListener('click', async () => {
     toast(e.message || '分类异常', 'error')
   } finally {
     btnSuggest.disabled = false
-    btnSuggest.textContent = prev
   }
 })
 
@@ -969,6 +1537,8 @@ inpProj.addEventListener('input', ()=>{
   if (note) { note.project = v; note.projectManual = titleManual; schedSave() }
 })
 editor.addEventListener('keydown', e=>{
+  // MD 列表缩进由前面的 keydown 处理，避免双重监听互相覆盖
+  if (e.defaultPrevented) return
   if(e.key==='Tab'){ e.preventDefault(); const s=editor.selectionStart; editor.value=editor.value.slice(0,s)+'  '+editor.value.slice(editor.selectionEnd); editor.selectionStart=editor.selectionEnd=s+2; schedSave() }
   if(e.key==='Escape'){
     if (modalOverlay.classList.contains('open')) { modalOverlay.classList.remove('open'); return }
@@ -1014,7 +1584,7 @@ window.api.onDelete(()=>note&&window.api.deleteNote(note.id))
 // ── 窗口控制 ─────────────────────────────────────────────────────────────────
 btnPin.addEventListener('click',  ()=>note&&window.api.togglePin(note.id))
 document.getElementById('btnHide').addEventListener('click', ()=>note&&window.api.hideNote(note.id))
-document.getElementById('btnDel') .addEventListener('click', ()=>note&&window.api.deleteNote(note.id))
+document.getElementById('btnMin') .addEventListener('click', ()=>note&&window.api.minimizeToTray(note.id))
 window.api.pinChanged(p=>{ if(note)note.pinned=p; btnPin.classList.toggle('on',!!p) })
 
 function syncLayoutState(state) {
@@ -1032,9 +1602,50 @@ function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 }
 
+// 轻量 Markdown 渲染（先转义再套格式，避免 XSS）
+function renderMarkdown(src) {
+  const inline = (t) => escHtml(t)
+    .replace(/`([^`]+?)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>')
+
+  const lines = String(src).replace(/\r\n/g, '\n').split('\n')
+  const out = []
+  let list = null   // 'ul' | 'ol'
+  let inCode = false, codeBuf = []
+
+  const closeList = () => { if (list) { out.push(`</${list}>`); list = null } }
+
+  for (const line of lines) {
+    const fence = line.match(/^\s*```/)
+    if (fence) {
+      if (inCode) { out.push(`<pre><code>${escHtml(codeBuf.join('\n'))}</code></pre>`); codeBuf = []; inCode = false }
+      else { closeList(); inCode = true }
+      continue
+    }
+    if (inCode) { codeBuf.push(line); continue }
+
+    if (!line.trim()) { closeList(); continue }
+
+    const h = line.match(/^(#{1,4})\s+(.*)$/)
+    if (h) { closeList(); const lv = h[1].length; out.push(`<h${lv} class="md-h">${inline(h[2])}</h${lv}>`); continue }
+
+    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/)
+    const ul = line.match(/^\s*[-*+]\s+(.*)$/)
+    if (ol) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol' } out.push(`<li>${inline(ol[1])}</li>`); continue }
+    if (ul) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul' } out.push(`<li>${inline(ul[1])}</li>`); continue }
+
+    closeList()
+    out.push(`<p>${inline(line)}</p>`)
+  }
+  if (inCode) out.push(`<pre><code>${escHtml(codeBuf.join('\n'))}</code></pre>`)
+  closeList()
+  return out.join('')
+}
+
 function renderChat() {
   if (!chatHistory.length) {
-    chatLog.innerHTML = '<div class="chat-empty">描述需求或点快捷指令，AI 会在这里对话<br>生成结果可应用到右侧编辑区</div>'
+    chatLog.innerHTML = '<div class="chat-empty">描述需求，AI 帮你写</div>'
     return
   }
   chatLog.innerHTML = chatHistory.map((m, i) => {
@@ -1047,7 +1658,11 @@ function renderChat() {
       <button class="chat-act" data-act="replace" data-idx="${i}">替换正文</button>
       <button class="chat-act subtle" data-act="append" data-idx="${i}">追加到文末</button>
     </div>` : ''
-    return `<div class="chat-bubble assistant${streamCls}" data-idx="${i}"><span class="chat-text">${escHtml(m.text)}</span>${cursor}${actions}</div>`
+    // 流式过程用纯文本（性能 + 光标），完成后渲染 Markdown 排版
+    const body = m.streaming
+      ? `<span class="chat-text">${escHtml(m.text)}</span>`
+      : `<div class="chat-text md">${renderMarkdown(m.text)}</div>`
+    return `<div class="chat-bubble assistant${streamCls}" data-idx="${i}">${body}${cursor}${actions}</div>`
   }).join('')
   chatLog.scrollTop = chatLog.scrollHeight
 }
@@ -1109,23 +1724,218 @@ async function setAiOpen(open) {
 aiToggle.addEventListener('click', () => setAiOpen(true))
 aiClose.addEventListener('click', () => setAiOpen(false))
 
-document.querySelectorAll('.quick-chip').forEach(btn => {
-  btn.addEventListener('click', e => {
+function hideAiMenus() {
+  if (aiQuickMenu) aiQuickMenu.classList.remove('show')
+  if (aiMoreMenu) aiMoreMenu.classList.remove('show')
+}
+
+let quickActive = 0
+function quickItems() {
+  if (!aiQuickMenu) return []
+  return Array.from(aiQuickMenu.querySelectorAll('[data-p]'))
+}
+
+function renderQuickActive() {
+  const items = quickItems()
+  if (!items.length) return
+  if (quickActive < 0) quickActive = items.length - 1
+  if (quickActive >= items.length) quickActive = 0
+  items.forEach((item, idx) => item.classList.toggle('active', idx === quickActive))
+}
+
+function applyQuickPrompt(prompt) {
+  const text = String(prompt || '').trim()
+  if (!text) return
+  aiInput.value = text
+  aiInput.dispatchEvent(new Event('input'))
+  aiInput.focus()
+  hideAiMenus()
+}
+
+function showQuickMenu() {
+  if (!aiQuickMenu) return
+  aiMoreMenu?.classList.remove('show')
+  aiQuickMenu.classList.add('show')
+  quickActive = 0
+  renderQuickActive()
+  aiInput.focus()
+}
+
+if (aiQuickBtn && aiQuickMenu) {
+  aiQuickBtn.addEventListener('click', (e) => {
     e.stopPropagation()
-    aiInput.value = btn.dataset.p
-    if (!aiOpen) setAiOpen(true)
-    setTimeout(runAI, 40)
+    if (aiQuickMenu.classList.contains('show')) {
+      aiQuickMenu.classList.remove('show')
+      return
+    }
+    showQuickMenu()
   })
+}
+
+if (aiMoreBtn && aiMoreMenu) {
+  aiMoreBtn.addEventListener('click', (e) => {
+    e.stopPropagation()
+    aiQuickMenu?.classList.remove('show')
+    aiMoreMenu.classList.toggle('show')
+  })
+}
+
+if (aiQuickMenu) {
+  aiQuickMenu.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-p]')
+    if (!btn) return
+    applyQuickPrompt(btn.dataset.p || '')
+  })
+  aiQuickMenu.addEventListener('mousemove', (e) => {
+    const btn = e.target.closest('[data-p]')
+    if (!btn) return
+    const items = quickItems()
+    const idx = items.indexOf(btn)
+    if (idx < 0 || idx === quickActive) return
+    quickActive = idx
+    renderQuickActive()
+  })
+}
+
+if (aiComposer) {
+  aiComposer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && (aiQuickMenu?.classList.contains('show') || aiMoreMenu?.classList.contains('show'))) {
+      e.preventDefault()
+      hideAiMenus()
+    }
+  })
+}
+
+document.addEventListener('click', (e) => {
+  if (!aiComposer?.contains(e.target)) hideAiMenus()
 })
+
+function clearChat() {
+  if (!chatHistory.length) {
+    toast('对话已为空')
+    return
+  }
+  chatHistory = []
+  renderChat()
+  toast('已清空对话', 'success')
+}
+
+const aiClearChat = document.getElementById('aiClearChat')
+if (aiClearChat) {
+  aiClearChat.addEventListener('click', e => {
+    e.stopPropagation()
+    hideAiMenus()
+    clearChat()
+  })
+}
 
 aiInput.addEventListener('input', () => {
   aiInput.style.height = 'auto'
   aiInput.style.height = Math.min(aiInput.scrollHeight, 88) + 'px'
+  updateSlashMenu()
 })
+
+const slashMenu = document.getElementById('slashMenu')
+let skillCatalog = []
+let slashOpen = false
+let slashActive = 0
+let slashQuery = ''
+
+async function ensureSkillCatalog() {
+  if (!window.api.listSkills) return []
+  try {
+    const r = await window.api.listSkills()
+    skillCatalog = r.ok ? (r.skills || []) : []
+  } catch {
+    skillCatalog = []
+  }
+  return skillCatalog
+}
+
+function getSlashContext() {
+  const val = aiInput.value
+  const caret = aiInput.selectionStart ?? val.length
+  const before = val.slice(0, caret)
+  const m = before.match(/(^|\s)\/([a-zA-Z0-9\-]*)$/)
+  if (!m) return null
+  return {
+    start: caret - m[2].length - 1,
+    end: caret,
+    query: m[2].toLowerCase(),
+  }
+}
+
+function hideSlashMenu() {
+  slashOpen = false
+  slashMenu.classList.remove('show')
+  slashMenu.innerHTML = ''
+}
+
+function filteredSkills() {
+  const q = slashQuery
+  return skillCatalog.filter((s) => {
+    const hay = `${s.slash} ${s.title} ${s.description || ''}`.toLowerCase()
+    return !q || hay.includes(q)
+  }).slice(0, 8)
+}
+
+function renderSlashMenu() {
+  const items = filteredSkills()
+  if (!slashOpen) return
+  if (!skillCatalog.length) {
+    slashMenu.innerHTML = '<div class="slash-empty">暂无技能。去 设置 → 知识库 → 新建技能，或先封装技能包。</div>'
+    slashMenu.classList.add('show')
+    return
+  }
+  if (!items.length) {
+    slashMenu.innerHTML = `<div class="slash-empty">没有匹配「/${slashQuery}」的技能</div>`
+    slashMenu.classList.add('show')
+    return
+  }
+  if (slashActive >= items.length) slashActive = 0
+  slashMenu.innerHTML = items.map((s, i) =>
+    `<button type="button" class="slash-item${i === slashActive ? ' active' : ''}" data-idx="${i}" role="option">
+      <span class="slash-cmd">/${s.slash}</span>
+      <span class="slash-title">${s.title || s.id}</span>
+    </button>`
+  ).join('')
+  slashMenu.classList.add('show')
+  slashMenu.querySelectorAll('.slash-item').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault()
+      pickSlashSkill(items[+btn.dataset.idx])
+    })
+  })
+}
+
+async function updateSlashMenu() {
+  const ctx = getSlashContext()
+  if (!ctx) { hideSlashMenu(); return }
+  slashQuery = ctx.query
+  slashOpen = true
+  await ensureSkillCatalog()
+  renderSlashMenu()
+}
+
+function pickSlashSkill(skill) {
+  if (!skill) return
+  const ctx = getSlashContext()
+  if (!ctx) return
+  const before = aiInput.value.slice(0, ctx.start)
+  const after = aiInput.value.slice(ctx.end)
+  const insert = `/${skill.slash} `
+  aiInput.value = before + insert + after
+  const pos = (before + insert).length
+  aiInput.setSelectionRange(pos, pos)
+  hideSlashMenu()
+  aiInput.focus()
+  aiInput.dispatchEvent(new Event('input'))
+}
 
 async function runAI() {
   const prompt = aiInput.value.trim()
   if (!prompt || !note) return
+  if (slashOpen) hideSlashMenu()
   if (!aiOpen) await setAiOpen(true)
 
   chatHistory.push({ role: 'user', text: prompt })
@@ -1144,8 +1954,23 @@ async function runAI() {
     updateStreamText(assistantIdx)
   })
 
+  const priorHistory = chatHistory
+    .slice(0, -2)
+    .filter(m => (m.role === 'user' || m.role === 'assistant') && m.text && !m.streaming)
+    .map(m => ({ role: m.role, text: m.text }))
+
+  const skillRefs = [...prompt.matchAll(/(^|\s)\/([a-z0-9][a-z0-9\-]{0,31})\b/gi)]
+    .map(m => m[2].toLowerCase())
+
   try {
-    const result = await window.api.aiGenerate({ prompt, context: editor.value.trim() || null })
+    const result = await window.api.aiGenerate({
+      prompt,
+      context: editor.value.trim() || null,
+      history: priorHistory,
+      noteId: note.id,
+      category: (note.category || inpCategory.value || '').trim(),
+      skillRefs,
+    })
     offChunk()
 
     if (result.error) {
@@ -1175,14 +2000,85 @@ async function runAI() {
 
 aiSend.addEventListener('click', runAI)
 aiInput.addEventListener('keydown', e => {
+  if (aiQuickMenu?.classList.contains('show')) {
+    const items = quickItems()
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      quickActive = (quickActive + 1) % Math.max(items.length, 1)
+      renderQuickActive()
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      quickActive = (quickActive - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1)
+      renderQuickActive()
+      return
+    }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      const active = items[quickActive] || items[0]
+      if (active) applyQuickPrompt(active.dataset.p || '')
+      return
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      hideAiMenus()
+      return
+    }
+  }
+
+  if (slashOpen) {
+    const items = filteredSkills()
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (items.length) {
+        slashActive = (slashActive + 1) % items.length
+        renderSlashMenu()
+      }
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      if (items.length) {
+        slashActive = (slashActive - 1 + items.length) % items.length
+        renderSlashMenu()
+      }
+      return
+    }
+    if (e.key === 'Enter' && !e.shiftKey && items.length) {
+      e.preventDefault()
+      pickSlashSkill(items[slashActive] || items[0])
+      return
+    }
+    if (e.key === 'Tab' && items.length) {
+      e.preventDefault()
+      pickSlashSkill(items[slashActive] || items[0])
+      return
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      hideSlashMenu()
+      return
+    }
+  }
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runAI() }
   if (e.key === 'Escape') {
     if (modalOverlay.classList.contains('open')) { modalOverlay.classList.remove('open'); return }
     if (aiOpen) setAiOpen(false)
   }
 })
+aiInput.addEventListener('blur', () => setTimeout(hideSlashMenu, 120))
+if (window.api.listSkills) ensureSkillCatalog()
 
-document.addEventListener('keydown', e => {
+document.addEventListener('keydown', async e => {
+  if ((e.ctrlKey || e.metaKey) && String(e.key || '').toLowerCase() === 'k') {
+    // 编辑器里 Ctrl+K 让位给 MD 链接快捷键，避免与 AI 快捷菜单冲突
+    if (e.target === editor && isMdEditMode()) return
+    e.preventDefault()
+    if (!aiOpen) await setAiOpen(true)
+    showQuickMenu()
+    return
+  }
   if (e.key !== 'Escape') return
   if (e.target === editor || e.target === aiInput) return
   if (modalOverlay.classList.contains('open')) { modalOverlay.classList.remove('open'); return }
@@ -1200,18 +2096,38 @@ window.api.initNote(n=>{
   titleManual    = n.projectManual ?? !!n.project?.trim()
   setVersion(n.version || '0.1')
   setFavorite(n.favorite || false)
-  btnPromote.textContent = '收入库'
   btnPromote.classList.remove('done')
-  if (n.sections) setSectionsUI(n.sections)
-  else if (n.editorMode === 'structured') setSectionsUI(parseSectionsToUI(n.content))
-  editorMode = n.editorMode || 'free'
-  modeFree.classList.toggle('active', editorMode !== 'structured')
-  modeStruct.classList.toggle('active', editorMode === 'structured')
-  sectionsWrap.classList.toggle('visible', editorMode === 'structured')
-  editorWrap.classList.toggle('hidden-mode', editorMode === 'structured')
+  btnPromote.title = '收入库 — 保存到本机知识库，便于复用'
+  const promoteIco = btnPromote.querySelector('.ico')
+  if (promoteIco) promoteIco.innerHTML = StickyIcons.svg('classify')
+  if (n.skillPackConceptId) {
+    btnPromote.classList.add('done')
+    btnPromote.title = '已封装为技能包'
+    if (promoteIco) promoteIco.innerHTML = StickyIcons.svg('check')
+  }
+  if (n.editorMode === 'preview') {
+    editorMode = 'md'
+    mdView = 'preview'
+  } else if (n.editorMode === 'edit') {
+    editorMode = 'md'
+    mdView = 'edit'
+  } else {
+    editorMode = n.editorMode === 'md' ? 'md' : 'plain'
+    mdView = n.mdView === 'preview' ? 'preview' : 'edit'
+  }
+  applyEditorModeUI()
   updateCounts()
   saveTime.textContent = relTime(n.updatedAt||n.createdAt)
   btnPin.classList.toggle('on', n.pinned!==false)
+  if (window.api.skillPackCheck) {
+    window.api.skillPackCheck().then((r) => {
+      const hit = (r.suggestions || []).find(
+        (s) => s.theme === (n.category || '').trim()
+      )
+      if (hit) showSkillSuggest(hit)
+      else hideSkillBanner()
+    }).catch(() => {})
+  }
   if (n.aiOpen) {
     aiOpen = true
     card.classList.add('ai-open')
@@ -1222,6 +2138,7 @@ window.api.initNote(n=>{
   if (n.content?.trim() && !n.project?.trim()) scheduleAutoTitle(600)
   if(empty&&noName) setTimeout(()=>inpProj.focus(),80)
   else if(empty)    setTimeout(()=>editor.focus(),80)
+  mountAllIcons()
 })
 setInterval(()=>{ if(note&&footerM.className==='footer-meta') saveTime.textContent=relTime(note.updatedAt||note.createdAt) }, 20000)
 </script>

@@ -29,7 +29,7 @@ function uniqueConceptPath(knowledgeDir, slug) {
 }
 
 function promoteNoteToConcept(knowledgeDir, note) {
-  const title = (note.project || '').trim() || '未命名提示词';
+  const title = (note.project || '').trim() || '未命名笔记';
   const slug = slugify(title);
   const rel = uniqueConceptPath(knowledgeDir, slug);
   const abs = path.join(knowledgeDir, rel);

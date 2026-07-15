@@ -113,9 +113,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .btn-sm.primary:hover:not(:disabled){background:#484bcc;border-color:#484bcc;color:#fff;}
 .btn-sm.ghost{background:transparent;}
 
-.kb-intro{padding:0 16px 10px;font:11px/1.7 var(--ui);color:var(--text3);}
-.kb-intro strong{color:var(--text2);font-weight:500;}
-
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 12px;}
 .stat-card{
   background:var(--bg-soft);border:1px solid var(--div2);border-radius:10px;padding:10px 12px;
@@ -124,28 +121,44 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .stat-label{font:10px var(--ui);color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
 .stat-value{font:600 18px/1.2 var(--ui);color:var(--text);letter-spacing:-.3px;}
 .stat-meta{font:10px var(--ui);color:var(--text3);margin-top:3px;}
-.stat-value.ok{color:var(--green);}
-.stat-value.warn{color:var(--amber);}
-.stat-value.err{color:var(--red);}
 
-.path-row{
-  margin:0 16px 12px;padding:8px 10px;background:var(--bg-top);border:1px solid var(--div2);
-  border-radius:8px;font:10px var(--mono);color:var(--text3);word-break:break-all;line-height:1.5;
+.kb-intro{padding:0 16px 8px;font:12px/1.5 var(--ui);color:var(--text3);}
+
+.kb-summary{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin:0 16px 12px;padding:10px 12px;background:var(--bg-soft);
+  border:1px solid var(--div2);border-radius:10px;
 }
+.kb-summary-text{font:12px/1.45 var(--ui);color:var(--text2);min-width:0;}
+.kb-summary-text strong{color:var(--text);font-weight:600;}
+.kb-summary-text .ok{color:var(--green);}
+.kb-summary-text .err{color:var(--red);}
+.kb-summary-actions{display:flex;gap:6px;flex-shrink:0;}
 
-.concept-wrap{padding:0 16px 12px;}
-.concept-label{font:10px var(--ui);color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
-.concept-list{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;}
+.kb-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:0 16px 8px;
+}
+.kb-toolbar-label{font:11px var(--ui);color:var(--text3);letter-spacing:.2px;}
+.kb-toolbar-right{display:flex;align-items:center;gap:8px;}
+.kb-link{
+  background:none;border:none;padding:0;font:11px var(--ui);color:var(--accent);
+  cursor:pointer;outline:none;
+}
+.kb-link:hover{text-decoration:underline;}
+
+.concept-list{display:flex;flex-direction:column;gap:4px;min-height:0;}
 .concept-chip{
-  font:11px var(--ui);color:var(--text2);background:var(--bg-mid);
-  border:1px solid var(--div2);border-radius:20px;padding:4px 10px;max-width:100%;
+  display:block;width:100%;text-align:left;
+  font:12px var(--ui);color:var(--text2);background:var(--bg-card);
+  border:1px solid var(--div2);border-radius:8px;padding:7px 10px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
 }
 .concept-chip:hover{border-color:var(--accent-b);color:var(--accent);background:var(--accent-bg);}
 .concept-empty{font:11px var(--ui);color:var(--text3);font-style:italic;}
 
 /* 知识分类 */
-.cat-list{padding:0 16px 14px;display:flex;flex-direction:column;gap:8px;}
+.cat-list{padding:0 16px 12px;display:flex;flex-direction:column;gap:8px;}
 .cat-card{
   border:1px solid var(--div2);border-radius:10px;background:var(--bg-soft);overflow:hidden;
 }
@@ -153,10 +166,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
   display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;
 }
 .cat-head:hover{background:rgba(0,0,0,0.02);}
-.cat-icon{
-  width:28px;height:28px;border-radius:8px;background:var(--accent-bg);color:var(--accent);
-  display:flex;align-items:center;justify-content:center;font:600 11px var(--mono);flex-shrink:0;
-}
+.cat-check{flex-shrink:0;width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
 .cat-meta{flex:1;min-width:0;}
 .cat-name{font:600 13px var(--ui);color:var(--text);}
 .cat-id{font:10px var(--mono);color:var(--text3);margin-top:1px;}
@@ -166,15 +176,53 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 }
 .cat-chevron{font:12px var(--ui);color:var(--text3);transition:transform .15s;flex-shrink:0;}
 .cat-card.open .cat-chevron{transform:rotate(90deg);}
-.cat-body{display:none;padding:0 12px 10px;border-top:1px solid var(--div2);}
+.cat-body{display:none;padding:0 12px 10px 38px;border-top:1px solid var(--div2);}
 .cat-card.open .cat-body{display:block;}
-.cat-body .concept-list{padding-top:10px;}
-.cat-empty{font:11px var(--ui);color:var(--text3);padding:10px 0 2px;font-style:italic;}
+.cat-body .concept-list{padding-top:8px;}
+.cat-empty{font:11px var(--ui);color:var(--text3);padding:8px 0 2px;font-style:italic;}
 
 .kb-actions{
   display:flex;gap:8px;padding:0 16px 14px;
 }
 .kb-actions .btn-sm{flex:1;text-align:center;padding:9px 12px;}
+
+.kb-drawer{
+  position:fixed;inset:0;z-index:90;background:rgba(28,25,23,0.28);
+  display:none;align-items:flex-end;justify-content:center;
+}
+.kb-drawer.show{display:flex;}
+.kb-drawer-panel{
+  width:100%;max-width:440px;max-height:72vh;background:var(--bg-card);
+  border-radius:14px 14px 0 0;box-shadow:0 -8px 32px rgba(0,0,0,0.18);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.kb-drawer-head{
+  display:flex;align-items:flex-start;gap:10px;padding:14px 16px 10px;
+  border-bottom:1px solid var(--div);
+}
+.kb-drawer-titles{flex:1;min-width:0;}
+.kb-drawer-title{font:600 14px/1.3 var(--ui);color:var(--text);}
+.kb-drawer-sub{font:11px var(--mono);color:var(--text3);margin-top:3px;word-break:break-all;}
+.kb-drawer-close{
+  flex-shrink:0;width:28px;height:28px;border-radius:8px;border:1px solid var(--div2);
+  background:var(--bg-soft);color:var(--text2);cursor:pointer;font:14px var(--ui);
+}
+.kb-drawer-close:hover{background:var(--bg-mid);color:var(--text);}
+.kb-drawer-body{
+  flex:1;overflow:auto;padding:12px 16px;font:12px/1.65 var(--ui);color:var(--text);
+  white-space:pre-wrap;word-break:break-word;
+}
+.kb-drawer-edit{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;padding:12px 16px;overflow:auto;}
+.kb-drawer-edit label{font:600 10px var(--ui);color:var(--text3);letter-spacing:.3px;}
+.kb-drawer-edit input,.kb-drawer-edit textarea{
+  width:100%;border:1px solid var(--div2);border-radius:8px;padding:8px 10px;
+  font:12px/1.55 var(--ui);color:var(--text);background:var(--bg-soft);outline:none;
+}
+.kb-drawer-edit textarea{min-height:220px;resize:vertical;font:12px/1.55 var(--mono);white-space:pre-wrap;}
+.kb-drawer-edit input:focus,.kb-drawer-edit textarea:focus{border-color:var(--accent-b);}
+.kb-drawer-foot{
+  display:flex;gap:8px;padding:10px 16px 14px;border-top:1px solid var(--div);
+}
 
 .footer{
   flex-shrink:0;padding:12px 16px 14px;background:var(--bg-card);
@@ -244,8 +292,11 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
         <input id="model" placeholder="gpt-4o-mini" spellcheck="false">
       </div>
       <div class="field">
-        <label>System Prompt</label>
-        <textarea id="sysPrompt" placeholder="AI 生成提示词时的系统指令…"></textarea>
+        <label>用户偏好提示词</label>
+        <textarea id="userPrompt" placeholder="例：专业领域是游戏数值策划；回答简洁、优先用列表；语气专业克制…"></textarea>
+        <div class="hint">
+          填写专业领域、回答风格等个人偏好。产品已内置固定助手指令（防幻觉与输出规范），此处内容会追加在其后。
+        </div>
       </div>
     </div>
   </div>
@@ -269,7 +320,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
       <div class="action-row">
         <div class="action-body">
           <div class="action-label">便签备份</div>
-          <div class="action-sub">导出/导入全部提示词卡片 JSON</div>
+          <div class="action-sub">导出/导入全部笔记 JSON</div>
         </div>
         <button class="btn-sm primary" id="btnNotesExport">导出</button>
         <button class="btn-sm" id="btnNotesImport">导入</button>
@@ -285,11 +336,11 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
       <div class="action-row">
         <div class="action-body">
           <div class="action-label">数据目录</div>
-          <div class="action-sub">提示词卡片 JSON 存储位置</div>
+          <div class="action-sub">笔记 JSON 存储位置</div>
         </div>
         <button class="btn-sm ghost" id="btnDataDir">打开</button>
       </div>
-      <p class="kb-intro" style="padding-top:0">右上角 <strong>✕ 关闭</strong>仅隐藏窗口，内容仍保留；删除请点垃圾桶图标并确认。</p>
+      <p class="kb-intro" style="padding-top:0">右上角 <strong>最小化</strong>收起到托盘，<strong>✕ 关闭</strong>仅隐藏当前窗；永久删除请在总览或便签右键菜单中确认。</p>
     </div>
   </div>
 
@@ -297,61 +348,60 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
   <div class="tab-panel" id="panel-knowledge" role="tabpanel">
     <div class="section" id="kbSection">
       <div class="section-head">
-        <div class="section-title">知识库与记忆</div>
-        <span class="section-badge">OKF v0.1</span>
+        <div class="section-title">知识库</div>
+        <span class="section-badge">OKF</span>
       </div>
-      <p class="kb-intro">
-        知识包与使用记忆保存在本机应用数据目录，<strong>可导入导出</strong>与他人交换。
-        AI 生成时会自动引用知识摘要与近期使用习惯。
-      </p>
+      <p class="kb-intro">本机概念供 AI 引用。勾选主题后导出；全选即导出整包。</p>
 
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">知识概念</div>
-          <div class="stat-value" id="statConcepts">—</div>
-          <div class="stat-meta" id="statKbLint">校验中…</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-label">使用记忆</div>
-          <div class="stat-value" id="statMemory">—</div>
-          <div class="stat-meta" id="statMemMeta">加载中…</div>
+      <div class="kb-summary">
+        <div class="kb-summary-text" id="kbSummaryText">加载中…</div>
+        <div class="kb-summary-actions">
+          <button class="btn-sm ghost" id="btnKnowledgeDir" type="button">目录</button>
+          <button class="btn-sm" id="btnMemoryPanel" type="button">记忆</button>
         </div>
       </div>
 
-      <div class="path-row" id="kbPath" title="">知识库路径加载中…</div>
-
-      <div class="concept-wrap">
-        <div class="concept-label">知识分类</div>
+      <div class="kb-toolbar">
+        <span class="kb-toolbar-label">知识主题</span>
+        <div class="kb-toolbar-right">
+          <button type="button" class="kb-link" id="btnCreateSkill">新建技能</button>
+          <button type="button" class="kb-link" id="btnKbSelectAll">全选</button>
+          <button type="button" class="kb-link" id="btnKbSelectNone">清空</button>
+        </div>
       </div>
       <div class="cat-list" id="categoryList">
         <span class="concept-empty">加载中…</span>
       </div>
 
       <div class="kb-actions">
-        <button class="btn-sm primary" id="btnKnowledgeExport">导出 OKF 包</button>
-        <button class="btn-sm" id="btnKnowledgeImport">导入 OKF 包</button>
+        <button class="btn-sm primary" id="btnKnowledgeExport">导出所选</button>
+        <button class="btn-sm" id="btnKnowledgeImport">导入</button>
       </div>
+    </div>
+  </div>
 
-      <div class="action-row">
-        <div class="action-body">
-          <div class="action-label">打开知识库目录</div>
-          <div class="action-sub">直接编辑 Markdown 概念文件</div>
+  <div class="kb-drawer" id="kbDrawer" aria-hidden="true">
+    <div class="kb-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="kbDrawerTitle">
+      <div class="kb-drawer-head">
+        <div class="kb-drawer-titles">
+          <div class="kb-drawer-title" id="kbDrawerTitle">—</div>
+          <div class="kb-drawer-sub" id="kbDrawerSub"></div>
         </div>
-        <button class="btn-sm ghost" id="btnKnowledgeDir">打开</button>
+        <button type="button" class="kb-drawer-close" id="kbDrawerClose" aria-label="关闭">✕</button>
       </div>
-      <div class="action-row">
-        <div class="action-body">
-          <div class="action-label">使用记忆面板</div>
-          <div class="action-sub">查看近期打开、复制、AI 生成记录</div>
-        </div>
-        <button class="btn-sm" id="btnMemoryPanel">打开</button>
+      <div class="kb-drawer-body" id="kbDrawerBody"></div>
+      <div class="kb-drawer-edit" id="kbDrawerEdit" hidden>
+        <label for="kbEditTitle">标题</label>
+        <input id="kbEditTitle" type="text" spellcheck="false">
+        <label for="kbEditSlash">快捷命令 <span style="font-weight:400;color:var(--text3)">AI 助写输入 /命令</span></label>
+        <input id="kbEditSlash" type="text" spellcheck="false" placeholder="如 code-review" maxlength="32">
+        <label for="kbEditBody">正文（Markdown）</label>
+        <textarea id="kbEditBody" spellcheck="false"></textarea>
       </div>
-      <div class="action-row">
-        <div class="action-body">
-          <div class="action-label">打开记忆目录</div>
-          <div class="action-sub" id="memPathHint">episodes / patterns / working</div>
-        </div>
-        <button class="btn-sm ghost" id="btnMemoryDir">打开</button>
+      <div class="kb-drawer-foot">
+        <button type="button" class="btn-sm primary" id="kbDrawerSave" style="flex:1" hidden>保存修改</button>
+        <button type="button" class="btn-sm primary" id="kbDrawerInstantiate" style="flex:1">实例化为卡片</button>
+        <button type="button" class="btn-sm" id="kbDrawerClose2" style="flex:1">关闭</button>
       </div>
     </div>
   </div>
@@ -417,13 +467,111 @@ function shortPath(p) {
   return p.length > 58 ? '…' + p.slice(-55) : p
 }
 
+function escHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+let previewConceptId = null
+let previewEditable = false
+/** 'idle' | 'edit' | 'create' — Electron 禁用 window.prompt，新建走抽屉 */
+let kbDrawerMode = 'idle'
+
+function resetKbDrawerChrome() {
+  const save = $('kbDrawerSave')
+  save.hidden = true
+  save.textContent = '保存修改'
+  if (save.dataset.label) save.dataset.label = '保存修改'
+  $('kbDrawerInstantiate').hidden = false
+  $('kbDrawerBody').hidden = false
+  $('kbDrawerEdit').hidden = true
+}
+
+function closeKbDrawer() {
+  const d = $('kbDrawer')
+  d.classList.remove('show')
+  d.setAttribute('aria-hidden', 'true')
+  previewConceptId = null
+  previewEditable = false
+  kbDrawerMode = 'idle'
+  resetKbDrawerChrome()
+}
+
+function openCreateSkillDrawer() {
+  previewConceptId = null
+  previewEditable = false
+  kbDrawerMode = 'create'
+  $('kbDrawerTitle').textContent = '新建技能'
+  $('kbDrawerSub').textContent = '创建后可在 AI 助写输入 /命令 引用'
+  $('kbDrawerBody').hidden = true
+  $('kbDrawerEdit').hidden = false
+  const save = $('kbDrawerSave')
+  save.hidden = false
+  save.textContent = '创建技能'
+  save.dataset.label = '创建技能'
+  $('kbDrawerInstantiate').hidden = true
+  $('kbEditTitle').value = ''
+  $('kbEditSlash').value = ''
+  $('kbEditBody').value = '# 我的技能\n\n## 用途\n\n（请补充）\n\n## 提示词模板\n\n```\n\n```\n'
+  const d = $('kbDrawer')
+  d.classList.add('show')
+  d.setAttribute('aria-hidden', 'false')
+  setTimeout(() => $('kbEditTitle').focus(), 0)
+}
+
+async function openConceptPreview(conceptId) {
+  previewConceptId = conceptId
+  previewEditable = false
+  kbDrawerMode = 'edit'
+  $('kbDrawerTitle').textContent = '加载中…'
+  $('kbDrawerSub').textContent = conceptId || ''
+  $('kbDrawerBody').textContent = ''
+  resetKbDrawerChrome()
+  const d = $('kbDrawer')
+  d.classList.add('show')
+  d.setAttribute('aria-hidden', 'false')
+  try {
+    const r = await window.api.knowledgeReadConcept(conceptId)
+    if (!r.ok) {
+      $('kbDrawerTitle').textContent = '无法打开'
+      $('kbDrawerBody').textContent = r.error || '概念不存在'
+      return
+    }
+    $('kbDrawerTitle').textContent = r.title || conceptId
+    $('kbDrawerSub').textContent = r.rel || conceptId
+    previewEditable = true
+    $('kbDrawerBody').hidden = true
+    $('kbDrawerEdit').hidden = false
+    $('kbDrawerSave').hidden = false
+    $('kbDrawerSave').textContent = '保存修改'
+    $('kbDrawerSave').dataset.label = '保存修改'
+    $('kbDrawerInstantiate').hidden = false
+    $('kbEditTitle').value = r.title || ''
+    const slash = (r.frontmatter && r.frontmatter.slash) || ''
+    $('kbEditSlash').value = String(slash).replace(/^\//, '')
+    $('kbEditBody').value = r.body || ''
+  } catch (e) {
+    $('kbDrawerTitle').textContent = '读取失败'
+    $('kbDrawerBody').textContent = e.message || String(e)
+  }
+}
+
+function getSelectedCategories() {
+  return [...document.querySelectorAll('#categoryList .cat-check:checked')].map(el => el.value)
+}
+
+function setAllCategoryChecks(on) {
+  document.querySelectorAll('#categoryList .cat-check').forEach(el => { el.checked = !!on })
+}
+
 function bindConceptChips(root) {
   root.querySelectorAll('[data-concept]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation()
-      const r = await window.api.instantiateFromOkf(btn.dataset.concept)
-      if (r.ok) toast('已实例化为新卡片', 'success')
-      else toast(r.error || '实例化失败', 'error')
+      openConceptPreview(btn.dataset.concept)
     })
   })
 }
@@ -431,24 +579,27 @@ function bindConceptChips(root) {
 function renderCategories(categories) {
   const list = $('categoryList')
   if (!categories?.length) {
-    list.innerHTML = '<span class="concept-empty">暂无分类，可导入 OKF 包或在知识库目录下新建文件夹</span>'
+    list.innerHTML = '<span class="concept-empty">暂无主题，可导入 OKF 包</span>'
     return
   }
 
+  const prev = new Set(getSelectedCategories())
+  const firstLoad = !list.querySelector('.cat-check')
+
   list.innerHTML = categories.map((cat, i) => {
-    const initial = (cat.label || cat.id || '?').slice(0, 1).toUpperCase()
     const chips = cat.items?.length
       ? cat.items.map(c =>
-          `<button type="button" class="concept-chip" data-concept="${c.id}" title="点击实例化为提示词卡片">${c.title || c.id}</button>`
+          `<button type="button" class="concept-chip" data-concept="${escHtml(c.id)}" title="查看内容">${escHtml(c.title || c.id)}</button>`
         ).join('')
-      : '<div class="cat-empty">该分类下暂无概念</div>'
+      : '<div class="cat-empty">该主题下暂无概念</div>'
     const open = i === 0 ? ' open' : ''
-    return `<div class="cat-card${open}" data-cat="${cat.id}">
+    const checked = firstLoad || prev.has(cat.id)
+    return `<div class="cat-card${open}" data-cat="${escHtml(cat.id)}">
       <div class="cat-head">
-        <div class="cat-icon">${initial}</div>
+        <input type="checkbox" class="cat-check" value="${escHtml(cat.id)}" ${checked ? 'checked' : ''} title="导出此主题" aria-label="选择${escHtml(cat.label || cat.id)}">
         <div class="cat-meta">
-          <div class="cat-name">${cat.label || cat.id}</div>
-          <div class="cat-id">${cat.id === '_root' ? '根目录' : cat.id + '/'}</div>
+          <div class="cat-name">${escHtml(cat.label || cat.id)}</div>
+          <div class="cat-id">${cat.id === '_root' ? '根目录' : escHtml(cat.id) + '/'}</div>
         </div>
         <span class="cat-count">${cat.count}</span>
         <span class="cat-chevron">›</span>
@@ -457,10 +608,16 @@ function renderCategories(categories) {
     </div>`
   }).join('')
 
+  if (firstLoad) setAllCategoryChecks(true)
+
   list.querySelectorAll('.cat-head').forEach(head => {
-    head.addEventListener('click', () => {
+    head.addEventListener('click', (e) => {
+      if (e.target.closest('.cat-check')) return
       head.closest('.cat-card').classList.toggle('open')
     })
+  })
+  list.querySelectorAll('.cat-check').forEach(cb => {
+    cb.addEventListener('click', e => e.stopPropagation())
   })
   bindConceptChips(list)
 }
@@ -469,32 +626,16 @@ async function refreshKbMemStatus() {
   const list = $('categoryList')
   try {
     const kb = await window.api.knowledgeStatus()
-    $('statConcepts').textContent = kb.concepts ?? 0
-    const lintEl = $('statKbLint')
-    if (kb.ok) {
-      lintEl.textContent = 'OKF 校验通过'
-      $('statConcepts').className = 'stat-value ok'
-    } else {
-      lintEl.textContent = `${kb.errors} 个校验错误`
-      $('statConcepts').className = 'stat-value err'
-    }
-    $('kbPath').textContent = shortPath(kb.path)
-    $('kbPath').title = kb.path || ''
-
-    renderCategories(kb.categories)
-
     const mem = await window.api.memoryStatus()
-    $('statMemory').textContent = mem.recentCount ?? 0
-    $('statMemMeta').textContent =
-      `${mem.patternsCount ?? 0} 个模式 · ${mem.pendingPromotions ?? 0} 项待升格 · 最近 ${fmtTime(mem.lastActivity)}`
-    $('memPathHint').textContent = shortPath(mem.path)
-    $('memPathHint').title = mem.path || ''
+    const lintCls = kb.ok ? 'ok' : 'err'
+    const lintTxt = kb.ok ? '校验通过' : `${kb.errors} 个错误`
+    $('kbSummaryText').innerHTML =
+      `<strong>${kb.concepts ?? 0}</strong> 概念 · <span class="${lintCls}">${lintTxt}</span>` +
+      ` · 记忆 <strong>${mem.recentCount ?? 0}</strong>`
+    renderCategories(kb.categories)
   } catch (e) {
-    $('statConcepts').textContent = '!'
-    $('statKbLint').textContent = '加载失败'
-    $('statMemory').textContent = '!'
-    $('statMemMeta').textContent = e.message || '不可用'
-    list.innerHTML = '<span class="concept-empty">知识库 API 不可用，请重启应用</span>'
+    $('kbSummaryText').textContent = '加载失败：' + (e.message || '请重启应用')
+    list.innerHTML = '<span class="concept-empty">知识库不可用</span>'
   }
 }
 
@@ -519,7 +660,7 @@ window.api.initSettings(s => {
   $('endpoint').value  = s.apiEndpoint  || ''
   $('apikey').value    = s.apiKey       || ''
   $('model').value     = s.model        || ''
-  $('sysPrompt').value = s.systemPrompt || ''
+  $('userPrompt').value = s.userPrompt || ''
 })
 $('autostart').checked = window.api.getAutostart()
 refreshKbMemStatus()
@@ -603,20 +744,90 @@ $('btnClassifyAi').addEventListener('click', () =>
 $('autostart').addEventListener('change', e => window.api.setAutostart(e.target.checked))
 $('btnDataDir').addEventListener('click', () => window.api.openDataDir())
 $('btnKnowledgeDir').addEventListener('click', () => window.api.openKnowledgeDir())
-$('btnMemoryDir').addEventListener('click', () => window.api.openMemoryDir())
 $('btnMemoryPanel').addEventListener('click', () => window.api.openMemoryPanel())
+$('btnKbSelectAll').addEventListener('click', () => setAllCategoryChecks(true))
+$('btnKbSelectNone').addEventListener('click', () => setAllCategoryChecks(false))
+$('kbDrawerClose').addEventListener('click', closeKbDrawer)
+$('kbDrawerClose2').addEventListener('click', closeKbDrawer)
+$('kbDrawer').addEventListener('click', (e) => {
+  if (e.target === $('kbDrawer')) closeKbDrawer()
+})
+$('kbDrawerSave').addEventListener('click', async () => {
+  if (kbDrawerMode !== 'create' && !previewConceptId) return
+  const btn = $('kbDrawerSave')
+  const slashRaw = ($('kbEditSlash').value || '').trim().replace(/^\//, '')
+  const title = $('kbEditTitle').value.trim() || '未命名技能'
+  const body = $('kbEditBody').value
+
+  if (kbDrawerMode === 'create') {
+    setLoading(btn, true, '创建中…')
+    try {
+      const r = await window.api.createSkill({
+        title,
+        slash: slashRaw,
+        body,
+      })
+      if (r.ok) {
+        toast(`已创建 /${r.slash || ''}`, 'success')
+        await refreshKbMemStatus()
+        await openConceptPreview(r.conceptId)
+      } else toast(r.error || '创建失败', 'error')
+    } catch (e) {
+      toast(e.message || '创建异常', 'error')
+    } finally {
+      setLoading(btn, false)
+    }
+    return
+  }
+
+  setLoading(btn, true, '保存中…')
+  try {
+    const r = await window.api.knowledgeWriteConcept({
+      id: previewConceptId,
+      title,
+      body,
+      frontmatter: slashRaw ? { slash: slashRaw.toLowerCase().replace(/[^a-z0-9\-]+/g, '-').replace(/^-+|-+$/g, '') } : {},
+    })
+    if (r.ok) {
+      toast('已保存到知识库', 'success')
+      $('kbDrawerTitle').textContent = title || previewConceptId
+      refreshKbMemStatus()
+    } else toast(r.error || '保存失败', 'error')
+  } catch (e) {
+    toast(e.message || '保存异常', 'error')
+  } finally {
+    setLoading(btn, false)
+  }
+})
+
+$('btnCreateSkill').addEventListener('click', () => openCreateSkillDrawer())
+
+$('kbDrawerInstantiate').addEventListener('click', async () => {
+  if (!previewConceptId) return
+  const r = await window.api.instantiateFromOkf(previewConceptId)
+  if (r?.ok) {
+    toast('已实例化为新卡片', 'success')
+    closeKbDrawer()
+  } else toast(r?.error || '实例化失败', 'error')
+})
 
 $('btnKnowledgeExport').addEventListener('click', async () => {
+  const categories = getSelectedCategories()
+  if (!categories.length) {
+    toast('请先勾选主题，或点全选', 'error')
+    return
+  }
   const btn = $('btnKnowledgeExport')
   setLoading(btn, true, '选择目录…')
   try {
-    const r = await window.api.knowledgeExport()
+    const r = await window.api.knowledgeExport({ categories })
     if (r.canceled) return
     if (r.ok) {
-      toast(`已导出 ${r.concepts} 个概念`, 'success')
+      const tip = r.partial ? `已导出 ${r.concepts} 个概念（部分主题）` : `已导出整包 ${r.concepts} 个概念`
+      toast(tip, 'success')
       refreshKbMemStatus()
     } else {
-      const msg = r.error || (r.lint?.errors?.[0]?.message) || '导出失败，请检查知识库格式'
+      const msg = r.error || (r.lint?.errors?.[0]?.message) || '导出失败'
       toast(msg, 'error', 6000)
     }
   } catch (e) {
@@ -652,7 +863,7 @@ $('btnSave').addEventListener('click', async () => {
     apiEndpoint:  $('endpoint').value.trim(),
     apiKey:       $('apikey').value.trim(),
     model:        $('model').value.trim() || 'gpt-4o-mini',
-    systemPrompt: $('sysPrompt').value.trim()
+    userPrompt: $('userPrompt').value.trim()
   })
   const st = $('status')
   if (r?.warning) {

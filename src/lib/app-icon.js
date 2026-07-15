@@ -132,4 +132,34 @@ function createTrayIconPng(size = 32) {
   return encodePng(buf, size)
 }
 
-module.exports = { createAppIconPng, createTrayIconPng }
+/**
+ * Windows 多尺寸 .ico —— 任务栏/exe/开始菜单需要小尺寸表示，
+ * 单尺寸 PNG 在透明无边框窗口上会回退到系统默认图标。
+ */
+function createAppIcoBuffer(sizes = [16, 24, 32, 48, 64, 128, 256]) {
+  const images = sizes.map((s) => ({ size: s, png: createAppIconPng(s) }))
+  const count = images.length
+  const header = Buffer.alloc(6)
+  header.writeUInt16LE(0, 0)
+  header.writeUInt16LE(1, 2)
+  header.writeUInt16LE(count, 4)
+
+  const entries = Buffer.alloc(16 * count)
+  let offset = 6 + 16 * count
+  images.forEach((img, i) => {
+    const e = 16 * i
+    entries[e] = img.size >= 256 ? 0 : img.size
+    entries[e + 1] = img.size >= 256 ? 0 : img.size
+    entries[e + 2] = 0
+    entries[e + 3] = 0
+    entries.writeUInt16LE(1, e + 4)
+    entries.writeUInt16LE(32, e + 6)
+    entries.writeUInt32LE(img.png.length, e + 8)
+    entries.writeUInt32LE(offset, e + 12)
+    offset += img.png.length
+  })
+
+  return Buffer.concat([header, entries, ...images.map((img) => img.png)])
+}
+
+module.exports = { createAppIconPng, createTrayIconPng, createAppIcoBuffer }

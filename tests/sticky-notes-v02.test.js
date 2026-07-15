@@ -37,8 +37,26 @@ describe('prompt-sections', () => {
     assert.equal(dirty, true);
     assert.equal(note.category, '');
     assert.deepEqual(note.okfTags, []);
-    assert.equal(note.editorMode, 'free');
+    assert.equal(note.editorMode, 'plain');
+    assert.equal(note.mdView, 'edit');
     assert.equal(note.parentNoteId, null);
+  });
+
+  it('migrateNoteFields merges structured sections into content', () => {
+    const note = {
+      id: 'n_2',
+      content: '',
+      editorMode: 'structured',
+      sections: { role: '助手', task: '写代码', context: '', output: '', criteria: '' },
+    };
+    const dirty = promptSections.migrateNoteFields(note);
+    assert.equal(dirty, true);
+    assert.equal(note.editorMode, 'plain');
+    assert.equal(note.mdView, 'edit');
+    assert.equal(note.sections, null);
+    assert.ok(note.content.includes('## 角色'));
+    assert.ok(note.content.includes('助手'));
+    assert.ok(note.content.includes('写代码'));
   });
 });
 

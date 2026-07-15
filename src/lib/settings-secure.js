@@ -2,14 +2,14 @@
 
 const fs = require('fs');
 const { safeStorage } = require('electron');
+const { resolveUserPrompt } = require('./ai-assistant-context');
 
 const DEFAULT_SETTINGS = {
   apiEndpoint: 'https://api.openai.com/v1/chat/completions',
   apiKey: '',
   model: 'gpt-4o-mini',
-  systemPrompt: `你是一个专业的 AI 提示词工程师。帮助用户生成结构化、高质量的 AI 提示词。
-提示词要包含：角色定义、背景约束、工作流程、待产出内容、成功标准。
-输出直接可用的提示词正文，不要额外解释。`,
+  /** 用户偏好：专业领域、回答风格等；追加到产品固定底座之后 */
+  userPrompt: '',
 };
 
 function decryptApiKey(raw) {
@@ -30,8 +30,15 @@ function load(file) {
     raw = {};
   }
   const apiKey = decryptApiKey(raw);
-  const merged = { ...DEFAULT_SETTINGS, ...raw, apiKey };
+  const { userPrompt } = resolveUserPrompt(raw);
+  const merged = {
+    ...DEFAULT_SETTINGS,
+    ...raw,
+    apiKey,
+    userPrompt,
+  };
   delete merged.apiKeyEnc;
+  delete merged.systemPrompt;
   return merged;
 }
 
@@ -39,7 +46,7 @@ function save(file, settings) {
   const out = {
     apiEndpoint: settings.apiEndpoint,
     model: settings.model,
-    systemPrompt: settings.systemPrompt,
+    userPrompt: String(settings.userPrompt != null ? settings.userPrompt : '').trim(),
   };
   const key = (settings.apiKey || '').trim();
   let warning = null;

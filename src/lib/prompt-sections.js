@@ -57,20 +57,54 @@ const NOTE_V2_DEFAULTS = {
   okfTags: [],
   okfConceptId: null,
   parentNoteId: null,
-  editorMode: 'free',
+  editorMode: 'plain',
+  mdView: 'edit',
   sections: null,
 };
+
+function hasSectionContent(sections) {
+  if (!sections || typeof sections !== 'object') return false;
+  return Object.values(sections).some(v => (v || '').trim());
+}
+
+function migrateStructuredToContent(note) {
+  let content = (note.content || '').trim();
+  if (hasSectionContent(note.sections)) {
+    content = assembleContent(note.sections);
+  } else if (note.editorMode === 'structured') {
+    const parsed = parseSectionsFromContent(note.content);
+    if (hasSectionContent(parsed)) content = assembleContent(parsed);
+  }
+  if (content) note.content = content;
+  note.sections = null;
+  note.editorMode = 'plain';
+  note.mdView = 'edit';
+}
 
 function migrateNoteFields(note) {
   let dirty = false;
   for (const [k, v] of Object.entries(NOTE_V2_DEFAULTS)) {
     if (note[k] === undefined) {
-      note[k] = Array.isArray(v) ? [] : v;
+      note[k] = Array.isArray(v) ? [] : (v === null ? null : v);
       dirty = true;
     }
   }
-  if (note.editorMode === 'structured' && !note.sections) {
-    note.sections = parseSectionsFromContent(note.content);
+  if (note.editorMode === 'free') {
+    note.editorMode = 'plain';
+    dirty = true;
+  }
+  if (note.editorMode === 'edit') {
+    note.editorMode = 'md';
+    note.mdView = 'edit';
+    dirty = true;
+  }
+  if (note.editorMode === 'preview') {
+    note.editorMode = 'md';
+    note.mdView = 'preview';
+    dirty = true;
+  }
+  if (note.editorMode === 'structured' || hasSectionContent(note.sections)) {
+    migrateStructuredToContent(note);
     dirty = true;
   }
   return dirty;

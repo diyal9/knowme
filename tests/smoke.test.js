@@ -72,6 +72,10 @@ describe('sticky-notes v0.2', () => {
     assert.ok(preload.includes('promoteToOkf'));
     assert.ok(preload.includes('memoryRecent'));
     assert.ok(preload.includes('suggestClassification'));
+    assert.ok(preload.includes('skillPackGenerate'));
+    assert.ok(preload.includes('knowledgeWriteConcept'));
+    assert.ok(preload.includes('listSkills'));
+    assert.ok(preload.includes('createSkill'));
   });
 
   it('memory.html exists', () => {

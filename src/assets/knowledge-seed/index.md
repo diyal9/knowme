@@ -14,3 +14,7 @@ okf_version: "0.1"
 ## Processes
 
 * [知识库导入导出](processes/knowledge-io.md) - 如何与他人交换 OKF 包
+
+## 技能包
+
+本分类由「同主题 ≥3 条提示词封装」生成，每条便签对应一份技能文档；可在设置中审阅修改。

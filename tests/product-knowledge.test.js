@@ -52,6 +52,43 @@ describe('product knowledge OKF', () => {
     assert.ok(concepts.items.some((i) => i.title));
     assert.equal(concepts.label, '概念');
   });
+
+  it('exports a single category pack', () => {
+    productKnowledge.ensureKnowledge(knowledgeDir, seedDir);
+    const full = productKnowledge.lint(knowledgeDir);
+    const exportDir = path.join(TMP, 'export-concepts-only');
+    const ex = productKnowledge.exportBundle(knowledgeDir, exportDir, {
+      categories: ['concepts'],
+    });
+    assert.ok(ex.ok, ex.error);
+    assert.equal(ex.partial, true);
+    const exported = productKnowledge.listConcepts(exportDir, 100);
+    assert.ok(exported.length >= 1);
+    assert.ok(exported.every((c) => c.category === 'concepts'));
+    assert.ok(exported.length < full.concepts || full.concepts === exported.length);
+    // when seed has processes, partial must be fewer
+    const hasProc = productKnowledge.listCategories(knowledgeDir).some((c) => c.id === 'processes' && c.count > 0);
+    if (hasProc) assert.ok(exported.length < full.concepts);
+    const body = productKnowledge.readConcept(exportDir, exported[0].id);
+    assert.ok(body?.body);
+  });
+
+  it('rejects empty category selection', () => {
+    productKnowledge.ensureKnowledge(knowledgeDir, seedDir);
+    const exportDir = path.join(TMP, 'export-empty');
+    const ex = productKnowledge.exportBundle(knowledgeDir, exportDir, { categories: [] });
+    assert.equal(ex.ok, false);
+  });
+
+  it('full category selection equals whole-bundle export', () => {
+    productKnowledge.ensureKnowledge(knowledgeDir, seedDir);
+    const ids = productKnowledge.listCategories(knowledgeDir).map((c) => c.id);
+    const exportDir = path.join(TMP, 'export-all-selected');
+    const ex = productKnowledge.exportBundle(knowledgeDir, exportDir, { categories: ids });
+    assert.ok(ex.ok, ex.error);
+    assert.equal(ex.partial, false);
+    assert.equal(ex.concepts, productKnowledge.lint(knowledgeDir).concepts);
+  });
 });
 
 describe('product memory', () => {

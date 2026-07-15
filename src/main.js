@@ -9,14 +9,48 @@ const http  = require('http')
 const productKnowledge = require('./lib/product-knowledge')
 const productMemory = require('./lib/product-memory')
 const settingsSecure = require('./lib/settings-secure')
+const {
+  buildSystemContent,
+  buildChatMessages,
+} = require('./lib/ai-assistant-context')
 const notesBackup = require('./lib/notes-backup')
 const promptSections = require('./lib/prompt-sections')
 const promptOkf = require('./lib/prompt-okf')
 const noteDiff = require('./lib/note-diff')
 const noteVersions = require('./lib/note-versions')
 const noteClassify = require('./lib/note-classify')
-const { createAppIconPng, createTrayIconPng } = require('./lib/app-icon')
+const skillPack = require('./lib/skill-pack')
+const { createAppIconPng, createTrayIconPng, createAppIcoBuffer } = require('./lib/app-icon')
 const { initAutoUpdate, checkForUpdatesManual } = require('./lib/auto-update')
+
+const THEME_LABELS = {
+  nine_center: '活动中心',
+  nine_skills: '技能包',
+  tools: '工具',
+  workbench: '工作台',
+  daemon: 'Daemon',
+  webui: 'WebUI',
+}
+
+function themeDisplayLabel(theme) {
+  return THEME_LABELS[theme] || theme
+}
+
+function broadcastSkillPackSuggest() {
+  const suggestions = skillPack.scanSuggestions(
+    loadAllNotes(),
+    MEMORY_DIR,
+    themeDisplayLabel
+  )
+  if (!suggestions.length) return
+  const payload = suggestions[0]
+  for (const [, w] of noteWins) {
+    if (w && !w.isDestroyed()) w.webContents.send('skill-pack-suggest', payload)
+  }
+  if (listWin && !listWin.isDestroyed()) {
+    listWin.webContents.send('skill-pack-suggest', payload)
+  }
+}
 
 // ── 路径 ─────────────────────────────────────────────────────────────────────
 const DATA_DIR      = path.join(app.getPath('userData'), 'notes')
@@ -47,10 +81,18 @@ const ICON_DIR = path.join(__dirname, 'assets')
 const ICON_PNG = path.join(ICON_DIR, 'icon.png')
 let appIconImage = null
 let jumpIconPath = process.execPath
+// Windows 任务栏（尤其透明无边框窗口）需要多尺寸 .ico，单尺寸 PNG 会回退到系统默认图标。
+// 释放到 userData（asar 外）后再用 createFromPath 加载，避免读取 asar 内文件失败。
+let winIcoPath = null
 
 function getAppIconImage() {
   if (!appIconImage || appIconImage.isEmpty()) {
-    appIconImage = nativeImage.createFromBuffer(createAppIconPng(256))
+    if (process.platform === 'win32' && winIcoPath && fs.existsSync(winIcoPath)) {
+      appIconImage = nativeImage.createFromPath(winIcoPath)
+    }
+    if (!appIconImage || appIconImage.isEmpty()) {
+      appIconImage = nativeImage.createFromBuffer(createAppIconPng(256))
+    }
   }
   return appIconImage
 }
@@ -59,7 +101,14 @@ function ensureBrandIcons() {
   try {
     if (!fs.existsSync(ICON_DIR)) fs.mkdirSync(ICON_DIR, { recursive: true })
     if (!fs.existsSync(ICON_PNG)) fs.writeFileSync(ICON_PNG, createAppIconPng(256))
-    const jumpPng = path.join(app.getPath('userData'), 'jump-icon.png')
+    const userData = app.getPath('userData')
+    if (process.platform === 'win32') {
+      const ico = path.join(userData, 'app-icon.ico')
+      fs.writeFileSync(ico, createAppIcoBuffer())
+      winIcoPath = ico
+      appIconImage = null
+    }
+    const jumpPng = path.join(userData, 'jump-icon.png')
     fs.writeFileSync(jumpPng, createAppIconPng(32))
     jumpIconPath = jumpPng
   } catch {
@@ -76,6 +125,54 @@ let tray = null, settingsWin = null, listWin = null, memoryWin = null
 const taskbarHooked = new WeakSet()
 const APP_DISPLAY_NAME = 'Sticky-Notes'
 let isQuitting = false
+/** 最近一次用户有意关闭（隐藏）的便签，供托盘「继续编辑」 */
+let lastClosedNoteId = null
+
+function noteLabelForMenu(n) {
+  if (!n) return '未命名'
+  const title = (n.project || '').trim()
+  if (title) return title.slice(0, 28)
+  const line = (n.content || '').split('\n')[0].trim()
+  return (line || '未命名').slice(0, 28)
+}
+
+function hasOtherVisibleNotes(exceptId) {
+  for (const [id, w] of noteWins) {
+    if (exceptId && id === exceptId) continue
+    if (w && !w.isDestroyed() && w.isVisible()) return true
+  }
+  return false
+}
+
+function sendListHighlight(noteId) {
+  if (!listWin || listWin.isDestroyed() || !noteId) return
+  const push = () => {
+    if (!listWin || listWin.isDestroyed()) return
+    listWin.webContents.send('init-list', loadAllNotes())
+    listWin.webContents.send('list-highlight', noteId)
+  }
+  if (listWin.webContents.isLoading()) {
+    listWin.webContents.once('did-finish-load', push)
+  } else {
+    push()
+  }
+}
+
+/** 用户关闭单张便签后的续编路径（隐藏全部 / 退出不走这里） */
+function resumeAfterNoteHide(noteId) {
+  if (!noteId || delPending.has(noteId)) return
+  const n = readNote(noteId)
+  if (!n || isNoteEmpty(n)) {
+    if (lastClosedNoteId === noteId) lastClosedNoteId = null
+    updateTray()
+    return
+  }
+  lastClosedNoteId = noteId
+  updateTray()
+  if (hasOtherVisibleNotes(noteId)) return
+  toggleListWin(true)
+  setImmediate(() => sendListHighlight(noteId))
+}
 
 function isAnyWindowVisible() {
   const wins = [settingsWin, listWin, ...noteWins.values()]
@@ -83,13 +180,6 @@ function isAnyWindowVisible() {
 }
 
 function restoreAppWindows() {
-  if (settingsWin && !settingsWin.isDestroyed()) {
-    settingsWin.show()
-    settingsWin.focus()
-    return
-  }
-
-  const notes = loadAllNotes()
   const visibleNote = [...noteWins.values()].find(w => !w.isDestroyed() && w.isVisible())
   if (visibleNote) {
     visibleNote.focus()
@@ -99,7 +189,20 @@ function restoreAppWindows() {
     listWin.focus()
     return
   }
+  if (settingsWin && !settingsWin.isDestroyed() && settingsWin.isVisible()) {
+    bringSettingsToFront()
+    return
+  }
 
+  // 任务栏 / 托盘恢复：优先回到最近编辑（含最小化到托盘）的便签
+  if (lastClosedNoteId && readNote(lastClosedNoteId)) {
+    showNote(lastClosedNoteId)
+    updateTaskbarAnchor()
+    updateTray()
+    return
+  }
+
+  const notes = loadAllNotes()
   if (notes.length > 1) {
     if (!listWin || listWin.isDestroyed()) toggleListWin(true)
     else { listWin.show(); listWin.focus() }
@@ -110,6 +213,16 @@ function restoreAppWindows() {
   }
   updateTaskbarAnchor()
   updateTray()
+}
+
+/** 顶栏「最小化到托盘」：隐藏全部窗口，恢复时优先打开该编辑窗 */
+function minimizeNoteToTray(noteId) {
+  if (noteId && readNote(noteId)) {
+    lastClosedNoteId = noteId
+    updateTray()
+  }
+  hideAllWindows()
+  updateTaskbarAnchor()
 }
 
 function hideAllWindows() {
@@ -153,7 +266,11 @@ function updateTaskbarAnchor() {
 
   noteWins.forEach(w => { if (!w.isDestroyed()) w.setSkipTaskbar(w !== anchor) })
   if (listWin && !listWin.isDestroyed()) listWin.setSkipTaskbar(listWin !== anchor)
-  if (anchor && !anchor.isDestroyed()) hookTaskbarRestore(anchor)
+  if (anchor && !anchor.isDestroyed()) {
+    // 透明无边框窗口在任务栏偶发回退到默认图标，显式重设品牌图标
+    try { anchor.setIcon(getAppIconImage()) } catch { /* noop */ }
+    hookTaskbarRestore(anchor)
+  }
 }
 
 function clampNoteToWorkArea(note) {
@@ -250,7 +367,7 @@ function updateJumpList() {
   categories.push({
     type: 'tasks',
     items: [
-      { type: 'task', title: '新建提示词', program: process.execPath, args: jumpListArgs('--new-note'), iconPath, iconIndex: 0 },
+      { type: 'task', title: '新建笔记', program: process.execPath, args: jumpListArgs('--new-note'), iconPath, iconIndex: 0 },
       { type: 'task', title: '总览列表', program: process.execPath, args: jumpListArgs('--open-list'), iconPath, iconIndex: 0 },
     ],
   })
@@ -262,6 +379,30 @@ const notePath     = id => path.join(DATA_DIR, `${id}.json`)
 const saveNote     = note => { note.updatedAt = new Date().toISOString(); fs.writeFileSync(notePath(note.id), JSON.stringify(note, null, 2), 'utf8') }
 const readNote     = id  => { try { return JSON.parse(fs.readFileSync(notePath(id), 'utf8')) } catch { return null } }
 const deleteNoteF  = id  => { try { fs.unlinkSync(notePath(id)) } catch {} }
+
+// 空便签：无正文、无项目名、无结构化分段、未收藏 → 不值得保存
+function isNoteEmpty(n) {
+  if (!n) return false
+  if (n.favorite) return false
+  if ((n.content || '').trim()) return false
+  if ((n.project || '').trim()) return false
+  return true
+}
+
+// 清理无窗口打开的空便签（打开/刷新列表、启动时调用）
+function purgeEmptyClosedNotes() {
+  if (!fs.existsSync(DATA_DIR)) return 0
+  let removed = 0
+  for (const f of fs.readdirSync(DATA_DIR)) {
+    if (!f.endsWith('.json')) continue
+    const id = f.replace(/\.json$/, '')
+    if (noteWins.has(id)) continue
+    let n = null
+    try { n = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8')) } catch { continue }
+    if (isNoteEmpty(n)) { deleteNoteF(id); removed++ }
+  }
+  return removed
+}
 
 const loadAllNotes = () => {
   if (!fs.existsSync(DATA_DIR)) return []
@@ -391,8 +532,18 @@ function updateTray() {
       })
     : [{ label: '暂无卡片', enabled: false }]
 
+  const closed = lastClosedNoteId ? readNote(lastClosedNoteId) : null
+  if (lastClosedNoteId && !closed) lastClosedNoteId = null
+  const resumeItems = lastClosedNoteId && closed
+    ? [
+        { label: `继续编辑：${noteLabelForMenu(closed)}`, click: () => showNote(lastClosedNoteId) },
+        { type: 'separator' },
+      ]
+    : []
+
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: '新建提示词',  accelerator: 'CmdOrCtrl+Alt+N', click: newNote },
+    ...resumeItems,
+    { label: '新建笔记',  accelerator: 'CmdOrCtrl+Alt+N', click: newNote },
     { label: '总览…',       accelerator: 'CmdOrCtrl+Alt+L', click: toggleListWin },
     { label: '使用记忆…',   click: openMemoryPanel },
     { type: 'separator' },
@@ -445,14 +596,24 @@ function createNoteWindow(note) {
     if (n) applyNoteLayout(win, n)
   })
   win.on('close', e => {
+    // 空便签直接删除，不落盘（含退出场景）
+    if (!delPending.has(note.id) && isNoteEmpty(readNote(note.id))) {
+      deleteNoteF(note.id)
+      return
+    }
     if (isQuitting) return
     if (!delPending.has(note.id)) {
       e.preventDefault()
       win.hide()
-      updateTray()
+      resumeAfterNoteHide(note.id)
     }
   })
-  win.on('closed', () => { noteWins.delete(note.id); delPending.delete(note.id); updateTray() })
+  win.on('closed', () => {
+    noteWins.delete(note.id)
+    delPending.delete(note.id)
+    if (lastClosedNoteId === note.id && !readNote(note.id)) lastClosedNoteId = null
+    updateTray()
+  })
   noteWins.set(note.id, win)
   updateTaskbarAnchor()
   return win
@@ -462,7 +623,7 @@ const layoutApplying = new WeakSet()
 
 const LAYOUT = {
   note:    { w: 440, h: 580 },
-  aiSplit: { w: 1200, h: 680 },
+  aiSplit: { w: 1280, h: 760 },
 }
 
 function layoutSize(aiOpen) {
@@ -500,7 +661,7 @@ function newNote() {
   const note = {
     id, content:'', project:'', version:'0.1', favorite:false, tags:[], copyCount:0,
     category:'', okfTags:[], okfConceptId:null, parentNoteId:null,
-    sections:null, editorMode:'free',
+    sections:null, editorMode:'plain', mdView:'edit',
     ...pos, w:440, h:580, pinned:true,
     createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
   }
@@ -577,17 +738,29 @@ function showNote(id) {
 }
 
 // ── 设置窗口 ──────────────────────────────────────────────────────────────────
+function bringSettingsToFront() {
+  if (!settingsWin || settingsWin.isDestroyed()) return
+  // 便签 / 总览默认 alwaysOnTop，设置窗必须临时抬升才能盖过它们
+  settingsWin.setAlwaysOnTop(true)
+  if (settingsWin.isMinimized()) settingsWin.restore()
+  settingsWin.show()
+  settingsWin.focus()
+  settingsWin.moveTop()
+}
+
 function openSettings() {
-  if (settingsWin && !settingsWin.isDestroyed()) { settingsWin.focus(); return }
+  if (settingsWin && !settingsWin.isDestroyed()) { bringSettingsToFront(); return }
   settingsWin = new BrowserWindow({ width:520, height:720, minWidth:480, minHeight:560,
     title:'Sticky-Notes — 设置', center:true, resizable:true,
     frame:true, autoHideMenuBar:true, backgroundColor:'#f8f7f4',
+    alwaysOnTop:true,
     icon: getAppIconImage(),
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
   })
   settingsWin.loadFile(path.join(__dirname,'settings.html'))
   settingsWin.webContents.on('did-finish-load', () => settingsWin.webContents.send('init-settings', loadSettings()))
   settingsWin.on('closed', () => { settingsWin = null })
+  bringSettingsToFront()
 }
 
 // ── 总览面板 ──────────────────────────────────────────────────────────────────
@@ -610,7 +783,7 @@ function toggleListWin(forceShow = false) {
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
   })
   listWin.loadFile(path.join(__dirname,'list.html'))
-  listWin.webContents.on('did-finish-load', () => listWin.webContents.send('init-list', loadAllNotes()))
+  listWin.webContents.on('did-finish-load', () => { purgeEmptyClosedNotes(); listWin.webContents.send('init-list', loadAllNotes()) })
   listWin.on('close', e => {
     if (isQuitting) return
     e.preventDefault()
@@ -654,11 +827,9 @@ function openMemoryPanel() {
 // ── IPC ───────────────────────────────────────────────────────────────────────
 ipcMain.on('note-update', (_e, data) => {
   const n = readNote(data.id); if (!n) return
-  if (data.editorMode === 'structured' && data.sections) {
-    data.content = promptSections.assembleContent(data.sections)
-  }
   Object.assign(n, data); saveNote(n); updateTray()
   if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+  try { broadcastSkillPackSuggest() } catch { /* ignore */ }
 })
 ipcMain.on('note-delete', (_e, id) => {
   const n = readNote(id)
@@ -672,7 +843,7 @@ ipcMain.on('note-delete', (_e, id) => {
     title: '删除便签？',
     message: `永久删除「${label}」？`,
     detail:
-      '关闭窗口（右上角 ✕）只会隐藏，内容仍保留。\n' +
+      '右上角最小化到托盘或 ✕ 关闭都不会删内容。\n' +
       '删除将从本机移除该便签，不可恢复。\n' +
       '建议先在「设置 → 系统配置」导出备份。',
     buttons: ['永久删除', '仅关闭窗口', '取消'],
@@ -683,18 +854,34 @@ ipcMain.on('note-delete', (_e, id) => {
   if (choice === 1) {
     const w = noteWins.get(id)
     if (w && !w.isDestroyed()) w.hide()
-    updateTray()
+    resumeAfterNoteHide(id)
     return
   }
   if (choice !== 0) return
   delPending.add(id); deleteNoteF(id)
+  if (lastClosedNoteId === id) lastClosedNoteId = null
   const w = noteWins.get(id)
   if (w && !w.isDestroyed()) w.close()
   else { noteWins.delete(id); delPending.delete(id) }
   updateTray()
   if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
 })
-ipcMain.on('note-hide',       (_e, id) => { const w=noteWins.get(id); if(w&&!w.isDestroyed())w.hide(); updateTray() })
+ipcMain.on('note-minimize-tray', (_e, id) => { minimizeNoteToTray(id) })
+ipcMain.on('note-hide',       (_e, id) => {
+  const w = noteWins.get(id)
+  const n = readNote(id)
+  if (isNoteEmpty(n)) {
+    delPending.add(id); deleteNoteF(id)
+    if (lastClosedNoteId === id) lastClosedNoteId = null
+    if (w && !w.isDestroyed()) w.close()
+    else { noteWins.delete(id); delPending.delete(id) }
+    updateTray()
+    if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+    return
+  }
+  if (w && !w.isDestroyed()) w.hide()
+  resumeAfterNoteHide(id)
+})
 ipcMain.on('note-pin-toggle', (_e, id) => {
   const w=noteWins.get(id), n=readNote(id); if(!w||!n)return
   n.pinned=!n.pinned; saveNote(n); w.setAlwaysOnTop(n.pinned); w.webContents.send('pin-changed', n.pinned)
@@ -979,12 +1166,111 @@ ipcMain.on('show-context-menu', (event, noteId) => {
     { label: '关闭窗口（隐藏）', click: () => {
         const w = noteWins.get(noteId)
         if (w && !w.isDestroyed()) w.hide()
-        updateTray()
+        resumeAfterNoteHide(noteId)
       }
     },
     { label: '删除便签…',       click: () => event.sender.send('cmd-delete') }
   ])
   menu.popup({ window: BrowserWindow.fromWebContents(event.sender) })
+})
+
+/** 总览列表右键：打开 / 快捷复制全文 / 收藏 / 多版本展开 / 删除 */
+ipcMain.on('show-list-context-menu', (event, payload) => {
+  const noteId = payload?.noteId
+  const groupKey = payload?.groupKey || null
+  const groupSize = Number(payload?.groupSize) || 0
+  const n = readNote(noteId)
+  if (!n) return
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const isFav = !!n.favorite
+  const items = [
+    {
+      label: '快捷复制全文',
+      click: () => {
+        const nn = readNote(noteId)
+        if (!nn) return
+        clipboard.writeText(String(nn.content || ''))
+        nn.copyCount = (nn.copyCount || 0) + 1
+        saveNote(nn)
+        productMemory.capture(MEMORY_DIR, {
+          kind: 'habit',
+          summary: `复制提示词：${(nn.project || '未命名')} v${nn.version || '0.1'}`,
+          meta: { noteId, action: 'copy' },
+        })
+        if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+      },
+    },
+    { type: 'separator' },
+    {
+      label: '打开',
+      click: () => {
+        showNote(noteId)
+        setImmediate(() => {
+          if (listWin && !listWin.isDestroyed() && listWin.isVisible()) listWin.hide()
+          const nw = noteWins.get(noteId)
+          if (nw && !nw.isDestroyed()) {
+            nw.show()
+            nw.focus()
+            nw.moveTop()
+          }
+          updateTaskbarAnchor()
+        })
+      },
+    },
+    {
+      label: isFav ? '★ 取消收藏' : '☆ 收藏',
+      click: () => {
+        const nn = readNote(noteId)
+        if (!nn) return
+        nn.favorite = !nn.favorite
+        saveNote(nn)
+        productMemory.capture(MEMORY_DIR, {
+          kind: 'habit',
+          summary: `${nn.favorite ? '收藏' : '取消收藏'}：${nn.project || '未命名'}`,
+          meta: { noteId, action: 'favorite' },
+        })
+        const nw = noteWins.get(noteId)
+        if (nw && !nw.isDestroyed()) nw.webContents.send('favorite-changed', nn.favorite)
+        if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+        updateTray()
+      },
+    },
+  ]
+  if (groupSize > 1 && groupKey) {
+    items.push({
+      label: `查看全部 ${groupSize} 个版本`,
+      click: () => event.sender.send('list-open-group', groupKey),
+    })
+  }
+  items.push({ type: 'separator' })
+  items.push({
+    label: '删除…',
+    click: () => {
+      const title = (n.project || '').trim()
+      const preview = (n.content?.split('\n')[0]?.trim() || '').substring(0, 40)
+      const label = title || preview || '未命名便签'
+      const choice = dialog.showMessageBoxSync(win || listWin, {
+        type: 'warning',
+        title: '删除便签？',
+        message: `永久删除「${label}」？`,
+        detail: '删除将从本机移除该便签，不可恢复。',
+        buttons: ['永久删除', '取消'],
+        defaultId: 1,
+        cancelId: 1,
+        noLink: true,
+      })
+      if (choice !== 0) return
+      delPending.add(noteId)
+      deleteNoteF(noteId)
+      if (lastClosedNoteId === noteId) lastClosedNoteId = null
+      const nw = noteWins.get(noteId)
+      if (nw && !nw.isDestroyed()) nw.close()
+      else { noteWins.delete(noteId); delPending.delete(noteId) }
+      updateTray()
+      if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+    },
+  })
+  Menu.buildFromTemplate(items).popup({ window: win })
 })
 
 function normalizeChatEndpoint(endpoint) {
@@ -1114,7 +1400,7 @@ ipcMain.handle('ai-suggest-title', async (_e, { content }) => {
   return { title: cleanSuggestedTitle(result.text) }
 })
 
-ipcMain.handle('ai-generate', async (e, { prompt, context }) => {
+ipcMain.handle('ai-generate', async (e, { prompt, context, history, noteId, category, skillRefs }) => {
   const webContents = e.sender
   const s = loadSettings()
   if (!s.apiKey)      return { error: '未填写 API Key，请托盘右键 → API 设置' }
@@ -1124,22 +1410,41 @@ ipcMain.handle('ai-generate', async (e, { prompt, context }) => {
   const endpoint = normalizeChatEndpoint(s.apiEndpoint)
   try { url = new URL(endpoint) } catch { return { error: `Endpoint 格式错误: ${s.apiEndpoint}` } }
 
-  const userMsg = context
-    ? `当前提示词内容：\n"""\n${context}\n"""\n\n需求：${prompt}`
-    : prompt
-
+  let theme = String(category || '').trim()
+  if (!theme && noteId) {
+    const n = readNote(noteId)
+    if (n) theme = skillPack.themeKey(n)
+  }
+  const fromPrompt = productKnowledge.parseSlashTokens(prompt)
+  const slashRefs = [
+    ...new Set([
+      ...(Array.isArray(skillRefs) ? skillRefs.map(productKnowledge.normalizeSlash) : []),
+      ...fromPrompt,
+    ].filter(Boolean)),
+  ]
   const kbSnippet = productKnowledge.getContextSnippet(KNOWLEDGE_DIR)
-  const memCtx = productMemory.getContextForAI(MEMORY_DIR, kbSnippet)
-  const systemContent = memCtx
-    ? `${s.systemPrompt}\n\n---\n${memCtx}`
-    : s.systemPrompt
+  const skillCtx = productKnowledge.getSkillContext(KNOWLEDGE_DIR, {
+    category: theme,
+    slashRefs,
+  })
+  const memCtx = productMemory.getContextForAI(
+    MEMORY_DIR,
+    [kbSnippet, skillCtx].filter(Boolean).join('\n\n')
+  )
+  const systemContent = buildSystemContent({
+    userPrompt: s.userPrompt,
+    dynamicContext: memCtx,
+  })
+  const messages = buildChatMessages({
+    systemContent,
+    history,
+    prompt,
+    noteContext: context,
+  })
 
   const body = JSON.stringify({
     model: s.model || 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: systemContent },
-      { role: 'user',   content: userMsg }
-    ],
+    messages,
     max_tokens: 2000,
     temperature: 0.7,
     stream: true
@@ -1257,13 +1562,32 @@ ipcMain.handle('ai-generate', async (e, { prompt, context }) => {
 })
 
 // ── 产品知识库 OKF / Memory（用户数据目录，非仓库 brain/）────────────────────
-ipcMain.handle('notes-export', async () => {
-  const parent = BrowserWindow.getFocusedWindow() || settingsWin
-  const { canceled, filePaths } = await dialog.showOpenDialog({
+/** 原生目录对话框：挂靠发起窗；alwaysOnTop 窗体需短暂取消置顶，否则系统框会被挡住 */
+async function showOpenDialogFor(sender, options) {
+  const parent =
+    (sender && BrowserWindow.fromWebContents(sender)) ||
+    (settingsWin && !settingsWin.isDestroyed() ? settingsWin : null) ||
+    BrowserWindow.getFocusedWindow()
+  if (!parent || parent.isDestroyed()) {
+    return dialog.showOpenDialog(options)
+  }
+  const wasOnTop = parent.isAlwaysOnTop()
+  if (wasOnTop) parent.setAlwaysOnTop(false)
+  try {
+    return await dialog.showOpenDialog(parent, options)
+  } finally {
+    if (wasOnTop && !parent.isDestroyed()) {
+      parent.setAlwaysOnTop(true)
+      parent.focus()
+    }
+  }
+}
+
+ipcMain.handle('notes-export', async (e) => {
+  const { canceled, filePaths } = await showOpenDialogFor(e.sender, {
     title: '选择便签备份导出目录',
     defaultPath: app.getPath('documents'),
     properties: ['openDirectory', 'createDirectory'],
-    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
   })
   if (canceled || !filePaths?.length) return { ok: false, canceled: true }
   const dest = path.join(filePaths[0], `sticky-notes-backup-${new Date().toISOString().slice(0, 10)}`)
@@ -1272,12 +1596,10 @@ ipcMain.handle('notes-export', async () => {
   return result
 })
 
-ipcMain.handle('notes-import', async () => {
-  const parent = BrowserWindow.getFocusedWindow() || settingsWin
-  const { canceled, filePaths } = await dialog.showOpenDialog({
+ipcMain.handle('notes-import', async (e) => {
+  const { canceled, filePaths } = await showOpenDialogFor(e.sender, {
     title: '选择便签备份文件夹',
     properties: ['openDirectory'],
-    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
   })
   if (canceled || !filePaths?.length) return { ok: false, canceled: true }
   const result = notesBackup.importBundle(DATA_DIR, filePaths[0])
@@ -1309,27 +1631,169 @@ ipcMain.handle('knowledge-status', () => {
   }
 })
 
-ipcMain.handle('knowledge-export', async () => {
-  const parent = BrowserWindow.getFocusedWindow() || settingsWin
-  const { canceled, filePaths } = await dialog.showOpenDialog({
+ipcMain.handle('knowledge-read-concept', (_e, conceptId) => {
+  const c = productKnowledge.readConcept(KNOWLEDGE_DIR, conceptId)
+  if (!c) return { ok: false, error: '概念不存在' }
+  return {
+    ok: true,
+    title: c.title,
+    type: c.type,
+    body: c.body,
+    rel: c.rel,
+    frontmatter: c.frontmatter || {},
+  }
+})
+
+ipcMain.handle('knowledge-write-concept', (_e, payload = {}) => {
+  const id = payload.id || payload.conceptId
+  if (!id) return { ok: false, error: '缺少概念 id' }
+  const title = payload.title
+  const body = payload.body
+  if (body == null) return { ok: false, error: '缺少正文' }
+  return productKnowledge.writeConcept(KNOWLEDGE_DIR, {
+    id,
+    title,
+    body,
+    frontmatter: payload.frontmatter || {},
+  })
+})
+
+ipcMain.handle('skill-pack-check', () => {
+  return {
+    ok: true,
+    suggestions: skillPack.scanSuggestions(loadAllNotes(), MEMORY_DIR, themeDisplayLabel),
+  }
+})
+
+ipcMain.handle('list-skills', () => {
+  try {
+    return { ok: true, skills: productKnowledge.listSkills(KNOWLEDGE_DIR) }
+  } catch (e) {
+    return { ok: false, error: e.message || String(e), skills: [] }
+  }
+})
+
+ipcMain.handle('create-skill', (_e, payload = {}) => {
+  try {
+    return productKnowledge.createSkill(KNOWLEDGE_DIR, payload)
+  } catch (e) {
+    return { ok: false, error: e.message || String(e) }
+  }
+})
+
+ipcMain.handle('skill-pack-dismiss', (_e, theme) => {
+  const key = String(theme || '').trim()
+  if (!key) return { ok: false, error: '缺少主题' }
+  const notes = loadAllNotes().filter((n) => skillPack.isEligibleNote(n, key))
+  skillPack.setThemeState(MEMORY_DIR, key, {
+    state: 'dismissed',
+    eligible_at_dismiss: notes.length,
+  })
+  return { ok: true }
+})
+
+ipcMain.handle('skill-pack-generate', async (_e, { theme } = {}) => {
+  const key = String(theme || '').trim()
+  if (!key) return { ok: false, error: '缺少主题' }
+  const notes = loadAllNotes().filter((n) => skillPack.isEligibleNote(n, key))
+  if (!notes.length) return { ok: false, error: '没有可封装的便签' }
+
+  const s = loadSettings()
+  const created = []
+  const errors = []
+
+  for (const n of notes) {
+    let body = skillPack.localSkillBody(n, key)
+    if (s.apiKey && s.apiEndpoint) {
+      const ai = await chatCompletionOnce(s, [
+        {
+          role: 'system',
+          content:
+            '你是知识库编辑。将用户的提示词卡片整理为 OKF 技能文档正文（Markdown）。' +
+            '必须包含：用途、适用场景、提示词模板、变量说明、注意事项。' +
+            '不要输出 YAML frontmatter，不要用代码围栏包裹全文。语言与原文一致。',
+        },
+        {
+          role: 'user',
+          content:
+            `主题: ${key}\n标题: ${(n.project || '').trim() || '未命名'}\n` +
+            `标签: ${(n.okfTags || n.tags || []).join(', ')}\n\n` +
+            `原文:\n${(n.content || '').slice(0, 6000)}`,
+        },
+      ], 1600)
+      if (!ai.error && ai.text) {
+        body = skillPack.stripAiFrontmatter(ai.text) || body
+      }
+    }
+
+    const written = skillPack.writeSkillConcept(KNOWLEDGE_DIR, n, body, key)
+    if (!written.ok) {
+      errors.push({ noteId: n.id, error: written.error })
+      continue
+    }
+    n.skillPackConceptId = written.conceptId
+    n.okfConceptId = written.conceptId
+    saveNote(n)
+    created.push({ noteId: n.id, conceptId: written.conceptId })
+    productMemory.capture(MEMORY_DIR, {
+      kind: 'workflow',
+      summary: `封装技能包：${(n.project || '').trim() || written.conceptId}`,
+      meta: { action: 'skill-pack', theme: key, conceptId: written.conceptId },
+    })
+  }
+
+  skillPack.setThemeState(MEMORY_DIR, key, {
+    state: 'packed',
+    packed_count: created.length,
+    concept_ids: created.map((c) => c.conceptId),
+  })
+
+  if (listWin && !listWin.isDestroyed()) listWin.webContents.send('init-list', loadAllNotes())
+  for (const c of created) {
+    const w = noteWins.get(c.noteId)
+    if (w && !w.isDestroyed()) {
+      const nn = readNote(c.noteId)
+      if (nn) w.webContents.send('init-note', nn)
+    }
+  }
+
+  if (!created.length) {
+    return { ok: false, error: errors[0]?.error || '封装失败', errors }
+  }
+  return {
+    ok: true,
+    theme: key,
+    label: themeDisplayLabel(key),
+    created,
+    errors,
+    message: `已生成 ${created.length} 个技能文档`,
+  }
+})
+
+ipcMain.handle('knowledge-export', async (e, opts = {}) => {
+  const { canceled, filePaths } = await showOpenDialogFor(e.sender, {
     title: '选择导出目标文件夹',
     defaultPath: app.getPath('documents'),
     properties: ['openDirectory', 'createDirectory'],
-    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
   })
   if (canceled || !filePaths?.length) return { ok: false, canceled: true }
-  const dest = path.join(filePaths[0], `sticky-notes-knowledge-${new Date().toISOString().slice(0, 10)}`)
-  const result = productKnowledge.exportBundle(KNOWLEDGE_DIR, dest)
+  const stamp = new Date().toISOString().slice(0, 10)
+  const partial = Array.isArray(opts.categories) && opts.categories.length
+  const destName = partial
+    ? `sticky-notes-knowledge-${opts.categories.join('-')}-${stamp}`
+    : `sticky-notes-knowledge-${stamp}`
+  const dest = path.join(filePaths[0], destName.slice(0, 80))
+  const result = productKnowledge.exportBundle(KNOWLEDGE_DIR, dest, {
+    categories: opts.categories,
+  })
   if (result.ok) shell.showItemInFolder(dest)
   return result
 })
 
-ipcMain.handle('knowledge-import', async () => {
-  const parent = BrowserWindow.getFocusedWindow() || settingsWin
-  const { canceled, filePaths } = await dialog.showOpenDialog({
+ipcMain.handle('knowledge-import', async (e) => {
+  const { canceled, filePaths } = await showOpenDialogFor(e.sender, {
     title: '选择要导入的 OKF 知识包文件夹',
     properties: ['openDirectory'],
-    ...(parent && !parent.isDestroyed() ? { browserWindow: parent } : {}),
   })
   if (canceled || !filePaths?.length) return { ok: false, canceled: true }
   const result = productKnowledge.importBundle(KNOWLEDGE_DIR, filePaths[0])
@@ -1361,6 +1825,7 @@ if (gotSingleInstanceLock) {
     if (process.platform === 'darwin' && app.dock) app.dock.setIcon(getAppIconImage())
     productKnowledge.ensureKnowledge(KNOWLEDGE_DIR, KNOWLEDGE_SEED)
     productMemory.ensureMemory(MEMORY_DIR)
+    purgeEmptyClosedNotes()
     tray = new Tray(makeTrayIcon())
     tray.setToolTip(`${APP_DISPLAY_NAME}  左键显示/隐藏 · 右键菜单`)
     tray.on('click', toggleAppVisibility)

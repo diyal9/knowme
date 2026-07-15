@@ -19,7 +19,9 @@ describe('list-home v0.3', () => {
   it('uses compact single-line preview', () => {
     assert.ok(listHtml.includes('row-foot'), 'time+preview footer row');
     assert.ok(listHtml.includes('btn-primary'), 'primary new button');
-    assert.ok(listHtml.includes('btn-ghost'), 'ghost classify button');
+    assert.ok(listHtml.includes('rail-foot'), 'rail footer for classify');
+    assert.ok(listHtml.includes('data-icon="classify"'), 'classify icon button in rail');
+    assert.ok(listHtml.includes('overflow-x:hidden'), 'no horizontal rail scrollbar');
     assert.ok(listHtml.includes('data-fav'), 'clickable favorite star');
     assert.ok(listHtml.includes('THEME_LABELS'), 'theme chinese labels');
     assert.ok(listHtml.includes('data-icon="star"'), 'svg favorite star');
@@ -35,5 +37,21 @@ describe('list-home v0.3', () => {
     assert.ok(listHtml.includes('row-ver-count'), 'N versions badge');
     assert.ok(listHtml.includes('data-open-group'), 'expand group from badge');
     assert.ok(listHtml.includes('data-project'), 'rail sub project click');
+  });
+
+  it('has list-only context menu wiring', () => {
+    assert.ok(listHtml.includes('showListContextMenu'), 'list context menu API');
+    assert.ok(listHtml.includes('contextmenu'), 'row right-click handler');
+    assert.ok(listHtml.includes('data-group-key'), 'group meta for multi-version menu');
+    assert.ok(listHtml.includes('onListOpenGroup'), 'open group from menu');
+    assert.ok(!listHtml.includes('复制全文'), 'no note-window copy-all in list');
+    assert.ok(!listHtml.includes('收录到知识库'), 'no OKF promote in list menu UI');
+  });
+
+  it('preload exposes list context menu', () => {
+    const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8');
+    assert.ok(preload.includes('showListContextMenu'));
+    assert.ok(preload.includes('onListOpenGroup'));
+    assert.ok(preload.includes('show-list-context-menu'));
   });
 });
