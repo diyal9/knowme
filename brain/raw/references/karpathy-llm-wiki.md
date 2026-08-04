@@ -23,7 +23,7 @@ resource: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
 
 ## 与本项目
 
-StickyNotes 将 OKF bundle（`brain/knowledge/`）作为可交换的长期知识层，wiki 作为领域综合层。
+KnowMe 将 OKF bundle（`brain/knowledge/`）作为可交换的长期知识层，wiki 作为领域综合层。
 
 # Citations
 

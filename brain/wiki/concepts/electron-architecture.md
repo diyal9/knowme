@@ -1,7 +1,7 @@
 ---
 type: Concept
 title: Electron 架构
-description: StickyNotes 主进程、预加载、渲染进程分工与 IPC 安全。
+description: KnowMe 主进程、预加载、渲染进程分工与 IPC 安全。
 tags: [architecture, electron, ipc, security]
 timestamp: 2026-07-01T00:00:00Z
 ---

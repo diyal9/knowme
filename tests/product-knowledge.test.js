@@ -10,7 +10,7 @@ const os = require('os');
 const productKnowledge = require('../src/lib/product-knowledge');
 const productMemory = require('../src/lib/product-memory');
 
-const TMP = path.join(os.tmpdir(), `sticky-notes-product-test-${Date.now()}`);
+const TMP = path.join(os.tmpdir(), `knowme-product-test-${Date.now()}`);
 
 describe('product knowledge OKF', () => {
   const knowledgeDir = path.join(TMP, 'knowledge');
@@ -97,14 +97,19 @@ describe('product memory', () => {
   it('captures and returns context', () => {
     productMemory.ensureMemory(memoryDir);
     productMemory.capture(memoryDir, {
-      kind: 'habit',
+      kind: 'telemetry',
       summary: '测试复制提示词',
       meta: { test: true },
     });
     const recent = productMemory.getRecent(memoryDir, 5);
     assert.ok(recent.length >= 1);
     const ctx = productMemory.getContextForAI(memoryDir);
-    assert.ok(ctx.includes('测试复制'));
+    assert.ok(!ctx.includes('测试复制'));
+    const ctxWithWork = productMemory.getContextForAI(memoryDir, '', {
+      includeRecent: true,
+      workContext: '测试任务',
+    });
+    assert.ok(ctxWithWork.includes('测试复制'));
     const st = productMemory.status(memoryDir);
     assert.ok(st.recentCount >= 1);
   });

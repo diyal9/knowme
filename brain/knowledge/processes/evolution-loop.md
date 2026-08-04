@@ -1,7 +1,7 @@
 ---
 type: Playbook
 title: Team Self-Evolution Loop
-description: How StickyNotes agent team compounds knowledge and promotes skills.
+description: How KnowMe agent team compounds knowledge and promotes skills.
 tags: [process, evolution, react]
 timestamp: 2026-07-01T00:00:00Z
 ---
@@ -14,7 +14,7 @@ timestamp: 2026-07-01T00:00:00Z
 Story 完成 → Hook 自动 working + memory 回顾 → /kb-ingest → /kb-lint → 复发≥3 → /evolve → /kb-export
 ```
 
-个人 episodic：`sticky-agent-memory`（`%LOCALAPPDATA%\sticky-notes\memory\`，不入 git）
+个人 episodic：`sticky-agent-memory`（`%LOCALAPPDATA%\knowme\memory\`，不入 git）
 
 ## 1. Capture（Observe）
 

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "team-run",
+  "name": "三角色协作开发",
+  "description": "制作人规划 OpenSpec → 开发实现自测 → 测试 QA 兜底",
+  "entry_node": "n-producer-plan",
+  "nodes": [
+    {
+      "id": "n-producer-plan",
+      "type": "agent",
+      "agent": "producer",
+      "intent": "规划 proposal/specs/tasks/qa-plan 与验收标准",
+      "output": { "kind": "openspec_plan", "path": "openspec/changes/<change>/proposal.md" },
+      "next": "gate-producer"
+    },
+    {
+      "id": "gate-producer",
+      "type": "gate",
+      "gate_id": "producer-uat",
+      "on_approve": "n-developer-impl",
+      "on_reject": "n-producer-plan",
+      "on_revise": "n-producer-plan"
+    },
+    {
+      "id": "n-developer-impl",
+      "type": "agent",
+      "agent": "developer",
+      "intent": "按 tasks 实现功能并通过 npm test/lint 自测",
+      "input": { "paths": ["openspec/changes/<change>/tasks.md"] },
+      "output": { "kind": "implementation", "path": "src/" },
+      "next": "gate-dev"
+    },
+    {
+      "id": "gate-dev",
+      "type": "gate",
+      "gate_id": "dev-self-test",
+      "on_approve": "n-tester-qa",
+      "on_reject": "n-developer-impl",
+      "on_revise": "n-developer-impl"
+    },
+    {
+      "id": "n-tester-qa",
+      "type": "agent",
+      "agent": "tester",
+      "intent": "按 qa-plan 执行 QA 并输出 test-report",
+      "output": { "kind": "test_report", "path": "openspec/changes/<change>/evidence/test-report.md" },
+      "next": "n-done"
+    },
+    {
+      "id": "n-done",
+      "type": "terminal",
+      "status": "completed"
+    }
+  ]
+}

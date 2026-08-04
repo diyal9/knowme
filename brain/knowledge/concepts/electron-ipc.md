@@ -1,7 +1,7 @@
 ---
 type: Playbook
 title: Electron IPC Security
-description: IPC boundaries and preload conventions for StickyNotes.
+description: IPC boundaries and preload conventions for KnowMe.
 tags: [electron, ipc, security, architecture]
 timestamp: 2026-07-01T00:00:00Z
 ---

@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Sticky-Notes</title>
+<title>KnowMe</title>
 <style>
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
@@ -15,9 +15,9 @@
   --text:     #1c1917;
   --text2:    #57534e;
   --text3:    #a8a29e;
-  --accent:   #5558e8;
-  --accent-bg:rgba(85,88,232,0.07);
-  --accent-b: rgba(85,88,232,0.18);
+  --accent:   #3d3a36;
+  --accent-bg:rgba(61,58,54,0.07);
+  --accent-b: rgba(61,58,54,0.18);
   --star:     #f59e0b;
   --green:    #16a34a;
   --amber:    #d97706;
@@ -76,22 +76,16 @@ html, body {
 .wbtn .ico { width:16px; height:16px; }
 .wbtn .ico svg { width:16px; height:16px; }
 
-/* 统一图标 — Cursor Codicon：内容区 18 / 顶栏与小号 16 · stroke 1.5 */
+/* 统一图标 — Lucide/Obsidian：不强制 stroke，由 SVG 属性控制 */
 .ico {
   display:flex; align-items:center; justify-content:center;
   width:18px; height:18px; flex-shrink:0; pointer-events:none;
 }
-.ico svg {
-  width:18px; height:18px;
-  stroke:currentColor;
-  stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round;
-  shape-rendering:geometricPrecision;
-}
+.ico svg { width:100%; height:100%; display:block; }
 .ico-sm { width:16px; height:16px; }
-.ico-sm svg { width:16px; height:16px; stroke-width:1.5; }
 .ico-star .s-f { display:none; }
 #btnStar.on .ico-star .s-o { display:none; }
-#btnStar.on .ico-star .s-f { display:inline; fill:var(--star); }
+#btnStar.on .ico-star .s-f { display:inline; }
 
 /* ── 编辑区头（标题+元信息，两行压紧）── */
 .head-block {
@@ -121,7 +115,7 @@ html, body {
   padding:3px 7px; border-radius:5px; cursor:pointer;
   transition:background .12s;
 }
-.ver-display:hover { background:rgba(85,88,232,0.12); }
+.ver-display:hover { background:rgba(61,58,54,0.12); }
 .ver-display.hidden { display:none; }
 .ver-input {
   width:52px; background:var(--accent-bg);
@@ -146,49 +140,44 @@ html, body {
   transition:background .15s, border-color .15s, box-shadow .15s;
 }
 .meta-input:hover { background:rgba(0,0,0,0.03); }
-.meta-input:focus { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(85,88,232,0.10); }
+.meta-input:focus { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(61,58,54,0.10); }
 .meta-input.cat { width:72px; flex:0 0 72px; }
-.meta-input.flash { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(85,88,232,0.12); }
+.meta-input.flash { background:var(--bg-top); border-color:var(--accent-b); box-shadow:0 0 0 2px rgba(61,58,54,0.12); }
 .mode-seg {
-  display:inline-flex; align-items:center; height:28px;
-  border:1px solid rgba(0,0,0,0.10); border-radius:6px;
-  overflow:hidden; flex-shrink:0;
+  display:inline-flex; align-items:center; height:26px;
+  gap:1px; flex-shrink:0;
 }
 .mode-btn {
   display:inline-flex; align-items:center; justify-content:center;
-  height:28px; min-width:28px;
-  background:transparent; border:none; border-radius:0; padding:0 8px;
-  color:var(--text3); cursor:pointer; outline:none;
+  width:26px; height:26px;
+  background:transparent; border:none; border-radius:4px; padding:0;
+  color:#787878; cursor:pointer; outline:none;
 }
-.mode-btn .ico svg { width:15px; height:15px; }
-.mode-btn .ico svg path { fill: currentColor; stroke: none; }
-.mode-btn + .mode-btn { border-left:1px solid rgba(0,0,0,0.08); }
-.mode-btn.active { background:var(--accent-bg); color:var(--accent); }
-.mode-btn:hover:not(.active) { background:rgba(0,0,0,0.03); color:var(--text2); }
+.mode-btn .ico { width:18px; height:18px; }
+.mode-btn.active { background:rgba(0,0,0,0.08); color:#222; }
+.mode-btn:hover:not(.active) { background:rgba(0,0,0,0.06); color:#222; }
 .mode-btn:disabled { opacity:.45; cursor:default; }
 
-/* 底栏中间紧凑工具组 */
+/* 底栏中间工具组 — Obsidian 幽灵按钮 */
 .foot-tools {
   display:inline-flex; align-items:center; gap:1px;
-  height:28px; flex-shrink:0; margin-left:2px;
+  height:26px; flex-shrink:0; margin-left:4px;
 }
 .foot-tool {
   width:26px; height:26px; flex-shrink:0; padding:0;
   display:inline-flex; align-items:center; justify-content:center;
-  background:transparent; border:none; border-radius:5px;
-  color:var(--text2); cursor:pointer; outline:none;
-  transition:background .12s, color .12s;
+  background:transparent; border:none; border-radius:4px;
+  color:#787878; cursor:pointer; outline:none;
 }
-.foot-tool .ico svg { width:14px; height:14px; }
-.foot-tool .ico svg path { fill: currentColor; stroke: none; }
-.foot-tool:hover { background:var(--accent-bg); color:var(--accent); }
-.foot-tool.active { background:var(--accent-bg); color:var(--accent); }
+.foot-tool .ico { width:18px; height:18px; }
+.foot-tool:hover { background:rgba(0,0,0,0.06); color:#222; }
+.foot-tool.active { background:rgba(0,0,0,0.08); color:#222; }
 .foot-tool:disabled { opacity:.45; cursor:default; }
-.foot-tool:disabled:hover { background:transparent; color:var(--text2); }
+.foot-tool:disabled:hover { background:transparent; color:#787878; }
 .foot-tool.done { color:var(--green); }
 .foot-tool.done:hover { background:rgba(22,163,74,0.08); color:var(--green); }
-.foot-tool.on { color:var(--star); background:rgba(245,158,11,0.10); }
-.foot-tool.on:hover { background:rgba(245,158,11,0.16); color:var(--star); }
+.foot-tool.on { color:var(--star); }
+.foot-tool.on:hover { background:rgba(245,158,11,0.12); color:var(--star); }
 
 /* ── 主工作区（普通 / AI 左右分栏）── */
 .workspace {
@@ -276,6 +265,41 @@ html, body {
   display:block; background:none; padding:0;
   font:11px/1.6 var(--mono); white-space:pre;
 }
+.chat-bubble.thinking {
+  color:var(--text3); font-style:italic; border-style:dashed;
+  min-height:36px; display:inline-flex; align-items:center;
+}
+.chat-bubble.thinking.has-execution {
+  min-height:0; padding:0; border:0; background:transparent; width:min(560px, 96%);
+}
+.thinking-status { display:inline-flex; align-items:center; gap:8px; font:12px/1.5 var(--ui); }
+.thinking-dots { display:inline-flex; gap:3px; align-items:center; }
+.thinking-dots i {
+  display:block; width:4px; height:4px; border-radius:50%; background:currentColor;
+  opacity:0.3; animation:thinking-bounce 1.2s ease-in-out infinite;
+}
+.thinking-dots i:nth-child(2) { animation-delay:0.15s; }
+.thinking-dots i:nth-child(3) { animation-delay:0.3s; }
+@keyframes thinking-bounce {
+  0%, 80%, 100% { opacity:0.25; transform:translateY(0); }
+  40% { opacity:1; transform:translateY(-2px); }
+}
+.chat-execution { width:100%; margin:0 0 10px; border:0; background:transparent; overflow:hidden; font-style:normal; }
+.chat-bubble.thinking .chat-execution { margin:0; }
+.chat-execution-summary { display:flex; align-items:center; gap:8px; cursor:pointer; list-style:none; padding:2px 0 8px; color:var(--text); font:600 12px/1.45 var(--ui); }
+.chat-execution-summary::-webkit-details-marker { display:none; }
+.chat-execution-summary::after { content:'›'; margin-left:auto; color:var(--text3); font-size:15px; transition:transform .15s ease; }
+.chat-execution[open] > .chat-execution-summary::after { transform:rotate(90deg); }
+.chat-execution-orb { width:18px; height:18px; flex:0 0 18px; border-radius:50%; background:#343746; box-shadow:inset 0 0 0 5px #e9eaf0; animation:orb-breathe 1.4s ease-in-out infinite; }
+.chat-execution-list { display:flex; flex-direction:column; gap:1px; max-height:176px; overflow-y:auto; margin-left:8px; padding:0 8px 8px 15px; border-left:3px solid #ececeb; scrollbar-width:thin; }
+.trace-row { display:grid; grid-template-columns:16px minmax(0,1fr) auto; align-items:center; gap:6px; min-height:27px; color:var(--text2); font:11.5px/1.45 var(--ui); }
+.trace-mark { display:flex; width:14px; height:14px; align-items:center; justify-content:center; color:var(--accent); font-weight:700; }
+.trace-row.error .trace-mark { color:#dc2626; }
+.trace-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.trace-time { color:var(--text3); font-size:10px; }
+.trace-pulse { display:inline-block; width:7px; height:7px; border-radius:50%; background:#4d8a78; box-shadow:0 0 0 0 rgba(77,138,120,.3); animation:trace-pulse 1.2s ease-out infinite; }
+@keyframes trace-pulse { 70%,100% { box-shadow:0 0 0 6px rgba(77,138,120,0); } }
+@keyframes orb-breathe { 50% { opacity:.62; transform:scale(.92); } }
 .chat-bubble.streaming .stream-cursor {
   display:inline-block; margin-left:1px; color:var(--accent);
   animation:stream-blink 0.9s step-end infinite;
@@ -397,8 +421,8 @@ textarea#editor::placeholder {
 .var-bar {
   display:none;
   padding:5px 13px;
-  background:rgba(85,88,232,0.05);
-  border-top:1px solid rgba(85,88,232,0.10);
+  background:rgba(61,58,54,0.05);
+  border-top:1px solid rgba(61,58,54,0.10);
   flex-shrink:0;
 }
 .var-bar.visible { display:flex; align-items:center; gap:5px; }
@@ -434,28 +458,24 @@ textarea#editor::placeholder {
 .footer-meta.saved .save-dot  { background:var(--green); }
 .footer-meta.saved .save-time { color:var(--green); }
 
-/* 底栏右侧操作：AI / 复制统一轻量样式 */
+/* 底栏右侧操作：AI / 复制 — Obsidian 幽灵按钮 */
 .foot-actions {
-  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
+  display:inline-flex; align-items:center; gap:2px; flex-shrink:0;
 }
 .foot-action {
-  display:inline-flex; align-items:center; gap:4px; flex-shrink:0;
-  height:28px; padding:0 9px;
-  background:transparent;
-  border:1px solid rgba(0,0,0,0.09);
-  border-radius:6px;
-  font:500 11px var(--ui); color:var(--text2); cursor:pointer;
-  transition:background .12s, border-color .12s, color .12s;
+  display:inline-flex; align-items:center; gap:5px; flex-shrink:0;
+  height:26px; padding:0 8px;
+  background:transparent; border:none; border-radius:4px;
+  font:500 12px var(--ui); color:#57534e; cursor:pointer;
   outline:none; user-select:none;
 }
-.foot-action .ico { color:currentColor; }
-.foot-action .ico svg { width:13px; height:13px; }
-.foot-action:hover { background:rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.16); color:var(--text); }
-.foot-action:active { transform:scale(.97); }
-.ai-toggle:hover { background:var(--accent-bg); border-color:var(--accent-b); color:var(--accent); }
+.foot-action .ico { width:16px; height:16px; color:currentColor; }
+.foot-action:hover { background:rgba(0,0,0,0.06); color:#1c1917; }
+.foot-action:active { background:rgba(0,0,0,0.09); }
+.ai-toggle:hover { background:var(--accent-bg); color:var(--accent); }
 .ai-toggle-label { font:inherit; color:inherit; white-space:nowrap; }
 .btn-copy-primary.copied {
-  color:var(--green); border-color:rgba(22,163,74,0.35); background:rgba(22,163,74,0.06);
+  color:var(--green); background:rgba(22,163,74,0.08);
 }
 .btn-copy-primary.copied .ico { color:var(--green); }
 
@@ -466,8 +486,8 @@ textarea#editor::placeholder {
   transition:border-color .14s, box-shadow .14s;
 }
 .ai-composer-shell:focus-within {
-  border-color:rgba(85,88,232,0.34);
-  box-shadow:0 0 0 3px rgba(85,88,232,0.07);
+  border-color:rgba(61,58,54,0.34);
+  box-shadow:0 0 0 3px rgba(61,58,54,0.07);
 }
 .ai-toolbar {
   display:flex; align-items:center; gap:4px;
@@ -485,14 +505,19 @@ textarea#editor::placeholder {
 .ai-action-btn .chev { transform:rotate(90deg); opacity:.9; }
 .ai-menu {
   position:absolute; left:0; bottom:36px; z-index:45; min-width:184px;
-  display:none; padding:5px;
+  display:block; padding:5px; opacity:0; visibility:hidden; pointer-events:none;
+  transform:translateY(6px) scale(.98); transform-origin:left bottom;
   background:var(--bg-card); border:1px solid var(--div); border-radius:10px;
   box-shadow:0 12px 30px rgba(0,0,0,0.16);
+  transition:opacity .14s ease, transform .16s ease, visibility 0s linear .16s;
 }
 .ai-menu.quick-menu {
-  min-width:0; width:100%; padding:3px;
+  min-width:188px; width:max-content; max-width:260px; padding:3px;
 }
-.ai-menu.show { display:block; }
+.ai-menu.show {
+  opacity:1; visibility:visible; pointer-events:auto; transform:translateY(0) scale(1);
+  transition-delay:0s;
+}
 .ai-menu-item {
   width:100%; border:none; background:transparent; border-radius:7px;
   display:flex; align-items:center; gap:6px;
@@ -508,6 +533,9 @@ textarea#editor::placeholder {
 }
 .ai-menu.quick-menu .ai-menu-item .ico { width:12px; height:12px; }
 .ai-menu.quick-menu .ai-menu-item .ico svg { width:12px; height:12px; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-menu { transition:none; transform:none; }
+}
 
 .ai-input-wrap { position:relative; width:100%; min-width:0; display:flex; align-items:flex-end; }
 textarea#aiInput {
@@ -530,13 +558,18 @@ textarea#aiInput:focus { box-shadow:none; }
 .ai-go:hover  { background:rgba(0,0,0,0.05); color:var(--text); }
 .ai-go:active { transform:scale(.92); }
 .ai-go:disabled { opacity:.4; cursor:default; }
-.ai-go .ico { width:14px; height:14px; }
-.ai-go .ico svg { width:14px; height:14px; stroke-width:1.5; }
+.ai-go .ico { width:16px; height:16px; }
 
 /* 滚动条 */
-::-webkit-scrollbar { width:4px; }
-::-webkit-scrollbar-thumb { background:rgba(0,0,0,0.10); border-radius:2px; }
-::-webkit-scrollbar-thumb:hover { background:rgba(85,88,232,0.25); }
+::-webkit-scrollbar { width:10px; height:10px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb {
+  background:rgba(61,58,54,0.24);
+  border-radius:999px;
+  border:3px solid transparent;
+  background-clip:padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background:rgba(61,58,54,0.36); }
 
 @keyframes appear {
   from { opacity:0; transform:scale(.96) translateY(8px); }
@@ -626,7 +659,7 @@ textarea#aiInput:focus { box-shadow:none; }
 
   <!-- 顶栏 -->
   <div class="topbar">
-    <span class="topbar-logo">Sticky-Notes</span>
+    <span class="topbar-logo">KnowMe</span>
     <div class="win-btns">
       <button class="wbtn pin" id="btnPin" title="窗口置顶">
         <span class="ico" data-icon="pin"></span>
@@ -640,11 +673,6 @@ textarea#aiInput:focus { box-shadow:none; }
     </div>
   </div>
 
-  <div class="skill-banner" id="skillBanner" role="status">
-    <span id="skillBannerText"></span>
-    <button type="button" class="skill-go" id="skillBannerGo">封装为技能包</button>
-    <button type="button" class="skill-later" id="skillBannerLater">暂不</button>
-  </div>
 
   <div class="workspace" id="workspace">
 
@@ -652,11 +680,11 @@ textarea#aiInput:focus { box-shadow:none; }
     <aside class="ai-pane" id="aiPane">
       <div class="ai-pane-head">
         <span class="ico" data-icon="chat"></span>
-        <span class="ai-pane-title">AI 助写</span>
-        <button class="ai-pane-close" id="aiClose" type="button" title="收起 AI 助写"><span class="ico ico-sm" data-icon="chevronLeft"></span></button>
+        <span class="ai-pane-title">助手</span>
+        <button class="ai-pane-close" id="aiClose" type="button" title="收起助手"><span class="ico ico-sm" data-icon="chevronLeft"></span></button>
       </div>
       <div class="chat-log" id="chatLog">
-        <div class="chat-empty">描述需求，AI 帮你写</div>
+        <div class="chat-empty">描述需求，助手帮你写</div>
       </div>
       <div class="ai-pane-foot">
         <div class="ai-composer-shell" id="aiComposer">
@@ -666,16 +694,18 @@ textarea#aiInput:focus { box-shadow:none; }
           </div>
           <div class="ai-toolbar">
             <div class="ai-menu-wrap">
-              <button class="ai-action-btn" id="aiQuickBtn" type="button" title="快捷（Ctrl+K）">
+              <button class="ai-action-btn" id="aiQuickBtn" type="button" title="快捷（Ctrl+K）" aria-expanded="false" aria-controls="aiQuickMenu">
                 <span class="ico ico-sm" data-icon="optimize"></span>
                 <span>快捷</span>
                 <span class="ico ico-sm chev" data-icon="chevronRight"></span>
               </button>
-              <div class="ai-menu quick-menu" id="aiQuickMenu">
-                <button class="ai-menu-item" type="button" data-p="优化这段提示词，让它更清晰准确、减少歧义，直接输出优化后的提示词"><span class="ico ico-sm" data-icon="optimize"></span><span>优化</span></button>
-                <button class="ai-menu-item" type="button" data-p="在保留原意的前提下扩展这段提示词，补充更多细节和约束条件"><span class="ico ico-sm" data-icon="expandText"></span><span>扩展</span></button>
-                <button class="ai-menu-item" type="button" data-p="精简这段提示词，去掉冗余，只保留核心意图，直接输出精简后的提示词"><span class="ico ico-sm" data-icon="simplify"></span><span>精简</span></button>
-                <button class="ai-menu-item" type="button" data-p="将下面这段提示词翻译成英文，保持原意"><span class="ico ico-sm" data-icon="en"></span><span>翻译</span></button>
+              <div class="ai-menu quick-menu" id="aiQuickMenu" role="menu" aria-label="快捷操作" aria-hidden="true">
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请作为飞书协同沟通助手，基于当前上下文起草一条可直接发送的消息；给出正式版和简洁版各一条，并标注适用对象。"><span class="ico ico-sm" data-icon="expandText"></span><span>飞书沟通</span></button>
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请执行飞书文档读写流程：先搜索并读取相关文档，再输出可回写的文档草稿（标题、正文、待确认项）。"><span class="ico ico-sm" data-icon="note"></span><span>文档读写</span></button>
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请走飞书知识体系流程：先定位知识库空间与节点，再给出结论、证据来源和可落表的数据结构建议。"><span class="ico ico-sm" data-icon="list"></span><span>知识库检索</span></button>
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请处理飞书会议体系：整理会议纪要，输出议题、结论、行动项、负责人、时间点和风险提醒。优先使用已注册的飞书只读工具（搜索文档/读取文档）获取原文后再总结。"><span class="ico ico-sm" data-icon="check"></span><span>会议记录</span></button>
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请联动飞书日程与任务：给出今天到本周的日程安排、未完成任务、优先级重排建议和下一步执行清单。"><span class="ico ico-sm" data-icon="optimize"></span><span>日程任务</span></button>
+                <button class="ai-menu-item" type="button" role="menuitem" data-p="请按飞书组织协同场景处理：先明确对象与目标，再给出审批、OKR对齐和邮件沟通建议。"><span class="ico ico-sm" data-icon="list"></span><span>组织协同</span></button>
               </div>
             </div>
             <div style="flex:1"></div>
@@ -743,9 +773,6 @@ textarea#aiInput:focus { box-shadow:none; }
           <button class="foot-tool" id="btnStar" type="button" title="收藏" aria-label="收藏">
             <span class="ico ico-sm ico-star" id="icoStar" data-icon="star"></span>
           </button>
-          <button class="foot-tool" id="btnPromote" type="button" title="收入库 — 保存到本机知识库，便于复用" aria-label="收入库">
-            <span class="ico ico-sm" data-icon="classify"></span>
-          </button>
           <button class="foot-tool" id="btnSuggest" type="button" title="智能分类 — 用 AI 建议主题与标签" aria-label="智能分类">
             <span class="ico ico-sm" data-icon="optimize"></span>
           </button>
@@ -762,9 +789,9 @@ textarea#aiInput:focus { box-shadow:none; }
           <span class="copy-count" id="copyCountEl"></span>
         </div>
         <div class="foot-actions">
-          <button class="foot-action ai-toggle" id="aiToggle" type="button" title="AI 助写 · 打开侧栏对话">
+          <button class="foot-action ai-toggle" id="aiToggle" type="button" title="助手 · 打开侧栏对话">
             <span class="ico ico-sm" data-icon="chat"></span>
-            <span class="ai-toggle-label">AI 助写</span>
+            <span class="ai-toggle-label">助手</span>
           </button>
           <button class="foot-action btn-copy-primary" id="btnCopy" type="button" title="复制内容到剪贴板">
             <span class="ico ico-sm" id="copyIcon" data-icon="copy"></span>
@@ -800,9 +827,11 @@ textarea#aiInput:focus { box-shadow:none; }
   <button type="button" data-md="link" title="链接"><span class="ico ico-sm" data-icon="link"></span></button>
 </div>
 
-<script src="ui-icons.js?v=codicon10"></script>
+<script src="ui-icons.js?v=lucide2"></script>
 <script src="assets/vendor/marked.umd.js"></script>
 <script src="assets/vendor/purify.min.js"></script>
+<script src="lib/ui-kit.js?v=1"></script>
+<script src="lib/markdown-lite.js?v=1"></script>
 <script>
 function mountAllIcons(root) { if (window.StickyIcons) StickyIcons.mount(root || document) }
 mountAllIcons()
@@ -837,7 +866,6 @@ const modePlain  = document.getElementById('modePlain')
 const modeMd = document.getElementById('modeMd')
 const modeMdPreview = document.getElementById('modeMdPreview')
 const btnVersions=document.getElementById('btnVersions')
-const btnPromote = document.getElementById('btnPromote')
 const btnSuggest = document.getElementById('btnSuggest')
 const modalOverlay=document.getElementById('modalOverlay')
 const modalBody = document.getElementById('modalBody')
@@ -845,10 +873,6 @@ const modalTitle= document.getElementById('modalTitle')
 const modalClose= document.getElementById('modalClose')
 const toastWrap = document.getElementById('toastWrap')
 const toastEl   = document.getElementById('toast')
-const skillBanner = document.getElementById('skillBanner')
-const skillBannerText = document.getElementById('skillBannerText')
-const skillBannerGo = document.getElementById('skillBannerGo')
-const skillBannerLater = document.getElementById('skillBannerLater')
 const tokenEst  = document.getElementById('tokenEst')
 const verDisp   = document.getElementById('verDisplay')
 const verInput  = document.getElementById('verInput')
@@ -874,62 +898,7 @@ const aiQuickMenu = document.getElementById('aiQuickMenu')
 const aiMoreBtn = document.getElementById('aiMoreBtn')
 const aiMoreMenu = document.getElementById('aiMoreMenu')
 
-let pendingSkillTheme = null
-
-function toast(msg, type = 'info', ms = 3200) {
-  toastEl.textContent = msg
-  toastWrap.className = 'toast-wrap show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '')
-  clearTimeout(toast._t)
-  toast._t = setTimeout(() => { toastWrap.className = 'toast-wrap' }, ms)
-}
-
-function hideSkillBanner() {
-  skillBanner.classList.remove('show')
-  pendingSkillTheme = null
-}
-
-function showSkillSuggest(payload) {
-  if (!payload?.theme) return
-  if (note?.category && payload.theme !== String(note.category || '').trim()) return
-  pendingSkillTheme = payload.theme
-  const label = payload.label || THEME_LABELS[payload.theme] || payload.theme
-  skillBannerText.textContent =
-    `「${label}」已有 ${payload.count} 条同类提示词，可封装为技能包（每条对应一份知识库文档）`
-  skillBanner.classList.add('show')
-}
-
-async function runSkillPackGenerate() {
-  if (!pendingSkillTheme) return
-  const theme = pendingSkillTheme
-  skillBannerGo.disabled = true
-  skillBannerGo.textContent = '生成中…'
-  try {
-    const r = await window.api.skillPackGenerate({ theme })
-    if (r.ok) {
-      hideSkillBanner()
-      toast(r.message || `已生成 ${r.created?.length || 0} 个技能文档`, 'success', 4200)
-    } else {
-      toast(r.error || '封装失败', 'error')
-    }
-  } catch (e) {
-    toast(e.message || '封装异常', 'error')
-  } finally {
-    skillBannerGo.disabled = false
-    skillBannerGo.textContent = '封装为技能包'
-  }
-}
-
-skillBannerGo.addEventListener('click', () => runSkillPackGenerate())
-skillBannerLater.addEventListener('click', async () => {
-  if (!pendingSkillTheme) { hideSkillBanner(); return }
-  await window.api.skillPackDismiss(pendingSkillTheme)
-  hideSkillBanner()
-  toast('已忽略，有新增卡片时再提醒', 'info')
-})
-
-if (window.api.onSkillPackSuggest) {
-  window.api.onSkillPackSuggest(showSkillSuggest)
-}
+const toast = window.UIKit.createToast({ wrap: toastWrap, text: toastEl, defaultMs: 3200 })
 
 function syncCategoryHint() {
   const c = inpCategory.value.trim()
@@ -1247,19 +1216,11 @@ function handleListTab(e, outdent) {
 function updateCounts() {
   const text = getActiveContent()
   cntEl.textContent = text.length
-  tokenEst.textContent = text.length ? `~${estimateTokens(text)} tok` : ''
+  tokenEst.textContent = ''
 }
 
 // ── 工具 ──────────────────────────────────────────────────────────────────────
-function relTime(iso) {
-  if (!iso) return '—'
-  const s = (Date.now()-new Date(iso))/1000
-  if (s<5)    return '刚刚'
-  if (s<60)   return `${Math.floor(s)}s 前`
-  if (s<3600) return `${Math.floor(s/60)}m 前`
-  if (s<86400)return `${Math.floor(s/3600)}h 前`
-  return `${Math.floor(s/86400)}d 前`
-}
+const relTime = window.UIKit.relativeTimeCompact
 
 // ── 变量检测 {{...}} ─────────────────────────────────────────────────────────
 function detectVars(text) {
@@ -1449,27 +1410,6 @@ selBubble.querySelectorAll('button[data-md]').forEach(btn => {
 })
 StickyIcons.mount(selBubble)
 
-btnPromote.addEventListener('click', async () => {
-  if (!note) return
-  btnPromote.disabled = true
-  try {
-    const r = await window.api.promoteToOkf(note.id)
-    if (r.ok) {
-      toast(`已收录：${r.conceptId}`, 'success')
-      btnPromote.classList.add('done')
-      btnPromote.title = '已收录到本机知识库'
-      const doneIco = btnPromote.querySelector('.ico')
-      if (doneIco) doneIco.innerHTML = StickyIcons.svg('check')
-    } else {
-      toast(r.error || '收录失败', 'error')
-    }
-  } catch (e) {
-    toast(e.message || '收录异常', 'error')
-  } finally {
-    btnPromote.disabled = false
-  }
-})
-
 btnSuggest.addEventListener('click', async () => {
   if (!note) return
   btnSuggest.disabled = true
@@ -1598,54 +1538,63 @@ function syncLayoutState(state) {
 window.api.onLayoutChanged(syncLayoutState)
 
 // ── AI 左右分栏 ─────────────────────────────────────────────────────────────
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+const escHtml = window.UIKit.escapeHtml
+
+function renderMarkdown(src) {
+  return window.MarkdownLite.render(src)
 }
 
-// 轻量 Markdown 渲染（先转义再套格式，避免 XSS）
-function renderMarkdown(src) {
-  const inline = (t) => escHtml(t)
-    .replace(/`([^`]+?)`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/(^|[^*])\*([^*\n]+?)\*(?!\*)/g, '$1<em>$2</em>')
+function traceStatusIcon(status) {
+  if (status === 'error') return '!'
+  if (status === 'pending') return '<span class="trace-pulse" aria-hidden="true"></span>'
+  return '✓'
+}
 
-  const lines = String(src).replace(/\r\n/g, '\n').split('\n')
-  const out = []
-  let list = null   // 'ul' | 'ol'
-  let inCode = false, codeBuf = []
+function renderExecutionTimeline(m) {
+  const trace = Array.isArray(m.trace) ? m.trace : []
+  if (!trace.length) return ''
+  const toolCount = trace.filter(item => item.kind === 'tool').length
+  const errorCount = trace.filter(item => item.status === 'error').length
+  const pending = trace.some(item => item.status === 'pending')
+  const summary = pending
+    ? '深度思考'
+    : `思考过程 · ${trace.length} 步${toolCount ? ` · ${toolCount} 个工具` : ''}${errorCount ? ` · ${errorCount} 个失败` : ''}`
+  const rows = trace.map(item => {
+    const status = item.status === 'error' ? 'error' : item.status === 'pending' ? 'pending' : 'done'
+    const duration = Number.isFinite(item.durationMs) && item.durationMs > 0
+      ? `<span class="trace-time">${item.durationMs < 1000 ? `${Math.round(item.durationMs)}ms` : `${(item.durationMs / 1000).toFixed(1)}s`}</span>`
+      : ''
+    return `<div class="trace-row ${status}">
+      <span class="trace-mark">${traceStatusIcon(status)}</span>
+      <span class="trace-title">${escHtml(item.title || '执行步骤')}</span>
+      ${duration}
+    </div>`
+  }).join('')
+  return `<details class="chat-execution${pending ? ' is-running' : ''}"${pending || m.streaming ? ' open' : ''}>
+    <summary class="chat-execution-summary">${pending ? '<span class="chat-execution-orb" aria-hidden="true"></span>' : ''}<span>${escHtml(summary)}</span></summary>
+    <div class="chat-execution-list" role="log" aria-live="polite">${rows}</div>
+  </details>`
+}
 
-  const closeList = () => { if (list) { out.push(`</${list}>`); list = null } }
-
-  for (const line of lines) {
-    const fence = line.match(/^\s*```/)
-    if (fence) {
-      if (inCode) { out.push(`<pre><code>${escHtml(codeBuf.join('\n'))}</code></pre>`); codeBuf = []; inCode = false }
-      else { closeList(); inCode = true }
-      continue
-    }
-    if (inCode) { codeBuf.push(line); continue }
-
-    if (!line.trim()) { closeList(); continue }
-
-    const h = line.match(/^(#{1,4})\s+(.*)$/)
-    if (h) { closeList(); const lv = h[1].length; out.push(`<h${lv} class="md-h">${inline(h[2])}</h${lv}>`); continue }
-
-    const ol = line.match(/^\s*\d+[.)]\s+(.*)$/)
-    const ul = line.match(/^\s*[-*+]\s+(.*)$/)
-    if (ol) { if (list !== 'ol') { closeList(); out.push('<ol>'); list = 'ol' } out.push(`<li>${inline(ol[1])}</li>`); continue }
-    if (ul) { if (list !== 'ul') { closeList(); out.push('<ul>'); list = 'ul' } out.push(`<li>${inline(ul[1])}</li>`); continue }
-
-    closeList()
-    out.push(`<p>${inline(line)}</p>`)
+function upsertAssistantTrace(message, event) {
+  if (!message || !event?.id) return
+  const trace = Array.isArray(message.trace) ? message.trace : []
+  const index = trace.findIndex(item => item.id === event.id)
+  const next = {
+    id: String(event.id),
+    kind: event.kind === 'tool' ? 'tool' : 'stage',
+    title: String(event.title || '执行步骤'),
+    status: event.status === 'error' ? 'error' : event.status === 'pending' ? 'pending' : 'done',
+    durationMs: Number.isFinite(event.durationMs) ? event.durationMs : undefined,
   }
-  if (inCode) out.push(`<pre><code>${escHtml(codeBuf.join('\n'))}</code></pre>`)
-  closeList()
-  return out.join('')
+  if (index >= 0) trace[index] = { ...trace[index], ...next }
+  else trace.push(next)
+  message.trace = trace.slice(-40)
 }
 
 function renderChat() {
   if (!chatHistory.length) {
-    chatLog.innerHTML = '<div class="chat-empty">描述需求，AI 帮你写</div>'
+    chatLog.innerHTML = '<div class="chat-empty">描述需求，助手帮你写</div>'
     return
   }
   chatLog.innerHTML = chatHistory.map((m, i) => {
@@ -1653,16 +1602,26 @@ function renderChat() {
     if (m.role === 'error') return `<div class="chat-bubble assistant err">${escHtml(m.text)}</div>`
     if (m.role === 'user') return `<div class="chat-bubble user">${escHtml(m.text)}</div>`
     const streamCls = m.streaming ? ' streaming' : ''
+    const waiting = m.streaming && !String(m.text || '').trim()
+    if (waiting) {
+      const hasTrace = Array.isArray(m.trace) && m.trace.length > 0
+      const status = hasTrace
+        ? ''
+        : `<span class="thinking-status" role="status"><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span>${escHtml(m.activity || '思考中…')}</span>`
+      return `<div class="chat-bubble assistant streaming thinking${hasTrace ? ' has-execution' : ''}" data-idx="${i}" aria-busy="true">${renderExecutionTimeline(m)}${status}</div>`
+    }
     const cursor = m.streaming ? '<span class="stream-cursor">▍</span>' : ''
     const actions = (!m.streaming && m.text) ? `<div class="chat-actions">
-      <button class="chat-act" data-act="replace" data-idx="${i}">替换正文</button>
-      <button class="chat-act subtle" data-act="append" data-idx="${i}">追加到文末</button>
+      <button class="chat-act" data-act="copy" data-idx="${i}">复制</button>
+      <button class="chat-act subtle" data-act="insert" data-idx="${i}">插入光标</button>
+      <button class="chat-act subtle" data-act="append" data-idx="${i}">追加文末</button>
+      <button class="chat-act subtle" data-act="replace" data-idx="${i}">替换全文…</button>
     </div>` : ''
     // 流式过程用纯文本（性能 + 光标），完成后渲染 Markdown 排版
     const body = m.streaming
       ? `<span class="chat-text">${escHtml(m.text)}</span>`
       : `<div class="chat-text md">${renderMarkdown(m.text)}</div>`
-    return `<div class="chat-bubble assistant${streamCls}" data-idx="${i}">${body}${cursor}${actions}</div>`
+    return `<div class="chat-bubble assistant${streamCls}" data-idx="${i}">${renderExecutionTimeline(m)}${body}${cursor}${actions}</div>`
   }).join('')
   chatLog.scrollTop = chatLog.scrollHeight
 }
@@ -1673,6 +1632,7 @@ function updateStreamText(idx) {
   if (!bubble || !m) { renderChat(); return }
   const textEl = bubble.querySelector('.chat-text')
   if (textEl) textEl.textContent = m.text
+  else { renderChat(); return }
   chatLog.scrollTop = chatLog.scrollHeight
 }
 
@@ -1693,6 +1653,14 @@ function applyAssistantText(text, mode) {
   if (!text) return
   if (mode === 'replace') {
     editor.value = text
+  } else if (mode === 'insert') {
+    const start = editor.selectionStart
+    const end = editor.selectionEnd
+    const before = editor.value.slice(0, start)
+    const after = editor.value.slice(end)
+    editor.value = before + text + after
+    const pos = start + text.length
+    editor.setSelectionRange(pos, pos)
   } else {
     const sep = editor.value.trim() ? '\n\n---\n' : ''
     editor.value += sep + text
@@ -1708,7 +1676,17 @@ chatLog.addEventListener('click', e => {
   if (!btn) return
   const m = chatHistory[+btn.dataset.idx]
   if (!m || m.role !== 'assistant') return
-  applyAssistantText(m.text, btn.dataset.act)
+  const act = btn.dataset.act
+  if (act === 'copy') {
+    try { navigator.clipboard.writeText(m.text) } catch { window.api.copyToClipboard(m.text) }
+    toast('已复制')
+    return
+  }
+  if (act === 'replace') {
+    if (!window.confirm('将用助手内容替换当前文件全文，是否允许？')) return
+  }
+  applyAssistantText(m.text, act === 'replace' ? 'replace' : act === 'insert' ? 'insert' : 'append')
+  toast(act === 'replace' ? '已替换全文' : act === 'insert' ? '已插入光标处' : '已追加到文末')
 })
 
 async function setAiOpen(open) {
@@ -1724,8 +1702,15 @@ async function setAiOpen(open) {
 aiToggle.addEventListener('click', () => setAiOpen(true))
 aiClose.addEventListener('click', () => setAiOpen(false))
 
+function setQuickMenuOpen(open) {
+  const next = !!open
+  aiQuickMenu?.classList.toggle('show', next)
+  aiQuickMenu?.setAttribute('aria-hidden', String(!next))
+  aiQuickBtn?.setAttribute('aria-expanded', String(next))
+}
+
 function hideAiMenus() {
-  if (aiQuickMenu) aiQuickMenu.classList.remove('show')
+  setQuickMenuOpen(false)
   if (aiMoreMenu) aiMoreMenu.classList.remove('show')
 }
 
@@ -1752,10 +1737,18 @@ function applyQuickPrompt(prompt) {
   hideAiMenus()
 }
 
+async function runQuickShortcut(prompt) {
+  if (aiSend?.disabled) { toast('当前助手正在生成，请稍候'); return }
+  const text = String(prompt || '').trim()
+  if (!text) return
+  hideAiMenus()
+  await runAI({ promptText: text, displayPrompt: '快捷操作' })
+}
+
 function showQuickMenu() {
   if (!aiQuickMenu) return
   aiMoreMenu?.classList.remove('show')
-  aiQuickMenu.classList.add('show')
+  setQuickMenuOpen(true)
   quickActive = 0
   renderQuickActive()
   aiInput.focus()
@@ -1765,7 +1758,7 @@ if (aiQuickBtn && aiQuickMenu) {
   aiQuickBtn.addEventListener('click', (e) => {
     e.stopPropagation()
     if (aiQuickMenu.classList.contains('show')) {
-      aiQuickMenu.classList.remove('show')
+      setQuickMenuOpen(false)
       return
     }
     showQuickMenu()
@@ -1775,7 +1768,7 @@ if (aiQuickBtn && aiQuickMenu) {
 if (aiMoreBtn && aiMoreMenu) {
   aiMoreBtn.addEventListener('click', (e) => {
     e.stopPropagation()
-    aiQuickMenu?.classList.remove('show')
+    setQuickMenuOpen(false)
     aiMoreMenu.classList.toggle('show')
   })
 }
@@ -1784,7 +1777,7 @@ if (aiQuickMenu) {
   aiQuickMenu.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-p]')
     if (!btn) return
-    applyQuickPrompt(btn.dataset.p || '')
+    void runQuickShortcut(btn.dataset.p || '')
   })
   aiQuickMenu.addEventListener('mousemove', (e) => {
     const btn = e.target.closest('[data-p]')
@@ -1932,14 +1925,16 @@ function pickSlashSkill(skill) {
   aiInput.dispatchEvent(new Event('input'))
 }
 
-async function runAI() {
-  const prompt = aiInput.value.trim()
+async function runAI(options = {}) {
+  const shortcutPrompt = String(options?.promptText || '').trim()
+  const prompt = shortcutPrompt || aiInput.value.trim()
   if (!prompt || !note) return
   if (slashOpen) hideSlashMenu()
   if (!aiOpen) await setAiOpen(true)
+  const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
 
-  chatHistory.push({ role: 'user', text: prompt })
-  chatHistory.push({ role: 'assistant', text: '', streaming: true })
+  chatHistory.push({ role: 'user', text: shortcutPrompt ? String(options?.displayPrompt || '快捷操作') : prompt })
+  chatHistory.push({ role: 'assistant', text: '', streaming: true, runId, activity: '正在准备上下文…', trace: [] })
   const assistantIdx = chatHistory.length - 1
   renderChat()
 
@@ -1948,6 +1943,53 @@ async function runAI() {
   aiInput.style.height = 'auto'
 
   let gotStream = false
+  const offEvent = window.api.onAiStreamEvent
+    ? window.api.onAiStreamEvent(event => {
+        if (!event || event.runId !== runId) return
+        const message = chatHistory[assistantIdx]
+        if (!message) return
+        if (event.type === 'content') {
+          gotStream = true
+          message.text = String(event.text || '')
+          message.activity = '正在生成回答…'
+          updateStreamText(assistantIdx)
+          return
+        }
+        if (event.type === 'stage' || event.type === 'fallback') {
+          message.activity = String(event.title || event.activity || '正在处理…')
+          upsertAssistantTrace(message, {
+            id: event.id || `stage_${event.stage || 'working'}`,
+            kind: 'stage',
+            title: event.title || event.activity || '执行步骤',
+            status: event.status || 'pending',
+            durationMs: event.durationMs,
+          })
+          renderChat()
+          return
+        }
+        if (event.type === 'tool.started' || event.type === 'tool.completed' || event.type === 'tool.failed') {
+          const pending = event.type === 'tool.started'
+          const failed = event.type === 'tool.failed'
+          message.activity = pending ? String(event.title || '正在调用工具…') : message.activity
+          upsertAssistantTrace(message, {
+            id: event.id || event.toolCallId,
+            kind: 'tool',
+            title: event.title || event.toolName || '工具调用',
+            status: pending ? 'pending' : failed ? 'error' : 'done',
+            durationMs: event.durationMs,
+          })
+          renderChat()
+          return
+        }
+        if (event.type === 'done' || event.type === 'error') {
+          message.activity = ''
+          for (const item of message.trace || []) {
+            if (item.status === 'pending') item.status = event.type === 'error' ? 'error' : 'done'
+          }
+          renderChat()
+        }
+      })
+    : () => {}
   const offChunk = window.api.onAiStreamChunk(({ text }) => {
     gotStream = true
     chatHistory[assistantIdx].text = text
@@ -1970,7 +2012,9 @@ async function runAI() {
       noteId: note.id,
       category: (note.category || inpCategory.value || '').trim(),
       skillRefs,
+      runId,
     })
+    offEvent()
     offChunk()
 
     if (result.error) {
@@ -1987,13 +2031,16 @@ async function runAI() {
       chatHistory[assistantIdx].text = finalText
     }
     chatHistory[assistantIdx].streaming = false
+    chatHistory[assistantIdx].activity = ''
     renderChat()
   } catch (err) {
+    offEvent()
     offChunk()
     chatHistory.splice(assistantIdx, 1)
     chatHistory.push({ role: 'error', text: err.message || '生成失败' })
     renderChat()
   } finally {
+    offEvent()
     aiSend.disabled = false
   }
 }
@@ -2017,7 +2064,7 @@ aiInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       const active = items[quickActive] || items[0]
-      if (active) applyQuickPrompt(active.dataset.p || '')
+      if (active) void runQuickShortcut(active.dataset.p || '')
       return
     }
     if (e.key === 'Escape') {
@@ -2071,10 +2118,41 @@ aiInput.addEventListener('blur', () => setTimeout(hideSlashMenu, 120))
 if (window.api.listSkills) ensureSkillCatalog()
 
 document.addEventListener('keydown', async e => {
+  if (e.defaultPrevented) return
+  if (aiQuickMenu?.classList.contains('show')) {
+    const items = quickItems()
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      quickActive = (quickActive + 1) % Math.max(items.length, 1)
+      renderQuickActive()
+      return
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      quickActive = (quickActive - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1)
+      renderQuickActive()
+      return
+    }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      const active = items[quickActive] || items[0]
+      if (active) void runQuickShortcut(active.dataset.p || '')
+      return
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault()
+      hideAiMenus()
+      return
+    }
+  }
   if ((e.ctrlKey || e.metaKey) && String(e.key || '').toLowerCase() === 'k') {
     // 编辑器里 Ctrl+K 让位给 MD 链接快捷键，避免与 AI 快捷菜单冲突
     if (e.target === editor && isMdEditMode()) return
     e.preventDefault()
+    if (aiQuickMenu?.classList.contains('show')) {
+      setQuickMenuOpen(false)
+      return
+    }
     if (!aiOpen) await setAiOpen(true)
     showQuickMenu()
     return
@@ -2096,15 +2174,6 @@ window.api.initNote(n=>{
   titleManual    = n.projectManual ?? !!n.project?.trim()
   setVersion(n.version || '0.1')
   setFavorite(n.favorite || false)
-  btnPromote.classList.remove('done')
-  btnPromote.title = '收入库 — 保存到本机知识库，便于复用'
-  const promoteIco = btnPromote.querySelector('.ico')
-  if (promoteIco) promoteIco.innerHTML = StickyIcons.svg('classify')
-  if (n.skillPackConceptId) {
-    btnPromote.classList.add('done')
-    btnPromote.title = '已封装为技能包'
-    if (promoteIco) promoteIco.innerHTML = StickyIcons.svg('check')
-  }
   if (n.editorMode === 'preview') {
     editorMode = 'md'
     mdView = 'preview'
@@ -2119,15 +2188,6 @@ window.api.initNote(n=>{
   updateCounts()
   saveTime.textContent = relTime(n.updatedAt||n.createdAt)
   btnPin.classList.toggle('on', n.pinned!==false)
-  if (window.api.skillPackCheck) {
-    window.api.skillPackCheck().then((r) => {
-      const hit = (r.suggestions || []).find(
-        (s) => s.theme === (n.category || '').trim()
-      )
-      if (hit) showSkillSuggest(hit)
-      else hideSkillBanner()
-    }).catch(() => {})
-  }
   if (n.aiOpen) {
     aiOpen = true
     card.classList.add('ai-open')

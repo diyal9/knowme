@@ -93,7 +93,7 @@ def synthesize_daily(day: str, sections: dict[str, list[str]]) -> str | None:
             bullets.append(f"### {title}\n" + "\n".join(items[:25]))
     user = (
         f"日期：{day}\n\n"
-        "以下为 StickyNotes 项目 Agent 记忆片段。"
+        "以下为 KnowMe 项目 Agent 记忆片段。"
         "请用中文输出 200～400 字结构化摘要：\n"
         "1. 用户纠正了什么\n"
         "2. 产品/架构约定\n"
@@ -102,7 +102,7 @@ def synthesize_daily(day: str, sections: dict[str, list[str]]) -> str | None:
         "不要编造未出现的事实。\n\n" + "\n\n".join(bullets)
     )
     return chat_complete(
-        "你是 StickyNotes 桌面便签项目的记忆整理员，只基于给定片段摘要，不臆测。",
+        "你是 KnowMe 桌面便签项目的记忆整理员，只基于给定片段摘要，不臆测。",
         user,
     )
 
@@ -121,7 +121,7 @@ def synthesize_period(period_label: str, daily_bodies: list[str]) -> str | None:
         "不要编造。\n\n" + joined
     )
     return chat_complete(
-        "你是 StickyNotes 项目的记忆整理员，合并日摘要为周期摘要。",
+        "你是 KnowMe 项目的记忆整理员，合并日摘要为周期摘要。",
         user,
     )
 

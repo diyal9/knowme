@@ -2,7 +2,7 @@
 okf_version: "0.1"
 ---
 
-# StickyNotes Knowledge Bundle
+# KnowMe Knowledge Bundle
 
 OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 
@@ -12,6 +12,7 @@ OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 
 * [Product Overview](concepts/product-overview.md) - 产品定位与边界
 * [Electron IPC](concepts/electron-ipc.md) - IPC 与安全约定
+* [LLM Runtime And Cursor Benchmark](concepts/llm-processing-and-cursor-benchmark.md) - LLM 处理链路、能力对标与差距边界
 
 ## Decisions
 

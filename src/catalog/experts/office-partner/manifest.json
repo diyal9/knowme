@@ -1,0 +1,7 @@
+{
+  "id": "office-partner",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["writing-polish"],
+  "connectors": ["feishu"]
+}

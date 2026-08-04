@@ -11,5 +11,5 @@ description: 导出 OKF 知识库 bundle，供其他用户导入
 npm run kb:export
 ```
 
-输出 `dist/kb-export/sticky-notes-knowledge-<date>/`，含 MANIFEST.json。  
+输出 `dist/kb-export/knowme-knowledge-<date>/`，含 MANIFEST.json。  
 导出前自动 lint（可用 `--skip-lint` 跳过）。

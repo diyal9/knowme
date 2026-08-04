@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>组织配置 · KnowMe Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header>
+<strong>KnowMe 管理后台</strong>
+<span class="muted">{{.User.Username}} ({{.User.Role}})</span>
+<nav>
+<a href="/admin/config" class="active">组织配置</a>
+<a href="/admin/users">用户</a>
+<form method="post" action="/admin/logout"><button class="btn secondary" type="submit">退出</button></form>
+</nav>
+</header>
+<main>
+<div class="card">
+<h1>组织公共配置</h1>
+<p class="muted">客户端启用「组织托管」后通过 <code>GET /v1/config/public</code> 拉取。</p>
+<form method="post" action="/admin/config">
+<div class="row">
+<div><label>Provider</label><input name="provider" value="{{.Provider}}"></div>
+<div><label>Model</label><input name="model" value="{{.Model}}"></div>
+</div>
+<label>API Endpoint</label>
+<input name="endpoint" value="{{.Endpoint}}">
+<label>Feature flags（JSON）</label>
+<textarea name="feature_flags">{{.FeatureFlagsJSON}}</textarea>
+
+<h2>连接器配置</h2>
+<div class="card inner">
+<h3>飞书文档与知识库</h3>
+<p class="muted">当前默认面向飞书文档/知识库只读，写入能力不会自动启用。</p>
+<label>飞书工具白名单（可多选）</label>
+<select class="multi-select" name="feishu_allowlist_items" multiple size="8">
+{{range .FeishuTools}}
+<option value="{{.Name}}" {{if .Selected}}selected{{end}}>{{.Label}}</option>
+{{end}}
+</select>
+<p class="muted">默认全选。若全部取消，保存时会自动恢复为全选。</p>
+</div>
+<button class="btn" type="submit" {{if not .CanWrite}}disabled{{end}}>保存</button>
+{{if not .CanWrite}}<p class="muted">viewer 只读。</p>{{end}}
+{{if .Saved}}<p class="ok">已保存 · {{.UpdatedAt}}</p>{{end}}
+{{if .Error}}<p class="err">{{.Error}}</p>{{end}}
+</form>
+</div>
+</main>
+</body>
+</html>

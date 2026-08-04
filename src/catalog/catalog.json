@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-04T00:00:00.000Z",
+  "entries": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "name": "写作润色",
+      "description": "优化文案结构、语气一致性与可读性，适合邮件、汇报与对外材料。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["写作"],
+      "tags": ["writing", "polish"],
+      "featured": true,
+      "bundlePath": "skills/writing-polish"
+    },
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "name": "代码审查",
+      "description": "按最小改动原则审查 diff，关注回归风险、边界条件与可测试性。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["开发"],
+      "tags": ["code", "review"],
+      "featured": true,
+      "bundlePath": "skills/code-review"
+    },
+    {
+      "id": "office-partner",
+      "kind": "expert",
+      "name": "办公伙伴",
+      "description": "面向日常办公场景的多能力专家，绑定写作润色与飞书连接器。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["办公"],
+      "tags": ["office", "partner"],
+      "featured": true,
+      "bundlePath": "experts/office-partner"
+    },
+    {
+      "id": "feishu",
+      "kind": "connector",
+      "name": "飞书",
+      "description": "读取飞书文档、会议与 IM 上下文；密钥通过 env: 引用。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["连接器", "飞书"],
+      "tags": ["feishu", "mcp"],
+      "featured": true,
+      "bundlePath": "connectors/feishu"
+    },
+    {
+      "id": "mcp-generic",
+      "kind": "connector",
+      "name": "通用 MCP",
+      "description": "通过 command/args 启动任意 MCP 服务，环境变量使用 env: 占位。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["连接器"],
+      "tags": ["mcp", "generic"],
+      "featured": false,
+      "bundlePath": "connectors/mcp-generic"
+    }
+  ]
+}

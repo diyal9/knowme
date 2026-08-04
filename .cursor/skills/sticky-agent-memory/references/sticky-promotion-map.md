@@ -1,4 +1,4 @@
-# StickyNotes 升库映射
+# KnowMe 升库映射
 
 用户确认「写入 OKF」时，按内容类型选路径：
 

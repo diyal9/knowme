@@ -25,7 +25,8 @@ describe('list-home v0.3', () => {
     assert.ok(listHtml.includes('data-fav'), 'clickable favorite star');
     assert.ok(listHtml.includes('THEME_LABELS'), 'theme chinese labels');
     assert.ok(listHtml.includes('data-icon="star"'), 'svg favorite star');
-    assert.ok(listHtml.includes('stroke-width:1.5'), 'codicon stroke on list');
+    assert.ok(listHtml.includes('ui-icons.js?v=lucide'), 'lucide icon script');
+    assert.ok(listHtml.includes('width:100%;height:100%;display:block'), 'svg size without stroke override');
     assert.ok(listHtml.includes('chip-more') || listHtml.includes('maxTags'), 'tag chip limit');
     assert.ok(listHtml.includes('chip-cat{color:var(--text2)'), 'category chip muted gray');
   });

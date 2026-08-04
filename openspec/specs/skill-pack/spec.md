@@ -1,3 +1,5 @@
+> **SUPERSEDED** by \`reposition-ai-file-editor\` (2026-07-16). See \`openspec/specs/workspace/spec.md\` and related workspace specs.
+
 # skill-pack Specification
 
 ## Purpose

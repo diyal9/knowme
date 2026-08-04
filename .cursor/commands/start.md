@@ -5,7 +5,7 @@ category: Team
 description: 智能体仓库 onboarding — 读 AGENTS.md，跑 preflight，选择角色
 ---
 
-# 启动 StickyNotes 智能体仓库
+# 启动 KnowMe 智能体仓库
 
 1. 读取 `AGENTS.md` 与 `team/charter.md`
 2. 运行 `npm run harness:preflight`

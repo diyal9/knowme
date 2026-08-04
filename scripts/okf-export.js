@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Export OKF knowledge bundle for sharing
- * Output: dist/kb-export/sticky-notes-knowledge-<date>/
+ * Output: dist/kb-export/knowme-knowledge-<date>/
  */
 'use strict';
 
@@ -19,7 +19,7 @@ function main() {
   const skipLint = args.includes('--skip-lint');
   const outIdx = args.indexOf('--out');
   const date = new Date().toISOString().slice(0, 10);
-  const defaultName = `sticky-notes-knowledge-${date}`;
+  const defaultName = `knowme-knowledge-${date}`;
   const outName = outIdx >= 0 ? args[outIdx + 1] : defaultName;
   const dest = path.join(DIST, outName);
 
@@ -41,7 +41,7 @@ function main() {
   const manifest = {
     okf_version: '0.1',
     exported_at: new Date().toISOString(),
-    source: 'sticky-notes',
+    source: 'knowme',
     bundle_path: dest,
     concepts: lintBundle(SOURCE).concepts,
     import_hint: 'npm run kb:import -- ' + path.relative(ROOT, dest),

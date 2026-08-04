@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""StickyNotes Agent 记忆存储路径解析（Hook 与 Skill 共用）。"""
+"""KnowMe Agent 记忆存储路径解析（Hook 与 Skill 共用）。"""
 from __future__ import annotations
 
 import hashlib
@@ -36,9 +36,9 @@ def memory_root(repo_root: Path | None = None) -> Path:
     ws = workspace_id(repo_root)
     if os.name == "nt":
         local = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
-        return Path(local) / "sticky-notes" / "memory" / ws
+        return Path(local) / "knowme" / "memory" / ws
     xdg = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
-    return Path(xdg) / "sticky-notes" / "memory" / ws
+    return Path(xdg) / "knowme" / "memory" / ws
 
 
 def memory_buffer_dir(repo_root: Path | None = None) -> Path:
@@ -47,7 +47,7 @@ def memory_buffer_dir(repo_root: Path | None = None) -> Path:
         return Path(override).expanduser()
     return (
         Path(tempfile.gettempdir())
-        / "sticky-notes"
+        / "knowme"
         / "memory-buffer"
         / workspace_id(repo_root)
     )
@@ -86,7 +86,7 @@ def ensure_memory_layout(repo_root: Path | None = None) -> Path:
         layout[key].mkdir(parents=True, exist_ok=True)
     if not layout["index"].is_file():
         layout["index"].write_text(
-            "# StickyNotes Agent Memory Index\n\n"
+            "# KnowMe Agent Memory Index\n\n"
             f"- workspace_id: `{workspace_id(repo_root)}`\n"
             f"- root: `{root}`\n"
             "- skill: `.cursor/skills/sticky-agent-memory/SKILL.md`\n"

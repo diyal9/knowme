@@ -1,5 +1,5 @@
 /**
- * Sticky-Notes smoke tests — 门禁硬项 npm test
+ * KnowMe smoke tests — 门禁硬项 npm test
  */
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
@@ -41,7 +41,7 @@ describe('release materials', () => {
     assert.ok(fs.existsSync(privacy));
     const content = fs.readFileSync(privacy, 'utf8');
     assert.ok(content.includes('API Key'), 'privacy should cover API Key');
-    assert.ok(content.includes('便签'), 'privacy should cover notes');
+    assert.ok(content.includes('KnowMe') || content.includes('便签'), 'privacy should name the product');
   });
 
   it('package version matches release target', () => {
@@ -59,7 +59,7 @@ describe('release materials', () => {
     assert.ok(wf.includes('needs: test'));
   });
 });
-describe('sticky-notes v0.2', () => {
+describe('knowme v0.2', () => {
   it('prompt-sections module exists', () => {
     const mod = require('../src/lib/prompt-sections');
     assert.ok(typeof mod.assembleContent === 'function');
@@ -69,13 +69,14 @@ describe('sticky-notes v0.2', () => {
   it('preload exposes v0.2 IPC', () => {
     const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8');
     assert.ok(preload.includes('getNoteVersions'));
-    assert.ok(preload.includes('promoteToOkf'));
-    assert.ok(preload.includes('memoryRecent'));
-    assert.ok(preload.includes('suggestClassification'));
-    assert.ok(preload.includes('skillPackGenerate'));
+    assert.ok(preload.includes('workspaceInit'));
+    assert.ok(preload.includes('buildFinalPrompt'));
     assert.ok(preload.includes('knowledgeWriteConcept'));
     assert.ok(preload.includes('listSkills'));
     assert.ok(preload.includes('createSkill'));
+    assert.ok(preload.includes('knowledgeProviderList'), 'dual knowledge base provider bridge');
+    assert.ok(preload.includes('knowledgeProviderQuery'), 'provider query bridge');
+    assert.ok(!preload.includes('promoteToOkf'), 'legacy note→OKF bridge removed');
   });
 
   it('memory.html exists', () => {

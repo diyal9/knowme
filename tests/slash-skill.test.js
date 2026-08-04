@@ -67,16 +67,13 @@ describe('slash-skill-ref', () => {
     assert.equal(b.slash, 'dup-2');
   });
 
-  it('settings create-skill uses drawer, not window.prompt', () => {
+  it('settings keeps skill management out of personal memory', () => {
     const html = fs.readFileSync(
       path.join(__dirname, '..', 'src', 'settings.html'),
       'utf8'
     );
-    assert.ok(html.includes('openCreateSkillDrawer'), 'must open drawer for create');
-    assert.ok(html.includes('btnCreateSkill'), 'create button present');
-    assert.ok(
-      !html.includes('window.prompt('),
-      'Electron disables prompt; must not use window.prompt'
-    );
+    assert.ok(html.includes('data-tab="memory"'), 'personal memory tab present');
+    assert.ok(!html.includes('btnCreateSkill'), 'skill management belongs outside settings');
+    assert.ok(!html.includes('openCreateSkillDrawer'), 'legacy skill drawer removed');
   });
 });

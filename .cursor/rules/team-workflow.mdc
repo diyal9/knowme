@@ -1,5 +1,5 @@
 ---
-description: StickyNotes 三角色团队协作工作流（制作人→开发→测试）
+description: KnowMe 三角色团队协作工作流（制作人→开发→测试）
 alwaysApply: true
 ---
 
@@ -56,4 +56,4 @@ alwaysApply: true
 
 - 产品：Windows 桌面便签（Electron）
 - 技术栈：Electron 31、electron-store、原生 HTML/JS
-- 数据：`%APPDATA%\sticky-notes\notes\`
+- 数据：`%APPDATA%\KnowMe\notes\`

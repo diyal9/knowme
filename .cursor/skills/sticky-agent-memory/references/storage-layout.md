@@ -41,7 +41,7 @@
 |------|------|------|
 | `STICKY_MEMORY` | `1` | `0` 关闭 |
 | `STICKY_MEMORY_ROOT` | 见上 | 覆盖持久根 |
-| `STICKY_MEMORY_BUFFER` | `%TEMP%/sticky-notes/memory-buffer/<ws>` | 热缓冲 |
+| `STICKY_MEMORY_BUFFER` | `%TEMP%/knowme/memory-buffer/<ws>` | 热缓冲 |
 | `STICKY_MEMORY_PROMPT_THRESHOLD` | `3` | 重复几次后入 pending |
 | `STICKY_MEMORY_LLM` | — | `1` 启用可选 LLM 摘要 |
 | `STICKY_MEMORY_LLM_API_KEY` | — | 或 `OPENAI_API_KEY` |

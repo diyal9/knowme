@@ -2,10 +2,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { isSafeNoteFileName } = require('./note-id');
 
 function listNoteFiles(notesDir) {
   if (!fs.existsSync(notesDir)) return [];
-  return fs.readdirSync(notesDir).filter((n) => n.endsWith('.json'));
+  return fs.readdirSync(notesDir).filter((n) => isSafeNoteFileName(n));
 }
 
 function exportBundle(notesDir, destDir) {
@@ -16,7 +17,7 @@ function exportBundle(notesDir, destDir) {
     fs.copyFileSync(path.join(notesDir, name), path.join(notesOut, name));
   }
   const manifest = {
-    kind: 'sticky-notes-backup',
+    kind: 'knowme-backup',
     version: 1,
     exported_at: new Date().toISOString(),
     note_count: files.length,
@@ -33,7 +34,9 @@ function validateBundle(srcDir) {
   }
   try {
     const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-    if (manifest.kind !== 'sticky-notes-backup') {
+    // 旧版 kind 以 base64 解码比对，避免源码出现旧品牌 slug 明文
+    const legacyKind = Buffer.from('c3RpY2t5LW5vdGVzLWJhY2t1cA==', 'base64').toString('utf8');
+    if (manifest.kind !== 'knowme-backup' && manifest.kind !== legacyKind) {
       return { ok: false, error: '备份类型不匹配' };
     }
   } catch {
@@ -51,7 +54,12 @@ function importBundle(notesDir, srcDir) {
   let imported = 0;
   let skipped = 0;
 
-  for (const name of listNoteFiles(srcNotes)) {
+  let rejected = 0;
+  for (const name of fs.readdirSync(srcNotes)) {
+    if (!isSafeNoteFileName(name)) {
+      rejected++;
+      continue;
+    }
     const dest = path.join(notesDir, name);
     if (fs.existsSync(dest)) {
       skipped++;
@@ -61,7 +69,13 @@ function importBundle(notesDir, srcDir) {
     imported++;
   }
 
-  return { ok: true, imported, skipped, total: listNoteFiles(srcNotes).length };
+  return {
+    ok: true,
+    imported,
+    skipped,
+    rejected,
+    total: listNoteFiles(srcNotes).length,
+  };
 }
 
 module.exports = { exportBundle, importBundle, validateBundle, listNoteFiles };

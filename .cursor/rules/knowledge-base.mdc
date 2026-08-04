@@ -5,7 +5,7 @@ alwaysApply: true
 
 # 知识库与自我进化
 
-> **产品 vs 仓库**：终端用户的 OKF/Memory 在 `%APPDATA%\sticky-notes\knowledge\` 与 `memory\`（`src/lib/product-*.js`，设置页管理）。本节 `brain/` 与 `/kb-*` 命令仅服务 **Cursor 智能体开发**。
+> **产品 vs 仓库**：终端用户的 OKF/Memory 在 `%APPDATA%\KnowMe\knowledge\` 与 `memory\`（`src/lib/product-*.js`，设置页管理）。本节 `brain/` 与 `/kb-*` 命令仅服务 **Cursor 智能体开发**。
 
 ## 架构（Karpathy LLM Wiki + OKF）
 
@@ -13,8 +13,8 @@ alwaysApply: true
 |----|--------------|--------------|
 | Raw | `brain/raw/` | — |
 | Wiki | `brain/wiki/` | — |
-| Knowledge | `brain/knowledge/` | `%APPDATA%\sticky-notes\knowledge\` |
-| Memory | `brain/memory/` | `%APPDATA%\sticky-notes\memory\` |
+| Knowledge | `brain/knowledge/` | `%APPDATA%\KnowMe\knowledge\` |
+| Memory | `brain/memory/` | `%APPDATA%\KnowMe\memory\` |
 
 参考：[Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)、[OKF SPEC](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
 
@@ -32,8 +32,8 @@ alwaysApply: true
 
 | 层 | 路径 | 写入 |
 |----|------|------|
-| **Agent episodic** | `%LOCALAPPDATA%\sticky-notes\memory\<ws_id>\` | Hook 自动（`sticky-agent-memory`） |
-| **产品 episodic** | `%APPDATA%\sticky-notes\memory\` | 复制/收藏/AI 等（`product-memory.js`） |
+| **Agent episodic** | `%LOCALAPPDATA%\knowme\memory\<ws_id>\` | Hook 自动（`sticky-agent-memory`） |
+| **产品 episodic** | `%APPDATA%\KnowMe\memory\` | 复制/收藏/AI 等（`product-memory.js`） |
 | **团队 OKF** | `brain/knowledge/` | 用户确认后 `/kb-ingest` |
 
 个人记忆 **禁止** 未经确认当作团队事实。≥3 次重复见 `sticky-agent-memory` references/promotion.md

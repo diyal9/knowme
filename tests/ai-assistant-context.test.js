@@ -13,6 +13,30 @@ const {
 } = require('../src/lib/ai-assistant-context');
 
 describe('ai-assistant-context', () => {
+  it('positions the assistant as a work partner instead of a prompt tool', () => {
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('你是 KnowMe（知我）Agent'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('不得自称“WorkBuddy”'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('推动工作真正完成'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('普通问候、宽泛意图和默认建议中禁止主动推荐提示词'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('只有用户明确要求生成或优化提示词时才处理该能力'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('规划任务、分析问题、创作内容、推进工作或检索知识'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.search_docs'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止声称'));
+  });
+
+  it('routes external links to fetch_web_page and feishu links to read_doc', () => {
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('fetch_web_page'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.cn / larksuite.com 链接用 feishu.read_doc'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('其余外部网页一律用 fetch_web_page 读取'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止拿外部链接或其片段去调 feishu.search_docs'));
+  });
+
+  it('forbids denying web access when a fetch tool exists', () => {
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('没有联网能力'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('手动复制粘贴网页正文'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('我没有访问外部网页的能力'));
+  });
+
   it('detects legacy default system prompt fingerprint', () => {
     assert.equal(isLegacyDefaultSystemPrompt(LEGACY_DEFAULT_SYSTEM_PROMPT), true);
     assert.equal(isLegacyDefaultSystemPrompt(ASSISTANT_BASE_PROMPT), true);
@@ -60,9 +84,26 @@ describe('ai-assistant-context', () => {
     assert.ok(prefIdx > baseIdx);
   });
 
+  it('assembles scene, user, and skill layers in stable order', () => {
+    const sys = buildSystemContent({
+      scenePrompt: '场景：工作伙伴',
+      userPrompt: '语气专业克制',
+      skillPrompt: '技能：会议总结',
+    });
+    const coreIdx = sys.indexOf(ASSISTANT_BASE_PROMPT);
+    const sceneIdx = sys.indexOf('## 场景策略');
+    const userIdx = sys.indexOf('## 用户偏好');
+    const skillIdx = sys.indexOf('## 技能策略');
+    assert.ok(coreIdx === 0);
+    assert.ok(coreIdx < sceneIdx);
+    assert.ok(sceneIdx < userIdx);
+    assert.ok(userIdx < skillIdx);
+  });
+
   it('builds multi-turn messages with note context', () => {
     const messages = buildChatMessages({
       systemContent: 'BASE',
+      contextMessage: 'DYN',
       history: [
         { role: 'user', text: '第一问' },
         { role: 'assistant', text: '第一答' },
@@ -73,13 +114,44 @@ describe('ai-assistant-context', () => {
     });
     assert.equal(messages[0].role, 'system');
     assert.equal(messages[0].content, 'BASE');
+    assert.equal(messages[1].role, 'system');
+    assert.equal(messages[1].content, 'DYN');
+    assert.equal(messages[2].role, 'user');
+    assert.equal(messages[2].content, '第一问');
+    assert.equal(messages[3].role, 'assistant');
+    assert.equal(messages[3].content, '第一答');
+    assert.equal(messages[4].role, 'user');
+    assert.ok(messages[4].content.includes('便签正文'));
+    assert.ok(messages[4].content.includes('参考文件正文'));
+    assert.ok(messages[4].content.includes('第二问'));
+    assert.ok(!messages[4].content.includes('需求：'));
+  });
+
+  it('sends plain greeting without demand prefix', () => {
+    const messages = buildChatMessages({
+      systemContent: 'S',
+      history: [],
+      prompt: '你好',
+      noteContext: null,
+    });
     assert.equal(messages[1].role, 'user');
-    assert.equal(messages[1].content, '第一问');
-    assert.equal(messages[2].role, 'assistant');
-    assert.equal(messages[2].content, '第一答');
-    assert.equal(messages[3].role, 'user');
-    assert.ok(messages[3].content.includes('便签正文'));
-    assert.ok(messages[3].content.includes('需求：第二问'));
+    assert.equal(messages[1].content, '你好');
+  });
+
+  it('default maxTurns allows more than 6 turns', () => {
+    const history = [];
+    for (let i = 0; i < 10; i++) {
+      history.push({ role: 'user', text: `u${i}` });
+      history.push({ role: 'assistant', text: `a${i}` });
+    }
+    const messages = buildChatMessages({
+      systemContent: 'S',
+      history,
+      prompt: 'now',
+    });
+    // system + 20 history (10 turns) + current — default maxTurns=12 keeps all 10
+    assert.equal(messages.length, 22);
+    assert.equal(messages[1].content, 'u0');
   });
 
   it('truncates history to maxTurns', () => {

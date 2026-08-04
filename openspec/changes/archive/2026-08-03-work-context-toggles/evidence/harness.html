@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>本轮上下文开关</title>
+<style>
+body{margin:0;padding:150px 28px 28px;background:#faf9f7;font:13px/1.5 system-ui,sans-serif}
+.wrap{width:560px}
+.composer{border:1px solid rgba(61,58,54,0.16);border-radius:12px;background:#fffefb;padding:12px 14px;min-height:78px;color:#a9a199}
+.meta{margin-top:8px;color:#8a8178;font-size:11px}
+
+.agent-work-hints{display:flex;flex-wrap:wrap;align-items:center;gap:6px;width:var(--agent-message-track,100%);max-width:var(--agent-message-track,100%);margin:0 0 6px;padding:0 2px;overflow:visible}
+.agent-work-hints[hidden]{display:none!important}
+.agent-work-hints-title{flex:0 0 auto;color:#8a8178;font:11px/1.35 var(--ui,system-ui,sans-serif)}
+.agent-work-hint{position:relative;display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:min(260px,calc(100% - 42px));border:1px solid rgba(61,58,54,0.12);background:rgba(61,58,54,0.035);color:#5f5a54;border-radius:10px;padding:5px 9px 5px 7px;font:11px/1.35 var(--ui,system-ui,sans-serif);cursor:pointer;text-align:left}
+.agent-work-hint:hover,.agent-work-hint:focus-within{background:rgba(61,58,54,0.075);border-color:rgba(61,58,54,0.22);color:#3d3a36}
+.agent-work-hint.is-on{background:rgba(103,95,85,0.1);border-color:rgba(103,95,85,0.32);color:#3d3a36}
+.agent-work-hint-check{width:13px;height:13px;margin:0;flex:0 0 auto;accent-color:#675f55;cursor:pointer}
+.agent-work-hint-label{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-work-hint-detail{display:none;position:absolute;left:0;bottom:calc(100% + 8px);z-index:30;width:min(330px,calc(100vw - 48px));padding:10px 11px;border:1px solid rgba(61,58,54,0.16);border-radius:10px;background:rgba(255,254,251,0.98);box-shadow:0 10px 28px rgba(47,43,38,0.14);color:#514b45;white-space:normal;cursor:default}
+.agent-work-hint:hover .agent-work-hint-detail,.agent-work-hint:focus-within .agent-work-hint-detail{display:grid;gap:8px}
+.agent-work-hint-detail-row{display:grid;gap:2px}
+.agent-work-hint-detail-title{font-size:10px;font-weight:700;color:#8a8178}
+.agent-work-hint-detail-copy{font-size:11px;line-height:1.5;overflow-wrap:anywhere;white-space:pre-line}
+.agent-work-hint-dismiss{margin-left:auto;border:none;background:transparent;color:#b0a89e;font-size:11px;cursor:pointer;padding:2px 4px}
+
+</style></head>
+<body><div class="wrap">
+<div class="agent-work-hints"><span class="agent-work-hints-title">本轮带上</span><label class="agent-work-hint is-on"><input class="agent-work-hint-check" type="checkbox" data-work-hint-index="0" checked aria-describedby="agentWorkHintDetail0"><span class="agent-work-hint-label">先给结论，再给依据；会议总结优先给待办</span><span class="agent-work-hint-detail" id="agentWorkHintDetail0" role="tooltip"><span class="agent-work-hint-detail-row"><span class="agent-work-hint-detail-title">具体内容</span><span class="agent-work-hint-detail-copy">用户主动填写的协作偏好：先给结论，再给依据
+已确认习惯：会议总结优先给待办</span></span><span class="agent-work-hint-detail-row"><span class="agent-work-hint-detail-title">为什么推荐</span><span class="agent-work-hint-detail-copy">这是你填写或已确认的协作偏好，当前每轮对话都会生效；取消勾选可让本轮不使用。</span></span></span></label><label class="agent-work-hint"><input class="agent-work-hint-check" type="checkbox" data-work-hint-index="1" aria-describedby="agentWorkHintDetail1"><span class="agent-work-hint-label">决策：会议纪要先出待办再出邮件</span><span class="agent-work-hint-detail" id="agentWorkHintDetail1" role="tooltip"><span class="agent-work-hint-detail-row"><span class="agent-work-hint-detail-title">具体内容</span><span class="agent-work-hint-detail-copy">会议纪要先出待办再出邮件</span></span><span class="agent-work-hint-detail-row"><span class="agent-work-hint-detail-title">为什么推荐</span><span class="agent-work-hint-detail-copy">从近期工作内容推断，尚未确认。</span></span></span></label><button type="button" class="agent-work-hint-dismiss" aria-label="隐藏本轮上下文">隐藏</button></div>
+<div class="composer">帮我把今天的会议纪要整理成给团队的同步邮件</div>
+<div class="meta">准备发送 · Enter 发送 · 已带上 1 条上下文</div>
+</div></body></html>

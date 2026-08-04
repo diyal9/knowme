@@ -1,4 +1,4 @@
-# StickyNotes 团队宪章
+# KnowMe 团队宪章
 
 ## 使命
 

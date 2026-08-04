@@ -26,7 +26,7 @@ try {
 }
 
 const lines = [
-  '## StickyNotes Agent Team',
+  '## KnowMe Agent Team',
   '- 读取 `AGENTS.md` 与 `team/charter.md`',
   '- 工作流：制作人 → 开发 → 测试；OpenSpec OPSX + ReACT',
   '- 知识库：`brain/knowledge/index.md`（OKF，可 `/kb-export` `/kb-import`）',

@@ -1,0 +1,17 @@
+{
+  "id": "mcp-generic",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "通用 MCP",
+  "description": "通过 command/args 启动任意 MCP 服务。敏感值 MUST 使用 env:VAR_NAME。",
+  "mcp": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "example-mcp-server"],
+    "env": {
+      "API_TOKEN": "env:MCP_API_TOKEN"
+    }
+  },
+  "allowlist": []
+}

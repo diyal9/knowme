@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>KnowMe FAB · 挂边圆角药丸（as-shipped）</title>
+<style>
+  :root { --ui: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--ui); color: #2b2925; background: #efeae1; padding: 26px 26px 50px; }
+  h1 { font-size: 16px; font-weight: 700; margin: 0 0 4px; }
+  .lead { color: #6a655d; font-size: 12px; margin: 0 0 20px; }
+  .grid { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; }
+  .win {
+    position: relative; width: 360px; height: 260px; border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff, #fbfaf7);
+    border: 1px solid #e4ded3; box-shadow: 0 12px 30px rgba(30,40,60,.10); overflow: hidden;
+  }
+  .win .fc { position: absolute; inset: 14px; display: flex; flex-direction: column; gap: 9px; }
+  .win .line { height: 9px; border-radius: 6px; background: #eee7db; }
+  .win .line.s { width: 55%; } .win .line.m { width: 78%; }
+  .win .card { margin-top: 6px; height: 66px; border-radius: 10px; background: #f6f3ee; border: 1px solid #ece5da; border-left: 3px solid #2f6f5e; }
+  .cap { color: #4a453d; font-size: 12px; font-weight: 600; margin-top: 10px; }
+  .cap small { color: #9a948a; font-weight: 500; }
+
+  /* ===== 与 workspace.html 实装一致 ===== */
+  .km-fab-root { position: absolute; right: 0; bottom: 96px; }
+  .km-fab-btn {
+    width: 38px; height: 48px; border: 0; padding: 0 3px 0 0; cursor: grab;
+    border-radius: 16px 0 0 16px; background: linear-gradient(150deg, #e07a6d, #d86a5f);
+    position: relative; display: flex; align-items: center; justify-content: center;
+    box-shadow: -3px 4px 12px rgba(120, 48, 40, .22);
+  }
+  .km-fab-glyph svg { width: 26px; height: 26px; display: block; }
+  .km-fab-badge {
+    position: absolute; top: -5px; left: -5px; min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 999px; background: #7a2f2a; color: #fff; border: 2px solid #fff;
+    font: 700 9px/1 var(--ui); display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(86, 38, 34, .25);
+  }
+  /* 展开面板 */
+  .km-fab-panel {
+    position: absolute; right: 48px; bottom: 96px; width: 246px;
+    background: rgba(255,255,255,.96); border: 1px solid rgba(36,65,127,.13);
+    border-radius: 16px; box-shadow: 0 18px 44px rgba(20,30,60,.22); padding: 13px 13px 11px;
+  }
+  .km-fab-head { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+  .km-fab-avatar {
+    width: 36px; height: 36px; flex: 0 0 36px; display: grid; place-items: center; border-radius: 11px;
+    background: linear-gradient(150deg, #e07a6d, #d86a5f); box-shadow: 0 4px 10px rgba(120,48,40,.18);
+  }
+  .km-fab-avatar svg { width: 24px; height: 24px; display: block; }
+  .km-fab-title { font-size: 14px; font-weight: 600; color: #1f2a44; }
+  .km-fab-sub { font-size: 11px; color: #6b7488; margin-top: 2px; }
+  .km-fab-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; min-height: 38px; padding: 8px 10px;
+    border: 1px solid transparent; border-radius: 10px; background: transparent; color: #26324f; font-size: 13px;
+  }
+  .km-fab-item.hl { background: rgba(36,65,127,.08); border-color: rgba(36,65,127,.16); }
+  .km-fab-ico { width:18px;height:18px;color:#3f5fae;display:inline-flex; }
+  .km-fab-ico svg { width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+  .km-fab-meta { color:#8a92a6;font-size:11px;margin-left:auto; }
+  .km-fab-sep { height:1px;margin:8px 4px;background:rgba(36,65,127,.12); }
+</style>
+</head>
+<body>
+  <h1>KnowMe 助理 · 挂边圆角药丸（已实装到 workspace.html）</h1>
+  <p class="lead">贴右缘、仅可纵向滑动；便签气泡+珊瑚点内联 SVG，可随状态换色。左＝收起态，右＝展开面板（从把手左侧弹出）。</p>
+
+  <div class="grid">
+    <div>
+      <div class="win">
+        <div class="fc"><div class="line m"></div><div class="line s"></div><div class="line m"></div><div class="card"></div></div>
+        <div class="km-fab-root">
+          <button class="km-fab-btn" title="KnowMe 助理">
+            <span class="km-fab-glyph" id="gClosed"></span>
+            <span class="km-fab-badge">1</span>
+          </button>
+        </div>
+      </div>
+      <div class="cap">收起态 <small>贴右缘，角标在外侧角</small></div>
+    </div>
+
+    <div>
+      <div class="win">
+        <div class="fc"><div class="line m"></div><div class="line s"></div><div class="line m"></div></div>
+        <div class="km-fab-panel">
+          <div class="km-fab-head">
+            <span class="km-fab-avatar" id="gAvatar"></span>
+            <div><div class="km-fab-title">KnowMe 助理</div><div class="km-fab-sub">快捷操作</div></div>
+          </div>
+          <div class="km-fab-item hl">
+            <span class="km-fab-ico"><svg viewBox="0 0 24 24"><path d="M9 11.8l2.2 2.2L15.6 9.5"/><path d="M20 12a8 8 0 11-4-6.9"/></svg></span>
+            <span>加入待办</span><span class="km-fab-meta">当前主题</span>
+          </div>
+          <div class="km-fab-sep"></div>
+          <div class="km-fab-item">
+            <span class="km-fab-ico"><svg viewBox="0 0 24 24"><path d="M8 4h8"/><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 11h6M9 15h6"/></svg></span>
+            <span>日志中心</span><span class="km-fab-meta">运行/LLM/MCP</span>
+          </div>
+        </div>
+        <div class="km-fab-root">
+          <button class="km-fab-btn" title="KnowMe 助理" style="transform:translateX(-2px)">
+            <span class="km-fab-glyph" id="gOpen"></span>
+          </button>
+        </div>
+      </div>
+      <div class="cap">展开态 <small>面板从把手左侧弹出</small></div>
+    </div>
+  </div>
+
+<script>
+  function glyph(){ return ''+
+    '<svg viewBox="0 0 40 40">'+
+      '<path d="M11 9 h18 a5 5 0 0 1 5 5 v9.5 a5 5 0 0 1 -5 5 h-9.5 l-6.2 5 v-5 H11 a5 5 0 0 1 -5 -5 V14 a5 5 0 0 1 5 -5 Z" fill="#f4efe7"/>'+
+      '<g fill="#172535" opacity=".26"><rect x="12" y="16" width="12" height="2.4" rx="1.2"/><rect x="12" y="21" width="9" height="2.4" rx="1.2"/></g>'+
+      '<circle cx="29.5" cy="11" r="5.4" fill="#f4efe7"/><circle cx="29.5" cy="11" r="3.4" fill="#f05d4e"/>'+
+    '</svg>'; }
+  gClosed.innerHTML = glyph(); gOpen.innerHTML = glyph(); gAvatar.innerHTML = glyph();
+</script>
+</body>
+</html>

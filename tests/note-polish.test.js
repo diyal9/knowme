@@ -24,20 +24,21 @@ describe('note-polish', () => {
     assert.ok(!noteHtml.includes('tool-btn'), 'old pill tool buttons removed');
   });
 
-  it('uses Cursor/Codicon icon style', () => {
-    assert.ok(icons.includes('stroke-width="1.5"'), 'codicon stroke weight');
-    assert.ok(icons.includes('panelRight:'), 'cursor panel icons');
-    assert.ok(icons.includes('M4.1 1.082'), 'codicon thumbtack pin');
-    assert.ok(icons.includes('M1 4.5C1 3.11929'), 'codicon comment bubble');
-    assert.ok(icons.includes('fill="currentColor" stroke="none"'), 'codicon filled icons');
-    assert.ok(noteHtml.includes('ui-icons.js?v='), 'cache-busted icon script');
-    assert.ok(noteHtml.includes('stroke-width:1.5'), 'note css matches codicon stroke');
-    assert.ok(/\.foot-action\s*\{[^}]*background:transparent/s.test(noteHtml), 'footer actions are outline buttons');
+  it('uses Obsidian/Lucide icon style', () => {
+    assert.ok(icons.includes('stroke-width="2"'), 'lucide stroke weight');
+    assert.ok(icons.includes('viewBox="0 0 24 24"'), 'lucide 24 viewBox');
+    assert.ok(icons.includes('lucideSet'), 'lucide icon set');
+    assert.ok(icons.includes('M4.1 1.082'), 'codicon thumbtack pin for window chrome');
+    assert.ok(icons.includes('fill="currentColor" stroke="none"'), 'filled icons for chrome');
+    assert.ok(noteHtml.includes('ui-icons.js?v=lucide'), 'cache-busted lucide icon script');
+    assert.ok(noteHtml.includes('width:100%; height:100%; display:block'), 'svg size without stroke override');
+    assert.ok(/\.foot-action\s*\{[^}]*background:transparent/s.test(noteHtml), 'footer actions are ghost buttons');
+    assert.ok(/\.foot-tool\s*\{[^}]*border:\s*none/s.test(noteHtml), 'foot tools are borderless');
   });
 
   it('uses toast instead of alert for promote/suggest', () => {
     assert.ok(!/alert\(/.test(noteHtml), 'no alert()');
-    assert.ok(noteHtml.includes('function toast('), 'toast helper');
+    assert.ok(noteHtml.includes('window.UIKit.createToast('), 'toast helper');
     assert.ok(noteHtml.includes('THEME_LABELS'), 'category chinese labels');
   });
 
@@ -54,7 +55,7 @@ describe('note-polish', () => {
     assert.ok(noteHtml.includes('meta-label'), 'field labels for theme/tags');
     assert.ok(noteHtml.includes('文本'), 'mode: 文本');
     assert.ok(noteHtml.includes('预览'), 'mode: 预览');
-    assert.ok(noteHtml.includes('收入库'), 'promote label simplified');
+    assert.ok(!noteHtml.includes('收入库'), 'legacy OKF promote label removed');
     assert.ok(noteHtml.includes('智能分类'), 'suggest label simplified');
     assert.ok(noteHtml.includes('打开侧栏对话'), 'ai toggle hint plain');
   });

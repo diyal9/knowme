@@ -1,4 +1,4 @@
-# Sticky-Notes v0.3.0
+# KnowMe v0.3.0
 
 总览重构：按主题管理提示词库。
 
@@ -11,9 +11,9 @@
 
 ## 下载与安装（Windows）
 
-1. 在 [GitHub Releases](https://github.com/diyal9/sticky-notes/releases) 下载 `0.3.0` 安装版或便携版。
+1. 在 [GitHub Releases](https://github.com/diyal9/knowme/releases) 下载 `0.3.0` 安装版或便携版。
 2. 对照 `SHA256SUMS.txt` 校验（可选）。
-3. 数据仍在 `%APPDATA%\sticky-notes\`，旧版卡片自动兼容。
+3. 数据仍在 `%APPDATA%\KnowMe\`，旧版卡片自动兼容。
 
 ### 代码签名说明
 

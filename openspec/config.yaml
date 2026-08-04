@@ -1,9 +1,10 @@
 schema: spec-driven
 
 context: |
-  产品：StickyNotes — Windows 桌面便签（Electron）
-  技术栈：Electron 31、electron-store、原生 HTML/JS
-  数据路径：%APPDATA%\sticky-notes\notes\
+  产品：知我 KnowMe — AI 知识工作台 / 工作伙伴 Agent（Electron）
+  技术栈：Electron 31、原生 HTML/JS
+  数据路径：%APPDATA%\KnowMe\（内容源：本地文件夹 + GitLab）
+  仓库本地文件夹名可能仍为历史名称（与产品名无关）
 
   ## 团队协作
   三角色：制作人（规划+验收）→ 开发（实现+自测）→ 测试（QA+反模式）

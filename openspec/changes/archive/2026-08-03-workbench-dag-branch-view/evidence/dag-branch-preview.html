@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>DAG 分支预览</title>
+<style>
+:root{--ui:system-ui,sans-serif;--text:#1c1917;--text3:#78716c;--line:#e7e5e4;--bg:#fafaf9}
+body{margin:0;background:#f5f5f4;font:12px/1.4 var(--ui);color:var(--text);padding:28px}
+.wrap{max-width:360px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 8px 24px rgba(0,0,0,.04)}
+.wb-dag-panel {
+  min-height:0; flex:1; display:flex; flex-direction:column; gap:10px;
+  border:1px solid #e0ded8; border-radius:11px; background:#fff;
+  padding:13px 13px 11px; box-shadow:0 1px 0 rgba(28,25,23,.04);
+}
+.wb-dag-panel.degraded { background:#f8f7f5; border-style:dashed; box-shadow:none; }
+.wb-dag-head {
+  flex-shrink:0; min-height:32px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.wb-dag-head-copy {
+  min-width:0; display:flex; align-items:baseline; flex-wrap:wrap; gap:5px 7px;
+}
+.wb-dag-kicker {
+  color:#2f6f5e; font:700 9.5px/1.2 var(--ui); letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.wb-dag-head-title { color:#44403c; font:650 12px/1.3 var(--ui); }
+.wb-dag-head-subtitle {
+  color:#aaa69e; font:10px/1.3 var(--ui);
+}
+.wb-dag-head-subtitle .wb-help-wrap { margin-left:2px; }
+.wb-dag-count {
+  display:inline-flex; align-items:baseline; gap:3px; flex-shrink:0;
+  color:#7d7971; font:600 10px/1.2 var(--ui);
+  padding:4px 8px; border:1px solid #e8e6e1; border-radius:999px; background:#fafaf9;
+}
+.wb-dag-count strong {
+  color:#2f6f5e; font:750 13px/1 var(--ui);
+}
+.wb-dag-flow-shell {
+  position:relative; min-height:0; height:0; flex:1 1 0;
+}
+.wb-dag-flow-shell::before,
+.wb-dag-flow-shell::after {
+  content:""; position:absolute; z-index:2; left:0; right:8px; height:16px;
+  pointer-events:none;
+}
+.wb-dag-flow-shell::before {
+  top:0; background:linear-gradient(180deg, #fff 8%, rgba(255,255,255,0) 100%);
+}
+.wb-dag-flow-shell::after {
+  bottom:0; background:linear-gradient(0deg, #fff 8%, rgba(255,255,255,0) 100%);
+}
+.wb-dag-panel.degraded .wb-dag-flow-shell::before,
+.wb-dag-panel.degraded .wb-dag-flow-shell::after { display:none; }
+.wb-dag-flow {
+  position:relative; width:100%; height:100%; min-height:0; max-height:100%;
+  flex:1 1 0; overflow-x:hidden; overflow-y:auto;
+  display:flex; flex-direction:column; align-items:center; gap:0;
+  padding:4px 5px 10px 7px; scrollbar-gutter:stable;
+  overscroll-behavior:contain; scroll-behavior:smooth;
+  scrollbar-width:thin; scrollbar-color:#d6d2c9 transparent;
+}
+.wb-dag-flow:focus-visible {
+  outline:2px solid rgba(47,111,94,.28); outline-offset:-2px; border-radius:7px;
+}
+.wb-dag-flow::-webkit-scrollbar { width:8px; }
+.wb-dag-flow::-webkit-scrollbar-track { background:transparent; }
+.wb-dag-flow::-webkit-scrollbar-thumb {
+  border:2px solid transparent; border-radius:999px; background:#d6d2c9;
+  background-clip:padding-box;
+}
+.wb-dag-flow::-webkit-scrollbar-thumb:hover { background:#b9b4aa; background-clip:padding-box; }
+.wb-dag-node {
+  position:relative; z-index:1; width:min(100%, 244px); align-self:center; flex-shrink:0;
+  min-height:0; padding:10px 12px 10px 17px; overflow:hidden;
+  border:1px solid #e4e1da; border-radius:10px; background:#fff;
+  box-shadow:0 1px 2px rgba(28,25,23,.05);
+  transition:border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.wb-dag-node-rail {
+  position:absolute; left:0; top:0; bottom:0; width:4px; background:#c7cbc9;
+}
+.wb-dag-node-content {
+  position:relative; z-index:1; min-width:0;
+  display:flex; flex-direction:column; align-items:flex-start; gap:5px; text-align:left;
+}
+.wb-dag-node:hover {
+  border-color:#cfd9d3; box-shadow:0 6px 16px rgba(45,42,37,.09);
+  transform:translateY(-1px);
+}
+.wb-dag-node.type-agent .wb-dag-node-rail { background:#6c9c89; }
+.wb-dag-node.type-script .wb-dag-node-rail { background:#7d8a99; }
+.wb-dag-node.type-loop .wb-dag-node-rail { background:#b08968; }
+.wb-dag-node.type-parallel .wb-dag-node-rail { background:#8a7fb0; }
+.wb-dag-node.type-gate .wb-dag-node-rail { background:#c9a66b; }
+.wb-dag-node.type-terminal .wb-dag-node-rail { background:#8aa4b8; }
+.wb-dag-node.is-entry {
+  border-color:#bcd7c9;
+  box-shadow:0 0 0 1px rgba(47,111,94,.12), 0 4px 12px rgba(47,111,94,.08);
+}
+.wb-dag-node-head { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.wb-dag-step {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:20px; height:20px; padding:0 5px; border-radius:6px;
+  background:#f0eeea; color:#6b6860; font:750 10px/1 var(--ui);
+}
+.wb-dag-type {
+  display:inline-flex; padding:2px 7px; border-radius:999px; background:#eef2ef;
+  color:#5f6a63; font:600 10px/1.2 var(--ui);
+}
+.wb-dag-node.type-agent .wb-dag-type { background:#e6f0eb; color:#2f6f5e; }
+.wb-dag-node.type-script .wb-dag-type { background:#eef1f4; color:#566372; }
+.wb-dag-node.type-loop .wb-dag-type { background:#f3ebe3; color:#8a6244; }
+.wb-dag-node.type-parallel .wb-dag-type { background:#efecf6; color:#5f5487; }
+.wb-dag-node.type-gate .wb-dag-type { background:#f5efe4; color:#8a6d3b; }
+.wb-dag-node.type-terminal .wb-dag-type { background:#e8eef5; color:#4a667a; }
+.wb-dag-badge {
+  display:inline-flex; padding:2px 6px; border-radius:999px; background:#dfe9e3;
+  color:#2f6f5e; font:600 10px/1.2 var(--ui);
+}
+.wb-dag-title {
+  display:block; width:100%; color:#242623; font:650 12.5px/1.35 var(--ui);
+  overflow-wrap:anywhere;
+}
+.wb-dag-link {
+  position:relative; z-index:1; align-self:center; flex-shrink:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  width:auto; min-height:20px; margin:0; padding:2px 0;
+}
+.wb-dag-link-line {
+  width:2px; height:10px; min-height:8px;
+  background:linear-gradient(180deg, #d3cec5 0%, #b8b3a8 100%);
+}
+.wb-dag-link-label {
+  margin:2px 0; padding:1px 8px; border-radius:999px; border:1px solid #e6e3dd;
+  background:#f0eeea; color:#6b6860; font:600 9.5px/1.5 var(--ui); white-space:nowrap;
+}
+.wb-dag-link-arrow {
+  width:0; height:0; margin-top:1px;
+  border-left:4px solid transparent; border-right:4px solid transparent;
+  border-top:5px solid #b8b3a8;
+}
+.wb-dag-node-exits {
+  margin-top:8px; padding-top:7px; border-top:1px dashed #ece9e3;
+  display:flex; flex-direction:column; gap:5px; width:100%;
+}
+.wb-dag-exit {
+  display:flex; align-items:center; gap:5px; min-width:0;
+}
+.wb-dag-exit-label {
+  flex:0 0 auto; padding:1px 7px; border-radius:5px; border:1px solid #e6e3dd;
+  background:#f4f2ee; color:#6b6860; font:600 9px/1.5 var(--ui); white-space:nowrap;
+}
+.wb-dag-exit-arrow { flex:0 0 auto; color:#b4afa6; font-size:10px; line-height:1; }
+.wb-dag-exit-target {
+  min-width:0; color:#8a857c; font:10.5px/1.3 var(--ui);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.wb-dag-exit.is-back .wb-dag-exit-target { color:#a4864f; }
+.wb-dag-link-label.tone-ok, .wb-dag-exit-label.tone-ok { background:#e6f0eb; color:#2f6f5e; border-color:#cfe4d9; }
+.wb-dag-link-label.tone-warn, .wb-dag-exit-label.tone-warn { background:#f7e9e6; color:#a4542f; border-color:#eed3cb; }
+.wb-dag-link-label.tone-revise, .wb-dag-exit-label.tone-revise { background:#f6efe1; color:#8a6d3b; border-color:#eaddc4; }
+.wb-dag-link-label.tone-fork, .wb-dag-exit-label.tone-fork { background:#efecf6; color:#5f5487; border-color:#ddd6ee; }
+.wb-dag-link-label.tone-merge, .wb-dag-exit-label.tone-merge { background:#e9eef2; color:#4a667a; border-color:#d5e0e8; }
+.wb-dag-muted { color:#a8a29e; font:12px/1.55 var(--ui); padding:8px 2px; }
+.tone-ok, .wb-dag-exit-label.tone-ok { background:#e6f0eb; color:#2f6f5e; border-color:#cfe4d9; }
+.tone-warn, .wb-dag-exit-label.tone-warn { background:#f7e9e6; color:#a4542f; border-color:#eed3cb; }
+.tone-revise, .wb-dag-exit-label.tone-revise { background:#f6efe1; color:#8a6d3b; border-color:#eaddc4; }
+.tone-fork, .wb-dag-exit-label.tone-fork { background:#efecf6; color:#5f5487; border-color:#ddd6ee; }
+.tone-merge, .wb-dag-exit-label.tone-merge { background:#e9eef2; color:#4a667a; border-color:#d5e0e8; }
+.note{margin-top:14px;color:var(--text3);font-size:11px;text-align:center}
+</style></head><body>
+<div class="wrap">
+  <div class="wb-dag-panel">
+    <div class="wb-dag-head"><div class="wb-dag-head-copy">
+      <span class="wb-dag-kicker">执行拓扑</span>
+      <span class="wb-dag-head-title">DAG 关系图</span>
+      <span class="wb-dag-head-subtitle">只读预览 · 网关 + 循环样例</span>
+    </div><span class="wb-dag-count"><strong>5</strong><span>步</span></span></div>
+    <div class="wb-dag-flow-shell"><div class="wb-dag-flow" role="region">
+      <article class="wb-dag-node type-agent is-entry"><span class="wb-dag-node-rail"></span><div class="wb-dag-node-content">
+        <div class="wb-dag-node-head"><span class="wb-dag-step">1</span><span class="wb-dag-type">Agent</span><span class="wb-dag-badge">起点</span></div>
+        <strong class="wb-dag-title">收集材料</strong>
+      </div></article>
+      <div class="wb-dag-link" aria-hidden="true"><span class="wb-dag-link-line"></span><span class="wb-dag-link-arrow"></span></div>
+      <article class="wb-dag-node type-gate"><span class="wb-dag-node-rail"></span><div class="wb-dag-node-content">
+        <div class="wb-dag-node-head"><span class="wb-dag-step">2</span><span class="wb-dag-type">门禁</span></div>
+        <strong class="wb-dag-title">质量门禁</strong>
+        <div class="wb-dag-node-exits">
+          <span class="wb-dag-exit"><span class="wb-dag-exit-label tone-ok">通过</span><span class="wb-dag-exit-arrow">→</span><span class="wb-dag-exit-target">交付收尾</span></span>
+          <span class="wb-dag-exit"><span class="wb-dag-exit-label tone-warn">打回</span><span class="wb-dag-exit-arrow">→</span><span class="wb-dag-exit-target">修订草稿</span></span>
+          <span class="wb-dag-exit"><span class="wb-dag-exit-label tone-revise">修订</span><span class="wb-dag-exit-arrow">→</span><span class="wb-dag-exit-target">修订草稿</span></span>
+        </div>
+      </div></article>
+      <div class="wb-dag-link" aria-hidden="true"><span class="wb-dag-link-line"></span><span class="wb-dag-link-arrow"></span></div>
+      <article class="wb-dag-node type-loop"><span class="wb-dag-node-rail"></span><div class="wb-dag-node-content">
+        <div class="wb-dag-node-head"><span class="wb-dag-step">3</span><span class="wb-dag-type">循环</span></div>
+        <strong class="wb-dag-title">修订草稿</strong>
+        <div class="wb-dag-node-exits">
+          <span class="wb-dag-exit is-back"><span class="wb-dag-exit-label tone-revise">检查</span><span class="wb-dag-exit-arrow">↩</span><span class="wb-dag-exit-target">质量门禁</span></span>
+          <span class="wb-dag-exit"><span class="wb-dag-exit-label tone-ok">成功</span><span class="wb-dag-exit-arrow">→</span><span class="wb-dag-exit-target">交付收尾</span></span>
+        </div>
+      </div></article>
+      <div class="wb-dag-link" aria-hidden="true"><span class="wb-dag-link-line"></span><span class="wb-dag-link-label tone-merge">汇合</span><span class="wb-dag-link-arrow"></span></div>
+      <article class="wb-dag-node type-terminal"><span class="wb-dag-node-rail"></span><div class="wb-dag-node-content">
+        <div class="wb-dag-node-head"><span class="wb-dag-step">4</span><span class="wb-dag-type">完成</span></div>
+        <strong class="wb-dag-title">交付收尾</strong>
+      </div></article>
+    </div></div>
+  </div>
+</div>
+<p class="note">静态预览 · workbench-dag-branch-view · 制作人验收（卡内出口徽标 + 语义色）</p>
+</body></html>

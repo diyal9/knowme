@@ -2,14 +2,14 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>Sticky-Notes — 设置</title>
+<title>KnowMe — 设置</title>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 :root{
   --bg-page:#f3f1ec;--bg-card:#ffffff;--bg-top:#f8f7f4;--bg-mid:#f5f3ef;--bg-soft:#faf9f7;
   --div:rgba(0,0,0,0.07);--div2:rgba(0,0,0,0.05);
   --text:#1c1917;--text2:#6b6560;--text3:#b0a89e;
-  --accent:#5558e8;--accent-bg:rgba(85,88,232,0.08);--accent-b:rgba(85,88,232,0.22);
+  --accent:#3d3a36;--accent-bg:rgba(61,58,54,0.08);--accent-b:rgba(61,58,54,0.22);
   --green:#16a34a;--green-bg:rgba(22,163,74,0.08);
   --amber:#d97706;--amber-bg:rgba(217,119,6,0.08);
   --red:#dc2626;--red-bg:rgba(220,38,38,0.08);
@@ -42,8 +42,15 @@ body{background:var(--bg-page);color:var(--text);font:13px var(--ui);-webkit-fon
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
 .scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 16px 8px;}
-.scroll::-webkit-scrollbar{width:6px;}
-.scroll::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.12);border-radius:3px;}
+.scroll::-webkit-scrollbar{width:10px;height:10px;}
+.scroll::-webkit-scrollbar-track{background:transparent;}
+.scroll::-webkit-scrollbar-thumb{
+  background:rgba(61,58,54,0.24);
+  border-radius:999px;
+  border:3px solid transparent;
+  background-clip:padding-box;
+}
+.scroll::-webkit-scrollbar-thumb:hover{background:rgba(61,58,54,0.36);}
 
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
@@ -65,13 +72,25 @@ body{background:var(--bg-page);color:var(--text);font:13px var(--ui);-webkit-fon
 .field{padding:4px 16px 12px;border-bottom:1px solid var(--div2);}
 .field:last-child{border-bottom:none;}
 label{display:block;font:500 10px var(--ui);color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:6px;}
-input,textarea{
+input,textarea,select{
   width:100%;background:var(--bg-top);border:1px solid rgba(0,0,0,0.10);
   border-radius:9px;padding:8px 12px;font:12px var(--mono);color:var(--text);
   outline:none;transition:border-color .14s,box-shadow .14s;
 }
-input:focus,textarea:focus{border-color:rgba(85,88,232,0.42);box-shadow:0 0 0 3px rgba(85,88,232,0.08);}
-input::placeholder,textarea::placeholder{color:var(--text3);}
+input:focus,textarea:focus,select:focus{border-color:rgba(61,58,54,0.42);box-shadow:0 0 0 3px rgba(61,58,54,0.08);}
+select{
+  appearance:none;-webkit-appearance:none;
+  padding-right:30px;line-height:1.35;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(61,58,54,.75) 50%),
+    linear-gradient(135deg, rgba(61,58,54,.75) 50%, transparent 50%);
+  background-position:
+    calc(100% - 14px) 50%,
+    calc(100% - 9px) 50%;
+  background-size:5px 5px,5px 5px;
+  background-repeat:no-repeat;
+}
+input:read-only,select:disabled{background:#f0eeea;color:var(--text2)}
 textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .hint{font:11px/1.65 var(--ui);color:var(--text3);margin-top:6px;}
 .hint code{font:10px var(--mono);background:rgba(0,0,0,0.05);padding:1px 5px;border-radius:4px;color:var(--text2);}
@@ -110,7 +129,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .btn-sm:hover:not(:disabled){background:var(--bg-mid);border-color:rgba(0,0,0,0.16);color:var(--text);}
 .btn-sm:disabled{opacity:.55;cursor:wait;}
 .btn-sm.primary{background:var(--accent);border-color:var(--accent);color:#fff;}
-.btn-sm.primary:hover:not(:disabled){background:#484bcc;border-color:#484bcc;color:#fff;}
+.btn-sm.primary:hover:not(:disabled){background:#2a2723;border-color:#2a2723;color:#fff;}
 .btn-sm.ghost{background:transparent;}
 
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px 12px;}
@@ -121,6 +140,105 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .stat-label{font:10px var(--ui);color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
 .stat-value{font:600 18px/1.2 var(--ui);color:var(--text);letter-spacing:-.3px;}
 .stat-meta{font:10px var(--ui);color:var(--text3);margin-top:3px;}
+
+.memory-list{padding:0 16px 14px;display:flex;flex-direction:column;gap:7px;}
+.memory-row{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 12px;
+  background:var(--bg-soft);border:1px solid var(--div2);border-radius:10px;
+}
+.memory-row-body{flex:1;min-width:0;}
+.memory-row-title{font:12px/1.45 var(--ui);color:var(--text);word-break:break-word;}
+.memory-row-meta{font:10px/1.4 var(--ui);color:var(--text3);margin-top:3px;}
+.memory-row-actions{display:flex;gap:5px;flex-shrink:0;}
+.memory-empty{
+  margin:0 16px 14px;padding:18px 12px;text-align:center;border:1px dashed var(--div);
+  border-radius:10px;font:11px/1.6 var(--ui);color:var(--text3);
+}
+.memory-state{
+  display:inline-flex;align-items:center;padding:2px 7px;border-radius:12px;
+  font:500 9px var(--ui);background:var(--accent-bg);color:var(--text2);
+}
+.memory-state.accepted{background:var(--green-bg);color:var(--green);}
+.memory-state.dismissed{background:rgba(0,0,0,.04);color:var(--text3);}
+
+.user-brief{
+  margin:0 18px 12px;
+  padding:12px 12px 10px;
+  border:1px solid rgba(45,40,35,.09);
+  border-radius:11px;
+  background:linear-gradient(180deg,#fdfcfb 0%,#f8f6f2 100%);
+}
+.user-brief-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-bottom:9px;
+}
+.user-brief-title{
+  font:600 11px var(--ui);
+  color:#5f5850;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+.user-brief-meta{
+  font:600 9.5px var(--ui);
+  color:#8c857d;
+  padding:2px 8px;
+  border:1px solid rgba(45,40,35,.1);
+  border-radius:999px;
+  background:#fff;
+}
+.user-brief-text{
+  font:12px/1.65 var(--ui);
+  color:#3d3833;
+}
+.user-brief-text .muted{
+  color:#918a82;
+}
+.user-brief-list{
+  margin-top:9px;
+  display:grid;
+  gap:7px;
+}
+.user-brief-item{
+  padding:8px 10px;
+  border:1px solid rgba(45,40,35,.08);
+  border-radius:8px;
+  background:rgba(255,255,255,.75);
+}
+.user-brief-key{
+  font:600 10px var(--ui);
+  color:#897f74;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.user-brief-val{
+  margin-top:3px;
+  font:11.5px/1.55 var(--ui);
+  color:#45403a;
+  word-break:break-word;
+}
+.memory-editor-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+}
+.memory-editor-grid .field{
+  border-right:1px solid var(--div2);
+  border-bottom:none;
+}
+.memory-editor-grid .field:last-child{
+  border-right:0;
+}
+.memory-save-state{
+  margin:0 16px 12px;
+  font:10px/1.4 var(--ui);
+  color:var(--text3);
+  text-align:right;
+}
+.memory-save-state.unsaved{color:var(--amber);}
+.memory-save-state.saved{color:var(--green);}
 
 .kb-intro{padding:0 16px 8px;font:12px/1.5 var(--ui);color:var(--text3);}
 
@@ -186,6 +304,125 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 }
 .kb-actions .btn-sm{flex:1;text-align:center;padding:9px 12px;}
 
+.connector-quick-card{
+  margin:0 16px 12px;
+  padding:12px;
+  border:1px solid var(--div2);
+  border-radius:10px;
+  background:var(--bg-soft);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.connector-quick-main{flex:1;min-width:0;}
+.connector-quick-title{
+  font:600 12px var(--ui);
+  color:var(--text);
+}
+.connector-quick-sub{
+  margin-top:3px;
+  font:11px/1.5 var(--ui);
+  color:var(--text3);
+}
+.connector-quick-actions{
+  display:flex;
+  gap:8px;
+  flex-shrink:0;
+}
+.connector-feishu-card{
+  margin:0 16px 14px;
+  border:1px solid var(--div2);
+  border-radius:14px;
+  background:var(--bg-soft);
+  overflow:hidden;
+}
+.connector-feishu-card .connector-quick-card{
+  margin:0;
+  border:0;
+  border-bottom:1px solid var(--div2);
+  border-radius:0;
+  background:transparent;
+}
+.connector-feishu-card .concept-list{
+  margin:0;
+  border-bottom:1px solid var(--div2);
+}
+.connector-card-block{
+  padding-top:12px;
+}
+.connector-card-block+.connector-card-block{
+  border-top:1px solid var(--div2);
+}
+.connector-card-block .section-head{
+  padding-top:0;
+}
+.connector-auth-panel{
+  margin-left:16px;
+  margin-right:16px;
+  margin-bottom:14px;
+  padding:12px;
+  border:1px solid var(--div2);
+  border-radius:10px;
+  background:var(--bg-soft);
+}
+.connector-auth-link{
+  color:var(--accent);
+  text-decoration:none;
+}
+.connector-auth-link:hover{
+  text-decoration:underline;
+}
+.connector-auth-qr{margin-top:10px;}
+.connector-auth-qr>summary{
+  cursor:pointer;
+  color:var(--text2);
+  font:12px var(--ui);
+  user-select:none;
+}
+.connector-auth-qr>img{
+  display:block;
+  margin-top:8px;
+  width:156px;height:156px;
+  border:1px solid var(--div2);
+  border-radius:10px;
+  background:#fff;
+}
+.connector-auth-panel.is-done{
+  border-color:var(--accent);
+}
+.connector-scope-list{
+  display:flex;flex-direction:column;gap:4px;
+  margin-top:8px;
+}
+.connector-scope-row{
+  display:flex;align-items:center;gap:8px;
+  font:11px var(--ui);color:var(--text2);
+}
+.connector-scope-row .connector-scope-state{
+  flex:none;min-width:44px;
+  font:10px var(--ui);
+}
+.connector-scope-row.is-missing .connector-scope-state{color:var(--accent);}
+.connector-scope-row.is-ready{color:var(--text3);}
+
+.about-links{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  padding:4px 16px 10px;
+}
+.btn-icon{
+  width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;
+  background:var(--bg-soft);border:1px solid rgba(0,0,0,0.11);border-radius:10px;
+  color:var(--text2);cursor:pointer;outline:none;
+  transition:background .12s,border-color .12s,color .12s,transform .12s;
+}
+.btn-icon:hover{background:var(--bg-mid);border-color:rgba(0,0,0,0.16);color:var(--text);}
+.btn-icon:active{transform:scale(0.96);}
+.btn-icon .ico,.btn-icon .ico svg{width:18px;height:18px;display:block;}
+.about-copyright{
+  text-align:center;font:11px/1.5 var(--ui);color:var(--text3);
+  padding:0 16px 14px;
+}
+
 .kb-drawer{
   position:fixed;inset:0;z-index:90;background:rgba(28,25,23,0.28);
   display:none;align-items:flex-end;justify-content:center;
@@ -235,7 +472,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 .btn-cancel{background:transparent;border:1px solid rgba(0,0,0,0.12);color:var(--text2);}
 .btn-cancel:hover{background:var(--bg-mid);color:var(--text);}
 .btn-save{background:var(--accent);border:1px solid var(--accent);color:#fff;}
-.btn-save:hover{background:#484bcc;border-color:#484bcc;}
+.btn-save:hover{background:#2a2723;border-color:#2a2723;}
 .footer-status{font:11px var(--ui);color:var(--green);min-width:72px;text-align:right;}
 .footer.kb-only .btn-save{display:none;}
 
@@ -251,26 +488,331 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 }
 .toast-wrap.error .toast{background:#7f1d1d;}
 .toast-wrap.success .toast{background:#14532d;}
+
+/* Settings workspace polish — compact editorial control panel */
+body{
+  --content-max:1040px;
+  --control-h:34px;
+  background:
+    radial-gradient(circle at 78% -20%,rgba(255,255,255,.9),transparent 34%),
+    var(--bg-page);
+}
+.titlebar{
+  padding:0 28px;background:rgba(255,255,255,.94);
+  box-shadow:0 1px 0 rgba(255,255,255,.8);
+}
+.titlebar-inner{width:min(100%,var(--content-max));margin:0 auto;padding-top:18px;}
+.titlebar-brand{
+  margin-bottom:5px;color:#8a837b;font-size:10px;font-weight:650;
+  letter-spacing:.09em;text-transform:uppercase;
+}
+.titlebar h1{font-size:21px;font-weight:650;line-height:1.15;letter-spacing:-.45px;}
+.titlebar p{margin-top:5px;margin-bottom:15px;color:#938c84;font-size:11.5px;}
+.tabs{gap:18px;margin:0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{
+  flex:0 0 auto;min-width:72px;padding:10px 4px 12px;
+  color:#9b948c;font-size:11.5px;font-weight:520;border-bottom-width:2px;
+}
+.tab:hover{color:#4f4a45;}
+.tab.active{color:#282521;font-weight:620;}
+.tab:focus-visible,.btn:focus-visible,.btn-sm:focus-visible,.btn-icon:focus-visible,
+.kb-link:focus-visible{
+  outline:2px solid rgba(61,58,54,.48);outline-offset:2px;
+}
+.scroll{padding:22px 28px 28px;scrollbar-gutter:stable;}
+.tab-panel{width:min(100%,var(--content-max));margin:0 auto;}
+.section{
+  margin-bottom:16px;border-color:rgba(50,45,40,.08);border-radius:14px;
+  box-shadow:0 1px 2px rgba(38,33,28,.025),0 10px 30px rgba(38,33,28,.035);
+}
+.section-head{min-height:45px;padding:14px 18px 9px;}
+.section-title{color:#7f776f;font-size:10px;font-weight:650;letter-spacing:.09em;}
+.section-badge{
+  padding:3px 8px;border:1px solid rgba(61,58,54,.08);
+  background:#f5f3ef;color:#706960;font-size:9px;font-weight:600;
+}
+.kb-intro{max-width:760px;padding:0 18px 12px;color:#8c857d;font-size:11.5px;line-height:1.7;}
+.field{padding:7px 18px 15px;}
+label{margin-bottom:7px;color:#8e877f;font-size:9.5px;font-weight:650;letter-spacing:.07em;}
+input,textarea{
+  min-height:var(--control-h);padding:8px 11px;border-color:rgba(45,40,35,.11);
+  border-radius:8px;background:#fbfaf8;font-size:11.5px;
+}
+input:hover,textarea:hover{border-color:rgba(45,40,35,.2);}
+input:focus,textarea:focus{
+  border-color:rgba(61,58,54,.5);background:#fff;
+  box-shadow:0 0 0 3px rgba(61,58,54,.075);
+}
+.hint{color:#9c958d;font-size:10.5px;}
+.btn-sm{
+  min-height:32px;padding:6px 12px;border-radius:8px;background:#fff;
+  border-color:rgba(45,40,35,.12);font-size:10.5px;font-weight:600;
+  box-shadow:0 1px 1px rgba(30,25,20,.025);
+}
+.btn-sm:hover:not(:disabled){background:#f6f4f0;border-color:rgba(45,40,35,.22);}
+.btn-sm.primary{background:#35312d;border-color:#35312d;box-shadow:0 1px 2px rgba(28,25,23,.16);}
+.btn-sm.primary:hover:not(:disabled){background:#211f1c;border-color:#211f1c;}
+.btn-sm.ghost{border-color:transparent;background:transparent;box-shadow:none;}
+.btn-sm.danger{border-color:transparent;background:transparent;color:#a54c43;box-shadow:none;}
+.btn-sm.danger:hover:not(:disabled){border-color:rgba(165,76,67,.14);background:rgba(165,76,67,.065);color:#873b34;}
+.btn-sm.status{
+  border-color:rgba(47,111,94,.12);background:rgba(47,111,94,.08);
+  color:#2f6f5e;cursor:default;box-shadow:none;
+}
+.kb-actions{align-items:center;justify-content:flex-start;gap:8px;padding:2px 18px 16px;}
+.kb-actions .btn-sm{flex:0 0 auto;min-width:104px;padding:8px 14px;}
+.kb-actions .hint{margin-left:4px;}
+#sourcesList{
+  margin:0 18px 16px;gap:0;overflow:hidden;
+  border:1px solid rgba(45,40,35,.075);border-radius:11px;background:#fff;
+}
+#sourcesList>.concept-empty{padding:18px;color:#989189;}
+.source-row{
+  min-height:62px;padding:11px 12px;border-top:1px solid rgba(45,40,35,.06);
+  transition:background .14s;
+}
+.source-row:first-child{border-top:0;}
+.source-row:hover{background:#fbfaf8;}
+.source-row.is-current{background:linear-gradient(90deg,rgba(47,111,94,.045),transparent 55%);}
+.source-row .action-label{font-size:12px;font-weight:600;color:#37332f;}
+.source-row .action-sub{margin-top:4px;color:#989189;font:10px/1.4 var(--mono);}
+.source-actions{display:flex;align-items:center;justify-content:flex-end;gap:4px;flex-wrap:wrap;}
+.source-actions .btn-sm{min-width:auto;}
+.source-state{
+  display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:0 9px;
+  border:1px solid rgba(47,111,94,.13);border-radius:999px;
+  background:rgba(47,111,94,.075);color:#2f6f5e;font-size:9.5px;font-weight:650;
+}
+.source-state::before{content:'';width:5px;height:5px;border-radius:50%;background:#3d806c;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;}
+.form-grid .field{border-right:1px solid var(--div2);}
+.form-grid .field:nth-child(2n){border-right:0;}
+.form-grid .field.full{grid-column:1/-1;border-right:0;}
+.form-grid+.kb-actions{padding-top:14px;border-top:1px solid var(--div2);}
+.toggle-row,.action-row{padding:13px 18px;}
+.action-label,.toggle-label{font-size:12px;font-weight:550;}
+.action-sub,.toggle-sub{margin-top:3px;font-size:10.5px;}
+.memory-list{
+  padding-left:18px;
+  padding-right:18px;
+}
+.memory-empty{
+  margin-left:18px;
+  margin-right:18px;
+}
+.footer{padding:10px 28px 12px;background:rgba(255,255,255,.94);box-shadow:0 -8px 24px rgba(44,38,32,.035);}
+.footer-inner{width:min(100%,var(--content-max));margin:0 auto;display:flex;align-items:center;gap:8px;}
+.btn{
+  flex:0 0 auto;min-width:132px;min-height:38px;padding:9px 18px;border-radius:9px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+}
+.btn .ico{width:14px;height:14px;}
+.btn-cancel{background:#fff;}
+.btn-cancel:hover .ico{transform:rotate(90deg);}
+.btn-save{margin-left:auto;min-width:180px;background:#35312d;border-color:#35312d;box-shadow:0 1px 2px rgba(28,25,23,.16);}
+.btn-save:hover{background:#211f1c;border-color:#211f1c;}
+.btn .ico{transition:transform .16s ease;}
+.embedded-settings .footer .btn-cancel{display:none;}
+.embedded-settings .footer-inner{justify-content:flex-end;}
+.embedded-settings .footer-status{margin-left:auto;}
+.embedded-settings .btn-save{margin-left:0;}
+.footer-status{min-width:64px;}
+.toast-wrap{bottom:70px;}
+
+/* Assistant mode panel polish */
+.assistant-mode-section .section-head{
+  padding-bottom:12px;
+}
+.assistant-intro{
+  margin:0 18px 14px;
+  padding:10px 12px;
+  border:1px solid rgba(45,40,35,.08);
+  border-radius:10px;
+  background:#faf8f5;
+  color:#857e76;
+  font-size:12px;
+  line-height:1.65;
+}
+.assistant-mode-section .field{
+  border-bottom:none;
+}
+.assistant-mode-section .assistant-soul-field{
+  margin:0 18px 12px;
+  padding:12px;
+  border:1px solid var(--div2);
+  border-radius:10px;
+  background:#fbfaf8;
+}
+.assistant-mode-section .assistant-mode-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:0 18px 16px;
+}
+.assistant-mode-section .assistant-mode-grid .assistant-field{
+  margin:0;
+  padding:12px;
+  border:1px solid var(--div2);
+  border-radius:10px;
+  background:#fbfaf8;
+}
+.assistant-mode-section label{
+  margin-bottom:8px;
+  color:#7d756d;
+  font-size:11px;
+  font-weight:650;
+  letter-spacing:.05em;
+}
+.assistant-mode-section textarea{
+  min-height:92px;
+  font:12px/1.62 var(--ui);
+  background:#fff;
+}
+.assistant-mode-section .hint{
+  margin-top:7px;
+  color:#938c84;
+  font-size:11px;
+  line-height:1.55;
+}
+
+@media (max-width:760px){
+  .titlebar,.footer{padding-left:16px;padding-right:16px;}
+  .scroll{padding:16px 12px 22px;}
+  .tabs{gap:10px;}
+  .tab{min-width:68px;}
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid .field,.form-grid .field:nth-child(2n){grid-column:1;border-right:0;}
+  .memory-editor-grid{grid-template-columns:1fr;}
+  .memory-editor-grid .field{border-right:0;border-bottom:1px solid var(--div2);}
+  .memory-editor-grid .field:last-child{border-bottom:none;}
+  .source-row{align-items:flex-start;flex-wrap:wrap;}
+  .source-row .action-body{flex-basis:100%;}
+  .source-actions{width:100%;justify-content:flex-start;}
+  .btn{min-width:96px;}
+  .btn-save{min-width:132px;}
+  .assistant-mode-section .assistant-intro{
+    margin:0 12px 12px;
+  }
+  .assistant-mode-section .assistant-soul-field{
+    margin:0 12px 10px;
+  }
+  .assistant-mode-section .assistant-mode-grid{
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:0 12px 12px;
+  }
+}
 </style>
 </head>
 <body>
 
 <div class="titlebar">
-  <div class="titlebar-brand">Sticky-Notes</div>
-  <h1>设置</h1>
-  <p>配置 AI 接口、系统偏好与知识库</p>
-  <div class="tabs" role="tablist">
-    <button type="button" class="tab active" role="tab" data-tab="ai" aria-selected="true">AI 接口</button>
-    <button type="button" class="tab" role="tab" data-tab="system" aria-selected="false">系统配置</button>
-    <button type="button" class="tab" role="tab" data-tab="knowledge" aria-selected="false">知识库</button>
-    <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false">关于</button>
+  <div class="titlebar-inner">
+    <div class="titlebar-brand">KnowMe / Preferences</div>
+    <h1>设置</h1>
+    <p>管理内容源、AI 能力与个人工作偏好</p>
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab active" role="tab" data-tab="sources" aria-selected="true">内容源</button>
+      <button type="button" class="tab" role="tab" data-tab="ai" aria-selected="false">AI 接口</button>
+      <button type="button" class="tab" role="tab" data-tab="assistant" aria-selected="false">助手模式</button>
+      <button type="button" class="tab" role="tab" data-tab="system" aria-selected="false">系统配置</button>
+      <button type="button" class="tab" role="tab" data-tab="connectors" aria-selected="false">连接器</button>
+      <button type="button" class="tab" role="tab" data-tab="memory" aria-selected="false">我的记忆</button>
+      <button type="button" class="tab" role="tab" data-tab="about" aria-selected="false">关于</button>
+    </div>
   </div>
 </div>
 
 <div class="scroll">
 
+  <!-- 内容源 -->
+  <div class="tab-panel active" id="panel-sources" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">内容源</div>
+        <span class="section-badge">Local / GitLab / GitHub / Web</span>
+      </div>
+      <p class="kb-intro">知我的知识来自你绑定的本地文件夹、GitLab/GitHub 仓库或网页资料。应用数据目录只保存会话与设置，不再把正文锁在便签 JSON 里。</p>
+      <div class="kb-actions" style="margin-bottom:12px">
+        <button class="btn-sm primary" type="button" id="btnAddLocalSource">添加本地文件夹</button>
+        <button class="btn-sm" type="button" id="btnRefreshSources">刷新列表</button>
+      </div>
+      <div id="sourcesList" class="concept-list" style="min-height:48px"></div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">GitLab</div>
+        <span class="section-badge">远程仓库</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>实例地址</label>
+          <input id="gitlabHost" placeholder="https://gitlab.com 或公司 GitLab" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>项目路径</label>
+          <input id="gitlabProject" placeholder="group/subgroup/project" spellcheck="false">
+        </div>
+        <div class="field full">
+          <label>Personal Access Token</label>
+          <input id="gitlabToken" type="password" placeholder="需要 read_repository 权限" spellcheck="false" autocomplete="off">
+          <div class="hint">Token 经系统加密保存在本地，不会写入 sources.json。</div>
+        </div>
+        <div class="field full">
+          <label>分支</label>
+          <input id="gitlabBranch" placeholder="main" spellcheck="false" value="main">
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" type="button" id="btnAddGitlabSource">克隆并添加</button>
+        <span class="hint" id="gitAvailHint" style="margin:0"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">GitHub</div>
+        <span class="section-badge">远程仓库</span>
+      </div>
+      <div class="form-grid">
+        <div class="field full">
+          <label>仓库地址</label>
+          <input id="githubRepoUrl" placeholder="https://github.com/org/repo" spellcheck="false">
+        </div>
+        <div class="field full">
+          <label>Personal Access Token（可选）</label>
+          <input id="githubToken" type="password" placeholder="私有仓库需要 repo 读权限" spellcheck="false" autocomplete="off">
+          <div class="hint">公开仓库可不填 Token；Token 经系统加密保存在本地。</div>
+        </div>
+        <div class="field full">
+          <label>分支</label>
+          <input id="githubBranch" placeholder="main" spellcheck="false" value="main">
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" type="button" id="btnAddGithubSource">克隆并添加</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">网页资料</div>
+        <span class="section-badge">公开网页</span>
+      </div>
+      <p class="kb-intro">抓取公开网页正文并缓存为只读资料，供工作台浏览与写作助手引用。不支持需要登录的页面。</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label>网页 URL</label>
+          <input id="webPageUrl" placeholder="https://example.com/article" spellcheck="false">
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" type="button" id="btnAddWebSource">抓取并添加</button>
+      </div>
+    </div>
+  </div>
+
   <!-- AI -->
-  <div class="tab-panel active" id="panel-ai" role="tabpanel">
+  <div class="tab-panel" id="panel-ai" role="tabpanel">
     <div class="section">
       <div class="section-head">
         <div class="section-title">AI 接口</div>
@@ -288,14 +830,80 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
         <input id="apikey" type="password" placeholder="sk-…" spellcheck="false" autocomplete="off">
       </div>
       <div class="field">
-        <label>Model</label>
-        <input id="model" placeholder="gpt-4o-mini" spellcheck="false">
+        <label>Provider</label>
+        <select id="llmProvider">
+          <option value="dashscope">阿里云百炼</option>
+          <option value="openai">OpenAI</option>
+          <option value="custom">自定义兼容接口</option>
+        </select>
       </div>
       <div class="field">
-        <label>用户偏好提示词</label>
-        <textarea id="userPrompt" placeholder="例：专业领域是游戏数值策划；回答简洁、优先用列表；语气专业克制…"></textarea>
+        <label>模型预设</label>
+        <select id="modelPreset"></select>
+        <div class="hint">预设只用于选择模型能力；也可以在下方填写自定义模型 ID。</div>
+      </div>
+      <div class="field">
+        <label>Model ID</label>
+        <input id="model" placeholder="qwen-plus 或 gpt-4o-mini" spellcheck="false">
+        <div class="hint" id="modelProfileHint">上下文能力：加载中…</div>
+      </div>
+      <div class="field">
+        <label>对话温度 <span id="temperatureVal" style="font-weight:500;color:var(--text2)">0.7</span></label>
+        <input id="temperature" type="range" min="0" max="2" step="0.1" value="0.7" style="width:100%">
         <div class="hint">
-          填写专业领域、回答风格等个人偏好。产品已内置固定助手指令（防幻觉与输出规范），此处内容会追加在其后。
+          控制回答随机性：偏低更严谨稳定，偏高更发散创意。默认 0.7。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 助手模式 -->
+  <div class="tab-panel" id="panel-assistant" role="tabpanel">
+    <div class="section legacy-skill-banner" id="legacySkillBanner">
+      <div class="section-head">
+        <div class="section-title">技能管理已迁移</div>
+        <span class="section-badge">能力 Hub</span>
+      </div>
+      <p class="kb-intro assistant-intro">
+        旧版 OKF slash 技能入口已迁移至工作台左侧「能力」入口。请在<strong>能力 Hub</strong>中通过 Tab 浏览、安装与管理专家、技能与 MCP 连接器。
+      </p>
+      <div class="field" style="padding-top:0">
+        <button type="button" class="btn primary" id="btnOpenCapabilityHubFromSettings">打开能力 Hub</button>
+      </div>
+    </div>
+    <div class="section assistant-mode-section">
+      <div class="section-head">
+        <div class="section-title">助手模式提示词</div>
+        <span class="section-badge">4 Modes</span>
+      </div>
+      <p class="kb-intro assistant-intro">
+        这里填写的是“用户可追加偏好”。系统基础提示词始终在后台生效且不会展示，避免误改导致能力失效。
+      </p>
+      <div class="field assistant-field assistant-soul-field">
+        <label>Soul（通用回答风格）</label>
+        <textarea id="assistantSoul" placeholder="例：简洁直接；先结论后展开；不确定时明确假设并给验证路径。"></textarea>
+        <div class="hint">对所有模式生效，建议写语气、结构偏好；留空则仅使用系统默认风格。</div>
+      </div>
+      <div class="assistant-mode-grid">
+        <div class="field assistant-field">
+          <label>通用办公（general）</label>
+          <textarea id="assistantModeGeneral" placeholder="例：先给可执行结论，再给 1-3 步行动建议；避免过度技术细节。"></textarea>
+          <div class="hint">可选补充。留空表示沿用系统默认模式能力。</div>
+        </div>
+        <div class="field assistant-field">
+          <label>知识管家（steward）</label>
+          <textarea id="assistantModeSteward" placeholder="例：先结论，再列依据来源与适用边界；缺信息时指出缺口并建议补齐路径。"></textarea>
+          <div class="hint">可选补充。建议描述你偏好的证据呈现方式。</div>
+        </div>
+        <div class="field assistant-field">
+          <label>写作专家（writing）</label>
+          <textarea id="assistantModeWriting" placeholder="例：输出可直接发送版本；保持原意；必要时给正式版与简版。"></textarea>
+          <div class="hint">可选补充。建议写明语气、长度、格式偏好。</div>
+        </div>
+        <div class="field assistant-field">
+          <label>研发助手（coding）</label>
+          <textarea id="assistantModeCoding" placeholder="例：先复述问题，再给根因假设、最小改动方案和验收清单。"></textarea>
+          <div class="hint">可选补充。建议写明你偏好的排查/实现输出结构。</div>
         </div>
       </div>
     </div>
@@ -303,6 +911,33 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
 
   <!-- 系统 -->
   <div class="tab-panel" id="panel-system" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">组织托管</div>
+        <span class="section-badge">Remote · 可选</span>
+      </div>
+      <p class="kb-intro">默认关闭。启用后从本机管理后台拉取组织级模型与连接器策略；个人 API Key、记忆与内容源仍可本地编辑。</p>
+      <div class="toggle-row">
+        <div class="toggle-label-wrap">
+          <div class="toggle-label">启用组织远程配置</div>
+          <div class="toggle-sub">仅允许连接本机 HTTP 服务（127.0.0.1 / localhost）</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="remoteConfigEnabled">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="field">
+        <label>管理后台地址</label>
+        <input id="remoteConfigEndpoint" placeholder="http://127.0.0.1:8020" spellcheck="false">
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" type="button" id="btnRemoteConfigPull">拉取组织配置</button>
+        <button class="btn-sm" type="button" id="btnRemoteConfigSavePrefs">保存连接设置</button>
+      </div>
+      <p class="hint" id="remoteConfigStatus">状态：未启用</p>
+      <p class="hint" id="orgManagedHint" style="display:none;color:var(--amber)">部分 AI / 连接器字段已由管理员托管，请在后台修改。</p>
+    </div>
     <div class="section">
       <div class="section-head">
         <div class="section-title">系统</div>
@@ -325,7 +960,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
         <button class="btn-sm primary" id="btnNotesExport">导出</button>
         <button class="btn-sm" id="btnNotesImport">导入</button>
       </div>
-      <div class="action-row">
+      <div class="action-row" style="display:none">
         <div class="action-body">
           <div class="action-label">整理旧数据分类</div>
           <div class="action-sub">按路径/名称补全空的 category 与标签（不覆盖已有）</div>
@@ -344,64 +979,274 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
     </div>
   </div>
 
-  <!-- 知识库 -->
-  <div class="tab-panel" id="panel-knowledge" role="tabpanel">
-    <div class="section" id="kbSection">
+  <!-- 连接器 -->
+  <div class="tab-panel" id="panel-connectors" role="tabpanel">
+    <div class="section">
       <div class="section-head">
-        <div class="section-title">知识库</div>
-        <span class="section-badge">OKF</span>
+        <div class="section-title">连接器</div>
+        <span class="section-badge">公司系统 / 飞书</span>
       </div>
-      <p class="kb-intro">本机概念供 AI 引用。勾选主题后导出；全选即导出整包。</p>
-
-      <div class="kb-summary">
-        <div class="kb-summary-text" id="kbSummaryText">加载中…</div>
-        <div class="kb-summary-actions">
-          <button class="btn-sm ghost" id="btnKnowledgeDir" type="button">目录</button>
-          <button class="btn-sm" id="btnMemoryPanel" type="button">记忆</button>
+      <p class="kb-intro">点击一次即可完成飞书连接和当前项目所需权限授权。Token 不会被 KnowMe 持久化保存。</p>
+      <div class="connector-feishu-card" id="feishuCard">
+        <div class="connector-quick-card" id="feishuQuickCard">
+          <div class="connector-quick-main">
+            <div class="connector-quick-title">飞书连接</div>
+            <div class="connector-quick-sub" id="feishuQuickState">正在读取连接状态…</div>
+          </div>
+          <div class="connector-quick-actions">
+            <button class="btn-sm primary" type="button" id="btnFeishuQuickAction">一键授权</button>
+            <button class="btn-sm" type="button" id="btnRefreshConnectors">刷新状态</button>
+          </div>
+        </div>
+        <div id="feishuScopeConfirm" class="kb-intro connector-auth-panel" style="display:none;margin-top:12px">
+          <strong id="feishuScopeConfirmTitle">确认申请飞书权限</strong>
+          <div id="feishuScopeConfirmIntro" style="margin-top:6px"></div>
+          <div id="feishuScopeConfirmList" class="connector-scope-list"></div>
+          <details class="connector-auth-fallback" style="margin-top:8px">
+            <summary>查看原始 scope</summary>
+            <div id="feishuScopeConfirmRaw" class="hint" style="margin-top:8px;word-break:break-all"></div>
+          </details>
+          <div class="kb-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn-sm primary" type="button" id="btnFeishuScopeConfirm">确认并授权</button>
+            <button class="btn-sm" type="button" id="btnFeishuScopeCancel">取消</button>
+          </div>
+        </div>
+        <div id="feishuAuthPanel" class="kb-intro connector-auth-panel" style="display:none;margin-top:12px">
+          <strong id="feishuAuthTitle">飞书授权</strong>
+          <div id="feishuAuthMessage" style="margin-top:6px"></div>
+          <div class="hint" id="feishuPermissionSummary" style="margin-top:8px">
+            本次将申请：云盘、文档、知识库、多维表格、通讯录、聊天、会议、妙记、日程和待办。
+          </div>
+          <div class="kb-actions" id="feishuAuthPrimaryActions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn-sm primary" type="button" id="btnOpenFeishuAuth" style="display:none">重新打开授权页</button>
+          </div>
+          <details class="connector-auth-fallback" id="feishuAuthFallback" style="margin-top:8px">
+            <summary>浏览器打不开？使用复制链接或扫码</summary>
+            <div id="feishuAuthUrl" style="margin-top:8px;word-break:break-all"></div>
+            <button class="btn-sm" type="button" id="btnCopyFeishuAuth" style="display:none;margin-top:8px">复制授权链接</button>
+            <details class="connector-auth-qr" id="feishuAuthQrBox" style="display:none;margin-top:8px">
+              <summary>使用飞书 App 扫码</summary>
+              <img id="feishuAuthQr" alt="飞书授权二维码">
+            </details>
+          </details>
+          <div class="hint" id="feishuAuthHint" style="margin-top:6px"></div>
+          <div class="kb-actions" id="feishuAuthSecondaryActions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px">
+            <button class="btn-sm" type="button" id="btnCheckFeishuAuth">我已完成，检测连接</button>
+            <button class="btn-sm" type="button" id="btnRetryFeishuAuth">重试授权</button>
+            <button class="btn-sm" type="button" id="btnCloseFeishuAuth">收起</button>
+          </div>
+        </div>
+        <details class="connector-card-block connector-advanced-settings">
+          <summary class="section-head">
+            <div class="section-title">高级设置：Agent 工具白名单</div>
+          </summary>
+          <div class="field" style="margin-top:12px">
+            <label>允许 Agent 调用的工具（开发者选项）</label>
+            <input id="feishuAllowlist" placeholder="保持默认即可" spellcheck="false">
+            <div class="hint">普通使用无需修改。写入能力仍需在操作前确认。</div>
+          </div>
+          <div class="kb-actions">
+            <button class="btn-sm" type="button" id="btnSaveFeishuAllowlist">保存高级设置</button>
+          </div>
+        </details>
+        <div class="connector-card-block">
+          <div class="section-head">
+            <div class="section-title">待确认的飞书写入</div>
+            <span class="section-badge">人在环</span>
+          </div>
+          <div id="connectorDrafts" class="concept-list" style="min-height:32px"></div>
         </div>
       </div>
-
-      <div class="kb-toolbar">
-        <span class="kb-toolbar-label">知识主题</span>
-        <div class="kb-toolbar-right">
-          <button type="button" class="kb-link" id="btnCreateSkill">新建技能</button>
-          <button type="button" class="kb-link" id="btnKbSelectAll">全选</button>
-          <button type="button" class="kb-link" id="btnKbSelectNone">清空</button>
-        </div>
+      <div id="connectorsList" class="concept-list" style="min-height:48px"></div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">公司 MCP</div>
       </div>
-      <div class="cat-list" id="categoryList">
-        <span class="concept-empty">加载中…</span>
+      <div class="field">
+        <label>启动命令</label>
+        <input id="mcpCommand" placeholder="例如 npx 或绝对路径" spellcheck="false">
       </div>
-
+      <div class="field">
+        <label>参数（空格分隔）</label>
+        <input id="mcpArgs" placeholder="-y @scope/mcp-server" spellcheck="false">
+      </div>
+      <div class="field">
+        <label>Agent 工具白名单（逗号分隔）</label>
+        <input id="mcpAllowlist" placeholder="tool_a, tool_b" spellcheck="false">
+        <div class="hint">留空表示不向 Agent 投影任何 MCP 工具。</div>
+      </div>
       <div class="kb-actions">
-        <button class="btn-sm primary" id="btnKnowledgeExport">导出所选</button>
-        <button class="btn-sm" id="btnKnowledgeImport">导入</button>
+        <button class="btn-sm primary" type="button" id="btnSaveMcpConnector">保存 MCP 配置</button>
       </div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Workbench 授权</div>
+        <span class="section-badge">Agent Service</span>
+      </div>
+      <p class="kb-intro">连接本机或远程 Agent Service（默认 127.0.0.1:8010）。远程地址必须使用 HTTPS；授权码经系统加密保存在本地，不会写入 git 或日志。</p>
+      <div class="form-grid">
+        <div class="field">
+          <label>服务地址</label>
+          <input id="workbenchAuthEndpoint" placeholder="http://127.0.0.1:8010 或 https://daemon.example.com" spellcheck="false">
+        </div>
+        <div class="field">
+          <label>项目组（可选）</label>
+          <select id="workbenchAuthTenant">
+            <option value="">平台管理员</option>
+            <option value="rdpi">RDPI</option>
+            <option value="ff">FF</option>
+            <option value="hyper">Hyper</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>授权码</label>
+          <input id="workbenchAuthKey" type="password" placeholder="向管理员索取 wb_* 授权码" spellcheck="false" autocomplete="off">
+          <div class="hint">验证成功后会加密保存；此处不会回显已保存的授权码。</div>
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm primary" type="button" id="btnWorkbenchAuthLogin">验证并保存</button>
+        <button class="btn-sm" type="button" id="btnWorkbenchAuthLogout">清除授权</button>
+        <button class="btn-sm" type="button" id="btnWorkbenchAuthRefresh">刷新状态</button>
+      </div>
+      <p class="hint" id="workbenchAuthStatus">状态：未配置</p>
     </div>
   </div>
 
-  <div class="kb-drawer" id="kbDrawer" aria-hidden="true">
-    <div class="kb-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="kbDrawerTitle">
-      <div class="kb-drawer-head">
-        <div class="kb-drawer-titles">
-          <div class="kb-drawer-title" id="kbDrawerTitle">—</div>
-          <div class="kb-drawer-sub" id="kbDrawerSub"></div>
+  <!-- 我的记忆 -->
+  <div class="tab-panel" id="panel-memory" role="tabpanel">
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">KnowMe 如何理解我</div>
+        <span class="section-badge">仅存本机</span>
+      </div>
+      <p class="kb-intro">让 KnowMe 越用越懂你，同时始终由你决定。个人资料和协作偏好会跨项目生效；项目事实与资料请在「内容源」管理。</p>
+      <div class="user-brief" id="userBriefCard">
+        <div class="user-brief-head">
+          <div class="user-brief-title">KnowMe 目前这样理解你</div>
+          <div class="user-brief-meta" id="userBriefMeta">待完善</div>
         </div>
-        <button type="button" class="kb-drawer-close" id="kbDrawerClose" aria-label="关闭">✕</button>
+        <div class="user-brief-text" id="userBriefText"></div>
+        <div class="user-brief-list">
+          <div class="user-brief-item">
+            <div class="user-brief-key">行业</div>
+            <div class="user-brief-val" id="userBriefIndustry">—</div>
+          </div>
+          <div class="user-brief-item">
+            <div class="user-brief-key">身份背景</div>
+            <div class="user-brief-val" id="userBriefProfile">—</div>
+          </div>
+          <div class="user-brief-item">
+            <div class="user-brief-key">协作方式</div>
+            <div class="user-brief-val" id="userBriefPrompt">—</div>
+          </div>
+        </div>
       </div>
-      <div class="kb-drawer-body" id="kbDrawerBody"></div>
-      <div class="kb-drawer-edit" id="kbDrawerEdit" hidden>
-        <label for="kbEditTitle">标题</label>
-        <input id="kbEditTitle" type="text" spellcheck="false">
-        <label for="kbEditSlash">快捷命令 <span style="font-weight:400;color:var(--text3)">AI 助写输入 /命令</span></label>
-        <input id="kbEditSlash" type="text" spellcheck="false" placeholder="如 code-review" maxlength="32">
-        <label for="kbEditBody">正文（Markdown）</label>
-        <textarea id="kbEditBody" spellcheck="false"></textarea>
+      <div class="memory-editor-grid">
+        <div class="field" style="grid-column:1/-1">
+          <label for="userIndustry">行业</label>
+          <select id="userIndustry" class="knowledge-select" style="width:100%;max-width:320px">
+            <option value="general">通用办公</option>
+            <option value="software">互联网/软件</option>
+            <option value="game">游戏</option>
+            <option value="sales">销售/商务</option>
+            <option value="education">教育/培训</option>
+            <option value="content">内容/媒体</option>
+          </select>
+          <div class="hint">影响助手默认口吻，以及缺事实时的占位示例（如今日优先级空态）。不替代「关于我」自由文本。</div>
+        </div>
+        <div class="field">
+          <label>关于我</label>
+          <textarea id="userProfile" placeholder="例：我是独立开发者，主要做 Windows 桌面产品；熟悉 JavaScript 和产品设计…"></textarea>
+          <div class="hint">填写长期稳定的身份、专业领域与工作背景。保存后参与 AI 对话，不会写入项目知识库。</div>
+        </div>
+        <div class="field">
+          <label>协作偏好</label>
+          <textarea id="userPrompt" placeholder="例：回答简洁、优先用列表；先给结论；语气专业克制…"></textarea>
+          <div class="hint">你明确写下的偏好优先于软件推断；产品固定安全规则仍具有最高优先级。</div>
+        </div>
       </div>
-      <div class="kb-drawer-foot">
-        <button type="button" class="btn-sm primary" id="kbDrawerSave" style="flex:1" hidden>保存修改</button>
-        <button type="button" class="btn-sm primary" id="kbDrawerInstantiate" style="flex:1">实例化为卡片</button>
-        <button type="button" class="btn-sm" id="kbDrawerClose2" style="flex:1">关闭</button>
+      <div class="memory-save-state" id="memorySaveState" aria-live="polite">已保存</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">AI 学到的习惯</div>
+        <span class="section-badge" id="memoryLearningBadge">加载中</span>
+      </div>
+      <p class="kb-intro">KnowMe 会根据你的使用方式提出推测。只有你接受后，才会作为稳定协作偏好影响 AI。</p>
+      <div class="toggle-row">
+        <div class="toggle-label-wrap">
+          <div class="toggle-label">适应我的工作方式</div>
+          <div class="toggle-sub">学习收藏、复制和工作流等本地行为；关闭后停止新增记忆</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="memoryLearning">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="stat-grid" style="padding-top:12px">
+        <div class="stat-card">
+          <div class="stat-label">最近学习记录</div>
+          <div class="stat-value" id="memoryRecentCount">—</div>
+          <div class="stat-meta">不是项目知识库事实</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">已应用习惯</div>
+          <div class="stat-value" id="memoryAcceptedCount">—</div>
+          <div class="stat-meta"><span id="memoryPendingCount">—</span> 条等你确认</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">等你确认的推测</div>
+        <span class="section-badge">确认后生效</span>
+      </div>
+      <p class="kb-intro">这是 AI 对你工作方式的推测，不是事实。可以接受、修改、忽略，也可以稍后恢复。</p>
+      <div class="memory-list" id="memoryPatterns"></div>
+      <div class="memory-empty" id="memoryPatternsEmpty" hidden>暂无可审阅的习惯。持续使用一段时间后，这里会出现重复模式。</div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">工作记忆整合</div>
+        <span class="section-badge" id="memoryConsolidatedBadge">—</span>
+      </div>
+      <p class="kb-intro">从近期活动与已确认偏好中提炼结构化工作记忆，帮助 Agent 理解你正在做什么。活动信号与近期推断不是项目知识库事实。</p>
+      <div class="memory-list" id="memoryConsolidated"></div>
+      <div class="memory-empty" id="memoryConsolidatedEmpty" hidden>暂无整合结果。持续使用或确认习惯后，点击「重新整合」。</div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">重新整合</div>
+          <div class="action-sub">基于最近记录重新提炼；已确认偏好会保留</div>
+        </div>
+        <button class="btn-sm" id="btnMemoryConsolidate" type="button">整合</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">近期记忆</div>
+      </div>
+      <div class="memory-list" id="memoryRecent"></div>
+      <div class="memory-empty" id="memoryRecentEmpty" hidden>暂无使用记忆。</div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">隐私与数据</div>
+          <div class="action-sub">个人记忆仅保存在本机；不会自动写入项目知识库。未来连接的飞书/工作空间资料仍属于独立知识来源。</div>
+        </div>
+        <button class="btn-sm ghost" id="btnMemoryDir" type="button">打开</button>
+      </div>
+      <div class="action-row">
+        <div class="action-body">
+          <div class="action-label">一键遗忘</div>
+          <div class="action-sub">清除自动记忆与推断，不影响个人资料和项目知识库</div>
+        </div>
+        <button class="btn-sm" id="btnMemoryClear" type="button">清除</button>
       </div>
     </div>
   </div>
@@ -422,29 +1267,60 @@ textarea{resize:vertical;min-height:76px;line-height:1.65;}
       <div class="kb-actions">
         <button class="btn-sm" id="btnCheckUpdate">检查更新</button>
       </div>
+      <div class="about-links" role="group" aria-label="开发者信息">
+        <button type="button" class="btn-icon" id="btnAboutBlog" title="技术博客 · TCloud Blog" aria-label="技术博客">
+          <span class="ico" data-icon="bookOpen"></span>
+        </button>
+        <button type="button" class="btn-icon" id="btnAboutCoffee" title="请我喝杯冰美式（不加糖）· 微信 diyalyin" aria-label="请喝冰美式">
+          <span class="ico" data-icon="coffee"></span>
+        </button>
+        <button type="button" class="btn-icon" id="btnAboutMail" title="邮箱 670924505@qq.com" aria-label="联系邮箱">
+          <span class="ico" data-icon="mail"></span>
+        </button>
+      </div>
+      <p class="about-copyright">© 2026 KnowMe · diyal9</p>
     </div>
   </div>
 
 </div>
 
 <div class="footer" id="footerBar">
-  <button class="btn btn-cancel" id="btnCancel">关闭</button>
-  <button class="btn btn-save" id="btnSave">保存设置</button>
-  <span class="footer-status" id="status"></span>
+  <div class="footer-inner">
+    <button class="btn btn-cancel" id="btnCancel" title="关闭设置">
+      <span class="ico" data-icon="close" aria-hidden="true"></span>
+      <span>关闭</span>
+    </button>
+    <span class="footer-status" id="status"></span>
+    <button class="btn btn-save" id="btnSave">
+      <span class="ico" data-icon="check" aria-hidden="true"></span>
+      <span>保存设置</span>
+    </button>
+  </div>
 </div>
 
 <div class="toast-wrap" id="toastWrap"><div class="toast" id="toast"></div></div>
 
+<script src="ui-icons.js?v=about1"></script>
+<script src="lib/ui-kit.js?v=1"></script>
 <script>
+try {
+  if (!window.api && window.parent && window.parent !== window && window.parent.api) {
+    window.api = window.parent.api
+  }
+} catch {}
+const embeddedMode = window.parent && window.parent !== window
+document.documentElement.classList.toggle('embedded-settings', embeddedMode)
+const initialTabFromQuery = (() => {
+  try { return new URLSearchParams(window.location.search).get('tab') || '' } catch { return '' }
+})()
 const $ = id => document.getElementById(id)
+if (window.StickyIcons) StickyIcons.mount()
 
-function toast(msg, type = 'info', ms = 4200) {
-  const wrap = $('toastWrap')
-  $('toast').textContent = msg
-  wrap.className = 'toast-wrap show' + (type === 'error' ? ' error' : type === 'success' ? ' success' : '')
-  clearTimeout(toast._t)
-  toast._t = setTimeout(() => { wrap.className = 'toast-wrap' }, ms)
-}
+const toast = window.UIKit.createToast({
+  wrap: () => $('toastWrap'),
+  text: () => $('toast'),
+  defaultMs: 4200,
+})
 
 function setLoading(btn, on, label) {
   if (!btn) return
@@ -467,203 +1343,1354 @@ function shortPath(p) {
   return p.length > 58 ? '…' + p.slice(-55) : p
 }
 
-function escHtml(s) {
-  return String(s ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-}
-
-let previewConceptId = null
-let previewEditable = false
-/** 'idle' | 'edit' | 'create' — Electron 禁用 window.prompt，新建走抽屉 */
-let kbDrawerMode = 'idle'
-
-function resetKbDrawerChrome() {
-  const save = $('kbDrawerSave')
-  save.hidden = true
-  save.textContent = '保存修改'
-  if (save.dataset.label) save.dataset.label = '保存修改'
-  $('kbDrawerInstantiate').hidden = false
-  $('kbDrawerBody').hidden = false
-  $('kbDrawerEdit').hidden = true
-}
-
-function closeKbDrawer() {
-  const d = $('kbDrawer')
-  d.classList.remove('show')
-  d.setAttribute('aria-hidden', 'true')
-  previewConceptId = null
-  previewEditable = false
-  kbDrawerMode = 'idle'
-  resetKbDrawerChrome()
-}
-
-function openCreateSkillDrawer() {
-  previewConceptId = null
-  previewEditable = false
-  kbDrawerMode = 'create'
-  $('kbDrawerTitle').textContent = '新建技能'
-  $('kbDrawerSub').textContent = '创建后可在 AI 助写输入 /命令 引用'
-  $('kbDrawerBody').hidden = true
-  $('kbDrawerEdit').hidden = false
-  const save = $('kbDrawerSave')
-  save.hidden = false
-  save.textContent = '创建技能'
-  save.dataset.label = '创建技能'
-  $('kbDrawerInstantiate').hidden = true
-  $('kbEditTitle').value = ''
-  $('kbEditSlash').value = ''
-  $('kbEditBody').value = '# 我的技能\n\n## 用途\n\n（请补充）\n\n## 提示词模板\n\n```\n\n```\n'
-  const d = $('kbDrawer')
-  d.classList.add('show')
-  d.setAttribute('aria-hidden', 'false')
-  setTimeout(() => $('kbEditTitle').focus(), 0)
-}
-
-async function openConceptPreview(conceptId) {
-  previewConceptId = conceptId
-  previewEditable = false
-  kbDrawerMode = 'edit'
-  $('kbDrawerTitle').textContent = '加载中…'
-  $('kbDrawerSub').textContent = conceptId || ''
-  $('kbDrawerBody').textContent = ''
-  resetKbDrawerChrome()
-  const d = $('kbDrawer')
-  d.classList.add('show')
-  d.setAttribute('aria-hidden', 'false')
-  try {
-    const r = await window.api.knowledgeReadConcept(conceptId)
-    if (!r.ok) {
-      $('kbDrawerTitle').textContent = '无法打开'
-      $('kbDrawerBody').textContent = r.error || '概念不存在'
-      return
+function parseFeishuAuthMeta(rawUrl) {
+  const text = String(rawUrl || '').trim()
+  if (!text) return { url: '', userCode: '' }
+  let normalized = text
+  for (let i = 0; i < 3; i += 1) {
+    const quoted =
+      (normalized.startsWith('"') && normalized.endsWith('"')) ||
+      (normalized.startsWith('\'') && normalized.endsWith('\''))
+    if (quoted) {
+      normalized = normalized.slice(1, -1).trim()
+      continue
     }
-    $('kbDrawerTitle').textContent = r.title || conceptId
-    $('kbDrawerSub').textContent = r.rel || conceptId
-    previewEditable = true
-    $('kbDrawerBody').hidden = true
-    $('kbDrawerEdit').hidden = false
-    $('kbDrawerSave').hidden = false
-    $('kbDrawerSave').textContent = '保存修改'
-    $('kbDrawerSave').dataset.label = '保存修改'
-    $('kbDrawerInstantiate').hidden = false
-    $('kbEditTitle').value = r.title || ''
-    const slash = (r.frontmatter && r.frontmatter.slash) || ''
-    $('kbEditSlash').value = String(slash).replace(/^\//, '')
-    $('kbEditBody').value = r.body || ''
-  } catch (e) {
-    $('kbDrawerTitle').textContent = '读取失败'
-    $('kbDrawerBody').textContent = e.message || String(e)
+    try {
+      const parsed = JSON.parse(normalized)
+      if (typeof parsed === 'string') {
+        normalized = parsed.trim()
+        continue
+      }
+    } catch {
+      // ignore and keep original
+    }
+    break
   }
-}
-
-function getSelectedCategories() {
-  return [...document.querySelectorAll('#categoryList .cat-check:checked')].map(el => el.value)
-}
-
-function setAllCategoryChecks(on) {
-  document.querySelectorAll('#categoryList .cat-check').forEach(el => { el.checked = !!on })
-}
-
-function bindConceptChips(root) {
-  root.querySelectorAll('[data-concept]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation()
-      openConceptPreview(btn.dataset.concept)
-    })
-  })
-}
-
-function renderCategories(categories) {
-  const list = $('categoryList')
-  if (!categories?.length) {
-    list.innerHTML = '<span class="concept-empty">暂无主题，可导入 OKF 包</span>'
-    return
+  normalized = normalized.replace(/^\\+/, '').replace(/^['"]+|['"]+$/g, '').trim()
+  let userCode = ''
+  try {
+    const u = new URL(normalized)
+    userCode = String(u.searchParams.get('user_code') || '').trim()
+  } catch {
+    userCode = ''
   }
+  return { url: normalized, userCode }
+}
 
-  const prev = new Set(getSelectedCategories())
-  const firstLoad = !list.querySelector('.cat-check')
+const escHtml = window.UIKit.escapeHtml
 
-  list.innerHTML = categories.map((cat, i) => {
-    const chips = cat.items?.length
-      ? cat.items.map(c =>
-          `<button type="button" class="concept-chip" data-concept="${escHtml(c.id)}" title="查看内容">${escHtml(c.title || c.id)}</button>`
-        ).join('')
-      : '<div class="cat-empty">该主题下暂无概念</div>'
-    const open = i === 0 ? ' open' : ''
-    const checked = firstLoad || prev.has(cat.id)
-    return `<div class="cat-card${open}" data-cat="${escHtml(cat.id)}">
-      <div class="cat-head">
-        <input type="checkbox" class="cat-check" value="${escHtml(cat.id)}" ${checked ? 'checked' : ''} title="导出此主题" aria-label="选择${escHtml(cat.label || cat.id)}">
-        <div class="cat-meta">
-          <div class="cat-name">${escHtml(cat.label || cat.id)}</div>
-          <div class="cat-id">${cat.id === '_root' ? '根目录' : escHtml(cat.id) + '/'}</div>
-        </div>
-        <span class="cat-count">${cat.count}</span>
-        <span class="cat-chevron">›</span>
+function pickBriefText(text, maxLen = 56) {
+  const cleaned = String(text || '').replace(/\s+/g, ' ').trim()
+  if (!cleaned) return ''
+  const sentence = cleaned.split(/[。！？!?\n]/).find(Boolean) || cleaned
+  if (sentence.length <= maxLen) return sentence
+  return sentence.slice(0, maxLen - 1) + '…'
+}
+
+function renderUserBrief() {
+  const profile = $('userProfile')?.value || ''
+  const prompt = $('userPrompt')?.value || ''
+  const industrySel = $('userIndustry')
+  const industryLabel = industrySel?.selectedOptions?.[0]?.textContent?.trim()
+    || industrySel?.value
+    || '通用办公'
+  const profileBrief = pickBriefText(profile, 68)
+  const promptBrief = pickBriefText(prompt, 68)
+  const completed = Number(Boolean(profileBrief)) + Number(Boolean(promptBrief))
+  const meta = $('userBriefMeta')
+  const text = $('userBriefText')
+  const profileBox = $('userBriefProfile')
+  const promptBox = $('userBriefPrompt')
+  const industryBox = $('userBriefIndustry')
+  if (!meta || !text || !profileBox || !promptBox) return
+
+  meta.textContent = completed === 2 ? '完整' : completed === 1 ? '部分完善' : '待完善'
+  if (completed === 0) {
+    text.innerHTML = '<span class="muted">填写“关于我”和“协作偏好”后，KnowMe 会用一段简短摘要确认自己是否理解正确。行业选择会调整默认口吻与示例。</span>'
+  } else {
+    const parts = [industryLabel, profileBrief, promptBrief].filter(Boolean)
+    text.textContent = `${parts.join('；')}。保存后，这些信息会作为长期偏好参与对话。`
+  }
+  if (industryBox) industryBox.textContent = industryLabel || '通用办公'
+  profileBox.textContent = profileBrief || '未填写身份背景'
+  promptBox.textContent = promptBrief || '未填写协作偏好'
+}
+
+function memoryStateLabel(state) {
+  if (state === 'accepted') return '已接受'
+  if (state === 'dismissed') return '已忽略'
+  return '待确认'
+}
+
+function memoryPatternSourceLabel(pattern = {}) {
+  const action = String(pattern.meta?.action || '').trim()
+  const kind = String(pattern.kind || '').trim()
+  if (action === 'format-list') return '来自你多次偏好列表化表达'
+  if (action === 'workflow') return '来自你重复完成相似工作流'
+  if (action === 'copy') return '来自你重复复制相似内容'
+  if (action === 'ai-output') return '来自你重复保留相似 AI 输出'
+  if (kind === 'preference') return '来自近期重复出现的协作偏好'
+  if (kind === 'workflow') return '来自近期重复出现的工作方式'
+  return '来自近期重复出现的本地使用信号'
+}
+
+function memoryPatternEffectLabel(pattern = {}) {
+  const state = String(pattern.prompt_state || 'pending')
+  if (state === 'accepted') return '已作为稳定协作偏好参与 AI 对话'
+  if (state === 'dismissed') return '已忽略，不会影响 AI 对话'
+  return '确认后才会影响 AI 对话'
+}
+
+function renderMemoryPatterns(patterns = []) {
+  const list = $('memoryPatterns')
+  const empty = $('memoryPatternsEmpty')
+  window.__memoryPatterns = patterns
+  list.innerHTML = patterns.map(p => {
+    const state = p.prompt_state || 'pending'
+    const sourceLabel = memoryPatternSourceLabel(p)
+    const effectLabel = memoryPatternEffectLabel(p)
+    const lastSeen = p.last_seen ? fmtTime(p.last_seen) : '暂无记录'
+    const actions = state === 'pending'
+      ? `<div class="memory-row-actions">
+          <button type="button" class="btn-sm" data-memory-pattern="${escHtml(p.id)}" data-action="edit">修改</button>
+          <button type="button" class="btn-sm primary" data-memory-pattern="${escHtml(p.id)}" data-action="accepted">接受</button>
+          <button type="button" class="btn-sm" data-memory-pattern="${escHtml(p.id)}" data-action="dismissed">忽略</button>
+        </div>`
+      : state === 'dismissed'
+        ? `<div class="memory-row-actions">
+            <button type="button" class="btn-sm" data-memory-pattern="${escHtml(p.id)}" data-action="restore">恢复确认</button>
+          </div>`
+        : `<div class="memory-row-actions">
+            <button type="button" class="btn-sm" data-memory-pattern="${escHtml(p.id)}" data-action="edit">修改</button>
+          </div>`
+    return `<div class="memory-row">
+      <div class="memory-row-body">
+        <div class="memory-row-title">${escHtml(p.summary || '未命名模式')}</div>
+        <div class="memory-row-meta">出现 ${Number(p.count) || 1} 次 · <span class="memory-state ${state}">${memoryStateLabel(state)}</span></div>
+        <div class="memory-row-meta">来源：${escHtml(sourceLabel)} · 最近触发：${escHtml(lastSeen)}</div>
+        <div class="memory-row-meta">生效规则：${escHtml(effectLabel)}</div>
       </div>
-      <div class="cat-body"><div class="concept-list">${chips}</div></div>
+      ${actions}
     </div>`
   }).join('')
-
-  if (firstLoad) setAllCategoryChecks(true)
-
-  list.querySelectorAll('.cat-head').forEach(head => {
-    head.addEventListener('click', (e) => {
-      if (e.target.closest('.cat-check')) return
-      head.closest('.cat-card').classList.toggle('open')
-    })
-  })
-  list.querySelectorAll('.cat-check').forEach(cb => {
-    cb.addEventListener('click', e => e.stopPropagation())
-  })
-  bindConceptChips(list)
+  empty.hidden = patterns.length > 0
 }
 
-async function refreshKbMemStatus() {
-  const list = $('categoryList')
+function renderMemoryRecent(items = []) {
+  const list = $('memoryRecent')
+  const empty = $('memoryRecentEmpty')
+  list.innerHTML = [...items].reverse().slice(0, 12).map(item => `
+    <div class="memory-row">
+      <div class="memory-row-body">
+        <div class="memory-row-title">${escHtml(item.summary || '使用记录')}</div>
+        <div class="memory-row-meta">${escHtml(item.kind || 'habit')} · ${fmtTime(item.ts)}</div>
+      </div>
+    </div>`).join('')
+  empty.hidden = items.length > 0
+}
+
+function renderMemoryConsolidated(consolidated = {}) {
+  const list = $('memoryConsolidated')
+  const empty = $('memoryConsolidatedEmpty')
+  const badge = $('memoryConsolidatedBadge')
+  const preview = consolidated.preview || []
+  if (badge) {
+    badge.textContent = consolidated.total ? `${consolidated.total} 条` : '暂无'
+  }
+  if (!list || !empty) return
+  if (!preview.length) {
+    list.innerHTML = ''
+    empty.hidden = false
+    return
+  }
+  empty.hidden = true
+  list.innerHTML = preview.map(item => {
+    const confLabel = item.confidence === 'confirmed'
+      ? '已确认'
+      : item.confidence === 'activity'
+        ? '活动信号'
+        : '近期推断'
+    return `<div class="memory-row">
+      <div class="memory-row-body">
+        <div class="memory-row-title">${escHtml(item.fieldLabel || item.field)}：${escHtml(item.text || '')}</div>
+        <div class="memory-row-meta">${escHtml(confLabel)} · 来源：${escHtml(item.sourceSummary || '近期记录')}</div>
+      </div>
+    </div>`
+  }).join('')
+}
+
+async function refreshMemoryOverview() {
   try {
-    const kb = await window.api.knowledgeStatus()
-    const mem = await window.api.memoryStatus()
-    const lintCls = kb.ok ? 'ok' : 'err'
-    const lintTxt = kb.ok ? '校验通过' : `${kb.errors} 个错误`
-    $('kbSummaryText').innerHTML =
-      `<strong>${kb.concepts ?? 0}</strong> 概念 · <span class="${lintCls}">${lintTxt}</span>` +
-      ` · 记忆 <strong>${mem.recentCount ?? 0}</strong>`
-    renderCategories(kb.categories)
+    const data = await window.api.memoryOverview()
+    const learning = data.config?.learningEnabled !== false
+    $('memoryLearning').checked = learning
+    $('memoryLearningBadge').textContent = learning ? '学习中' : '已暂停'
+    $('memoryRecentCount').textContent = data.stats?.recentCount ?? 0
+    $('memoryAcceptedCount').textContent = data.stats?.acceptedCount ?? 0
+    $('memoryPendingCount').textContent = data.stats?.pendingCount ?? 0
+    renderMemoryPatterns(data.patterns || [])
+    renderMemoryRecent(data.recent || [])
+    renderMemoryConsolidated(data.consolidated || {})
   } catch (e) {
-    $('kbSummaryText').textContent = '加载失败：' + (e.message || '请重启应用')
-    list.innerHTML = '<span class="concept-empty">知识库不可用</span>'
+    $('memoryLearningBadge').textContent = '不可用'
+    renderMemoryPatterns([])
+    renderMemoryRecent([])
+    renderMemoryConsolidated({})
+    toast('记忆加载失败：' + (e.message || '请重启应用'), 'error')
   }
 }
 
 /* Tab 切换 */
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const id = tab.dataset.tab
-    document.querySelectorAll('.tab').forEach(t => {
-      t.classList.toggle('active', t === tab)
-      t.setAttribute('aria-selected', t === tab ? 'true' : 'false')
-    })
-    document.querySelectorAll('.tab-panel').forEach(p => {
-      p.classList.toggle('active', p.id === `panel-${id}`)
-    })
-    // AI / 系统 需要保存；知识库与关于隐藏保存按钮
-    $('footerBar').classList.toggle('kb-only', id === 'knowledge' || id === 'about')
-    if (id === 'knowledge') refreshKbMemStatus()
+function selectSettingsTab(id) {
+  const tab = document.querySelector(`.tab[data-tab="${id}"]`)
+  if (!tab) return
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t === tab)
+    t.setAttribute('aria-selected', t === tab ? 'true' : 'false')
   })
+  document.querySelectorAll('.tab-panel').forEach(p => {
+    p.classList.toggle('active', p.id === `panel-${id}`)
+  })
+  $('footerBar').classList.toggle('kb-only', id === 'about')
+  if (id === 'memory') refreshMemoryOverview()
+  if (id === 'sources') refreshSourcesList()
+  if (id === 'connectors') refreshConnectorsList()
+}
+
+async function refreshConnectorsList() {
+  const list = $('connectorsList')
+  if (!list || !window.api?.connectorsList) return
+  try {
+    const r = await window.api.connectorsList()
+    const rows = r.connectors || []
+    if (!rows.length) {
+      list.innerHTML = '<span class="concept-empty">暂无连接器。</span>'
+      updateFeishuQuickCard(null)
+      return
+    }
+    const withStatus = await Promise.all(rows.map(async (c) => {
+      try {
+        const st = await window.api.connectorsStatus(c.id)
+        return st.connector || c
+      } catch {
+        return c
+      }
+    }))
+    const visibleRows = withStatus.filter((c) => c.id !== 'feishu')
+    list.innerHTML = visibleRows.length ? visibleRows.map((c) => {
+      const st = c.status || {}
+      const state = st.state || (c.enabled ? 'enabled' : 'disabled')
+      const stateLabel = state === 'auth_required'
+        ? '待授权'
+        : state === 'enabled'
+          ? '已启用'
+          : state === 'disabled'
+            ? '未启用'
+            : state
+      const msg = st.message || c.meta?.identityHint || ''
+      return `<div class="action-row" style="align-items:flex-start">
+        <div class="action-body">
+          <div class="action-label">${escHtml(c.title)} · ${escHtml(c.type)}</div>
+          <div class="action-sub">${escHtml(stateLabel)}${msg ? ' · ' + escHtml(msg) : ''}</div>
+        </div>
+        <button type="button" class="btn-sm ${c.enabled ? 'primary' : ''}" data-conn-toggle="${escHtml(c.id)}" data-enabled="${c.enabled ? '1' : '0'}">${c.enabled ? '已启用' : '启用'}</button>
+        ${c.id === 'feishu' && c.enabled
+          ? `<button type="button" class="btn-sm" data-feishu-auth>${st.state === 'auth_required' ? '继续授权' : '重新授权'}</button>` : ''}
+      </div>`
+    }).join('') : '<span class="concept-empty">暂无其他连接器。</span>'
+    const mcp = withStatus.find((c) => c.id === 'mcp-default')
+    if (mcp) {
+      if ($('mcpCommand')) $('mcpCommand').value = mcp.mcp?.command || ''
+      if ($('mcpArgs')) $('mcpArgs').value = (mcp.mcp?.args || []).join(' ')
+      if ($('mcpAllowlist')) $('mcpAllowlist').value = (mcp.allowlist || []).join(', ')
+    }
+    const feishu = withStatus.find((c) => c.id === 'feishu')
+    if (feishu && $('feishuAllowlist')) {
+      $('feishuAllowlist').value = (feishu.allowlist || []).join(', ')
+    }
+    updateFeishuQuickCard(feishu)
+    await refreshConnectorDrafts()
+  } catch (e) {
+    list.innerHTML = `<span class="concept-empty">加载失败：${escHtml(e.message || e)}</span>`
+    updateFeishuQuickCard(null)
+  }
+}
+
+function getDefaultFeishuAllowlist() {
+  return [
+    'feishu.search_docs',
+    'feishu.read_doc',
+    'feishu.list_wiki_spaces',
+    'feishu.list_wiki_nodes',
+    'feishu.get_wiki_node',
+  ]
+}
+
+function updateFeishuQuickCard(feishu) {
+  const stateText = $('feishuQuickState')
+  const actionBtn = $('btnFeishuQuickAction')
+  if (!stateText || !actionBtn) return
+  if (!feishu) {
+    stateText.textContent = '未发现飞书连接器，请先刷新状态。'
+    actionBtn.textContent = '刷新后重试'
+    actionBtn.disabled = true
+    actionBtn.dataset.mode = 'none'
+    return
+  }
+  const st = feishu.status || {}
+  const ready = feishuUserReady(feishu)
+  const docKbReady = feishuDocKbReadiness(feishu)
+  const permissionsComplete = feishuPermissionsComplete(feishu)
+  const enabled = !!feishu.enabled
+  actionBtn.classList.add('primary')
+  renderFeishuPermissionSummary(feishu)
+  if (enabled && ready && docKbReady === false) {
+    stateText.textContent = '飞书账号已连接，但文档/知识库权限仍未完全获得。'
+    actionBtn.textContent = '一键授权'
+    actionBtn.disabled = false
+    actionBtn.dataset.mode = 'full-auth'
+    return
+  }
+  if (enabled && ready) {
+    const missingKey = feishuMissingCategoryIds(feishu).join('|')
+    // A top-up that already ran and granted nothing must not keep occupying the
+    // primary slot — that is what makes users click the same button repeatedly.
+    if (permissionsComplete === false && missingKey && missingKey === feishuTopUpStalledKey) {
+      const labels = feishuMissingCategoryLabels(feishu)
+      stateText.textContent = `已连接，可直接读取飞书文档/知识库；${labels.join('、')}未获批，通常需管理员审批。`
+      actionBtn.textContent = '重试补充权限'
+      actionBtn.classList.remove('primary')
+      actionBtn.disabled = false
+      actionBtn.dataset.mode = 'full-auth'
+      return
+    }
+    stateText.textContent = permissionsComplete === false
+      ? '已连接，可直接读取飞书文档/知识库；部分扩展权限未开通。'
+      : (st.message || '已连接，可直接在对话中使用飞书能力。')
+    actionBtn.textContent = permissionsComplete === false ? '补充扩展权限' : '已连接'
+    actionBtn.disabled = permissionsComplete === false ? false : true
+    actionBtn.dataset.mode = permissionsComplete === false ? 'full-auth' : 'done'
+    return
+  }
+  if (enabled) {
+    stateText.textContent = st.message || '已启用，等待完成账号授权。'
+    actionBtn.textContent = '一键授权'
+    actionBtn.disabled = false
+    actionBtn.dataset.mode = 'full-auth'
+    return
+  }
+  stateText.textContent = '未连接，点击一次即可完成连接与授权。'
+  actionBtn.textContent = '一键授权'
+  actionBtn.disabled = false
+  actionBtn.dataset.mode = 'full-auth'
+}
+
+async function refreshConnectorDrafts() {
+  const box = $('connectorDrafts')
+  if (!box || !window.api?.connectorsDrafts) return
+  try {
+    const r = await window.api.connectorsDrafts()
+    const pending = (r.drafts || []).filter((d) => d.status === 'pending_review').slice(-10).reverse()
+    if (!pending.length) {
+      box.innerHTML = '<span class="concept-empty">暂无待确认草稿。</span>'
+      return
+    }
+    box.innerHTML = pending.map((d) => {
+      const isPermission = d.action === 'apply_minute_permission'
+      const sub = isPermission
+        ? `向妙记 ${d.minuteToken || ''} 所有者申请「${d.perm === 'edit' ? '可编辑' : '可阅读'}」`
+        : String(d.body || '').slice(0, 120)
+      return `<div class="action-row" style="align-items:flex-start">
+      <div class="action-body">
+        <div class="action-label">${escHtml(d.title || '未命名')}</div>
+        <div class="action-sub">${escHtml(sub)}</div>
+      </div>
+      <button type="button" class="btn-sm primary" data-draft-approve="${escHtml(d.id)}" data-draft-kind="${isPermission ? 'permission' : 'doc'}">${isPermission ? '确认申请' : '确认写入'}</button>
+      <button type="button" class="btn-sm" data-draft-reject="${escHtml(d.id)}">拒绝</button>
+    </div>`
+    }).join('')
+  } catch (e) {
+    box.innerHTML = `<span class="concept-empty">加载失败：${escHtml(e.message || e)}</span>`
+  }
+}
+
+$('btnRefreshConnectors')?.addEventListener('click', () => refreshConnectorsList())
+const FEISHU_AUTH_POLL_MS = 2500
+const FEISHU_AUTH_TIMEOUT_MS = 300000
+let feishuAuthPollTimer = null
+let feishuAuthPollDeadline = 0
+let feishuAuthDoneTimer = null
+let feishuAuthAutoOpened = { url: '', at: 0 }
+let feishuAuthStartPromise = null
+let feishuAuthMode = 'normal'
+// Baseline captured before an authorization round. A top-up round only counts as
+// successful when this set actually shrinks — otherwise "已登录 + 文档知识库就绪"
+// would report success on the first poll, before the user confirmed anything.
+let feishuAuthBaseline = { topUp: false, missing: [], key: '', signature: '' }
+// Remembers a top-up round that finished without granting anything new, so the
+// card stops presenting the same dead-end action as the primary next step.
+let feishuTopUpStalledKey = ''
+let feishuScopeConfirmDecide = null
+
+function closeFeishuScopeConfirm(decision) {
+  const panel = $('feishuScopeConfirm')
+  if (panel) panel.style.display = 'none'
+  const decide = feishuScopeConfirmDecide
+  feishuScopeConfirmDecide = null
+  if (decide) decide(decision === true)
+}
+
+function renderFeishuScopeConfirm(plan, topUp) {
+  const intro = $('feishuScopeConfirmIntro')
+  const list = $('feishuScopeConfirmList')
+  const raw = $('feishuScopeConfirmRaw')
+  const categories = Array.isArray(plan?.categories) ? plan.categories : []
+  const missingLabels = categories.filter(c => c.state === 'missing').map(c => c.label)
+  if ($('feishuScopeConfirmTitle')) {
+    $('feishuScopeConfirmTitle').textContent = topUp ? '确认补充飞书权限' : '确认申请飞书权限'
+  }
+  if (intro) {
+    intro.textContent = topUp && missingLabels.length
+      ? `确认后会打开飞书授权页，申请补齐：${missingLabels.join('、')}。飞书会保留已授予的权限，其余能力不受影响。`
+      : '确认后会打开飞书授权页，一次性申请以下能力。Token 不会被 KnowMe 持久化保存。'
+  }
+  if (list) {
+    list.innerHTML = categories.length
+      ? categories.map(item => {
+        const ready = item.state === 'ready'
+        const label = ready ? '已授权' : item.state === 'missing' ? '本次申请' : '待确认'
+        return `<div class="connector-scope-row ${ready ? 'is-ready' : 'is-missing'}">
+          <span class="connector-scope-state">${escHtml(label)}</span>
+          <span>${escHtml(item.label)}</span>
+        </div>`
+      }).join('')
+      : '<div class="connector-scope-row">读取权限清单失败，将按项目默认范围申请。</div>'
+  }
+  if (raw) raw.textContent = (plan?.scopes || []).join('  ')
+}
+
+// Authorization must never be a blind click-through: show what will be requested
+// and wait for an explicit decision before opening the browser.
+function confirmFeishuScopeRequest(plan, topUp) {
+  const panel = $('feishuScopeConfirm')
+  if (!panel) return Promise.resolve(true)
+  closeFeishuScopeConfirm(false)
+  renderFeishuScopeConfirm(plan, topUp)
+  panel.style.display = 'block'
+  return new Promise(resolve => { feishuScopeConfirmDecide = resolve })
+}
+
+$('btnFeishuScopeConfirm')?.addEventListener('click', () => closeFeishuScopeConfirm(true))
+$('btnFeishuScopeCancel')?.addEventListener('click', () => closeFeishuScopeConfirm(false))
+
+function stopFeishuAuthPolling() {
+  if (feishuAuthPollTimer) clearTimeout(feishuAuthPollTimer)
+  feishuAuthPollTimer = null
+  feishuAuthPollDeadline = 0
+}
+
+function unpackFeishuStatus(payload) {
+  if (payload && payload.connector && payload.connector.status) return payload.connector.status
+  if (payload && payload.status) return payload.status
+  if (payload && typeof payload === 'object') return payload
+  return {}
+}
+
+function feishuUserReady(payload) {
+  const status = unpackFeishuStatus(payload)
+  const state = String(status.state || '').toLowerCase()
+  if (state === 'auth_required') return false
+  return status.userReady !== false
+}
+
+function feishuPermissionsComplete(payload) {
+  const permissions = unpackFeishuStatus(payload).permissions
+  if (!permissions?.known) return null
+  return permissions.complete === true
+}
+
+function feishuScopeSignature(payload) {
+  return String(unpackFeishuStatus(payload).permissions?.signature || '')
+}
+
+function feishuMissingCategoryIds(payload) {
+  const permissions = unpackFeishuStatus(payload).permissions
+  if (!permissions?.known) return []
+  return (permissions.categories || [])
+    .filter(item => item.state === 'missing')
+    .map(item => item.id)
+    .sort()
+}
+
+function feishuMissingCategoryLabels(payload) {
+  const permissions = unpackFeishuStatus(payload).permissions
+  if (!permissions?.known) return []
+  return (permissions.categories || [])
+    .filter(item => item.state === 'missing')
+    .map(item => item.label)
+}
+
+// A stable identity for "the exact set of capabilities still missing", so a
+// top-up round that changed nothing can be recognized and stop looping.
+function feishuMissingKey(payload) {
+  return feishuMissingCategoryIds(payload).join('|')
+}
+
+function feishuDocKbReadiness(payload) {
+  const status = unpackFeishuStatus(payload)
+  const ready = status.capabilities?.docsKb?.ready
+  if (typeof ready === 'boolean') return ready
+  const permissions = status.permissions
+  if (!permissions?.known) return null
+  const required = new Set(['drive', 'docs', 'wiki'])
+  const missing = (permissions.categories || []).filter(item => required.has(item.id) && item.state === 'missing')
+  return missing.length === 0
+}
+
+function feishuOptionalMissingLabels(payload) {
+  const permissions = unpackFeishuStatus(payload).permissions
+  if (!permissions?.known) return []
+  const core = new Set(['drive', 'docs', 'wiki'])
+  return (permissions.categories || [])
+    .filter(item => item.state === 'missing' && !core.has(item.id))
+    .map(item => item.label)
+}
+
+function renderFeishuPermissionSummary(payload) {
+  const target = $('feishuPermissionSummary')
+  if (!target) return
+  const status = unpackFeishuStatus(payload)
+  const permissions = status.permissions
+  if (!permissions?.known) {
+    target.textContent = '授权范围：云盘、文档、知识库、多维表格、通讯录、聊天、会议、妙记、日程和待办。'
+    return
+  }
+  const docKbReady = feishuDocKbReadiness(payload)
+  const coreMissing = status.capabilities?.docsKb?.missing || []
+  const optionalMissing = feishuOptionalMissingLabels(payload)
+  if (docKbReady === false) {
+    target.textContent = coreMissing.length
+      ? `飞书已登录，但文档/知识库仍缺少：${coreMissing.join('、')}。请在飞书授权页确认，或联系管理员审批。`
+      : '飞书已登录，但文档/知识库权限还未完全就绪，请重新授权后再试。'
+    return
+  }
+  if (optionalMissing.length) {
+    target.textContent = `飞书文档/知识库已就绪；扩展能力仍缺少：${optionalMissing.join('、')}。只有在对应场景（如今日进度）才需要补齐。`
+    return
+  }
+  target.textContent = '当前项目所需飞书权限已全部具备。具体文档/妙记仍受飞书资源访问权限控制。'
+}
+
+function renderFeishuAuthDone(payload = null) {
+  const panel = $('feishuAuthPanel')
+  if (!panel) return
+  panel.classList.add('is-done')
+  const optionalMissing = feishuOptionalMissingLabels(payload)
+  if ($('feishuAuthTitle')) $('feishuAuthTitle').textContent = '飞书已连接'
+  if ($('feishuAuthMessage')) {
+    $('feishuAuthMessage').textContent = feishuAuthMode === 'full'
+      ? (optionalMissing.length
+        ? '文档/知识库已授权完成，飞书 user 身份可用。'
+        : '全部项目权限已获取，飞书 user 身份可用。')
+      : '授权已完成，飞书 user 身份可用。'
+  }
+  if ($('feishuAuthHint')) {
+    $('feishuAuthHint').textContent = feishuAuthMode === 'full'
+      ? (optionalMissing.length
+        ? `飞书文档/知识库已经就绪；扩展能力仍缺少：${optionalMissing.join('、')}，后续按需补齐即可。`
+        : '当前项目所需飞书能力已就绪；具体文档/妙记仍受资源访问权限控制。')
+      : '你现在可以直接在对话中读取飞书文档/知识库，无需手动刷新。'
+  }
+  if ($('feishuAuthUrl')) $('feishuAuthUrl').innerHTML = ''
+  const qrBox = $('feishuAuthQrBox')
+  if (qrBox) {
+    qrBox.open = false
+    qrBox.style.display = 'none'
+  }
+  if ($('feishuAuthFallback')) $('feishuAuthFallback').open = false
+  if ($('feishuAuthQr')) $('feishuAuthQr').removeAttribute('src')
+  if ($('feishuAuthPrimaryActions')) $('feishuAuthPrimaryActions').style.display = 'none'
+  if ($('btnCheckFeishuAuth')) $('btnCheckFeishuAuth').style.display = 'none'
+  if ($('btnRetryFeishuAuth')) $('btnRetryFeishuAuth').style.display = 'none'
+  feishuAuthAutoOpened = { url: '', at: 0 }
+  if (feishuAuthDoneTimer) clearTimeout(feishuAuthDoneTimer)
+  feishuAuthDoneTimer = setTimeout(() => {
+    feishuAuthDoneTimer = null
+    if (panel.classList.contains('is-done')) panel.style.display = 'none'
+  }, 3000)
+}
+
+async function checkFeishuAuthStatus({ quiet = false } = {}) {
+  if (!window.api?.connectorsStatus) return false
+  let result = null
+  try {
+    result = await window.api.connectorsStatus('feishu')
+  } catch (error) {
+    if (!quiet) toast(error.message || '检测飞书状态失败', 'error')
+    return false
+  }
+  const fullReady = feishuPermissionsComplete(result)
+  const docKbReady = feishuDocKbReadiness(result)
+  renderFeishuPermissionSummary(result)
+  // In a top-up round the login and doc/KB checks already passed before the user
+  // clicked, so they cannot prove this round granted anything. Require the gap to
+  // actually shrink, otherwise the first poll would falsely report success.
+  const grantedSomething = feishuAuthBaseline.topUp
+    ? (fullReady === true
+      || feishuScopeSignature(result) !== feishuAuthBaseline.signature
+      || feishuMissingCategoryIds(result).length < feishuAuthBaseline.missing.length)
+    : true
+  if (feishuUserReady(result) && docKbReady !== false && grantedSomething) {
+    stopFeishuAuthPolling()
+    feishuTopUpStalledKey = ''
+    renderFeishuAuthDone(result)
+    toast('飞书授权成功', 'success')
+    refreshConnectorsList()
+    return true
+  }
+  const status = unpackFeishuStatus(result)
+  if (feishuAuthBaseline.topUp && !grantedSomething) {
+    const labels = feishuMissingCategoryLabels(result)
+    $('feishuAuthHint').textContent = labels.length
+      ? `还没检测到新增授权，仍缺少：${labels.join('、')}。请在飞书授权页点击确认。`
+      : '还没检测到新增授权，请在飞书授权页点击确认。'
+    if (!quiet) {
+      stopFeishuAuthPolling()
+      toast('还没检测到新增授权', 'info')
+    }
+    return false
+  }
+  if (docKbReady === false) {
+    const missing = status.capabilities?.docsKb?.missing || []
+    $('feishuAuthHint').textContent = missing.length
+      ? `账号已登录，但文档/知识库仍缺少：${missing.join('、')}。请在飞书中确认授权或联系管理员。`
+      : '账号已登录，但文档/知识库权限仍未完全就绪，请重新授权后再检测。'
+    if (!quiet) {
+      stopFeishuAuthPolling()
+      toast('文档/知识库权限尚未获得', 'info')
+    }
+    return false
+  }
+  if (feishuAuthMode === 'full' && fullReady === null) {
+    $('feishuAuthHint').textContent = '账号已登录，但当前 lark-cli 未返回权限清单，无法确认是否全部授权。'
+    if (!quiet) {
+      stopFeishuAuthPolling()
+      toast('无法确认全部飞书权限', 'info')
+    }
+    return false
+  }
+  $('feishuAuthHint').textContent = status.message
+    ? `状态：${status.message}`
+    : '仍在等待你完成授权；可点击「在浏览器完成授权」，或展开二维码扫码。'
+  if (!quiet) toast('还没检测到授权完成，请先在飞书确认后再检测', 'info')
+  return false
+}
+
+function activeSettingsTabId() {
+  return document.querySelector('.tab.active')?.dataset.tab || ''
+}
+
+let connectorsFocusRefreshAt = 0
+async function refreshConnectorsOnForeground() {
+  if (activeSettingsTabId() !== 'connectors') return
+  const now = Date.now()
+  if (now - connectorsFocusRefreshAt < 1200) return
+  connectorsFocusRefreshAt = now
+  await refreshConnectorsList()
+}
+
+// A top-up round that expires without granting anything is a dead end, usually
+// because the tenant admin has not approved those scopes. Say so and stop
+// presenting the same action as the obvious next step.
+async function reportFeishuAuthTimeout() {
+  const fallback = '等待超时：还没有检测到授权完成。可点击「重试授权」重新生成。'
+  if (!feishuAuthBaseline.topUp) {
+    $('feishuAuthHint').textContent = fallback
+    return
+  }
+  let result = null
+  try {
+    result = await window.api?.connectorsStatus?.('feishu')
+  } catch {
+    result = null
+  }
+  const key = feishuMissingKey(result)
+  if (key && key === feishuAuthBaseline.key) {
+    feishuTopUpStalledKey = key
+    const labels = feishuMissingCategoryLabels(result)
+    $('feishuAuthHint').textContent = labels.length
+      ? `本次授权没有新增权限，仍未开通：${labels.join('、')}。这类扩展能力通常需要飞书管理员审批，重复点击不会生效。`
+      : '本次授权没有新增权限。请确认飞书授权页是否完成，或联系管理员审批。'
+  } else {
+    $('feishuAuthHint').textContent = fallback
+  }
+  refreshConnectorsList()
+}
+
+function scheduleFeishuAuthPolling() {
+  if (!feishuAuthPollDeadline) return
+  if (Date.now() >= feishuAuthPollDeadline) {
+    stopFeishuAuthPolling()
+    reportFeishuAuthTimeout()
+    return
+  }
+  feishuAuthPollTimer = setTimeout(async () => {
+    const ok = await checkFeishuAuthStatus({ quiet: true })
+    if (!ok) scheduleFeishuAuthPolling()
+  }, FEISHU_AUTH_POLL_MS)
+}
+
+function startFeishuAuthPolling() {
+  stopFeishuAuthPolling()
+  feishuAuthPollDeadline = Date.now() + FEISHU_AUTH_TIMEOUT_MS
+  scheduleFeishuAuthPolling()
+}
+
+function resetFeishuAuthPanel() {
+  if (feishuAuthDoneTimer) clearTimeout(feishuAuthDoneTimer)
+  feishuAuthDoneTimer = null
+  const panel = $('feishuAuthPanel')
+  if (panel) panel.classList.remove('is-done')
+  if ($('feishuAuthTitle')) $('feishuAuthTitle').textContent = '飞书授权'
+  if ($('feishuAuthFallback')) $('feishuAuthFallback').open = false
+  if ($('feishuAuthPrimaryActions')) $('feishuAuthPrimaryActions').style.display = 'flex'
+  if ($('btnCheckFeishuAuth')) $('btnCheckFeishuAuth').style.display = 'inline-flex'
+  if ($('btnRetryFeishuAuth')) $('btnRetryFeishuAuth').style.display = 'inline-flex'
+}
+
+async function openFeishuAuthUrl(url) {
+  if (!url) {
+    toast('授权链接为空，请重试', 'error')
+    return false
+  }
+  const r = await window.api?.openExternal?.(url)
+  if (!r?.ok) {
+    toast(r?.message || '无法打开飞书授权链接，请改用扫码', 'error')
+    return false
+  }
+  return true
+}
+
+// A pending device-code授权 can be re-surfaced by several entry points; only the
+// first surfacing should steal focus with a browser window.
+function autoOpenFeishuAuthUrl(url) {
+  if (!url) return
+  const now = Date.now()
+  if (feishuAuthAutoOpened.url === url && now - feishuAuthAutoOpened.at < 60000) return
+  feishuAuthAutoOpened = { url, at: now }
+  openFeishuAuthUrl(url)
+}
+
+function showFeishuAuth(result) {
+  const panel = $('feishuAuthPanel')
+  if (!panel) return
+  resetFeishuAuthPanel()
+  panel.style.display = 'block'
+  const ok = !!result?.ok
+  const inProgress = String(result?.code || '') === 'in_progress'
+  const meta = parseFeishuAuthMeta(result?.verificationUrl || '')
+  const value = meta.url
+  $('feishuAuthMessage').textContent = ok
+    ? (inProgress
+      ? '授权进行中：已为你打开浏览器授权页，确认后这里会自动变为已连接。'
+      : '已在默认浏览器打开飞书授权页，请在页面中点击「确认授权」。')
+    : (result?.message || '无法发起飞书授权')
+  const url = $('feishuAuthUrl')
+  if (url) {
+    url.innerHTML = value
+      ? `授权链接：<a class="connector-auth-link" href="${escHtml(value)}" target="_blank" rel="noreferrer">${escHtml(value)}</a>`
+      : ''
+  }
+  const qrBox = $('feishuAuthQrBox')
+  const qr = $('feishuAuthQr')
+  const qrData = String(result?.qrDataUrl || '').trim()
+  if (qr) qr.src = qrData
+  if (qrBox) {
+    qrBox.open = false
+    qrBox.style.display = ok && qrData ? 'block' : 'none'
+  }
+  const hint = $('feishuAuthHint')
+  if (hint) {
+    const fallback = meta.userCode
+      ? `浏览器没弹出？手动访问 https://accounts.feishu.cn/oauth/v1/device/verify 并输入 user_code：${meta.userCode}`
+      : '浏览器没弹出？点上面的「重新打开授权页」，或展开备用方式完成授权。'
+    hint.textContent = ok ? fallback : '可点击「重试授权」再次尝试。'
+  }
+  const openBtn = $('btnOpenFeishuAuth')
+  const copyBtn = $('btnCopyFeishuAuth')
+  if (openBtn) {
+    openBtn.style.display = ok && value ? 'inline-flex' : 'none'
+    openBtn.dataset.url = value
+  }
+  if (copyBtn) {
+    copyBtn.style.display = ok && value ? 'inline-flex' : 'none'
+    copyBtn.dataset.url = value
+  }
+  if (ok) {
+    startFeishuAuthPolling()
+    autoOpenFeishuAuthUrl(value)
+  }
+}
+
+async function startFeishuAuthFlow({ ensureEnabled = false, force = false, full = false, confirm = true } = {}) {
+  if (!window.api?.connectorsFeishuAuthStart) return
+  if (feishuAuthStartPromise) return feishuAuthStartPromise
+  const flow = (async () => {
+    if (ensureEnabled && window.api?.connectorsUpsert) {
+      const current = ($('feishuAllowlist')?.value || '').split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+      const allowlist = [...new Set([...current, ...getDefaultFeishuAllowlist()])]
+      const enabledRes = await window.api.connectorsUpsert({
+        id: 'feishu',
+        type: 'feishu',
+        enabled: true,
+        allowlist,
+      })
+      if (!enabledRes?.ok) {
+        toast(enabledRes?.error || '启用飞书连接器失败', 'error')
+        return
+      }
+    }
+    let statusPayload = null
+    if (window.api.connectorsStatus) {
+      try {
+        statusPayload = await window.api.connectorsStatus('feishu')
+      } catch {
+        // 状态探测失败时继续走授权流程，由授权命令返回真实错误。
+      }
+    }
+    if (!force && statusPayload && feishuUserReady(statusPayload)) {
+      refreshConnectorsList()
+      toast('飞书已连接，无需重复授权', 'success')
+      return
+    }
+    const missing = feishuMissingCategoryIds(statusPayload)
+    const topUp = !!statusPayload
+      && feishuUserReady(statusPayload)
+      && feishuDocKbReadiness(statusPayload) !== false
+      && missing.length > 0
+    if (confirm) {
+      const plan = unpackFeishuStatus(statusPayload).permissionPlan || null
+      const agreed = await confirmFeishuScopeRequest(plan, topUp)
+      if (!agreed) return
+    }
+    feishuAuthBaseline = {
+      topUp,
+      missing,
+      key: missing.join('|'),
+      signature: feishuScopeSignature(statusPayload),
+    }
+    feishuAuthMode = full ? 'full' : 'normal'
+    showFeishuAuth(await window.api.connectorsFeishuAuthStart({ force, full: feishuAuthMode === 'full' }))
+    refreshConnectorsList()
+  })()
+  feishuAuthStartPromise = flow
+  try {
+    return await flow
+  } finally {
+    if (feishuAuthStartPromise === flow) feishuAuthStartPromise = null
+  }
+}
+
+$('btnCloseFeishuAuth')?.addEventListener('click', () => {
+  stopFeishuAuthPolling()
+  if (feishuAuthDoneTimer) clearTimeout(feishuAuthDoneTimer)
+  feishuAuthDoneTimer = null
+  if ($('feishuAuthPanel')) $('feishuAuthPanel').style.display = 'none'
+})
+$('btnOpenFeishuAuth')?.addEventListener('click', async () => {
+  await openFeishuAuthUrl($('btnOpenFeishuAuth')?.dataset.url || '')
+})
+$('btnCopyFeishuAuth')?.addEventListener('click', () => {
+  const url = $('btnCopyFeishuAuth')?.dataset.url || ''
+  if (!url) {
+    toast('授权链接为空，请重试', 'error')
+    return
+  }
+  if (window.api?.copyToClipboard) window.api.copyToClipboard(url)
+  toast('授权链接已复制', 'success')
+})
+$('btnCheckFeishuAuth')?.addEventListener('click', async () => {
+  await checkFeishuAuthStatus({ quiet: false })
+})
+$('btnRetryFeishuAuth')?.addEventListener('click', async (e) => {
+  const btn = e.currentTarget
+  if (!window.api?.connectorsFeishuAuthStart) return
+  setLoading(btn, true, '生成中…')
+  feishuAuthAutoOpened = { url: '', at: 0 }
+  try {
+    await startFeishuAuthFlow({ ensureEnabled: true, force: true, full: true })
+  } finally {
+    setLoading(btn, false)
+  }
+})
+$('btnFeishuQuickAction')?.addEventListener('click', async () => {
+  const mode = $('btnFeishuQuickAction')?.dataset.mode || ''
+  if (mode === 'enable-auth' || mode === 'auth' || mode === 'full-auth') {
+    await startFeishuAuthFlow({ ensureEnabled: true, force: true, full: true })
+    return
+  }
+})
+window.addEventListener('focus', () => {
+  refreshConnectorsOnForeground()
+})
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshConnectorsOnForeground()
+})
+$('connectorsList')?.addEventListener('click', async (e) => {
+  const authButton = e.target.closest('[data-feishu-auth]')
+  if (authButton && window.api?.connectorsFeishuAuthStart) {
+    await startFeishuAuthFlow({ ensureEnabled: true, force: true, full: true })
+    return
+  }
+  const t = e.target.closest('[data-conn-toggle]')
+  if (!t) return
+  const id = t.dataset.connToggle
+  const enabled = t.dataset.enabled !== '1'
+  const patch = { id, enabled }
+  if (id === 'feishu' && enabled) {
+    const defaults = getDefaultFeishuAllowlist()
+    const current = ($('feishuAllowlist')?.value || '').split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+    patch.allowlist = [...new Set([...current, ...defaults])]
+  }
+  const r = await window.api.connectorsUpsert(patch)
+  if (!r.ok) toast(r.error || '更新失败', 'error')
+  else {
+    toast(enabled ? '已启用连接器' : '已禁用连接器', 'success')
+    if (id === 'feishu' && enabled) {
+      await startFeishuAuthFlow({ ensureEnabled: true, force: true, full: true })
+    }
+    else refreshConnectorsList()
+  }
+})
+$('btnSaveFeishuAllowlist')?.addEventListener('click', async () => {
+  const allowlist = ($('feishuAllowlist')?.value || '').split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+  const r = await window.api.connectorsUpsert({ id: 'feishu', type: 'feishu', allowlist, enabled: true })
+  if (!r.ok) toast(r.error || '保存失败', 'error')
+  else { toast('飞书白名单已保存', 'success'); refreshConnectorsList() }
+})
+$('connectorDrafts')?.addEventListener('click', async (e) => {
+  const approve = e.target.closest('[data-draft-approve]')
+  const reject = e.target.closest('[data-draft-reject]')
+  if (!approve && !reject) return
+  const isReject = Boolean(reject)
+  const draftId = isReject ? reject.dataset.draftReject : approve.dataset.draftApprove
+  const confirmText = approve?.dataset.draftKind === 'permission'
+    ? '确认以当前飞书身份发起权限申请？纪要所有者会收到你的申请。'
+    : '确认以当前飞书身份写入该文档？此操作会修改飞书数据。'
+  if (!isReject && !window.confirm(confirmText)) return
+  const r = await window.api.connectorsApproveDraft({ draftId, reject: isReject })
+  if (!r.ok) toast(r.message || '操作失败', 'error')
+  else { toast(isReject ? '已拒绝' : '已提交写入飞书', 'success'); refreshConnectorDrafts() }
+})
+$('btnSaveMcpConnector')?.addEventListener('click', async () => {
+  const command = ($('mcpCommand')?.value || '').trim()
+  const args = ($('mcpArgs')?.value || '').trim().split(/\s+/).filter(Boolean)
+  const allowlist = ($('mcpAllowlist')?.value || '').split(/[,，]/).map((s) => s.trim()).filter(Boolean)
+  const r = await window.api.connectorsUpsert({
+    id: 'mcp-default',
+    type: 'mcp',
+    title: '公司 MCP',
+    enabled: true,
+    mcp: { command, args, envKeys: [] },
+    allowlist,
+  })
+  if (!r.ok) toast(r.error || '保存失败', 'error')
+  else { toast('MCP 配置已保存', 'success'); refreshConnectorsList() }
 })
 
-window.api.initSettings(s => {
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => selectSettingsTab(tab.dataset.tab))
+})
+window.api?.onSelectSettingsTab?.(selectSettingsTab)
+if (initialTabFromQuery) selectSettingsTab(initialTabFromQuery)
+
+async function refreshSourcesList() {
+  const list = $('sourcesList')
+  if (!list) return
+  const typeLabel = {
+    local: '本地目录',
+    gitlab: 'GitLab',
+    github: 'GitHub',
+    web: '网页资料',
+  }
+  try {
+    const r = await window.api.sourcesList()
+    $('gitAvailHint').textContent = r.gitAvailable ? '已检测到本机 git' : '未检测到 git（GitLab / GitHub 克隆需要）'
+    if (!r.sources?.length) {
+      list.innerHTML = '<span class="concept-empty">尚未添加内容源。可添加本地文件夹、GitLab/GitHub 仓库或网页资料。</span>'
+      return
+    }
+    list.innerHTML = r.sources.map(s => {
+      const active = s.id === r.activeSourceId
+      const sync = (s.type === 'gitlab' || s.type === 'github' || s.type === 'web')
+        ? `<button type="button" class="btn-sm" data-sync="${escHtml(s.id)}">${s.type === 'web' ? '刷新' : '同步'}</button>`
+        : ''
+      const kind = typeLabel[s.type] || s.type
+      const sub = s.type === 'web'
+        ? `${kind} · ${escHtml(s.pageUrl || s.remoteUrl || shortPath(s.rootPath))}`
+        : `${kind} · ${escHtml(shortPath(s.rootPath))}`
+      return `<div class="action-row source-row ${active ? 'is-current' : ''}">
+        <div class="action-body">
+          <div class="action-label">${escHtml(s.displayName)}</div>
+          <div class="action-sub">${sub}</div>
+        </div>
+        <div class="source-actions">
+          ${active
+            ? '<span class="source-state" aria-label="当前使用中的内容源">使用中</span>'
+            : `<button type="button" class="btn-sm primary" data-activate="${escHtml(s.id)}">启用</button>`}
+          <button type="button" class="btn-sm ghost" data-open="${escHtml(s.id)}">打开目录</button>
+          ${sync}
+          <button type="button" class="btn-sm danger" data-remove="${escHtml(s.id)}">移除</button>
+        </div>
+      </div>`
+    }).join('')
+  } catch (e) {
+    list.innerHTML = `<span class="concept-empty">加载失败：${escHtml(e.message || e)}</span>`
+  }
+}
+
+$('sourcesList')?.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-activate],[data-remove],[data-sync],[data-open]')
+  if (!t) return
+  if (t.dataset.activate) {
+    const r = await window.api.sourcesSetActive(t.dataset.activate)
+    if (!r.ok) toast(r.error || '切换失败', 'error')
+    else { toast('已切换内容源', 'success'); refreshSourcesList() }
+  } else if (t.dataset.remove) {
+    const r = await window.api.sourcesRemove(t.dataset.remove)
+    if (!r.ok) toast(r.error || '移除失败', 'error')
+    else { toast('已移除（本地文件未删除）', 'success'); refreshSourcesList() }
+  } else if (t.dataset.sync) {
+    setLoading(t, true, '同步…')
+    try {
+      const r = await window.api.sourcesSync(t.dataset.sync)
+      if (!r.ok) toast(r.error || '同步失败', 'error', 6000)
+      else { toast('已同步', 'success'); refreshSourcesList() }
+    } finally { setLoading(t, false) }
+  } else if (t.dataset.open) {
+    await window.api.sourcesOpenRoot(t.dataset.open)
+  }
+})
+
+$('btnAddLocalSource')?.addEventListener('click', async () => {
+  const btn = $('btnAddLocalSource')
+  setLoading(btn, true, '选择…')
+  try {
+    const r = await window.api.sourcesAddLocal()
+    if (r.canceled) return
+    if (!r.ok) toast(r.error || '添加失败', 'error')
+    else { toast('已添加本地文件夹', 'success'); refreshSourcesList() }
+  } finally { setLoading(btn, false) }
+})
+
+$('btnRefreshSources')?.addEventListener('click', () => refreshSourcesList())
+
+$('btnAddGitlabSource')?.addEventListener('click', async () => {
+  const btn = $('btnAddGitlabSource')
+  setLoading(btn, true, '克隆中…')
+  try {
+    const r = await window.api.sourcesAddGitlab({
+      host: $('gitlabHost').value.trim(),
+      token: $('gitlabToken').value.trim(),
+      projectPath: $('gitlabProject').value.trim(),
+      branch: $('gitlabBranch').value.trim() || 'main',
+    })
+    if (!r.ok) toast(r.error || '添加失败', 'error', 7000)
+    else {
+      toast(r.reused ? '已复用本地工作副本' : '克隆成功并已添加', 'success')
+      $('gitlabProject').value = ''
+      refreshSourcesList()
+    }
+  } catch (e) {
+    toast(e.message || '克隆异常', 'error')
+  } finally { setLoading(btn, false) }
+})
+
+$('btnAddGithubSource')?.addEventListener('click', async () => {
+  const btn = $('btnAddGithubSource')
+  setLoading(btn, true, '克隆中…')
+  try {
+    const r = await window.api.sourcesAddGithub({
+      remoteUrl: $('githubRepoUrl').value.trim(),
+      token: $('githubToken').value.trim(),
+      branch: $('githubBranch').value.trim() || 'main',
+    })
+    if (!r.ok) toast(r.error || '添加失败', 'error', 7000)
+    else {
+      toast(r.reused ? '已复用本地工作副本' : '克隆成功并已添加', 'success')
+      $('githubRepoUrl').value = ''
+      refreshSourcesList()
+    }
+  } catch (e) {
+    toast(e.message || '克隆异常', 'error')
+  } finally { setLoading(btn, false) }
+})
+
+$('btnAddWebSource')?.addEventListener('click', async () => {
+  const btn = $('btnAddWebSource')
+  setLoading(btn, true, '抓取中…')
+  try {
+    const r = await window.api.sourcesAddWeb({
+      pageUrl: $('webPageUrl').value.trim(),
+    })
+    if (!r.ok) toast(r.error || '添加失败', 'error', 7000)
+    else {
+      toast('网页已抓取并添加', 'success')
+      $('webPageUrl').value = ''
+      refreshSourcesList()
+    }
+  } catch (e) {
+    toast(e.message || '抓取异常', 'error')
+  } finally { setLoading(btn, false) }
+})
+
+function syncTemperatureLabel() {
+  const el = $('temperature')
+  const lab = $('temperatureVal')
+  if (!el || !lab) return
+  lab.textContent = Number(el.value).toFixed(1)
+}
+$('temperature')?.addEventListener('input', syncTemperatureLabel)
+
+const MODEL_PRESETS = {
+  dashscope: [
+    ['auto', 'Auto', 131072, 8192],
+    ['qwen-plus', 'Qwen3 Plus', 131072, 8192],
+    ['qwen-turbo', 'Qwen3 Turbo', 131072, 8192],
+    ['qwen-max', 'Qwen3 Max', 32768, 8192],
+    ['qwen-long', 'Qwen3 Long', 1000000, 8192, false],
+    ['deepseek-v3', 'DeepSeek V3', 131072, 8192],
+  ],
+  openai: [
+    ['auto', 'Auto', 128000, 8192],
+    ['gpt-4o-mini', 'GPT-4o mini', 128000, 8192],
+    ['gpt-4o', 'GPT-4o', 128000, 8192],
+  ],
+  custom: [
+    ['auto', 'Auto', 128000, 8192],
+  ],
+}
+
+function formatTokens(n) {
+  const value = Number(n) || 0
+  return value >= 1000000 ? `${(value / 1000000).toFixed(1)}M`
+    : value >= 1000 ? `${Math.round(value / 1000)}K`
+      : String(value)
+}
+
+function modelPresetById(id) {
+  return Object.values(MODEL_PRESETS).flat().find(item => item[0] === id)
+}
+
+function refreshModelProfileHint() {
+  const item = modelPresetById($('model')?.value.trim())
+  const hint = $('modelProfileHint')
+  if (!hint) return
+  if (item?.[0] === 'auto') {
+    hint.textContent = 'Auto 模式：按任务复杂度自动选择模型（优先使用适配本软件的工具可用模型）'
+    return
+  }
+  hint.textContent = item
+    ? `上下文能力：${formatTokens(item[2])} · 最大输出：${formatTokens(item[3])}`
+    : '自定义模型：使用保守上下文预算 32K，可在模型服务商文档中确认能力'
+}
+
+function populateModelPresets(provider, selectedModel = '') {
+  const select = $('modelPreset')
+  if (!select) return
+  const list = MODEL_PRESETS[provider] || []
+  select.innerHTML = '<option value="">自定义模型 ID</option>' +
+    list.map(item => `<option value="${item[0]}">${item[1]}（${formatTokens(item[2])} 上下文）</option>`).join('')
+  select.value = list.some(item => item[0] === selectedModel) ? selectedModel : ''
+}
+
+function syncProviderModels() {
+  const provider = $('llmProvider')?.value || 'custom'
+  populateModelPresets(provider, $('model')?.value.trim() || '')
+  refreshModelProfileHint()
+}
+
+$('llmProvider')?.addEventListener('change', syncProviderModels)
+$('modelPreset')?.addEventListener('change', () => {
+  if ($('modelPreset').value) $('model').value = $('modelPreset').value
+  refreshModelProfileHint()
+})
+$('model')?.addEventListener('input', refreshModelProfileHint)
+
+function applyOrgManagedUI(managed) {
+  const ids = ['endpoint', 'llmProvider', 'model', 'modelPreset', 'feishuAllowlist']
+  ids.forEach((id) => {
+    const el = $(id)
+    if (!el) return
+    if (el.tagName === 'SELECT') el.disabled = !!managed
+    else el.readOnly = !!managed
+  })
+  if ($('orgManagedHint')) $('orgManagedHint').style.display = managed ? 'block' : 'none'
+}
+
+function renderRemoteConfigStatus(s = {}) {
+  const rc = s.remoteConfig || {}
+  const el = $('remoteConfigStatus')
+  if (!el) return
+  if (!rc.enabled) {
+    el.textContent = '状态：未启用远程托管'
+    applyOrgManagedUI(false)
+    return
+  }
+  const parts = [`地址 ${rc.endpoint || '—'}`]
+  if (rc.lastOk) parts.push(`已连接 · 版本 ${rc.updatedAt || '—'}`)
+  else parts.push(`离线${rc.lastError ? ` · ${rc.lastError}` : ''}`)
+  el.textContent = `状态：${parts.join(' · ')}`
+  applyOrgManagedUI(s.orgManaged === true && rc.lastOk === true)
+}
+
+function renderWorkbenchAuthStatus(auth = {}, snapshot = {}) {
+  const el = $('workbenchAuthStatus')
+  if (!el) return
+  const meta = snapshot.workbenchAuth || {}
+  if (!auth.authEnabled) {
+    el.textContent = '状态：工作服务未启用授权（可直接启动任务）'
+    return
+  }
+  if (auth.configured) {
+    const parts = [`已授权 · ${auth.user || '用户'}`]
+    if (auth.tier) parts.push(`tier ${auth.tier}`)
+    if (auth.tenantId || meta.tenantId) parts.push(`租户 ${auth.tenantId || meta.tenantId}`)
+    el.textContent = `状态：${parts.join(' · ')}`
+    return
+  }
+  el.textContent = '状态：需要 Workbench 授权码（工作台可浏览，启动任务前请先验证）'
+}
+
+async function refreshWorkbenchAuthStatus(snapshot = {}) {
+  if (!window.api?.workbenchAuthStatus) return
+  try {
+    const res = await window.api.workbenchAuthStatus()
+    renderWorkbenchAuthStatus(res?.auth || {}, snapshot)
+  } catch {
+    renderWorkbenchAuthStatus({}, snapshot)
+  }
+}
+
+const ASSISTANT_MODE_EDITABLE_SUGGESTIONS = {
+  soul: [
+    '先给结论，再展开细节。',
+    '语气专业、克制，避免空话。',
+    '不确定时先说明假设与验证方式。',
+  ].join('\n'),
+  general: [
+    '优先输出可执行结论，并给 1-3 个下一步动作。',
+    '信息不足时只追问必要信息，避免连续追问。',
+  ].join('\n'),
+  steward: [
+    '回答结构：结论 → 依据来源 → 适用边界。',
+    '证据不足时明确缺口，并给补齐路径。',
+  ].join('\n'),
+  writing: [
+    '默认输出可直接发送版本，保持原意。',
+    '必要时同时给正式版与简洁版。',
+  ].join('\n'),
+  coding: [
+    '回答结构：问题复述 → 根因假设 → 最小改动方案 → 验收清单。',
+    '明确影响范围、回归风险与回滚要点。',
+  ].join('\n'),
+}
+
+function withSuggestion(value, key) {
+  const v = String(value || '').trim()
+  return v || ASSISTANT_MODE_EDITABLE_SUGGESTIONS[key] || ''
+}
+
+function applyAssistantModeSettings(s = {}) {
+  const cfg = (s.assistantModeConfig && typeof s.assistantModeConfig === 'object') ? s.assistantModeConfig : {}
+  if ($('assistantSoul')) $('assistantSoul').value = withSuggestion(cfg.soul, 'soul')
+  if ($('assistantModeGeneral')) $('assistantModeGeneral').value = withSuggestion(cfg.general, 'general')
+  if ($('assistantModeSteward')) $('assistantModeSteward').value = withSuggestion(cfg.steward, 'steward')
+  if ($('assistantModeWriting')) $('assistantModeWriting').value = withSuggestion(cfg.writing, 'writing')
+  if ($('assistantModeCoding')) $('assistantModeCoding').value = withSuggestion(cfg.coding, 'coding')
+}
+
+function collectAssistantModeSettings() {
+  return {
+    soul: $('assistantSoul') ? $('assistantSoul').value.trim() : '',
+    general: $('assistantModeGeneral') ? $('assistantModeGeneral').value.trim() : '',
+    steward: $('assistantModeSteward') ? $('assistantModeSteward').value.trim() : '',
+    writing: $('assistantModeWriting') ? $('assistantModeWriting').value.trim() : '',
+    coding: $('assistantModeCoding') ? $('assistantModeCoding').value.trim() : '',
+  }
+}
+
+function applySettingsSnapshot(s = {}) {
   $('endpoint').value  = s.apiEndpoint  || ''
   $('apikey').value    = s.apiKey       || ''
   $('model').value     = s.model        || ''
+  $('llmProvider').value = s.llmProvider || (
+    String(s.apiEndpoint || '').includes('dashscope.aliyuncs.com') ? 'dashscope' : 'custom'
+  )
+  populateModelPresets($('llmProvider').value, $('model').value)
+  refreshModelProfileHint()
+  $('userProfile').value = s.userProfile || ''
   $('userPrompt').value = s.userPrompt || ''
+  if ($('userIndustry')) {
+    const allowed = new Set(['general', 'software', 'game', 'sales', 'education', 'content'])
+    const industry = String(s.industry || 'general')
+    $('userIndustry').value = allowed.has(industry) ? industry : 'general'
+  }
+  renderUserBrief()
+  if ($('memorySaveState')) {
+    $('memorySaveState').textContent = '已保存'
+    $('memorySaveState').classList.remove('unsaved')
+    $('memorySaveState').classList.add('saved')
+  }
+  if ($('temperature')) {
+    const t = Number(s.temperature)
+    $('temperature').value = String(Number.isFinite(t) ? Math.min(2, Math.max(0, t)) : 0.7)
+    syncTemperatureLabel()
+  }
+  if ($('gitlabHost')) $('gitlabHost').value = s.gitlabHost || ''
+  if ($('gitlabToken')) $('gitlabToken').value = s.gitlabToken || ''
+  if ($('githubToken')) $('githubToken').value = s.githubToken || ''
+  if (s.orgFeishuAllowlist && $('feishuAllowlist')) $('feishuAllowlist').value = s.orgFeishuAllowlist
+  if ($('remoteConfigEnabled')) $('remoteConfigEnabled').checked = !!(s.remoteConfig && s.remoteConfig.enabled)
+  if ($('remoteConfigEndpoint')) {
+    $('remoteConfigEndpoint').value = (s.remoteConfig && s.remoteConfig.endpoint) || 'http://127.0.0.1:8020'
+  }
+  applyAssistantModeSettings(s)
+  renderRemoteConfigStatus(s)
+  const wb = s.workbenchAuth || {}
+  if ($('workbenchAuthEndpoint')) $('workbenchAuthEndpoint').value = wb.endpoint || 'http://127.0.0.1:8010'
+  if ($('workbenchAuthTenant')) $('workbenchAuthTenant').value = wb.tenantId || ''
+  if ($('workbenchAuthKey')) $('workbenchAuthKey').value = ''
+  refreshWorkbenchAuthStatus(s)
+}
+
+window.api?.initSettings?.((s) => applySettingsSnapshot(s))
+try {
+  const snapshot = window.api?.getSettings?.()
+  if (snapshot) applySettingsSnapshot(snapshot)
+} catch {}
+$('autostart').checked = window.api?.getAutostart?.() || false
+if (window.api) refreshSourcesList()
+renderUserBrief()
+function markMemoryUnsaved() {
+  const state = $('memorySaveState')
+  if (!state) return
+  state.textContent = '有未保存的资料'
+  state.classList.remove('saved')
+  state.classList.add('unsaved')
+}
+$('userProfile')?.addEventListener('input', () => {
+  renderUserBrief()
+  markMemoryUnsaved()
 })
-$('autostart').checked = window.api.getAutostart()
-refreshKbMemStatus()
+$('userPrompt')?.addEventListener('input', () => {
+  renderUserBrief()
+  markMemoryUnsaved()
+})
+$('userIndustry')?.addEventListener('change', () => {
+  renderUserBrief()
+  markMemoryUnsaved()
+})
 
 async function refreshAppInfo() {
   try {
@@ -675,7 +2702,7 @@ async function refreshAppInfo() {
     $('appBuildMeta').textContent = '无法读取版本'
   }
 }
-refreshAppInfo()
+if (window.api) refreshAppInfo()
 
 $('btnCheckUpdate').addEventListener('click', async () => {
   const btn = $('btnCheckUpdate')
@@ -687,6 +2714,45 @@ $('btnCheckUpdate').addEventListener('click', async () => {
     toast(e.message || '检查更新失败', 'error')
   } finally {
     setLoading(btn, false)
+  }
+})
+
+const ABOUT_BLOG = 'https://diyal9.github.io/tcloudblog/'
+const ABOUT_WECHAT = 'diyalyin'
+const ABOUT_MAIL = '670924505@qq.com'
+
+function copyAboutText(text, okMsg) {
+  const done = () => toast(okMsg, 'success', 2800)
+  const fail = () => {
+    try { window.api.copyToClipboard(text); done() }
+    catch { toast('复制失败', 'error') }
+  }
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(fail)
+  } else {
+    fail()
+  }
+}
+
+$('btnAboutBlog')?.addEventListener('click', async () => {
+  try {
+    const r = await window.api.openExternal(ABOUT_BLOG)
+    if (!r?.ok) toast(r?.message || '无法打开博客', 'error')
+  } catch (e) {
+    toast(e.message || '无法打开博客', 'error')
+  }
+})
+
+$('btnAboutCoffee')?.addEventListener('click', () => {
+  copyAboutText(ABOUT_WECHAT, '喜欢喝冰美式（不加糖）· 微信已复制 diyalyin')
+})
+
+$('btnAboutMail')?.addEventListener('click', async () => {
+  try {
+    const r = await window.api.openExternal(`mailto:${ABOUT_MAIL}`)
+    if (!r?.ok) copyAboutText(ABOUT_MAIL, '邮箱已复制')
+  } catch {
+    copyAboutText(ABOUT_MAIL, '邮箱已复制')
   }
 })
 
@@ -723,136 +2789,137 @@ $('btnNotesImport').addEventListener('click', async () => {
   }
 })
 
-async function runBatchClassify(mode, btn, loadingLabel) {
-  setLoading(btn, true, loadingLabel)
-  try {
-    const r = await window.api.notesBatchClassify({ mode })
-    if (r.ok) toast(r.message || `已更新 ${r.updated} 张`, 'success', 5000)
-    else toast(r.error || '整理失败', 'error', 6000)
-  } catch (e) {
-    toast(e.message || '整理异常', 'error')
-  } finally {
-    setLoading(btn, false)
-  }
-}
-
-$('btnClassifyLocal').addEventListener('click', () =>
-  runBatchClassify('heuristic', $('btnClassifyLocal'), '整理中…'))
-$('btnClassifyAi').addEventListener('click', () =>
-  runBatchClassify('ai', $('btnClassifyAi'), 'AI 分类中…'))
-
 $('autostart').addEventListener('change', e => window.api.setAutostart(e.target.checked))
 $('btnDataDir').addEventListener('click', () => window.api.openDataDir())
-$('btnKnowledgeDir').addEventListener('click', () => window.api.openKnowledgeDir())
-$('btnMemoryPanel').addEventListener('click', () => window.api.openMemoryPanel())
-$('btnKbSelectAll').addEventListener('click', () => setAllCategoryChecks(true))
-$('btnKbSelectNone').addEventListener('click', () => setAllCategoryChecks(false))
-$('kbDrawerClose').addEventListener('click', closeKbDrawer)
-$('kbDrawerClose2').addEventListener('click', closeKbDrawer)
-$('kbDrawer').addEventListener('click', (e) => {
-  if (e.target === $('kbDrawer')) closeKbDrawer()
-})
-$('kbDrawerSave').addEventListener('click', async () => {
-  if (kbDrawerMode !== 'create' && !previewConceptId) return
-  const btn = $('kbDrawerSave')
-  const slashRaw = ($('kbEditSlash').value || '').trim().replace(/^\//, '')
-  const title = $('kbEditTitle').value.trim() || '未命名技能'
-  const body = $('kbEditBody').value
-
-  if (kbDrawerMode === 'create') {
-    setLoading(btn, true, '创建中…')
-    try {
-      const r = await window.api.createSkill({
-        title,
-        slash: slashRaw,
-        body,
-      })
-      if (r.ok) {
-        toast(`已创建 /${r.slash || ''}`, 'success')
-        await refreshKbMemStatus()
-        await openConceptPreview(r.conceptId)
-      } else toast(r.error || '创建失败', 'error')
-    } catch (e) {
-      toast(e.message || '创建异常', 'error')
-    } finally {
-      setLoading(btn, false)
+$('btnMemoryDir').addEventListener('click', () => window.api.openMemoryDir())
+$('btnMemoryConsolidate')?.addEventListener('click', async () => {
+  const btn = $('btnMemoryConsolidate')
+  if (!btn || !window.api?.memoryConsolidate) return
+  btn.disabled = true
+  try {
+    const r = await window.api.memoryConsolidate()
+    if (r?.ok) {
+      toast('工作记忆已重新整合', 'success')
+      await refreshMemoryOverview()
+    } else {
+      toast('整合失败', 'error')
     }
+  } catch (err) {
+    toast('整合失败：' + (err.message || '未知错误'), 'error')
+  } finally {
+    btn.disabled = false
+  }
+})
+
+$('memoryLearning').addEventListener('change', async e => {
+  const enabled = e.target.checked
+  const r = await window.api.memorySetLearning(enabled)
+  if (!r?.ok) {
+    e.target.checked = !enabled
+    toast(r?.error || '更新学习状态失败', 'error')
     return
   }
+  toast(enabled ? '已恢复自动学习' : '已暂停自动学习', 'success')
+  refreshMemoryOverview()
+})
+$('memoryPatterns').addEventListener('click', async e => {
+  const btn = e.target.closest('[data-memory-pattern]')
+  if (!btn) return
+  const requestedAction = btn.dataset.action
+  const pattern = (window.__memoryPatterns || []).find(p => p.id === btn.dataset.memoryPattern)
+  if (!pattern) return
+  let action = requestedAction
+  let summary = ''
+  if (requestedAction === 'edit') {
+    summary = window.prompt('修改这条协作习惯：', pattern.summary || '')
+    if (summary === null) return
+    summary = summary.trim()
+    if (!summary) {
+      toast('习惯内容不能为空', 'error')
+      return
+    }
+    action = pattern.prompt_state === 'dismissed' ? 'dismissed' : 'accepted'
+  } else if (requestedAction === 'restore') {
+    action = 'pending'
+  }
+  const loadingText = action === 'accepted'
+    ? '接受中…'
+    : action === 'dismissed'
+      ? '忽略中…'
+      : action === 'pending'
+        ? '恢复中…'
+        : '保存中…'
+  setLoading(btn, true, loadingText)
+  try {
+    const r = await window.api.memoryReviewPattern({
+      id: btn.dataset.memoryPattern,
+      action,
+      summary,
+    })
+    if (!r?.ok) toast(r?.error || '更新失败', 'error')
+    else {
+      const message = action === 'accepted'
+        ? '已加入稳定习惯'
+        : action === 'dismissed'
+          ? '已忽略该推测'
+          : '已恢复为待确认'
+      toast(message, 'success')
+      refreshMemoryOverview()
+    }
+  } finally {
+    setLoading(btn, false)
+  }
+})
+$('btnMemoryClear').addEventListener('click', async () => {
+  if (!window.confirm('清除全部自动记忆、近期记录和 AI 推断？“关于我”、协作偏好和项目知识库不会被删除。')) return
+  const btn = $('btnMemoryClear')
+  setLoading(btn, true, '清除中…')
+  try {
+    const r = await window.api.memoryClear()
+    if (!r?.ok) toast(r?.error || '清除失败', 'error')
+    else {
+      toast('已清除自动记忆', 'success')
+      refreshMemoryOverview()
+    }
+  } finally {
+    setLoading(btn, false)
+  }
+})
 
+$('btnRemoteConfigSavePrefs')?.addEventListener('click', async () => {
+  const btn = $('btnRemoteConfigSavePrefs')
   setLoading(btn, true, '保存中…')
   try {
-    const r = await window.api.knowledgeWriteConcept({
-      id: previewConceptId,
-      title,
-      body,
-      frontmatter: slashRaw ? { slash: slashRaw.toLowerCase().replace(/[^a-z0-9\-]+/g, '-').replace(/^-+|-+$/g, '') } : {},
+    const r = await window.api.saveRemoteConfigPrefs({
+      enabled: !!$('remoteConfigEnabled')?.checked,
+      endpoint: ($('remoteConfigEndpoint')?.value || '').trim(),
     })
-    if (r.ok) {
-      toast('已保存到知识库', 'success')
-      $('kbDrawerTitle').textContent = title || previewConceptId
-      refreshKbMemStatus()
-    } else toast(r.error || '保存失败', 'error')
-  } catch (e) {
-    toast(e.message || '保存异常', 'error')
+    if (!r?.ok) toast('保存失败', 'error')
+    else {
+      toast('连接设置已保存', 'success')
+      renderRemoteConfigStatus(window.api.getSettings())
+    }
   } finally {
     setLoading(btn, false)
   }
 })
 
-$('btnCreateSkill').addEventListener('click', () => openCreateSkillDrawer())
-
-$('kbDrawerInstantiate').addEventListener('click', async () => {
-  if (!previewConceptId) return
-  const r = await window.api.instantiateFromOkf(previewConceptId)
-  if (r?.ok) {
-    toast('已实例化为新卡片', 'success')
-    closeKbDrawer()
-  } else toast(r?.error || '实例化失败', 'error')
-})
-
-$('btnKnowledgeExport').addEventListener('click', async () => {
-  const categories = getSelectedCategories()
-  if (!categories.length) {
-    toast('请先勾选主题，或点全选', 'error')
-    return
-  }
-  const btn = $('btnKnowledgeExport')
-  setLoading(btn, true, '选择目录…')
+$('btnRemoteConfigPull')?.addEventListener('click', async () => {
+  const btn = $('btnRemoteConfigPull')
+  setLoading(btn, true, '拉取中…')
   try {
-    const r = await window.api.knowledgeExport({ categories })
-    if (r.canceled) return
-    if (r.ok) {
-      const tip = r.partial ? `已导出 ${r.concepts} 个概念（部分主题）` : `已导出整包 ${r.concepts} 个概念`
-      toast(tip, 'success')
-      refreshKbMemStatus()
-    } else {
-      const msg = r.error || (r.lint?.errors?.[0]?.message) || '导出失败'
-      toast(msg, 'error', 6000)
+    await window.api.saveRemoteConfigPrefs({
+      enabled: !!$('remoteConfigEnabled')?.checked,
+      endpoint: ($('remoteConfigEndpoint')?.value || '').trim(),
+    })
+    const r = await window.api.pullRemoteConfig()
+    if (!r?.ok) {
+      toast(r?.error || '拉取失败', 'error', 5000)
+      renderRemoteConfigStatus(window.api.getSettings())
+      return
     }
-  } catch (e) {
-    toast(e.message || '导出异常', 'error')
-  } finally {
-    setLoading(btn, false)
-  }
-})
-
-$('btnKnowledgeImport').addEventListener('click', async () => {
-  const btn = $('btnKnowledgeImport')
-  setLoading(btn, true, '选择包…')
-  try {
-    const r = await window.api.knowledgeImport()
-    if (r.canceled) return
-    if (r.ok) {
-      const n = r.stats?.imported ?? 0
-      const sk = r.stats?.skipped ?? 0
-      toast(`导入完成：${n} 个文件${sk ? `，跳过 ${sk}` : ''}`, 'success')
-      refreshKbMemStatus()
-    } else {
-      toast(r.error || '导入失败，所选文件夹不是有效 OKF 包', 'error', 6000)
-    }
-  } catch (e) {
-    toast(e.message || '导入异常', 'error')
+    toast('已应用组织配置', 'success')
+    applySettingsSnapshot(r.settings || window.api.getSettings())
   } finally {
     setLoading(btn, false)
   }
@@ -863,7 +2930,24 @@ $('btnSave').addEventListener('click', async () => {
     apiEndpoint:  $('endpoint').value.trim(),
     apiKey:       $('apikey').value.trim(),
     model:        $('model').value.trim() || 'gpt-4o-mini',
-    userPrompt: $('userPrompt').value.trim()
+    llmProvider:  $('llmProvider')?.value || 'custom',
+    llmProfile: (() => {
+      const item = modelPresetById($('model').value.trim())
+      return item ? {
+        contextWindow: item[2],
+        maxOutput: item[3],
+        supportsTools: item[4] !== false,
+        parameter: 'max_tokens',
+      } : null
+    })(),
+    userProfile: $('userProfile').value.trim(),
+    userPrompt: $('userPrompt').value.trim(),
+    industry: $('userIndustry')?.value || 'general',
+    temperature: $('temperature') ? Number($('temperature').value) : 0.7,
+    gitlabHost: $('gitlabHost') ? $('gitlabHost').value.trim() : '',
+    gitlabToken: $('gitlabToken') ? $('gitlabToken').value.trim() : '',
+    githubToken: $('githubToken') ? $('githubToken').value.trim() : '',
+    assistantModeConfig: collectAssistantModeSettings(),
   })
   const st = $('status')
   if (r?.warning) {
@@ -872,11 +2956,59 @@ $('btnSave').addEventListener('click', async () => {
     return
   }
   st.textContent = '✓ 已保存'
+  const memoryState = $('memorySaveState')
+  if (memoryState) {
+    memoryState.textContent = '已保存'
+    memoryState.classList.remove('unsaved')
+    memoryState.classList.add('saved')
+  }
   toast('设置已保存', 'success', 2200)
   setTimeout(() => { st.textContent = '' }, 2500)
 })
 
-$('btnCancel').addEventListener('click', () => window.close())
+$('btnCancel').addEventListener('click', () => {
+  if (embeddedMode) {
+    window.parent.postMessage({ type: 'close-settings-inline' }, '*')
+    return
+  }
+  window.close()
+})
+
+$('btnWorkbenchAuthLogin')?.addEventListener('click', async () => {
+  const key = $('workbenchAuthKey')?.value.trim() || ''
+  if (!key) {
+    toast('请填写 Workbench 授权码', 'error')
+    return
+  }
+  const res = await window.api.workbenchAuthLogin({
+    endpoint: $('workbenchAuthEndpoint')?.value.trim() || 'http://127.0.0.1:8010',
+    tenantId: $('workbenchAuthTenant')?.value.trim() || '',
+    key,
+  })
+  if (!res?.ok) {
+    toast(res?.error || 'Workbench 授权失败', 'error', 5000)
+    return
+  }
+  if ($('workbenchAuthKey')) $('workbenchAuthKey').value = ''
+  renderWorkbenchAuthStatus(res.auth || {}, window.api.getSettings?.() || {})
+  toast('Workbench 授权已保存', 'success')
+})
+
+$('btnWorkbenchAuthLogout')?.addEventListener('click', async () => {
+  const res = await window.api.workbenchAuthLogout()
+  if ($('workbenchAuthKey')) $('workbenchAuthKey').value = ''
+  renderWorkbenchAuthStatus(res?.auth || {}, window.api.getSettings?.() || {})
+  toast('已清除 Workbench 授权', 'success')
+})
+
+$('btnWorkbenchAuthRefresh')?.addEventListener('click', async () => {
+  await refreshWorkbenchAuthStatus(window.api.getSettings?.() || {})
+  toast('已刷新 Workbench 授权状态', 'success', 1800)
+})
+
+$('btnOpenCapabilityHubFromSettings')?.addEventListener('click', () => {
+  window.parent.postMessage({ type: 'open-capability-hub', tab: 'skills' }, '*')
+})
 </script>
 </body>
 </html>

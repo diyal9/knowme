@@ -1,5 +1,5 @@
 /**
- * StickyNotes agent memory hook smoke tests
+ * KnowMe agent memory hook smoke tests
  */
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
@@ -20,13 +20,13 @@ function py(args, input) {
 }
 
 describe('sticky-agent-memory hooks', () => {
-  it('memory_paths resolves root under sticky-notes', () => {
+  it('memory_paths resolves root under knowme', () => {
     const r = py([
       '-c',
       "import sys; sys.path.insert(0,'.cursor/hooks'); import memory_paths as m; print(m.memory_root())",
     ]);
     assert.equal(r.status, 0, r.stderr);
-    assert.ok(r.stdout.includes('sticky-notes'), r.stdout);
+    assert.ok(r.stdout.includes('knowme'), r.stdout);
     assert.ok(r.stdout.includes('memory'), r.stdout);
   });
 

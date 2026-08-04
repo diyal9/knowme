@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' file: data:; img-src 'self' file: data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' file:" />
+  <title>KnowMe - 日志中心</title>
+  <style>
+    :root {
+      --bg: #f1efec;
+      --panel: #f8f7f4;
+      --panel-2: #ffffff;
+      --border: rgba(0, 0, 0, 0.08);
+      --text: #1c1917;
+      --muted: #78716c;
+      --accent: #f59e0b;
+      --brand: #2f7d6d;
+      --ok: #2f7d6d;
+      --debug: #64748b;
+      --info: #2563eb;
+      --warn: #b45309;
+      --error: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    header {
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #f7f6f3;
+      position: sticky; top: 0; z-index: 2;
+    }
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 15px;
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    .title img { width: 24px; height: 24px; }
+    .spacer { flex: 1; }
+    select, input[type="search"], button {
+      background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 9px; padding: 7px 10px; font-size: 12px; outline: none;
+    }
+    select:focus, input[type="search"]:focus, button:focus {
+      border-color: rgba(47,125,109,.45);
+      box-shadow: 0 0 0 2px rgba(47,125,109,.12);
+    }
+    input[type="search"] { min-width: 200px; }
+    button { cursor: pointer; transition: background .14s, border-color .14s, transform .12s; }
+    button:hover { background: #f4f2ee; border-color: rgba(0, 0, 0, 0.14); }
+    button:active { transform: translateY(1px); }
+    button.ghost { background: transparent; }
+    button.danger:hover { border-color: var(--error); color: var(--error); }
+    .overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    .stat-card {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 9px 11px;
+      background: #ffffff;
+    }
+    .stat-label { color: var(--muted); font-size: 11px; letter-spacing: .2px; }
+    .stat-value { color: var(--text); font-weight: 700; font-size: 20px; margin-top: 5px; font-variant-numeric: tabular-nums; }
+    .quick-filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .quick-btn {
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .quick-btn:hover { color: var(--text); border-color: rgba(47,125,109,.42); }
+    .quick-btn.active {
+      color: #ffffff;
+      border-color: var(--brand);
+      background: var(--brand);
+    }
+    .health {
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      background: #f7f6f3;
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .health-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--ok);
+    }
+    .health-dot.warn { background: var(--warn); }
+    .health-dot.error { background: var(--error); }
+    .tabs {
+      display: flex; gap: 6px; padding: 10px 16px; border-bottom: 1px solid var(--border);
+      flex-wrap: wrap; background: #f7f6f3;
+    }
+    .tab {
+      padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: rgba(47,125,109,.12); border-color: rgba(47,125,109,.5); color: #2f7d6d; }
+    .tab .count { background: #efede8; border-radius: 999px; padding: 0 7px; font-size: 11px; min-width: 18px; text-align: center; color: #6b645f; }
+    #list { flex: 1; overflow-y: auto; padding: 8px 12px 24px; background: #f1efec; }
+    #list::-webkit-scrollbar { width: 10px; }
+    #list::-webkit-scrollbar-thumb { background: #cbc5bd; border-radius: 6px; }
+    .entry {
+      border: 1px solid var(--border); border-radius: 10px; margin: 8px 0;
+      background: #ffffff; overflow: hidden;
+    }
+    .entry-head { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
+    .entry-head:hover { background: #f8f7f4; }
+    .entry-head:focus-visible, .run-head:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+    .lvl { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; letter-spacing: .3px; }
+    .lvl.debug { color: var(--debug); background: rgba(122,134,153,.15); }
+    .lvl.info { color: var(--info); background: rgba(79,154,214,.15); }
+    .lvl.warn { color: var(--warn); background: rgba(224,161,58,.15); }
+    .lvl.error { color: var(--error); background: rgba(232,97,90,.16); }
+    .cat { font-size: 11px; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 1px 7px; background:#faf9f7; }
+    .ev { font-weight: 600; color: #292524; }
+    .msg { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .ts { color: #948b82; font-variant-numeric: tabular-nums; font-size: 11px; margin-left: auto; white-space: nowrap; }
+    .dur { color: #2f7d6d; font-size: 11px; }
+    .entry-body { display: none; padding: 0 12px 12px; }
+    .entry.open .entry-body { display: block; }
+    .entry.open .entry-head { border-bottom: 1px dashed var(--border); }
+    .body-loading {
+      margin-top: 8px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      background: #f8f7f4;
+    }
+    pre {
+      background: #f7f6f3; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; margin: 8px 0 0; overflow-x: auto; font-size: 12px;
+      color: #3f3a36; font-family: "Cascadia Code", Consolas, monospace; white-space: pre-wrap; word-break: break-word;
+    }
+    .kv { color: #2f7d6d; }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 72px 20px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      margin-top: 8px;
+      background: #fcfbf9;
+    }
+    .empty-title { color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .empty-desc { font-size: 12px; line-height: 1.6; }
+    .empty img { width: 72px; opacity: .5; margin-bottom: 14px; }
+    .skeleton {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 8px;
+      background: #ffffff;
+    }
+    .skeleton .line {
+      height: 11px;
+      border-radius: 999px;
+      margin: 10px 0;
+      background: linear-gradient(90deg, rgba(203,197,189,.25) 20%, rgba(168,160,151,.44) 45%, rgba(203,197,189,.25) 70%);
+      background-size: 220% 100%;
+      animation: shimmer 1.2s ease-in-out infinite;
+    }
+    .skeleton .line.lg { width: 92%; }
+    .skeleton .line { width: 78%; }
+    .skeleton .line.sm { width: 52%; }
+    @keyframes shimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -20% 0; }
+    }
+    .run-group {
+      border: 1px solid rgba(47,125,109,.28); border-radius: 11px; margin: 8px 0;
+      background: #ffffff; overflow: hidden;
+    }
+    .run-group.has-error { border-color: rgba(220,38,38,.38); }
+    .run-head { display: flex; align-items: center; gap: 9px; padding: 10px 12px; cursor: pointer; }
+    .run-head:hover { background: #f5f8f6; }
+    .run-caret { color: var(--muted); font-size: 10px; transition: transform .14s; }
+    .run-group.open .run-caret { transform: rotate(90deg); }
+    .run-title { font-weight: 650; color: #292524; }
+    .run-chip {
+      font-size: 11px; color: var(--brand); background: rgba(47,125,109,.1);
+      border-radius: 999px; padding: 2px 8px; white-space: nowrap;
+    }
+    .run-chip.alert { color: var(--error); background: rgba(220,38,38,.1); }
+    .run-meta { color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+    .run-body { display: none; padding: 2px 12px 12px; background: #fbfaf8; border-top: 1px dashed var(--border); }
+    .run-group.open .run-body { display: block; }
+    .run-body .entry { background: #ffffff; }
+    .round-sep { display: flex; align-items: center; gap: 8px; margin: 12px 0 2px; color: #8a8178; font-size: 11px; }
+    .round-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .round-tag { border: 1px solid var(--border); border-radius: 999px; padding: 1px 8px; background: #ffffff; }
+    .run-footnote { margin-top: 10px; color: #a19890; font-size: 11px; font-family: "Cascadia Code", Consolas, monospace; }
+    button.toggle.active { background: rgba(47,125,109,.12); border-color: rgba(47,125,109,.5); color: var(--brand); }
+    footer { padding: 8px 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 11px; background: #f7f6f3; display: flex; gap: 14px; }
+    .prompt-block { background:#f7f6f3; border:1px solid var(--border); border-radius:8px; padding:10px 12px; margin-top:8px; white-space:pre-wrap; word-break:break-word; color:#3d3834; font-size:12px; line-height:1.55; }
+    .prompt-label { color: var(--accent); font-size: 11px; font-weight:600; margin: 8px 0 2px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title"><span>日志中心</span></div>
+    <div class="spacer"></div>
+    <select id="date"></select>
+    <select id="level">
+      <option value="">全部级别</option>
+      <option value="debug">DEBUG+</option>
+      <option value="info">INFO+</option>
+      <option value="warn">WARN+</option>
+      <option value="error">ERROR</option>
+    </select>
+    <input type="search" id="search" placeholder="搜索事件 / 内容 / 元数据…" />
+    <button id="group-toggle" class="ghost toggle" aria-pressed="true" title="把同一次对话的多轮日志合并为一张卡片">按对话合并</button>
+    <button id="refresh" class="ghost" title="刷新">刷新</button>
+    <button id="opendir" class="ghost" title="打开日志目录">日志目录</button>
+    <button id="clear" class="danger ghost" title="清空当天日志">清空</button>
+  </header>
+  <div class="overview">
+    <div class="stat-card">
+      <div class="stat-label">总日志条数</div>
+      <div class="stat-value" id="stat-total">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LLM 日志</div>
+      <div class="stat-value" id="stat-llm">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">软件运行日志</div>
+      <div class="stat-value" id="stat-system">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">当前异常数（WARN+）</div>
+      <div class="stat-value" id="stat-errors">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">最近加载耗时</div>
+      <div class="stat-value" id="stat-latency">0ms</div>
+    </div>
+    <div class="quick-filters">
+      <button class="quick-btn active" id="quick-all">查看全部</button>
+      <button class="quick-btn" id="quick-llm">仅看 LLM</button>
+      <button class="quick-btn" id="quick-system">仅看软件运行</button>
+    </div>
+  </div>
+  <div class="health" id="health">
+    <span class="health-dot" id="health-dot"></span>
+    <span id="health-text">监控状态：初始化中...</span>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="list"></div>
+  <footer>
+    <span id="stat">加载中…</span>
+    <span class="spacer" style="flex:1"></span>
+    <span>KnowMe 统一日志 · JSONL · 已脱敏</span>
+  </footer>
+  <script src="lib/log-grouping.js?v=1"></script>
+  <script src="log-viewer.js"></script>
+</body>
+</html>

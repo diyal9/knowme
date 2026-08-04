@@ -1,7 +1,7 @@
 ---
 name: okf-import
 description: >-
-  Use when importing an external OKF knowledge bundle into StickyNotes,
+  Use when importing an external OKF knowledge bundle into KnowMe,
   merging another team's learnings, or restoring from kb-export backup.
 disable-model-invocation: true
 ---
@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ```bash
 # 替换整个 brain/knowledge/（原目录备份到 brain/.knowledge-backup/）
-npm run kb:import -- dist/kb-export/sticky-notes-knowledge-2026-07-01
+npm run kb:import -- dist/kb-export/knowme-knowledge-2026-07-01
 
 # 合并模式：冲突文件另存为 *-imported.md
 npm run kb:import -- <path> --merge

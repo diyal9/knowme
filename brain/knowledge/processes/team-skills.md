@@ -1,7 +1,7 @@
 ---
 type: Reference
 title: Team Skills Registry
-description: Registry of team-learned and core skills for StickyNotes agent repo.
+description: Registry of team-learned and core skills for KnowMe agent repo.
 tags: [process, skills, registry]
 timestamp: 2026-07-01T00:00:00Z
 ---
@@ -20,11 +20,10 @@ timestamp: 2026-07-01T00:00:00Z
 
 # Team-Learned Skills
 
-（尚无 — 复发问题达标后在此登记）
-
 | Skill | 触发 | 批准日期 |
 |-------|------|----------|
-| — | — | — |
+| `team-learned-dev-electron-runloop` | 打包 / 执行 / 重启 / `npm start` / electron-builder | 2026-07-16 |
+| `team-learned-dev-playwright-ui-verify` | Playwright MCP navigate + screenshot 验 UI | 2026-07-16 |
 
 # Promotion
 

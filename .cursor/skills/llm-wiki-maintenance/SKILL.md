@@ -2,7 +2,7 @@
 name: llm-wiki-maintenance
 description: >-
   Use when ingesting sources into brain/wiki, updating OKF knowledge bundle,
-  querying wiki/knowledge, or linting contradictions and broken links for StickyNotes.
+  querying wiki/knowledge, or linting contradictions and broken links for KnowMe.
 ---
 
 # LLM Wiki 维护

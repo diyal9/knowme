@@ -15,6 +15,12 @@ Thumbs.db
 
 # Agent / local
 .cursor/env.*
+.lark_device_code.txt
+.lark_login.json
+feishu-*-qr.png
+feishu-reauth-qr.png
+nul
+**/__pycache__/
 brain/.knowledge-backup/
 openspec/changes/**/evidence/screenshots/*.png
 openspec/changes/**/evidence/screenshots/*.jpg

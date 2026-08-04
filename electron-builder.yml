@@ -1,5 +1,5 @@
-appId: com.aispace.sticky-notes
-productName: Sticky-Notes
+appId: com.aispace.knowme
+productName: KnowMe
 copyright: Copyright © 2026 aispace
 directories:
   output: dist
@@ -14,7 +14,7 @@ compression: maximum
 publish:
   provider: github
   owner: diyal9
-  repo: sticky-notes
+  repo: knowme
 
 releaseInfo:
   releaseNotesFile: build/release-notes.md
@@ -42,8 +42,8 @@ nsis:
   allowElevation: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Sticky-Notes
-  uninstallDisplayName: Sticky-Notes
+  shortcutName: KnowMe
+  uninstallDisplayName: KnowMe
   artifactName: ${productName}-${version}-setup-win-${arch}.${ext}
 
 portable:
@@ -68,5 +68,5 @@ mac:
   artifactName: ${productName}-${version}-mac-${arch}.${ext}
 
 dmg:
-  title: Sticky-Notes ${version}
+  title: KnowMe ${version}
   writeUpdateInfo: false

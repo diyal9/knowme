@@ -44,7 +44,7 @@ function writeManifest(destDir, concepts, extra = {}) {
   const manifest = {
     okf_version: '0.1',
     exported_at: new Date().toISOString(),
-    source: 'sticky-notes',
+    source: 'knowme',
     concepts,
     ...extra,
   };
@@ -66,7 +66,7 @@ function buildPartialIndex(selectedConcepts) {
     'okf_version: "0.1"',
     '---',
     '',
-    '# Sticky-Notes 知识库（部分导出）',
+    '# KnowMe 知识库（部分导出）',
     '',
   ];
   for (const [cat, items] of byCat) {
@@ -315,7 +315,7 @@ function ensureIndexLink(knowledgeDir, sectionTitle, conceptId, title, rel) {
   const line = `* [${title}](${href})`;
   let text = fs.existsSync(indexPath)
     ? fs.readFileSync(indexPath, 'utf8')
-    : '---\nokf_version: "0.1"\n---\n\n# Sticky-Notes 知识库\n';
+    : '---\nokf_version: "0.1"\n---\n\n# KnowMe 知识库\n';
   if (text.includes(`](${href})`) || text.includes(`](${conceptId}.md)`)) {
     return;
   }

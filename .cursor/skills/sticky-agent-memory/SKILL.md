@@ -1,11 +1,11 @@
 ---
 name: sticky-agent-memory
 description: >-
-  StickyNotes 本地会话记忆：用户指正、产品约定、开发习惯；日/周/月摘要；≥3 次重复提示升
+  KnowMe 本地会话记忆：用户指正、产品约定、开发习惯；日/周/月摘要；≥3 次重复提示升
   OKF 或建 Skill。Hook 自动落盘，存储在用户目录（非 git）。
 ---
 
-# StickyNotes Agent Memory
+# KnowMe Agent Memory
 
 可复用记忆协议：**Hook 落盘 + Agent 加载 + 升库门阀**。  
 设计移植自 th-bi-agent-memory，升库目标为 `brain/knowledge/`（OKF）。
@@ -25,8 +25,8 @@ description: >-
 由 `.cursor/hooks/memory_paths.py` 解析：
 
 1. `STICKY_MEMORY_ROOT`（可含 `{workspace_id}`）
-2. Windows：`%LOCALAPPDATA%\sticky-notes\memory\<workspace_id>\`
-3. Linux：`$XDG_DATA_HOME/sticky-notes/memory/<workspace_id>/`
+2. Windows：`%LOCALAPPDATA%\knowme\memory\<workspace_id>\`
+3. Linux：`$XDG_DATA_HOME/knowme/memory/<workspace_id>/`
 
 关闭：`STICKY_MEMORY=0`
 
@@ -50,7 +50,7 @@ description: >-
 | 日/周/月摘要 | [summarization.md](references/summarization.md) |
 | ≥3 次指纹 | [pattern-detection.md](references/pattern-detection.md) |
 | 升 OKF / 建技能话术 | [promotion.md](references/promotion.md) |
-| StickyNotes 升库映射 | [sticky-promotion-map.md](references/sticky-promotion-map.md) |
+| KnowMe 升库映射 | [sticky-promotion-map.md](references/sticky-promotion-map.md) |
 | 会话加载顺序 | [loading.md](references/loading.md) |
 
 ## Hook 集成

@@ -13,8 +13,10 @@ readHookInput();
 const changesDir = path.resolve(__dirname, '..', '..', 'openspec', 'changes');
 let active = [];
 if (fs.existsSync(changesDir)) {
+  // 与 harness listActiveChanges 一致：带 .archived 的残桩/tombstone 不算活跃
   active = fs.readdirSync(changesDir, { withFileTypes: true })
     .filter((d) => d.isDirectory() && d.name !== 'archive')
+    .filter((d) => !fs.existsSync(path.join(changesDir, d.name, '.archived')))
     .map((d) => d.name);
 }
 

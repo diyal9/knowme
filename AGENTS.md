@@ -1,4 +1,4 @@
-# StickyNotes — 智能体仓库总纲
+# KnowMe — 智能体仓库总纲
 
 会话启动时 **MUST** 读取本文件。本仓库是 **Electron 桌面便签 + 三角色 Agent Team** 的智能体驱动项目。
 
@@ -16,7 +16,7 @@
 
 ## 团队使命
 
-以 **制作人 → 开发 → 测试** 三角色协作，按 OpenSpec + ReACT 持续演进 StickyNotes 桌面便签产品。
+以 **制作人 → 开发 → 测试** 三角色协作，按 OpenSpec + ReACT 持续演进 KnowMe 桌面便签产品。
 
 ## 角色矩阵
 
@@ -31,14 +31,14 @@
 ## 知识库与自我进化
 
 > **边界**：以下为 **智能体仓库开发基建**（`brain/`、Hook、`npm run kb:*`）。  
-> **产品运行时**知识库与记忆在 `%APPDATA%\sticky-notes\knowledge\` 与 `memory\`，见 `src/lib/product-*.js`、设置页「知识库与记忆」。
+> **产品运行时**知识库与记忆在 `%APPDATA%\KnowMe\knowledge\` 与 `memory\`，见 `src/lib/product-*.js`、设置页「知识库与记忆」。
 
 基于 [Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) + [OKF v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)：
 
 | 层 | 开发仓库路径 | 产品用户数据路径 |
 |----|--------------|------------------|
-| Knowledge (OKF) | `brain/knowledge/` 模板/种子 | `%APPDATA%\sticky-notes\knowledge\` |
-| Memory | `brain/memory/` 团队回顾 | `%APPDATA%\sticky-notes\memory\` |
+| Knowledge (OKF) | `brain/knowledge/` 模板/种子 | `%APPDATA%\KnowMe\knowledge\` |
+| Memory | `brain/memory/` 团队回顾 | `%APPDATA%\KnowMe\memory\` |
 | Wiki / Raw | `brain/wiki/`、`brain/raw/` | 仅开发用 |
 
 | 命令 | 作用 |
@@ -51,7 +51,7 @@
 
 ### 个人会话记忆（Hook 自动）
 
-Skill：`sticky-agent-memory` — 存储在 `%LOCALAPPDATA%\sticky-notes\memory\`（不入 git）
+Skill：`sticky-agent-memory` — 存储在 `%LOCALAPPDATA%\knowme\memory\`（不入 git）
 
 | 能力 | 说明 |
 |------|------|

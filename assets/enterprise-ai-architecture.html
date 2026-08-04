@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>企业 AI 落地架构图</title>
+<style>
+  :root{
+    --bg:#0a1420;
+    --panel:#0f1c2b;
+    --panel2:#12233699;
+    --line:#2b3f52;
+    --red:#e2352b;
+    --red2:#ff5a4d;
+    --redsoft:#7a1f1c;
+    --txt:#e8eef5;
+    --muted:#8ba0b3;
+    --chip:#16283a;
+    --blue:#1f3b57;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI","Microsoft YaHei",-apple-system,sans-serif;}
+  body{background:radial-gradient(1200px 700px at 70% 10%,#12243a 0%,var(--bg) 60%);color:var(--txt);}
+  .wrap{width:1280px;margin:0 auto;padding:40px 48px 56px;}
+  .head{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+  .title{font-size:26px;font-weight:700;letter-spacing:1px;}
+  .title .en{color:var(--muted);font-size:13px;font-weight:500;letter-spacing:3px;text-transform:uppercase;display:block;margin-top:6px;}
+  .legend{display:flex;gap:16px;font-size:12px;color:var(--muted);}
+  .legend .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle;}
+
+  .layer{position:relative;border:1px solid var(--line);border-radius:16px;padding:20px 22px 24px;margin-bottom:26px;background:linear-gradient(180deg,#0e1d2c 0%,#0b1826 100%);}
+  .layer::before{content:attr(data-tag);position:absolute;top:-11px;left:24px;background:var(--chip);border:1px solid var(--line);color:var(--muted);font-size:11px;letter-spacing:2px;padding:3px 12px;border-radius:20px;text-transform:uppercase;}
+  .layer-title{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .layer-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+
+  .row{display:flex;gap:18px;flex-wrap:wrap;}
+  .card{flex:1;min-width:220px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden;transition:.2s;}
+  .card.red{border-color:#6a2521;background:linear-gradient(160deg,#241012 0%,#12202f 70%);}
+  .card .ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px;background:var(--blue);border:1px solid var(--line);}
+  .card.red .ic{background:linear-gradient(160deg,var(--red) 0%,var(--redsoft) 100%);border-color:#8a2c27;box-shadow:0 6px 18px rgba(226,53,43,.35);}
+  .card h4{font-size:15px;font-weight:600;margin-bottom:6px;}
+  .card p{font-size:12.5px;line-height:1.6;color:var(--muted);}
+  .card .tags{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;}
+  .tag{font-size:11px;color:#c6d4e2;background:var(--chip);border:1px solid var(--line);padding:3px 9px;border-radius:20px;}
+  .card .glow{position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,rgba(226,53,43,.25),transparent 70%);}
+
+  /* app layer agents */
+  .agents{display:flex;gap:16px;flex-wrap:wrap;}
+  .agent{flex:1;min-width:150px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 12px;}
+  .agent .av{width:46px;height:46px;margin:0 auto 10px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:linear-gradient(160deg,#20374f,#132132);border:1px solid var(--line);}
+  .agent.core .av{background:linear-gradient(160deg,var(--red),var(--redsoft));box-shadow:0 6px 18px rgba(226,53,43,.4);}
+  .agent h4{font-size:13.5px;font-weight:600;margin-bottom:4px;}
+  .agent p{font-size:11px;color:var(--muted);line-height:1.5;}
+
+  .flowline{display:flex;align-items:center;justify-content:center;gap:10px;margin:2px 0 16px;color:var(--muted);font-size:11.5px;flex-wrap:wrap;}
+  .flowline .step{background:var(--chip);border:1px solid var(--line);padding:5px 12px;border-radius:20px;color:#c6d4e2;}
+  .flowline .arr{color:var(--red2);font-size:14px;}
+
+  .conn{text-align:center;color:var(--line);font-size:22px;line-height:1;margin:-14px 0 8px;letter-spacing:6px;}
+  .foot{text-align:center;color:var(--muted);font-size:11px;margin-top:8px;letter-spacing:1px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="title">企业 AI 落地架构
+      <span class="en">Enterprise AI Architecture · RAG × Agent × Redis Iris</span>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--red)"></span>核心能力</span>
+      <span><span class="dot" style="background:var(--blue)"></span>支撑组件</span>
+      <span><span class="dot" style="background:var(--chip);border:1px solid var(--line)"></span>流程节点</span>
+    </div>
+  </div>
+
+  <!-- 应用层 -->
+  <div class="layer" data-tag="Application · 应用层">
+    <div class="layer-title">Agent 体系</div>
+    <div class="layer-sub">面向业务场景的智能体应用，统一编排、按需调度底层能力</div>
+    <div class="agents">
+      <div class="agent core">
+        <div class="av">🧭</div>
+        <h4>Orchestrator 主控 Agent</h4>
+        <p>任务规划 / 路由分发 / 结果汇聚</p>
+      </div>
+      <div class="agent">
+        <div class="av">💬</div>
+        <h4>问答 / 知识 Agent</h4>
+        <p>企业知识问答、资料检索</p>
+      </div>
+      <div class="agent">
+        <div class="av">📋</div>
+        <h4>办公 / 审批 Agent</h4>
+        <p>飞书流程、待办、审批协同</p>
+      </div>
+      <div class="agent">
+        <div class="av">🛠️</div>
+        <h4>业务系统 Agent</h4>
+        <p>内部系统操作、数据取用</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn">⋮</div>
+
+  <!-- 平台/流程层 -->
+  <div class="layer" data-tag="Platform · 数据与流程层">
+    <div class="layer-title">数据入库 & Agent 运转流程</div>
+    <div class="layer-sub">将公司传统资料清洗入库，驱动 Agent 的推理—工具—记忆闭环</div>
+    <div class="row">
+      <div class="card">
+        <span class="glow"></span>
+        <div class="ic">🗂️</div>
+        <h4>传统资料入库清理流程</h4>
+        <p>数据 ETL 管线：采集 → 解析 → 清洗去重 → 切分 → 向量化 → 入库</p>
+        <div class="flowline" style="margin-top:12px;justify-content:flex-start">
+          <span class="step">采集</span><span class="arr">→</span>
+          <span class="step">解析</span><span class="arr">→</span>
+          <span class="step">清洗</span><span class="arr">→</span>
+          <span class="step">切分</span><span class="arr">→</span>
+          <span class="step">向量化</span><span class="arr">→</span>
+          <span class="step">入库</span>
+        </div>
+      </div>
+      <div class="card">
+        <span class="glow"></span>
+        <div class="ic">🔄</div>
+        <h4>Agent 运转流程</h4>
+        <p>感知 → 意图识别 → 规划 → 工具调用 → 记忆更新 → 响应</p>
+        <div class="flowline" style="margin-top:12px;justify-content:flex-start">
+          <span class="step">意图识别</span><span class="arr">→</span>
+          <span class="step">检索 RAG</span><span class="arr">→</span>
+          <span class="step">规划</span><span class="arr">→</span>
+          <span class="step">工具调用</span><span class="arr">→</span>
+          <span class="step">记忆写回</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="conn">⋮</div>
+
+  <!-- 底座层 -->
+  <div class="layer" data-tag="Foundation · 底座能力层">
+    <div class="layer-title">核心能力底座</div>
+    <div class="layer-sub">检索理解、系统连接、上下文记忆三大能力支撑上层一切</div>
+    <div class="row">
+      <div class="card red">
+        <span class="glow"></span>
+        <div class="ic">🔍</div>
+        <h4>RAG 检索增强</h4>
+        <p>意图识别与语义检索，为 Agent 提供准确的企业知识上下文</p>
+        <div class="tags"><span class="tag">意图识别</span><span class="tag">语义检索</span><span class="tag">重排召回</span></div>
+      </div>
+      <div class="card">
+        <span class="glow"></span>
+        <div class="ic">🔗</div>
+        <h4>中继服务 (MCP / Gateway)</h4>
+        <p>统一连接飞书与内部系统，屏蔽异构接口，做鉴权与限流</p>
+        <div class="tags"><span class="tag">飞书</span><span class="tag">内部系统</span><span class="tag">统一鉴权</span></div>
+      </div>
+      <div class="card red">
+        <span class="glow"></span>
+        <div class="ic">⚡</div>
+        <h4>Redis Iris · Agent 上下文</h4>
+        <p>高性能会话记忆与短/长期上下文存储，支撑多轮对话与状态</p>
+        <div class="tags"><span class="tag">会话记忆</span><span class="tag">向量存储</span><span class="tag">低延迟</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">底座能力 ↑ 支撑数据与流程 ↑ 驱动应用层 Agent 体系 · Enterprise AI Landing Blueprint</div>
+</div>
+</body>
+</html>

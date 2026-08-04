@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>登录 · KnowMe Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<main class="narrow">
+<div class="card">
+<h1>登录</h1>
+<p class="muted">使用本地账号访问组织配置与用户管理。</p>
+<form method="post" action="/admin/login">
+<label>用户名</label>
+<input name="username" autocomplete="username" required>
+<label>密码</label>
+<input name="password" type="password" autocomplete="current-password" required>
+<button class="btn" type="submit">登录</button>
+{{if .Error}}<p class="err">{{.Error}}</p>{{end}}
+</form>
+</div>
+</main>
+</body>
+</html>

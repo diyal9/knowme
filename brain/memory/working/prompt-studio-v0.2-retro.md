@@ -4,7 +4,7 @@
 
 ## 做了什么
 
-v0.2.0 将产品叙事统一为 Sticky-Notes：结构化五段编辑、版本 diff、category/OKF 筛选、记忆面板、卡片↔Concept 双向。
+v0.2.0 将产品叙事统一为 KnowMe：结构化五段编辑、版本 diff、category/OKF 筛选、记忆面板、卡片↔Concept 双向。
 
 ## 做得好的
 

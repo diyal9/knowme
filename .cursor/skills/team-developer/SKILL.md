@@ -59,10 +59,10 @@ npm run lint       # lint 无 error（硬门禁）
 3. **Observe**：跑 test/lint，手动冒烟，记日志
 4. **Reflect**：失败则修；全 task 完成且自测通过 → 请求制作人验收
 
-## 技术约束（StickyNotes）
+## 技术约束（KnowMe）
 
 - 主进程：`src/main.js`；预加载：`src/preload.js`
-- 存储：`electron-store`，路径 `%APPDATA%\sticky-notes\`
+- 存储：`electron-store`，路径 `%APPDATA%\KnowMe\`
 - 不引入过重依赖；危险 shell 命令需用户确认
 - 端口/进程：同会话内可直接覆盖占用端口
 

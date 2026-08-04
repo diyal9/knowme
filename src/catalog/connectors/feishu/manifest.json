@@ -1,0 +1,22 @@
+{
+  "id": "feishu",
+  "kind": "connector",
+  "type": "feishu",
+  "version": "1.0.0",
+  "title": "飞书",
+  "description": "读取飞书文档、会议与 IM；OAuth 与 token 通过系统安全存储，manifest 仅保留 env: 引用。",
+  "mcp": {
+    "transport": "stdio",
+    "command": "npx",
+    "args": ["-y", "@larksuiteoapi/lark-mcp"],
+    "env": {
+      "LARK_APP_ID": "env:LARK_APP_ID",
+      "LARK_APP_SECRET": "env:LARK_APP_SECRET"
+    }
+  },
+  "allowlist": [
+    "feishu.search_docs",
+    "feishu.read_doc",
+    "feishu.meeting_candidates"
+  ]
+}

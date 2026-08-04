@@ -16,7 +16,7 @@ timestamp: 2026-07-01T00:00:00Z
 
 | 层 | 位置 | 写入 |
 |----|------|------|
-| Episodic | `%LOCALAPPDATA%\sticky-notes\memory\<ws>\` | Python Hook 自动 |
+| Episodic | `%LOCALAPPDATA%\knowme\memory\<ws>\` | Python Hook 自动 |
 | Team OKF | `brain/knowledge/` | 用户确认 + `/kb-ingest` |
 
 Hook：`.cursor/hooks/memory_cursor_hook.py`  

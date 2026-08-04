@@ -43,7 +43,7 @@ function initAutoUpdate() {
     const choice = dialog.showMessageBoxSync(win, {
       type: 'info',
       title: '发现新版本',
-      message: `Sticky-Notes ${info.version} 已下载完成`,
+      message: `KnowMe ${info.version} 已下载完成`,
       detail: '关闭应用后将自动安装更新，也可以立即重启安装。',
       buttons: ['立即重启', '稍后'],
       defaultId: 0,

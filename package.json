@@ -1,7 +1,7 @@
 {
-  "name": "sticky-notes",
+  "name": "knowme",
   "version": "0.3.0",
-  "description": "AI 驱动的本地 Markdown 笔记本（Sticky-Notes）",
+  "description": "知我 KnowMe — AI 知识工作台 / 工作伙伴 Agent",
   "license": "MIT",
   "author": "aispace",
   "main": "src/main.js",
@@ -17,7 +17,7 @@
     "publish:mac": "npm run prebuild && electron-builder --mac --x64 --arm64 --publish always",
     "smoke:release": "node scripts/release-smoke.js dist-release",
     "test": "node --test tests/*.test.js",
-    "lint": "node scripts/lint.js",
+    "lint": "node scripts/lint.js && node scripts/check-script-scope.js",
     "harness:check": "node .cursor/scripts/harness.js check",
     "harness:preflight": "node .cursor/scripts/harness.js preflight",
     "harness:gate": "node .cursor/scripts/harness.js gate",

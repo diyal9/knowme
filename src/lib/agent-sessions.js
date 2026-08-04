@@ -1,0 +1,343 @@
+'use strict'
+
+const crypto = require('crypto')
+
+const agentRun = require('./agent-run')
+const { normalizeAssistantOutput } = require('./assistant-output-style')
+
+const AGENTS = [
+  { id: 'general', name: '通用', icon: 'chat', description: '处理日常问题与笔记整理' },
+  { id: 'steward', name: '知识管家', icon: 'book', description: '整理 Wiki、健康检查与升格 OKF' },
+  { id: 'writing', name: '写作', icon: 'edit', description: '润色、改写与内容结构化' },
+  { id: 'coding', name: '编程', icon: 'code', description: '分析代码与实现方案' },
+]
+
+const MAX_MESSAGES = 80
+const MAX_CONTEXT_CHARS = 24000
+const KEEP_MESSAGES_AFTER_COMPACT = 12
+const DEFAULT_TITLE = '新助手'
+const MAX_OPEN_TABS = 24
+const MAX_HISTORY = 30
+const MAX_TRACE_EVENTS = 40
+
+function newId(prefix = 's') {
+  return `${prefix}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
+}
+
+function createSession(agentId = 'general', index = 1, runOpts = {}) {
+  const agent = AGENTS.find(a => a.id === agentId) || AGENTS[0]
+  const role = runOpts.role || (agentRun.RUN_ROLES.includes(agent.id) ? agent.id : 'general')
+  return {
+    id: newId('session'),
+    agentId: agent.id,
+    expertId: String(runOpts.expertId || '').trim(),
+    capabilitySnapshotId: String(runOpts.capabilitySnapshotId || '').trim(),
+    snapshotPath: String(runOpts.snapshotPath || '').trim(),
+    ephemeral: runOpts.ephemeral === true,
+    title: DEFAULT_TITLE,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    summary: '',
+    messages: [],
+    pinned: false,
+    run: agentRun.createEmptyRun(role, runOpts.goal || ''),
+  }
+}
+
+function normalizeTraceEvent(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const kind = raw.kind === 'tool' ? 'tool' : 'stage'
+  const status = ['pending', 'done', 'error'].includes(raw.status) ? raw.status : 'done'
+  const duration = Number(raw.durationMs)
+  const event = {
+    id: String(raw.id || newId('trace')).slice(0, 120),
+    kind,
+    title: String(raw.title || (kind === 'tool' ? '工具调用' : '执行步骤')).slice(0, 160),
+    status: status === 'pending' ? 'done' : status,
+  }
+  if (raw.summary) event.summary = String(raw.summary).slice(0, 1000)
+  if (raw.toolCallId) event.toolCallId = String(raw.toolCallId).slice(0, 160)
+  if (raw.toolName) event.toolName = String(raw.toolName).slice(0, 120)
+  if (Number.isFinite(duration) && duration >= 0) event.durationMs = Math.min(duration, 3_600_000)
+  return event
+}
+
+function normalizeMessage(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const role = raw.role
+  if (!['user', 'assistant', 'tool'].includes(role)) return null
+  const text = String(raw.text || '').slice(0, role === 'tool' ? 24000 : 12000)
+  const trace = Array.isArray(raw.trace)
+    ? raw.trace.map(normalizeTraceEvent).filter(Boolean).slice(-MAX_TRACE_EVENTS)
+    : []
+  if (!text.trim() && !trace.length) return null
+  const message = { role, text }
+  if (trace.length && role === 'assistant') message.trace = trace
+  if (role === 'tool') {
+    message.toolCallId = String(raw.toolCallId || '').slice(0, 160)
+    message.toolName = String(raw.toolName || 'tool').slice(0, 120)
+    message.status = raw.status === 'error' ? 'error' : 'done'
+    const duration = Number(raw.durationMs)
+    if (Number.isFinite(duration) && duration >= 0) message.durationMs = Math.min(duration, 3_600_000)
+  }
+  return message
+}
+
+function normalizeSession(raw, fallbackIndex = 1) {
+  const base = createSession(raw?.agentId || 'general', fallbackIndex)
+  const messages = Array.isArray(raw?.messages)
+    ? raw.messages
+      .map(normalizeMessage)
+      .filter(Boolean)
+      .slice(-MAX_MESSAGES)
+    : []
+  const rawTitle = String(raw?.title || '').trim()
+  const title = (!rawTitle || /^新对话\s*\d*$/.test(rawTitle)) ? DEFAULT_TITLE : rawTitle
+  const run = raw?.run != null ? agentRun.normalizeRun(raw.run) : undefined
+  return {
+    ...base,
+    ...raw,
+    id: String(raw?.id || base.id),
+    agentId: AGENTS.some(a => a.id === raw?.agentId) ? raw.agentId : 'general',
+    expertId: String(raw?.expertId || '').trim(),
+    capabilitySnapshotId: String(raw?.capabilitySnapshotId || raw?.snapshotId || '').trim(),
+    snapshotPath: String(raw?.snapshotPath || '').trim(),
+    ephemeral: raw?.ephemeral === true,
+    title: title.slice(0, 80) || DEFAULT_TITLE,
+    summary: String(raw?.summary || '').slice(0, 12000),
+    displayTitle: String(raw?.displayTitle || '').slice(0, 80),
+    labels: Array.isArray(raw?.labels)
+      ? [...new Set(raw.labels.map(String).map(v => v.trim()).filter(Boolean))].slice(0, 3)
+      : [],
+    grounding: String(raw?.grounding || '').slice(0, 3000),
+    messages,
+    pinned: !!raw?.pinned,
+    createdAt: raw?.createdAt || base.createdAt,
+    updatedAt: raw?.updatedAt || base.updatedAt,
+    ...(run ? { run } : { run: undefined }),
+  }
+}
+
+function estimateChars(session) {
+  return String(session?.summary || '').length +
+    (session?.messages || []).reduce((n, m) => n + String(m.text || '').length, 0)
+}
+
+function compactMessageText(text, max = 900) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim()
+  if (value.length <= max) return value
+  return `${value.slice(0, max - 80)} … ${value.slice(-77)}`
+}
+
+function buildSessionDigest(messages, max = 8000) {
+  const list = Array.isArray(messages) ? messages : []
+  const users = list.filter(m => m.role === 'user' && String(m.text || '').trim())
+  const assistants = list.filter(m => m.role === 'assistant' && String(m.text || '').trim())
+  const tools = list.filter(m => m.role === 'tool' && String(m.text || '').trim())
+  const sections = []
+  const goals = [...new Set([
+    users[0]?.text,
+    users.at(-1)?.text,
+  ].filter(Boolean))]
+  if (goals.length) {
+    sections.push(`### 当前目标\n${goals.map(text => `- ${compactMessageText(text)}`).join('\n')}`)
+  }
+  if (assistants.length) {
+    sections.push(`### 已确认内容\n${assistants.slice(-4).map(m => `- ${compactMessageText(m.text)}`).join('\n')}`)
+  }
+  if (tools.length) {
+    sections.push(`### 已执行工具与结果\n${tools.slice(-6).map(m =>
+      `- ${m.toolName || 'tool'}：${compactMessageText(m.text, 700)}`
+    ).join('\n')}`)
+  }
+  if (users.length > 1) {
+    sections.push(`### 用户约束与待办\n${users.slice(-3).map(m => `- ${compactMessageText(m.text, 700)}`).join('\n')}`)
+  }
+  const digest = sections.join('\n\n')
+  if (digest.length <= max) return digest
+  const sectionBudget = Math.max(220, Math.floor(max / sections.length))
+  return sections.map(section => limitSummary(section, sectionBudget)).join('\n\n')
+}
+
+function limitSummary(text, max) {
+  const value = String(text || '')
+  if (value.length <= max) return value
+  const left = Math.max(1, Math.floor(max * 0.65))
+  const right = Math.max(1, max - left - 30)
+  return `${value.slice(0, left)}\n…（摘要已压缩）…\n${value.slice(-right)}`
+}
+
+function compactSession(session) {
+  const normalized = normalizeSession(session)
+  if (estimateChars(normalized) <= MAX_CONTEXT_CHARS && normalized.messages.length <= MAX_MESSAGES) {
+    return { session: normalized, compacted: false }
+  }
+  const keep = normalized.messages.slice(-KEEP_MESSAGES_AFTER_COMPACT)
+  const old = normalized.messages.slice(0, -KEEP_MESSAGES_AFTER_COMPACT)
+  const keptChars = keep.reduce((n, m) => n + String(m.text || '').length, 0)
+  const summaryBudget = Math.max(1000, MAX_CONTEXT_CHARS - keptChars - 200)
+  const digest = buildSessionDigest(old, summaryBudget)
+  const summary = limitSummary(
+    [normalized.summary, digest].filter(Boolean).join('\n\n'),
+    summaryBudget,
+  )
+  return {
+    session: {
+      ...normalized,
+      summary,
+      messages: keep,
+      updatedAt: new Date().toISOString(),
+    },
+    compacted: true,
+  }
+}
+
+function contextMessages(session) {
+  const compacted = compactSession(session).session
+  const history = []
+  if (compacted.summary) {
+    history.push({ role: 'user', text: `[会话历史摘要]\n${compacted.summary}` })
+    history.push({ role: 'assistant', text: '已了解以上会话背景，我会继续基于当前 Session 作答。' })
+  }
+  return history.concat(compacted.messages.filter(m => m.role === 'user' || m.role === 'assistant'))
+}
+
+function sessionDisplayTitle(session) {
+  const t = String(session?.title || '').trim()
+  if (t && t !== DEFAULT_TITLE && !/^新对话\s*\d*$/.test(t)) return t.slice(0, 40)
+  const goal = String(session?.run?.goal || '').trim()
+  if (goal) return goal.replace(/\s+/g, ' ').slice(0, 28)
+  const firstUser = (session?.messages || []).find(m => m.role === 'user' && String(m.text || '').trim())
+  if (firstUser) return String(firstUser.text).replace(/\s+/g, ' ').trim().slice(0, 28) || DEFAULT_TITLE
+  if (session?.agentId === 'steward') {
+    const steward = AGENTS.find(a => a.id === 'steward')
+    return steward?.name || '知识管家'
+  }
+  if (session?.agentId) {
+    const agent = AGENTS.find(a => a.id === session.agentId)
+    if (agent?.name) return agent.name
+  }
+  return DEFAULT_TITLE
+}
+
+function buildSummaryText(session) {
+  const normalized = normalizeSession(session)
+  if (normalized.summary?.trim()) return normalized.summary.trim()
+  const lines = (normalized.messages || []).slice(-12).map(m =>
+    `${m.role === 'user' ? '用户' : '助手'}：${m.role === 'assistant'
+      ? normalizeAssistantOutput(m.text)
+      : String(m.text || '').trim()}`
+  ).filter(l => l.length > 3)
+  return lines.join('\n\n').slice(0, 8000)
+}
+
+function buildResumeProjection(session) {
+  const normalized = normalizeSession(session)
+  const summary = buildSummaryText(normalized).trim()
+  const goal = String(normalized.run?.goal || '').trim()
+  if (!summary && !goal) return null
+  return {
+    id: normalized.id,
+    agentId: normalized.agentId,
+    title: sessionDisplayTitle(normalized),
+    summary: (summary || goal).slice(0, 600),
+    updatedAt: normalized.updatedAt,
+    source: 'session',
+  }
+}
+
+function buildTranscriptText(session) {
+  const normalized = normalizeSession(session)
+  const parts = []
+  if (normalized.summary?.trim()) {
+    parts.push(`[会话摘要]\n${normalized.summary.trim()}`)
+  }
+  for (const m of normalized.messages || []) {
+    const label = m.role === 'user' ? 'User' : m.role === 'tool' ? `Tool (${m.toolName || 'tool'})` : 'Assistant'
+    const text = m.role === 'assistant'
+      ? normalizeAssistantOutput(m.text).trim()
+      : String(m.text || '').trim()
+    if (text) parts.push(`${label}:\n${text}`)
+  }
+  return parts.join('\n\n').slice(0, 200000)
+}
+
+/** 打开 Tab：Pin 的 Session 靠前，其余保持相对顺序 */
+function sortOpenSessionIds(openIds, sessions) {
+  const byId = new Map(sessions.map(s => [s.id, s]))
+  const pinned = []
+  const rest = []
+  for (const id of openIds) {
+    if (byId.get(id)?.pinned) pinned.push(id)
+    else rest.push(id)
+  }
+  return [...pinned, ...rest]
+}
+
+function normalizeUi(rawUi, sessions) {
+  const ids = new Set(sessions.map(s => s.id))
+  let openSessionIds = Array.isArray(rawUi?.openSessionIds)
+    ? rawUi.openSessionIds.map(String).filter(id => ids.has(id))
+    : []
+  openSessionIds = [...new Set(openSessionIds)].slice(0, MAX_OPEN_TABS)
+
+  if (!openSessionIds.length && sessions.length) {
+    // 迁移：按最近更新取最多 3 个打开 Tab
+    openSessionIds = [...sessions]
+      .sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0))
+      .slice(0, 3)
+      .map(s => s.id)
+  }
+
+  openSessionIds = sortOpenSessionIds(openSessionIds, sessions)
+
+  let activeSessionId = String(rawUi?.activeSessionId || '')
+  if (!openSessionIds.includes(activeSessionId)) {
+    activeSessionId = openSessionIds[0] || ''
+  }
+
+  return { openSessionIds, activeSessionId }
+}
+
+function migrateStore(raw) {
+  const sessions = Array.isArray(raw?.sessions)
+    ? raw.sessions.map((s, i) => normalizeSession(s, i + 1))
+    : (Array.isArray(raw) ? raw.map((s, i) => normalizeSession(s, i + 1)) : [])
+  const ui = normalizeUi(raw?.ui, sessions)
+  return { sessions, ui }
+}
+
+function forkSession(source, agentId) {
+  const summary = buildSummaryText(source)
+  const session = createSession(agentId || source?.agentId || 'general')
+  session.title = DEFAULT_TITLE
+  session.summary = summary.slice(0, 12000)
+  session.messages = []
+  return session
+}
+
+module.exports = {
+  AGENTS,
+  MAX_MESSAGES,
+  MAX_CONTEXT_CHARS,
+  KEEP_MESSAGES_AFTER_COMPACT,
+  DEFAULT_TITLE,
+  MAX_OPEN_TABS,
+  MAX_HISTORY,
+  MAX_TRACE_EVENTS,
+  createSession,
+  normalizeMessage,
+  normalizeTraceEvent,
+  normalizeSession,
+  compactSession,
+  contextMessages,
+  sessionDisplayTitle,
+  buildSummaryText,
+  buildResumeProjection,
+  buildTranscriptText,
+  sortOpenSessionIds,
+  normalizeUi,
+  migrateStore,
+  forkSession,
+  agentRun,
+}

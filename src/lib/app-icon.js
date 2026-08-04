@@ -1,7 +1,14 @@
 const zlib = require('zlib')
+const fs = require('fs')
+const path = require('path')
 
-const ACCENT = { r: 85, g: 88, b: 232 }
+const BRAND_PNG = path.join(__dirname, '..', 'assets', 'icon.png')
+const BRAND_ICO = path.join(__dirname, '..', 'assets', 'icon.ico')
+
 const WHITE = { r: 255, g: 255, b: 255, a: 255 }
+/** 窗口/任务栏图标：深炭底（与系统托盘线稿同系，适配浅色标题栏） */
+const ICON_BG = { r: 28, g: 32, b: 38 }
+const ICON_FG = { r: 220, g: 224, b: 230, a: 255 }
 
 const crcTable = (() => {
   const t = new Uint32Array(256)
@@ -76,8 +83,19 @@ function inRoundRect(x, y, x1, y1, x2, y2, cr) {
   return true
 }
 
-/** 便签线稿：圆角矩形 + 三条横线 */
-function drawNoteGlyph(buf, size, { fg, bg = null, fold = false }) {
+function fillRoundRect(buf, size, x1, y1, x2, y2, cr, color) {
+  for (let y = Math.max(0, y1); y <= Math.min(size - 1, y2); y++) {
+    for (let x = Math.max(0, x1); x <= Math.min(size - 1, x2); x++) {
+      if (inRoundRect(x, y, x1, y1, x2, y2, cr)) setPx(buf, size, x, y, color)
+    }
+  }
+}
+
+/**
+ * 便签线稿：透明底 + 单色圆角矩形 + 三条横线（系统托盘专用）。
+ * 托盘区为单色渲染，保留描边造型以便小尺寸清晰。
+ */
+function drawNoteGlyph(buf, size, { fg }) {
   const pad = Math.max(2, Math.round(size * 0.14))
   const x1 = pad
   const y1 = pad
@@ -92,44 +110,26 @@ function drawNoteGlyph(buf, size, { fg, bg = null, fold = false }) {
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
       if (!inRoundRect(x, y, x1, y1, x2, y2, cr)) continue
-      if (bg) setPx(buf, size, x, y, bg)
-
       const onBorder = x <= x1 + lw || x >= x2 - lw || y <= y1 + lw || y >= y2 - lw
       const onLine = lineYs.includes(y) && x >= lx1 && x <= lx2
-      if (fold) {
-        const fx = x2 - Math.round(size * 0.18)
-        const fy = y1 + Math.round(size * 0.18)
-        if (x >= fx && y <= fy && x + y <= fx + fy + lw) {
-          setPx(buf, size, x, y, fg)
-          continue
-        }
-      }
       if (onBorder || onLine) setPx(buf, size, x, y, fg)
     }
   }
 }
 
-/** 任务栏 / 窗口：品牌紫底 + 白色便签 */
+/**
+ * 应用 / 任务栏 / 窗口图标：深炭圆角底 + 浅灰便签线稿（与托盘同系）。
+ * 小尺寸保持线稿可辨，避免再退化成实心色块。
+ */
 function createAppIconPng(size = 256) {
-  const buf = Buffer.alloc(size * size * 4)
-  const pad = Math.max(1, Math.round(size * 0.06))
-  const cr = Math.max(3, Math.round(size * 0.18))
-  for (let y = pad; y < size - pad; y++) {
-    for (let x = pad; x < size - pad; x++) {
-      if (inRoundRect(x, y, pad, pad, size - pad - 1, size - pad - 1, cr)) {
-        setPx(buf, size, x, y, ACCENT)
-      }
-    }
-  }
-  drawNoteGlyph(buf, size, { fg: WHITE, fold: size >= 48 })
-  return encodePng(buf, size)
+  void size
+  return fs.readFileSync(BRAND_PNG)
 }
 
-/** 系统托盘：透明底 + 白色便签线稿 */
+/** 系统托盘：与应用入口统一使用 KM 机器人徽章。 */
 function createTrayIconPng(size = 32) {
-  const buf = Buffer.alloc(size * size * 4)
-  drawNoteGlyph(buf, size, { fg: { ...WHITE, a: 220 } })
-  return encodePng(buf, size)
+  void size
+  return fs.readFileSync(BRAND_PNG)
 }
 
 /**
@@ -137,29 +137,8 @@ function createTrayIconPng(size = 32) {
  * 单尺寸 PNG 在透明无边框窗口上会回退到系统默认图标。
  */
 function createAppIcoBuffer(sizes = [16, 24, 32, 48, 64, 128, 256]) {
-  const images = sizes.map((s) => ({ size: s, png: createAppIconPng(s) }))
-  const count = images.length
-  const header = Buffer.alloc(6)
-  header.writeUInt16LE(0, 0)
-  header.writeUInt16LE(1, 2)
-  header.writeUInt16LE(count, 4)
-
-  const entries = Buffer.alloc(16 * count)
-  let offset = 6 + 16 * count
-  images.forEach((img, i) => {
-    const e = 16 * i
-    entries[e] = img.size >= 256 ? 0 : img.size
-    entries[e + 1] = img.size >= 256 ? 0 : img.size
-    entries[e + 2] = 0
-    entries[e + 3] = 0
-    entries.writeUInt16LE(1, e + 4)
-    entries.writeUInt16LE(32, e + 6)
-    entries.writeUInt32LE(img.png.length, e + 8)
-    entries.writeUInt32LE(offset, e + 12)
-    offset += img.png.length
-  })
-
-  return Buffer.concat([header, entries, ...images.map((img) => img.png)])
+  void sizes
+  return fs.readFileSync(BRAND_ICO)
 }
 
 module.exports = { createAppIconPng, createTrayIconPng, createAppIcoBuffer }

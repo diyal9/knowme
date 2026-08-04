@@ -1,10 +1,10 @@
 ---
 type: Concept
-title: StickyNotes Product Overview
-description: Lightweight Windows desktop sticky notes built with Electron.
-tags: [product, sticky-notes]
+title: KnowMe Product Overview
+description: Lightweight Windows desktop knowledge workbench built with Electron.
+tags: [product, knowme]
 timestamp: 2026-07-01T00:00:00Z
-resource: sticky-notes://product
+resource: knowme://product
 ---
 
 # Scope
@@ -16,7 +16,7 @@ C 端桌面便签：多窗口、美观、轻量、无打扰。产品细节见本
 - Multi-note independent windows
 - Auto-save 500ms debounce
 - Tray + global hotkey `Ctrl+Alt+N`
-- Persist to `%APPDATA%\sticky-notes\`
+- Persist to `%APPDATA%\KnowMe\`
 
 # Team workflow
 
@@ -24,5 +24,6 @@ C 端桌面便签：多窗口、美观、轻量、无打扰。产品细节见本
 
 # Related
 
-- Wiki synthesis: [StickyNotes 产品概览](../../wiki/concepts/sticky-notes-overview.md)
+- Wiki synthesis: [KnowMe 产品概览](../../wiki/concepts/knowme-overview.md)
 - IPC: [Electron IPC](/concepts/electron-ipc.md)
+- LLM runtime: [LLM Runtime And Cursor Benchmark](/concepts/llm-processing-and-cursor-benchmark.md)

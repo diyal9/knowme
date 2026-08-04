@@ -1,0 +1,11 @@
+{
+  "workflows": [
+    {
+      "id": "team-run",
+      "name": "三角色协作开发",
+      "description": "制作人规划 → 开发实现 → 测试 QA，按 OpenSpec 门禁推进",
+      "tags": ["团队", "OpenSpec"],
+      "path": "team-run.json"
+    }
+  ]
+}

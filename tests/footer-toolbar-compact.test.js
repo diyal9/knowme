@@ -28,7 +28,8 @@ describe('footer-toolbar-compact', () => {
     const tools = footer.slice(toolsStart, toolsEnd)
     assert.ok(tools.includes('id="modeMdPreview"'), 'preview in tools')
     assert.ok(tools.includes('id="btnStar"'), 'star in tools')
-    assert.ok(tools.includes('id="btnPromote"') && tools.includes('id="btnSuggest"'), 'promote/suggest')
+    assert.ok(tools.includes('id="btnSuggest"'), 'suggest in tools')
+    assert.ok(!tools.includes('id="btnPromote"'), 'legacy OKF promote removed')
     assert.ok(tools.includes('id="btnVersions"'), 'history in tools')
   })
 

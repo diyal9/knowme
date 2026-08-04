@@ -45,3 +45,12 @@
 ### Requirement: Concise knowledge UI copy
 
 知识库页说明文案 MUST 精简，不以长段路径/多行说明占据首屏。
+
+### Requirement: Guide to workbench knowledge panel
+
+设置页知识库 MUST 保留浏览/导出能力，并 SHALL 引导用户日常使用工作台「知识面板」（见 `knowledge-os`）。
+
+#### Scenario: Intro mentions workbench
+
+- **WHEN** 用户打开设置 → 知识库
+- **THEN** 说明文案提及工作台知识面板为日常入口

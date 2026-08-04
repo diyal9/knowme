@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用户 · KnowMe Admin</title>
+<link rel="stylesheet" href="/admin/static/admin.css">
+</head>
+<body>
+<header>
+<strong>KnowMe 管理后台</strong>
+<span class="muted">{{.User.Username}} ({{.User.Role}})</span>
+<nav>
+<a href="/admin/config">组织配置</a>
+<a href="/admin/users" class="active">用户</a>
+<form method="post" action="/admin/logout"><button class="btn secondary" type="submit">退出</button></form>
+</nav>
+</header>
+<main>
+<div class="card">
+<h1>用户</h1>
+<table>
+<thead><tr><th>ID</th><th>用户名</th><th>角色</th><th>创建</th></tr></thead>
+<tbody>
+{{range .Users}}
+<tr><td>{{.ID}}</td><td>{{.Username}}</td><td>{{.Role}}</td><td>{{.CreatedAt}}</td></tr>
+{{else}}
+<tr><td colspan="4">暂无</td></tr>
+{{end}}
+</tbody>
+</table>
+{{if .CanManage}}
+<form method="post" action="/admin/users" class="card inner">
+<h2>新增用户</h2>
+<div class="row">
+<div><label>用户名</label><input name="username" required></div>
+<div><label>角色</label><select name="role"><option value="viewer">viewer</option><option value="admin">admin</option></select></div>
+</div>
+<label>密码</label>
+<input name="password" type="password" required>
+<button class="btn" type="submit">创建</button>
+{{if .UserError}}<p class="err">{{.UserError}}</p>{{end}}
+{{if .UserSaved}}<p class="ok">已创建</p>{{end}}
+</form>
+{{end}}
+</div>
+</main>
+</body>
+</html>

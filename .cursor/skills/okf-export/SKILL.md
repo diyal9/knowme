@@ -1,7 +1,7 @@
 ---
 name: okf-export
 description: >-
-  Use when exporting StickyNotes OKF knowledge bundle for other users,
+  Use when exporting KnowMe OKF knowledge bundle for other users,
   sharing team learnings, or creating a portable knowledge package.
 disable-model-invocation: true
 ---
@@ -19,7 +19,7 @@ npm run kb:export -- --skip-lint   # 仅调试
 
 ## 输出
 
-`dist/kb-export/sticky-notes-knowledge-<date>/`
+`dist/kb-export/knowme-knowledge-<date>/`
 
 含 `MANIFEST.json`（okf_version、导出时间、import 提示）。
 

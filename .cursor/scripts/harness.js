@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * StickyNotes Agent Harness
+ * KnowMe Agent Harness
  *
  *   check      只读健康检查（--json）
  *   preflight  会话前轻量预检（--json）
@@ -53,6 +53,7 @@ function listActiveChanges() {
   if (!exists(CHANGES)) return [];
   return fs.readdirSync(CHANGES, { withFileTypes: true })
     .filter((d) => d.isDirectory() && d.name !== 'archive')
+    .filter((d) => !exists(path.join(CHANGES, d.name, '.archived')))
     .map((d) => d.name);
 }
 
@@ -97,7 +98,7 @@ function buildCheckReport() {
 
   return {
     ok: missing.length === 0 && node.ok && npm.ok,
-    project: 'sticky-notes',
+    project: 'knowme',
     root: ROOT,
     node: node.stdout || null,
     npm: npm.stdout || null,

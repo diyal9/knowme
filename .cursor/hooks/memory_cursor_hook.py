@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cursor Hook：StickyNotes 本地 Agent 记忆采集、模式计数、上下文注入。"""
+"""Cursor Hook：KnowMe 本地 Agent 记忆采集、模式计数、上下文注入。"""
 from __future__ import annotations
 
 import hashlib

@@ -1,12 +1,26 @@
-/** Sticky-Notes 图标 — Cursor / VS Code Codicon 官方 path（16×16）
- *  填充型图标内联 fill/stroke 覆盖描边 wrapper；star 保留线型以支持空心/实心切换。 */
+/** KnowMe 图标 — Codicon（16）+ Lucide/Obsidian（24） */
 ;(function () {
   const BASE =
     'viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"'
+  // Obsidian 同源 Lucide：24×24、stroke=2；显示时缩到 18px（工具栏）或 16px（树）
+  const LUCIDE =
+    'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
 
-  // 填充型 codicon 统一属性（覆盖线型 wrapper）
   const F = 'fill="currentColor" stroke="none"'
   const FE = 'fill="currentColor" stroke="none" fill-rule="evenodd" clip-rule="evenodd"'
+
+  // 使用 Lucide 24 视口的图标名
+  const lucideSet = new Set([
+    'obsidianNewNote', 'obsidianFolderPlus', 'obsidianSort', 'obsidianPanel', 'obsidianCollapse', 'sidePanel',
+    'folder', 'file', 'chevronTree', 'searchLine', 'starLine', 'listLine', 'settingsLine', 'chevronLeftLine', 'plusLine', 'collapseAll',
+    'history', 'eye', 'note', 'code', 'star', 'chat', 'copy', 'send', 'chevronLeft', 'chevronRight', 'list', 'optimize', 'expandText', 'simplify', 'en', 'bold', 'italic', 'strikethrough', 'link', 'close', 'classify', 'trash', 'settings', 'plus', 'columns', 'newVersion', 'edit',
+    'bookOpen', 'pencilLine', 'moreVertical', 'moreHorizontal', 'paperclip',
+    'coffee', 'mail', 'wechat',
+    // 工作台：必须用 24 viewBox，否则 path 被 16 裁切显得「残缺」
+    'workbench', 'workflow', 'users', 'play', 'step', 'refresh', 'automation',
+    'database', 'component', 'capabilityStack', 'network', 'flask', 'server', 'clipboardCheck',
+    'panelsTopLeft', 'terminal',
+  ])
 
   const paths = {
     // 收藏星：Codicon star-empty（空心）/ star-full（收藏态），由 CSS 切换 .s-o/.s-f
@@ -38,6 +52,9 @@
     // 发送（Codicon send）
     send: `<path ${F} d="M1.17683 1.11898C1.32953 0.989634 1.54464 0.963786 1.72363 1.05328L14.7236 7.55328C14.893 7.63797 15 7.8111 15 8.00049C15 8.18987 14.893 8.36301 14.7236 8.4477L1.72363 14.9477C1.54464 15.0372 1.32953 15.0113 1.17683 14.882C1.02414 14.7526 0.96328 14.5447 1.02213 14.3534L2.97688 8.00049L1.02213 1.64754C0.96328 1.45627 1.02414 1.24833 1.17683 1.11898ZM3.8693 8.50049L2.32155 13.5307L13.382 8.00049L2.32155 2.47027L3.8693 7.50049H9.50001C9.77615 7.50049 10 7.72435 10 8.00049C10 8.27663 9.77615 8.50049 9.50001 8.50049H3.8693Z"/>`,
 
+    // 停止生成：深色圆形按钮内的白色圆角方块
+    stop: `<rect ${F} x="3.5" y="3.5" width="9" height="9" rx="1.5"/>`,
+
     // 复制（Codicon copy）
     copy: `<path ${F} d="M3 5V12.73C2.4 12.38 2 11.74 2 11V5C2 2.79 3.79 1 6 1H9C9.74 1 10.38 1.4 10.73 2H6C4.35 2 3 3.35 3 5ZM11 15H6C4.897 15 4 14.103 4 13V5C4 3.897 4.897 3 6 3H11C12.103 3 13 3.897 13 5V13C13 14.103 12.103 15 11 15ZM12 5C12 4.448 11.552 4 11 4H6C5.448 4 5 4.448 5 5V13C5 13.552 5.448 14 6 14H11C11.552 14 12 13.552 12 13V5Z"/>`,
 
@@ -47,7 +64,29 @@
     // 历史（Codicon history）
     history: `<path ${F} d="M7.99909 3C10.7605 3 12.9991 5.23858 12.9991 8C12.9991 10.7614 10.7605 13 7.99909 13C5.39117 13 3.2491 11.003 3.0195 8.45512C2.99471 8.1801 2.75167 7.97723 2.47664 8.00202C2.20161 8.0268 1.99875 8.26985 2.02353 8.54488C2.29916 11.6035 4.86898 14 7.99909 14C11.3128 14 13.9991 11.3137 13.9991 8C13.9991 4.68629 11.3128 2 7.99909 2C6.20656 2 4.59815 2.78613 3.49909 4.03138V2.5C3.49909 2.22386 3.27524 2 2.99909 2C2.72295 2 2.49909 2.22386 2.49909 2.5V5.5C2.49909 5.77614 2.72295 6 2.99909 6H3.08812C3.09498 6.00014 3.10184 6.00014 3.10868 6H5.99909C6.27524 6 6.49909 5.77614 6.49909 5.5C6.49909 5.22386 6.27524 5 5.99909 5H3.99863C4.91128 3.78495 6.36382 3 7.99909 3ZM7.99909 5.5C7.99909 5.22386 7.77524 5 7.49909 5C7.22295 5 6.99909 5.22386 6.99909 5.5V8.5C6.99909 8.77614 7.22295 9 7.49909 9H9.49909C9.77524 9 9.99909 8.77614 9.99909 8.5C9.99909 8.22386 9.77524 8 9.49909 8H7.99909V5.5Z"/>`,
 
-    // 右箭头（Codicon chevron-right）
+    // Lucide 官方 path（Obsidian 同源，配合 LUCIDE 24 视口）
+    chevronTree: `<path d="m9 18 6-6-6-6"/>`,
+    folder: `<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>`,
+    file: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>`,
+    paperclip: `<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>`,
+    plusLine: `<path d="M5 12h14"/><path d="M12 5v14"/>`,
+    searchLine: `<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>`,
+    listLine: `<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>`,
+    settingsLine: `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`,
+    starLine: `<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`,
+    collapseAll: `<path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/>`,
+    chevronLeftLine: `<path d="m15 18-6-6 6-6"/>`,
+
+    // Files 工具栏 = Lucide square-pen / folder-plus / arrow-up-narrow-wide / panel / chevrons-down-up
+    obsidianNewNote: `<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>`,
+    obsidianFolderPlus: `<path d="M12 10v6"/><path d="M9 13h6"/><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>`,
+    obsidianSort: `<path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h4"/><path d="M11 16h7"/><path d="M11 20h10"/>`,
+    obsidianPanel: `<path d="M4 4h16"/><rect width="14" height="10" x="5" y="7" rx="1"/><path d="M4 20h16"/>`,
+    obsidianCollapse: `<path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/>`,
+    // Lucide panel-left：侧栏开关（Obsidian 左侧 ribbon）
+    sidePanel: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>`,
+
+    // 右箭头（Codicon chevron-right · 非树用）
     chevronRight: `<path ${F} d="M6.14601 3.14579C5.95101 3.34079 5.95101 3.65779 6.14601 3.85279L10.292 7.99879L6.14601 12.1448C5.95101 12.3398 5.95101 12.6568 6.14601 12.8518C6.34101 13.0468 6.65801 13.0468 6.85301 12.8518L11.353 8.35179C11.548 8.15679 11.548 7.83979 11.353 7.64478L6.85301 3.14479C6.65801 2.94979 6.34101 2.95079 6.14601 3.14579Z"/>`,
 
     // 左箭头（Codicon chevron-left）
@@ -112,12 +151,89 @@
 
     // Codicon horizontal rule
     hr: `<path ${F} d="M2 8H14V9H2V8Z"/>`,
+
+    // Codicon add（新建）
+    plus: `<path ${F} d="M7.5 2C7.77614 2 8 2.22386 8 2.5V7H12.5C12.7761 7 13 7.22386 13 7.5C13 7.77614 12.7761 8 12.5 8H8V12.5C8 12.7761 7.77614 13 7.5 13C7.22386 13 7 12.7761 7 12.5V8H2.5C2.22386 8 2 7.77614 2 7.5C2 7.22386 2.22386 7 2.5 7H7V2.5C7 2.22386 7.22386 2 7.5 2Z"/>`,
+
+    // 新建版本：文档 + 加号（区别于 history「查看/对比版本」）
+    newVersion:
+      `<path ${F} d="M2 2.5C2 1.67157 2.67157 1 3.5 1H8.79289C9.055 1 9.30643 1.10536 9.48959 1.2918L12.6967 4.56066C12.8915 4.75915 13 5.02391 13 5.2995V8H12V5.5H9C8.44772 5.5 8 5.05228 8 4.5V2H3.5C3.22386 2 3 2.22386 3 2.5V12.5C3 12.7761 3.22386 13 3.5 13H8V14H3.5C2.67157 14 2 13.3284 2 12.5V2.5ZM9 2.20711V4.5H11.2929L9 2.20711Z"/>` +
+      `<path ${F} d="M11.5 9.25C11.7761 9.25 12 9.47386 12 9.75V11H13.25C13.5261 11 13.75 11.2239 13.75 11.5C13.75 11.7761 13.5261 12 13.25 12H12V13.25C12 13.5261 11.7761 13.75 11.5 13.75C11.2239 13.75 11 13.5261 11 13.25V12H9.75C9.47386 12 9.25 11.7761 9.25 11.5C9.25 11.2239 9.47386 11 9.75 11H11V9.75C11 9.47386 11.2239 9.25 11.5 9.25Z"/>`,
+
+    // 分屏：左右双栏编辑区（中缝更清晰）
+    columns: `<path ${F} d="M2 2.5C2 1.67157 2.67157 1 3.5 1H12.5C13.3284 1 14 1.67157 14 2.5V13.5C14 14.3284 13.3284 15 12.5 15H3.5C2.67157 15 2 14.3284 2 13.5V2.5ZM3 2.5V13.5C3 13.7761 3.22386 14 3.5 14H7V2H3.5C3.22386 2 3 2.22386 3 2.5ZM8 2V14H12.5C12.7761 14 13 13.7761 13 13.5V2.5C13 2.22386 12.7761 2 12.5 2H8Z"/>`,
+
+    // Codicon gear（设置）
+    settings: `<path ${F} d="M8 5.5C6.62 5.5 5.5 6.62 5.5 8C5.5 9.38 6.62 10.5 8 10.5C9.38 10.5 10.5 9.38 10.5 8C10.5 6.62 9.38 5.5 8 5.5ZM6.5 8C6.5 7.17 7.17 6.5 8 6.5C8.83 6.5 9.5 7.17 9.5 8C9.5 8.83 8.83 9.5 8 9.5C7.17 9.5 6.5 8.83 6.5 8ZM7 1.5L6.7 3.16C6.3 3.3 5.93 3.51 5.6 3.78L4.03 3.18L3.03 4.92L4.3 6C4.27 6.22 4.25 6.44 4.25 6.66C4.25 6.88 4.27 7.1 4.3 7.32L3.03 8.4L4.03 10.14L5.6 9.54C5.93 9.81 6.3 10.02 6.7 10.16L7 11.82H9L9.3 10.16C9.7 10.02 10.07 9.81 10.4 9.54L11.97 10.14L12.97 8.4L11.7 7.32C11.73 7.1 11.75 6.88 11.75 6.66C11.75 6.44 11.73 6.22 11.7 6L12.97 4.92L11.97 3.18L10.4 3.78C10.07 3.51 9.7 3.3 9.3 3.16L9 1.5H7Z"/>`,
+    // ── Lucide 覆盖（Obsidian 同源，统一 24 viewBox）──
+    history: `<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>`,
+    eye: `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>`,
+    note: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>`,
+    code: `<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>`,
+    star: `<path class="s-o" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/><path class="s-f" fill="currentColor" stroke="none" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`,
+    chat: `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`,
+    // Lucide layout-grid：完整 2×2 宫格，作工作台入口（替代易被裁切的不对称 dashboard）
+    workbench: `<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>`,
+    workflow: `<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>`,
+    database: `<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>`,
+    component: `<rect width="8" height="8" x="3" y="3" rx="2"/><rect width="8" height="8" x="13" y="13" rx="2"/><path d="M13 7h-2a2 2 0 0 0-2 2v2"/><path d="M7 13v-2a2 2 0 0 1 2-2h2"/>`,
+    capabilityStack: `<path d="m12.83 2.18 8.58 3.9a1 1 0 0 1 0 1.83l-8.58 3.91a2 2 0 0 1-1.66 0L2.59 7.91a1 1 0 0 1 0-1.83l8.58-3.9a2 2 0 0 1 1.66 0Z"/><path d="m21.5 12.4-8.67 3.94a2 2 0 0 1-1.66 0L2.5 12.4"/><path d="m21.5 17.4-8.67 3.94a2 2 0 0 1-1.66 0L2.5 17.4"/>`,
+    network: `<rect width="6" height="6" x="9" y="3" rx="1"/><rect width="6" height="6" x="3" y="15" rx="1"/><rect width="6" height="6" x="15" y="15" rx="1"/><path d="M12 9v3"/><path d="m6 15 4-3"/><path d="m18 15-4-3"/>`,
+    flask: `<path d="M9 3h6"/><path d="M10 3v6.5l-5.4 8.1A2.3 2.3 0 0 0 6.5 21h11a2.3 2.3 0 0 0 1.9-3.4L14 9.5V3"/><path d="M8 15h8"/>`,
+    server: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M7 11h.01"/><path d="M7 15h.01"/><path d="M11 7h6"/><path d="M11 11h6"/><path d="M11 15h6"/>`,
+    clipboardCheck: `<rect width="16" height="18" x="4" y="3" rx="2"/><path d="M9 3V2h6v1"/><path d="m8 13 2 2 5-5"/>`,
+    panelsTopLeft: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>`,
+    terminal: `<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>`,
+    users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
+    // Lucide refresh-cw
+    refresh: `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>`,
+    // 自动化（循环执行 + 智能中心）
+    automation: `<path d="M4 12a8 8 0 0 1 13.66-5.66L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 16"/><path d="M4 20v-4h4"/><path d="m12 9 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/>`,
+    play: `<polygon points="6 3 20 12 6 21 6 3"/>`,
+    step: `<path d="M6 4h2v16H6z"/><path d="m10 4 10 8-10 8z"/>`,
+    copy: `<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`,
+    send: `<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>`,
+    chevronLeft: `<path d="m15 18-6-6 6-6"/>`,
+    chevronRight: `<path d="m9 18 6-6-6-6"/>`,
+    list: `<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>`,
+    optimize: `<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>`,
+    expandText: `<path d="M12 22v-6"/><path d="M12 8V2"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/><path d="m15 19-3 3-3-3"/><path d="m15 5-3-3-3 3"/>`,
+    simplify: `<path d="M12 22v-6"/><path d="M12 8V2"/><path d="M4 12H2"/><path d="M10 12H8"/><path d="M16 12h-2"/><path d="M22 12h-2"/><path d="m15 19-3-3-3 3"/><path d="m15 5-3 3-3-3"/>`,
+    en: `<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>`,
+    bold: `<path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/>`,
+    italic: `<line x1="19" x2="10" y1="4" y2="4"/><line x1="14" x2="5" y1="20" y2="20"/><line x1="15" x2="9" y1="4" y2="20"/>`,
+    strikethrough: `<path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/>`,
+    link: `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>`,
+    close: `<path d="M18 6 6 18"/><path d="m6 6 12 12"/>`,
+    classify: `<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>`,
+    trash: `<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>`,
+    settings: `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`,
+    plus: `<path d="M5 12h14"/><path d="M12 5v14"/>`,
+    columns: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/>`,
+    newVersion: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M12 18v-6"/><path d="M9 15h6"/>`,
+    edit: `<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/>`,
+    // Lucide book-open（Obsidian 阅读视图）
+    bookOpen: `<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>`,
+    // Lucide pencil-line（阅读视图 → 返回 MD 编辑）
+    pencilLine: `<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>`,
+    // Lucide ellipsis-vertical（更多）
+    moreVertical: `<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>`,
+    // Lucide ellipsis（水平三点）
+    moreHorizontal: `<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>`,
+    // Lucide coffee（请喝冰美式）
+    coffee: `<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" x2="6" y1="1" y2="4"/><line x1="10" x2="10" y1="1" y2="4"/><line x1="14" x2="14" y1="1" y2="4"/>`,
+    // Lucide mail
+    mail: `<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/>`,
+    // Lucide message-circle（微信联系）
+    wechat: `<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>`,
+
   }
 
   function svg(name) {
     const inner = paths[name]
     if (!inner) return ''
-    return `<svg ${BASE} aria-hidden="true">${inner}</svg>`
+    const attrs = lucideSet.has(name) ? LUCIDE : BASE
+    return `<svg ${attrs} aria-hidden="true">${inner}</svg>`
   }
 
   function mount(root = document) {

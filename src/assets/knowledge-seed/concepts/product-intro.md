@@ -1,8 +1,8 @@
 ---
 type: Concept
-title: Sticky-Notes 简介
+title: KnowMe 简介
 description: 桌面提示词卡片管理工具，支持版本迭代与 AI 辅助生成。
-tags: [product, sticky-notes]
+tags: [product, knowme]
 timestamp: 2026-07-01T00:00:00Z
 ---
 

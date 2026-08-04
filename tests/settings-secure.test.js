@@ -145,4 +145,48 @@ describe('settings-secure', () => {
     assert.equal(raw.systemPrompt, undefined);
     restoreLoad();
   });
+
+  it('defaults and clamps temperature', () => {
+    const { save, load, clampTemperature } = loadSettingsSecure(true);
+    assert.equal(clampTemperature(undefined), 0.7);
+    assert.equal(clampTemperature(-1), 0);
+    assert.equal(clampTemperature(3), 2);
+    assert.equal(clampTemperature(1.23), 1.23);
+    save(settingsFile, {
+      apiEndpoint: 'https://api.example.com',
+      apiKey: 'sk-t',
+      model: 'gpt-4o-mini',
+      userPrompt: '',
+      temperature: 1.5,
+    });
+    assert.equal(load(settingsFile).temperature, 1.5);
+    save(settingsFile, {
+      ...load(settingsFile),
+      apiKey: '',
+      temperature: 9,
+    });
+    assert.equal(load(settingsFile).temperature, 2);
+    restoreLoad();
+  });
+
+  it('encrypts workbench token and omits plaintext from load()', () => {
+    const { save, load, publicSettings } = loadSettingsSecure(true);
+    const result = save(settingsFile, {
+      apiEndpoint: 'https://api.example.com',
+      apiKey: '',
+      model: 'gpt-4o-mini',
+      userPrompt: '',
+      workbenchToken: 'wb_demo_key',
+      workbenchAuth: { endpoint: 'http://127.0.0.1:8010', tenantId: 'rdpi' },
+    });
+    assert.equal(result.ok, true);
+    const raw = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    assert.ok(raw.workbenchTokenEnc);
+    assert.equal(raw.workbenchToken, undefined);
+    const merged = load(settingsFile);
+    assert.equal(merged.workbenchToken, 'wb_demo_key');
+    assert.equal(merged.workbenchAuth.tenantId, 'rdpi');
+    assert.equal(publicSettings(merged).workbenchToken, undefined);
+    restoreLoad();
+  });
 });

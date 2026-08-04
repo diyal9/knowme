@@ -1,3 +1,6 @@
+> **SUPERSEDED** for workspace `editor-pane` by `obsidian-doc-chrome` (2026-07-16). See `openspec/specs/doc-chrome/spec.md`.  
+> Legacy floating `note.html` still follows this spec until removed.
+
 # Spec: footer-toolbar
 
 ## 底栏分区

@@ -2,7 +2,7 @@
 name: team-evolution
 description: >-
   Use when the same defect recurs ≥3 times, promoting learnings to a new Skill,
-  or running the self-evolution loop after story-done for StickyNotes.
+  or running the self-evolution loop after story-done for KnowMe.
 ---
 
 # 团队自我进化
@@ -57,4 +57,4 @@ description: Use when <触发场景，第三人称>
 
 ## 分享
 
-进化后的 OKF bundle：`npm run kb:export` → 给其他 StickyNotes 用户 `kb:import`
+进化后的 OKF bundle：`npm run kb:export` → 给其他 KnowMe 用户 `kb:import`
