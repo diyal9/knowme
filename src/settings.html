@@ -1113,6 +1113,26 @@ input:focus,textarea:focus{
       </div>
       <p class="hint" id="workbenchAuthStatus">状态：未配置</p>
     </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="section-title">Workbench 部署与兼容</div>
+        <span class="section-badge">Daemon Bootstrap</span>
+      </div>
+      <p class="kb-intro">配置本机 Workbench 安装目录后，KnowMe 可自动注册 <code>game-dev-delivery</code> 工作流，并在版本匹配时安装 script-only 兼容层（无需手工 patch 外部仓库）。</p>
+      <div class="form-grid">
+        <div class="field full">
+          <label>Workbench 安装目录</label>
+          <input id="workbenchInstallPath" placeholder="例如 D:\workflows\workbench 或 KNOWME_WORKBENCH_INSTALL" spellcheck="false">
+          <div class="hint">Daemon 进程使用的 Workbench 仓库根目录；留空则尝试环境变量自动发现。</div>
+        </div>
+      </div>
+      <div class="kb-actions">
+        <button class="btn-sm" type="button" id="btnWorkbenchBootstrapStatus">检测状态</button>
+        <button class="btn-sm primary" type="button" id="btnWorkbenchBootstrapDeploy">注册工作流</button>
+        <button class="btn-sm" type="button" id="btnWorkbenchBootstrapCompat">安装兼容层</button>
+      </div>
+      <p class="hint" id="workbenchBootstrapStatus">状态：尚未检测</p>
+    </div>
   </div>
 
   <!-- 我的记忆 -->
@@ -2572,6 +2592,46 @@ async function refreshWorkbenchAuthStatus(snapshot = {}) {
   }
 }
 
+function renderWorkbenchBootstrapStatus(status = {}) {
+  const el = $('workbenchBootstrapStatus')
+  if (!el) return
+  const parts = []
+  if (status.installPath) parts.push(`目录 ${status.installPath}`)
+  if (status.compat?.status) parts.push(`兼容 ${status.compat.status}`)
+  if (status.deploy?.ok) parts.push('工作流已部署')
+  else if (status.workflowRegisteredRemote) parts.push('Daemon 已注册 game-dev-delivery')
+  if (status.tokenConfigured) parts.push('Token 已配置')
+  else parts.push('Token 未配置')
+  if (status.daemonOnline) parts.push('Daemon 在线')
+  else parts.push('Daemon 离线')
+  const headline = status.ok ? '就绪' : (status.message || '未就绪')
+  el.textContent = `状态：${headline}${parts.length ? ` · ${parts.join(' · ')}` : ''}`
+}
+
+async function refreshWorkbenchBootstrapStatus() {
+  if (!window.api?.workbenchBootstrapStatus) return
+  try {
+    const res = await window.api.workbenchBootstrapStatus()
+    renderWorkbenchBootstrapStatus(res?.status || {})
+  } catch {
+    renderWorkbenchBootstrapStatus({ message: '检测失败' })
+  }
+}
+
+async function runWorkbenchBootstrap({ applyCompat = false } = {}) {
+  const installPath = $('workbenchInstallPath')?.value.trim() || ''
+  const res = await window.api.workbenchBootstrapRun({
+    installPath,
+    applyCompat,
+    deploy: true,
+    saveInstallPath: true,
+  })
+  renderWorkbenchBootstrapStatus(res?.status || {})
+  if (res?.ok) toast(applyCompat ? '兼容层与工作流已就绪' : '工作流注册完成', 'success')
+  else toast(res?.status?.message || res?.message || 'Bootstrap 未完成', 'error', 5000)
+  return res
+}
+
 const ASSISTANT_MODE_EDITABLE_SUGGESTIONS = {
   soul: [
     '先给结论，再展开细节。',
@@ -2662,6 +2722,9 @@ function applySettingsSnapshot(s = {}) {
   if ($('workbenchAuthTenant')) $('workbenchAuthTenant').value = wb.tenantId || ''
   if ($('workbenchAuthKey')) $('workbenchAuthKey').value = ''
   refreshWorkbenchAuthStatus(s)
+  const wbi = s.workbenchInstall || {}
+  if ($('workbenchInstallPath')) $('workbenchInstallPath').value = wbi.path || ''
+  refreshWorkbenchBootstrapStatus()
 }
 
 window.api?.initSettings?.((s) => applySettingsSnapshot(s))
@@ -3004,6 +3067,19 @@ $('btnWorkbenchAuthLogout')?.addEventListener('click', async () => {
 $('btnWorkbenchAuthRefresh')?.addEventListener('click', async () => {
   await refreshWorkbenchAuthStatus(window.api.getSettings?.() || {})
   toast('已刷新 Workbench 授权状态', 'success', 1800)
+})
+
+$('btnWorkbenchBootstrapStatus')?.addEventListener('click', async () => {
+  await refreshWorkbenchBootstrapStatus()
+  toast('已刷新 Workbench 部署状态', 'success', 1800)
+})
+
+$('btnWorkbenchBootstrapDeploy')?.addEventListener('click', async () => {
+  await runWorkbenchBootstrap({ applyCompat: false })
+})
+
+$('btnWorkbenchBootstrapCompat')?.addEventListener('click', async () => {
+  await runWorkbenchBootstrap({ applyCompat: true })
 })
 
 $('btnOpenCapabilityHubFromSettings')?.addEventListener('click', () => {

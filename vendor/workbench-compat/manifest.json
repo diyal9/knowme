@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "knowmeCompatId": "knowme-cli-required-v1",
+  "description": "Honor workflow cli_required:false and auto skip CLI preflight for script-only workflows",
+  "upstreamWorkbench": {
+    "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+    "note": "Upstream at anchor commit ignores cli_required in workflow JSON; Daemon always runs CLI preflight unless patched."
+  },
+  "patch": {
+    "file": "patches/knowme-cli-required-v1.patch",
+    "appliedMarker": "def _workflow_requires_cli("
+  },
+  "targets": [
+    {
+      "relPath": "tools/workflow_runner/daemon/__main__.py",
+      "prePatchSha256": "523d7ac9b9e8b0376a51353d2718d0a69c27e51f3b73186745c57f1a40faec12"
+    },
+    {
+      "relPath": "tools/workflow_runner/orchestrator/loop.py",
+      "prePatchSha256": "fca587ff48158937a8382c86650bc073bd3afeabd155edd90e79b3f93a929d08"
+    }
+  ],
+  "workflows": [
+    {
+      "id": "game-dev-delivery",
+      "bundleFile": "game-dev-delivery.json",
+      "destRel": ".cursor/workflows/custom/game-dev-delivery.json"
+    }
+  ],
+  "scriptBundle": {
+    "src": "scripts/game-dev-deliver.py",
+    "destRel": "tools/knowme/game-dev-deliver.py"
+  }
+}

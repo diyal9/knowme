@@ -6,6 +6,7 @@ const handoff = require('../src/lib/game-workbench-handoff')
 const gameReq = require('../src/lib/game-requirement')
 const gameScenes = require('../src/lib/game-studio-scenes')
 const workbenchDaemon = require('../src/lib/workbench-daemon-client')
+const bootstrap = require('../src/lib/workbench-bootstrap')
 const { resolveWorkbenchToken } = require('./resolve-workbench-token')
 
 const ROOT = path.join(__dirname, '..')
@@ -13,7 +14,12 @@ const OUT = process.env.GAME_STUDIO_EVIDENCE
   ? path.resolve(process.env.GAME_STUDIO_EVIDENCE)
   : path.join(ROOT, 'openspec/changes/archive/2026-08-04-game-studio-work-partner-daemon/evidence')
 const REPORT = path.join(OUT, 'daemon-live-e2e.json')
-const WORKBENCH_ROOT = process.env.KNOWME_WORKBENCH_ROOT || 'D:/workflows/workbench'
+
+function resolveWorkbenchRoot() {
+  return bootstrap.resolveWorkbenchInstallPath({})
+    || bootstrap.discoverWorkbenchInstall()
+    || ''
+}
 
 const SUCCESS_STATES = new Set(['finished', 'completed', 'done'])
 const FAIL_STATES = new Set(['failed', 'cancelled'])
@@ -63,17 +69,17 @@ async function fetchLogs(client, slug, token) {
   }
 }
 
-function readTaskArtifact(taskSlug, relPath) {
-  const file = path.join(WORKBENCH_ROOT, 'workflow-spec', taskSlug, relPath)
+function readTaskArtifact(workbenchRoot, taskSlug, relPath) {
+  const file = path.join(workbenchRoot, 'workflow-spec', taskSlug, relPath)
   if (!fs.existsSync(file)) return ''
   return fs.readFileSync(file, 'utf8').slice(0, 4000)
 }
 
-function snapshotEvidence(taskSlug, files) {
+function snapshotEvidence(workbenchRoot, taskSlug, files) {
   const dir = path.join(OUT, 'daemon-artifacts', taskSlug)
   fs.mkdirSync(dir, { recursive: true })
   for (const rel of files) {
-    const src = path.join(WORKBENCH_ROOT, 'workflow-spec', taskSlug, rel)
+    const src = path.join(workbenchRoot, 'workflow-spec', taskSlug, rel)
     if (!fs.existsSync(src)) continue
     const dest = path.join(dir, rel.replace(/\//g, '__'))
     fs.copyFileSync(src, dest)
@@ -81,7 +87,17 @@ function snapshotEvidence(taskSlug, files) {
 }
 
 async function main() {
-  const token = resolveWorkbenchToken({ workbenchRoot: WORKBENCH_ROOT })
+  const workbenchRoot = resolveWorkbenchRoot()
+  const settings = { workbenchInstall: { path: workbenchRoot } }
+  const bootstrapResult = workbenchRoot
+    ? bootstrap.runBootstrap(settings, {
+      installPath: workbenchRoot,
+      deploy: true,
+      applyCompat: true,
+    })
+    : { ok: false, code: 'no_install_path' }
+
+  const token = resolveWorkbenchToken({ workbenchRoot, settings })
   if (!token) {
     console.error('缺少 Workbench token：设置 KNOWME_WORKBENCH_TOKEN 或在 KnowMe 设置中配置授权码')
     process.exit(1)
@@ -96,9 +112,11 @@ async function main() {
   const report = {
     at: new Date().toISOString(),
     endpoint: client.endpoint,
+    workbenchRoot: workbenchRoot || null,
+    bootstrap: bootstrapResult,
     rootCause: {
       original: 'demo-experience agent workflow failed CLI preflight (missing CURSOR_API_KEY)',
-      fixed: 'game-dev-delivery script workflow + meta-only handoff + skip CLI preflight patch',
+      fixed: 'game-dev-delivery script workflow + KnowMe bootstrap compat patch (versioned)',
     },
     steps: [],
     ok: false,
@@ -168,7 +186,7 @@ async function main() {
   if (failStarted.ok) {
     failTerminal = await pollTask(client, failSlug, { timeoutMs: 90000 })
     const logs = await fetchLogs(client, failSlug, token)
-    const failReport = readTaskArtifact(failSlug, 'artifacts/delivery-pack-report.md')
+    const failReport = readTaskArtifact(workbenchRoot, failSlug, 'artifacts/delivery-pack-report.md')
     const scriptExit1 = /exit_code:\s*1/i.test(failReport)
     const briefTooShort = /需求案内容过短|至少需要 40/i.test(`${logs.text}\n${failReport}`)
     const parkedRecoverable = /暂停待人工|resume|script_failed/i.test(logs.text)
@@ -186,7 +204,7 @@ async function main() {
       logTail: logs.text,
       reportTail: failReport.slice(-800),
     })
-    snapshotEvidence(failSlug, ['artifacts/delivery-pack-report.md', 'ingest/brief.md'])
+    snapshotEvidence(workbenchRoot, failSlug, ['artifacts/delivery-pack-report.md', 'ingest/brief.md'])
   } else {
     report.steps.push({ step: 'failurePath.executorFail', ok: false, error: failStarted.error })
   }
@@ -238,7 +256,7 @@ async function main() {
   })
 
   if (success) {
-    snapshotEvidence(successSlug, [
+    snapshotEvidence(workbenchRoot, successSlug, [
       'artifacts/delivery-pack.md',
       'artifacts/implementation-checklist.md',
       'artifacts/acceptance-matrix.md',

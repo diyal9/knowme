@@ -93,6 +93,8 @@ contextBridge.exposeInMainWorld('api', {
   workbenchAuthStatus: () => ipcRenderer.invoke('workbench-auth-status'),
   workbenchAuthLogin: payload => ipcRenderer.invoke('workbench-auth-login', payload || {}),
   workbenchAuthLogout: () => ipcRenderer.invoke('workbench-auth-logout'),
+  workbenchBootstrapStatus: () => ipcRenderer.invoke('workbench-bootstrap-status'),
+  workbenchBootstrapRun: payload => ipcRenderer.invoke('workbench-bootstrap-run', payload || {}),
   workbenchDaemonOverview: () => ipcRenderer.invoke('workbench-daemon-overview'),
   gameStudioScenes: () => ipcRenderer.invoke('game-studio-scenes'),
   gameRequirementBuild: payload => ipcRenderer.invoke('game-requirement-build', payload || {}),

@@ -1,9 +1,79 @@
 {
-  "at": "2026-08-04T08:25:18.241Z",
+  "at": "2026-08-04T08:36:46.037Z",
   "endpoint": "http://127.0.0.1:8010",
+  "workbenchRoot": "D:\\workflows\\workbench",
+  "bootstrap": {
+    "ok": true,
+    "installPath": "D:\\workflows\\workbench",
+    "steps": [
+      {
+        "step": "deployWorkflows",
+        "ok": true,
+        "dryRun": false,
+        "workflows": [
+          "game-dev-delivery.json"
+        ],
+        "script": "tools/knowme/game-dev-deliver.py",
+        "deployState": {
+          "ok": true,
+          "workflowFile": true,
+          "scriptFile": true,
+          "indexEntry": true,
+          "registryEntry": true
+        }
+      },
+      {
+        "step": "applyCompat",
+        "ok": true,
+        "skipped": true,
+        "state": {
+          "status": "applied",
+          "ok": true,
+          "compatId": "knowme-cli-required-v1",
+          "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+          "message": "兼容层已安装"
+        },
+        "message": "兼容层已存在"
+      }
+    ],
+    "status": {
+      "ok": false,
+      "installPath": "D:\\workflows\\workbench",
+      "compat": {
+        "status": "applied",
+        "ok": true,
+        "compatId": "knowme-cli-required-v1",
+        "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+        "message": "兼容层已安装"
+      },
+      "deploy": {
+        "ok": true,
+        "workflowFile": true,
+        "scriptFile": true,
+        "indexEntry": true,
+        "registryEntry": true
+      },
+      "workflowRegisteredRemote": false,
+      "daemonOnline": false,
+      "tokenConfigured": false,
+      "blockers": [
+        "token",
+        "daemon_offline"
+      ],
+      "compatId": "knowme-cli-required-v1",
+      "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+      "actions": {
+        "canDeployWorkflows": true,
+        "canApplyCompat": false,
+        "canRepair": false
+      },
+      "message": "Workbench 尚未完全就绪",
+      "recovery": []
+    }
+  },
   "rootCause": {
     "original": "demo-experience agent workflow failed CLI preflight (missing CURSOR_API_KEY)",
-    "fixed": "game-dev-delivery script workflow + meta-only handoff + skip CLI preflight patch"
+    "fixed": "game-dev-delivery script workflow + KnowMe bootstrap compat patch (versioned)"
   },
   "steps": [
     {
@@ -16,7 +86,7 @@
       "step": "buildHandoff",
       "ok": true,
       "workflow": "game-dev-delivery",
-      "slug": "game-req-7s74",
+      "slug": "game-req-mj75",
       "code": null,
       "contextKeys": [
         "meta"
@@ -31,7 +101,7 @@
     {
       "step": "failurePath.createShortBrief",
       "ok": true,
-      "slug": "fail-brief-ee7s74"
+      "slug": "fail-brief-eemj75"
     },
     {
       "step": "failurePath.executorFail",
@@ -40,13 +110,13 @@
       "returncode": 2,
       "reason": "parked (waiting for human / quota / error — see log)",
       "scriptExitCode": 1,
-      "logTail": "[08:25:20] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:25:20] daemon start: task=fail-brief-ee7s74 workflow=game-dev-delivery agent=cursor-agent\n[08:25:20]   cursor CLI: not set (cursor-agent uses local login)\n[08:25:20]   飞书通知: 本次跳过\n[08:25:21] action[1]: run_script node=n-deliver\n[08:25:26] action[2]: script_failed node=n-deliver\n[08:25:26] retry script n-deliver (attempt 1/2)\n[08:25:32] action[3]: script_failed node=n-deliver\n[08:25:32] retry script n-deliver (attempt 2/2)\n[08:25:37] action[4]: script_failed node=n-deliver\n[08:25:37] ALERT: 🔧 脚本失败待决策 · fail-brief-ee7s74 — **脚本节点**：`n-deliver` (`knowme-game-dev-deliver`) | **报告**：`workflow-spec/fail-brief-ee7s74/artifacts/delivery-pack-report.md` | **选项**：retry / abort / goto —\n[08:25:38] ALERT: ⏸ Workflow 暂停待人工 · fail-brief-ee7s74 — **节点**：`n-deliver` | **原因**：script n-deliver 重试 2 次仍失败 | **恢复**：修复后重跑 `run --workflow game-dev-delivery --task fail-brief-ee7s74`（resume）\n",
-      "reportTail": "# Game Dev Delivery Report\r\n\r\n- status: **FAILED**\r\n- script_id: `knowme-game-dev-deliver`\r\n- cwd: `.`\r\n- command: `python tools/knowme/game-dev-deliver.py --task fail-brief-ee7s74`\r\n- exit_code: 1\r\n- finished_at: 2026-08-04T08:25:33Z\r\n\r\n## stdout (tail)\r\n```\r\n(empty)\r\n```\r\n\r\n## stderr (tail)\r\n```\r\n需求案内容过短（10 字符，至少需要 40）：请通过 KnowMe handoff 写入完整结构化需求案后再重试\r\n\r\n```\r\n"
+      "logTail": "[08:36:49] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:36:49] daemon start: task=fail-brief-eemj75 workflow=game-dev-delivery agent=cursor-agent\n[08:36:49]   cursor CLI: not set (cursor-agent uses local login)\n[08:36:49]   飞书通知: 本次跳过\n[08:36:50] action[1]: run_script node=n-deliver\n[08:37:00] action[2]: script_failed node=n-deliver\n[08:37:00] retry script n-deliver (attempt 1/2)\n[08:37:07] action[3]: script_failed node=n-deliver\n[08:37:07] retry script n-deliver (attempt 2/2)\n[08:37:14] action[4]: script_failed node=n-deliver\n[08:37:14] ALERT: 🔧 脚本失败待决策 · fail-brief-eemj75 — **脚本节点**：`n-deliver` (`knowme-game-dev-deliver`) | **报告**：`workflow-spec/fail-brief-eemj75/artifacts/delivery-pack-report.md` | **选项**：retry / abort / goto —\n[08:37:15] ALERT: ⏸ Workflow 暂停待人工 · fail-brief-eemj75 — **节点**：`n-deliver` | **原因**：script n-deliver 重试 2 次仍失败 | **恢复**：修复后重跑 `run --workflow game-dev-delivery --task fail-brief-eemj75`（resume）\n",
+      "reportTail": "# Game Dev Delivery Report\r\n\r\n- status: **FAILED**\r\n- script_id: `knowme-game-dev-deliver`\r\n- cwd: `.`\r\n- command: `python tools/knowme/game-dev-deliver.py --task fail-brief-eemj75`\r\n- exit_code: 1\r\n- finished_at: 2026-08-04T08:37:08Z\r\n\r\n## stdout (tail)\r\n```\r\n(empty)\r\n```\r\n\r\n## stderr (tail)\r\n```\r\n需求案内容过短（10 字符，至少需要 40）：请通过 KnowMe handoff 写入完整结构化需求案后再重试\r\n\r\n```\r\n"
     },
     {
       "step": "successPath.createAndRun",
       "ok": true,
-      "slug": "game-req-7s74",
+      "slug": "game-req-mj75",
       "workflow": "game-dev-delivery",
       "error": null
     },
@@ -56,7 +126,7 @@
       "state": "finished",
       "returncode": 0,
       "reason": "",
-      "logTail": "[08:25:41] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:25:41] daemon start: task=game-req-7s74 workflow=game-dev-delivery agent=cursor-agent\n[08:25:41]   cursor CLI: not set (cursor-agent uses local login)\n[08:25:41]   飞书通知: 本次跳过\n[08:25:41] action[1]: run_script node=n-deliver\n[08:25:48] action[2]: completed node=-\n[08:25:48] task game-req-7s74 completed\n"
+      "logTail": "[08:37:18] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:37:18] daemon start: task=game-req-mj75 workflow=game-dev-delivery agent=cursor-agent\n[08:37:18]   cursor CLI: not set (cursor-agent uses local login)\n[08:37:18]   飞书通知: 本次跳过\n[08:37:19] action[1]: run_script node=n-deliver\n[08:37:25] action[2]: completed node=-\n[08:37:25] task game-req-mj75 completed\n"
     },
     {
       "step": "successPath.artifacts",
@@ -68,8 +138,8 @@
   "ok": true,
   "summary": {
     "workflow": "game-dev-delivery",
-    "successSlug": "game-req-7s74",
-    "failSlug": "fail-brief-ee7s74",
+    "successSlug": "game-req-mj75",
+    "failSlug": "fail-brief-eemj75",
     "exitCode": 0,
     "artifactFiles": 6
   }

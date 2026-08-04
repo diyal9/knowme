@@ -4,6 +4,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const workbenchAuth = require('../src/lib/workbench-auth')
+const bootstrap = require('../src/lib/workbench-bootstrap')
 
 function readJsonSafe(file) {
   try {
@@ -33,8 +34,9 @@ function resolveWorkbenchToken(options = {}) {
   if (fromSettings) return fromSettings
 
   const workbenchRoot = options.workbenchRoot
-    || process.env.KNOWME_WORKBENCH_ROOT
-    || 'D:/workflows/workbench'
+    || bootstrap.resolveWorkbenchInstallPath(options.settings || {})
+    || bootstrap.discoverWorkbenchInstall()
+  if (!workbenchRoot) return ''
   return fromWorkflowConfig(workbenchRoot)
 }
 

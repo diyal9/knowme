@@ -50,6 +50,11 @@ const DEFAULT_SETTINGS = {
   },
   orgManaged: false,
   workbenchAuth: { ...DEFAULT_WORKBENCH_AUTH },
+  workbenchInstall: {
+    path: '',
+    lastBootstrapAt: '',
+    lastBootstrapOk: false,
+  },
   workbenchToken: '',
 };
 
@@ -84,6 +89,15 @@ const LEGACY_ASSISTANT_MODE_PRESET = {
     '涉及风险操作时先提示风险与回滚思路。',
   ].join('\n'),
 };
+
+function normalizeWorkbenchInstall(raw) {
+  const input = raw && typeof raw === 'object' ? raw : {}
+  return {
+    path: String(input.path || '').trim().slice(0, 500),
+    lastBootstrapAt: String(input.lastBootstrapAt || '').trim(),
+    lastBootstrapOk: input.lastBootstrapOk === true,
+  }
+}
 
 function normalizeAssistantModeConfig(raw) {
   const base = DEFAULT_SETTINGS.assistantModeConfig;
@@ -165,6 +179,7 @@ function load(file) {
     remoteConfig: normalizeRemoteConfig(raw.remoteConfig),
     orgManaged: raw.orgManaged === true,
     workbenchAuth: normalizeWorkbenchAuth(raw.workbenchAuth),
+    workbenchInstall: normalizeWorkbenchInstall(raw.workbenchInstall),
   };
   delete merged.apiKeyEnc;
   delete merged.gitlabTokenEnc;
@@ -219,6 +234,9 @@ function save(file, settings) {
   if (settings.orgManaged != null) out.orgManaged = settings.orgManaged === true
   if (settings.workbenchAuth != null) {
     out.workbenchAuth = normalizeWorkbenchAuth(settings.workbenchAuth)
+  }
+  if (settings.workbenchInstall != null) {
+    out.workbenchInstall = normalizeWorkbenchInstall(settings.workbenchInstall)
   }
 
   let warning = null;

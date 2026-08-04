@@ -28,6 +28,8 @@
     "memory:path": "python -X utf8 -c \"import sys; sys.path.insert(0,'.cursor/hooks'); import memory_paths as m; print(m.memory_root())\"",
     "memory:bootstrap": "python -X utf8 .cursor/hooks/memory_rollup_llm.py bootstrap",
     "workbench:sync": "node scripts/sync-workbench-workflows.js",
+    "workbench:bootstrap": "node scripts/workbench-bootstrap-cli.js",
+    "test:workbench-clean-env": "node scripts/workbench-clean-env-e2e.js",
     "test:daemon-e2e": "node scripts/daemon-live-e2e.js"
   },
   "devDependencies": {

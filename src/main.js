@@ -107,6 +107,7 @@ const sourcesLib = require('./lib/sources')
 const workbenchRepo = require('./lib/workbench-repo')
 const workbenchDaemon = require('./lib/workbench-daemon-client')
 const workbenchAuth = require('./lib/workbench-auth')
+const workbenchBootstrap = require('./lib/workbench-bootstrap')
 const workbenchTaskProjection = require('./lib/workbench-task-projection')
 const gitlabSource = require('./lib/gitlab-source')
 const webSource = require('./lib/web-source')
@@ -2480,14 +2481,22 @@ async function loadWorkbenchDaemonOverview() {
   try {
     const result = await getWorkbenchDaemonClient().overview()
     const auth = publicWorkbenchAuthStatus(settings, result.health || null)
-    return { ...result, auth }
+    const bootstrapStatus = workbenchBootstrap.buildPublicStatus(settings, {
+      daemonOverview: result,
+      tokenConfigured: Boolean(workbenchAuth.resolveToken(settings)),
+    })
+    return { ...result, auth, bootstrap: bootstrapStatus }
   } catch (error) {
+    const bootstrapStatus = workbenchBootstrap.buildPublicStatus(settings, {
+      tokenConfigured: Boolean(workbenchAuth.resolveToken(settings)),
+    })
     return {
       ...workbenchDaemon.normalizeError(error),
       online: false,
       workflows: [],
       tasks: [],
       auth: publicWorkbenchAuthStatus(settings),
+      bootstrap: bootstrapStatus,
       hint: '请检查 Workbench 服务地址、网络连接和授权状态',
     }
   }
@@ -2550,6 +2559,52 @@ ipcMain.handle('workbench-daemon-overview', async () => {
   } catch (error) {
     return { ok: false, error: (error && error.message) || '无法读取工作服务' }
   }
+})
+
+ipcMain.handle('workbench-bootstrap-status', async () => {
+  const settings = loadSettings()
+  let daemonOverview = null
+  try {
+    daemonOverview = await getWorkbenchDaemonClient().overview()
+  } catch {
+    daemonOverview = null
+  }
+  const status = workbenchBootstrap.buildPublicStatus(settings, {
+    daemonOverview,
+    tokenConfigured: Boolean(workbenchAuth.resolveToken(settings)),
+  })
+  return { ok: true, status }
+})
+
+ipcMain.handle('workbench-bootstrap-run', async (_e, payload = {}) => {
+  const current = loadSettings()
+  const installPath = String(payload.installPath || current.workbenchInstall?.path || '').trim()
+  if (payload.saveInstallPath !== false && installPath) {
+    saveSettings_({
+      ...current,
+      workbenchInstall: {
+        ...(current.workbenchInstall || {}),
+        path: installPath,
+      },
+    })
+  }
+  const settings = loadSettings()
+  const result = workbenchBootstrap.runBootstrap(settings, {
+    installPath: installPath || undefined,
+    deploy: payload.deploy !== false,
+    applyCompat: payload.applyCompat === true,
+  })
+  const next = loadSettings()
+  saveSettings_({
+    ...next,
+    workbenchInstall: {
+      ...(next.workbenchInstall || {}),
+      path: result.installPath || installPath || next.workbenchInstall?.path || '',
+      lastBootstrapAt: new Date().toISOString(),
+      lastBootstrapOk: result.ok,
+    },
+  })
+  return result
 })
 
 ipcMain.handle('game-studio-scenes', () => ({

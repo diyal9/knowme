@@ -1,0 +1,84 @@
+diff --git a/tools/workflow_runner/daemon/__main__.py b/tools/workflow_runner/daemon/__main__.py
+index ce67592..da0a028 100644
+--- a/tools/workflow_runner/daemon/__main__.py
++++ b/tools/workflow_runner/daemon/__main__.py
+@@ -44,6 +44,21 @@ def _resolve_workflow(task: str, explicit: str | None, root: Path) -> str:
+     return st.load_status(task, root=root)["workflow_id"]
+ 
+ 
++def _workflow_requires_cli(workflow_id: str, root: Path) -> bool:
++    try:
++        from ..subflows import load_workflow
++    except ImportError:
++        from subflows import load_workflow  # type: ignore
++    try:
++        wf = load_workflow(workflow_id, root)
++    except SystemExit:
++        return True
++    if wf.get("cli_required") is False:
++        return False
++    nodes = wf.get("nodes") or []
++    return any(str(n.get("type", "agent")) == "agent" for n in nodes)
++
++
+ def _make_logger(task: str, root: Path):
+     log_path = fsutil.daemon_dir(task, root) / "daemon.log"
+     log_path.parent.mkdir(parents=True, exist_ok=True)
+@@ -146,8 +161,10 @@ def _cmd_run(args: argparse.Namespace) -> int:
+         approval_cfg["enabled"] = False
+ 
+     log = _make_logger(args.task, root)
++    requires_cli = _workflow_requires_cli(workflow, root)
++    skip_preflight = getattr(args, "skip_cli_preflight", False) or not requires_cli
+     cli_runtime = None
+-    if getattr(args, "skip_cli_preflight", False):
++    if skip_preflight:
+         try:
+             cli_runtime = prepare_cli_runtime(
+                 root=root,
+diff --git a/tools/workflow_runner/orchestrator/loop.py b/tools/workflow_runner/orchestrator/loop.py
+index 01bd59e..027e2b2 100644
+--- a/tools/workflow_runner/orchestrator/loop.py
++++ b/tools/workflow_runner/orchestrator/loop.py
+@@ -86,6 +86,7 @@ def build_command(
+     feishu_notify: bool,
+     *,
+     intent: str = "",
++    skip_cli_preflight: bool = False,
+ ) -> list[str]:
+     cmd = [
+         python, "-m", "tools.workflow_runner.daemon", "run",
+@@ -98,6 +99,8 @@ def build_command(
+         cmd.append("--force")
+     if job.from_node:
+         cmd += ["--from", job.from_node]
++    if skip_cli_preflight:
++        cmd.append("--skip-cli-preflight")
+     return cmd
+ 
+ 
+@@ -378,8 +381,23 @@ class Orchestrator:
+         cli_workspace = self._lease_workspace(job)
+         if cli_workspace is False:  # lease failed → job already finalized
+             return
++        try:
++            from ..subflows import load_workflow
++        except ImportError:
++            from subflows import load_workflow  # type: ignore
++        try:
++            wf = load_workflow(job.workflow, self.root)
++            requires_cli = wf.get("cli_required") is not False and any(
++                str(n.get("type", "agent")) == "agent" for n in (wf.get("nodes") or [])
++            )
++        except SystemExit:
++            requires_cli = True
+         cmd = build_command(
+-            self.python, job, job.notify_mode == "feishu_offline", intent=self._task_intent(job),
++            self.python,
++            job,
++            job.notify_mode == "feishu_offline",
++            intent=self._task_intent(job),
++            skip_cli_preflight=not requires_cli,
+         )
+         group_id = self._job_group_id(job)
+         tenant_settings = self.tenant_pool.settings if self.tenant_pool is not None else None

@@ -1,0 +1,10 @@
+{
+  "task": "game-req-mj75",
+  "title": "七日登录奖励",
+  "generatedAt": "2026-08-04T08:37:21Z",
+  "artifacts": [
+    "artifacts/delivery-pack.md",
+    "artifacts/implementation-checklist.md",
+    "artifacts/acceptance-matrix.md"
+  ]
+}

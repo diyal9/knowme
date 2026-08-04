@@ -1,0 +1,39 @@
+{
+  "at": "2026-08-04T08:36:31.618Z",
+  "tempRoot": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-wb-clean-jHl1dx",
+  "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+  "steps": [
+    {
+      "step": "detectUnpatched",
+      "ok": true,
+      "status": "needs_patch"
+    },
+    {
+      "step": "applyCompatClean",
+      "ok": true,
+      "status": "applied"
+    },
+    {
+      "step": "deployWorkflows",
+      "ok": true,
+      "deployState": {
+        "ok": true,
+        "workflowFile": true,
+        "scriptFile": true,
+        "indexEntry": true,
+        "registryEntry": true
+      }
+    },
+    {
+      "step": "unknownVersionBlocks",
+      "ok": true,
+      "status": "unknown_version"
+    },
+    {
+      "step": "tamperApplyBlocked",
+      "ok": true,
+      "code": "unknown_version"
+    }
+  ],
+  "ok": true
+}
