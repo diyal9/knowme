@@ -66,6 +66,71 @@
       "tags": ["mcp", "generic"],
       "featured": false,
       "bundlePath": "connectors/mcp-generic"
+    },
+    {
+      "id": "game-requirement-doc",
+      "kind": "skill",
+      "name": "游戏需求案",
+      "description": "结构化手游需求：背景、玩法、数值、埋点、验收与风险。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["游戏"],
+      "tags": ["game", "design", "requirement"],
+      "featured": true,
+      "bundlePath": "skills/game-requirement-doc"
+    },
+    {
+      "id": "game-dev-delivery",
+      "kind": "skill",
+      "name": "游戏研发交付",
+      "description": "从需求案经 Daemon 工作流完成研发交付与产物审阅。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["游戏"],
+      "tags": ["game", "dev", "daemon"],
+      "featured": true,
+      "bundlePath": "skills/game-dev-delivery"
+    },
+    {
+      "id": "game-qa-acceptance",
+      "kind": "skill",
+      "name": "游戏测试验收",
+      "description": "对照需求验收标准执行 QA 与反模式审查。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["游戏"],
+      "tags": ["game", "qa"],
+      "featured": true,
+      "bundlePath": "skills/game-qa-acceptance"
+    },
+    {
+      "id": "game-production",
+      "kind": "skill",
+      "name": "制作推进",
+      "description": "版本里程碑、风险清单与跨职能项目推进。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["游戏"],
+      "tags": ["game", "production"],
+      "featured": true,
+      "bundlePath": "skills/game-production"
+    },
+    {
+      "id": "game-studio-partner",
+      "kind": "expert",
+      "name": "游戏工作室伙伴",
+      "description": "手机游戏研发工作伙伴，覆盖策划、研发、测试与制作。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["游戏"],
+      "tags": ["game", "studio"],
+      "featured": true,
+      "bundlePath": "experts/game-studio-partner"
     }
   ]
 }

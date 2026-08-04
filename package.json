@@ -29,8 +29,10 @@
     "memory:bootstrap": "python -X utf8 .cursor/hooks/memory_rollup_llm.py bootstrap"
   },
   "devDependencies": {
+    "docx": "^9.7.1",
     "electron": "^31.7.7",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.0.0",
+    "playwright": "^1.62.1"
   },
   "dependencies": {
     "dompurify": "^3.4.12",

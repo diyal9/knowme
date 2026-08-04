@@ -75,6 +75,9 @@ const contextPacketLib = require('./lib/context-packet')
 const feishuGrounding = require('./lib/feishu-grounding')
 const feishuLink = require('./lib/feishu-link')
 const writingWorkflow = require('./lib/writing-workflow')
+const gameStudio = require('./lib/game-studio-scenes')
+const gameRequirement = require('./lib/game-requirement')
+const gameWorkbenchHandoff = require('./lib/game-workbench-handoff')
 const connectorsLib = require('./lib/connectors-stub')
 const connectorToolRuntime = require('./lib/connectors/tool-runtime')
 const feishuCli = require('./lib/connectors/feishu-cli')
@@ -1733,6 +1736,8 @@ ipcMain.handle('build-final-prompt', (_e, payload = {}) => {
     tier: previewTier,
     role: promptMode,
     hasNoteContext: !!content.trim(),
+    industry: s.industry,
+    prompt: previewPrompt,
   })
   const kbSnippet = productKnowledge.getContextSnippet(KNOWLEDGE_DIR)
   const skillCtx = productKnowledge.getSkillContext(KNOWLEDGE_DIR, { category: theme, slashRefs })
@@ -2544,6 +2549,66 @@ ipcMain.handle('workbench-daemon-overview', async () => {
     return { ok: true, daemon }
   } catch (error) {
     return { ok: false, error: (error && error.message) || '无法读取工作服务' }
+  }
+})
+
+ipcMain.handle('game-studio-scenes', () => ({
+  ok: true,
+  industry: loadSettings().industry || 'general',
+  scenes: gameStudio.listScenesForUi(),
+}))
+
+ipcMain.handle('game-requirement-build', (_e, payload = {}) => {
+  const markdown = String(payload.markdown || '').trim()
+  const title = String(payload.title || '').trim()
+  const doc = markdown
+    ? gameRequirement.parseFromMarkdown(markdown, title)
+    : gameRequirement.emptyDoc(title)
+  if (payload.source) {
+    return { ok: true, doc: gameRequirement.attachSource(doc, payload.source) }
+  }
+  return { ok: true, doc, validation: gameRequirement.validate(doc) }
+})
+
+ipcMain.handle('game-requirement-approve', (_e, payload = {}) => {
+  const doc = payload.doc
+  if (!doc) return { ok: false, error: '缺少需求案' }
+  const result = gameRequirement.approve(doc)
+  if (!result.ok) {
+    return { ok: false, error: '需求案未通过校验', validation: result.validation }
+  }
+  return {
+    ok: true,
+    doc: result.doc,
+    artifact: gameRequirement.buildArtifact(result.doc),
+  }
+})
+
+ipcMain.handle('game-workbench-handoff', async (_e, payload = {}) => {
+  try {
+    const daemon = await loadWorkbenchDaemonOverview()
+    const scene = gameStudio.getScene(payload.sceneId || 'game-dev')
+    const repo = workbenchRepo.resolveActiveRepo(loadSourcesStore())
+    const handoff = gameWorkbenchHandoff.buildHandoff({
+      requirementDoc: payload.requirement || payload.doc,
+      daemonOverview: daemon,
+      scene,
+      workflowId: payload.workflowId,
+      repo: repo.ok ? { id: repo.source?.id, name: repo.source?.displayName } : null,
+    })
+    if (!handoff.ok) return handoff
+    if (payload.start === true && !handoff.blocked) {
+      const started = await getWorkbenchDaemonClient().createAndRun({
+        workflow: handoff.workflow,
+        slug: handoff.slug,
+        intent: handoff.intent,
+        context: handoff.context,
+      })
+      return { ...handoff, start: started }
+    }
+    return handoff
+  } catch (error) {
+    return { ok: false, error: (error && error.message) || '交接失败' }
   }
 })
 
@@ -3823,6 +3888,8 @@ ipcMain.handle('ai-generate', async (e, payload = {}) => {
     tier,
     role: ctxRole,
     hasNoteContext: !!String(context || '').trim(),
+    industry: s.industry,
+    prompt,
   })
   const systemContent = buildSystemContent({
     scenePrompt: promptRouter.buildScenePrompt({ scene: sceneId, mode: ctxRole }),

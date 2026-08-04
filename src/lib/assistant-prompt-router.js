@@ -1,5 +1,7 @@
 'use strict'
 
+const gameStudio = require('./game-studio-scenes')
+
 const MODE_IDS = ['general', 'steward', 'writing', 'coding']
 const SCENE_IDS = ['assistant', 'work', 'knowledge', 'writing', 'coding']
 
@@ -68,7 +70,20 @@ function resolveScene({
   role = '',
   hasNoteContext = false,
   hasTask = false,
+  industry = '',
+  prompt = '',
+  explicitScene = '',
 } = {}) {
+  const gameScene = gameStudio.resolveGameScene({
+    industry,
+    mode,
+    prompt,
+    tier,
+    hasTask: hasTask || hasNoteContext,
+    explicitScene,
+  })
+  if (gameScene) return gameScene
+
   const modeId = normalizeMode(mode)
   const tierId = normalizeTier(tier)
   const roleId = String(role || '').trim().toLowerCase()
@@ -83,6 +98,7 @@ function resolveScene({
 }
 
 function sceneLabel(scene) {
+  if (gameStudio.SCENE_IDS.includes(scene)) return gameStudio.sceneLabel(scene)
   return SCENE_LABELS[SCENE_IDS.includes(scene) ? scene : 'assistant']
 }
 
@@ -90,6 +106,9 @@ function buildScenePrompt({
   scene = 'assistant',
   mode = 'general',
 } = {}) {
+  if (gameStudio.SCENE_IDS.includes(scene)) {
+    return gameStudio.buildScenePrompt(scene)
+  }
   const sceneId = SCENE_IDS.includes(scene) ? scene : 'assistant'
   const modeId = normalizeMode(mode)
   const lines = [

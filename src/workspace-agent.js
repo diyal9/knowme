@@ -2443,6 +2443,24 @@ window.WorkspaceAgent = (function () {
         <div class="agent-empty-tip"><span class="tip-label">飞书查询</span><span class="tip-key">${escHtml(feishuUsageHint)}</span></div>
       </div>`
     }
+    if (currentIndustry() === 'game') {
+      const gameCards = [
+        { id: 'game-design', title: '策划需求', subtitle: '结构化需求案 · 飞书引用', prompt: '帮我撰写手机游戏需求案，包含背景、玩法、数值、埋点与验收标准' },
+        { id: 'game-dev', title: '研发实现', subtitle: '交接 Workbench · 真实 Daemon', prompt: '基于已批准需求案，准备交接研发工作流并列出验收清单' },
+        { id: 'game-qa', title: '测试验收', subtitle: '对照需求做 QA', prompt: '对照游戏需求案列出测试矩阵、反模式与阻塞项' },
+        { id: 'game-production', title: '制作推进', subtitle: '版本里程碑与风险', prompt: '整理本版本里程碑、依赖与风险清单' },
+      ]
+      const cardsHtml = gameCards.map(card => `
+        <button type="button" class="agent-empty-act" data-auto-send="1" data-game-scene="${escHtml(card.id)}" data-prompt="${escHtml(card.prompt)}">
+          <strong>${escHtml(card.title)}</strong><span>${escHtml(card.subtitle)}</span>
+        </button>`).join('')
+      return `<div class="agent-empty-tips agent-empty-home agent-empty-game-studio" aria-label="游戏工作室任务入口">
+        <div class="agent-empty-kicker">游戏工作室</div>
+        <div class="agent-empty-hero">KnowMe 工作伙伴</div>
+        <div class="agent-empty-sub">选择任务场景立即开工；左侧 Rail 与工作台流程保持不变。</div>
+        <div class="agent-empty-actions">${cardsHtml}</div>
+      </div>`
+    }
     if (activeSession?.agentId === 'steward') {
       return `<div class="agent-empty-tips agent-empty-home agent-empty-steward" aria-label="知识管家入口">
         <div class="agent-empty-hero">公司知识协作</div>

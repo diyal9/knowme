@@ -32,6 +32,12 @@ describe('assistant-prompt-router', () => {
     assert.match(buildScenePrompt({ scene: 'writing', mode: 'writing' }), /结构化成稿/)
   })
 
+  it('routes game industry to studio scenes', () => {
+    assert.equal(resolveScene({ industry: 'game', mode: 'writing', tier: 'chat' }), 'game-design')
+    assert.equal(resolveScene({ industry: 'game', mode: 'coding', tier: 'chat' }), 'game-dev')
+    assert.match(buildScenePrompt({ scene: 'game-design' }), /策划需求/)
+  })
+
   it('falls back safely for unknown input', () => {
     assert.equal(normalizeMode('unknown'), 'general')
     assert.equal(resolveScene({ mode: 'unknown', tier: 'unknown', role: 'unknown' }), 'assistant')

@@ -94,6 +94,10 @@ contextBridge.exposeInMainWorld('api', {
   workbenchAuthLogin: payload => ipcRenderer.invoke('workbench-auth-login', payload || {}),
   workbenchAuthLogout: () => ipcRenderer.invoke('workbench-auth-logout'),
   workbenchDaemonOverview: () => ipcRenderer.invoke('workbench-daemon-overview'),
+  gameStudioScenes: () => ipcRenderer.invoke('game-studio-scenes'),
+  gameRequirementBuild: payload => ipcRenderer.invoke('game-requirement-build', payload || {}),
+  gameRequirementApprove: payload => ipcRenderer.invoke('game-requirement-approve', payload || {}),
+  gameWorkbenchHandoff: payload => ipcRenderer.invoke('game-workbench-handoff', payload || {}),
   onWorkbenchAuthChanged: cb => {
     const fn = (_e, auth) => cb(auth)
     ipcRenderer.on('workbench-auth-changed', fn)

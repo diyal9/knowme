@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>Game Studio UAT Preview</title>
+<style>
+  body { margin:0; font-family: system-ui, sans-serif; background:#f5f4f0; color:#1c1917; }
+  .layout { display:flex; min-height:100vh; }
+  .side-rail { width:52px; background:#eceae4; display:flex; flex-direction:column; align-items:center; padding:8px 0; gap:4px; }
+  .rail-btn { width:36px; height:36px; border-radius:8px; border:none; background:transparent; }
+  .rail-btn.active { background:rgba(180,120,60,.15); color:#9a6b2f; }
+  .main { flex:1; padding:32px; }
+  .agent-empty-tips { max-width:520px; margin:40px auto; }
+  .agent-empty-kicker { font-size:11px; color:#888; letter-spacing:.08em; text-transform:uppercase; }
+  .agent-empty-hero { font-size:20px; font-weight:650; margin-top:6px; }
+  .agent-empty-sub { font-size:12px; color:#666; margin-top:8px; line-height:1.6; }
+  .agent-empty-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
+  .agent-empty-act { text-align:left; padding:12px; border:1px solid #ddd; border-radius:10px; background:#fff; cursor:pointer; }
+  .agent-empty-act strong { display:block; font-size:13px; }
+  .agent-empty-act span { display:block; font-size:11px; color:#777; margin-top:4px; }
+  .daemon-panel { margin-top:24px; padding:16px; background:#fff; border-radius:10px; border:1px solid #e5e2dc; max-width:520px; margin-left:auto; margin-right:auto; }
+  .daemon-offline { color:#b45309; }
+  .daemon-ready { color:#15803d; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <nav class="side-rail" aria-label="Rail">
+    <button class="rail-btn active" title="助手">AI</button>
+    <button class="rail-btn" title="工作台">WB</button>
+    <button class="rail-btn" title="能力">Hub</button>
+  </nav>
+  <main class="main">
+    <div class="agent-empty-tips agent-empty-game-studio" id="gameStudioEmpty">
+      <div class="agent-empty-kicker">游戏工作室</div>
+      <div class="agent-empty-hero">KnowMe 工作伙伴</div>
+      <div class="agent-empty-sub">选择任务场景立即开工；左侧 Rail 与工作台流程保持不变。</div>
+      <div class="agent-empty-actions">
+        <button class="agent-empty-act"><strong>策划需求</strong><span>结构化需求案 · 飞书引用</span></button>
+        <button class="agent-empty-act"><strong>研发实现</strong><span>交接 Workbench · 真实 Daemon</span></button>
+        <button class="agent-empty-act"><strong>测试验收</strong><span>对照需求做 QA</span></button>
+        <button class="agent-empty-act"><strong>制作推进</strong><span>版本里程碑与风险</span></button>
+      </div>
+    </div>
+    <div class="daemon-panel" id="daemonOffline">
+      <strong class="daemon-offline">Workbench 未就绪</strong>
+      <p>无法连接 Workbench 服务，请确认 Daemon 已启动。</p>
+      <ul><li>打开设置 → Workbench 连接</li><li>确认 127.0.0.1:8010 可达</li></ul>
+    </div>
+    <div class="daemon-panel" id="daemonReady" style="display:none">
+      <strong class="daemon-ready">Workbench 已就绪</strong>
+      <p>workflow: team-run · slug: login-reward-x7k2</p>
+    </div>
+  </main>
+</div>
+<script>
+  window.__uat = { scene: 'game-studio-empty', daemon: 'offline' };
+</script>
+</body>
+</html>
