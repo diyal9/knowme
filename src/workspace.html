@@ -2946,6 +2946,13 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--bg-app); 
 .wb-graph-node.degraded .wb-graph-marker { border-color:#d4cfc4; background:#f5f3ef; }
 .wb-run-degraded-exit { margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; }
 .wb-run-muted { color:#9a958c; font:11px/1.45 var(--ui); }
+.wb-run-trace { display:grid; gap:6px; }
+.wb-run-trace-row {
+  display:grid; grid-template-columns:72px 1fr; gap:8px; align-items:start;
+  padding:6px 8px; border:1px solid #ebe7df; border-radius:7px; background:#faf9f6;
+}
+.wb-run-trace-label { color:#8a857c; font:600 10px/1.35 var(--ui); letter-spacing:.04em; }
+.wb-run-trace-value { color:#3f3c36; font:500 11px/1.45 var(--ui); word-break:break-word; }
 .wb-run-graph { position:relative; display:flex; flex-direction:column; gap:0; }
 .wb-graph-node {
   position:relative; display:flex; align-items:flex-start; gap:10px;
@@ -3895,6 +3902,10 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--bg-app); 
                       <div class="wb-run-status" id="wbRunStatus">根据本地工作流生成任务事实…</div>
                       <div class="wb-run-next-label">你现在要做什么</div>
                       <div class="wb-run-next-action" id="wbRunNextAction">关注流程进度，按下方按钮继续。</div>
+                    </section>
+                    <section class="wb-run-section" aria-labelledby="wbRunTraceTitle">
+                      <div class="wb-run-section-title" id="wbRunTraceTitle">任务追溯</div>
+                      <div class="wb-run-trace" id="wbRunTrace" data-testid="wb-run-trace"></div>
                     </section>
                     <section class="wb-run-section" aria-labelledby="wbRunGoalTitle">
                       <div class="wb-run-section-title" id="wbRunGoalTitle">任务目标</div>

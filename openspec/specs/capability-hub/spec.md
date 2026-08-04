@@ -6,7 +6,7 @@
 ## Requirements
 ### Requirement: Hub browse layout matches curated store pattern
 
-Capability Hub MUST 为专家、技能和 MCP 连接器提供统一的 KnowMe 浅色暖灰视觉系统。页面 MUST 包含清晰的页面标题与当前类型说明、顶部搜索、同页类型 Tab、分类筛选、已安装筛选、可选精选区、响应式能力目录和右侧详情抽屉；在桌面常见窗口宽度下 MUST 保持可扫描的信息层级且不产生横向溢出。可交互元素 MUST 提供悬停、按压与键盘焦点反馈，目录加载、无结果及错误 MUST 显示与页面结构匹配的状态。
+Capability Hub MUST 为专家、技能和 MCP 连接器提供统一的 KnowMe 浅色暖灰视觉系统。页面 MUST 包含与工作台一致的单层外部顶部菜单栏、顶部搜索、同页类型 Tab、分类筛选、已安装筛选、可选精选区、响应式能力目录和右侧详情抽屉；在桌面常见窗口宽度下 MUST 保持可扫描的信息层级且不产生横向溢出。工作区宿主顶部栏 MUST 按“能力图标与能力 Hub 标题 → 类型 Tab → 右侧操作”的顺序组织，类型 Tab MUST 使用与工作台一级页签一致的分组底板、纯文字标签和绿色实底选中态。Hub 内嵌页面 MUST 隐藏自身重复菜单栏，内容区 MUST NOT 再重复展示英文眉题、当前类型大标题、总数徽标或介绍文案。可交互元素 MUST 提供悬停、按压与键盘焦点反馈，目录加载、无结果及错误 MUST 显示与页面结构匹配的状态。
 
 #### Scenario: Search filters cards
 
@@ -49,6 +49,14 @@ Capability Hub MUST 为专家、技能和 MCP 连接器提供统一的 KnowMe �
 - **WHEN** Hub 宽度从宽桌面缩小到窄桌面窗口
 - **THEN** 标题、搜索、类型 Tab、筛选和能力目录按可用空间重排
 - **AND** 页面不产生横向滚动，核心操作保持可见
+
+#### Scenario: Capability type tab matches workbench navigation
+
+- **WHEN** 用户查看或切换“专家”“技能”“MCP 连接器”
+- **THEN** 工作区外层顶部栏显示能力图标与“能力 Hub”标题，页签紧随其后并使用与工作台“首页 / 工作流”相同的菜单栏位置、底板、圆角、字号与绿色选中态
+- **AND** 页签仅显示文字且当前项保持正确的 `aria-selected` 状态
+- **AND** 内嵌 Hub 页面不再渲染第二条菜单栏
+- **AND** 搜索与筛选直接位于顶部栏下方，不重复展示当前类型介绍区
 
 ### Requirement: Unified capability catalog and install store
 

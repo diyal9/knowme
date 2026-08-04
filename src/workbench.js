@@ -31,7 +31,7 @@ window.Workbench = (function () {
   let elStatService, elStatWorkflows, elStatTasks, elStatAgents
   let elTodoForm, elTodoInput, elTodoList, elTodoCount, elTodoClear
   let elRunner, elRunnerTitle, elRunnerMeta, elRunnerLog, elRunnerActions
-  let elRunGoal, elRunStatus, elRunNextAction, elRunProgress, elRunAgents, elRunGraph, elRunArtifacts, elHeadTitle
+  let elRunGoal, elRunStatus, elRunNextAction, elRunProgress, elRunAgents, elRunGraph, elRunArtifacts, elRunTrace, elHeadTitle
   let elModal, elModalTitle, elModalBody, elModalHint, btnModalClose, btnModalCancel, btnModalConfirm
   let run = emptyRun()
   let modal = emptyModal()
@@ -137,7 +137,58 @@ window.Workbench = (function () {
       task: null,
       artifacts: [],
       projection: null,
+      taskTrace: null,
     }
+  }
+
+  function buildTaskTrace({ context = null, handoff = null, session = null, slug = '', workflow = '' } = {}) {
+    const meta = (context && context.meta) || {}
+    const trace = (handoff && handoff.trace) || {}
+    const requirement = (handoff && handoff.requirement) || {}
+    const list = value => {
+      if (Array.isArray(value)) return value.map(item => String(item || '').trim()).filter(Boolean)
+      const text = String(value || '').trim()
+      return text ? [text] : []
+    }
+    return {
+      sceneId: String(meta.sceneId || trace.sceneId || '').trim(),
+      skillId: String(meta.skillId || trace.skillId || '').trim(),
+      connectors: list(meta.connectors || trace.connectors),
+      knowledgeSources: list(meta.sources || requirement.sources || trace.knowledgeSources),
+      sessionId: String((session && session.id) || meta.sessionId || trace.sessionId || '').trim(),
+      runId: String((session && session.run && session.run.id) || meta.runId || trace.runId || slug || '').trim(),
+      workflow: String(workflow || (handoff && handoff.workflow) || meta.workflow || '').trim(),
+      handoffFrom: String(meta.handoffFrom || trace.handoffFrom || '').trim(),
+      sessionCompatMode: String(trace.sessionCompatMode || meta.sessionCompatMode || '').trim(),
+    }
+  }
+
+  function renderTaskTracePanel() {
+    if (!elRunTrace) return
+    const trace = run.taskTrace || buildTaskTrace({
+      context: run.context,
+      slug: run.slug,
+      workflow: run.workflow && (run.workflow.id || run.workflow.name),
+    })
+    const rows = []
+    if (trace.sceneId) rows.push(['场景', trace.sceneId])
+    if (trace.skillId) rows.push(['Skill', trace.skillId])
+    if (trace.connectors.length) rows.push(['连接器', trace.connectors.join(' · ')])
+    if (trace.knowledgeSources.length) rows.push(['知识来源', trace.knowledgeSources.join(' · ')])
+    if (trace.sessionId) rows.push(['Session', trace.sessionId])
+    if (trace.runId) rows.push(['Run', trace.runId])
+    if (trace.workflow) rows.push(['Workflow', trace.workflow])
+    if (trace.handoffFrom) rows.push(['交接来源', trace.handoffFrom])
+    if (trace.sessionCompatMode) rows.push(['兼容模式', trace.sessionCompatMode])
+    if (!rows.length) {
+      elRunTrace.innerHTML = '<span class="wb-run-muted">任务追溯将在场景 Skill 或 Daemon 交接后显示</span>'
+      toggleRunSection(elRunTrace, true)
+      return
+    }
+    elRunTrace.innerHTML = rows.map(([label, value]) =>
+      `<div class="wb-run-trace-row"><span class="wb-run-trace-label">${esc(label)}</span><span class="wb-run-trace-value">${esc(value)}</span></div>`
+    ).join('')
+    toggleRunSection(elRunTrace, true)
   }
 
   function daemonContextStorageKey(workflowId) {
@@ -314,6 +365,7 @@ window.Workbench = (function () {
     elRunAgents = document.getElementById('wbRunAgents')
     elRunGraph = document.getElementById('wbRunGraph')
     elRunArtifacts = document.getElementById('wbRunArtifacts')
+    elRunTrace = document.getElementById('wbRunTrace')
     elModal = document.getElementById('wbWorkflowModal')
     elModalTitle = document.getElementById('wbModalTitle')
     elModalBody = document.getElementById('wbModalBody')
@@ -1829,6 +1881,8 @@ window.Workbench = (function () {
     }
     if (elRunGoal) elRunGoal.textContent = context.intent || context.name || '围绕当前工作流完成交付'
 
+    renderTaskTracePanel()
+
     const hasAgents = context.agents.length > 0
     const hasArtifacts = run.artifacts.length > 0
 
@@ -2700,6 +2754,13 @@ window.Workbench = (function () {
       run.intent = intent
       run.context = context
       run.contextSummary = res.contextSummary || ''
+      run.taskTrace = buildTaskTrace({
+        context,
+        slug: res.slug,
+        workflow: (modal.workflow || item).id,
+        handoff: modal.handoff || null,
+        session: modal.session || null,
+      })
       run.status = (res.job && res.job.state) || 'queued'
       addLog('任务已提交', `${res.slug} · ${intent}${run.contextSummary ? ` · ${run.contextSummary}` : ''}`)
       renderWorkflows()
@@ -3263,5 +3324,56 @@ window.Workbench = (function () {
     })
   }
 
-  return { init, ensureLoaded, load, resetRun, openPage }
+  async function startDaemonFromHandoff(handoff, session = null) {
+    if (!handoff || !handoff.ok || handoff.blocked) {
+      toastFn((handoff && handoff.error) || '无法交接任务', 'error')
+      return handoff
+    }
+    const item = (data.daemon && data.daemon.workflows || []).find(w => w.id === handoff.workflow)
+      || { id: handoff.workflow, name: handoff.workflowName || handoff.workflow }
+    if (!item || !item.id) {
+      toastFn('Daemon 工作流不可用', 'error')
+      return { ok: false, error: 'workflow_missing' }
+    }
+    setWorkbenchPage('tasks', { force: true })
+    const res = await window.api.workbenchDaemonStart({
+      workflow: handoff.workflow,
+      slug: handoff.slug,
+      intent: handoff.intent,
+      context: handoff.context,
+    })
+    if (!res || !res.ok) {
+      if (handleDaemonAuthFailure(res)) return res
+      toastFn((res && res.error) || '任务启动失败', 'error')
+      return res
+    }
+    run = emptyRun()
+    run.mode = 'daemon'
+    run.workflow = item
+    run.slug = res.slug
+    run.intent = handoff.intent
+    run.context = handoff.context
+    run.contextSummary = res.contextSummary || ''
+    run.status = (res.job && res.job.state) || 'queued'
+    run.taskTrace = buildTaskTrace({
+      context: handoff.context,
+      handoff,
+      session,
+      slug: res.slug,
+      workflow: handoff.workflow,
+    })
+    addLog('游戏需求已交接', `${res.slug} · ${handoff.workflow}`)
+    renderWorkflows()
+    renderRunner()
+    await refreshDaemonTask(false)
+    return { ok: true, slug: res.slug, taskTrace: run.taskTrace }
+  }
+
+  function previewTaskTrace(input = {}) {
+    run.taskTrace = buildTaskTrace(input)
+    renderTaskTracePanel()
+    return run.taskTrace
+  }
+
+  return { init, ensureLoaded, load, resetRun, openPage, startDaemonFromHandoff, previewTaskTrace, getRunTrace: () => run.taskTrace || null }
 })()

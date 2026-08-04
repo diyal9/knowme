@@ -1,0 +1,18 @@
+{
+  "at": "2026-08-04T08:01:51.111Z",
+  "change": "align-capability-hub-tabs",
+  "shots": [
+    "electron-hub-outer-topbar.png"
+  ],
+  "checks": [
+    {
+      "id": "hub-open",
+      "ok": true
+    },
+    {
+      "id": "shot-electron-hub-outer-topbar.png",
+      "ok": true
+    }
+  ],
+  "ok": true
+}

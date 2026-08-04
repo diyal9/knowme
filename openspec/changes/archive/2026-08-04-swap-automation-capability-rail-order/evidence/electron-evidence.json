@@ -1,0 +1,18 @@
+{
+  "at": "2026-08-04T08:02:02.468Z",
+  "change": "swap-automation-capability-rail-order",
+  "shots": [
+    "electron-rail-order.png"
+  ],
+  "checks": [
+    {
+      "id": "rail-workbench",
+      "ok": true
+    },
+    {
+      "id": "shot-electron-rail-order.png",
+      "ok": true
+    }
+  ],
+  "ok": true
+}

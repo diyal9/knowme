@@ -1,0 +1,25 @@
+{
+  "at": "2026-08-04T08:00:06.533Z",
+  "probe": {
+    "ok": true,
+    "state": "online",
+    "message": "飞书 CLI 已就绪",
+    "userReady": true,
+    "appReady": true,
+    "user": ""
+  },
+  "readApi": {
+    "ok": true,
+    "command": "lark-cli drive +search --query knowme --page-size 1",
+    "resultCount": 1,
+    "sampleTitle": "Personal Manual Template"
+  },
+  "connector": {
+    "enabled": true,
+    "state": "online",
+    "message": "飞书 CLI 已就绪",
+    "userReady": true
+  },
+  "writeBlocked": true,
+  "note": "只读探测；未执行任何飞书写入或业务发送。"
+}

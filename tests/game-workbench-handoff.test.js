@@ -40,9 +40,22 @@ describe('game workbench handoff', () => {
     assert.equal(result.trace.skillId, 'game-dev-delivery')
   })
 
-  it('assesses auth required state', () => {
-    const readiness = handoff.assessDaemonReadiness({ authRequired: true, online: false })
+  it('assesses auth required state when offline without workflows', () => {
+    const readiness = handoff.assessDaemonReadiness({
+      auth: { state: 'required' },
+      online: false,
+      workflows: [],
+    })
     assert.equal(readiness.ready, false)
     assert.equal(readiness.code, 'auth_required')
+  })
+
+  it('allows guest handoff when auth required but daemon online', () => {
+    const readiness = handoff.assessDaemonReadiness({
+      auth: { state: 'required' },
+      online: true,
+      workflows: [{ id: 'team-run' }],
+    })
+    assert.equal(readiness.ready, true)
   })
 })

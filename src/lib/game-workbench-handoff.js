@@ -23,12 +23,16 @@ function assessDaemonReadiness(daemonOverview = {}) {
       recovery: ['打开设置 → Workbench 连接', '确认本机 127.0.0.1:8010 或配置的 HTTPS 端点可达', '检查 Bearer Token 是否有效'],
     }
   }
-  if (daemonOverview.authRequired) {
-    return {
-      ready: false,
-      code: 'auth_required',
-      message: 'Workbench 需要登录后才能启动工作流',
-      recovery: ['在工作台点击「连接工作服务」完成认证'],
+  const auth = daemonOverview.auth || {}
+  if (daemonOverview.authRequired === true || auth.state === 'required') {
+    const workflows = Array.isArray(daemonOverview.workflows) ? daemonOverview.workflows : []
+    if (!daemonOverview.online || workflows.length === 0) {
+      return {
+        ready: false,
+        code: 'auth_required',
+        message: 'Workbench 需要登录后才能启动工作流',
+        recovery: ['在工作台点击「连接工作服务」完成认证'],
+      }
     }
   }
   if (!daemonOverview.online) {

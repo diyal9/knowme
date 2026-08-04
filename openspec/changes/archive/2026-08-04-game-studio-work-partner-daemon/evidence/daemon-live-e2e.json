@@ -1,0 +1,29 @@
+{
+  "at": "2026-08-04T07:59:18.567Z",
+  "endpoint": "http://127.0.0.1:8010",
+  "steps": [
+    {
+      "step": "health+workflows",
+      "ok": true,
+      "workflowCount": 19,
+      "auth": null,
+      "code": null
+    },
+    {
+      "step": "createAndRun",
+      "ok": true,
+      "slug": "demo-knowme-live-edac2z",
+      "state": "queued",
+      "error": null,
+      "code": null
+    },
+    {
+      "step": "taskStatus",
+      "ok": true,
+      "state": "failed",
+      "terminal": true,
+      "reason": "daemon exited with code 1"
+    }
+  ],
+  "ok": true
+}

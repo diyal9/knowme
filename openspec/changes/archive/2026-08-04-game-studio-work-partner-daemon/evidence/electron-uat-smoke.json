@@ -1,0 +1,60 @@
+{
+  "at": "2026-08-04T08:00:44.116Z",
+  "ok": true,
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-uat-eLqvKL",
+  "consoleErrors": [],
+  "checks": [
+    {
+      "id": "rail-visible",
+      "ok": true
+    },
+    {
+      "id": "window-title",
+      "ok": true,
+      "title": "KnowMe"
+    },
+    {
+      "id": "screenshot-main",
+      "ok": true
+    },
+    {
+      "id": "app-shell",
+      "ok": true
+    },
+    {
+      "id": "trace-panel-attached",
+      "ok": true
+    },
+    {
+      "id": "workbench-trace-seed",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "trace": {
+          "sceneId": "game-dev",
+          "skillId": "game-dev-delivery",
+          "connectors": [
+            "feishu"
+          ],
+          "knowledgeSources": [
+            "feishu:docx:uat-probe"
+          ],
+          "sessionId": "uat-session",
+          "runId": "uat-run",
+          "workflow": "demo-experience",
+          "handoffFrom": "game-requirement",
+          "sessionCompatMode": ""
+        }
+      }
+    },
+    {
+      "id": "workbench-trace-visible",
+      "ok": true,
+      "sample": "场景game-devSkillgame-dev-delivery连接器feishu知识来源feishu:docx:uat-probeSessionuat-sessionRunuat-runWorkflowdemo-experience交接来源game-requirement"
+    },
+    {
+      "id": "screenshot-trace",
+      "ok": true
+    }
+  ]
+}
