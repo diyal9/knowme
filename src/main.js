@@ -2594,7 +2594,8 @@ ipcMain.handle('game-workbench-handoff', async (_e, payload = {}) => {
       daemonOverview: daemon,
       scene,
       workflowId: payload.workflowId,
-      repo: repo.ok ? { id: repo.source?.id, name: repo.source?.displayName } : null,
+      repo: repo.ok ? repo.source : null,
+      executorReady: payload.executorReady,
     })
     if (!handoff.ok) return handoff
     if (payload.start === true && !handoff.blocked) {

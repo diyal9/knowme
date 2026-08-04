@@ -1,10 +1,17 @@
 {
   "workflows": [
     {
+      "id": "game-dev-delivery",
+      "name": "手机游戏研发交付",
+      "description": "从已批准需求案生成交付包（脚本链路，无需 Cursor CLI）",
+      "tags": ["game", "knowme", "script-only"],
+      "path": "game-dev-delivery.json"
+    },
+    {
       "id": "team-run",
       "name": "三角色协作开发",
       "description": "制作人规划 → 开发实现 → 测试 QA，按 OpenSpec 门禁推进",
-      "tags": ["团队", "OpenSpec"],
+      "tags": ["团队", "OpenSpec", "agent"],
       "path": "team-run.json"
     }
   ]

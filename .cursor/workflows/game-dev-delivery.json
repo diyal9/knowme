@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "id": "game-dev-delivery",
+  "name": "手机游戏研发交付",
+  "description": "从已批准需求案 ingest/brief.md 生成交付包（脚本链路，无需 Cursor CLI）",
+  "cli_required": false,
+  "entry_node": "n-deliver",
+  "nodes": [
+    {
+      "id": "n-deliver",
+      "type": "script",
+      "script": "knowme-game-dev-deliver",
+      "node_key": "s1-deliver",
+      "intent": "从 ingest/brief.md 生成交付制品",
+      "output": {
+        "kind": "delivery_pack",
+        "path": "artifacts/delivery-pack-report.md"
+      },
+      "next": "n-done"
+    },
+    {
+      "id": "n-done",
+      "type": "terminal",
+      "status": "completed",
+      "intent": "交付完成"
+    }
+  ]
+}

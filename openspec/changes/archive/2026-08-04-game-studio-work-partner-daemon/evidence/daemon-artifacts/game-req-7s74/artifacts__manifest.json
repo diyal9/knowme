@@ -1,0 +1,10 @@
+{
+  "task": "game-req-7s74",
+  "title": "七日登录奖励",
+  "generatedAt": "2026-08-04T08:25:44Z",
+  "artifacts": [
+    "artifacts/delivery-pack.md",
+    "artifacts/implementation-checklist.md",
+    "artifacts/acceptance-matrix.md"
+  ]
+}

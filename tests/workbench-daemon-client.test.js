@@ -5,6 +5,7 @@ const {
   validateSlug,
   createClient,
   buildAuthHeaders,
+  buildSubmitContext,
 } = require('../src/lib/workbench-daemon-client')
 
 function jsonResponse(body, status = 200) {
@@ -169,6 +170,25 @@ describe('workbench daemon API client', () => {
     assert.equal(result.ok, false)
     assert.equal(result.code, 'invalid_context_path')
     assert.equal(calls, 0)
+  })
+
+  it('submits meta-only context for script workflows', async () => {
+    const context = buildSubmitContext({
+      meta: { handoffFrom: 'game-requirement', sceneId: 'game-dev' },
+    })
+    assert.deepEqual(context, {
+      protocolVersion: '1',
+      meta: { handoffFrom: 'game-requirement', sceneId: 'game-dev' },
+    })
+  })
+
+  it('ignores incomplete gitlab context when meta is present', () => {
+    const context = buildSubmitContext({
+      meta: { handoffFrom: 'game-requirement' },
+      inputs: { prd: 'requirements/demo.md' },
+    })
+    assert.equal(context.meta.handoffFrom, 'game-requirement')
+    assert.equal(context.workspace, undefined)
   })
 
   it('injects Authorization header when token configured', async () => {

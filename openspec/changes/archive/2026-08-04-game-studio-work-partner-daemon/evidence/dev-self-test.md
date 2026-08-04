@@ -1,27 +1,34 @@
-# 开发自测报告
+# 开发自测: game-studio-work-partner-daemon (follow-up)
 
-- 日期：2026-08-04
-- Change：game-studio-work-partner-daemon
-- npm test: **PASS** (909/909)
-- npm run lint: **PASS**
+## 环境
 
-## Electron 真机 UAT
+- Branch: `feature/game-studio-work-partner`
+- Workbench: `http://127.0.0.1:8010`（`D:/workflows/workbench`）
+- Token: 自 `.nine/.workflow-config.yaml` admin key（E2E 自动解析）
 
-- `node scripts/electron-uat-smoke.js`：**PASS**
-- 主窗口无 uncaught error；Workbench trace 面板可见 scene/skill/connector/session/run
-- 证据：`electron-uat-smoke.json`、`screenshots/electron-main-window.png`、`screenshots/electron-workbench-trace.png`
+## 命令
 
-## Daemon 在线 E2E
+```bash
+node scripts/sync-workbench-workflows.js
+node scripts/daemon-live-e2e.js
+npm test
+npm run lint
+npm run harness:gate
+node scripts/generate-game-studio-uat-docx.js
+```
 
-- `node scripts/daemon-live-e2e.js`：**在线 PASS**（health → workflows → start → terminal）
-- 任务终态：`failed: daemon exited with code 1`（executor 诚实失败，非客户端伪造）
-- 证据：`daemon-live-e2e.json`
+## 结果
 
-## 飞书只读
+| 检查 | 结果 |
+|------|------|
+| sync-workbench-workflows | PASS |
+| daemon-live-e2e | **PASS**（success exit 0 / fail script exit 1） |
+| npm test | 916/916 |
+| lint | PASS |
+| harness gate | PASS |
 
-- `node scripts/feishu-auth-probe.js`：auth **PASS**，readApi **PASS**，writeBlocked **预期**
-- 证据：`feishu-auth-probe.json`（不含 token）
+## 关键观察
 
-## UAT 报告
-
-- `node scripts/generate-game-studio-uat-docx.js` 已重新生成 DOCX，区分 PASS / 契约 PASS / BLOCKED
+- `game-dev-delivery` 从 handoff intent 写入 `ingest/brief.md`，脚本生成交付包
+- 成功路径无需 GitLab / CURSOR_API_KEY
+- 失败路径：Daemon 任务 parked（returncode 2），脚本报告 exit 1，含可读原因与 resume 命令

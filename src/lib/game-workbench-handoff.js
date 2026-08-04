@@ -14,7 +14,16 @@ function slugify(title) {
   return `${slug}-${suffix}`.slice(0, 80)
 }
 
-function assessDaemonReadiness(daemonOverview = {}) {
+function workflowNeedsCli(workflow = {}) {
+  if (workflow.cliRequired === false) return false
+  const tags = Array.isArray(workflow.tags) ? workflow.tags.map(String) : []
+  if (tags.some(t => /script-only|no-cli/i.test(t))) return false
+  const blob = `${workflow.id || ''} ${workflow.name || ''} ${workflow.description || ''}`
+  if (/game-dev-delivery|script-only|交付包/i.test(blob)) return false
+  return true
+}
+
+function assessDaemonReadiness(daemonOverview = {}, options = {}) {
   if (!daemonOverview || typeof daemonOverview !== 'object') {
     return {
       ready: false,
@@ -46,12 +55,26 @@ function assessDaemonReadiness(daemonOverview = {}) {
   return { ready: true, code: 'ready', message: 'Workbench 已就绪', recovery: [] }
 }
 
+function resolveRepoContext(repo = null) {
+  if (!repo || typeof repo !== 'object') return null
+  const projectId = String(
+    repo.projectId || repo.projectPath || repo.ownerRepo || '',
+  ).trim()
+  if (!projectId) return null
+  return {
+    projectId,
+    ref: String(repo.ref || repo.branch || 'main').trim() || 'main',
+  }
+}
+
 function pickWorkflow(daemonOverview = {}, scene = {}, preferredId = '') {
   const workflows = Array.isArray(daemonOverview.workflows) ? daemonOverview.workflows : []
-  const want = String(preferredId || scene.defaultWorkflow || 'team-run').trim()
+  const want = String(preferredId || scene.defaultWorkflow || 'game-dev-delivery').trim()
   const hit = workflows.find(w => w.id === want)
   if (hit) return hit
-  const devTagged = workflows.find(w => /dev|team|run|game/i.test(`${w.id} ${w.name}`))
+  const gameDelivery = workflows.find(w => w.id === 'game-dev-delivery')
+  if (gameDelivery) return gameDelivery
+  const devTagged = workflows.find(w => /game-dev-delivery|dev|team|run|game/i.test(`${w.id} ${w.name}`))
   if (devTagged) return devTagged
   return workflows[0] || null
 }
@@ -62,6 +85,7 @@ function buildHandoff({
   scene = {},
   workflowId = '',
   repo = null,
+  executorReady = undefined,
 } = {}) {
   const readiness = assessDaemonReadiness(daemonOverview)
   if (!requirementDoc) {
@@ -91,8 +115,24 @@ function buildHandoff({
       ok: false,
       code: 'no_workflow',
       error: 'Daemon 未返回可用工作流，无法交接研发任务',
-      recovery: ['确认激活内容源包含 .cursor/workflows/', '在 Daemon 侧注册 team-run 等工作流'],
+      recovery: ['确认激活内容源包含 .cursor/workflows/', '运行 npm run workbench:sync 注册 game-dev-delivery'],
       requirement: { id: doc.id, title: doc.title, validation },
+      blocked: true,
+    }
+  }
+
+  if (workflowNeedsCli(workflow) && executorReady === false) {
+    return {
+      ok: false,
+      code: 'executor_not_ready',
+      error: '当前工作流需要 Cursor Agent CLI，但 Daemon 执行器未就绪（缺少 CURSOR_API_KEY）',
+      recovery: [
+        '在 Workbench 仓库 .nine/.env.local 配置 CURSOR_API_KEY',
+        '或改用「手机游戏研发交付」(game-dev-delivery) 脚本工作流',
+        '运行 python -m tools.workflow_runner.daemon doctor 自检',
+      ],
+      requirement: { id: doc.id, title: doc.title, validation },
+      workflow: workflow.id,
       blocked: true,
     }
   }
@@ -103,19 +143,22 @@ function buildHandoff({
     gameReq.buildPromptContext(doc).slice(0, 2000),
   ].join('\n\n')
 
-  const context = {
-    inputs: {
+  const meta = {
+    sceneId: scene.id || 'game-dev',
+    skillId: scene.skillId || 'game-dev-delivery',
+    sources: doc.sources || [],
+    handoffFrom: 'game-requirement',
+  }
+
+  const context = { meta }
+  const repoCtx = resolveRepoContext(repo)
+  if (repoCtx) {
+    context.workspace = { projectId: repoCtx.projectId, ref: repoCtx.ref }
+    context.inputs = {
       prd: `requirements/${slug}.md`,
       requirementId: doc.id,
       requirementTitle: doc.title,
-    },
-    workspace: repo?.id ? { projectId: repo.id, ref: 'main' } : undefined,
-    meta: {
-      sceneId: scene.id || 'game-dev',
-      skillId: scene.skillId || 'game-dev-delivery',
-      sources: doc.sources || [],
-      handoffFrom: 'game-requirement',
-    },
+    }
   }
 
   return {
@@ -159,6 +202,8 @@ function formatTaskTrace(handoff = {}, session = {}) {
 module.exports = {
   slugify,
   assessDaemonReadiness,
+  workflowNeedsCli,
+  resolveRepoContext,
   pickWorkflow,
   buildHandoff,
   formatTaskTrace,

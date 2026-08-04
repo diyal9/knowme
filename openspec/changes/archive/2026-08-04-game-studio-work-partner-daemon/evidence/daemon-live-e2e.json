@@ -1,29 +1,76 @@
 {
-  "at": "2026-08-04T07:59:18.567Z",
+  "at": "2026-08-04T08:25:18.241Z",
   "endpoint": "http://127.0.0.1:8010",
+  "rootCause": {
+    "original": "demo-experience agent workflow failed CLI preflight (missing CURSOR_API_KEY)",
+    "fixed": "game-dev-delivery script workflow + meta-only handoff + skip CLI preflight patch"
+  },
   "steps": [
     {
       "step": "health+workflows",
       "ok": true,
       "workflowCount": 19,
-      "auth": null,
-      "code": null
+      "hasGameDevDelivery": true
     },
     {
-      "step": "createAndRun",
+      "step": "buildHandoff",
       "ok": true,
-      "slug": "demo-knowme-live-edac2z",
-      "state": "queued",
-      "error": null,
-      "code": null
+      "workflow": "game-dev-delivery",
+      "slug": "game-req-7s74",
+      "code": null,
+      "contextKeys": [
+        "meta"
+      ]
     },
     {
-      "step": "taskStatus",
+      "step": "failurePath.clientValidation",
       "ok": true,
-      "state": "failed",
-      "terminal": true,
-      "reason": "daemon exited with code 1"
+      "code": "invalid_intent",
+      "error": "请填写任务目标"
+    },
+    {
+      "step": "failurePath.createShortBrief",
+      "ok": true,
+      "slug": "fail-brief-ee7s74"
+    },
+    {
+      "step": "failurePath.executorFail",
+      "ok": true,
+      "state": "finished",
+      "returncode": 2,
+      "reason": "parked (waiting for human / quota / error — see log)",
+      "scriptExitCode": 1,
+      "logTail": "[08:25:20] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:25:20] daemon start: task=fail-brief-ee7s74 workflow=game-dev-delivery agent=cursor-agent\n[08:25:20]   cursor CLI: not set (cursor-agent uses local login)\n[08:25:20]   飞书通知: 本次跳过\n[08:25:21] action[1]: run_script node=n-deliver\n[08:25:26] action[2]: script_failed node=n-deliver\n[08:25:26] retry script n-deliver (attempt 1/2)\n[08:25:32] action[3]: script_failed node=n-deliver\n[08:25:32] retry script n-deliver (attempt 2/2)\n[08:25:37] action[4]: script_failed node=n-deliver\n[08:25:37] ALERT: 🔧 脚本失败待决策 · fail-brief-ee7s74 — **脚本节点**：`n-deliver` (`knowme-game-dev-deliver`) | **报告**：`workflow-spec/fail-brief-ee7s74/artifacts/delivery-pack-report.md` | **选项**：retry / abort / goto —\n[08:25:38] ALERT: ⏸ Workflow 暂停待人工 · fail-brief-ee7s74 — **节点**：`n-deliver` | **原因**：script n-deliver 重试 2 次仍失败 | **恢复**：修复后重跑 `run --workflow game-dev-delivery --task fail-brief-ee7s74`（resume）\n",
+      "reportTail": "# Game Dev Delivery Report\r\n\r\n- status: **FAILED**\r\n- script_id: `knowme-game-dev-deliver`\r\n- cwd: `.`\r\n- command: `python tools/knowme/game-dev-deliver.py --task fail-brief-ee7s74`\r\n- exit_code: 1\r\n- finished_at: 2026-08-04T08:25:33Z\r\n\r\n## stdout (tail)\r\n```\r\n(empty)\r\n```\r\n\r\n## stderr (tail)\r\n```\r\n需求案内容过短（10 字符，至少需要 40）：请通过 KnowMe handoff 写入完整结构化需求案后再重试\r\n\r\n```\r\n"
+    },
+    {
+      "step": "successPath.createAndRun",
+      "ok": true,
+      "slug": "game-req-7s74",
+      "workflow": "game-dev-delivery",
+      "error": null
+    },
+    {
+      "step": "successPath.terminal",
+      "ok": true,
+      "state": "finished",
+      "returncode": 0,
+      "reason": "",
+      "logTail": "[08:25:41] CLI preflight: cache-only miss (CURSOR_API_KEY 未配置。 Daemon 依赖 Cursor Agent CLI 鉴权，请在 .nine/.env 或 .nine/.env.local 设置 CURSOR_API_KEY（或 CURSOR_API）。); lazy init on first dispatch\n[08:25:41] daemon start: task=game-req-7s74 workflow=game-dev-delivery agent=cursor-agent\n[08:25:41]   cursor CLI: not set (cursor-agent uses local login)\n[08:25:41]   飞书通知: 本次跳过\n[08:25:41] action[1]: run_script node=n-deliver\n[08:25:48] action[2]: completed node=-\n[08:25:48] task game-req-7s74 completed\n"
+    },
+    {
+      "step": "successPath.artifacts",
+      "ok": true,
+      "fileCount": 6,
+      "sample": "artifacts/acceptance-matrix.md artifacts/delivery-pack-report.md artifacts/delivery-pack.md artifacts/implementation-checklist.md artifacts/manifest.json ingest/brief.md"
     }
   ],
-  "ok": true
+  "ok": true,
+  "summary": {
+    "workflow": "game-dev-delivery",
+    "successSlug": "game-req-7s74",
+    "failSlug": "fail-brief-ee7s74",
+    "exitCode": 0,
+    "artifactFiles": 6
+  }
 }

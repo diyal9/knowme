@@ -114,6 +114,27 @@ function taskState(item) {
   ).toLowerCase()
 }
 
+function buildSubmitContext(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const meta = raw.meta && typeof raw.meta === 'object' ? raw.meta : null
+  let gitlab = null
+  try {
+    gitlab = normalizeTaskContext({
+      workspace: raw.workspace,
+      inputs: raw.inputs,
+      outputs: raw.outputs,
+    })
+  } catch (error) {
+    if (!meta) throw error
+  }
+  if (!gitlab && !meta) return null
+  return {
+    protocolVersion: '1',
+    ...(gitlab || {}),
+    ...(meta ? { meta } : {}),
+  }
+}
+
 function normalizeTask(item) {
   return {
     slug: String(item && item.slug || ''),
@@ -240,7 +261,7 @@ function createClient(options = {}) {
       const intent = String(payload.intent || '').trim()
       if (!workflow) throw clientError('invalid_workflow', '请选择工作流')
       if (!intent) throw clientError('invalid_intent', '请填写任务目标')
-      const context = normalizeTaskContext(payload.context)
+      const context = buildSubmitContext(payload.context)
       const requestId = String(payload.requestId || createRequestId())
       const form = new FormData()
       form.set('workflow', workflow)
@@ -363,5 +384,6 @@ module.exports = {
   validateSlug,
   normalizeError,
   buildAuthHeaders,
+  buildSubmitContext,
   createClient,
 }

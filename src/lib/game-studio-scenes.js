@@ -27,7 +27,7 @@ const SCENES = {
     connectors: ['feishu'],
     legacyModes: ['coding'],
     keywords: /(开发|实现|客户端|服务端|代码|接口|联调|daemon|工作流|workflow|交付)/i,
-    defaultWorkflow: 'team-run',
+    defaultWorkflow: 'game-dev-delivery',
   },
   'game-qa': {
     id: 'game-qa',

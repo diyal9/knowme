@@ -41,8 +41,10 @@ async function main() {
   const feishu = readJson('feishu-auth-probe.json')
 
   const electronPass = Boolean(electron?.ok)
-  const daemonOnline = Boolean(daemon?.ok && daemon.steps?.[0]?.ok)
-  const daemonJobFailed = daemon?.steps?.find(s => s.step === 'taskStatus')?.state === 'failed'
+  const daemonPass = Boolean(daemon?.ok)
+  const daemonOnline = Boolean(daemon?.steps?.find(s => s.step === 'health+workflows')?.ok)
+  const daemonExecPass = Boolean(daemon?.steps?.find(s => s.step === 'successPath.terminal')?.ok)
+  const daemonFailPathPass = Boolean(daemon?.steps?.find(s => s.step === 'failurePath.executorFail')?.ok)
   const feishuAuthPass = Boolean(feishu?.probe?.userReady)
   const feishuReadPass = Boolean(feishu?.readApi?.ok)
 
@@ -85,8 +87,9 @@ async function main() {
             row('飞书 OAuth + 只读 API', feishuAuthPass && feishuReadPass ? 'PASS' : (feishuAuthPass ? 'PARTIAL' : 'BLOCKED'), feishuReadPass ? 'auth status + drive +search 1 条' : '凭据失效或未跑通只读 API'),
             row('飞书写入/审批', 'BLOCKED（预期）', 'writeBlocked=true；未发送业务数据'),
             row('需求交接 Workbench', 'PASS', 'handoff 契约 + guest/offline 场景单测'),
-            row('Daemon health/workflows/start', daemonOnline ? 'PASS（在线 E2E）' : 'BLOCKED', daemonOnline ? `${daemon.steps[0].workflowCount} workflows @8010` : 'Daemon 未在线'),
-            row('Daemon 任务执行成功', daemonJobFailed ? 'FAIL（诚实态）' : 'PASS', daemonJobFailed ? 'taskStatus=failed: daemon exited code 1（执行器环境，非客户端伪造）' : '任务终端态正常'),
+            row('Daemon health/workflows/start', daemonOnline ? 'PASS（在线 E2E）' : 'BLOCKED', daemonOnline ? `${daemon.steps?.[0]?.workflowCount || 0} workflows @8010` : 'Daemon 未在线'),
+            row('Daemon 任务执行成功', daemonExecPass ? 'PASS（exit 0 + 交付物）' : 'FAIL', daemonExecPass ? `slug=${daemon.summary?.successSlug || ''} returncode=0` : 'game-dev-delivery 未在终态成功'),
+            row('Daemon 失败可恢复路径', daemonFailPathPass ? 'PASS' : 'FAIL', daemonFailPathPass ? '短 brief → script exit 1 + 暂停待人工/resume 提示' : '失败路径未验证'),
             row('Workbench trace UI', electronPass ? 'PASS' : 'FAIL', electron?.checks?.find(c => c.id === 'workbench-trace-visible')?.ok ? 'scene/skill/connector 可见' : '待复验'),
             row('Electron 真机主窗口', electronPass ? 'PASS' : 'FAIL', 'Playwright _electron；无 uncaught console error'),
             row('四类场景 + legacy', 'PASS', 'npm test 全绿'),
@@ -95,7 +98,7 @@ async function main() {
         new Paragraph({ text: '3. 门禁结果', heading: HeadingLevel.HEADING_1 }),
         new Paragraph({ children: [new TextRun('npm test / lint / harness gate：随 follow-up commit 复跑')] }),
         new Paragraph({ text: '4. 已知限制', heading: HeadingLevel.HEADING_1 }),
-        new Paragraph({ children: [new TextRun('Daemon 任务执行失败为外部 executor 环境问题；KnowMe 客户端已如实展示 failed 终端态。飞书写入仍停在草稿审批前。')] }),
+        new Paragraph({ children: [new TextRun('Daemon game-dev-delivery 脚本工作流已在本机 Workbench 真实执行 exit 0，并生成交付包 artifacts。失败路径保留 script exit 1 + 人工 resume 提示。飞书写入仍停在草稿审批前。')] }),
         new Paragraph({ children: [new PageBreak()] }),
         new Paragraph({ text: '5. 截图与 JSON 证据', heading: HeadingLevel.HEADING_1 }),
         new Paragraph({ children: [new TextRun('electron-uat-smoke.json · daemon-live-e2e.json · feishu-auth-probe.json')] }),
