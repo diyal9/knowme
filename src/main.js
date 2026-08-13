@@ -38,6 +38,38 @@ const logger = require('./lib/logger')
 const { materializeWindowsIcon } = require('./lib/app-icon')
 const productKnowledge = require('./lib/product-knowledge')
 const productMemory = require('./lib/product-memory')
+
+const { getRendererMode } = require('./lib/renderer-entry')
+
+/**
+ * Load a BrowserWindow with legacy HTML or Vite React entry.
+ * @param {import('electron').BrowserWindow} win
+ * @param {{ legacyFile: string, viteEntry: string, viteDevPath?: string }} opts
+ */
+async function loadRendererEntry(win, opts) {
+  const mode = getRendererMode()
+  if (mode === 'vite') {
+    const isDev = !app.isPackaged && process.argv.includes('--dev')
+    if (isDev) {
+      const base = String(process.env.KNOWME_VITE_URL || 'http://127.0.0.1:5173').replace(/\/$/, '')
+      const devPath = opts.viteDevPath || `/${opts.viteEntry}/`
+      try {
+        await win.loadURL(`${base}${devPath}`)
+        return
+      } catch (err) {
+        console.warn('[renderer] vite dev URL failed, trying dist then legacy', err)
+      }
+    }
+    const built = path.join(__dirname, '..', 'dist', 'renderer', opts.viteEntry, 'index.html')
+    if (fs.existsSync(built)) {
+      await win.loadFile(built)
+      return
+    }
+    console.warn(`[renderer] missing ${built}; fallback to legacy ${opts.legacyFile}`)
+  }
+  await win.loadFile(path.join(__dirname, opts.legacyFile))
+}
+
 const settingsSecure = require('./lib/settings-secure')
 const { createRemoteConfigClient } = require('./lib/remote-config-client')
 const { mergeOrgPublicConfig, normalizeRemoteConfig } = require('./lib/remote-config-merge')
@@ -1306,7 +1338,7 @@ function createNoteWindow(note) {
     icon: getWindowIconOption(),
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true }
   })
-  win.loadFile(path.join(__dirname, 'note.html'))
+  void loadRendererEntry(win, { legacyFile: 'note.html', viteEntry: 'note', viteDevPath: '/note/' })
   win.webContents.on('did-finish-load', () => {
     const n = readNote(note.id)
     if (n) applyNoteLayout(win, n)
@@ -1487,7 +1519,11 @@ function createWorkspaceWindow() {
     }
   }
   workspaceWin = new BrowserWindow(workspaceOpts)
-  workspaceWin.loadFile(path.join(__dirname, 'workspace.html'))
+  void loadRendererEntry(workspaceWin, {
+    legacyFile: 'workspace.html',
+    viteEntry: 'workspace',
+    viteDevPath: '/workspace/',
+  })
   workspaceWin.webContents.on('will-attach-webview', (event, webPreferences, params) => {
     delete webPreferences.preload
     webPreferences.nodeIntegration = false
@@ -1580,7 +1616,7 @@ function openSettingsWindow(tab = '') {
     icon: getWindowIconOption(),
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
   })
-  settingsWin.loadFile(path.join(__dirname,'settings.html'))
+  void loadRendererEntry(settingsWin, { legacyFile: 'settings.html', viteEntry: 'settings', viteDevPath: '/settings/' })
   settingsWin.webContents.on('did-finish-load', () => {
     settingsWin.webContents.send('init-settings', JSON.parse(JSON.stringify(settingsSecure.publicSettings(loadSettings(), { includeSecrets: true }))))
     if (tabId) settingsWin.webContents.send('select-settings-tab', tabId)
@@ -1608,7 +1644,7 @@ function toggleListWin(forceShow = false) {
     icon: getWindowIconOption(),
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true }
   })
-  listWin.loadFile(path.join(__dirname,'list.html'))
+  void loadRendererEntry(listWin, { legacyFile: 'list.html', viteEntry: 'list', viteDevPath: '/list/' })
   listWin.webContents.on('did-finish-load', () => { purgeEmptyClosedNotes(); listWin.webContents.send('init-list', loadAllNotes()) })
   listWin.on('close', e => {
     if (isQuitting) return
@@ -1638,7 +1674,7 @@ function openMemoryPanel() {
     icon: getWindowIconOption(),
     webPreferences: { preload: path.join(__dirname,'preload.js'), contextIsolation:true },
   })
-  memoryWin.loadFile(path.join(__dirname,'memory.html'))
+  void loadRendererEntry(memoryWin, { legacyFile: 'memory.html', viteEntry: 'memory', viteDevPath: '/memory/' })
   memoryWin.webContents.on('did-finish-load', () => {
     memoryWin.webContents.send('init-memory', productMemory.getRecent(MEMORY_DIR, 50))
   })
@@ -1690,7 +1726,11 @@ function openLogViewer() {
   logViewerWin.webContents.on('render-process-gone', (_event, details) => {
     console.error('[log-viewer-render-gone]', details)
   })
-  logViewerWin.loadFile(path.join(__dirname, 'log-viewer.html'))
+  void loadRendererEntry(logViewerWin, {
+    legacyFile: 'log-viewer.html',
+    viteEntry: 'log-viewer',
+    viteDevPath: '/log-viewer/',
+  })
   logViewerWin.on('closed', () => { logViewerWin = null })
   logger.operation('open-log-viewer', '打开日志中心窗口')
   return logViewerWin

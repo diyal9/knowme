@@ -6,6 +6,7 @@ directories:
   buildResources: build
 files:
   - src/**/*
+  - dist/renderer/**/*
   - package.json
   - "!**/*.map"
 asar: true

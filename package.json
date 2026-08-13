@@ -26,6 +26,9 @@
     "eval:weekly": "node scripts/agent-benchmark.js --suite core-10 --out openspec/changes/establish-knowme-evals-system/evidence/benchmark-report",
     "lint": "node scripts/lint.js && node scripts/check-script-scope.js",
     "typecheck": "node scripts/check-jsdoc.js",
+    "typecheck:renderer": "tsc --noEmit -p tsconfig.json",
+    "renderer:dev": "vite",
+    "renderer:build": "vite build",
     "daemon:docs-check": "node scripts/check-daemon-docs-sync.js",
     "harness:check": "node .cursor/scripts/harness.js check",
     "harness:preflight": "node .cursor/scripts/harness.js preflight",
@@ -44,16 +47,23 @@
     "test:daemon-e2e": "node scripts/daemon-live-e2e.js"
   },
   "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.7.0",
     "docx": "^9.7.1",
     "electron": "^31.7.7",
     "electron-builder": "^24.0.0",
     "playwright": "^1.62.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vite": "^6.3.5"
   },
   "dependencies": {
     "dompurify": "^3.4.12",
     "electron-store": "^8.2.0",
     "electron-updater": "^6.3.0",
-    "marked": "^18.0.6"
+    "marked": "^18.0.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
