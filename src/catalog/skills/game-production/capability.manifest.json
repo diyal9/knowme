@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "game-production",
+  "kind": "skill",
+  "name": "制作推进",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "gameProduction",
+          "title": "制作推进",
+          "subtitle": "里程碑、依赖与风险清单",
+          "icon": "flag",
+          "group": "game-production",
+          "modes": ["general"],
+          "surfaces": ["scene"],
+          "prompt": "整理本版本里程碑、跨职能依赖与风险清单，并给出下一步负责人。"
+        }]
+      }
+    }
+  }
+}

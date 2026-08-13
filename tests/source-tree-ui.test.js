@@ -21,6 +21,9 @@ describe('source file tree UI', () => {
   it('toggles directories without opening a file', () => {
     assert.match(workspace, /data-source-pick="\$\{esc\(s\.id\)\}"/)
     assert.match(workspace, /closest\('\[data-source-pick\]'\)/)
+    assert.match(workspace, /fileCenterLayer = 'tree'/)
+    assert.match(workspace, /btnSwitchSource/)
+    assert.match(workspace, /showFileCenterHub/)
     assert.match(workspace, /const sourceDir = e\.target\.closest\('\[data-src-dir\]'\)/)
     assert.match(workspace, /sourceCollapsed\.(?:has|delete|add)\(key\)/)
     assert.match(workspace, /sourceDir\.dataset\.srcDir/)

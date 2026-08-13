@@ -1,0 +1,23 @@
+{
+  "at": "2026-08-07T10:47:44.369Z",
+  "command": "node --test tests/agent-runtime-production-readiness.test.js tests/agent-team-runtime-core.test.js tests/agent-team-runtime-integration.test.js",
+  "status": "PASS",
+  "ok": true,
+  "exitCode": 0,
+  "durationMs": 1447,
+  "tests": 69,
+  "passed": 69,
+  "failed": 0,
+  "checks": {
+    "noLegacyActiveSubRuns": true,
+    "packageTrust": true,
+    "corruptionMatrix": true,
+    "interruptedRecovery": true,
+    "duplicateTerminal": true,
+    "cancelStorm": true,
+    "idempotentEffects": true,
+    "remoteFaults": true,
+    "zeroResourceLeak": true
+  },
+  "metricsEvidence": "runtime-metrics.json"
+}

@@ -1,0 +1,18 @@
+{
+  "name": "grounding-inject",
+  "input": { "prompt": "总结当前文档", "tier": "chat" },
+  "grounding": {
+    "active": true,
+    "title": "测试文档",
+    "text": "【当前文档】这是 grounding 注入的上下文片段。",
+    "labels": ["writing"]
+  },
+  "llmScript": [
+    { "response": { "text": "根据当前文档，总结如下：这是 grounding 注入的上下文片段。" } }
+  ],
+  "expect": {
+    "terminal": "DONE",
+    "phases": ["PREPARE", "CONTEXT", "MODEL", "PERSIST", "DONE"],
+    "toolCalls": 0
+  }
+}

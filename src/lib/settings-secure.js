@@ -188,11 +188,23 @@ function load(file) {
   return merged;
 }
 
-/** 供渲染进程 IPC：不含 Workbench 授权码明文 */
-function publicSettings(settings) {
+/**
+ * 供渲染进程 IPC。
+ * 默认 redact apiKey/gitlabToken（仅保留 configured 标记）；设置窗传 includeSecrets:true。
+ * 始终不含 Workbench 授权码明文。
+ */
+function publicSettings(settings, { includeSecrets = false } = {}) {
   const out = { ...settings };
   delete out.workbenchToken;
   delete out.workbenchTokenEnc;
+  const hasApiKey = !!(String(settings?.apiKey || '').trim());
+  const hasGitlabToken = !!(String(settings?.gitlabToken || '').trim());
+  out.apiKeyConfigured = hasApiKey;
+  out.gitlabTokenConfigured = hasGitlabToken;
+  if (!includeSecrets) {
+    out.apiKey = '';
+    out.gitlabToken = '';
+  }
   return out;
 }
 

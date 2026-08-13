@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>助理头像 vs 应用图标</title>
+<style>
+  body { margin: 0; padding: 28px; background: #f4f5f8; font: 13px/1.5 system-ui, sans-serif; color: #26324f; }
+  .row { display: flex; align-items: flex-end; gap: 28px; margin-bottom: 22px; }
+  .cell { text-align: center; }
+  .cell span { display: block; margin-top: 8px; font-size: 11px; color: #6b7488; }
+  .km-fab-avatar {
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    border-radius: 7px;
+    background: #172535;
+    color: #f4efe7;
+    box-shadow: 0 4px 10px rgba(23, 37, 53, .2);
+  }
+  .km-fab-avatar svg { width: 22px; height: 22px; display: block; }
+  .km-fab-mark-line {
+    fill: none; stroke: currentColor; stroke-width: 48;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .km-fab-mark-node { fill: currentColor; }
+  .km-fab-mark-origin { fill: #f05d4e; }
+  .icon-36 { width: 36px; height: 36px; display: block; }
+  .icon-96 { width: 96px; height: 96px; display: block; }
+  .avatar-96 { width: 96px; height: 96px; border-radius: 18px; }
+  .avatar-96 svg { width: 59px; height: 59px; }
+  .head {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-radius: 12px; background: #fff;
+    box-shadow: 0 6px 18px rgba(23, 37, 53, .08);
+  }
+  .head-title { font-size: 14px; font-weight: 600; color: #1f2a44; line-height: 1.2; }
+  .head-sub { font-size: 11px; color: #6b7488; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="cell">
+    <span class="km-fab-avatar avatar-96">
+      <svg viewBox="208 201 620 620">
+        <path class="km-fab-mark-line" d="M273 285 L273 718 L545 509"/>
+        <path class="km-fab-mark-line" d="M545 509 L750 279"/>
+        <path class="km-fab-mark-line" d="M545 509 L750 724"/>
+        <circle class="km-fab-mark-node" cx="273" cy="718" r="66"/>
+        <circle class="km-fab-mark-node" cx="545" cy="509" r="76"/>
+        <circle class="km-fab-mark-node" cx="750" cy="279" r="66"/>
+        <circle class="km-fab-mark-node" cx="750" cy="724" r="66"/>
+        <circle class="km-fab-mark-origin" cx="273" cy="285" r="53"/>
+      </svg>
+    </span>
+    <span>新头像 96px</span>
+  </div>
+  <div class="cell">
+    <img class="icon-96" src="../../../../assets/brand-src/knowme-icon.svg" alt="应用图标">
+    <span>应用图标 96px</span>
+  </div>
+  <div class="cell">
+    <span class="km-fab-avatar">
+      <svg viewBox="208 201 620 620">
+        <path class="km-fab-mark-line" d="M273 285 L273 718 L545 509"/>
+        <path class="km-fab-mark-line" d="M545 509 L750 279"/>
+        <path class="km-fab-mark-line" d="M545 509 L750 724"/>
+        <circle class="km-fab-mark-node" cx="273" cy="718" r="66"/>
+        <circle class="km-fab-mark-node" cx="545" cy="509" r="76"/>
+        <circle class="km-fab-mark-node" cx="750" cy="279" r="66"/>
+        <circle class="km-fab-mark-node" cx="750" cy="724" r="66"/>
+        <circle class="km-fab-mark-origin" cx="273" cy="285" r="53"/>
+      </svg>
+    </span>
+    <span>新头像 36px</span>
+  </div>
+  <div class="cell">
+    <img class="icon-36" src="../../../../assets/brand-src/knowme-icon.svg" alt="应用图标">
+    <span>应用图标 36px</span>
+  </div>
+</div>
+<div class="head">
+  <span class="km-fab-avatar">
+    <svg viewBox="208 201 620 620">
+      <path class="km-fab-mark-line" d="M273 285 L273 718 L545 509"/>
+      <path class="km-fab-mark-line" d="M545 509 L750 279"/>
+      <path class="km-fab-mark-line" d="M545 509 L750 724"/>
+      <circle class="km-fab-mark-node" cx="273" cy="718" r="66"/>
+      <circle class="km-fab-mark-node" cx="545" cy="509" r="76"/>
+      <circle class="km-fab-mark-node" cx="750" cy="279" r="66"/>
+      <circle class="km-fab-mark-node" cx="750" cy="724" r="66"/>
+      <circle class="km-fab-mark-origin" cx="273" cy="285" r="53"/>
+    </svg>
+  </span>
+  <div>
+    <div class="head-title">KnowMe 助理</div>
+    <div class="head-sub">快捷操作</div>
+  </div>
+</div>
+</body>
+</html>

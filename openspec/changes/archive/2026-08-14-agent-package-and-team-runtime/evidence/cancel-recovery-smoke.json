@@ -1,0 +1,18 @@
+{
+  "at": "2026-08-07T09:11:14.265Z",
+  "command": "node --test tests/agent-team-runtime-core.test.js tests/agent-team-runtime-integration.test.js tests/agent-team-runtime-governance-ui.test.js tests/agent-team-workflow-runner.test.js",
+  "exitCode": 0,
+  "durationMs": 1389,
+  "tests": 88,
+  "passed": 88,
+  "failed": 0,
+  "checks": {
+    "cascadeUnderThreeSeconds": true,
+    "interruptedRecovery": true,
+    "safeResume": true,
+    "idempotentReceipt": true,
+    "terminalExactlyOnce": true,
+    "launchFailureWakeup": true
+  },
+  "ok": true
+}

@@ -1,0 +1,89 @@
+{
+  "change": "rebuild-root-llmwiki-workbench",
+  "at": "2026-08-10T11:12:42.931Z",
+  "passed": 7,
+  "total": 8,
+  "ok": false,
+  "checks": [
+    {
+      "id": "root-workbench-has-three-panes",
+      "pass": true,
+      "detail": {
+        "tree": true,
+        "reader": true,
+        "context": true,
+        "add": true,
+        "refresh": true,
+        "lint": true,
+        "obsidian": true,
+        "bodyHeight": 626,
+        "text": "\n      \n        \n          根 LLMWiki资料\n          添加\n        \n        \n    \n      \n      \n        全部 2\n        资料 1\n        已整理 1\n      \n    \n    \n    \n      \n        ▾\n        \n        concepts\n        1\n      \n      \n        \n        \n        已整理条目\n        已整理\n      \n    \n      \n        ▾\n        \n        raw\n        1\n      \n      \n        \n        \n        资料笔记\n        可编辑\n      \n    \n    \n  \n  \n      \n      \n    \n      W\n      从左侧选择一份资料\n      阅读已整理知识，或打开 raw 资料继续编辑。\n      \n        添加资料\n        1 份资料 · 1 条已整理知识\n      \n    \n  \n      \n      i\n      选择一份资料\n      从左侧资料树打开条目，右侧会显示来源和处理状态。\n      添加资料\n    \n    ",
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "no-internal-graph-surface",
+      "pass": true,
+      "detail": {
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "raw-entry-opens-in-editor-with-context",
+      "pass": true,
+      "detail": {
+        "path": "\n    当前条目\n    资料笔记\n    raw/desk-note.md\n    \n      来源本地资料\n      类型可编辑资料\n      更新时间2026/8/10 19:12:38\n      编辑边界可以编辑并保存\n    \n    \n      \n      已载入，可编辑\n    \n    \n      检查问题\n      交给 AI 整理\n      查看提案\n    \n  ",
+        "editor": true,
+        "preview": true
+      }
+    },
+    {
+      "id": "raw-editor-exposes-unsaved-state",
+      "pass": true,
+      "detail": {
+        "dirty": "未保存"
+      }
+    },
+    {
+      "id": "raw-editor-safe-save-completes",
+      "pass": true,
+      "detail": {
+        "saved": "已安全保存"
+      }
+    },
+    {
+      "id": "organized-entry-is-read-only",
+      "pass": true,
+      "detail": {
+        "editor": false,
+        "reader": "\n    \n      已整理条目\n      concepts/organized.md\n      已整理知识16 字符更新于 2026/8/10 19:12:38\n    \n    已整理条目只读知识内容\n  ",
+        "context": "\n    当前条目\n    已整理条目\n    concepts/organized.md\n    \n      来源已整理知识\n      类型已整理知识\n      更新时间2026/8/10 19:12:38\n      编辑边界只读阅读\n    \n    \n      \n      已载入，只读\n    \n    \n      \n      交给 AI 整理\n      查看提案\n    \n  "
+      }
+    },
+    {
+      "id": "narrow-layout-stacks-without-overflow",
+      "pass": true,
+      "detail": {
+        "viewport": 510,
+        "bodyWidth": 510,
+        "tree": true,
+        "reader": true,
+        "context": true,
+        "contextTop": 876,
+        "readerTop": 456
+      }
+    },
+    {
+      "id": "no-new-renderer-errors",
+      "pass": false,
+      "detail": {
+        "consoleErrors": [
+          "[workspace-unhandled-rejection] ReferenceError: btnShelfNewWorkflow is not defined\n    at bind (file:///D:/aispace/sticky-notes/src/workbench.js?v=modes2:4758:5)\n    at Object.init (file:///D:/aispace/sticky-notes/src/workbench.js?v=modes2:5267:5)\n    at init (file:///D:/aispace/sticky-notes/src/workspace.js?v=src-lazy16:4014:42)\n    at file:///D:/aispace/sticky-notes/src/workspace.js?v=src-lazy16:4307:1"
+        ],
+        "pageErrors": [
+          "btnShelfNewWorkflow is not defined"
+        ]
+      }
+    }
+  ]
+}

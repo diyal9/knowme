@@ -8,6 +8,7 @@
 const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
+const { validateAndNormalizeManifest } = require('./capability-manifest-v2')
 
 const STORE_VERSION = 1
 const VALID_KINDS = new Set(['skill', 'expert', 'connector'])
@@ -40,12 +41,70 @@ function resolvePaths(userData) {
     root,
     installStore: path.join(root, 'install-store.json'),
     catalogOverlay: path.join(root, 'catalog-overlay.json'),
+    favorites: path.join(root, 'favorites.json'),
     staging: path.join(root, 'imports', 'staging'),
     skills: path.join(root, 'skills'),
     experts: path.join(root, 'experts'),
     connectors: path.join(root, 'connectors'),
     snapshots: path.join(root, 'snapshots'),
   }
+}
+
+function favoriteKey(kind, id) {
+  const k = String(kind || 'skill').trim() || 'skill'
+  const i = String(id || '').trim()
+  if (!i) return ''
+  return `${k}:${i}`
+}
+
+function loadFavorites(userData) {
+  const paths = resolvePaths(userData)
+  fs.mkdirSync(paths.root, { recursive: true })
+  const raw = readJson(paths.favorites)
+  const keys = new Set()
+  const list = Array.isArray(raw?.keys) ? raw.keys : (Array.isArray(raw?.ids) ? raw.ids : [])
+  for (const item of list) {
+    const key = String(item || '').trim()
+    if (key) keys.add(key)
+  }
+  return {
+    version: Number(raw?.version) || 1,
+    updatedAt: String(raw?.updatedAt || '').trim() || nowIso(),
+    keys,
+    paths,
+  }
+}
+
+function saveFavorites(userData, favorites) {
+  const paths = resolvePaths(userData)
+  const keys = [...(favorites.keys || [])].map(String).filter(Boolean).sort()
+  writeJsonAtomic(paths.favorites, {
+    version: 1,
+    updatedAt: nowIso(),
+    keys,
+  })
+  return { ok: true, keys }
+}
+
+function listFavoriteKeys(userData) {
+  return [...loadFavorites(userData).keys]
+}
+
+function isFavorite(userData, kind, id) {
+  const key = favoriteKey(kind, id)
+  if (!key) return false
+  return loadFavorites(userData).keys.has(key)
+}
+
+function toggleFavorite(userData, kind, id) {
+  const key = favoriteKey(kind, id)
+  if (!key) return { ok: false, error: '无效的收藏目标' }
+  const fav = loadFavorites(userData)
+  const next = !fav.keys.has(key)
+  if (next) fav.keys.add(key)
+  else fav.keys.delete(key)
+  saveFavorites(userData, fav)
+  return { ok: true, key, favorite: next, keys: [...fav.keys].sort() }
 }
 
 function kindDir(paths, kind) {
@@ -69,12 +128,40 @@ function readJson(file) {
   }
 }
 
+function renameWithRetrySync(src, dest, options = {}) {
+  const retries = Number.isInteger(options.retries) ? Math.max(0, options.retries) : 4
+  const delays = Array.isArray(options.delays) && options.delays.length
+    ? options.delays
+    : [20, 50, 100, 200]
+  const renameSync = typeof options.renameSync === 'function' ? options.renameSync : fs.renameSync
+  let lastError = null
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      renameSync(src, dest)
+      return { ok: true, attempts: attempt + 1 }
+    } catch (error) {
+      lastError = error
+      const retryable = ['EPERM', 'EACCES', 'EBUSY'].includes(error?.code)
+      if (!retryable || attempt >= retries) break
+      const delay = Number(delays[Math.min(attempt, delays.length - 1)]) || 0
+      if (delay > 0) {
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay)
+      }
+    }
+  }
+  return { ok: false, error: lastError }
+}
+
 function writeJsonAtomic(file, data) {
   const dir = path.dirname(file)
   fs.mkdirSync(dir, { recursive: true })
-  const tmp = `${file}.${process.pid}.tmp`
+  const tmp = `${file}.${process.pid}.${crypto.randomBytes(3).toString('hex')}.tmp`
   fs.writeFileSync(tmp, JSON.stringify(data, null, 2), 'utf8')
-  fs.renameSync(tmp, file)
+  const renamed = renameWithRetrySync(tmp, file)
+  if (!renamed.ok) {
+    try { fs.rmSync(tmp, { force: true }) } catch { /* best effort */ }
+    throw renamed.error
+  }
 }
 
 function normalizeId(id) {
@@ -112,6 +199,21 @@ function normalizeEntry(raw = {}) {
     ? (status === 'disabled' ? 'enabled' : (status === 'installed' ? 'enabled' : status))
     : (status === 'enabled' || status === 'installed' ? 'disabled' : status)
 
+  let manifest = null
+  if (raw.manifest && typeof raw.manifest === 'object') {
+    const normalizedManifest = validateAndNormalizeManifest(raw.manifest, {
+      id: idResult.id,
+      kind,
+      version: raw.version,
+      name: raw.name,
+      description: raw.description,
+    })
+    if (!normalizedManifest.ok) {
+      return { ok: false, error: normalizedManifest.issues[0]?.message || '无效的 capability manifest' }
+    }
+    manifest = normalizedManifest.manifest
+  }
+
   return {
     ok: true,
     entry: {
@@ -132,7 +234,16 @@ function normalizeEntry(raw = {}) {
       originPath: String(raw.originPath || '').trim().replace(/\\/g, '/'),
       repositoryId: String(raw.repositoryId || '').trim(),
       name: String(raw.name || '').trim(),
+      originName: String(raw.originName || '').trim(),
+      nameSource: String(raw.nameSource || '').trim(),
       description: String(raw.description || '').trim(),
+      manifest,
+      dependencies: manifest?.dependencies || (Array.isArray(raw.dependencies) ? raw.dependencies : []),
+      permissions: manifest?.permissions || (raw.permissions && typeof raw.permissions === 'object' ? raw.permissions : {}),
+      inputs: manifest?.inputs || (Array.isArray(raw.inputs) ? raw.inputs : []),
+      outputs: manifest?.outputs || (Array.isArray(raw.outputs) ? raw.outputs : []),
+      risk: manifest?.risk || (raw.risk && typeof raw.risk === 'object' ? raw.risk : { level: 'low', reasons: [] }),
+      provenance: manifest?.provenance || (raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : {}),
     },
   }
 }
@@ -319,6 +430,15 @@ function installFromStaging(userData, options = {}) {
     version: options.version,
     trust: options.trust,
     originUrl: options.originUrl,
+    name: options.name,
+    description: options.description,
+    manifest: options.manifest,
+    dependencies: options.dependencies,
+    permissions: options.permissions,
+    inputs: options.inputs,
+    outputs: options.outputs,
+    risk: options.risk,
+    provenance: options.provenance,
     status: 'installing',
     enabled: options.enabled !== false,
   })
@@ -465,6 +585,15 @@ function updateFromStaging(userData, id, options = {}) {
     version: options.version || current.entry.version,
     trust: options.trust || current.entry.trust,
     originUrl: options.originUrl || current.entry.originUrl,
+    name: options.name || current.entry.name,
+    description: options.description || current.entry.description,
+    manifest: options.manifest || current.entry.manifest,
+    dependencies: options.dependencies || current.entry.dependencies,
+    permissions: options.permissions || current.entry.permissions,
+    inputs: options.inputs || current.entry.inputs,
+    outputs: options.outputs || current.entry.outputs,
+    risk: options.risk || current.entry.risk,
+    provenance: options.provenance || current.entry.provenance,
     enabled: current.entry.enabled,
     stagingPath: options.stagingPath,
   })
@@ -499,6 +628,9 @@ function createCapabilityStore(options = {}) {
     disable: (id) => disable(getUserData(), id),
     updateFromStaging: (id, opts) => updateFromStaging(getUserData(), id, opts),
     clearStaging: () => clearStaging(getUserData()),
+    listFavoriteKeys: () => listFavoriteKeys(getUserData()),
+    isFavorite: (kind, id) => isFavorite(getUserData(), kind, id),
+    toggleFavorite: (kind, id) => toggleFavorite(getUserData(), kind, id),
     hashDirectory,
     copyDirectorySafe,
   }
@@ -514,6 +646,12 @@ module.exports = {
   normalizeEntry,
   loadInstallStore,
   saveInstallStore,
+  favoriteKey,
+  loadFavorites,
+  saveFavorites,
+  listFavoriteKeys,
+  isFavorite,
+  toggleFavorite,
   listEntries,
   getEntry,
   upsertEntry,
@@ -526,6 +664,7 @@ module.exports = {
   clearStaging,
   hashDirectory,
   copyDirectorySafe,
+  renameWithRetrySync,
   assertSafeRelativeSegment,
   assertPathInsideRoot,
   assertNotSymlink,

@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-08-07T14:25:38.665Z",
+  "pass": true,
+  "viewports": [
+    {
+      "width": 1360,
+      "height": 860
+    },
+    {
+      "width": 720,
+      "height": 640
+    }
+  ],
+  "checks": [
+    {
+      "id": "visual-mode-empty-team",
+      "pass": true,
+      "detail": {
+        "mode": "visual",
+        "copy": "\n        \n        \n          先组建你的 Agent 团队\n          添加一个 Agent，让它在「视觉创作」中长期协作；已安装的技能、连接器和权限会继续沿用。\n        \n        \n          添加 Agent\n          浏览能力中心\n        \n      "
+      }
+    },
+    {
+      "id": "advanced-menu-visible",
+      "pass": true,
+      "detail": {
+        "mode": "visual",
+        "emptyHeight": 142,
+        "headOverflowX": false,
+        "menuTop": 42,
+        "menuBottom": 115,
+        "viewportHeight": 860
+      }
+    },
+    {
+      "id": "narrow-no-overflow",
+      "pass": true,
+      "detail": {
+        "headOverflowX": false,
+        "emptyOverflowX": false,
+        "menuWithinViewport": true,
+        "emptyHeight": 142
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

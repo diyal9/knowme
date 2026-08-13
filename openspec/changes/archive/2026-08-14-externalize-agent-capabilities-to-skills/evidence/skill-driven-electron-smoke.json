@@ -1,0 +1,592 @@
+{
+  "at": "2026-08-05T19:09:19.301Z",
+  "change": "externalize-agent-capabilities-to-skills",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-skill-driven-cBAeM5",
+  "ok": true,
+  "checks": [
+    {
+      "id": "preload-task-apis",
+      "pass": true,
+      "detail": {
+        "tasks": true,
+        "nestedTasks": true,
+        "skillLoad": true,
+        "packInstall": true
+      }
+    },
+    {
+      "id": "install-game-studio-pack",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "packId": "game-studio",
+        "version": "1.1.0"
+      }
+    },
+    {
+      "id": "legacy-scene-fallback",
+      "pass": true,
+      "detail": {
+        "id": "legacy-smoke",
+        "title": "旧入口回退",
+        "subtitle": "scene-only compatibility",
+        "prompt": "legacy prompt",
+        "dynamic": false
+      }
+    },
+    {
+      "id": "eight-office-skill-tasks",
+      "pass": true,
+      "detail": {
+        "count": 9,
+        "missing": []
+      }
+    },
+    {
+      "id": "dynamic-task-provenance",
+      "pass": true,
+      "detail": {
+        "id": "relatedChats",
+        "title": "分析跟我相关的聊天",
+        "subtitle": "今天：私聊/群聊主题与 @我",
+        "icon": "chat",
+        "group": "knowledge-collab",
+        "modes": [
+          "general"
+        ],
+        "surfaces": [
+          "empty",
+          "quick-menu"
+        ],
+        "prompt": "请分析跟我相关的聊天。",
+        "preflight": {
+          "type": "connector-auth",
+          "message": "要分析跟你相关的聊天，我得先连上飞书读取你今天的会话。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「分析跟我相关的聊天」。",
+          "connector": "feishu"
+        },
+        "requiredTools": [
+          "feishu.related_chats"
+        ],
+        "templateVars": {
+          "days": 1
+        },
+        "skillId": "feishu-related-chats",
+        "source": "pack",
+        "ownerPackId": "game-studio"
+      }
+    },
+    {
+      "id": "display-safe-dto",
+      "pass": true
+    },
+    {
+      "id": "pack-skill-l1-loads",
+      "pass": true
+    },
+    {
+      "id": "general-empty-cards-visible",
+      "pass": true,
+      "detail": [
+        "\n          查文档/知识库文件夹·记忆推荐·最近编辑/阅读\n        ",
+        "\n          会议总结为我总结最近三天的会议\n        ",
+        "\n          分析跟我相关的聊天今天：私聊/群聊主题与 @我\n        ",
+        "\n          需求梳理飞书资料 → 结构化 intake → 可启动工作流\n        ",
+        "\n          今日优先级基于飞书日程/待办直接出 Top3\n        "
+      ]
+    },
+    {
+      "id": "quick-menu-uses-skill-tasks",
+      "pass": true,
+      "detail": "\n          \n            飞书沟通\n            文档读写\n            知识库检索\n            会议记录\n            日程任务\n            组织协同\n          \n          \n            快捷大类\n            \n      \n        \n        办公核心\n      \n    \n      \n        \n        文档与沟通\n      \n    \n          \n          \n            快捷子项\n            \n        \n          \n          会议总结\n        \n      \n        \n          \n          今日优先级\n        \n      \n        \n          \n          查文档/知识库\n        \n      \n        \n          \n          分析跟我相关的聊天\n "
+    },
+    {
+      "id": "disable-feishu-for-preflight",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "connectors": [
+          {
+            "id": "feishu",
+            "type": "feishu",
+            "title": "飞书",
+            "enabled": false,
+            "agentVisible": true,
+            "allowlist": [],
+            "meta": {
+              "identityHint": "使用本机 lark-cli 登录态，KnowMe 不保存飞书 Token"
+            }
+          },
+          {
+            "id": "mcp-default",
+            "type": "mcp",
+            "title": "公司 MCP",
+            "enabled": false,
+            "agentVisible": true,
+            "allowlist": [],
+            "meta": {
+              "identityHint": "stdio MCP Server；仅保存命令与参数，不保存密钥值"
+            },
+            "mcp": {
+              "command": "",
+              "args": [],
+              "cwd": "",
+              "envKeys": []
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "feishu-status-is-disabled",
+      "pass": true,
+      "detail": {
+        "id": "feishu",
+        "type": "feishu",
+        "title": "飞书",
+        "enabled": false,
+        "agentVisible": true,
+        "allowlist": [],
+        "meta": {
+          "identityHint": "使用本机 lark-cli 登录态，KnowMe 不保存飞书 Token"
+        },
+        "status": {
+          "ok": true,
+          "state": "online",
+          "message": "User identity needs refresh and will be refreshed automatically on the next user API call.",
+          "identity": "user",
+          "botReady": true,
+          "userReady": true,
+          "brand": "feishu",
+          "userName": "",
+          "permissions": {
+            "known": true,
+            "complete": true,
+            "signature": "141:1knv14o",
+            "categories": [
+              {
+                "id": "drive",
+                "label": "云盘文件",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "docs",
+                "label": "文档读写",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "wiki",
+                "label": "知识库",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "base",
+                "label": "多维表格",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "contact",
+                "label": "通讯录",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "im",
+                "label": "聊天读写",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "vc",
+                "label": "视频会议",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "minutes",
+                "label": "妙记与会议纪要",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "calendar",
+                "label": "日程",
+                "state": "ready",
+                "missing": []
+              },
+              {
+                "id": "task",
+                "label": "待办",
+                "state": "ready",
+                "missing": []
+              }
+            ]
+          },
+          "capabilities": {
+            "docsKb": {
+              "known": true,
+              "ready": true,
+              "label": "文档/知识库",
+              "missing": [],
+              "categories": [
+                {
+                  "id": "drive",
+                  "label": "云盘文件",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "docs",
+                  "label": "文档读写",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "wiki",
+                  "label": "知识库",
+                  "state": "ready",
+                  "missing": []
+                }
+              ]
+            },
+            "officeCore": {
+              "known": true,
+              "ready": true,
+              "label": "办公基础能力",
+              "missing": [],
+              "categories": [
+                {
+                  "id": "drive",
+                  "label": "云盘文件",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "docs",
+                  "label": "文档读写",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "wiki",
+                  "label": "知识库",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "base",
+                  "label": "多维表格",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "contact",
+                  "label": "通讯录",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "im",
+                  "label": "聊天读写",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "vc",
+                  "label": "视频会议",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "minutes",
+                  "label": "妙记与会议纪要",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "task",
+                  "label": "待办",
+                  "state": "ready",
+                  "missing": []
+                }
+              ]
+            },
+            "todayPriority": {
+              "known": true,
+              "ready": true,
+              "label": "今日进度",
+              "missing": [],
+              "categories": [
+                {
+                  "id": "calendar",
+                  "label": "日程",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "task",
+                  "label": "待办",
+                  "state": "ready",
+                  "missing": []
+                },
+                {
+                  "id": "im",
+                  "label": "聊天读写",
+                  "state": "ready",
+                  "missing": []
+                }
+              ]
+            }
+          },
+          "permissionPlan": {
+            "known": true,
+            "mode": "full",
+            "categories": [
+              {
+                "id": "drive",
+                "label": "云盘文件",
+                "state": "ready",
+                "scopes": [
+                  "drive:drive:readonly"
+                ]
+              },
+              {
+                "id": "docs",
+                "label": "文档读写",
+                "state": "ready",
+                "scopes": [
+                  "search:docs:read",
+                  "docx:document:readonly",
+                  "docx:document:create"
+                ]
+              },
+              {
+                "id": "wiki",
+                "label": "知识库",
+                "state": "ready",
+                "scopes": [
+                  "wiki:node:read",
+                  "wiki:space:read"
+                ]
+              },
+              {
+                "id": "base",
+                "label": "多维表格",
+                "state": "ready",
+                "scopes": [
+                  "bitable:app:readonly"
+                ]
+              },
+              {
+                "id": "contact",
+                "label": "通讯录",
+                "state": "ready",
+                "scopes": [
+                  "contact:user:search"
+                ]
+              },
+              {
+                "id": "im",
+                "label": "聊天读写",
+                "state": "ready",
+                "scopes": [
+                  "im:chat:read",
+                  "im:message:readonly",
+                  "im:message.send_as_user"
+                ]
+              },
+              {
+                "id": "vc",
+                "label": "视频会议",
+                "state": "ready",
+                "scopes": [
+                  "vc:meeting.search:read"
+                ]
+              },
+              {
+                "id": "minutes",
+                "label": "妙记与会议纪要",
+                "state": "ready",
+                "scopes": [
+                  "minutes:minutes.search:read",
+                  "minutes:permission:apply"
+                ]
+              },
+              {
+                "id": "calendar",
+                "label": "日程",
+                "state": "ready",
+                "scopes": [
+                  "calendar:calendar:readonly"
+                ]
+              },
+              {
+                "id": "task",
+                "label": "待办",
+                "state": "ready",
+                "scopes": [
+                  "task:task:read"
+                ]
+              }
+            ],
+            "missingCategories": [],
+            "scopes": [
+              "auth:user.id:read",
+              "contact:user:search",
+              "im:chat:read",
+              "im:message:readonly",
+              "im:message.send_as_user",
+              "drive:drive:readonly",
+              "search:docs:read",
+              "docx:document:readonly",
+              "docx:document:create",
+              "docx:document:write_only",
+              "wiki:node:read",
+              "wiki:space:read",
+              "bitable:app:readonly",
+              "calendar:calendar:readonly",
+              "task:task:read",
+              "vc:meeting.search:read",
+              "minutes:minutes.search:read",
+              "minutes:permission:apply"
+            ]
+          },
+          "projectedAllowlist": []
+        }
+      }
+    },
+    {
+      "id": "related-task-entry-clickable",
+      "pass": true
+    },
+    {
+      "id": "unauthorized-preflight-blocks-generation",
+      "pass": true,
+      "detail": "要分析跟你相关的聊天，我得先连上飞书读取你今天的会话。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「分析跟我相关的聊天」。"
+    },
+    {
+      "id": "writing-empty-uses-pack-skill-tasks",
+      "pass": true,
+      "detail": {
+        "writingSelected": true,
+        "writingCards": [
+          "\n          写需求文档背景、范围、验收标准、风险\n        ",
+          "\n          写办公文档通知、汇报、周报、纪要等成稿\n        ",
+          "\n          按提纲成稿提纲扩写为完整段落与过渡\n        ",
+          "\n          排版定稿统一结构、列表、行动项与可发送版本\n        "
+        ],
+        "writingState": {
+          "sessions": {
+            "agents": [
+              {
+                "id": "general",
+                "name": "通用",
+                "icon": "chat",
+                "description": "处理日常问题与笔记整理"
+              },
+              {
+                "id": "steward",
+                "name": "知识管家",
+                "icon": "book",
+                "description": "整理 Wiki、健康检查与升格 OKF"
+              },
+              {
+                "id": "writing",
+                "name": "写作",
+                "icon": "edit",
+                "description": "润色、改写与内容结构化"
+              },
+              {
+                "id": "coding",
+                "name": "编程",
+                "icon": "code",
+                "description": "分析代码与实现方案"
+              }
+            ],
+            "sessions": [
+              {
+                "id": "session_1785956956891_12e9dbfd",
+                "agentId": "writing",
+                "expertId": "",
+                "capabilitySnapshotId": "",
+                "snapshotPath": "",
+                "ephemeral": false,
+                "title": "新助手",
+                "createdAt": "2026-08-05T19:09:16.891Z",
+                "updatedAt": "2026-08-05T19:09:16.891Z",
+                "summary": "",
+                "pinned": false,
+                "run": {
+                  "goal": "",
+                  "role": "writing",
+                  "status": "active",
+                  "toolsUsed": [],
+                  "steps": [],
+                  "artifacts": [],
+                  "applyLog": []
+                },
+                "displayTitle": "写作",
+                "labels": [],
+                "grounding": "",
+                "expertName": "",
+                "messageCount": 0,
+                "resume": null
+              },
+              {
+                "id": "session_1785956949336_bc747bce",
+                "agentId": "general",
+                "expertId": "",
+                "capabilitySnapshotId": "",
+                "snapshotPath": "",
+                "ephemeral": false,
+                "title": "新助手",
+                "createdAt": "2026-08-05T19:09:09.336Z",
+                "updatedAt": "2026-08-05T19:09:09.336Z",
+                "summary": "",
+                "pinned": false,
+                "run": {
+                  "goal": "",
+                  "role": "general",
+                  "status": "active",
+                  "toolsUsed": [],
+                  "steps": [],
+                  "artifacts": [],
+                  "applyLog": []
+                },
+                "displayTitle": "通用",
+                "labels": [],
+                "grounding": "",
+                "expertName": "",
+                "messageCount": 0,
+                "resume": null
+              }
+            ],
+            "ui": {
+              "openSessionIds": [
+                "session_1785956956891_12e9dbfd",
+                "session_1785956949336_bc747bce"
+              ],
+              "activeSessionId": "session_1785956956891_12e9dbfd"
+            }
+          },
+          "shortcuts": [
+            "writingRequirementsDoc",
+            "writingOfficeDoc",
+            "writingOutlineDraft",
+            "writingFinalize"
+          ],
+          "emptyText": "\n      写作办公搭档\n      点一个日常文档任务立即开工；也可直接贴提纲、草稿或材料。\n      \n        \n        \n          写需求文档背景、范围、验收标准、风险\n        \n        \n          写办公文档通知、汇报、周报、纪要等成稿\n        \n        \n          按提纲成稿提纲扩写为完整段落与过渡\n        \n        \n          排版定稿统一结构、列表、行动项与可发送版本\n        \n      \n    "
+        }
+      }
+    },
+    {
+      "id": "no-renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "consoleErrors": []
+}

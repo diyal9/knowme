@@ -1,0 +1,113 @@
+{
+  "at": "2026-08-05T16:49:41.202Z",
+  "role": "producer",
+  "change": "strengthen-workbench-tool-surface",
+  "ok": true,
+  "scenarios": [
+    {
+      "label": "v1",
+      "envFlag": "v1",
+      "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-producer-v1-7P61R3",
+      "ok": true,
+      "checks": [
+        {
+          "id": "rail-ai-visible",
+          "pass": true
+        },
+        {
+          "id": "workbench-screenshot",
+          "pass": true,
+          "path": "screenshots\\producer-v1-workbench.png"
+        },
+        {
+          "id": "agent-chat-log-present",
+          "pass": true
+        },
+        {
+          "id": "preload-toolApproveDraft",
+          "pass": true
+        },
+        {
+          "id": "preload-toolDraftsList",
+          "pass": true
+        },
+        {
+          "id": "approval-card-visible",
+          "pass": true
+        },
+        {
+          "id": "approval-diff-preview",
+          "pass": true
+        },
+        {
+          "id": "artifact-card-visible",
+          "pass": true
+        },
+        {
+          "id": "approval-screenshot",
+          "pass": true,
+          "path": "screenshots\\producer-v1-approval-timeline.png"
+        },
+        {
+          "id": "no-console-errors",
+          "pass": true,
+          "consoleErrors": []
+        }
+      ],
+      "consoleErrors": []
+    },
+    {
+      "label": "legacy",
+      "envFlag": "legacy",
+      "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-producer-legacy-2pGnsf",
+      "ok": true,
+      "checks": [
+        {
+          "id": "rail-ai-visible",
+          "pass": true
+        },
+        {
+          "id": "workbench-screenshot",
+          "pass": true,
+          "path": "screenshots\\producer-legacy-workbench.png"
+        },
+        {
+          "id": "agent-chat-log-present",
+          "pass": true
+        },
+        {
+          "id": "preload-toolApproveDraft",
+          "pass": true
+        },
+        {
+          "id": "preload-toolDraftsList",
+          "pass": true
+        },
+        {
+          "id": "approval-card-visible",
+          "pass": true
+        },
+        {
+          "id": "approval-diff-preview",
+          "pass": true
+        },
+        {
+          "id": "artifact-card-visible",
+          "pass": true
+        },
+        {
+          "id": "approval-screenshot",
+          "pass": true,
+          "path": "screenshots\\producer-legacy-approval-timeline.png"
+        },
+        {
+          "id": "no-console-errors",
+          "pass": true,
+          "consoleErrors": []
+        }
+      ],
+      "consoleErrors": []
+    }
+  ],
+  "note": "Electron 真机 UI 子集；完整 Agent 闭环见 fake eval + 单测；飞书/Playwright 真实凭据未执行"
+}

@@ -1,0 +1,50 @@
+{
+  "at": "2026-08-08T00:42:51.741Z",
+  "ok": true,
+  "mode": "electron",
+  "checks": [
+    {
+      "id": "home-three-paths",
+      "ok": true
+    },
+    {
+      "id": "legacy-removed",
+      "ok": true
+    },
+    {
+      "id": "goal-path-picker-visible",
+      "ok": true
+    },
+    {
+      "id": "graph-path-available",
+      "ok": true
+    },
+    {
+      "id": "pipeline-opens-flows",
+      "ok": true
+    },
+    {
+      "id": "team-assets-panel",
+      "ok": true
+    },
+    {
+      "id": "console-error-free",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [],
+  "homePaths": {
+    "pipeline": true,
+    "agent": true,
+    "graph": true,
+    "legacyHidden": true
+  },
+  "picker": {
+    "recommendation": "推荐：暂未匹配到固定管线，可先让系统生成 Agent 协作图草案。",
+    "graphContinue": true
+  },
+  "flows": {
+    "active": true,
+    "groups": true
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "scenes": [
+    {
+      "id": "feishu-today-priority",
+      "label": "今日优先级",
+      "description": "基于飞书日程/待办直接出 Top3",
+      "skillId": "feishu-today-priority",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": ["general"],
+      "keywords": "(今日优先级|今天优先级|Top3|today_priority|先做什么)",
+      "emptyPrompt": "请作为今日优先级助手：先调用 feishu.today_priority 拉取我今天的飞书日程、未完成待办与今日 @我 信号；拿到事实后立刻给出我现在先做的最多 3 件事（每项含优先级理由、预计耗时、第一步动作）。禁止先问三项澄清；仅当日程与待办都为空或无法判断时最多追问 1 句。",
+      "showInEmptyState": true
+    },
+    {
+      "id": "feishu-docs",
+      "label": "查文档/知识库",
+      "description": "个人文件夹、知识空间与最近编辑/阅读",
+      "skillId": "feishu-doc-kb",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": [],
+      "keywords": "(查文档|知识库|飞书文档|doc_kb|文件夹|最近编辑|最近阅读)",
+      "emptyPrompt": "请查文档/知识库：点击后直接执行。先检查飞书 user 授权；已授权则立刻调用 feishu.doc_kb_suggest，列出我的个人文件夹、可见知识库空间，以及依据个人记忆可能需要的文件（≤5）、最近自己编辑的文件（≤5）、最近自己阅读的文件（≤5）。首轮不要澄清提问、不读取正文；等我选定后再深入读取或检索。",
+      "showInEmptyState": true
+    },
+    {
+      "id": "feishu-meeting",
+      "label": "会议总结",
+      "description": "最近会议候选 → 妙记读取 → 结论与待办",
+      "skillId": "feishu-meeting-summary",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": [],
+      "keywords": "(会议总结|会议纪要|妙记|meeting_summary|meeting_read)",
+      "emptyPrompt": "请为我做会议总结：总结最近三天与我相关的会议。第一阶段仅展示候选会议列表；第二阶段等我选择具体会议后再读取并输出总结与待办。",
+      "showInEmptyState": true
+    },
+    {
+      "id": "feishu-chats",
+      "label": "相关聊天",
+      "description": "今天私聊/群聊主题与 @我 待回应",
+      "skillId": "feishu-related-chats",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": [],
+      "keywords": "(相关聊天|@我|未读|私聊|群聊|related_chats)",
+      "emptyPrompt": "请分析跟我相关的聊天：用飞书 CLI 读取我授权账号今天内的私聊与群聊主题及 @我 内容，整理待回应事项与建议下一步。",
+      "showInEmptyState": true
+    },
+    {
+      "id": "office-writing",
+      "label": "文档写作",
+      "description": "润色邮件、汇报与对外材料，保持语气一致",
+      "skillId": "writing-polish",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": ["writing"],
+      "keywords": "(写作|润色|邮件|汇报|文档|纪要|总结)",
+      "emptyPrompt": "帮我润色这份办公文档，保持结构清晰、语气专业",
+      "showInEmptyState": false
+    },
+    {
+      "id": "office-meeting",
+      "label": "会议协作",
+      "description": "整理会议要点、待办与飞书文档引用",
+      "skillId": "writing-polish",
+      "expertId": "office-partner",
+      "connectors": ["feishu"],
+      "legacyModes": [],
+      "keywords": "(会议|纪要|待办|飞书|日程)",
+      "emptyPrompt": "整理本次会议要点与待办，标注需跟进的负责人",
+      "showInEmptyState": false
+    }
+  ],
+  "scenePrompts": {
+    "feishu-today-priority": "你是 KnowMe 今日优先级助手。\n必须先调用 feishu.today_priority 拉取事实，再输出 Top3；禁止先问多项澄清。",
+    "feishu-docs": "你是 KnowMe 办公文档检索伙伴。\n先授权与检索，用户选定后再深入阅读；写入飞书须审批。",
+    "feishu-meeting": "你是 KnowMe 会议协作伙伴。\n先出候选会议列表，用户选定后再总结；不编造未读取的内容。",
+    "feishu-chats": "你是 KnowMe 飞书聊天整理伙伴。\n优先整理今天 @我 与待回应事项。",
+    "office-writing": "你是 KnowMe 办公写作伙伴。\n优先输出可直接发送的文档；引用飞书资料时标注来源，写入须等用户审批。",
+    "office-meeting": "你是 KnowMe 会议协作伙伴。\n整理结论、待办与责任人；外部写入仅生成审批草稿。"
+  },
+  "legacyModeMap": {
+    "writing": "office-writing",
+    "general": "feishu-today-priority"
+  }
+}

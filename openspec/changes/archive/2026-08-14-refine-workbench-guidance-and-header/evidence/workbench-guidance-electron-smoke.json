@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-08-07T10:50:29.471Z",
+  "pass": true,
+  "viewports": [
+    {
+      "width": 1360,
+      "height": 860
+    },
+    {
+      "width": 780,
+      "height": 720
+    }
+  ],
+  "checks": [
+    {
+      "id": "integrated-mode-context",
+      "pass": true,
+      "detail": {
+        "headOverflowX": false,
+        "switcherHeight": 34,
+        "emptyHeight": 96
+      }
+    },
+    {
+      "id": "actionable-empty-state",
+      "pass": true,
+      "detail": {
+        "copy": "\n          \n          \n            为「视觉创作」接通第一个工作流\n            安装适合「视觉创作」的技能或添加 Agent 后，就能在这里选择流程并开始工作。\n          \n          \n            安装专业能力\n            添加 Agent\n          \n        ",
+        "height": 96
+      }
+    },
+    {
+      "id": "capability-and-agent-actions",
+      "pass": true,
+      "detail": {
+        "capabilitySrc": "capability-hub.html?embedded=1&tab=skills",
+        "agentSrc": "capability-hub.html?embedded=1&tab=experts"
+      }
+    },
+    {
+      "id": "cross-mode-history-disclosure",
+      "pass": true,
+      "detail": {
+        "recentNote": "跨模式历史 · 来自软件研发",
+        "failedActionCount": 8
+      }
+    },
+    {
+      "id": "failed-run-details-label",
+      "pass": true,
+      "detail": [
+        "查看详情",
+        "查看详情",
+        "查看详情",
+        "查看详情",
+        "查看详情",
+        "查看详情",
+        "查看详情",
+        "查看详情"
+      ]
+    },
+    {
+      "id": "responsive-no-overflow",
+      "pass": true,
+      "detail": {
+        "desktopBounds": {
+          "headOverflowX": false,
+          "switcherHeight": 34,
+          "emptyHeight": 96
+        },
+        "narrowBounds": {
+          "headOverflowX": false,
+          "emptyOverflowX": false
+        }
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

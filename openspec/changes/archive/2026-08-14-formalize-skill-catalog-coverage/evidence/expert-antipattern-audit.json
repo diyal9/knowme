@@ -1,0 +1,315 @@
+{
+  "packs": [
+    "game-studio",
+    "office-partner"
+  ],
+  "catalogExperts": [
+    "action-owner",
+    "copywriter",
+    "developer",
+    "game-studio-partner",
+    "meeting-scribe",
+    "office-partner",
+    "producer",
+    "tester",
+    "visual-designer"
+  ],
+  "hubExperts": [
+    {
+      "id": "office-partner",
+      "name": "办公伙伴",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "tester",
+      "name": "测试",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "action-owner",
+      "name": "待办编排",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "meeting-scribe",
+      "name": "纪要专家",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "developer",
+      "name": "开发",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "visual-designer",
+      "name": "视觉",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "copywriter",
+      "name": "文案",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "producer",
+      "name": "制作人",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "game-studio-partner",
+      "name": "game-studio-partner",
+      "source": "curated",
+      "status": "enabled"
+    },
+    {
+      "id": "qa-copy-n1fa1g",
+      "name": "QA 自建 qa-copy-n1fa1g",
+      "source": "custom",
+      "status": "enabled"
+    },
+    {
+      "id": "test1",
+      "name": "test1",
+      "source": "custom",
+      "status": "enabled"
+    }
+  ],
+  "installedExperts": [
+    {
+      "id": "office-partner",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "meeting-scribe",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "action-owner",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "producer",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "developer",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "tester",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "copywriter",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "visual-designer",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    },
+    {
+      "id": "game-studio-partner",
+      "source": "curated",
+      "status": "enabled",
+      "enabled": true
+    }
+  ],
+  "loadFailures": [],
+  "skillLoadFailures": [],
+  "workflows": [
+    {
+      "id": "official-office-meeting-loop",
+      "name": "会议闭环",
+      "agents": [
+        "meeting-scribe",
+        "action-owner",
+        "office-partner"
+      ],
+      "skills": [
+        "writing-polish",
+        "feishu-meeting-summary"
+      ]
+    },
+    {
+      "id": "official-engineering-team-delivery",
+      "name": "三角色协作交付",
+      "agents": [
+        "producer",
+        "developer",
+        "tester"
+      ],
+      "skills": [
+        "code-review"
+      ]
+    },
+    {
+      "id": "official-visual-brief-review",
+      "name": "Brief 出图审阅",
+      "agents": [
+        "copywriter",
+        "visual-designer"
+      ],
+      "skills": [
+        "writing-polish",
+        "visual-brief-prompt"
+      ]
+    }
+  ],
+  "wfIssues": [],
+  "sceneIssues": [],
+  "modeIssues": [],
+  "taskGhostCount": 5,
+  "taskGhosts": [
+    {
+      "taskId": "task-mspzyacr-h2xl0",
+      "title": "三元礼包",
+      "expertId": "artbundle-expert"
+    },
+    {
+      "taskId": "task-msosvseg-dh5y2",
+      "title": "与 BI 分析智能体 协作",
+      "expertId": "th-bi-b34eeabc8d"
+    },
+    {
+      "taskId": "task-msorsd2k-h2ktl",
+      "title": "与 BI 分析智能体 协作",
+      "expertId": "th-bi-b34eeabc8d"
+    },
+    {
+      "taskId": "task-mson7xhr-fklh6",
+      "title": "与 BI 分析智能体 协作",
+      "expertId": "th-bi-b34eeabc8d"
+    },
+    {
+      "taskId": "task-mson6c33-ymmor",
+      "title": "与 BI 分析智能体 协作",
+      "expertId": "th-bi-b34eeabc8d"
+    }
+  ],
+  "orphanDirs": [
+    "qa-copy-n1fa1g",
+    "test1"
+  ],
+  "catalogMissingFromHub": [],
+  "nameCollisions": [],
+  "emptySkillExperts": [
+    {
+      "id": "test1",
+      "name": "test1",
+      "bodyLen": 0
+    }
+  ],
+  "thinBodyExperts": [
+    {
+      "id": "action-owner",
+      "name": "待办编排",
+      "bodyLen": 0
+    },
+    {
+      "id": "copywriter",
+      "name": "文案",
+      "bodyLen": 0
+    },
+    {
+      "id": "developer",
+      "name": "开发",
+      "bodyLen": 0
+    },
+    {
+      "id": "game-studio-partner",
+      "name": "game-studio-partner",
+      "bodyLen": 55
+    },
+    {
+      "id": "meeting-scribe",
+      "name": "纪要专家",
+      "bodyLen": 0
+    },
+    {
+      "id": "office-partner",
+      "name": "office-partner",
+      "bodyLen": 58
+    },
+    {
+      "id": "producer",
+      "name": "制作人",
+      "bodyLen": 0
+    },
+    {
+      "id": "tester",
+      "name": "测试",
+      "bodyLen": 0
+    },
+    {
+      "id": "visual-designer",
+      "name": "视觉",
+      "bodyLen": 0
+    },
+    {
+      "id": "qa-copy-n1fa1g",
+      "name": "QA 自建 qa-copy-n1fa1g",
+      "bodyLen": 0
+    },
+    {
+      "id": "test1",
+      "name": "test1",
+      "bodyLen": 0
+    }
+  ],
+  "hubSkillCount": 16,
+  "emptyScenes": [
+    {
+      "pack": "office-partner",
+      "id": "feishu-today-priority",
+      "label": "今日优先级"
+    },
+    {
+      "pack": "office-partner",
+      "id": "feishu-docs",
+      "label": "查文档/知识库"
+    },
+    {
+      "pack": "office-partner",
+      "id": "feishu-meeting",
+      "label": "会议总结"
+    },
+    {
+      "pack": "office-partner",
+      "id": "feishu-chats",
+      "label": "相关聊天"
+    }
+  ],
+  "summary": {
+    "expertLoadOk": 11,
+    "expertLoadFail": 0,
+    "wfIssueCount": 0,
+    "sceneIssueCount": 0,
+    "modeIssueCount": 0,
+    "orphanDirCount": 2,
+    "emptySkillExpertCount": 1
+  }
+}

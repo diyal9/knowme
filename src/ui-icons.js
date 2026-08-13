@@ -13,13 +13,15 @@
   const lucideSet = new Set([
     'obsidianNewNote', 'obsidianFolderPlus', 'obsidianSort', 'obsidianPanel', 'obsidianCollapse', 'sidePanel',
     'folder', 'file', 'chevronTree', 'searchLine', 'starLine', 'listLine', 'settingsLine', 'chevronLeftLine', 'plusLine', 'collapseAll',
-    'history', 'eye', 'note', 'code', 'star', 'chat', 'copy', 'send', 'chevronLeft', 'chevronRight', 'list', 'optimize', 'expandText', 'simplify', 'en', 'bold', 'italic', 'strikethrough', 'link', 'close', 'classify', 'trash', 'settings', 'plus', 'columns', 'newVersion', 'edit',
+    'history', 'eye', 'note', 'code', 'image', 'star', 'chat', 'copy', 'send', 'chevronLeft', 'chevronRight', 'list', 'optimize', 'expandText', 'simplify', 'en', 'bold', 'italic', 'strikethrough', 'link', 'close', 'maximize', 'externalLink', 'circleX', 'classify', 'trash', 'settings', 'plus', 'columns', 'newVersion', 'edit',
     'bookOpen', 'pencilLine', 'moreVertical', 'moreHorizontal', 'paperclip',
     'coffee', 'mail', 'wechat',
     // 工作台：必须用 24 viewBox，否则 path 被 16 裁切显得「残缺」
-    'workbench', 'workflow', 'users', 'play', 'step', 'refresh', 'automation',
+    'workbench', 'workflow', 'users', 'play', 'step', 'refresh', 'automation', 'clock',
     'database', 'component', 'capabilityStack', 'network', 'flask', 'server', 'clipboardCheck',
-    'panelsTopLeft', 'terminal',
+    'panelsTopLeft', 'terminal', 'arrowLeftRight',
+    'save', 'alignLeft', 'alignTop', 'alignCenterH', 'layoutTidy', 'square',
+    'gamepad',
   ])
 
   const paths = {
@@ -130,6 +132,7 @@
 
     // Codicon code（16×16 内联）
     code: `<path ${F} d="M5.5 4.5L2.5 8L5.5 11.5L4.5 12.5L0.5 8.5V7.5L4.5 3.5L5.5 4.5ZM10.5 4.5L11.5 3.5L15.5 7.5V8.5L11.5 12.5L10.5 11.5L13.5 8L10.5 4.5Z"/>`,
+    image: `<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-4.5-4.5L7 20"/>`,
 
     // Codicon quote
     quote: `<path ${F} d="M3.5 3C2.67157 3 2 3.67157 2 4.5V9.5C2 10.3284 2.67157 11 3.5 11H4V13.5C4 13.7761 4.22386 14 4.5 14C4.63261 14 4.75979 13.9473 4.85355 13.8536L7.35355 11.3536C7.44732 11.2598 7.5 11.1326 7.5 11V4.5C7.5 3.67157 6.82843 3 6 3H3.5ZM10 3C9.17157 3 8.5 3.67157 8.5 4.5V9.5C8.5 10.3284 9.17157 11 10 11H10.5V13.5C10.5 13.7761 10.724 14 10.951 14C11.083 14 11.21 13.947 11.304 13.853L13.804 11.353C13.898 11.259 13.951 11.132 13.951 11V4.5C13.951 3.672 13.279 3 12.451 3H10Z"/>`,
@@ -187,9 +190,25 @@
     users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,
     // Lucide refresh-cw
     refresh: `<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>`,
+    // Lucide arrow-left-right（切换内容源）
+    arrowLeftRight: `<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>`,
     // 自动化（循环执行 + 智能中心）
     automation: `<path d="M4 12a8 8 0 0 1 13.66-5.66L20 8"/><path d="M20 4v4h-4"/><path d="M20 12a8 8 0 0 1-13.66 5.66L4 16"/><path d="M4 20v-4h4"/><path d="m12 9 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/>`,
+    // Lucide clock — 定时任务
+    clock: `<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>`,
     play: `<polygon points="6 3 20 12 6 21 6 3"/>`,
+    // Lucide gamepad-2 — 游戏域技能代表图标
+    gamepad: `<line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>`,
+    // Lucide square — 结束节点等
+    square: `<rect width="18" height="18" x="3" y="3" rx="2"/>`,
+    // Lucide save
+    save: `<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>`,
+    // Lucide align-start-vertical / align-start-horizontal / align-center-vertical
+    alignLeft: `<rect width="6" height="14" x="5" y="5" rx="2"/><rect width="6" height="10" x="13" y="7" rx="2"/><path d="M2 2v20"/>`,
+    alignTop: `<rect width="14" height="6" x="5" y="5" rx="2"/><rect width="10" height="6" x="7" y="13" rx="2"/><path d="M2 2h20"/>`,
+    alignCenterH: `<rect width="6" height="14" x="9" y="5" rx="2"/><rect width="6" height="10" x="16" y="7" rx="2"/><path d="M2 12h20"/>`,
+    // Lucide layout-template — 一键整理
+    layoutTidy: `<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/>`,
     step: `<path d="M6 4h2v16H6z"/><path d="m10 4 10 8-10 8z"/>`,
     copy: `<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`,
     send: `<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>`,
@@ -205,6 +224,9 @@
     strikethrough: `<path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><line x1="4" x2="20" y1="12" y2="12"/>`,
     link: `<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>`,
     close: `<path d="M18 6 6 18"/><path d="m6 6 12 12"/>`,
+    maximize: `<path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/>`,
+    externalLink: `<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>`,
+    circleX: `<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>`,
     classify: `<path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>`,
     trash: `<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>`,
     settings: `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`,

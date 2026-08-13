@@ -1,0 +1,60 @@
+{
+  "at": "2026-08-09T15:51:58.679Z",
+  "ok": true,
+  "mode": "electron",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-dual-track-BBAgYC",
+  "checks": [
+    {
+      "id": "two-user-paths",
+      "ok": true,
+      "detail": "[\"开始工作\",\"搭建 Agent\"]"
+    },
+    {
+      "id": "start-work-closure",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "desktop-no-page-overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "editable-agent-steps",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "inline-node-settings",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "workflow-and-profile-saved",
+      "ok": true,
+      "detail": "{\"profileSaved\":true,\"packageError\":\"\",\"visibleText\":\"文件\\n助理\\n工作台\\n能力\\n自动化\\n知识网\\n设置\\n我的空间\\n个人知识库\\n本地知识库\\n第二大脑\\n代码仓库\\n管理\\n暂无 GitLab / GitHub 仓库\\n网页资料\\n暂无网页资料\\n其他本地目录\\n暂无本地目录\\nAI 生成\\n最近 8 项\\n暂无生成产物\\n当前没有选中的内容源。\\n可从代码仓库、网页资料或本地目录中选择。\\n开始工作\\n搭建 Agent\\n全部\\n办公\\n研发\\n视觉\\n日常办公\\n软件研发\\n视觉创作\\n开始一项工作\\n选择 AGENT\\n我的 Agent\\n新建\\n\\n拖入中间步骤流，或使用“添加到流程”。\\n\\n开发 Agent\\n负责实现、验证和交付。\\n添加到流程\\n测试 Agent\\n负责质量验证和体验审查。\\n添加到流程\\n打开我的工作流\\n我的 Agent 协作\\n2 位 Agent · 已保存\\n保存\\n测试运行\\n1\\n负责实现功能并完成开发自测\\n负责实现功能并完成开发自测 · 0 个 Skill\\n↑\\n↓\\n＋\\n×\\n接着执行\\n同时执行\\n执行前确认\\n2\\n测试 Agent\\n测试 Agent · 0 个 Skill\\n↑\\n↓\\n＋\\n×\\nAGENT 设置\\n负责实现功能并完成开发自测\\n名称\\n职责\\nSkill\\n还没有已安装 Skill，可从能力中心添加。\\n提示词\\n知识库\\n我的第二大脑\\n允许读取工作记忆\\n高级设置\\n保存为我的 Agent\\n面板\\n已保存到“我的工作流”\\nKnowMe 助理\\n快捷操作\\n加入待办\\n当前主题\\n日志中心\\n运行/LLM/MCP\\n日志目录\"}"
+    },
+    {
+      "id": "profile-snapshot-fields",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-layout-usable",
+      "ok": true,
+      "detail": "{\"pageWidthOk\":true,\"graphWidthOk\":true,\"inspectorVisible\":true}"
+    },
+    {
+      "id": "restart-restores-node-settings",
+      "ok": true,
+      "detail": "{\"workflowId\":\"my-mslzdih1\",\"relation\":\"parallel\",\"prompt\":\"先理解目标，再实现；不得跳过测试；输出改动与证据。\"}"
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "failures": [],
+  "consoleErrors": []
+}

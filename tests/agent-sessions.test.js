@@ -178,4 +178,61 @@ describe('agent sessions', () => {
     assert.equal(contextMessages(session).some(m => m.role === 'tool'), false)
     assert.ok(buildTranscriptText(session).includes('Tool (search_knowledge)'))
   })
+
+  it('preserves v2 assistant metadata, choices and review state', () => {
+    const session = normalizeSession({
+      id: 's_v2',
+      agentId: 'general',
+      messages: [{
+        role: 'assistant',
+        text: '最终答复',
+        protocolVersion: 2,
+        answerHash: 'hash_1',
+        ui: [{
+          kind: 'choice',
+          title: '下一步',
+          items: [{ id: 'go', label: '继续', action: 'send', payload: 'go' }],
+        }],
+        trace: [{
+          id: 'write_1',
+          kind: 'tool',
+          title: '写入文件',
+          status: 'done',
+          requiresApproval: true,
+          draftId: 'draft_1',
+          draftStatus: 'pending_review',
+        }],
+      }],
+    })
+    const message = session.messages[0]
+    assert.equal(message.protocolVersion, 2)
+    assert.equal(message.answerHash, 'hash_1')
+    assert.equal(message.ui[0].items[0].action, 'send')
+    assert.equal(message.trace[0].requiresApproval, true)
+    assert.equal(message.trace[0].draftStatus, 'pending_review')
+  })
+
+  it('normalizes taskRef and bounded knowledgeRefs on create and migrate', () => {
+    const session = createSession('general', 1, {
+      taskRef: { id: 'task-abc' },
+      knowledgeRefs: [
+        { id: 'local-default' },
+        { id: 'local-default' },
+        { id: 'kp_remote' },
+      ],
+    })
+    assert.deepEqual(session.taskRef, { id: 'task-abc' })
+    assert.deepEqual(session.knowledgeRefs, [{ id: 'local-default' }, { id: 'kp_remote' }])
+
+    const migrated = normalizeSession({
+      id: 's_ctx',
+      agentId: 'general',
+      taskRef: { id: 'task-old', secret: 'drop-me' },
+      knowledgeRefs: Array.from({ length: 20 }, (_, i) => ({ id: `kp_${i}` })),
+    })
+    assert.deepEqual(migrated.taskRef, { id: 'task-old' })
+    assert.equal(migrated.knowledgeRefs.length, 16)
+    assert.equal(migrated.knowledgeRefs[0].id, 'kp_0')
+    assert.equal(migrated.knowledgeRefs[15].id, 'kp_15')
+  })
 })

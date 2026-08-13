@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-08-07T08:54:09.480Z",
+  "probe": {
+    "ok": true,
+    "provider": "bing-rss",
+    "query": "AI",
+    "count": 3,
+    "firstUrl": "https://www.msn.com/en-us/news/technology/the-latest-scary-sounding-ai-milestone-a-brand-new-virus/ar-AA29zmNn",
+    "retrievedAt": "2026-08-07T08:54:09.474Z",
+    "code": null,
+    "message": null
+  }
+}

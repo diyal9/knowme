@@ -54,10 +54,6 @@
     "stop": [
       {
         "command": "python -X utf8 .cursor/hooks/memory_cursor_hook.py stop"
-      },
-      {
-        "command": "node .cursor/hooks/stop-gate-reminder.js",
-        "loop_limit": 1
       }
     ]
   }

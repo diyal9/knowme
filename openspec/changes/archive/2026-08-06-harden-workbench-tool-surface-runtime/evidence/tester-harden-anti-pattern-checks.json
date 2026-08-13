@@ -1,0 +1,105 @@
+{
+  "change": "harden-workbench-tool-surface-runtime",
+  "at": "2026-08-05T17:52:00.893Z",
+  "total": 16,
+  "pass": 16,
+  "fail": 0,
+  "checks": [
+    {
+      "id": "AP1/rapid-approve-once",
+      "ok": true,
+      "level": "blocking",
+      "detail": "second=not_pending"
+    },
+    {
+      "id": "AP2/cross-window-not-pending",
+      "ok": true,
+      "level": "blocking",
+      "detail": "not_pending"
+    },
+    {
+      "id": "AP3/reject-no-write",
+      "ok": true,
+      "level": "blocking",
+      "detail": "disk unchanged"
+    },
+    {
+      "id": "AP4/cancel-subrun",
+      "ok": true,
+      "level": "blocking",
+      "detail": "elapsed=0ms"
+    },
+    {
+      "id": "AP5/powershell-injection",
+      "ok": true,
+      "level": "blocking",
+      "detail": "危险命令被拦截"
+    },
+    {
+      "id": "AP6/node-eval-injection",
+      "ok": true,
+      "level": "blocking",
+      "detail": "检测到 node -e/--eval/-p/--print 内联脚本；沙箱禁止该方式执行（可绕过禁网），请改用 workspace 内的 .js 脚本文件。"
+    },
+    {
+      "id": "AP7/intranet-scope-denied",
+      "ok": true,
+      "level": "blocking",
+      "detail": "域名被拦截: 192.168.0.1"
+    },
+    {
+      "id": "AP8/token-redaction",
+      "ok": true,
+      "level": "blocking",
+      "detail": "masked"
+    },
+    {
+      "id": "AP9/move-rollback",
+      "ok": true,
+      "level": "blocking",
+      "detail": "已回滚移动 src/a.txt → src/b.txt"
+    },
+    {
+      "id": "AP10/mkdir-low-risk-label",
+      "ok": true,
+      "level": "blocking",
+      "detail": "已创建目录 `parent/child` · 低风险直建"
+    },
+    {
+      "id": "AP11/store-lru-cap",
+      "ok": true,
+      "level": "blocking",
+      "detail": "size=2"
+    },
+    {
+      "id": "AP12/old-id-friendly",
+      "ok": true,
+      "level": "blocking",
+      "detail": "任务不存在或已清理"
+    },
+    {
+      "id": "AP15/legacy-no-write",
+      "ok": true,
+      "level": "blocking",
+      "detail": "filtered"
+    },
+    {
+      "id": "AP14/approve-ipc-handler",
+      "ok": true,
+      "level": "blocking",
+      "detail": "exported"
+    },
+    {
+      "id": "AP13/hub-playwright-link",
+      "ok": true,
+      "level": "advisory",
+      "detail": "click handler"
+    },
+    {
+      "id": "M2/strip-fakeApply",
+      "ok": true,
+      "level": "blocking",
+      "detail": "stripped"
+    }
+  ]
+}

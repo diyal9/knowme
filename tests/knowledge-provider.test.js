@@ -5,13 +5,20 @@ const assert = require('node:assert')
 const kp = require('../src/lib/knowledge-provider')
 
 describe('knowledge-provider', () => {
-  it('normalizes local and remote-rag defaults', () => {
+  it('normalizes local, qmd-local and remote-rag defaults', () => {
     const local = kp.normalizeProvider({ id: 'a' })
     assert.equal(local.kind, 'local')
+    assert.equal(local.scope, 'client')
+    assert.equal(local.authority, 2)
     assert.equal(local.displayName, '本地知识库')
-    const rag = kp.normalizeProvider({ id: 'b', kind: 'remote-rag' })
+    const qmd = kp.normalizeProvider({ id: 'b', kind: 'qmd-local', authority: 4, collectionId: 'root' })
+    assert.equal(qmd.kind, 'qmd-local')
+    assert.equal(qmd.collectionId, 'root')
+    assert.equal(qmd.authority, 4)
+    const rag = kp.normalizeProvider({ id: 'c', kind: 'remote-rag' })
     assert.equal(rag.kind, 'remote-rag')
     assert.equal(rag.topK, kp.DEFAULT_TOPK)
+    assert.equal(rag.writable, false)
   })
 
   it('redacts apiKey in listing (hasApiKey only)', () => {

@@ -1,0 +1,172 @@
+{
+  "at": "2026-08-10T06:44:40.935Z",
+  "ok": false,
+  "consoleErrors": [
+    "screenshot manage-drawer.png: page.screenshot: Timeout 15000ms exceeded.",
+    "screenshot run-live-stage.png: page.screenshot: Timeout 15000ms exceeded."
+  ],
+  "checks": [
+    {
+      "id": "shelf-active",
+      "ok": true
+    },
+    {
+      "id": "shelf-has-cards",
+      "ok": true,
+      "cards": 3,
+      "runnable": 1,
+      "summary": "3 个工作流 · 1 个现在可以运行"
+    },
+    {
+      "id": "shelf-summary-honest",
+      "ok": true
+    },
+    {
+      "id": "empty-state-consistent",
+      "ok": true
+    },
+    {
+      "id": "legacy-entries-removed",
+      "ok": true,
+      "legacyEntries": []
+    },
+    {
+      "id": "domain-filter-applies",
+      "ok": true,
+      "filtered": 1,
+      "clearVisible": true
+    },
+    {
+      "id": "filter-clear-restores",
+      "ok": true
+    },
+    {
+      "id": "mode-tabs-present",
+      "ok": true
+    },
+    {
+      "id": "team-tab-default-active",
+      "ok": true
+    },
+    {
+      "id": "domain-visible-on-team",
+      "ok": true
+    },
+    {
+      "id": "domain-hidden-on-mine",
+      "ok": true
+    },
+    {
+      "id": "mine-tab-content-or-selfstock",
+      "ok": true
+    },
+    {
+      "id": "team-tab-restores-domain",
+      "ok": true
+    },
+    {
+      "id": "manage-menu-opens",
+      "ok": true,
+      "debug": {
+        "hidden": false,
+        "display": "block",
+        "visibility": "visible",
+        "w": 200,
+        "h": 148
+      }
+    },
+    {
+      "id": "manage-panel-agents",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-studio",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-daemon",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-automation",
+      "ok": true
+    },
+    {
+      "id": "manage-drawer-closes",
+      "ok": true
+    },
+    {
+      "id": "run-surface-active",
+      "ok": true
+    },
+    {
+      "id": "run-stage-input",
+      "ok": true
+    },
+    {
+      "id": "run-input-has-goal-field",
+      "ok": true
+    },
+    {
+      "id": "run-backend-decided",
+      "ok": true,
+      "backend": "执行方式由系统决定：Local Team Runtime"
+    },
+    {
+      "id": "run-leaves-input-stage",
+      "ok": true,
+      "live": false,
+      "result": true,
+      "input": false,
+      "status": "任务已完成任务已结束，当前没有待审批或待澄清节点。",
+      "stepper": "done"
+    },
+    {
+      "id": "run-shows-live-status",
+      "ok": true,
+      "status": "任务已完成任务已结束，当前没有待审批或待澄清节点。"
+    },
+    {
+      "id": "no-blocking-mask-during-run",
+      "ok": true,
+      "blocking": ""
+    },
+    {
+      "id": "run-topbar-sits-above-body",
+      "ok": true,
+      "columns": "none",
+      "barBottom": 98,
+      "bodyTop": 98,
+      "barTop": 64
+    },
+    {
+      "id": "run-shell-is-single-column",
+      "ok": true,
+      "columns": "none",
+      "barBottom": 98,
+      "bodyTop": 98,
+      "barTop": 64
+    },
+    {
+      "id": "cancel-returns-to-shelf",
+      "ok": true
+    },
+    {
+      "id": "running-toggle-visible-after-launch",
+      "ok": true
+    },
+    {
+      "id": "narrow-no-horizontal-overflow",
+      "ok": true,
+      "overflow": 0
+    },
+    {
+      "id": "console-error-free",
+      "ok": false,
+      "errors": [
+        "screenshot manage-drawer.png: page.screenshot: Timeout 15000ms exceeded.",
+        "screenshot run-live-stage.png: page.screenshot: Timeout 15000ms exceeded."
+      ]
+    }
+  ]
+}

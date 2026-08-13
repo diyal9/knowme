@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-08-07T08:53:45.304Z",
+  "ok": true,
+  "mode": "electron-fixture",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-research-smoke-9xsK4W",
+  "checks": [
+    {
+      "id": "prompt-visible",
+      "pass": true
+    },
+    {
+      "id": "search-timeline",
+      "pass": true
+    },
+    {
+      "id": "fetch-timeline",
+      "pass": true
+    },
+    {
+      "id": "verify-timeline",
+      "pass": true
+    },
+    {
+      "id": "source-links",
+      "pass": true,
+      "count": 2
+    },
+    {
+      "id": "publication-and-retrieval-time",
+      "pass": true
+    },
+    {
+      "id": "no-single-feishu-choice",
+      "pass": true
+    },
+    {
+      "id": "no-console-errors",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "screenshot": "screenshots/realtime-research-timeline.png"
+}

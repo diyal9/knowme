@@ -1,0 +1,50 @@
+{
+  "change": "establish-root-knowledge-fabric",
+  "at": "2026-08-08T15:10:50.298Z",
+  "passed": 5,
+  "total": 5,
+  "ok": true,
+  "checks": [
+    {
+      "id": "retrieve-tab-search-hits",
+      "pass": true,
+      "detail": {
+        "hitCount": 2,
+        "routeText": "路由：根覆盖短路 · 根覆盖 17.7 · 引擎 fallback"
+      }
+    },
+    {
+      "id": "retrieve-no-result-empty-state",
+      "pass": true,
+      "detail": {
+        "hitCount": 0,
+        "emptyText": "未找到相关知识\n        试试更短或更通用的关键词，或先补充资料再检索。\n        \n          连接知识库\n          吸收资料\n          去织网整理",
+        "hasActions": true
+      }
+    },
+    {
+      "id": "weave-button-recovers-and-shows-proposal",
+      "pass": true,
+      "detail": {
+        "disabled": false,
+        "text": "织入当前库",
+        "pending": 1
+      }
+    },
+    {
+      "id": "weave-apply-closes-proposal-loop",
+      "pass": true,
+      "detail": {
+        "pending": 0,
+        "anchors": 2
+      }
+    },
+    {
+      "id": "console-clean",
+      "pass": true,
+      "detail": {
+        "consoleErrors": []
+      }
+    }
+  ]
+}

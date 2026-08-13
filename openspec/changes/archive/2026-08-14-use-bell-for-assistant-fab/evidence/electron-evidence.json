@@ -1,0 +1,22 @@
+{
+  "at": "2026-08-07T07:20:44.727Z",
+  "change": "use-bell-for-assistant-fab",
+  "check": {
+    "ok": true,
+    "bellWidth": 19,
+    "bellHeight": 19,
+    "fill": "none",
+    "stroke": "rgb(38, 56, 77)",
+    "badgeTop": "2px",
+    "badgeRight": "2px",
+    "badgeCount": 1,
+    "panelBrandPreserved": true
+  },
+  "pageErrors": [],
+  "consoleErrors": [],
+  "screenshots": [
+    "assistant-bell-workspace.png",
+    "assistant-bell-detail.png"
+  ],
+  "ok": true
+}

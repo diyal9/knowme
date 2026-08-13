@@ -1,0 +1,194 @@
+{
+  "change": "establish-root-knowledge-fabric",
+  "role": "tester",
+  "at": "2026-08-08T15:11:07.535Z",
+  "passed": 15,
+  "total": 15,
+  "ok": true,
+  "blockingFails": [],
+  "checks": [
+    {
+      "id": "empty-state-actionable-ctas",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "tabs": [
+          "状态",
+          "检索",
+          "织网",
+          "整理",
+          "连接"
+        ],
+        "hasEmpty": true,
+        "hasConnectBtn": true,
+        "hasWeaveBtn": true,
+        "hasOpenRetrieve": true,
+        "emptyCopy": "知识织网还是空的\n      连接资料后会自动从 Wiki 生成概念节点；挂载外挂库后可一键织网。\n      连接资料\n      生成织网提案",
+        "statsConcepts": "0"
+      }
+    },
+    {
+      "id": "regression-knowledge-tabs",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "tabs": [
+          "状态",
+          "检索",
+          "织网",
+          "整理",
+          "连接"
+        ]
+      }
+    },
+    {
+      "id": "retrieve-empty-guidance",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "placeholder": "例如：Electron IPC 便签同步",
+        "hasIngest": true,
+        "emptyHint": "输入问题试试根优先检索\n      会先查根 Fabric，再按路由选择性召回外挂库。"
+      }
+    },
+    {
+      "id": "empty-query-no-crash",
+      "pass": true,
+      "severity": "minor",
+      "detail": {
+        "toast": "请输入查询词"
+      }
+    },
+    {
+      "id": "special-chars-search-robust",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "hitCount": 0,
+        "routeText": "路由：广扇出 · 根覆盖 0.0 · 引擎 fallback"
+      }
+    },
+    {
+      "id": "narrow-viewport-fabric",
+      "pass": true,
+      "severity": "minor",
+      "detail": {
+        "overflowX": false,
+        "withinViewport": true
+      }
+    },
+    {
+      "id": "console-clean-empty-session",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "consoleErrors": []
+      }
+    },
+    {
+      "id": "retrieve-hit-with-provenance",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "hitCount": 2,
+        "hasKbTag": true,
+        "hasAuthority": true,
+        "routeText": "路由：根覆盖短路 · 根覆盖 17.7 · 引擎 fallback",
+        "snippet": "Electron IPC"
+      }
+    },
+    {
+      "id": "retrieve-no-result-guidance",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "hitCount": 0,
+        "emptyText": "未找到相关知识\n        试试更短或更通用的关键词，或先补充资料再检索。\n        \n          连接知识库\n          吸收资料\n          去织网整理",
+        "routeText": "路由：广扇出 · 根覆盖 0.0 · 引擎 fallback"
+      }
+    },
+    {
+      "id": "weave-generates-pending-proposal",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "pendingButtons": 1,
+        "rejectButtons": 1,
+        "proposalTitle": "织网：我的第二大脑"
+      }
+    },
+    {
+      "id": "weave-reject-no-write",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "conceptBefore": {
+          "concepts": 2,
+          "anchors": 0
+        },
+        "afterReject": {
+          "pending": 0,
+          "stats": [
+            2,
+            0,
+            0
+          ]
+        },
+        "proposalPending": {
+          "pendingButtons": 1,
+          "rejectButtons": 1,
+          "proposalTitle": "织网：我的第二大脑"
+        }
+      }
+    },
+    {
+      "id": "weave-apply-increases-graph",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "conceptBefore": {
+          "concepts": 2,
+          "anchors": 0
+        },
+        "afterApply": {
+          "pending": 0,
+          "stats": [
+            2,
+            2,
+            2
+          ],
+          "hasGraphSections": 3
+        },
+        "appliedOk": true
+      }
+    },
+    {
+      "id": "ingest-modal-accessible",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "hasTitle": true,
+        "hasBody": true,
+        "hasSave": true
+      }
+    },
+    {
+      "id": "console-clean-rich-session",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "consoleErrors": []
+      }
+    },
+    {
+      "id": "conflict-hint-visible",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "conflictBlocks": 1,
+        "conflictText": "⚠ 与「新版 IPC」存在冲突，已按 authority/recency 保留优先项",
+        "hitCount": 2
+      }
+    }
+  ]
+}

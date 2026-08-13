@@ -17,6 +17,7 @@ const {
 describe('feishu document link actions', () => {
   const agent = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace-agent.js'), 'utf8')
   const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.html'), 'utf8')
+  const icons = fs.readFileSync(path.join(__dirname, '..', 'src', 'ui-icons.js'), 'utf8')
 
   it('accepts secure Feishu and LarkSuite URLs', () => {
     assert.equal(parseFeishuUrl('https://forever9.feishu.cn/wiki/abc').host, 'forever9.feishu.cn')
@@ -42,10 +43,10 @@ describe('feishu document link actions', () => {
   })
 
   it('opens AppLinks through the client scheme with an https fallback', () => {
-    const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
-    assert.ok(main.includes('feishuLink.buildFeishuClientUrl(raw)'), 'tries the client scheme first')
-    assert.ok(main.includes('function hasSchemeHandler'), 'probes for a registered handler')
-    assert.ok(main.includes('viaClient: true'), 'reports the client path')
+    const openExternalIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'open-external.js'), 'utf8')
+    assert.ok(openExternalIpc.includes('feishuLink.buildFeishuClientUrl(raw)'), 'tries the client scheme first')
+    assert.ok(openExternalIpc.includes('function hasSchemeHandler'), 'probes for a registered handler')
+    assert.ok(openExternalIpc.includes('viaClient: true'), 'reports the client path')
   })
 
   it('classifies common Feishu resources without network metadata', () => {
@@ -143,5 +144,19 @@ describe('feishu document link actions', () => {
     assert.match(agent, /openSettings\?\.\('connectors'\)/)
     assert.match(html, /\.pane-wrap\.surface-link \.work-review \{ display:flex; \}/)
     assert.match(html, /\.pane-wrap\.surface-link \.panes \{ display:none; \}/)
+  })
+
+  it('keeps the link preview toolbar lightweight with semantic icons', () => {
+    assert.match(
+      html,
+      /\.work-surface-bar \.ws-bar-actions \{[\s\S]*?padding:0;[\s\S]*?border:0;[\s\S]*?background:transparent;/,
+    )
+    assert.match(html, /id="btnToggleLinkFullscreen"[\s\S]*?data-icon="maximize"/)
+    assert.match(html, /id="btnOpenLinkExternal"[\s\S]*?data-icon="externalLink"/)
+    assert.match(html, /id="btnCopyLinkTop"[\s\S]*?data-icon="copy"/)
+    assert.match(html, /id="btnBackToDoc"[\s\S]*?data-icon="circleX"/)
+    assert.match(icons, /maximize:\s*`<path/)
+    assert.match(icons, /externalLink:\s*`<path/)
+    assert.match(icons, /circleX:\s*`<circle/)
   })
 })

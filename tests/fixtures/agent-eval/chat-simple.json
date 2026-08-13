@@ -1,0 +1,12 @@
+{
+  "name": "chat-simple",
+  "input": { "prompt": "你好", "tier": "chat" },
+  "llmScript": [
+    { "response": { "text": "你好！" } }
+  ],
+  "expect": {
+    "terminal": "DONE",
+    "phases": ["PREPARE", "CONTEXT", "MODEL", "PERSIST", "DONE"],
+    "toolCalls": 0
+  }
+}

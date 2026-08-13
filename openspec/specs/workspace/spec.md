@@ -348,3 +348,59 @@ When settings industry is `game`, the agent empty state MUST show four task scen
 - **THEN** empty state displays KnowMe 工作伙伴 and four scenario buttons
 - **AND** left side rail buttons remain visible and unchanged
 
+### Requirement: Console-first workbench navigation
+
+工作台 MUST 以总览、管线、运行、Agent、编排为一级导航；目标输入 MUST 作为新建运行过程的一部分，而不是占据主页的营销式 Hero。自动化可保留应用侧入口，但其计划和失败 MUST 投影到总览与统一运行中心。
+
+#### Scenario: Open workbench
+
+- **WHEN** 用户进入工作台
+- **THEN** 顶栏显示领域筛选、环境健康状态和“新建运行”，正文默认展示运营总览
+
+#### Scenario: Switch primary page
+
+- **WHEN** 用户选择管线、运行、Agent 或编排
+- **THEN** 工作台只展示对应资源目录或工作面，不重复其他页面的目录
+
+### Requirement: Visible domain context
+
+工作台 MUST 提供全部、办公、研发、视觉领域筛选，并将该上下文应用到总览、Workflow Package、Run、Agent Profile 和 Graph；领域筛选不得隐藏在高级菜单中。
+
+#### Scenario: Filter engineering context
+
+- **WHEN** 用户选择研发
+- **THEN** 总览、管线、运行、Agent 与编排列表只显示研发或跨领域资源
+
+#### Scenario: Preserve domain context
+
+- **WHEN** 用户从管线进入运行并返回
+- **THEN** 原领域和列表筛选保持不变
+
+### Requirement: Unified run directory
+
+运行中心 MUST 统一展示 Daemon、Local Team Runtime、自动化触发和明确标记的兼容本地运行，并显示执行来源、状态、审批、失败原因、耗时和产物。兼容本地运行不得伪装成可恢复的正式运行。
+
+#### Scenario: Review mixed execution sources
+
+- **WHEN** 用户打开运行中心
+- **THEN** 不同执行来源使用统一状态语义，并各自显示明确来源标签
+
+#### Scenario: Reopen run room
+
+- **WHEN** 用户选择可恢复运行
+- **THEN** 工作台打开该运行的任务工作间并恢复状态、Graph、活动和产物
+
+### Requirement: Actionable console states
+
+工作台所有主要页面 MUST 覆盖 loading、empty、offline、degraded、permission 和 error 状态，并给出与状态一致的真实下一步；不得用成功样式表示等待、失败或取消。
+
+#### Scenario: No runnable pipeline
+
+- **WHEN** 当前领域没有可执行 Workflow Package
+- **THEN** 空态说明缺失能力并提供配置、安装或切换领域入口
+
+#### Scenario: Runtime offline
+
+- **WHEN** 执行后端离线
+- **THEN** 新建运行被 readiness 阻止，总览和详情提供就地诊断入口
+

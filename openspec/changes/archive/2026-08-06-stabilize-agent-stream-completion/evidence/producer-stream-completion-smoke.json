@@ -1,0 +1,61 @@
+{
+  "mode": "node-fixture-and-contract",
+  "at": "2026-08-06T08:44:25.688Z",
+  "change": "stabilize-agent-stream-completion",
+  "role": "producer",
+  "limitations": [
+    "当前环境 npm start 已占用 Electron 单实例锁，Playwright 无法并行拉起第二实例（见 main.js requestSingleInstanceLock）。",
+    "未使用在线 LLM；DOM 生命周期由受控 HTML fixture + 源码契约测试等价验证。",
+    "取消态 IPC 真机证据沿用 dev-self-test 的 cancel-ipc-smoke.json（开发自测时无并发实例）。"
+  ],
+  "contractTests": {
+    "pass": true,
+    "stdoutTail": "ℹ suites 2\nℹ pass 23\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 162.1796\n"
+  },
+  "checks": [
+    {
+      "id": "runtime-timeline-expanded",
+      "pass": true
+    },
+    {
+      "id": "completion-timeline-collapsed",
+      "pass": true
+    },
+    {
+      "id": "pending-review-stays-visible",
+      "pass": true
+    },
+    {
+      "id": "completion-text-preserved-no-replay",
+      "pass": true
+    },
+    {
+      "id": "user-can-reexpand-timeline",
+      "pass": true
+    },
+    {
+      "id": "no-raw-cot-in-ui",
+      "pass": true,
+      "detail": {
+        "rendererHasReasoningField": false
+      }
+    },
+    {
+      "id": "contract-tests-pass",
+      "pass": true
+    },
+    {
+      "id": "cancel-ipc-no-clone-error-dev-evidence",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "cancelledDuringRun": true,
+        "settled": true,
+        "cloneError": false,
+        "consoleErrors": [],
+        "stopped": true
+      }
+    }
+  ],
+  "ok": true
+}

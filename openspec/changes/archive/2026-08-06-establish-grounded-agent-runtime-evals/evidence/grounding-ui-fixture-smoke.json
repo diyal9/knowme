@@ -1,0 +1,49 @@
+{
+  "ok": true,
+  "audit": {
+    "mode": "controlled-ui-fixture",
+    "blocked": {
+      "status": "blocked",
+      "textLen": 55,
+      "hasRawToolInUserText": false,
+      "forbiddenHits": [],
+      "violationUserMessage": "缺少必需读取：飞书会议妙记读取"
+    },
+    "verified": {
+      "status": "verified",
+      "sourceTool": "feishu.meeting_read",
+      "sourceStatus": "ok",
+      "digestHash": "2f71bbb214c41ed1"
+    }
+  },
+  "screenshots": {
+    "blocked": "screenshots/meeting-blocked.png",
+    "verified": "screenshots/meeting-verified.png"
+  },
+  "checks": [
+    {
+      "id": "blocked-screenshot",
+      "pass": true
+    },
+    {
+      "id": "blocked-no-raw-tool-in-bubble",
+      "pass": true
+    },
+    {
+      "id": "blocked-friendly-violation-note",
+      "pass": true
+    },
+    {
+      "id": "verified-screenshot",
+      "pass": true
+    },
+    {
+      "id": "verified-friendly-source-label",
+      "pass": true
+    },
+    {
+      "id": "details-open-survives-rerender",
+      "pass": true
+    }
+  ]
+}

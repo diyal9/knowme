@@ -122,3 +122,4 @@ npm 别名：`npm run harness:preflight` / `harness:check` / `harness:gate`
 - Wiki：`brain/wiki/index.md`
 - OpenSpec 配置：`openspec/config.yaml`
 - 团队规则：`.cursor/rules/team-workflow.mdc`
+- **Daemon / 管线服务协议**：`docs/daemon/API.md`（上游同步）· `docs/daemon/README.md`（KnowMe 端点说明）

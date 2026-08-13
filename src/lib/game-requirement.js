@@ -1,8 +1,9 @@
 'use strict'
 
 const crypto = require('crypto')
+const { createCapabilityPackRuntime } = require('./capability-pack-runtime')
 
-const SECTIONS = [
+const DEFAULT_SECTIONS = [
   { key: 'background', title: '背景', required: true },
   { key: 'goals', title: '目标', required: true },
   { key: 'gameplay', title: '玩法', required: true },
@@ -13,19 +14,51 @@ const SECTIONS = [
   { key: 'risks', title: '风险与待确认', required: false },
 ]
 
-const SECTION_HEADING_RE = /^#{1,3}\s*(背景|目标|玩法|规则|数值\/资源|数值|资源|埋点|验收标准|风险)/
+const DEFAULT_HEADING_PATTERN = '^(背景|目标|玩法|规则|数值\\/资源|数值|资源|埋点|验收标准|风险)'
 
-function emptyDoc(title = '') {
+let packRuntime = createCapabilityPackRuntime()
+
+function setPackRuntimeForTests(next) {
+  packRuntime = next || createCapabilityPackRuntime()
+}
+
+function loadSchema(packId = 'game-studio') {
+  const schema = packRuntime.getRequirementSchema(packId)
+  if (!schema?.sections?.length) {
+    return {
+      sections: DEFAULT_SECTIONS,
+      headingPattern: DEFAULT_HEADING_PATTERN,
+    }
+  }
+  return {
+    sections: schema.sections,
+    headingPattern: schema.headingPattern || DEFAULT_HEADING_PATTERN,
+  }
+}
+
+function getSections(packId = 'game-studio') {
+  return loadSchema(packId).sections
+}
+
+function sectionHeadingRe(packId = 'game-studio') {
+  let pattern = loadSchema(packId).headingPattern
+  pattern = String(pattern || DEFAULT_HEADING_PATTERN).replace(/^\^/, '')
+  return new RegExp(`^#{1,3}\\s*(${pattern})`, 'i')
+}
+
+function emptyDoc(title = '', packId = 'game-studio') {
+  const sections = getSections(packId)
   const doc = {
     id: crypto.randomUUID(),
     title: String(title || '').trim() || '未命名游戏需求',
     status: 'draft',
     sections: {},
     sources: [],
+    packId,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
-  for (const s of SECTIONS) doc.sections[s.key] = ''
+  for (const s of sections) doc.sections[s.key] = ''
   return doc
 }
 
@@ -42,14 +75,15 @@ function headingToKey(heading) {
   return null
 }
 
-function parseFromMarkdown(text = '', title = '') {
-  const doc = emptyDoc(title)
+function parseFromMarkdown(text = '', title = '', packId = 'game-studio') {
+  const doc = emptyDoc(title, packId)
+  const headingRe = sectionHeadingRe(packId)
   const lines = String(text || '').split(/\r?\n/)
   let currentKey = null
   const chunks = []
 
   for (const line of lines) {
-    const m = line.match(SECTION_HEADING_RE)
+    const m = line.match(headingRe)
     if (m) {
       if (currentKey && chunks.length) {
         doc.sections[currentKey] = chunks.join('\n').trim()
@@ -71,14 +105,15 @@ function parseFromMarkdown(text = '', title = '') {
   return doc
 }
 
-function validate(doc) {
+function validate(doc, packId = 'game-studio') {
+  const sections = getSections(doc?.packId || packId)
   const errors = []
   const missing = []
   if (!doc || typeof doc !== 'object') {
-    return { ok: false, errors: ['invalid_document'], missing: SECTIONS.filter(s => s.required).map(s => s.key) }
+    return { ok: false, errors: ['invalid_document'], missing: sections.filter(s => s.required).map(s => s.key) }
   }
   if (!String(doc.title || '').trim()) errors.push('missing_title')
-  for (const s of SECTIONS) {
+  for (const s of sections) {
     const val = String(doc.sections?.[s.key] || '').trim()
     if (s.required && !val) missing.push(s.key)
   }
@@ -86,9 +121,10 @@ function validate(doc) {
   return { ok: errors.length === 0, errors, missing }
 }
 
-function toMarkdown(doc) {
+function toMarkdown(doc, packId = 'game-studio') {
+  const sections = getSections(doc?.packId || packId)
   const lines = [`# ${doc.title || '游戏需求案'}`, '']
-  for (const s of SECTIONS) {
+  for (const s of sections) {
     const body = String(doc.sections?.[s.key] || '').trim()
     lines.push(`## ${s.title}`, body || '（待补充）', '')
   }
@@ -100,12 +136,13 @@ function toMarkdown(doc) {
 
 function buildPromptContext(doc) {
   const v = validate(doc)
+  const sections = getSections(doc?.packId)
   const lines = [
     '【结构化游戏需求案】',
     `标题：${doc.title}`,
     `完整性：${v.ok ? '可提交审批' : `缺 ${v.missing.join('、')}`}`,
   ]
-  for (const s of SECTIONS) {
+  for (const s of sections) {
     const body = String(doc.sections?.[s.key] || '').trim()
     if (body) lines.push(`### ${s.title}\n${body.slice(0, 800)}`)
   }
@@ -146,8 +183,12 @@ function approve(doc) {
   }
 }
 
+packRuntime.ensureDefaultPacks()
+
 module.exports = {
-  SECTIONS,
+  SECTIONS: DEFAULT_SECTIONS,
+  getSections,
+  setPackRuntimeForTests,
   emptyDoc,
   parseFromMarkdown,
   validate,

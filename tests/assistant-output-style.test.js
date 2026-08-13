@@ -5,6 +5,7 @@ const assert = require('node:assert')
 const fs = require('fs')
 const path = require('path')
 const { normalizeAssistantOutput } = require('../src/lib/assistant-output-style')
+const { readMainIpcBundle } = require('./helpers/main-ipc-bundle')
 
 describe('assistant output style', () => {
   it('removes decorative emoji from generated structural text', () => {
@@ -38,7 +39,7 @@ describe('assistant output style', () => {
   it('wires the same policy into prompt, main, renderer, and workspace shell', () => {
     const root = path.join(__dirname, '..')
     const prompt = fs.readFileSync(path.join(root, 'src', 'lib', 'ai-assistant-context.js'), 'utf8')
-    const main = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8')
+    const main = readMainIpcBundle()
     const renderer = fs.readFileSync(path.join(root, 'src', 'workspace-agent.js'), 'utf8')
     const shell = fs.readFileSync(path.join(root, 'src', 'workspace.html'), 'utf8')
     const sessions = fs.readFileSync(path.join(root, 'src', 'lib', 'agent-sessions.js'), 'utf8')

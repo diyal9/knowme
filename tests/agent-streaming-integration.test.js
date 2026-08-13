@@ -4,10 +4,11 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert')
 const fs = require('fs')
 const path = require('path')
+const { readMainIpcBundle } = require('./helpers/main-ipc-bundle')
 
 describe('agent streaming tool timeline integration', () => {
   const root = path.join(__dirname, '..')
-  const main = fs.readFileSync(path.join(root, 'src', 'main.js'), 'utf8')
+  const main = readMainIpcBundle()
   const preload = fs.readFileSync(path.join(root, 'src', 'preload.js'), 'utf8')
   const renderer = fs.readFileSync(path.join(root, 'src', 'workspace-agent.js'), 'utf8')
   const settings = fs.readFileSync(path.join(root, 'src', 'settings.html'), 'utf8')
@@ -133,23 +134,43 @@ describe('agent streaming tool timeline integration', () => {
     assert.ok(preload.includes('aiCancelRun'), 'preload exposes run cancellation')
     assert.ok(main.includes("ipcMain.handle('ai-cancel-run'"), 'main handles run cancellation')
     assert.ok(main.includes('new AbortController()'), 'each run owns an abort controller')
+    assert.match(
+      main,
+      /if \(kernelResult\.cancelled\) \{[\s\S]*?cancelled: true,[\s\S]*?runId,[\s\S]*?\}/,
+      'cancelled runs return an explicit IPC-safe projection',
+    )
+    assert.doesNotMatch(
+      main,
+      /if \(kernelResult\.cancelled\)[^{\n]*return \{\s*\.\.\.kernelResult/,
+      'cancelled runs never expose internal executor ports over IPC',
+    )
+    assert.match(
+      renderer,
+      /if \(result\.cancelled\)[\s\S]*?settleCancelledAssistantText\(assistantRef\.message\)[\s\S]*?streaming = false/,
+      'cancellation drops unstable content before rendering the stopped state',
+    )
+    assert.ok(renderer.includes("message.text = String(stable || '').trim() || '已停止生成'"), 'early cancellation remains readable')
     assert.ok(main.includes('applyCacheControlMessages'), 'cache-control tags are attached with provider gating')
     assert.ok(main.includes('tokensNow > policy.inputBudget'), 'tool rounds rebudget only when needed')
-    assert.ok(main.includes('delta'), 'stream events expose incremental content')
+    assert.match(main, /onStreamChunk:\s*null/, 'kernel path avoids ai-stream-chunk dual emit')
+    assert.ok(renderer.includes('event.version == null'), 'workspace ignores only legacy no-version events')
+    assert.ok(renderer.includes('applyV2StreamEvent'), 'workspace maps v2 events through reducer')
   })
 
   it('wires provider model profiles to settings and the context meter', () => {
+    const settingsIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'settings.js'), 'utf8')
     assert.ok(settings.includes('id="llmProvider"'), 'settings exposes provider selection')
     assert.ok(settings.includes('id="modelPreset"'), 'settings exposes model presets')
     assert.ok(settings.includes('llmProfile'), 'settings persists explicit profile')
-    assert.ok(main.includes("ipcMain.handle('llm-profile'"), 'main exposes public model profile')
+    assert.ok(settingsIpc.includes("ipcMain.handle('llm-profile'"), 'settings ipc exposes public model profile')
     assert.ok(preload.includes('llmProfile'), 'preload exposes public model profile')
     assert.ok(renderer.includes('contextProfile'), 'renderer uses dynamic model capability')
   })
 
   it('adds a composer model picker and turn-compaction status', () => {
-    assert.ok(main.includes("ipcMain.handle('llm-models'"), 'main lists the model catalog')
-    assert.ok(main.includes("ipcMain.handle('llm-set-model'"), 'main persists composer model switch')
+    const settingsIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'settings.js'), 'utf8')
+    assert.ok(settingsIpc.includes("ipcMain.handle('llm-models'"), 'settings ipc lists the model catalog')
+    assert.ok(settingsIpc.includes("ipcMain.handle('llm-set-model'"), 'settings ipc persists composer model switch')
     assert.ok(preload.includes('llmModels'), 'preload exposes model listing')
     assert.ok(preload.includes('llmSetModel'), 'preload exposes model switch')
     assert.ok(renderer.includes('pickModel'), 'renderer switches models from the composer')

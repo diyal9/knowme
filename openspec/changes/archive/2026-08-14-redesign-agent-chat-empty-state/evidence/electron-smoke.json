@@ -1,0 +1,37 @@
+{
+  "generatedAt": "2026-08-06T17:42:42.487Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "launch-state-centered-composer-and-four-cards",
+      "pass": true,
+      "detail": {
+        "isLaunch": true,
+        "footInMount": true,
+        "composerCount": 1,
+        "inputCount": 1,
+        "title": "开始一个新任务",
+        "subtitle": "把你的问题或任务交给 KnowMe，它来帮你完成。",
+        "cardCount": 4,
+        "iconCardCount": 4
+      }
+    },
+    {
+      "id": "first-send-enters-conversation-state",
+      "pass": true,
+      "detail": {
+        "isLaunch": false,
+        "footDocked": true,
+        "userText": "你好，帮我规划今天的工作",
+        "userAlign": "flex-end",
+        "userWidth": 184,
+        "logWidth": 980
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

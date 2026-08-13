@@ -92,14 +92,42 @@ function retryDelayMs(attempt, { base = 400, cap = 4000 } = {}) {
   return Math.min(cap, base * (2 ** n))
 }
 
+/** 超时类用更长退避，避免贴着连续打满多次 TOOL_EXEC_TIMEOUT。 */
+function backoffDefaultsForCategory(category) {
+  if (String(category || '') === 'timeout') return { base: 2000, cap: 30000 }
+  return { base: 400, cap: 4000 }
+}
+
 /**
  * 单个工具调用是否应重试（仅网络/超时）。
+ * 默认指数退避：network 400→800→…cap4s；timeout 2s→4s→…cap30s。
  * @returns {{retry:boolean, delayMs:number}}
  */
-function planRetry({ category, attempt = 0, maxRetries = 2, base = 400, cap = 4000 } = {}) {
+function planRetry({ category, attempt = 0, maxRetries = 2, base, cap } = {}) {
   if (!isRetryable(category)) return { retry: false, delayMs: 0 }
   if (Number(attempt) >= Number(maxRetries)) return { retry: false, delayMs: 0 }
-  return { retry: true, delayMs: retryDelayMs(attempt, { base, cap }) }
+  const defaults = backoffDefaultsForCategory(category)
+  const resolvedBase = Number.isFinite(base) ? base : defaults.base
+  const resolvedCap = Number.isFinite(cap) ? cap : defaults.cap
+  return { retry: true, delayMs: retryDelayMs(attempt, { base: resolvedBase, cap: resolvedCap }) }
+}
+
+function formatToolTimeoutSummary({ argsSummary = '', timeoutSec = 45 } = {}) {
+  const sec = Math.max(1, Math.round(Number(timeoutSec) || 45))
+  const base = String(argsSummary || '').trim()
+  return base ? `${base} · 工具执行超时（${sec}s）` : `工具执行超时（${sec}s）`
+}
+
+/**
+ * 退避等待中的进度文案（第 attempt 次即将执行的重试，attempt 从 1 起）。
+ */
+function formatToolRetrySummary({ argsSummary = '', attempt = 1, delayMs = 0, reason = 'timeout' } = {}) {
+  const waitSec = Math.max(1, Math.ceil(Math.max(0, Number(delayMs) || 0) / 1000))
+  const n = Math.max(1, Math.floor(Number(attempt) || 1))
+  const reasonLabel = reason === 'network' ? '网络异常' : reason === 'timeout' ? '超时' : '失败'
+  const base = String(argsSummary || '').trim()
+  const tip = `${reasonLabel}，${waitSec}s 后第 ${n} 次重试`
+  return base ? `${base} · ${tip}` : tip
 }
 
 /**
@@ -185,7 +213,10 @@ module.exports = {
   classifyToolError,
   isRetryable,
   retryDelayMs,
+  backoffDefaultsForCategory,
   planRetry,
+  formatToolTimeoutSummary,
+  formatToolRetrySummary,
   suggestAlternativeTool,
   suggestParamCorrection,
   shouldAttemptRecovery,

@@ -1,0 +1,52 @@
+{
+  "at": "2026-08-04T11:41:41.860Z",
+  "change": "agent-kernel-executor-eval-baseline",
+  "role": "tester",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-tester-JzY9Tv",
+  "checks": [
+    {
+      "id": "R1-session-persistence",
+      "ok": true,
+      "marker": "QA-SESSION-PERSIST-1785843701854",
+      "bubbleCount": 52,
+      "sample": "你好\n✓\n执行过程\n2 步\n\n你好，我是 KnowMe（知我），你的智能工作伙伴。我可以帮你整理日常工作、维护知识库、处理日常任务等。\n\n如果你有具体的工作目标或需要协助的地方，请告诉我，我会根据你的需求提供最有价值的下一步建议。\n\n✓\n执行过程\n2 步\n\n你好，我是 KnowMe（知我），你的智能工作伙伴。我可以帮你整理日常工作、维护知识库、处理日常任务等。\n\n如果你有具体的工作目标或需要协助的地方，请告诉我，我会根据你的需求提供最有价值的下一步建议。\n\n查一下知识库里关于团队约定的内容\n✓\n执行过程\n2 步\n\n已检索知识库中关于“团队约定”的内容，命中以下相关条目：\n\n[1] RDPI 团"
+    },
+    {
+      "id": "S3-cancel-timing",
+      "ok": true,
+      "cancelledDuringRun": true,
+      "stopped": false,
+      "followUpOk": true,
+      "notBusy": true
+    },
+    {
+      "id": "SEC-no-api-key-desktop",
+      "ok": false,
+      "errorText": "",
+      "runPhaseLeaked": true
+    },
+    {
+      "id": "A6-latency-compare",
+      "ok": true,
+      "kernelMs": 4243,
+      "legacyMs": 3440,
+      "ratio": 1.2334302325581394
+    },
+    {
+      "id": "A5-no-runPhase-ui",
+      "ok": false,
+      "runPhaseVisible": true
+    },
+    {
+      "id": "A2-timeline-stages",
+      "ok": true,
+      "timelineSample": "✓\n执行过程\n3 步"
+    },
+    {
+      "id": "A3-rapid-send-while-busy",
+      "ok": false,
+      "note": "composer accepted or queued without crash"
+    }
+  ],
+  "ok": false
+}

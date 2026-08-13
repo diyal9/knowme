@@ -1,0 +1,155 @@
+{
+  "generatedAt": "2026-08-06T10:06:52.242Z",
+  "ok": true,
+  "mode": "electron",
+  "limitations": [],
+  "checks": [
+    {
+      "id": "history-bubble-body-same-node",
+      "pass": true,
+      "detail": {
+        "rollbackCount": 0,
+        "committedHash": "7e656effb8caaf2d",
+        "expectedHash": "7e656effb8caaf2d"
+      }
+    },
+    {
+      "id": "canonical-hash-stable",
+      "pass": true,
+      "detail": {
+        "textLength": 48,
+        "answerHash": "7e656effb8caaf2d",
+        "v2AnswerCommitted": true,
+        "streaming": false,
+        "uiCount": 1,
+        "traceCount": 12,
+        "state": {
+          "runId": "run_output_smoke_1786010812241",
+          "status": "completed",
+          "lastSeq": 16,
+          "terminalType": "run.completed",
+          "frozen": true,
+          "answerHash": "7e656effb8caaf2d",
+          "answerLength": 48,
+          "answerCommitted": true,
+          "uiCount": 1,
+          "counters": {
+            "duplicate": 0,
+            "late": 0,
+            "gap": 0
+          },
+          "diagnosticsCount": 0
+        }
+      }
+    },
+    {
+      "id": "visible-raw-json-zero",
+      "pass": true,
+      "detail": {
+        "visibleRawJsonMs": 0,
+        "rawLeak": false
+      }
+    },
+    {
+      "id": "scroll-drift-under-8px",
+      "pass": true,
+      "detail": {
+        "scrollBefore": 3516,
+        "scrollAfter": 3516,
+        "scrollDriftPx": 0
+      }
+    },
+    {
+      "id": "pending-review-timeline-open",
+      "pass": true,
+      "detail": {
+        "bubble": true,
+        "body": true,
+        "structuredUi": true,
+        "timelineOpen": true,
+        "approveVisible": true,
+        "rejectVisible": true,
+        "choiceInStructuredUi": true
+      }
+    },
+    {
+      "id": "choice-in-structured-ui",
+      "pass": true,
+      "detail": {
+        "bubble": true,
+        "body": true,
+        "structuredUi": true,
+        "timelineOpen": true,
+        "approveVisible": true,
+        "rejectVisible": true,
+        "choiceInStructuredUi": true
+      }
+    },
+    {
+      "id": "terminal-once-no-duplicate-late-dom",
+      "pass": true,
+      "detail": {
+        "terminalDomUpdates": 1,
+        "duplicateLateDomUpdates": 0,
+        "counters": {
+          "duplicate": 0,
+          "late": 0,
+          "gap": 0
+        }
+      }
+    },
+    {
+      "id": "history-nodes-present",
+      "pass": true,
+      "detail": {
+        "historyCount": 24
+      }
+    },
+    {
+      "id": "ipc-path-verified",
+      "pass": true,
+      "detail": {
+        "ipcDispatches": 18,
+        "ipcSuccess": 18
+      }
+    },
+    {
+      "id": "metrics-no-sensitive-fields",
+      "pass": true,
+      "detail": {
+        "runId": "run_output_smoke_1786010812241",
+        "seq": 16,
+        "round": 1,
+        "phase": "PERSIST",
+        "hash": "7e656effb8caaf2d",
+        "length": 48,
+        "count": 1,
+        "timingMs": 0,
+        "outputDiagnostics": [
+          {
+            "code": "answer_committed",
+            "hash": "7e656effb8caaf2d",
+            "timingMs": 1,
+            "count": 1
+          }
+        ]
+      }
+    }
+  ],
+  "audit": {
+    "rollbackCount": 0,
+    "visibleRawJsonMs": 0,
+    "terminalDomUpdates": 1,
+    "duplicateLateDomUpdates": 0,
+    "scrollDriftPx": 0,
+    "ipcDispatches": 18,
+    "ipcSuccess": 18
+  },
+  "screenshots": {
+    "running": "screenshots/running-progress.png",
+    "canonicalChoice": "screenshots/canonical-choice.png",
+    "terminalPendingReview": "screenshots/terminal-pending-review.png"
+  },
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-agent-output-smoke-7Ll4pM",
+  "ipcPathVerified": true
+}

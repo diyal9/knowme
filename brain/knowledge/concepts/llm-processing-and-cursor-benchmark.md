@@ -48,5 +48,6 @@ resource: knowme://llm/runtime-benchmark
 # Related
 
 - Wiki 说明：`../../wiki/concepts/llm-processing-and-cursor-benchmark.md`
+- 多 Agent Runtime：[/concepts/production-agent-team-runtime.md](/concepts/production-agent-team-runtime.md)
 - 产品总览：[/concepts/product-overview.md](/concepts/product-overview.md)
 - IPC 概念：[/concepts/electron-ipc.md](/concepts/electron-ipc.md)

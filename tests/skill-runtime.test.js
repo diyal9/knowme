@@ -59,8 +59,19 @@ metadata:
   })
 
   it('listSkillsL0 returns metadata only and respects enabled filter', () => {
-    writeSkill(capabilitiesRoot, 'alpha', 'name: Alpha\ndescription: Alpha skill for testing keyword match')
+    const alphaDir = writeSkill(capabilitiesRoot, 'alpha', 'name: Alpha\ndescription: Alpha skill for testing keyword match')
     writeSkill(capabilitiesRoot, 'beta', 'name: Beta\ndescription: Beta disabled skill\ndisable-model-invocation: true')
+    fs.writeFileSync(path.join(alphaDir, 'capability.manifest.json'), JSON.stringify({
+      schemaVersion: 2,
+      id: 'alpha',
+      kind: 'skill',
+      name: 'Alpha',
+      version: '1.0.0',
+      dependencies: [{ id: 'feishu', kind: 'connector', required: false }],
+      permissions: { filesystem: ['read'] },
+      risk: { level: 'medium', reasons: ['reads files'] },
+      provenance: { source: 'test', ref: 'alpha/SKILL.md' },
+    }), 'utf8')
 
     const runtime = createSkillRuntime({
       capabilitiesRoot,
@@ -77,6 +88,9 @@ metadata:
     assert.equal(list.length, 1)
     assert.equal(list[0].id, 'alpha')
     assert.equal(list[0].disableModelInvocation, false)
+    assert.equal(list[0].dependencies[0].id, 'feishu')
+    assert.deepEqual(list[0].permissions.filesystem, ['read'])
+    assert.equal(list[0].risk.level, 'medium')
     assert.ok(!list[0].body)
   })
 

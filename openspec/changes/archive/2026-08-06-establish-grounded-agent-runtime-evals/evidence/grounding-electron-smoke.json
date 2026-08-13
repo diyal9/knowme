@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-grounding-smoke-QySVp8",
+  "consoleErrors": [],
+  "screenshot": "screenshots/workspace-load.png",
+  "checks": [
+    {
+      "id": "workspace-screenshot",
+      "pass": true
+    },
+    {
+      "id": "agent-chat-log-present",
+      "pass": true
+    },
+    {
+      "id": "grounding-labels-loaded",
+      "pass": true
+    },
+    {
+      "id": "no-console-errors",
+      "pass": true
+    }
+  ]
+}

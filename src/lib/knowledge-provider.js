@@ -11,19 +11,41 @@
  * 纯逻辑：网络通过 ctx.fetch 注入；apiKey 明文仅存在于内存，持久层由主进程加密。
  */
 
-const knowledgeOs = require('./knowledge-os')
+const llmwikiService = require('./llmwiki-service')
 
 const DEFAULT_TIMEOUT_MS = 8000
 const DEFAULT_TOPK = 5
+const SCOPES = new Set(['client', 'server', 'shared'])
+const PROVIDER_KINDS = new Set(['local', 'qmd-local', 'remote-rag'])
+
+function clampAuthority(value, fallback = 2) {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.max(1, Math.min(5, Math.floor(n))) : fallback
+}
+
+function clampTier(value, fallback = 2) {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.max(1, Math.min(9, Math.floor(n))) : fallback
+}
 
 function normalizeProvider(def = {}) {
-  const kind = def.kind === 'remote-rag' ? 'remote-rag' : 'local'
+  const kind = PROVIDER_KINDS.has(def.kind) ? def.kind : 'local'
+  const scope = SCOPES.has(def.scope) ? def.scope : 'client'
+  const authority = clampAuthority(def.authority, kind === 'remote-rag' ? 3 : 2)
+  const retrievalTier = clampTier(def.retrievalTier, 1)
   const base = {
     id: String(def.id || ''),
     kind,
     displayName: String(
       def.displayName || (kind === 'remote-rag' ? '远程 RAG 知识库' : '本地知识库')
     ).slice(0, 60),
+    scope,
+    authority,
+    retrievalTier,
+    governance: String(def.governance || 'llm-wiki').slice(0, 40),
+    writable: def.writable !== false,
+    promotable: def.promotable !== false,
+    collectionId: String(def.collectionId || def.id || 'root').slice(0, 80),
   }
   if (kind === 'remote-rag') {
     return {
@@ -32,6 +54,8 @@ function normalizeProvider(def = {}) {
       apiKey: def.apiKey != null ? String(def.apiKey) : '',
       collection: String(def.collection || ''),
       topK: Number.isFinite(def.topK) ? def.topK : DEFAULT_TOPK,
+      writable: false,
+      promotable: false,
     }
   }
   return {
@@ -39,6 +63,24 @@ function normalizeProvider(def = {}) {
     spaceSourceId: def.spaceSourceId || null,
     subDir: String(def.subDir || ''),
   }
+}
+
+/** 默认根 Fabric 个人库 */
+function defaultPersonalProvider(cfg = {}) {
+  return normalizeProvider({
+    id: cfg.id || 'kb_personal',
+    displayName: cfg.displayName || '我的知识',
+    kind: 'qmd-local',
+    scope: cfg.scope || 'client',
+    authority: cfg.authority,
+    retrievalTier: cfg.retrievalTier || 1,
+    governance: 'llm-wiki',
+    writable: cfg.writable !== false,
+    promotable: cfg.promotable !== false,
+    collectionId: cfg.collectionId || 'root',
+    spaceSourceId: cfg.spaceSourceId || null,
+    subDir: cfg.subDir || '',
+  })
 }
 
 /** 列表/日志安全：移除 apiKey 明文，仅暴露 hasApiKey */
@@ -85,8 +127,11 @@ async function queryProvider(def, text, ctx = {}) {
   const q = String(text || '').trim()
   if (!q) return { ok: true, hits: [], message: '请输入查询关键词' }
 
-  if (p.kind === 'local') {
-    return knowledgeOs.queryRanked(ctx.userData, q, ctx)
+  if (p.kind === 'local' || p.kind === 'qmd-local') {
+    if (ctx.useFabric !== false && ctx.fabricSearch) {
+      return ctx.fabricSearch(ctx.userData, q, { ...ctx, providers: ctx.providers || [p] })
+    }
+    return llmwikiService.query(ctx.userData, q, ctx)
   }
 
   // remote-rag
@@ -132,7 +177,10 @@ async function queryProvider(def, text, ctx = {}) {
 module.exports = {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_TOPK,
+  SCOPES,
+  PROVIDER_KINDS,
   normalizeProvider,
+  defaultPersonalProvider,
   redactProvider,
   mapRagResponse,
   queryProvider,

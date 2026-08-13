@@ -1,0 +1,15 @@
+{
+  "name": "cancel-mid-model",
+  "input": { "prompt": "写一篇长文", "tier": "chat" },
+  "abortAt": { "phase": "MODEL", "afterLlmCall": 0 },
+  "llmScript": [
+    { "response": { "text": "开始生成…" } },
+    { "response": { "text": "不应到达" } }
+  ],
+  "expect": {
+    "terminal": "CANCELLED",
+    "phases": ["PREPARE", "CONTEXT", "MODEL", "CANCELLED"],
+    "toolCalls": 0,
+    "cancelled": true
+  }
+}

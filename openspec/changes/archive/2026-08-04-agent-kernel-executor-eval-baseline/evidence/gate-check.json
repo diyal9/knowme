@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-08-04T19:48:00+08:00",
+  "change": "agent-kernel-executor-eval-baseline",
+  "command": "node .cursor/scripts/harness.js gate --json --change agent-kernel-executor-eval-baseline",
+  "preflight": {
+    "ok": true,
+    "needs_fix": false,
+    "runAt": "2026-08-04T19:46:00+08:00"
+  },
+  "gate": "Story 完成门禁",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    { "id": "npm-test", "level": "blocking", "ok": true, "detail": "pass" },
+    { "id": "npm-lint", "level": "blocking", "ok": true, "detail": "pass" }
+  ],
+  "softManual": [
+    { "id": "qa-plan-smoke-scope", "level": "advisory", "ok": true, "path": "openspec/changes/agent-kernel-executor-eval-baseline/qa-plan.md", "note": "S1–S6 均已勾选" },
+    { "id": "code-review", "level": "advisory", "ok": true, "path": "openspec/changes/agent-kernel-executor-eval-baseline/code-review.md", "note": "正式复核已填写，结论通过含 ADVISORY" },
+    { "id": "test-report", "level": "advisory", "ok": true, "path": "openspec/changes/agent-kernel-executor-eval-baseline/evidence/test-report.md", "note": "Tester QA PASS，无 BLOCKING" }
+  ],
+  "harnessSoft": [],
+  "codeReviewBlocking": false,
+  "codeReviewAdvisories": ["R1-persist-double-push", "R2-tool-timeout-abort", "R3-duplicate-stage-prepare"],
+  "parallelChangeAttribution": "全量 npm test 含并行 change 用例均绿；本 gate 失败归因仅限 agent-kernel 相关硬项",
+  "storyDoneReady": true
+}

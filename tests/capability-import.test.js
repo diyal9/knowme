@@ -166,6 +166,17 @@ version: 1.0.0
     assert.equal(result.entry.trust, 'bundled')
   })
 
+  it('installs an expert in persona-only mode when bindings are unavailable', () => {
+    const result = importLib.installCurated(userData, 'office-partner', { bundledRoot: BUNDLED_ROOT })
+    assert.equal(result.ok, true)
+    assert.equal(result.entry.kind, 'expert')
+    assert.deepEqual(
+      result.manifest.dependencies.map(dep => [dep.id, dep.kind]),
+      [['writing-polish', 'skill'], ['feishu', 'connector']],
+    )
+    assert.equal(result.warnings.length, 2)
+  })
+
   it('extracts stored zip and installs through external adapter hook', () => {
     const zip = buildStoredZip([
       { name: 'SKILL.md', data: '---\nname: zip-skill\ndescription: z\nversion: 1.0.0\n---\n' },

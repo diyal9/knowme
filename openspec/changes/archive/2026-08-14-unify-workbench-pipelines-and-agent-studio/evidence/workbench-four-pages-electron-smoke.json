@@ -1,0 +1,79 @@
+{
+  "at": "2026-08-09T17:09:40.837Z",
+  "ok": true,
+  "mode": "electron",
+  "checks": [
+    {
+      "id": "four-primary-tabs",
+      "ok": true,
+      "detail": "[\"开始工作\",\"工作流\",\"智能体管理\",\"Daemon 模式\"]"
+    },
+    {
+      "id": "agent-manager-page-opens",
+      "ok": true,
+      "detail": "{\"pageClass\":\"wb-page active\",\"pageDisplay\":\"block\",\"layout\":\"overview\",\"activeTabs\":[\"wbTabAgents\"]}"
+    },
+    {
+      "id": "local-agent-package-profile-save",
+      "ok": true,
+      "detail": "{\"name\":\"开发搭档\",\"prompt\":\"先理解目标，再实现并完成测试。\",\"profile\":{\"profileVersion\":2,\"id\":\"developer-default\",\"agentId\":\"developer\",\"name\":\"开发搭档 默认设置\",\"description\":\"\",\"version\":\"1.0.0\",\"roleOverlay\":\"负责工程实现与开发自测\",\"promptOverlay\":\"不得跳过测试；输出改动与证据。\",\"skillRefs\":[],\"knowledgeRefs\":[],\"connectorRefs\":[],\"permissions\":{},\"memoryPolicy\":{\"scope\":\"session\"},\"knowledgePolicy\":{\"mode\":\"selected\",\"includeWorkMemory\":false},\"modelPolicy\":{\"model\":\"\"},\"outputContract\":{\"format\":\"\"},\"budget\":{},\"risk\":{\"level\":\"low\",\"reasons\":[]},\"provenance\":{\"scope\":\"default-agent\",\"source\":\"agent-manager\"},\"createdAt\":\"2026-08-09T17:09:45.031Z\",\"updatedAt\":\"2026-08-09T17:09:45.031Z\",\"profileHash\":\"sha256:331218f1a256266022a6a402160d87dc3c9611efd947271c3fd94eb2782a19a0\"}}"
+    },
+    {
+      "id": "workflow-local-agents-only",
+      "ok": true,
+      "detail": "[\"developer\",\"tester\"]"
+    },
+    {
+      "id": "workflow-step-scoped-editor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "workflow-node-snapshot",
+      "ok": true,
+      "detail": "{\"id\":\"my-msm25hns\",\"origin\":\"local\",\"packageHash\":\"9b4d36c1d9a1ef6c\",\"profileId\":\"developer-default\",\"profileHash\":\"sha256:331218f1a256266022a6a402160d87dc3c9611efd947271c3fd94eb2782a19a0\",\"relation\":\"parallel\"}"
+    },
+    {
+      "id": "daemon-fixed-readonly-roster",
+      "ok": true,
+      "detail": "{\"roster\":[\"Daemon 规划\",\"Daemon 验收\"],\"readOnlyLabels\":2,\"editInputs\":0,\"startEnabled\":true,\"tasks\":1}"
+    },
+    {
+      "id": "daemon-launch-and-monitor",
+      "ok": true,
+      "detail": "{\"roster\":[\"Daemon 规划\",\"Daemon 验收\"],\"readOnlyLabels\":2,\"editInputs\":0,\"startEnabled\":true,\"tasks\":1}"
+    },
+    {
+      "id": "narrow-no-overflow-homepage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-no-overflow-studiopage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-no-overflow-teampage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-no-overflow-daemonpage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "restart-preserves-workflow-snapshot",
+      "ok": true,
+      "detail": "{\"workflowId\":\"my-msm25hns\",\"origin\":\"local\",\"packageHash\":\"9b4d36c1d9a1ef6c\",\"profileHash\":\"sha256:331218f1a256266022a6a402160d87dc3c9611efd947271c3fd94eb2782a19a0\"}"
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "failures": [],
+  "consoleErrors": []
+}

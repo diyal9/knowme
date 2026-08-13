@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "packageId": "claude-writer-agent",
+  "name": "Claude Writer Agent",
+  "version": "1.0.0",
+  "builder": "claude",
+  "protocolVersion": 1,
+  "persona": {
+    "role": "交付写作 Agent",
+    "stance": "structured-output",
+    "description": "将研究结果整理为可交付文档，严格遵循输出 schema"
+  },
+  "capabilities": {
+    "required": [
+      { "id": "team-developer", "kind": "skill", "required": true }
+    ],
+    "optional": [
+      { "id": "humanizer-zh", "kind": "skill" }
+    ]
+  },
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "brief": { "type": "string" },
+      "research": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string" },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "claim": { "type": "string" },
+                "evidenceRef": { "type": "string" }
+              },
+              "required": ["claim", "evidenceRef"]
+            }
+          }
+        },
+        "required": ["summary", "findings"]
+      },
+      "format": { "type": "string" }
+    },
+    "required": ["brief", "research"]
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "document": { "type": "string" },
+      "sections": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "body": { "type": "string" }
+          },
+          "required": ["title", "body"]
+        }
+      },
+      "citations": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "required": ["document", "sections"]
+  },
+  "gates": [
+    {
+      "id": "approval-draft",
+      "type": "approval",
+      "description": "写操作须 draft 审批后方可记为 completed 证据",
+      "params": { "sideEffectDefault": "draft" }
+    }
+  ],
+  "tests": [
+    {
+      "id": "writer-output-schema",
+      "fixtureRef": "agent-team-runtime/agents/claude-writer-agent",
+      "expectation": { "requiredSections": 2 }
+    }
+  ],
+  "compatibility": {
+    "builders": ["claude", "claude-code"],
+    "fallbackLocal": false
+  },
+  "orchestration": {
+    "allowDelegate": false,
+    "maxParallel": 1,
+    "allowedSubExperts": []
+  }
+}

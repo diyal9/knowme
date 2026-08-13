@@ -11,6 +11,12 @@ function buildToolFailureHint(entries = []) {
   if (/未授权|auth_required|identity is missing|no token in keychain|401|403|权限不足|unauthorized|forbidden/i.test(joined)) {
     return '工具调用未成功：当前权限或身份不足。\n请先在“设置 → 连接器”完成授权并补齐权限范围后重试。'
   }
+  if (/approval_required|pending_review|等待.*批准|草稿/i.test(joined)) {
+    return '工具调用已生成预览草稿，等待你在审批卡中确认后才会执行写入。'
+  }
+  if (/scope_denied|patch_conflict|pdf_too_large|orchestration_depth_exceeded|parallel_cap_exceeded/i.test(joined)) {
+    return '工具调用未成功：路径/权限/编排策略不允许此操作。\n请检查内容源范围、文件冲突或子 Agent 预算后重试。'
+  }
   if (/unknown_tool|未注册工具|非只读飞书工具|invalid_args|需要|参数/i.test(joined)) {
     return '工具调用未成功：请求参数或工具能力不匹配。\n请明确目标对象与参数后重试（例如补充文档 token、查询关键词）。'
   }

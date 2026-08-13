@@ -28,6 +28,21 @@ describe('sources path safety', () => {
     assert.equal(bad.ok, false);
     fs.rmSync(root, { recursive: true, force: true });
   });
+
+  it('rejects oversized files', () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-src-'));
+    const bigPath = path.join(root, 'big.bin');
+    const fd = fs.openSync(bigPath, 'w');
+    try {
+      fs.ftruncateSync(fd, sources.MAX_READ_BYTES + 1);
+    } finally {
+      fs.closeSync(fd);
+    }
+    const r = sources.readFileUnder(root, 'big.bin');
+    assert.equal(r.ok, false);
+    assert.equal(r.code, 'too_large');
+    fs.rmSync(root, { recursive: true, force: true });
+  });
 });
 
 describe('sources store', () => {

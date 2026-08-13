@@ -1,0 +1,135 @@
+{
+  "at": "2026-08-09T04:49:19.227Z",
+  "ok": true,
+  "mode": "electron",
+  "checks": [
+    {
+      "id": "console-navigation",
+      "ok": true,
+      "detail": "工作/资源/编排"
+    },
+    {
+      "id": "visible-domain-filter",
+      "ok": true,
+      "detail": "all/office/engineering/visual"
+    },
+    {
+      "id": "three-domain-readiness",
+      "ok": true,
+      "detail": "3"
+    },
+    {
+      "id": "unified-new-run",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "office-pipeline-visible",
+      "ok": true,
+      "detail": "会议资料 → 纪要与待办"
+    },
+    {
+      "id": "office-pipeline-honest",
+      "ok": true,
+      "detail": "暂不可运行"
+    },
+    {
+      "id": "engineering-pipeline-visible",
+      "ok": true,
+      "detail": "需求 → 实现 → 测试 → 交付"
+    },
+    {
+      "id": "engineering-pipeline-honest",
+      "ok": true,
+      "detail": "暂不可运行"
+    },
+    {
+      "id": "visual-pipeline-visible",
+      "ok": true,
+      "detail": "Brief → 生成 → 审阅 → 导出"
+    },
+    {
+      "id": "visual-pipeline-honest",
+      "ok": true,
+      "detail": "暂不可运行"
+    },
+    {
+      "id": "agent-registry-surface",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "dedicated-studio-surface",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "studio-new-action",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "unified-run-center",
+      "ok": true,
+      "detail": "运行中心"
+    },
+    {
+      "id": "narrow-domain-visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-all-domain-visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-new-run-visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "narrow-no-page-overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "domains": {
+    "office": {
+      "domain": "office",
+      "title": "会议资料 → 纪要与待办",
+      "blocked": true,
+      "buttonText": "暂不可运行",
+      "listCount": 1,
+      "currentDomain": "office"
+    },
+    "engineering": {
+      "domain": "engineering",
+      "title": "需求 → 实现 → 测试 → 交付",
+      "blocked": true,
+      "buttonText": "暂不可运行",
+      "listCount": 1,
+      "currentDomain": "engineering"
+    },
+    "visual": {
+      "domain": "visual",
+      "title": "Brief → 生成 → 审阅 → 导出",
+      "blocked": true,
+      "buttonText": "暂不可运行",
+      "listCount": 1,
+      "currentDomain": "visual"
+    }
+  },
+  "consoleErrors": [],
+  "narrow": {
+    "domainVisible": true,
+    "allDomainVisible": true,
+    "newRunVisible": true,
+    "horizontalOverflow": false
+  }
+}

@@ -24,9 +24,13 @@ describe('about-developer-info', () => {
   })
 
   it('exposes openExternal with protocol guard', () => {
+    const openExternalIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'open-external.js'), 'utf8')
     assert.ok(preload.includes('openExternal:'), 'preload API')
-    assert.ok(main.includes("ipcMain.handle('open-external'"), 'main handler')
-    assert.ok(main.includes('mailto:'), 'mailto allowed')
+    assert.ok(main.includes('registerCoreIpc'), 'main registers core ipc')
+    assert.ok(openExternalIpc.includes("ipcMain.handle('open-external'"), 'open-external module')
+    assert.ok(openExternalIpc.includes('mailto:'), 'mailto allowed')
+    assert.ok(openExternalIpc.includes('shell.openPath'), 'file urls use openPath')
+    assert.ok(main.includes('will-attach-webview'), 'webview attach guard')
   })
 
   it('registers coffee/mail icons', () => {

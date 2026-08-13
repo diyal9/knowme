@@ -91,6 +91,9 @@ function normalizeJob(item = {}) {
     prompt: String(item.prompt || '').trim(),
     connectorId: String(item.connectorId || '').trim(),
     templateId: String(item.templateId || '').trim(),
+    workflowId: String(item.workflowId || '').trim(),
+    domain: String(item.domain || '').trim(),
+    backend: String(item.backend || '').trim(),
     enabled: item.enabled !== false,
     schedule,
     dateRange,
@@ -196,7 +199,9 @@ function makeId() {
   return `auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
 }
 
-function createStore(file) {
+function createStore(file, options = {}) {
+  const resolveLaunch = typeof options.resolveLaunch === 'function' ? options.resolveLaunch : null
+
   function load() {
     const raw = readJson(file)
     const jobs = Array.isArray(raw && raw.jobs) ? raw.jobs.map(normalizeJob).filter(j => j.id) : []
@@ -232,6 +237,9 @@ function createStore(file) {
       prompt,
       connectorId: payload.connectorId,
       templateId: payload.templateId,
+      workflowId: payload.workflowId,
+      domain: payload.domain,
+      backend: payload.backend,
       enabled: payload.enabled !== false,
       schedule: payload.schedule,
       dateRange: payload.dateRange,
@@ -286,16 +294,22 @@ function createStore(file) {
     const state = load()
     const index = state.jobs.findIndex(item => item.id === id)
     if (index < 0) return { ok: false, error: '自动化不存在' }
-    const current = state.jobs[index]
-    const next = normalizeJob({
-      ...current,
-      lastStatus: 'queued',
-      lastRunAt: nowIso(),
-      updatedAt: nowIso(),
-    })
-    state.jobs[index] = next
-    save(state)
-    return { ok: true, job: next, message: '已加入执行队列（调度器开发中）' }
+    const job = state.jobs[index]
+    if (!job.workflowId || !job.domain || !job.backend) {
+      return {
+        ok: false,
+        code: 'scheduler_unavailable',
+        error: '该自动化尚未绑定可执行 Workflow Package，不能立即执行',
+      }
+    }
+    if (resolveLaunch) {
+      return resolveLaunch(job)
+    }
+    return {
+      ok: false,
+      code: 'scheduler_unavailable',
+      error: '该自动化尚未绑定可执行 Workflow Package，不能立即执行',
+    }
   }
 
   return { list, create, update, remove, toggle, runNow }

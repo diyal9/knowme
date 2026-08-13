@@ -106,3 +106,41 @@ Hub MUST 支持专家的创建、编辑、安装、卸载，以及抽屉内「�
 - **THEN** 新试聊使用更新后的 Expert
 - **AND** 旧 Session 继续使用原快照
 
+### Requirement: Expert activation validates unified dependencies
+
+创建试聊、Session 快照或启用 Expert 前，系统 MUST 验证 Expert 统一声明中的 required Skill 与 Connector 均存在且已启用；旧 Session 快照 MUST 继续可读。
+
+#### Scenario: Expert dependency is disabled
+
+- **WHEN** Expert 必需绑定的 Skill 或 Connector 已禁用
+- **THEN** 新 Session 或试聊 MUST 被阻止并返回依赖问题
+
+#### Scenario: Existing snapshot outlives dependency change
+
+- **WHEN** 已有 Session 快照对应依赖后来被禁用
+- **THEN** 快照 persona 与 binding hashes SHALL 保持可读
+- **AND** 后续工具执行仍受当前安全策略约束
+
+### Requirement: Expert orchestration policy
+
+EXPERT.md frontmatter MUST 支持可选字段 `orchestration: { allowDelegate: boolean, maxParallel: number, allowedSubExperts: string[] }`；缺省 `allowDelegate=false`。
+
+#### Scenario: Delegate disabled
+
+- **WHEN** 专家 allowDelegate=false
+- **THEN** `delegate_to_expert` MUST NOT 对该专家可用
+
+#### Scenario: Sub-expert allowlist
+
+- **WHEN** allowedSubExperts 非空
+- **THEN** 仅列表内 expertId 可被委派
+
+### Requirement: Expert tool surface from registry
+
+专家 Session 的工具投影 MUST 来自 Tool Registry 与专家 connector/skill 绑定的交集，且每个工具契约可见。
+
+#### Scenario: High risk tool requires hub enable
+
+- **WHEN** 专家绑定 feishu 写 draft 工具
+- **THEN** 仍受 connector allowlist 与 requiresApproval 约束
+

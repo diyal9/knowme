@@ -73,7 +73,19 @@ function resolveCurrentNodeId(task) {
 
 function inferNodeStatus(nodeId, currentId, nodeIndex, currentIndex, taskState, statusMap) {
   if (statusMap.has(nodeId)) return statusMap.get(nodeId)
-  if (DONE_STATES.has(text(taskState).toLowerCase())) return 'done'
+  const state = text(taskState).toLowerCase()
+  // waiting / HITL：不得把全部节点涂成 done
+  if (['waiting', 'blocked', 'gate', 'clarification', 'needs_input', 'needs-input', 'paused', 'idle'].includes(state)) {
+    if (!currentId) return nodeIndex === 0 ? 'active' : 'pending'
+    if (currentIndex >= 0) {
+      if (nodeIndex < currentIndex) return 'done'
+      if (nodeIndex === currentIndex) return 'active'
+      return 'pending'
+    }
+    if (nodeId === currentId) return 'active'
+    return 'pending'
+  }
+  if (DONE_STATES.has(state)) return 'done'
   if (!currentId) return nodeIndex === 0 ? 'active' : 'pending'
   if (currentIndex >= 0) {
     if (nodeIndex < currentIndex) return 'done'
@@ -96,13 +108,26 @@ function ownerForNode(node, agentsById) {
   return LOCAL_APPROVER
 }
 
-function handoffLabel(node) {
+function pathBasename(value) {
+  const normalized = text(value).replace(/\\/g, '/')
+  if (!normalized) return ''
+  const parts = normalized.split('/')
+  return parts[parts.length - 1] || normalized
+}
+
+/** 产出短标签（UI）与完整提示；handoff 保留原始 kind/path 供程序使用 */
+function outputDisplay(node) {
   const out = node && node.output
-  if (!out) return ''
-  const parts = []
-  if (out.kind) parts.push(text(out.kind))
-  if (out.path) parts.push(text(out.path))
-  return parts.join(' · ')
+  if (!out) return { handoff: '', outputLabel: '', outputTitle: '' }
+  const kind = text(out.kind)
+  const path = text(out.path)
+  const base = pathBasename(path)
+  const handoff = [kind, path].filter(Boolean).join(' · ')
+  return {
+    handoff,
+    outputLabel: base || kind,
+    outputTitle: path || (kind ? `产出 ${kind}` : ''),
+  }
 }
 
 function rosterFromWorkflow(workflow, agentsById) {
@@ -122,8 +147,8 @@ function rosterFromWorkflow(workflow, agentsById) {
 }
 
 function userFacingDegradedReason() {
-  // 不向用户暴露 workflow id 或 .cursor/workflows/ 等实现细节，只给可执行的引导。
-  return '暂时无法确认执行步骤：当前激活内容源可能与该工作流不匹配。请在设置的内容源里确认已启用对应来源后刷新。'
+  // 不向用户暴露 workflow id 或安装路径等实现细节，只给可执行的引导。
+  return '暂时无法确认执行步骤：管线服务工作流定义未能加载。请在设置中确认已配置管线服务安装目录后刷新。'
 }
 
 function degradedGraphNodes(reason) {
@@ -134,6 +159,8 @@ function degradedGraphNodes(reason) {
     status: 'pending',
     owner: '',
     handoff: '',
+    outputLabel: '',
+    outputTitle: '',
     type: 'info',
     degraded: true,
     degradedPlaceholder: true,
@@ -185,7 +212,12 @@ function projectTaskRoom(input = {}) {
   const agentsById = Object.fromEntries(agents.map(a => [a.id, a]))
   const intent = text(task.intent || input.intent)
   const workflowId = text(task.workflow || input.workflowId || (workflow && workflow.id))
-  const taskState = text(task.state || (task.status && task.status.state) || input.status)
+  const hitl = (Array.isArray(task.pending_clarifications) && task.pending_clarifications.length)
+    || (Array.isArray(task.pending_gates) && task.pending_gates.length)
+    || task.waiting || task.gate || task.clarification
+  let taskState = text(task.state || (task.status && task.status.state) || input.status)
+  if (hitl && DONE_STATES.has(taskState.toLowerCase())) taskState = 'waiting'
+  if (hitl && !taskState) taskState = 'waiting'
   const status = task.status && typeof task.status === 'object' ? task.status : {}
   const currentNodeId = resolveCurrentNodeId(task)
   const statusMap = statusIndexMap(status)
@@ -195,7 +227,7 @@ function projectTaskRoom(input = {}) {
       ? status.agents.map(item => text(item && (item.name || item.role || item.id) || item)).filter(Boolean)
       : []
     const reason = workflow
-      ? '该工作流定义不完整，暂时无法确认执行步骤。请在设置的内容源里确认已启用完整来源后刷新。'
+      ? '该工作流定义不完整，暂时无法确认执行步骤。请确认管线服务安装目录中的流程定义完整后刷新。'
       : userFacingDegradedReason()
     const roster = remoteAgents.length
       ? remoteAgents.map(name => ({ id: name, label: name, title: name }))
@@ -227,15 +259,16 @@ function projectTaskRoom(input = {}) {
     const title = workbenchModel.nodeTitle(node, agentsById) || id
     const metaParts = [workbenchModel.nodeTypeLabel(node.type)]
     if (owner) metaParts.push(owner)
-    const handoff = handoffLabel(node)
-    if (handoff) metaParts.push(`产出 ${handoff}`)
+    const { handoff, outputLabel, outputTitle } = outputDisplay(node)
     return {
       id,
       label: title,
-      meta: metaParts.join(' · '),
+      meta: metaParts.filter(Boolean).join(' · '),
       status: nodeStatus,
       owner,
       handoff,
+      outputLabel,
+      outputTitle,
       type: node.type,
     }
   })
@@ -284,4 +317,6 @@ module.exports = {
   degradedGraphNodes,
   userFacingDegradedReason,
   summarizeRunnerProgress,
+  outputDisplay,
+  pathBasename,
 }

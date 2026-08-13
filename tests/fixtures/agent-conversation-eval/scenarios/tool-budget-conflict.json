@@ -1,0 +1,30 @@
+{
+  "name": "tool-budget-conflict",
+  "sessionScript": [
+    {
+      "taskFrame": {
+        "requiredTools": ["feishu.meeting_read"],
+        "completionConditions": [{ "type": "tool_success", "tool": "feishu.meeting_read" }]
+      }
+    }
+  ],
+  "input": { "prompt": "读取并总结", "tier": "retrieval", "forceTools": true },
+  "budget": { "maxRounds": 2, "maxToolCalls": 1 },
+  "llmScript": [
+    {
+      "response": {
+        "toolCalls": [{ "name": "search_knowledge", "arguments": { "query": "meeting" } }]
+      }
+    },
+    { "response": { "text": "已读取并完成总结，议题：预算讨论。" } }
+  ],
+  "toolScript": {
+    "search_knowledge": { "text": "unrelated" }
+  },
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["feishu.meeting_read"],
+    "forbiddenClaims": ["议题：", "已读取"],
+    "mustFail": true
+  }
+}

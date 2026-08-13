@@ -1,0 +1,12 @@
+{
+  "name": "error-no-api-key",
+  "input": { "prompt": "你好", "tier": "chat" },
+  "settingsError": "no-api-key",
+  "llmScript": [],
+  "expect": {
+    "terminal": "ERROR",
+    "phases": ["PREPARE", "ERROR"],
+    "toolCalls": 0,
+    "error": "API Key"
+  }
+}

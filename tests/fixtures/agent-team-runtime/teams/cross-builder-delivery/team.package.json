@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "packageId": "cross-builder-delivery",
+  "name": "Cross-Builder Delivery Team",
+  "version": "1.0.0",
+  "members": [
+    {
+      "agentPackageId": "cursor-research-agent",
+      "role": "researcher"
+    },
+    {
+      "agentPackageId": "claude-writer-agent",
+      "role": "writer",
+      "gateRef": "approval-draft"
+    }
+  ],
+  "workflow": {
+    "joinStrategy": "allSucceeded",
+    "parallelism": 2,
+    "nodes": [
+      {
+        "id": "n-research",
+        "type": "agent",
+        "agentPackageId": "cursor-research-agent",
+        "intent": "串行：Cursor Builder 完成资料研究与事实提炼"
+      },
+      {
+        "id": "n-gate-approval",
+        "type": "gate",
+        "gateRef": "approval-draft",
+        "description": "门禁：draft 审批通过后才进入写作阶段"
+      },
+      {
+        "id": "n-write",
+        "type": "agent",
+        "agentPackageId": "claude-writer-agent",
+        "intent": "串行：Claude Builder 将研究结果整理为交付文档"
+      },
+      {
+        "id": "n-parallel-c",
+        "type": "agent",
+        "agentPackageId": "cursor-research-agent",
+        "intent": "并行分支 C：补充引用核验"
+      },
+      {
+        "id": "n-parallel-d",
+        "type": "agent",
+        "agentPackageId": "claude-writer-agent",
+        "intent": "并行分支 D：生成摘要段落"
+      },
+      {
+        "id": "n-join",
+        "type": "join",
+        "joinStrategy": "allSucceeded",
+        "description": "汇聚：等待 C 与 D 均 succeeded"
+      },
+      {
+        "id": "n-final",
+        "type": "agent",
+        "agentPackageId": "claude-writer-agent",
+        "intent": "合并并行产物并输出终稿"
+      },
+      {
+        "id": "n-done",
+        "type": "terminal",
+        "status": "completed"
+      }
+    ],
+    "edges": [
+      { "from": "n-research", "to": "n-gate-approval" },
+      { "from": "n-gate-approval", "to": "n-write" },
+      { "from": "n-write", "to": "n-parallel-c" },
+      { "from": "n-write", "to": "n-parallel-d" },
+      { "from": "n-parallel-c", "to": "n-join" },
+      { "from": "n-parallel-d", "to": "n-join" },
+      { "from": "n-join", "to": "n-final" },
+      { "from": "n-final", "to": "n-done" }
+    ]
+  },
+  "gates": [
+    {
+      "id": "team-smoke",
+      "type": "smoke",
+      "description": "Team 启动前 smoke 校验",
+      "params": { "fixtureRef": "agent-team-runtime/teams/cross-builder-delivery" }
+    },
+    {
+      "id": "approval-draft",
+      "type": "approval",
+      "description": "写操作 draft 审批门禁",
+      "params": {
+        "requiresUserApproval": true,
+        "onReject": { "action": "rollback", "targetNodeId": "n-research", "maxAttempts": 1 }
+      }
+    }
+  ],
+  "tests": [
+    {
+      "id": "cross-builder-serial-handoff",
+      "fixtureRef": "agent-team-runtime/teams/cross-builder-delivery",
+      "expectation": {
+        "serialPath": ["n-research", "n-gate-approval", "n-write"],
+        "requiresApprovalGate": true
+      }
+    },
+    {
+      "id": "cross-builder-parallel-join",
+      "fixtureRef": "agent-team-runtime/teams/cross-builder-delivery",
+      "expectation": {
+        "parallelNodes": ["n-parallel-c", "n-parallel-d"],
+        "joinNode": "n-join",
+        "joinStrategy": "allSucceeded"
+      }
+    }
+  ]
+}

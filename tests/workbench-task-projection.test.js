@@ -65,6 +65,45 @@ describe('workbench-task-projection · team-run hydrate', () => {
     assert.match(gateNode.meta, /门禁/)
   })
 
+  it('keeps node meta scannable and shortens output to basename', () => {
+    const workflow = {
+      id: 'proto-flow',
+      name: 'Proto',
+      nodes: [
+        {
+          id: 'ProtoDesigner',
+          type: 'agent',
+          agent: 'developer',
+          node_key: 'ProtoDesigner',
+          next: 'n6-parallel-impl',
+          output: { kind: 'proto_changes_doc', path: 'artifacts/proto-changes.md' },
+        },
+        {
+          id: 'n6-parallel-impl',
+          type: 'parallel',
+        },
+      ],
+      edges: [{ from: 'ProtoDesigner', to: 'n6-parallel-impl' }],
+    }
+    const projection = P.projectTaskRoom({
+      task: { workflow: 'proto-flow', state: 'running', status: { current_node: 'ProtoDesigner' } },
+      workflow: M.parseWorkflow(workflow, { id: 'proto-flow', name: 'Proto' }),
+      agents: AGENTS,
+    })
+    const agentNode = projection.graphNodes.find(n => n.id === 'ProtoDesigner')
+    assert.ok(agentNode)
+    assert.match(agentNode.meta, /Agent/)
+    assert.match(agentNode.meta, /开发/)
+    assert.doesNotMatch(agentNode.meta, /proto_changes_doc|artifacts\//)
+    assert.equal(agentNode.outputLabel, 'proto-changes.md')
+    assert.equal(agentNode.outputTitle, 'artifacts/proto-changes.md')
+    assert.match(agentNode.handoff, /proto_changes_doc/)
+    const parallel = projection.graphNodes.find(n => n.id === 'n6-parallel-impl')
+    assert.ok(parallel)
+    assert.equal(parallel.outputLabel, '')
+    assert.doesNotMatch(parallel.meta, /产出/)
+  })
+
   it('degrades safely when workflow definition is missing', () => {
     const projection = P.projectTaskRoom({
       task: { workflow: 'missing-flow', intent: '离线任务', state: 'done' },
@@ -72,7 +111,7 @@ describe('workbench-task-projection · team-run hydrate', () => {
       agents: [],
     })
     assert.equal(projection.degraded, true)
-    assert.match(projection.degradedReason, /激活内容源可能与该工作流不匹配/)
+    assert.match(projection.degradedReason, /管线服务工作流定义未能加载|安装目录/)
     // 降级原因不得向用户暴露实现路径或 workflow id
     assert.doesNotMatch(projection.degradedReason, /\.cursor\/workflows/)
     assert.doesNotMatch(projection.degradedReason, /missing-flow/)

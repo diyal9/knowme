@@ -46,5 +46,6 @@ KnowMe 已具备与 Cursor L3 参考实现同构的核心闭环：**多会话上
 ## 相关知识
 
 - OKF 长期规范页：`brain/knowledge/concepts/llm-processing-and-cursor-benchmark.md`
+- 多 Agent Runtime：`brain/wiki/concepts/production-agent-team-runtime.md`
 - 产品概览：`brain/wiki/concepts/knowme-overview.md`
 - Electron 架构：`brain/wiki/concepts/electron-architecture.md`

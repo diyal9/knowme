@@ -1,11 +1,13 @@
 'use strict'
 
 /**
- * agent-context-assembly — Expert persona、Skill 自动匹配与 slash L1 注入。
+ * agent-context-assembly — Expert 分层提示词、Skill 自动匹配与 slash L1 注入。
  * 纯函数，便于单元测试；IO 经 skillRuntime / expertRuntime 注入。
  */
 
 const { LEGACY_PREFIX } = require('./skill-runtime')
+const groundingRuntime = require('./agent-grounding-runtime')
+const { assembleExpertLayeredBlocks, resolveSoulSop } = require('./expert-agentic-profile')
 
 const L0_BUDGET = 2400
 const L1_BUDGET = 8000
@@ -20,6 +22,8 @@ function isLegacySlashRef(ref) {
 }
 
 function buildExpertPersonaBlock(persona = {}) {
+  const layered = assembleExpertLayeredBlocks({ persona })
+  if (layered.expertBlock) return layered.expertBlock
   const name = String(persona.name || '').trim()
   const prompt = String(persona.systemPrompt || '').trim()
   if (!prompt) return ''
@@ -60,10 +64,12 @@ function buildSkillL1Block(entries = []) {
  *   skillRuntime?: {
  *     autoMatchSkills: Function,
  *     loadSkillL1: Function,
+ *     loadSkillGroundingContract?: Function,
  *     listSlashPickerItems: Function,
  *     findSkillRecord: Function,
  *   },
  *   legacySkillContext?: string,
+ *   taskId?: string,
  * }} opts
  */
 function assembleCapabilityContext(opts = {}) {
@@ -88,12 +94,20 @@ function assembleCapabilityContext(opts = {}) {
   }
 
   const filterOpts = {}
-  if (bindings.skills?.length) filterOpts.allowedIds = bindings.skills
+  if (Array.isArray(bindings.skills)) filterOpts.allowedIds = bindings.skills
 
-  const expertBlock = buildExpertPersonaBlock(persona || {})
+  const layered = assembleExpertLayeredBlocks({
+    persona: persona || {},
+    session: {
+      goal: session.goal || session.taskGoal || session.intent,
+      knowledgeRefs: session.knowledgeRefs,
+    },
+  })
+  const expertBlock = layered.dynamicExpertContext || buildExpertPersonaBlock(persona || {})
   let skillL0Block = ''
   let skillL1Block = ''
   const resolvedSlashIds = []
+  const groundingContracts = []
 
   const heavy = tier !== 'chat'
   if (heavy && skillRuntime) {
@@ -119,11 +133,24 @@ function assembleCapabilityContext(opts = {}) {
           legacyRefs.push(record.slash || ref)
           continue
         }
-        if (bindings.skills?.length && !bindings.skills.includes(record.id)) continue
+        if (Array.isArray(bindings.skills) && !bindings.skills.includes(record.id)) continue
         const loaded = skillRuntime.loadSkillL1(record.id, filterOpts)
         if (loaded?.ok) {
           l1Entries.push(loaded)
           resolvedSlashIds.push(record.id)
+          if (typeof skillRuntime.loadSkillGroundingContract === 'function') {
+            const grounding = skillRuntime.loadSkillGroundingContract(record.id, {
+              ...filterOpts,
+              taskId: String(opts.taskId || '').trim(),
+            })
+            if (grounding?.ok && grounding.contract) {
+              const c = grounding.contract
+              const hasRules = (c.requiredTools?.length || 0) > 0
+                || (c.requiredEvidence?.length || 0) > 0
+                || (c.completionConditions?.length || 0) > 0
+              if (hasRules) groundingContracts.push(c)
+            }
+          }
         }
       }
       skillL1Block = buildSkillL1Block(l1Entries)
@@ -138,14 +165,23 @@ function assembleCapabilityContext(opts = {}) {
   }
 
   const dynamicParts = [expertBlock, skillL0Block, skillL1Block].filter(Boolean)
+  const groundingContract = groundingContracts.length
+    ? groundingRuntime.mergeGroundingContracts(groundingContracts)
+    : null
+  const resolvedProfile = resolveSoulSop(persona || {})
   return {
     expertBlock,
     skillL0Block,
     skillL1Block,
     dynamicCapabilityContext: dynamicParts.join('\n\n'),
+    groundingContract,
     bindings,
     resolvedSlashIds,
     personaSource: persona ? (session.snapshotPath ? 'snapshot' : 'live') : 'none',
+    layers: layered.layers,
+    agenticType: resolvedProfile.agenticType,
+    soul: resolvedProfile.soul,
+    sop: resolvedProfile.sop,
   }
 }
 
@@ -155,8 +191,8 @@ function getSessionCapabilityBindings(session, expertRuntime) {
     const res = expertRuntime.getSessionPersona(session.id, session.expertId)
     if (res?.ok && res.bindings) {
       return {
-        allowedSkillIds: res.bindings.skills?.length ? res.bindings.skills : null,
-        allowedConnectorIds: res.bindings.connectors?.length ? res.bindings.connectors : null,
+        allowedSkillIds: Array.isArray(res.bindings.skills) ? res.bindings.skills : [],
+        allowedConnectorIds: Array.isArray(res.bindings.connectors) ? res.bindings.connectors : [],
       }
     }
   }
@@ -173,4 +209,6 @@ module.exports = {
   buildSkillL1Block,
   assembleCapabilityContext,
   getSessionCapabilityBindings,
+  assembleExpertLayeredBlocks,
+  resolveSoulSop,
 }

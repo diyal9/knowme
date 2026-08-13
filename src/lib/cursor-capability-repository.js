@@ -4,8 +4,14 @@ const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 const { parseSkillFrontmatter } = require('./skill-runtime')
+const { deriveExpertDisplayName } = require('./expert-display-name')
 const { scanSecrets } = require('./capability-import')
 const { resolvePaths } = require('./capability-store')
+const {
+  SIDECAR_FILE,
+  adaptLegacyCapability,
+  serializeSidecar,
+} = require('./capability-manifest-v2')
 
 const LIMITS = Object.freeze({
   skills: 200,
@@ -172,19 +178,26 @@ function scanAgents(root, skills, warnings) {
         message: `${entry.name} 声明了未发现技能：${missingSkills.join(', ')}`,
       })
     }
-    const name = String(parsed.frontmatter.name || manifest.title || manifest.id || entry.name).trim()
+    const originName = String(parsed.frontmatter.name || manifest.title || manifest.id || entry.name).trim()
     const description = String(
       parsed.frontmatter.description
       || manifest.display?.summary
       || parsed.frontmatter.persona?.role
-      || name,
+      || originName,
     ).trim()
+    const name = deriveExpertDisplayName({
+      name: originName,
+      description,
+      persona: parsed.frontmatter.persona,
+      frontmatter: { ...parsed.frontmatter, ...manifest },
+    }).name
     const systemPrompt = parsed.body || description
     agents.push({
       kind: 'expert',
       sourceId: String(manifest.id || entry.name),
       id: slug(manifest.id || entry.name, 'expert'),
       name,
+      originName,
       description,
       version: String(manifest.version || '1.0.0'),
       originPath: path.relative(root, dir).replace(/\\/g, '/'),
@@ -296,12 +309,15 @@ function scanCursorRepository(folderPath) {
   const repositoryId = repositoryIdentity(root)
   if (!experts.length && skills.length) {
     const primary = selectPrimarySkill(skills, path.basename(root))
+    const originName = primary?.name || path.basename(root)
+    const description = primary?.description || `${path.basename(root)} 仓库专家`
     experts.push({
       kind: 'expert',
       sourceId: repositoryId,
       id: repositoryId,
-      name: primary?.name || path.basename(root),
-      description: primary?.description || `${path.basename(root)} 仓库专家`,
+      name: deriveExpertDisplayName({ name: originName, description }).name,
+      originName,
+      description,
       version: '1.0.0',
       originPath: primary?.originPath || '.cursor/skills',
       systemPrompt: primary?.body || primary?.description || `你是 ${path.basename(root)} 仓库专家。`,
@@ -336,6 +352,7 @@ function publicPreview(preview, token = '') {
     sourceId: item.sourceId,
     id: item.id,
     name: item.name,
+    originName: item.originName || '',
     description: item.description,
     version: item.version,
     originPath: item.originPath,
@@ -404,6 +421,28 @@ function writeConnectorManifest(userData, id, item) {
   fs.writeFileSync(path.join(dir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
 }
 
+function buildRepositoryManifest(kind, id, item, preview, raw = {}) {
+  return adaptLegacyCapability(kind, {
+    ...raw,
+    id,
+    name: item.name,
+    description: item.description,
+    version: item.version,
+  }, {
+    id,
+    name: item.name,
+    description: item.description,
+    version: item.version,
+    source: 'local-repo',
+    ref: `${preview.root}#${item.originPath}`,
+    trust: 'user_confirmed',
+    contentHash: item.contentHash,
+    adaptedFrom: kind === 'skill' ? 'Cursor SKILL.md'
+      : (kind === 'expert' ? 'Cursor AGENT.md' : 'Cursor mcp.json'),
+    hasScripts: kind === 'skill' && fs.existsSync(path.join(preview.root, item.originPath, 'scripts')),
+  })
+}
+
 function registerCursorRepository(preview, deps = {}) {
   if (!preview?.ok) return fail('invalid_preview', 'Cursor 仓库预览无效')
   const store = deps.store
@@ -423,6 +462,11 @@ function registerCursorRepository(preview, deps = {}) {
     const id = chooseInstallId(item.id, 'skill', item.originPath, preview.repositoryId, entries, claimed)
     claimed.add(id)
     idMaps.skills[item.sourceId] = id
+    const unified = buildRepositoryManifest('skill', id, item, preview)
+    if (!unified.ok) {
+      result.failed.push({ kind: 'skill', sourceId: item.sourceId, error: unified.issues?.[0]?.message || '统一声明无效' })
+      continue
+    }
     const stored = store.upsertEntry({
       id,
       kind: 'skill',
@@ -438,6 +482,7 @@ function registerCursorRepository(preview, deps = {}) {
       repositoryId: preview.repositoryId,
       name: item.name,
       description: item.description,
+      manifest: unified.manifest,
     })
     if (!stored.ok) {
       result.failed.push({ kind: 'skill', sourceId: item.sourceId, error: stored.error })
@@ -454,6 +499,13 @@ function registerCursorRepository(preview, deps = {}) {
       categories: ['研发'],
       tags: ['Cursor', preview.name],
       contentHash: item.contentHash,
+      manifest: unified.manifest,
+      dependencies: unified.manifest.dependencies,
+      permissions: unified.manifest.permissions,
+      inputs: unified.manifest.inputs,
+      outputs: unified.manifest.outputs,
+      risk: unified.manifest.risk,
+      provenance: unified.manifest.provenance,
     })
     result.installed.push({ id, kind: 'skill', name: item.name })
   }
@@ -468,6 +520,12 @@ function registerCursorRepository(preview, deps = {}) {
     idMaps.connectors[item.sourceId] = id
     item.repositoryId = preview.repositoryId
     try {
+      const unified = buildRepositoryManifest('connector', id, item, preview, {
+        type: 'mcp',
+        mcp: item.mcp,
+        allowlist: [],
+      })
+      if (!unified.ok) throw new Error(unified.issues?.[0]?.message || '统一声明无效')
       writeConnectorManifest(userData, id, item)
       connectorsApi?.upsertConnector?.({
         id,
@@ -493,7 +551,12 @@ function registerCursorRepository(preview, deps = {}) {
         repositoryId: preview.repositoryId,
         name: item.name,
         description: item.description,
+        manifest: unified.manifest,
       })
+      const connectorSidecar = serializeSidecar(unified.manifest)
+      if (connectorSidecar.ok) {
+        fs.writeFileSync(path.join(resolvePaths(userData).connectors, id, SIDECAR_FILE), connectorSidecar.content, 'utf8')
+      }
       catalog.upsertOverlayEntry({
         id,
         kind: 'connector',
@@ -505,6 +568,13 @@ function registerCursorRepository(preview, deps = {}) {
         categories: ['MCP'],
         tags: ['Cursor', preview.name],
         contentHash: item.contentHash,
+        manifest: unified.manifest,
+        dependencies: unified.manifest.dependencies,
+        permissions: unified.manifest.permissions,
+        inputs: unified.manifest.inputs,
+        outputs: unified.manifest.outputs,
+        risk: unified.manifest.risk,
+        provenance: unified.manifest.provenance,
       })
       result.installed.push({ id, kind: 'connector', name: item.name })
     } catch (err) {
@@ -513,15 +583,28 @@ function registerCursorRepository(preview, deps = {}) {
   }
 
   const allConnectorIds = Object.values(idMaps.connectors)
-  for (const item of preview.experts) {
-    const id = chooseInstallId(item.id, 'expert', item.originPath, preview.repositoryId, entries, claimed)
+  for (const source of preview.experts) {
+    const id = chooseInstallId(source.id, 'expert', source.originPath, preview.repositoryId, entries, claimed)
     claimed.add(id)
-    idMaps.experts[item.sourceId] = id
+    idMaps.experts[source.sourceId] = id
+    const previous = entries[id]
+    const userNamed = previous?.nameSource === 'user' && previous.name
+    const item = userNamed ? { ...source, name: previous.name } : source
+    const originName = item.originName || previous?.originName || ''
     const boundSkills = (item.declaredSkills.length ? item.declaredSkills : preview.skills.map((skill) => skill.sourceId))
       .map((sourceId) => idMaps.skills[sourceId])
       .filter(Boolean)
+    const unified = buildRepositoryManifest('expert', id, item, preview, {
+      skills: boundSkills,
+      connectors: allConnectorIds,
+    })
+    if (!unified.ok) {
+      result.failed.push({ kind: 'expert', sourceId: item.sourceId, error: unified.issues?.[0]?.message || '统一声明无效' })
+      continue
+    }
     const saved = expertRuntime.saveExpert(id, {
       name: item.name,
+      originName,
       description: item.description,
       avatar: '',
       skills: boundSkills,
@@ -545,12 +628,21 @@ function registerCursorRepository(preview, deps = {}) {
       originPath: item.originPath,
       repositoryId: preview.repositoryId,
       name: item.name,
+      originName,
+      nameSource: userNamed ? 'user' : 'import',
       description: item.description,
+      manifest: unified.manifest,
     })
+    const expertSidecar = serializeSidecar(unified.manifest)
+    if (expertSidecar.ok) {
+      fs.writeFileSync(path.join(resolvePaths(userData).experts, id, SIDECAR_FILE), expertSidecar.content, 'utf8')
+    }
     catalog.upsertOverlayEntry({
       id,
       kind: 'expert',
       name: item.name,
+      originName,
+      nameSource: userNamed ? 'user' : 'import',
       description: item.description,
       version: item.version,
       source: 'local-repo',
@@ -558,6 +650,13 @@ function registerCursorRepository(preview, deps = {}) {
       categories: ['研发'],
       tags: ['Cursor', preview.name],
       contentHash: saved.contentHash,
+      manifest: unified.manifest,
+      dependencies: unified.manifest.dependencies,
+      permissions: unified.manifest.permissions,
+      inputs: unified.manifest.inputs,
+      outputs: unified.manifest.outputs,
+      risk: unified.manifest.risk,
+      provenance: unified.manifest.provenance,
     })
     result.installed.push({ id, kind: 'expert', name: item.name })
   }

@@ -1,12 +1,14 @@
 const zlib = require('zlib')
 const fs = require('fs')
 const path = require('path')
+const crypto = require('crypto')
 
 const BRAND_PNG = path.join(__dirname, '..', 'assets', 'icon.png')
 const BRAND_ICO = path.join(__dirname, '..', 'assets', 'icon.ico')
+const TRAY_PNG = path.join(__dirname, '..', 'assets', 'tray-icon.png')
 
 const WHITE = { r: 255, g: 255, b: 255, a: 255 }
-/** 窗口/任务栏图标：深炭底（与系统托盘线稿同系，适配浅色标题栏） */
+/** 旧像素绘制辅助常量；生产图标直接读取统一的已提交品牌资源。 */
 const ICON_BG = { r: 28, g: 32, b: 38 }
 const ICON_FG = { r: 220, g: 224, b: 230, a: 255 }
 
@@ -117,19 +119,16 @@ function drawNoteGlyph(buf, size, { fg }) {
   }
 }
 
-/**
- * 应用 / 任务栏 / 窗口图标：深炭圆角底 + 浅灰便签线稿（与托盘同系）。
- * 小尺寸保持线稿可辨，避免再退化成实心色块。
- */
+/** 应用 / 任务栏 / 窗口图标：统一的五节点连接品牌标志。 */
 function createAppIconPng(size = 256) {
   void size
   return fs.readFileSync(BRAND_PNG)
 }
 
-/** 系统托盘：与应用入口统一使用 KM 机器人徽章。 */
+/** 系统托盘：读取逐像素优化的 32 px / 2× 连接标志。 */
 function createTrayIconPng(size = 32) {
   void size
-  return fs.readFileSync(BRAND_PNG)
+  return fs.readFileSync(TRAY_PNG)
 }
 
 /**
@@ -141,4 +140,21 @@ function createAppIcoBuffer(sizes = [16, 24, 32, 48, 64, 128, 256]) {
   return fs.readFileSync(BRAND_ICO)
 }
 
-module.exports = { createAppIconPng, createTrayIconPng, createAppIcoBuffer }
+/**
+ * Windows 会按图标路径缓存任务栏位图。内容变化时生成新路径，避免覆盖固定
+ * app-icon.ico 后仍显示旧缓存；相同内容继续复用同一文件。
+ */
+function materializeWindowsIcon(sourcePath, userDataDir) {
+  const bytes = fs.readFileSync(sourcePath)
+  const digest = crypto.createHash('sha256').update(bytes).digest('hex').slice(0, 12)
+  const targetPath = path.join(userDataDir, `app-icon-${digest}.ico`)
+  if (!fs.existsSync(targetPath)) fs.writeFileSync(targetPath, bytes)
+  return targetPath
+}
+
+module.exports = {
+  createAppIconPng,
+  createTrayIconPng,
+  createAppIcoBuffer,
+  materializeWindowsIcon,
+}

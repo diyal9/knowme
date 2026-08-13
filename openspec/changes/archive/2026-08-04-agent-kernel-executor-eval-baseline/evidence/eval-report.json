@@ -1,0 +1,113 @@
+{
+  "generatedAt": "2026-08-04T11:38:37.449Z",
+  "passed": true,
+  "total": 7,
+  "results": [
+    {
+      "name": "cancel-mid-model",
+      "passed": true,
+      "terminal": "CANCELLED",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "CANCELLED"
+      ],
+      "toolCalls": 0,
+      "durationMs": 1,
+      "diff": null
+    },
+    {
+      "name": "chat-simple",
+      "passed": true,
+      "terminal": "DONE",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "PERSIST",
+        "DONE"
+      ],
+      "toolCalls": 0,
+      "durationMs": 5,
+      "diff": null
+    },
+    {
+      "name": "error-no-api-key",
+      "passed": true,
+      "terminal": "ERROR",
+      "runPhases": [
+        "PREPARE",
+        "ERROR"
+      ],
+      "toolCalls": 0,
+      "durationMs": 0,
+      "diff": null
+    },
+    {
+      "name": "grounding-inject",
+      "passed": true,
+      "terminal": "DONE",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "PERSIST",
+        "DONE"
+      ],
+      "toolCalls": 0,
+      "durationMs": 1,
+      "diff": null
+    },
+    {
+      "name": "knowledge-tool",
+      "passed": true,
+      "terminal": "DONE",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "TOOL",
+        "PERSIST",
+        "DONE"
+      ],
+      "toolCalls": 1,
+      "durationMs": 0,
+      "diff": null
+    },
+    {
+      "name": "plan-incomplete",
+      "passed": true,
+      "terminal": "DONE",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "TOOL",
+        "VERIFY",
+        "PERSIST",
+        "DONE"
+      ],
+      "toolCalls": 2,
+      "durationMs": 2,
+      "diff": null
+    },
+    {
+      "name": "tool-recovery",
+      "passed": true,
+      "terminal": "DONE",
+      "runPhases": [
+        "PREPARE",
+        "CONTEXT",
+        "MODEL",
+        "TOOL",
+        "RECOVER",
+        "PERSIST",
+        "DONE"
+      ],
+      "toolCalls": 2,
+      "durationMs": 0,
+      "diff": null
+    }
+  ]
+}

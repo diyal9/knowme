@@ -37,6 +37,15 @@ describe('ai-assistant-context', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('我没有访问外部网页的能力'));
   });
 
+  it('requires autonomous grounded research for current public information', () => {
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('search_web'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('MUST 直接搜索'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('搜索摘要只是发现线索'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('区分来源发布时间与本次检索时间'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止生成只有一个项目'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('来源选项只能来自本轮明确列出的真实可用工具'));
+  });
+
   it('detects legacy default system prompt fingerprint', () => {
     assert.equal(isLegacyDefaultSystemPrompt(LEGACY_DEFAULT_SYSTEM_PROMPT), true);
     assert.equal(isLegacyDefaultSystemPrompt(ASSISTANT_BASE_PROMPT), true);

@@ -1,0 +1,111 @@
+{
+  "at": "2026-08-07T04:28:38.683Z",
+  "change": "polish-workbench-navigation-shell",
+  "shots": [
+    "workbench-navigation-default.png",
+    "workbench-navigation-minimum.png",
+    "workbench-flat-workflow-tab.png",
+    "capability-overlay-aligned.png",
+    "capability-flat-skills-tab.png",
+    "knowledge-without-duplicate-title.png",
+    "settings-without-duplicate-title.png"
+  ],
+  "checks": [
+    {
+      "id": "default-navigation-layout",
+      "ok": true,
+      "railWidth": 120,
+      "shellWidth": 1266.4000244140625,
+      "viewportWidth": 1266,
+      "homeActive": true,
+      "homeSelected": "true",
+      "tabBackground": "rgba(0, 0, 0, 0)",
+      "tabShadow": "none",
+      "moduleTitleDisplay": "none"
+    },
+    {
+      "id": "shot-workbench-navigation-default.png",
+      "ok": true
+    },
+    {
+      "id": "minimum-navigation-layout",
+      "ok": true,
+      "railWidth": 120,
+      "mainWidth": 779.2000122070312,
+      "scrollWidth": 900,
+      "viewportWidth": 900
+    },
+    {
+      "id": "shot-workbench-navigation-minimum.png",
+      "ok": true
+    },
+    {
+      "id": "flat-tab-switch",
+      "ok": true,
+      "indicatorTransform": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    {
+      "id": "shot-workbench-flat-workflow-tab.png",
+      "ok": true
+    },
+    {
+      "id": "overlay-rail-alignment",
+      "ok": true,
+      "railRight": 120,
+      "drawerLeft": 120,
+      "capabilityBrandDisplay": "none",
+      "tabGroupBackground": "rgba(0, 0, 0, 0)",
+      "tabGroupShadow": "none",
+      "activeTabBackground": "rgba(0, 0, 0, 0)",
+      "activeIndicatorTransform": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    {
+      "id": "shot-capability-overlay-aligned.png",
+      "ok": true
+    },
+    {
+      "id": "capability-flat-tab-switch",
+      "ok": true,
+      "skillsActive": true,
+      "skillsSelected": "true",
+      "indicatorTransform": "matrix(1, 0, 0, 1, 0, 0)"
+    },
+    {
+      "id": "shot-capability-flat-skills-tab.png",
+      "ok": true
+    },
+    {
+      "id": "knowledge-title-deduplicated",
+      "ok": true,
+      "drawerTitleDisplay": "none",
+      "closeRightGap": 18
+    },
+    {
+      "id": "shot-knowledge-without-duplicate-title.png",
+      "ok": true
+    },
+    {
+      "id": "settings-title-deduplicated",
+      "ok": true,
+      "drawerTitleDisplay": "none",
+      "closeRightGap": 18
+    },
+    {
+      "id": "shot-settings-without-duplicate-title.png",
+      "ok": true
+    },
+    {
+      "id": "page-errors",
+      "ok": true,
+      "count": 0
+    },
+    {
+      "id": "console-errors",
+      "ok": true,
+      "count": 0
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "ok": true
+}

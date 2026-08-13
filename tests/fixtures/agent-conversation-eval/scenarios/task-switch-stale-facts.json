@@ -1,0 +1,14 @@
+{
+  "name": "task-switch-stale-facts",
+  "sessionScript": [
+    {
+      "pendingSelection": {
+        "options": [{ "id": "old-1", "label": "旧任务", "payload": { "minute_token": "old" } }]
+      },
+      "taskFrame": { "workflowId": "old-workflow", "requiredTools": ["feishu.meeting_read"] }
+    }
+  ],
+  "input": { "prompt": "开始新任务：查今日优先级", "tier": "retrieval", "forceTools": true },
+  "llmScript": [{ "response": { "text": "我将为你整理今日优先级。" } }],
+  "expect": { "terminal": "DONE", "forbiddenClaims": ["已读取", "议题："] }
+}

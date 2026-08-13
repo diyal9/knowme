@@ -13,6 +13,7 @@ OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 * [Product Overview](concepts/product-overview.md) - 产品定位与边界
 * [Electron IPC](concepts/electron-ipc.md) - IPC 与安全约定
 * [LLM Runtime And Cursor Benchmark](concepts/llm-processing-and-cursor-benchmark.md) - LLM 处理链路、能力对标与差距边界
+* [Production Agent Team Runtime](concepts/production-agent-team-runtime.md) - 真实子 Run、持久化编排、跨 Builder 治理与恢复
 
 ## Decisions
 
@@ -23,6 +24,8 @@ OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 
 * [Evolution Loop](processes/evolution-loop.md) - 自我进化循环
 * [Team Skills Registry](processes/team-skills.md) - 团队 Skill 登记
+* [Dev Collaboration Verbal Cues](processes/dev-collaboration-verbal-cues.md) - 口头确认与重启/评估优化口径
+* [MCP UI Deep Verify And Code Explore](processes/mcp-ui-and-code-explore-playbook.md) - Playwright 深验与 GitNexus list_repos
 
 ## References
 

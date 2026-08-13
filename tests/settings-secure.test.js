@@ -187,6 +187,30 @@ describe('settings-secure', () => {
     assert.equal(merged.workbenchToken, 'wb_demo_key');
     assert.equal(merged.workbenchAuth.tenantId, 'rdpi');
     assert.equal(publicSettings(merged).workbenchToken, undefined);
+    assert.equal(publicSettings(merged).apiKey, '');
+    assert.equal(publicSettings(merged).apiKeyConfigured, false);
+    assert.equal(publicSettings(merged, { includeSecrets: true }).apiKey, '');
+    restoreLoad();
+  });
+
+  it('redacts apiKey by default and keeps secrets when requested', () => {
+    const { publicSettings } = loadSettingsSecure(true);
+    const view = publicSettings({
+      apiKey: 'sk-secret',
+      gitlabToken: 'gl-secret',
+      model: 'gpt-4o-mini',
+    });
+    assert.equal(view.apiKey, '');
+    assert.equal(view.gitlabToken, '');
+    assert.equal(view.apiKeyConfigured, true);
+    assert.equal(view.gitlabTokenConfigured, true);
+    const full = publicSettings({
+      apiKey: 'sk-secret',
+      gitlabToken: 'gl-secret',
+      model: 'gpt-4o-mini',
+    }, { includeSecrets: true });
+    assert.equal(full.apiKey, 'sk-secret');
+    assert.equal(full.gitlabToken, 'gl-secret');
     restoreLoad();
   });
 });

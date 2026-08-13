@@ -1,0 +1,126 @@
+{
+  "version": 2,
+  "style": "knowme-flat-vector-v1",
+  "sizePx": 256,
+  "fallback": "other/partner",
+  "castNote": "Aim ~half male / half female across the set; do not default all roles to one gender.",
+  "presets": [
+    {
+      "id": "game/producer",
+      "domain": "game",
+      "role": "producer",
+      "label": "游戏制作",
+      "file": "game/producer.png",
+      "accent": "#2f6f5e",
+      "match": ["制作人", "producer", "production", "项目经理", "pm", "里程碑"]
+    },
+    {
+      "id": "game/planner",
+      "domain": "game",
+      "role": "planner",
+      "label": "产品策划",
+      "file": "game/planner.png",
+      "accent": "#8a641f",
+      "match": ["产品策划", "planner", "玩法策划", "feature"]
+    },
+    {
+      "id": "game/designer",
+      "domain": "game",
+      "role": "designer",
+      "label": "游戏策划",
+      "file": "game/designer.png",
+      "accent": "#8a641f",
+      "match": ["策划", "designer", "数值", "关卡", "requirement"]
+    },
+    {
+      "id": "game/client",
+      "domain": "game",
+      "role": "client",
+      "label": "客户端工程师",
+      "file": "game/client.png",
+      "accent": "#3d5a73",
+      "match": ["客户端", "client", "前端工程", "unity", "cocos"]
+    },
+    {
+      "id": "game/server",
+      "domain": "game",
+      "role": "server",
+      "label": "服务端工程师",
+      "file": "game/server.png",
+      "accent": "#3d5a73",
+      "match": ["服务端", "server", "后端", "网关"]
+    },
+    {
+      "id": "game/engineer",
+      "domain": "game",
+      "role": "engineer",
+      "label": "游戏研发",
+      "file": "game/engineer.png",
+      "accent": "#3d5a73",
+      "match": ["研发", "engineer", "开发", "dev", "coder"]
+    },
+    {
+      "id": "game/ui",
+      "domain": "game",
+      "role": "ui",
+      "label": "UI 设计",
+      "file": "game/ui.png",
+      "accent": "#8a5a3c",
+      "match": ["UI", "界面", "交互", "ux"]
+    },
+    {
+      "id": "game/vfx",
+      "domain": "game",
+      "role": "vfx",
+      "label": "特效",
+      "file": "game/vfx.png",
+      "accent": "#6b4a63",
+      "match": ["特效", "vfx", "粒子", "fx"]
+    },
+    {
+      "id": "game/qa",
+      "domain": "game",
+      "role": "qa",
+      "label": "游戏测试",
+      "file": "game/qa.png",
+      "accent": "#a94f45",
+      "match": ["测试", "qa", "验收", "quality", "test"]
+    },
+    {
+      "id": "office/writer",
+      "domain": "office",
+      "role": "writer",
+      "label": "办公写作",
+      "file": "office/writer.png",
+      "accent": "#2f6f5e",
+      "match": ["写作", "writer", "润色", "文案", "copy", "document", "office"]
+    },
+    {
+      "id": "office/collaborator",
+      "domain": "office",
+      "role": "collaborator",
+      "label": "办公协作",
+      "file": "office/collaborator.png",
+      "accent": "#3d5a73",
+      "match": ["会议", "纪要", "助理", "协作", "collaborat", "calendar", "feishu"]
+    },
+    {
+      "id": "office/knowledge",
+      "domain": "office",
+      "role": "knowledge",
+      "label": "知识管家",
+      "file": "office/knowledge.png",
+      "accent": "#8a641f",
+      "match": ["知识", "wiki", "knowledge", "检索", "资料", "steward"]
+    },
+    {
+      "id": "other/partner",
+      "domain": "other",
+      "role": "partner",
+      "label": "通用搭档",
+      "file": "other/partner.png",
+      "accent": "#2f6f5e",
+      "match": ["partner", "通用", "搭档", "default"]
+    }
+  ]
+}

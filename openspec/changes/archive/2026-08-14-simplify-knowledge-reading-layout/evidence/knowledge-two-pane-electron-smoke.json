@@ -1,0 +1,74 @@
+{
+  "change": "simplify-knowledge-reading-layout",
+  "at": "2026-08-10T11:23:34.386Z",
+  "passed": 7,
+  "total": 7,
+  "ok": true,
+  "checks": [
+    {
+      "id": "knowledge-home-has-two-panes",
+      "pass": true,
+      "detail": {
+        "columns": 2,
+        "context": false,
+        "treeLeftOfReader": true,
+        "readerWider": true,
+        "readerWidth": 864,
+        "rootLine": "资料保存在本机，可随时打开编辑"
+      }
+    },
+    {
+      "id": "topbar-does-not-print-absolute-path",
+      "pass": true,
+      "detail": {
+        "rootLine": "资料保存在本机，可随时打开编辑"
+      }
+    },
+    {
+      "id": "read-only-entry-keeps-metadata-and-actions-in-doc-head",
+      "pass": true,
+      "detail": {
+        "editor": false,
+        "head": "\n      已整理条目\n      concepts/organized.md\n      已整理知识16 字符更新于 2026/8/10 19:23:29只读阅读\n      \n    交给 AI 整理\n    查看提案\n    \n  \n    ",
+        "organize": true,
+        "review": true,
+        "body": "已整理条目只读知识内容"
+      }
+    },
+    {
+      "id": "raw-entry-gets-wide-editor-and-check-action",
+      "pass": true,
+      "detail": {
+        "health": true,
+        "preview": true,
+        "docWidth": 854
+      }
+    },
+    {
+      "id": "raw-safe-save-still-works",
+      "pass": true,
+      "detail": {
+        "dirty": "未保存",
+        "saved": "已安全保存"
+      }
+    },
+    {
+      "id": "narrow-layout-stacks-without-overflow",
+      "pass": true,
+      "detail": {
+        "viewport": 510,
+        "bodyWidth": 510,
+        "treeTop": 156,
+        "readerTop": 456
+      }
+    },
+    {
+      "id": "no-renderer-errors-in-knowledge-flow",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": []
+      }
+    }
+  ]
+}

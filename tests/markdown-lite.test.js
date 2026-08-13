@@ -41,6 +41,30 @@ describe('markdown-lite block rendering', () => {
     assert.match(html, /<pre><code>still open<\/code><\/pre>/)
   })
 
+  it('renders GFM pipe tables used by daemon Steps', () => {
+    const html = render([
+      '## Steps',
+      '',
+      '| step | status | started | ended | duration |',
+      '| --- | --- | --- | --- | --- |',
+      '| `n3-proto` | `waiting` | 2026-08-12 17:37:41 UTC | — | 44m 30s |',
+      '| `n4-codegen` | `pending` | — | — | — |',
+    ].join('\n'))
+
+    assert.match(html, /<h2 class="md-h">Steps<\/h2>/)
+    assert.match(html, /<div class="md-table-wrap"><table class="md-table">/)
+    assert.match(html, /<thead><tr><th>step<\/th><th>status<\/th>/)
+    assert.match(html, /<td><code>n3-proto<\/code><\/td><td><code>waiting<\/code><\/td>/)
+    assert.match(html, /<td><code>n4-codegen<\/code><\/td><td><code>pending<\/code><\/td>/)
+    assert.ok(!html.includes('<p>| step |'), 'must not dump pipe rows as paragraphs')
+  })
+
+  it('does not treat a lone pipe line as a table without a separator', () => {
+    const html = render('| not a table | still text |')
+    assert.match(html, /<p>.*\| not a table \| still text \|.*<\/p>/)
+    assert.ok(!html.includes('<table'))
+  })
+
   it('tolerates empty and non-string input', () => {
     assert.strictEqual(render(''), '')
     assert.strictEqual(render(null), '')

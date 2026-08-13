@@ -1,0 +1,7 @@
+{
+  "id": "developer",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["code-review"],
+  "connectors": []
+}

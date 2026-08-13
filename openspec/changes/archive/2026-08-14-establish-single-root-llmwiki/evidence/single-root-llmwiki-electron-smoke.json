@@ -1,0 +1,70 @@
+{
+  "change": "establish-single-root-llmwiki",
+  "at": "2026-08-09T17:15:08.215Z",
+  "ok": true,
+  "passed": 6,
+  "total": 6,
+  "checks": [
+    {
+      "id": "single-root-home",
+      "pass": true,
+      "detail": {
+        "railLabel": "知识网",
+        "drawerTitle": "我的知识",
+        "tabs": [
+          "我的知识",
+          "待我确认",
+          "来源"
+        ],
+        "hasSearch": true,
+        "hasAdd": true,
+        "hasRootIndex": true,
+        "indexText": "\n    \n      \n      我的知识本机根目录\n      2\n    \n    \n      \n        \n        \n        资料\n        2\n      \n      \n        \n      \n        \n        \n        研发\n        1\n      \n      \n        \n        \n        \n          发布规范\n          2026/8/10\n        \n        可编辑\n      \n      \n    \n        \n        \n          项目约定\n          2026/8/10\n        \n        可编辑\n      \n      \n    \n      \n        \n        \n        已整理知识\n        0\n      \n      \n        \n              还没有已确认的知识\n              \n            \n      \n    \n  ",
+        "directories": [
+          "资料",
+          "研发",
+          "已整理知识"
+        ],
+        "openDirectories": 3,
+        "hasProcessMap": false,
+        "rootReady": true
+      }
+    },
+    {
+      "id": "primary-copy-hides-internals",
+      "pass": true,
+      "detail": {
+        "forbiddenMatch": null
+      }
+    },
+    {
+      "id": "raw-editor-dirty-state",
+      "pass": true
+    },
+    {
+      "id": "raw-editor-save-roundtrip",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "editable": true,
+        "path": "raw/项目约定.md"
+      }
+    },
+    {
+      "id": "saved-content-searchable",
+      "pass": true,
+      "detail": {
+        "expected": "raw/项目约定.md",
+        "actual": "raw/项目约定.md"
+      }
+    },
+    {
+      "id": "no-renderer-errors",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": []
+      }
+    }
+  ]
+}

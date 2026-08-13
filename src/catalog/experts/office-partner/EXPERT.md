@@ -2,7 +2,7 @@
 name: office-partner
 description: 日常办公多能力专家，擅长写作润色与飞书上下文协作
 version: 1.0.0
-avatar: office
+avatar: office/writer
 skills:
   - writing-polish
 connectors:

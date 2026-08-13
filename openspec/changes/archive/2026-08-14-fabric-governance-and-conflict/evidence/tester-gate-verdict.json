@@ -1,0 +1,28 @@
+{
+  "taskA": {
+    "verdict": "pre-existing-exempt",
+    "summary": "5 workbench-templates failures are parallel workbench refactor debt (test assertions ahead of HTML), not fabric-governance regression",
+    "npmTestInitial": "1479/1484 pass (5 fail goal-first HTML in workbench-templates)",
+    "npmTestFinal": "1487/1488 pass (1 fail daemon catalog in workbench-templates)",
+    "fabricSubset": "22/22 pass (fabric-governance + fabric-knowledge-runtime + center-surface-tabs)",
+    "headTestOnCurrentTree": "15/27 pass (12 fail) — debt predates new test assertions"
+  },
+  "taskB": {
+    "verdict": "conditional-pass",
+    "smoke": {
+      "S1": "pass",
+      "S2": "pass",
+      "S3": "pass",
+      "S4": "pass",
+      "S5": "fail-pageerror"
+    },
+    "testerElectron": "9/10 (tester-fabric-governance-electron-qa.json)",
+    "devSmoke": "4/4 (console.error only; misses pageerror)"
+  },
+  "storyDoneRecommendation": {
+    "establish-root-knowledge-fabric": "yes-with-prior-qa",
+    "fabric-governance-and-conflict": "conditional-yes",
+    "blockers": ["workbench-templates 5 fail exempt", "pageerror api duplicate — workbench-console-model parallel debt"]
+  },
+  "at": "2026-08-08T15:35:00.000Z"
+}

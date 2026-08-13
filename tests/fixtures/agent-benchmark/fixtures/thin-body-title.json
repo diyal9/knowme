@@ -1,0 +1,29 @@
+{
+  "name": "thin-body-title-only",
+  "sessionScript": [
+    {
+      "taskFrame": {
+        "requiredTools": ["feishu.meeting_read"],
+        "requiredEvidence": [{ "kind": "tool_result", "tool": "feishu.meeting_read", "minChars": 80, "forbidTruncated": true }]
+      }
+    }
+  ],
+  "input": { "prompt": "总结这场会议", "tier": "retrieval", "forceTools": true },
+  "llmScript": [
+    {
+      "response": {
+        "toolCalls": [{ "name": "feishu.meeting_read", "arguments": { "minute_token": "thin" } }]
+      }
+    },
+    { "response": { "text": "议题：发布计划；负责人：王五。" } }
+  ],
+  "toolScript": {
+    "feishu.meeting_read": { "text": "{\"title\":\"某会议标题\"}" }
+  },
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["feishu.meeting_read"],
+    "forbiddenClaims": ["议题：", "负责人："],
+    "mustFail": true
+  }
+}

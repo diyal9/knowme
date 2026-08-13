@@ -1,0 +1,47 @@
+{
+  "at": "2026-08-07T23:54:02.906Z",
+  "ok": true,
+  "mode": "electron",
+  "checks": [
+    {
+      "id": "proposal-title",
+      "ok": true
+    },
+    {
+      "id": "proposal-goal",
+      "ok": true
+    },
+    {
+      "id": "proposal-has-multiple-agents",
+      "ok": true
+    },
+    {
+      "id": "proposal-requires-confirmation",
+      "ok": true
+    },
+    {
+      "id": "start-requires-runtime-config",
+      "ok": true
+    },
+    {
+      "id": "failed-start-keeps-proposal",
+      "ok": true
+    },
+    {
+      "id": "console-error-free",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [],
+  "proposal": {
+    "title": "Agent 协作图",
+    "body": "\n      \n        本地 Agent Graph\n        先确认协作角色和交接关系，确认后才会创建本地 Team Run。\n      \n      \n        目标\n        调研资料并整理成可交付方案\n      \n      \n        协作节点\n        \n        资料研究 Agent\n        围绕「调研资料并整理成可交付方案」完成资料研究 Agent负责的步骤\n      \n        交付写作 Agent\n        围绕「调研资料并整理成可交付方案」完成交付写作 Agent负责的步骤\n      \n        完成\n        terminal 节点\n      \n      \n      \n        交接关系\n        researcher → writer · writer → n-terminal\n      \n      \n          保存为我的工作流",
+    "nodeCount": 3,
+    "confirmText": "确认并启动"
+  },
+  "startGuard": {
+    "modalVisible": true,
+    "hint": "请先配置 AI API Key 和 Endpoint，再启动本地 Agent Graph",
+    "runnerHidden": true
+  }
+}

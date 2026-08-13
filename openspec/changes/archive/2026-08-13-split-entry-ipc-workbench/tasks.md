@@ -1,0 +1,50 @@
+# Tasks: split-entry-ipc-workbench
+
+- [x] 1. 写 proposal/design/spec（本文件配套）
+- [x] 2. 实现 `src/ipc/open-external.js` + `settings.js` + `sources.js` + `index.js`
+- [x] 3. main.js 改为 registerCoreIpc，删除已迁出的内联 handler
+- [x] 4. 实现 `src/workbench/provenance.js`，workspace.html 引入，workbench.js 委托
+- [x] 5. 建 `src/ui/README` 约定与 `src/lib/utils/` 约定
+- [x] 6. 补充单测（provenance + ipc 存在性）
+- [x] 7. npm test && npm run lint
+- [x] 8. evidence/dev-self-test.md
+- [x] 9. 续拆：`ipc/memory.js` + `product-knowledge.js` + `notes-backup.js`
+- [x] 10. 续拆：`workbench/escape.js` + `run-phase.js`，workspace 引入，workbench 委托
+- [x] 11. 事故恢复：从 Cursor checkpoint 还原完整 `main.js`（含 launch IPC），再安全重接 registerCoreIpc
+- [x] 12. npm test && lint 回归（1736）
+- [x] 13. 续拆：`ipc/knowledge-os.js` + `knowledge-steward.js`（Obsidian 并入 OS；provider/fabric 仍留 main）
+- [x] 14. 续拆：`workbench/labels.js`（console/backend/workflow 标签）
+- [x] 15. 合同测试改查 ipc 模块；npm test 1737 + lint
+- [x] 16. 续拆：`ipc/knowledge-provider.js` + `fabric.js`（helpers 仍留 main）
+- [x] 17. npm test 1737 + lint；更新证据
+- [x] 18. 续拆：`ipc/connectors.js`（connectors + tool-drafts）
+- [x] 19. 合同测试改查 connectors ipc；npm test 1737 + lint
+- [x] 20. 修复 connectors deps 漏注入；续拆 workbench auth / local-stores / launch / mode / automation
+- [x] 21. npm test 1753 + lint；更新证据
+- [x] 22. 续拆：`ipc/workbench-bootstrap.js` + `workbench-daemon.js` + `workbench-load.js`（marker 裁切；helpers 留 main）
+- [x] 23. 合同测试改查 daemon/bootstrap/load ipc；npm test 1754 + lint；更新证据
+- [x] 24. 续拆：`ipc/workbench-agent-graph.js` + `agent-run-control.js` + `workbench-dispatch.js`
+- [x] 25. 合同测试改查 agent-graph/dispatch；npm test 1754 + lint；更新证据
+- [x] 26. 续拆：`ipc/notes.js`（notes CRUD 三簇：desktop / workspace / favorite-copy；helpers 留 main）
+- [x] 27. 合同测试改查 `src/ipc/notes.js`；npm test + lint；更新证据
+- [x] 28. 续拆：notes Cluster D — `notes-batch-classify` + `suggest-classification`（deps: noteClassify / chatCompletionOnce）
+- [x] 29. 合同测试改查 classify 通道；npm test + lint；更新证据
+- [x] 30. 续拆：`ipc/game.js`（game-studio-scenes + requirement/handoff 两簇；跳过中间 capability-pack）
+- [x] 31. 合同测试改查 `src/ipc/game.js`；npm test + lint；更新证据
+- [x] 32. 续拆：`ipc/capability-pack.js`（list/empty-state/install/enable/disable/uninstall）
+- [x] 33. 合同测试改查 capability-pack；npm test + lint；更新证据
+- [x] 34. 续拆：`ipc/agent-profile.js`（list/get/save/remove）
+- [x] 35. 续拆：`ipc/agent-session.js`（list/get/new/context/run/artifacts/apply-log）
+- [x] 36. 续拆：`ipc/agent-session-ui.js`（set-ui/rename/fork/summary/transcript/pin/close-tab）
+- [x] 37. 续拆：`ipc/app-shell.js`（open-settings/clipboard/data-dir/autostart/import-prompt-space）
+- [x] 38. 续拆：`ipc/logs.js` + `ipc/skills.js` + `ipc/app-info.js`
+- [x] 39. 合同测试改查 agent-profile/session/shell/logs/skills/app-info；npm test 1777 + lint；更新证据
+- [x] 40. 续拆：`ipc/workspace-state.js`（get/save-workspace-state）
+- [x] 41. 续拆：`ipc/workspace-init.js`（workspace-init 单点）
+- [x] 42. 续拆：`ipc/build-final-prompt.js`（build-final-prompt 单点）
+- [x] 43. 续拆：`ipc/note-layout.js`（note-set-ai-mode 单点）
+- [x] 44. 续拆：`ipc/note-context-menu.js`（show-context-menu + show-list-context-menu）
+- [x] 45. 续拆：`ipc/ai-assist.js`（ai-suggest-title + ai-cancel-run 连续簇）
+- [x] 46. 续拆：`ipc/agent-output-fixture.js`（test-seam fixture 独立簇）
+- [x] 47. 续拆：`ipc/ai-generate.js`（ai-generate 大簇；与 cancel/fixture 非连续故分模块）
+- [x] 48. 合同测试 + 存量 main 静态测试改查 src/ipc；npm test 1784 + lint；更新证据

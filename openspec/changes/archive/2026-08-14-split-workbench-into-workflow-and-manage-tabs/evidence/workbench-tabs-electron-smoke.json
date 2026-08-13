@@ -1,0 +1,188 @@
+{
+  "at": "2026-08-10T11:22:30.506Z",
+  "ok": true,
+  "consoleErrors": [],
+  "checks": [
+    {
+      "id": "two-mode-tabs",
+      "ok": true,
+      "modes": [
+        {
+          "mode": "shelf",
+          "label": "工作流",
+          "active": true
+        },
+        {
+          "mode": "manage",
+          "label": "管理",
+          "active": false
+        }
+      ],
+      "manageToggle": false,
+      "shelfNewWorkflow": false,
+      "searchVisible": true
+    },
+    {
+      "id": "shelf-tab-default-active",
+      "ok": true
+    },
+    {
+      "id": "no-manage-dropdown",
+      "ok": true
+    },
+    {
+      "id": "filter-row-without-new-workflow",
+      "ok": true
+    },
+    {
+      "id": "search-visible-on-shelf",
+      "ok": true
+    },
+    {
+      "id": "manage-surface-active",
+      "ok": true,
+      "surfaceActive": true,
+      "fixed": false,
+      "shelfActive": false,
+      "panels": [
+        "workflows",
+        "daemon",
+        "automation"
+      ],
+      "activePanel": "workflows",
+      "searchHidden": true,
+      "reloadVisible": true,
+      "newWorkflowEntry": true,
+      "items": 2,
+      "emptyVisible": false
+    },
+    {
+      "id": "manage-not-a-drawer",
+      "ok": true,
+      "surfaceActive": true,
+      "fixed": false,
+      "shelfActive": false,
+      "panels": [
+        "workflows",
+        "daemon",
+        "automation"
+      ],
+      "activePanel": "workflows",
+      "searchHidden": true,
+      "reloadVisible": true,
+      "newWorkflowEntry": true,
+      "items": 2,
+      "emptyVisible": false
+    },
+    {
+      "id": "manage-three-sections",
+      "ok": true,
+      "surfaceActive": true,
+      "fixed": false,
+      "shelfActive": false,
+      "panels": [
+        "workflows",
+        "daemon",
+        "automation"
+      ],
+      "activePanel": "workflows",
+      "searchHidden": true,
+      "reloadVisible": true,
+      "newWorkflowEntry": true,
+      "items": 2,
+      "emptyVisible": false
+    },
+    {
+      "id": "manage-defaults-to-workflows",
+      "ok": true,
+      "surfaceActive": true,
+      "fixed": false,
+      "shelfActive": false,
+      "panels": [
+        "workflows",
+        "daemon",
+        "automation"
+      ],
+      "activePanel": "workflows",
+      "searchHidden": true,
+      "reloadVisible": true,
+      "newWorkflowEntry": true,
+      "items": 2,
+      "emptyVisible": false
+    },
+    {
+      "id": "search-hidden-on-manage",
+      "ok": true
+    },
+    {
+      "id": "reload-shared-across-tabs",
+      "ok": true
+    },
+    {
+      "id": "workflow-section-new-entry",
+      "ok": true
+    },
+    {
+      "id": "workflow-section-list-or-empty",
+      "ok": true,
+      "surfaceActive": true,
+      "fixed": false,
+      "shelfActive": false,
+      "panels": [
+        "workflows",
+        "daemon",
+        "automation"
+      ],
+      "activePanel": "workflows",
+      "searchHidden": true,
+      "reloadVisible": true,
+      "newWorkflowEntry": true,
+      "items": 2,
+      "emptyVisible": false
+    },
+    {
+      "id": "manage-panel-daemon",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-automation",
+      "ok": true
+    },
+    {
+      "id": "external-jump-to-automation",
+      "ok": true
+    },
+    {
+      "id": "back-to-shelf-tab",
+      "ok": true,
+      "shelfActive": true,
+      "searchVisible": true,
+      "query": "会议"
+    },
+    {
+      "id": "search-query-preserved",
+      "ok": true,
+      "shelfActive": true,
+      "searchVisible": true,
+      "query": "会议"
+    },
+    {
+      "id": "tabs-hidden-in-studio",
+      "ok": true
+    },
+    {
+      "id": "tabs-back-after-studio",
+      "ok": true
+    },
+    {
+      "id": "narrow-no-horizontal-overflow",
+      "ok": true,
+      "overflow": 0
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "errors": []
+    }
+  ]
+}

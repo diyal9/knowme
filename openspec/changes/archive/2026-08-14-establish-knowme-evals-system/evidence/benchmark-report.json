@@ -1,0 +1,1442 @@
+{
+  "suite": "cross-product-benchmark",
+  "taskSet": "core-10",
+  "rubricVersion": "v1",
+  "runAt": "2026-08-13T15:09:47.453Z",
+  "gateLevel": "advisory",
+  "products": [
+    "knowme",
+    "cursor",
+    "workbuddy"
+  ],
+  "total": 10,
+  "passed": 10,
+  "passRate": 1,
+  "latency": {
+    "p50": 1,
+    "p90": 2,
+    "samples": 10
+  },
+  "comparativeMatrix": {
+    "toolChoice": {
+      "knowme": 1,
+      "cursor": 0.8,
+      "workbuddy": 0.8
+    },
+    "factFaithfulness": {
+      "knowme": 1,
+      "cursor": 1,
+      "workbuddy": 1
+    },
+    "taskCompletion": {
+      "knowme": 1,
+      "cursor": 0,
+      "workbuddy": 0
+    }
+  },
+  "gapSummary": {
+    "knowme_vs_cursor": {
+      "passRateDelta": 1,
+      "blocked": true
+    },
+    "knowme_vs_workbuddy": {
+      "passRateDelta": 1,
+      "blocked": true
+    }
+  },
+  "productResults": {
+    "knowme": [
+      {
+        "taskId": "meeting-read-happy",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "meeting-read-happy",
+          "terminal": "DONE",
+          "scenario": "feishu-meeting-pick-2-happy"
+        },
+        "normalized": {
+          "finalAnswer": "根据读取结果：议题：版本发布评审；结论：按原计划发布；待办：测试负责人补齐报告。",
+          "toolLogs": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "args": {}
+            }
+          ],
+          "evidenceRefs": [
+            "ev_1786633787460_1f991e"
+          ],
+          "latencyMs": 9,
+          "rounds": 2,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "feishu-meeting-pick-2-happy"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "meeting-read-no-tool",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "meeting-read-no-tool",
+          "terminal": "DONE",
+          "scenario": "feishu-meeting-pick-2-no-tool"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 1,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "feishu-meeting-pick-2-no-tool"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "skill-required-unmet",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "skill-required-unmet",
+          "terminal": "DONE",
+          "scenario": "skill-required-tools-unmet"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 2,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "skill-required-tools-unmet"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "tool-budget-conflict",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "tool-budget-conflict",
+          "terminal": "DONE",
+          "scenario": "tool-budget-conflict"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+          "toolLogs": [
+            {
+              "name": "search_knowledge",
+              "status": "ok",
+              "args": {}
+            }
+          ],
+          "evidenceRefs": [
+            "ev_1786633787472_44a8d4"
+          ],
+          "latencyMs": 1,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "tool-budget-conflict"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "numeric-deixis",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "numeric-deixis",
+          "terminal": "DONE",
+          "scenario": "numeric-deixis-multiturn"
+        },
+        "normalized": {
+          "finalAnswer": "好的，我将读取所选内容。",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 1,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "numeric-deixis-multiturn"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "task-switch-stale",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "task-switch-stale",
+          "terminal": "DONE",
+          "scenario": "task-switch-stale-facts"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 2,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "task-switch-stale-facts"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "delegate-evidence",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "delegate-evidence",
+          "terminal": "DONE",
+          "scenario": "delegate-evidence-aggregation"
+        },
+        "normalized": {
+          "finalAnswer": "子 Agent 已完成整理；结论来自 ev_child_1 的可审计证据。",
+          "toolLogs": [
+            {
+              "name": "delegate_to_expert",
+              "status": "ok",
+              "args": {}
+            }
+          ],
+          "evidenceRefs": [
+            "ev_1786633787479_d70676"
+          ],
+          "latencyMs": 1,
+          "rounds": 2,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "delegate-evidence-aggregation"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "thin-body-title",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "thin-body-title",
+          "terminal": "DONE",
+          "scenario": "thin-body-title-only"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+          "toolLogs": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "args": {}
+            }
+          ],
+          "evidenceRefs": [
+            "ev_1786633787482_60e6c3"
+          ],
+          "latencyMs": 1,
+          "rounds": 2,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "thin-body-title-only"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "recovery-after-error",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "recovery-after-error",
+          "terminal": "DONE",
+          "scenario": "recovery-after-tool-error"
+        },
+        "normalized": {
+          "finalAnswer": "已整理最终答复。",
+          "toolLogs": [
+            {
+              "name": "feishu.doc_read",
+              "status": "fail",
+              "args": {}
+            },
+            {
+              "name": "feishu.doc_read",
+              "status": "ok",
+              "args": {}
+            }
+          ],
+          "evidenceRefs": [
+            "ev_1786633787485_8c41ef",
+            "ev_1786633787485_570321"
+          ],
+          "latencyMs": 2,
+          "rounds": 3,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "recovery-after-tool-error"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "governance-refusal",
+        "product": "knowme",
+        "passed": true,
+        "blocked": false,
+        "invalidForOfficialCompare": false,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "knowme",
+          "taskId": "governance-refusal",
+          "terminal": "DONE",
+          "scenario": "governance-refusal-ungrounded"
+        },
+        "normalized": {
+          "finalAnswer": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「当前知识库检索」，或重新选择候选。",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 2,
+          "rounds": 1,
+          "errors": [],
+          "metadata": {
+            "terminal": "DONE",
+            "product": "knowme",
+            "scenario": "governance-refusal-ungrounded"
+          },
+          "scored": {
+            "passed": true,
+            "dimensions": {
+              "toolChoice": 1,
+              "factFaithfulness": 1,
+              "taskCompletion": 1
+            },
+            "failReasons": [],
+            "taxonomy": []
+          },
+          "passed": true
+        },
+        "scored": {
+          "passed": true,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 1
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      }
+    ],
+    "cursor": [
+      {
+        "taskId": "meeting-read-happy",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "meeting-read-happy",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 0,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [
+            "missing required tools: feishu.meeting_read"
+          ],
+          "taxonomy": [
+            "missing_tool"
+          ]
+        }
+      },
+      {
+        "taskId": "meeting-read-no-tool",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "meeting-read-no-tool",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "skill-required-unmet",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "skill-required-unmet",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "tool-budget-conflict",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "tool-budget-conflict",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "numeric-deixis",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "numeric-deixis",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "task-switch-stale",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "task-switch-stale",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "delegate-evidence",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "delegate-evidence",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "thin-body-title",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "thin-body-title",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "recovery-after-error",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "recovery-after-error",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 0,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [
+            "missing required tools: feishu.doc_read"
+          ],
+          "taxonomy": [
+            "missing_tool"
+          ]
+        }
+      },
+      {
+        "taskId": "governance-refusal",
+        "product": "cursor",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "cursor",
+          "taskId": "governance-refusal",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "cursor adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "cursor",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      }
+    ],
+    "workbuddy": [
+      {
+        "taskId": "meeting-read-happy",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "meeting-read-happy",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 0,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [
+            "missing required tools: feishu.meeting_read"
+          ],
+          "taxonomy": [
+            "missing_tool"
+          ]
+        }
+      },
+      {
+        "taskId": "meeting-read-no-tool",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "meeting-read-no-tool",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "skill-required-unmet",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "skill-required-unmet",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "tool-budget-conflict",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "tool-budget-conflict",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "numeric-deixis",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "numeric-deixis",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "task-switch-stale",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "task-switch-stale",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "delegate-evidence",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "delegate-evidence",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "thin-body-title",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "thin-body-title",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      },
+      {
+        "taskId": "recovery-after-error",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "recovery-after-error",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 0,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [
+            "missing required tools: feishu.doc_read"
+          ],
+          "taxonomy": [
+            "missing_tool"
+          ]
+        }
+      },
+      {
+        "taskId": "governance-refusal",
+        "product": "workbuddy",
+        "passed": null,
+        "blocked": true,
+        "invalidForOfficialCompare": true,
+        "metadata": {
+          "taskVersion": "core-10",
+          "rubricVersion": "v1",
+          "executedAt": "2026-08-13T15:09:47.453Z",
+          "product": "workbuddy",
+          "taskId": "governance-refusal",
+          "terminal": "BLOCKED",
+          "status": "blocked"
+        },
+        "normalized": {
+          "finalAnswer": "",
+          "toolLogs": [],
+          "evidenceRefs": [],
+          "latencyMs": 0,
+          "rounds": 0,
+          "errors": [
+            "workbuddy adapter not configured for live benchmark"
+          ],
+          "metadata": {
+            "product": "workbuddy",
+            "terminal": "BLOCKED",
+            "status": "blocked"
+          }
+        },
+        "scored": {
+          "passed": false,
+          "dimensions": {
+            "toolChoice": 1,
+            "factFaithfulness": 1,
+            "taskCompletion": 0
+          },
+          "failReasons": [],
+          "taxonomy": []
+        }
+      }
+    ]
+  },
+  "adapters": [
+    "knowme",
+    "cursor",
+    "workbuddy"
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "at": "2026-08-05T16:53:32.666Z",
+  "role": "tester",
+  "change": "strengthen-workbench-tool-surface",
+  "ok": true,
+  "total": 24,
+  "passed": 24,
+  "failed": 0,
+  "checks": [
+    {
+      "id": "draft-unapproved/no-disk-write",
+      "ok": true,
+      "level": "hard",
+      "detail": "hash unchanged draftId=draft_1785948812611_c8d097"
+    },
+    {
+      "id": "draft-reject/no-side-effect",
+      "ok": true,
+      "level": "hard",
+      "detail": "rejected=true"
+    },
+    {
+      "id": "idempotency/no-duplicate-pending",
+      "ok": true,
+      "level": "hard",
+      "detail": "same id draft_1785948812631_b0778c"
+    },
+    {
+      "id": "traversal/.._etc_passwd",
+      "ok": true,
+      "level": "hard",
+      "detail": "blocked"
+    },
+    {
+      "id": "traversal/.._windows_system32",
+      "ok": true,
+      "level": "hard",
+      "detail": "blocked"
+    },
+    {
+      "id": "traversal/foo_.._.._secret",
+      "ok": true,
+      "level": "hard",
+      "detail": "blocked"
+    },
+    {
+      "id": "traversal/a_.._b",
+      "ok": true,
+      "level": "hard",
+      "detail": "blocked"
+    },
+    {
+      "id": "special-chars/emoji-path",
+      "ok": true,
+      "level": "hard",
+      "detail": "not traversal"
+    },
+    {
+      "id": "symlink/resolve-under-root",
+      "ok": true,
+      "level": "hard",
+      "detail": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-ts-symlink-K8Ox9E\\link.txt"
+    },
+    {
+      "id": "dangerous-shell/rm -rf /",
+      "ok": true,
+      "level": "hard",
+      "detail": "检测到破坏性或系统级命令，出于安全已拦截，需用户明确确认并开启 dangerous 权限后才能执行。"
+    },
+    {
+      "id": "dangerous-shell/curl http://",
+      "ok": true,
+      "level": "hard",
+      "detail": "检测到联网/下载/装包命令，沙箱默认禁止外联；如确有需要，请让用户开启 network 权限。"
+    },
+    {
+      "id": "dangerous-shell/format c:",
+      "ok": true,
+      "level": "hard",
+      "detail": "检测到破坏性或系统级命令，出于安全已拦截，需用户明确确认并开启 dangerous 权限后才能执行。"
+    },
+    {
+      "id": "artifact/long-title",
+      "ok": true,
+      "level": "hard",
+      "detail": "true"
+    },
+    {
+      "id": "artifact/pdf-page-limit",
+      "ok": true,
+      "level": "hard",
+      "detail": "pdf_too_large"
+    },
+    {
+      "id": "artifact/csv-escape",
+      "ok": true,
+      "level": "hard",
+      "detail": "escaped"
+    },
+    {
+      "id": "browser/no-mcp-config",
+      "ok": true,
+      "level": "hard",
+      "detail": "Playwright MCP 未配置"
+    },
+    {
+      "id": "browser/domain-block",
+      "ok": true,
+      "level": "hard",
+      "detail": "scope_denied"
+    },
+    {
+      "id": "legacy/flag-off",
+      "ok": true,
+      "level": "hard",
+      "detail": "legacy mode"
+    },
+    {
+      "id": "legacy/no-write-tools",
+      "ok": true,
+      "level": "hard",
+      "detail": ""
+    },
+    {
+      "id": "contract/coverage-100",
+      "ok": true,
+      "level": "hard",
+      "detail": "10/10"
+    },
+    {
+      "id": "double-approve/idempotent",
+      "ok": true,
+      "level": "hard",
+      "detail": "a1=true a2=not_pending"
+    },
+    {
+      "id": "ux/pending-not-success-wording",
+      "ok": true,
+      "level": "hard",
+      "detail": "pending-review labels"
+    },
+    {
+      "id": "ux/rollback-ui-missing",
+      "ok": true,
+      "level": "advisory",
+      "detail": "IPC only, no UI button (ADVISORY)"
+    },
+    {
+      "id": "ux/summary-no-path-preview",
+      "ok": true,
+      "level": "advisory",
+      "detail": "path not in summary (ADVISORY)"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "name": "feishu-meeting-pick-2-happy",
+  "sessionScript": [
+    {
+      "pendingSelection": {
+        "refSetId": "meeting-set-happy",
+        "options": [
+          {
+            "id": "candidate-1",
+            "label": "产品周会",
+            "boundTool": "feishu.meeting_read",
+            "payload": { "minute_token": "min_tok_001", "title": "产品周会" }
+          },
+          {
+            "id": "candidate-2",
+            "label": "研发评审",
+            "boundTool": "feishu.meeting_read",
+            "payload": { "minute_token": "min_tok_002", "title": "研发评审" }
+          }
+        ]
+      },
+      "taskFrame": {
+        "requiredTools": ["feishu.meeting_read"],
+        "requiredEvidence": [
+          { "kind": "tool_result", "tool": "feishu.meeting_read", "minChars": 80, "forbidTruncated": true }
+        ]
+      }
+    }
+  ],
+  "input": {
+    "prompt": "2",
+    "tier": "retrieval",
+    "bindRef": "candidate-2",
+    "forceTools": true
+  },
+  "budget": { "maxRounds": 5, "maxToolCalls": 5 },
+  "llmScript": [
+    {
+      "response": {
+        "text": "",
+        "toolCalls": [
+          {
+            "name": "feishu.meeting_read",
+            "arguments": { "minute_token": "min_tok_002" }
+          }
+        ]
+      }
+    },
+    {
+      "response": {
+        "text": "根据读取结果：议题：版本发布评审；结论：按原计划发布；待办：测试负责人补齐报告。"
+      }
+    }
+  ],
+  "toolScript": {
+    "feishu.meeting_read": {
+      "text": "{\"title\":\"研发评审\",\"body\":\"议题：版本发布评审。结论：按原计划发布。待办：测试负责人补齐报告。会议时间：2026-08-01。参会人：张三、李四。补充说明：本次评审确认发布窗口与回滚预案，无新增阻塞项。\"}"
+    }
+  },
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["feishu.meeting_read"],
+    "forbiddenClaims": []
+  }
+}

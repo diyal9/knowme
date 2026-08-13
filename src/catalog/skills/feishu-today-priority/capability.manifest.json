@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "id": "feishu-today-priority",
+  "kind": "skill",
+  "name": "今日优先级",
+  "version": "1.0.0",
+  "dependencies": [{ "id": "feishu", "kind": "connector", "required": true }],
+  "permissions": { "tools": ["feishu.today_priority"] },
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "todayPriority",
+          "title": "今日优先级",
+          "subtitle": "基于飞书日程/待办直接出 Top3",
+          "icon": "list",
+          "group": "office-core",
+          "modes": ["general"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请作为今日优先级助手。",
+          "preflight": {
+            "type": "connector-auth",
+            "connector": "feishu",
+            "message": "要排今日优先级，我得先连上飞书读取你的日程与待办。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「今日优先级」。"
+          },
+          "requiredTools": ["feishu.today_priority"],
+          "templateVars": { "days": 1 }
+        }]
+      }
+    }
+  }
+}

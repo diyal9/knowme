@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "game-dev-delivery",
+  "kind": "skill",
+  "name": "游戏研发交付",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "gameDevDelivery",
+          "title": "研发实现",
+          "subtitle": "需求案 → 管线服务工作流交付",
+          "icon": "rocket",
+          "group": "game-dev",
+          "modes": ["coding"],
+          "surfaces": ["scene", "workflow"],
+          "prompt": "基于已批准需求案，准备交接研发工作流并列出验收清单与产物路径。"
+        }]
+      }
+    }
+  }
+}

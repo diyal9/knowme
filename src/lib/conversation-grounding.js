@@ -1,10 +1,15 @@
 'use strict'
 
+const researchRouting = typeof require === 'function'
+  ? require('./research-routing')
+  : null
+
 const WORK_RE = /(整理|总结|概括|归纳|摘要|润色|改写|重写|翻译|校对|纠错|提炼|拆解|分析|对比|生成|起草|优化|列出|梳理|规划|设计|检查|评审|复盘|方案|计划|处理|完成)/
 const QUESTION_RE = /[？?]|(吗|呢|如何|怎么|怎样|为什么|为何|哪|是不是|能不能|可不可以|什么|多少|几)/
 const MATERIAL_RE = /(会议|纪要|文档|文件|材料|笔记|代码|数据|资料|内容|报告|记录|邮件|方案)/
 const CONSTRAINT_RE = /(要求|必须|不要|不能|保留|限制|控制|只要|仅需|不超过|格式|语气|面向)/
 const RESULT_RE = /(输出|生成|整理成|给我|形成|交付|返回|列出|写成|改成|最终)/
+const RESEARCH_RE = /(?=.*(?:今天|今日|最新|近期|最近|刚刚|实时|本周|本月|动态|资讯|新闻|进展|更新))(?=.*(?:资讯|新闻|动态|进展|更新|趋势|消息|看下|看看|查下|查一下|搜下|搜一下|检索))/i
 
 function clean(text, max = 180) {
   return String(text || '').replace(/\s+/g, ' ').trim().slice(0, max)
@@ -20,7 +25,9 @@ function firstMatch(text, re) {
 
 function isWorkInput(prompt, context = '', task = null) {
   const p = clean(prompt)
-  return !!task || !!clean(context) || WORK_RE.test(p) || (p.length > 4 && QUESTION_RE.test(p))
+  const research = researchRouting?.classifyResearchIntent?.(p)
+  const researchActive = research ? research.active === true : RESEARCH_RE.test(p)
+  return !!task || !!clean(context) || researchActive || WORK_RE.test(p) || (p.length > 4 && QUESTION_RE.test(p))
 }
 
 function buildGrounding({ prompt = '', displayPrompt = '', context = '', task = null, attachment = '' } = {}) {
@@ -86,6 +93,7 @@ function deriveTitle(prompt, task = null) {
   if (/会议.*(纪要|记录)|纪要/.test(source)) return '整理会议纪要'
   if (/改写|润色|重写/.test(source)) return '改写与润色内容'
   if (/拆解|小任务|任务清单/.test(source)) return '拆解工作任务'
+  if ((researchRouting?.classifyResearchIntent?.(source)?.active) || RESEARCH_RE.test(source)) return '研究最新资讯'
   if (/查询|搜索|查找|知识库|文档/.test(source)) return '查找相关资料'
   if (/代码|编程|实现|修复/.test(source)) return '处理代码问题'
   return source.replace(/^(请|帮我|我想|可以帮我|麻烦你)\s*/, '').slice(0, 28) || '新对话'
@@ -104,6 +112,7 @@ function deriveLabels(text) {
   add('写作', /(写作|改写|润色|重写|起草|文案)/)
   add('分析', /(分析|对比|评审|复盘|检查|规划|方案)/)
   add('代码', /(代码|编程|实现|修复|接口|脚本)/)
+  add('实时研究', /(今天|今日|最新|近期|最近|实时).*(资讯|新闻|动态|进展|更新)|(资讯|新闻).*(今天|今日|最新|近期|最近|实时)/)
   add('资料', /(知识库|文档|资料|查询|搜索|检索)/)
   return labels.slice(0, 3).length ? labels.slice(0, 3) : ['工作']
 }

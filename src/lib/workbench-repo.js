@@ -27,6 +27,39 @@ function resolveActiveRepo(store) {
   }
 }
 
+/** Daemon / 管线服务安装目录作为 workflow 定义内容源（非 KnowMe 本地内容源）。 */
+function resolveDaemonContentRepo(settings = {}) {
+  const installPath = String(
+    settings.workbenchInstall?.path
+    || settings.workbenchInstallPath
+    || '',
+  ).trim()
+  if (!installPath) {
+    return { ok: false, error: '未配置管线服务安装目录', code: 'missing_install' }
+  }
+  const root = sources.normalizeRoot(installPath) || path.resolve(installPath)
+  if (!root || !fs.existsSync(root)) {
+    return { ok: false, error: '管线服务安装目录不存在', code: 'missing_install', root: installPath }
+  }
+  const workflowsDir = path.join(root, '.cursor', 'workflows')
+  if (!fs.existsSync(workflowsDir)) {
+    return {
+      ok: false,
+      error: '管线服务安装目录缺少 .cursor/workflows',
+      code: 'missing_workflows',
+      root,
+    }
+  }
+  return {
+    ok: true,
+    root,
+    source: { id: 'daemon-install', displayName: '管线服务', rootPath: root },
+    agentsDir: path.join(root, '.cursor', 'agents'),
+    workflowsDir,
+    origin: 'daemon',
+  }
+}
+
 function resolveWorkflowFile(root, relPath) {
   const rel = String(relPath || '').trim()
   if (!rel || path.isAbsolute(rel) || /^[a-zA-Z]:[\\/]/.test(rel)) return null
@@ -74,6 +107,7 @@ function resolveArtifactOpenPath(filePath, store) {
 
 module.exports = {
   resolveActiveRepo,
+  resolveDaemonContentRepo,
   resolveWorkflowFile,
   resolveAgentDir,
   resolveArtifactOpenPath,

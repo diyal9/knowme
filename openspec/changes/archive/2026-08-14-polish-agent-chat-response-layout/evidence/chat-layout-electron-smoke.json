@@ -1,0 +1,61 @@
+{
+  "generatedAt": "2026-08-07T07:22:30.232Z",
+  "ok": true,
+  "mode": "electron",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-chat-layout-Zfg3rQ",
+  "checks": [
+    {
+      "id": "focused-reading-track",
+      "pass": true,
+      "detail": {
+        "bodyWidth": 780,
+        "bubbleWidth": 920
+      }
+    },
+    {
+      "id": "choice-aligns-with-reading-track",
+      "pass": true,
+      "detail": {
+        "choiceWidth": 780,
+        "bodyWidth": 780
+      }
+    },
+    {
+      "id": "choice-description-wraps",
+      "pass": true,
+      "detail": {
+        "whiteSpace": "pretty",
+        "choiceCount": 2
+      }
+    },
+    {
+      "id": "conversation-composer-compact",
+      "pass": true,
+      "detail": {
+        "composerHeight": 113,
+        "textareaHeight": 66
+      }
+    },
+    {
+      "id": "answer-and-actions-visible",
+      "pass": true
+    },
+    {
+      "id": "no-runtime-errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "metrics": {
+    "bubbleWidth": 920,
+    "bodyWidth": 780,
+    "choiceWidth": 780,
+    "composerHeight": 113,
+    "textareaHeight": 66,
+    "choiceDescriptionWhiteSpace": "pretty",
+    "choiceCount": 2,
+    "visibleText": "为帮你快速落地，我建议按这个顺序推进：\n\n下一步建议\n读取知识库开发架构文档：获取知识库开发的标准流程、目录规范与验证清单。\n读取 AI Agent 落地宣讲稿：提取手游 AI 落地的典型场景、技术栈与验收指标。\n结合服务端与 AI 架构角色：整理成一份可执行的手游服务端 AI 落地路线图。\n\n完成资料读取后，我会直接给出接入点、Agent 编排接口和版本交付节奏。\n\n建议先做\n选择一项\n1\n读取知识库开发架构文档\n加载完整架构文档，提取目录规范、标准流程和验证清单\n2\n读取 AI Agent 落地宣讲稿\n加载完整宣讲稿，提取手游场景、技术栈与验收指标"
+  },
+  "runtimeErrors": [],
+  "screenshot": "screenshots/chat-response-layout.png"
+}

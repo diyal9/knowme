@@ -27,6 +27,11 @@ const INDEX_ENTRY = {
   path: 'custom/game-dev-delivery.json',
   description: '从已批准需求案 ingest/brief.md 生成交付包（脚本链路，无需 Cursor CLI）',
   tags: ['game', 'knowme', 'script-only', 'mvp'],
+  catalog: {
+    visibility: 'deprecated',
+    category: 'delivery',
+    order: 90,
+  },
 }
 
 function sha256File(file) {
@@ -375,7 +380,7 @@ function buildPublicStatus(settings = {}, options = {}) {
     ok: false,
     message: '未配置或未找到 Workbench 安装目录',
     recovery: [
-      '在设置 → Workbench 填写本机 Daemon 对应的 Workbench 仓库路径',
+      '在设置 → Workbench 填写本机管线服务对应的 Workbench 仓库路径',
       '或设置环境变量 KNOWME_WORKBENCH_INSTALL',
     ],
   }

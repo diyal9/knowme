@@ -1,0 +1,14 @@
+{
+  "docType": "game-requirement",
+  "sections": [
+    { "key": "background", "title": "背景", "required": true },
+    { "key": "goals", "title": "目标", "required": true },
+    { "key": "gameplay", "title": "玩法", "required": true },
+    { "key": "rules", "title": "规则", "required": false },
+    { "key": "economy", "title": "数值/资源", "required": false },
+    { "key": "analytics", "title": "埋点", "required": false },
+    { "key": "acceptance", "title": "验收标准", "required": true },
+    { "key": "risks", "title": "风险与待确认", "required": false }
+  ],
+  "headingPattern": "^(背景|目标|玩法|规则|数值\\/资源|数值|资源|埋点|验收标准|风险)"
+}

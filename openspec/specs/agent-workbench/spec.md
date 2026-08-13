@@ -77,4 +77,66 @@ Ribbon 按钮 `#btnRailAi` MUST 作为「工作台」入口；点击 MUST 切换
 
 ### Requirement: Deferred dynamic orchestration
 
-客户端工作流 DAG 驱动编排 UI 已下线。后续 SHOULD 通过对话结构化提问选择操作实现动态编排；`workbench-model` 与相关 IPC MAY 保留供后续复用，但 MUST NOT 在当前 UI 暴露。
+工作台 MUST 支持从总览、管线详情、Agent 详情或新建运行入口进入专业管线选择、Agent Graph 草案和确认流程；Agent Profile 的创建/编辑/调优 MUST 仅在能力界面进行，工作台 Agent 详情 MUST 为只读展示并提供「前往能力界面调优」跳转。动态编排 MUST 使用已安装且已授权的 Agent 与 Skill 生成可解释 Graph，并在执行前完成 Graph、Agent 引用、handoff、权限和治理校验。客户端不得直接执行未经确认的任意 Graph。固定专业管线、个人工作流和 Daemon workflow MUST 通过统一 Workflow Package 表达，并保持明确的执行来源。
+
+#### Scenario: Goal routes to workflow choices
+
+- **WHEN** 用户在工作台输入目标
+- **THEN** 工作台显示匹配的专业管线、个人工作流、可用 Agent 和 Graph 编排入口
+
+#### Scenario: Dynamic orchestration from workbench
+
+- **WHEN** 用户选择动态 Agent 协作
+- **THEN** 工作台展示 Agent Graph 草案、节点职责、执行关系、能力版本和确认入口
+
+#### Scenario: Confirmed dynamic orchestration
+
+- **WHEN** 用户确认通过校验的 Agent Graph
+- **THEN** 工作台创建本地 Team Run 或指定后端 Run，并将真实 Run Tree 状态投影到任务区域
+
+#### Scenario: Invalid dynamic orchestration
+
+- **WHEN** Graph 引用未知 Agent/Skill、包含环或不满足治理约束
+- **THEN** 工作台阻止执行并保留可修订的 Graph 草案
+
+#### Scenario: Workflow source remains explicit
+
+- **WHEN** 用户启动 Daemon 专业管线或本地个人工作流
+- **THEN** 运行区域分别显示专业管线与 Daemon 后端、本地工作流与 Local Team Runtime，不得混淆二者
+
+#### Scenario: Continue with an Agent
+
+- **WHEN** 用户带着当前目标在 Agent 详情弹窗查看某位专家
+- **THEN** 工作台提供只读简介与「用此 Agent 继续」入口，并提供「前往能力界面调优 Agent」跳转；MUST NOT 提供 Profile 编辑或保存
+
+### Requirement: Workbench has no top-level tabs
+
+工作台一级 MUST NOT 提供工作模式 Tab。默认落地为单一工作流货架。
+
+#### Scenario: No tabs on entry
+
+- **WHEN** 用户从 Rail 进入工作台
+- **THEN** 顶部无工作模式 Tab，内容区首屏即工作流货架
+
+### Requirement: Orchestration is a first-class workbench action
+
+编排 MUST 是工作台一级动作（货架「新建工作流」/ 卡片「编辑」进入），MUST NOT 埋在管理抽屉。节点候选来自能力界面 Agent store。节点检查器 MUST 仅设置该步骤的目标 / 角色，MUST NOT 提供 Agent 本身的 Skill / 知识 / Tool 配置。保存后工作流以「我的」来源即时进入货架。
+
+#### Scenario: New workflow lands on shelf
+
+- **WHEN** 用户从货架「新建工作流」拖入 Agent 连成 DAG 并保存
+- **THEN** 该工作流以「我的」标签即时出现在同一货架，无需刷新
+
+#### Scenario: Node inspector only sets step goal
+
+- **WHEN** 用户点击编排中的某个 Agent 节点
+- **THEN** 检查器仅可设置该步骤目标 / 角色，不出现 Skill / 知识 / Tool 的配置项（跳转能力界面调优）
+
+### Requirement: Management drawer reduced to backend and automation
+
+管理抽屉 MUST 仅含「执行后端(Daemon)」与「自动化」两面板。智能体管理面板 MUST 撤销。
+
+#### Scenario: Drawer has two panels
+
+- **WHEN** 用户打开管理抽屉
+- **THEN** 只有执行后端与自动化两个分区，无智能体管理

@@ -154,9 +154,31 @@ function buildGateReport(changeName) {
   };
 }
 
+function runAdvisoryScript(relScript, args = ['--json']) {
+  const scriptPath = path.join(ROOT, relScript);
+  if (!exists(scriptPath)) return { available: false };
+  const r = run('node', [scriptPath, ...args], { timeout: 180000 });
+  let parsed = null;
+  try {
+    parsed = JSON.parse(r.stdout || '{}');
+  } catch {
+    parsed = null;
+  }
+  return {
+    available: true,
+    ok: r.ok && (parsed ? parsed.ok !== false : true),
+    status: r.status,
+    report: parsed,
+    detail: parsed
+      ? null
+      : (r.stderr || r.stdout || '').slice(0, 400),
+  };
+}
+
 function buildDoctorReport() {
   const check = buildCheckReport();
   const fixes = [];
+  const advisories = [];
 
   if (check.missing_files.length) {
     fixes.push({ action: 'restore_files', files: check.missing_files });
@@ -168,14 +190,44 @@ function buildDoctorReport() {
     fixes.push({ action: 'run', command: 'npm test' });
   }
 
+  const daemonDocs = runAdvisoryScript(path.join('scripts', 'check-daemon-docs-sync.js'));
+  if (daemonDocs.available) {
+    advisories.push({
+      id: 'daemon-docs-sync',
+      level: 'advisory',
+      ok: daemonDocs.ok,
+      error_count: daemonDocs.report?.errors?.length || 0,
+      advisory_count: daemonDocs.report?.advisories?.length || 0,
+      local_version: daemonDocs.report?.local?.api_version || null,
+    });
+    if (!daemonDocs.ok) {
+      fixes.push({ action: 'run', command: 'npm run daemon:docs-check' });
+    }
+  }
+
+  const typecheck = runAdvisoryScript(path.join('scripts', 'check-jsdoc.js'));
+  if (typecheck.available) {
+    advisories.push({
+      id: 'typecheck-jsdoc',
+      level: 'advisory',
+      ok: typecheck.ok,
+      error_count: typecheck.report?.error_count ?? null,
+    });
+    if (!typecheck.ok) {
+      fixes.push({ action: 'run', command: 'npm run typecheck' });
+    }
+  }
+
   return {
     ok: check.ok,
     check,
+    advisories,
     fixes,
     hints: [
       'Read AGENTS.md at session start',
       'Run: node .cursor/scripts/harness.js preflight --json',
       'Before story-done: node .cursor/scripts/harness.js gate --json',
+      'Optional: npm run daemon:docs-check / npm run typecheck (advisory)',
     ],
   };
 }
@@ -195,6 +247,12 @@ function output(data, json) {
       }
     } else if (data.check) {
       lines.push(`Doctor: ${data.ok ? 'OK' : 'NEEDS ATTENTION'}`);
+      for (const a of data.advisories || []) {
+        lines.push(
+          `  [advisory] ${a.id}: ${a.ok ? 'OK' : 'WARN'}` +
+            (a.error_count != null ? ` errors=${a.error_count}` : '')
+        );
+      }
     } else {
       lines.push(`Check: ${data.ok ? 'OK' : 'FAIL'}`);
       if (data.missing_files?.length) lines.push(`  missing: ${data.missing_files.join(', ')}`);

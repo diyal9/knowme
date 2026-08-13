@@ -1,0 +1,7 @@
+{
+  "id": "copywriter",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["writing-polish", "visual-brief-prompt"],
+  "connectors": []
+}

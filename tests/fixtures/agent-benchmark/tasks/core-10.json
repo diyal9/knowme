@@ -1,0 +1,77 @@
+{
+  "version": "core-10",
+  "rubricVersion": "v1",
+  "description": "Core cross-product benchmark tasks (offline KnowMe fixtures; Cursor/Workbuddy adapters advisory/blocked).",
+  "tasks": [
+    {
+      "id": "meeting-read-happy",
+      "intent": "Grounded meeting read with required tool",
+      "fixtureFile": "meeting-read-happy.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "requiredTools": ["feishu.meeting_read"], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "meeting-read-no-tool",
+      "intent": "Refuse ungrounded meeting claims when tool missing",
+      "fixtureFile": "meeting-read-no-tool.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "requiredTools": [], "forbiddenClaims": ["议题："], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "skill-required-unmet",
+      "intent": "Skill requiredTools governance refusal",
+      "fixtureFile": "skill-required-unmet.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "tool-budget-conflict",
+      "intent": "Tool budget conflict must not hallucinate completion",
+      "fixtureFile": "tool-budget-conflict.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "numeric-deixis",
+      "intent": "Multi-turn numeric deixis binding",
+      "fixtureFile": "numeric-deixis.json",
+      "inputConstraints": { "tier": "retrieval" },
+      "rubric": { "forbiddenClaims": ["议题："], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "task-switch-stale",
+      "intent": "Task switch avoids stale facts",
+      "fixtureFile": "task-switch-stale.json",
+      "inputConstraints": { "tier": "retrieval" },
+      "rubric": { "forbiddenClaims": ["已读取", "议题："], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "delegate-evidence",
+      "intent": "Delegate evidence aggregation",
+      "fixtureFile": "delegate-evidence.json",
+      "inputConstraints": { "tier": "retrieval" },
+      "rubric": { "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "thin-body-title",
+      "intent": "Thin body title-only grounding",
+      "fixtureFile": "thin-body-title.json",
+      "inputConstraints": { "tier": "retrieval" },
+      "rubric": { "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "recovery-after-error",
+      "intent": "Recovery after tool permission error",
+      "fixtureFile": "recovery-after-error.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "requiredTools": ["feishu.doc_read"], "expectTerminal": "DONE", "minScore": 1 }
+    },
+    {
+      "id": "governance-refusal",
+      "intent": "Governance refusal on ungrounded external facts",
+      "fixtureFile": "governance-refusal.json",
+      "inputConstraints": { "tier": "retrieval", "forceTools": true },
+      "rubric": { "forbiddenClaims": ["已确认发布"], "expectTerminal": "DONE", "minScore": 1 }
+    }
+  ]
+}

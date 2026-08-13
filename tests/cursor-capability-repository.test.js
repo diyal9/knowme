@@ -127,6 +127,11 @@ describe('cursor capability repository', () => {
     const skillId = first.idMaps.skills.alpha
     assert.equal(installed.entries[skillId].linked, true)
     assert.equal(installed.entries[skillId].originRoot, fs.realpathSync(root))
+    assert.equal(installed.entries[skillId].manifest.schemaVersion, 2)
+    assert.equal(installed.entries[skillId].manifest.provenance.source, 'local-repo')
+    const expertId = first.idMaps.experts.artist
+    assert.ok(installed.entries[expertId].manifest.dependencies.some(dep => dep.id === skillId && dep.kind === 'skill'))
+    assert.equal(installed.entries[first.idMaps.connectors.safe].manifest.risk.level, 'high')
 
     const runtime = createSkillRuntime({
       capabilitiesRoot: storeLib.resolvePaths(userData).root,
@@ -146,7 +151,58 @@ describe('cursor capability repository', () => {
       bundledRoot: path.join(__dirname, '..', 'src', 'catalog'),
     })
     assert.ok(listed.entries.some((item) => item.id === skillId && item.installed))
-    assert.ok(listed.entries.some((item) => item.id === first.idMaps.experts.artist && item.installed))
+    assert.ok(listed.entries.some((item) => item.id === expertId && item.installed))
+    assert.ok(listed.entries.find((item) => item.id === expertId).dependencies.some(dep => dep.id === skillId))
+  })
+
+  it('derives a Chinese display name for imported experts and keeps the original slug', () => {
+    createRepo(root)
+    write(path.join(root, '.cursor', 'agents', 'artist', 'AGENT.md'), `---
+name: artist
+description: >-
+  美术专家：负责制品标准化打包与发布前门禁控制。
+persona:
+  role: 美术制品打包与交付专家
+---
+# Artist
+Work carefully.
+`)
+    const scanned = repository.scanCursorRepository(root)
+    assert.equal(scanned.experts[0].name, '美术专家')
+    assert.equal(scanned.experts[0].originName, 'artist')
+    assert.equal(repository.publicPreview(scanned, 'token').experts[0].originName, 'artist')
+
+    const registered = repository.registerCursorRepository(scanned, deps())
+    const expertId = registered.idMaps.experts.artist
+    const entry = storeLib.loadInstallStore(userData).entries[expertId]
+    assert.equal(entry.name, '美术专家')
+    assert.equal(entry.originName, 'artist')
+    assert.equal(entry.nameSource, 'import')
+
+    const expert = createExpertRuntime({ capabilitiesRoot: storeLib.resolvePaths(userData).root })
+      .loadExpert(expertId)
+    assert.equal(expert.name, '美术专家')
+    assert.equal(expert.originName, 'artist')
+  })
+
+  it('keeps a user-renamed expert name when the repository is re-registered', () => {
+    createRepo(root)
+    const scanned = repository.scanCursorRepository(root)
+    const registered = repository.registerCursorRepository(scanned, deps())
+    const expertId = registered.idMaps.experts.artist
+
+    const installed = storeLib.loadInstallStore(userData).entries[expertId]
+    storeLib.upsertEntry(userData, { ...installed, name: '我的美术专家', nameSource: 'user' })
+
+    repository.registerCursorRepository(repository.scanCursorRepository(root), deps())
+    const after = storeLib.loadInstallStore(userData).entries[expertId]
+    assert.equal(after.name, '我的美术专家')
+    assert.equal(after.nameSource, 'user')
+
+    const listed = catalogLib.listCatalog(userData, {
+      bundledRoot: path.join(__dirname, '..', 'src', 'catalog'),
+    })
+    assert.equal(listed.entries.find((item) => item.id === expertId).name, '我的美术专家')
   })
 
   it('names conflicting capability ids deterministically', () => {

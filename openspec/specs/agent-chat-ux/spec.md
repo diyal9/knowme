@@ -8,17 +8,89 @@
 
 ### Requirement: Streaming assistant output
 
-助手回复 MUST 以流式方式展示（订阅 `ai-stream-chunk`）；流式过程中 MUST 显示进行中指示（如光标）；结束后 MUST 去掉进行中指示。
+助手回复 MUST 通过版本化 Agent 输出协议展示；执行过程中 MUST 显示进行中指示和可读阶段状态。工具可用、grounding 或后处理可能改写正文时，临时模型正文 MUST 先缓冲，只有 canonical answer 才进入最终回答区。已经展示到对话中的 canonical 正文 MUST NOT 在收尾阶段被清空、隐藏、缩短、静默覆盖或从头重放。
 
-#### Scenario: Chunks update bubble
+#### Scenario: Buffered tool-capable round
 
-- **WHEN** 模型开始流式返回
-- **THEN** 当前助手气泡文本随 chunk 增长更新，无需等整段结束后才出现正文
+- **WHEN** 模型轮可能继续调用工具或进入 grounding/后处理
+- **THEN** 最终回答区不展示该轮临时正文
+- **AND** 用户仍可在执行过程中看到阶段与工具进度
 
-#### Scenario: Fallback when no stream
+#### Scenario: Canonical answer commits
 
-- **WHEN** 接口返回完整文本且未产生 stream chunk
-- **THEN** 仍展示完整回复（可用轻量打字或直接落盘），且不留下永久 streaming 状态
+- **WHEN** Run 产生通过输出门禁的 canonical answer
+- **THEN** 当前助手气泡正文更新为该答案并移除空白等待态
+- **AND** 后续终态收尾不重新播放或替换正文
+
+#### Scenario: Fallback when no provider stream
+
+- **WHEN** 接口返回完整 canonical text 且未产生可展示流
+- **THEN** 系统直接提交完整回复
+- **AND** 不留下永久 streaming 状态或伪造 provider 流速
+
+#### Scenario: User cancels an active run
+
+- **WHEN** 用户在 Run 仍运行时点击停止
+- **THEN** 助手消息进入 cancelled 状态并保留已经提交的 canonical 正文
+- **AND** Renderer 不得显示 IPC 克隆错误或主进程内部对象
+
+### Requirement: Assistant message uses a stable multi-region shell
+
+每条实时助手消息 MUST 使用固定的执行过程、回答正文、结构化 UI 与动作区域；正常事件更新 MUST 只修改对应区域，MUST NOT 全量替换对话列表、历史消息、当前助手气泡或已经存在的正文容器。
+
+#### Scenario: First progress event arrives
+
+- **WHEN** 空助手消息收到首个 progress 或 tool 事件
+- **THEN** 在现有助手气泡中更新执行过程区域
+- **AND** 气泡节点身份保持不变
+
+#### Scenario: Answer is committed
+
+- **WHEN** 当前消息从 executing 转为 composing/completed
+- **THEN** 在同一回答正文区域提交 canonical answer
+- **AND** 执行过程与用户手动展开状态不因正文提交被重建
+
+#### Scenario: Run completes
+
+- **WHEN** 当前 Run 进入 completed、cancelled 或 error
+- **THEN** 系统在现有消息节点上移除 busy 状态并追加终态动作
+- **AND** 历史消息节点身份保持不变
+
+### Requirement: Structured UI never exposes protocol text
+
+结构化选择、审批参数和 thinking/suggestion JSON MUST 通过结构化 UI 区域展示；未闭合、非法、未通过动作白名单或尚未解析完成的协议内容 MUST NOT 出现在 Markdown 正文、代码块或纯文本尾中。
+
+#### Scenario: Suggestion fence is still incomplete
+
+- **WHEN** 缓冲正文包含未闭合 suggestion fence
+- **THEN** 用户可见正文不包含 fence 或半截 JSON
+- **AND** 系统可在结构化 UI 区显示非交互的「正在准备选项」状态
+
+#### Scenario: Valid choice is ready
+
+- **WHEN** suggestion 解析成功且动作全部通过白名单
+- **THEN** 系统渲染可点击选择组件
+- **AND** 正文只保留去除协议块后的 Markdown
+
+#### Scenario: Invalid choice payload
+
+- **WHEN** suggestion JSON 非法或没有合法选项
+- **THEN** 系统忽略结构化块并记录诊断
+- **AND** MUST NOT 把原始 JSON 回退显示给用户
+
+### Requirement: User scroll priority survives all output lanes
+
+发送新消息后系统 MUST 将当前会话定位到最新位置；生成期间用户主动滚动离开底部后，progress、tool、answer、ui 与 terminal 更新 MUST NOT 抢回滚动位置。
+
+#### Scenario: User scrolls up during tool execution
+
+- **WHEN** 用户在执行过程更新期间主动离开底部
+- **THEN** 后续工具、答案和完成事件不强制滚到底部
+
+#### Scenario: User returns near bottom
+
+- **WHEN** 用户主动回到接近底部区域
+- **THEN** 后续事件恢复跟随最新内容
 
 ### Requirement: Pre-stream thinking indicator
 
@@ -55,12 +127,20 @@
 
 ### Requirement: Stable streaming paint
 
-工作台 Agent 流式输出 MUST 避免因未完成 Markdown（表格/围栏/半行）频繁整树重排造成的明显闪屏；流式更新 SHOULD 合并到动画帧；仅在用户接近对话底部时自动滚动。
+工作台 Agent 流式输出 MUST 只把已经闭合且可按最终样式渲染的内容写入用户可见区域；未完成 Markdown（表格、代码围栏、链接、强调、列表或半行）、JSON 与内部协议尾部 MUST 保留在内存缓冲，MUST NOT 先以原始文本显示后再替换为格式化节点。流式更新 SHOULD 合并到动画帧；仅在用户接近对话底部时自动滚动。流式完成时 MUST 在现有正文容器中格式化并提交剩余合法内容，MUST NOT 全量替换对话列表、当前气泡或正文容器。
 
-#### Scenario: Incomplete table stays in plain tail
+#### Scenario: Incomplete tail stays buffered
 
-- **WHEN** 流式正文末尾为尚未以空行结束的 Markdown 表格行
-- **THEN** 这些行以纯文本尾展示，不反复重建完整 `<table>`，直至表格块稳定或流式结束
+- **WHEN** 最新流式内容以未完成半行、Markdown 结构、JSON 或协议片段结尾
+- **THEN** 用户可见正文只包含此前已经稳定格式化的块
+- **AND** 未完成尾部不以纯文本、代码块或转义源码显示
+- **AND** 系统以低干扰生成状态说明回答仍在继续
+
+#### Scenario: Stable block becomes visible
+
+- **WHEN** 缓冲内容形成可稳定格式化的完整段落、标题、列表、表格、代码块或链接
+- **THEN** 系统直接以最终展示样式将该块追加到当前正文区域
+- **AND** 同一内容不存在原始文本到格式化节点的可见转换
 
 #### Scenario: Stream updates coalesce
 
@@ -70,7 +150,14 @@
 #### Scenario: Final render matches full markdown
 
 - **WHEN** 流式结束
-- **THEN** 助手气泡使用完整 Markdown 渲染（与非流式一致），含表格
+- **THEN** 助手气泡在现有正文容器中使用完整 Markdown 渲染全部用户可见内容
+- **AND** 已格式化内容、当前气泡与历史消息节点 MUST 保持原节点身份
+
+#### Scenario: Completion decorates the existing bubble
+
+- **WHEN** 当前助手回复由 streaming 转为完成
+- **THEN** 系统 MUST 在现有气泡中移除生成状态并补充回答动作与状态元信息
+- **AND** 当前正文容器 MUST NOT 因收尾被整体替换
 
 ### Requirement: Partner-oriented quick actions
 
@@ -107,7 +194,7 @@ Composer 快捷菜单（Ctrl+K）MUST 以协作动作为主（总结、改写、
 
 ### Requirement: Suggestion / action bar in chat
 
-工作台 Agent 助手回复若包含合法 `suggestion` 结构化块，客户端 MUST 渲染为可点击的建议/操作条；MUST NOT 依赖 Markdown 表格作为唯一交互暗示。动作 MUST 限于白名单（`fill` / `send` / `copy` / `open_knowledge`）。
+工作台 Agent 助手回复若包含合法 `suggestion` 结构化块，客户端 MUST 渲染为可点击的建议/操作条；MUST NOT 依赖 Markdown 表格作为唯一交互暗示。动作 MUST 限于白名单（`fill` / `send` / `copy` / `open_knowledge` / `open_link`）。
 
 #### Scenario: Render suggestion bar
 
@@ -258,7 +345,7 @@ Agent 对话输入框的发送按钮 MUST 在助手生成过程中切换为停�
 
 ### Requirement: 对话滚动条按需显示
 
-Agent 对话内容区应仅在用户将鼠标移入该区域时显示滚动条滑块。
+Agent 对话内容区 MUST 仅在用户将鼠标移入该区域时显示滚动条滑块。
 
 #### Scenario: 鼠标位于对话内容区外
 
@@ -352,20 +439,20 @@ Agent composer MUST 展示可读的当前模型名；点击后弹出纵向分组
 
 ### Requirement: Streaming markdown repaints incrementally
 
-系统 MUST 在流式渲染 Markdown 时只更新变化的块级节点，MUST NOT 每帧整体替换 `.chat-text` 容器。
+系统 MUST 在流式渲染 Markdown 时只更新变化的稳定块级节点与固定生成状态，MUST NOT 把未完成模型尾部写入 DOM，MUST NOT 每帧整体替换 `.chat-text` 容器。
 
 #### Scenario: Text continues on the same line
 
 - **GIVEN** 助手正在输出，且新增内容仍在未闭合的尾行
 - **WHEN** 新的 chunk 到达并触发重绘
-- **THEN** 系统 MUST 只更新 `.md-stream-tail` 的文本内容
+- **THEN** 系统 MUST 复用固定生成状态且不把新增尾行文本写入 DOM
 - **AND** 已渲染的段落 / 表格 / 链接卡片节点 MUST 保持同一节点身份
 
 #### Scenario: A stable block is finalized
 
 - **GIVEN** 尾行完成并进入稳定区
 - **WHEN** 重绘发生
-- **THEN** 系统 MUST 只替换新增或变化的块级节点，其余保持不变
+- **THEN** 系统 MUST 直接插入最终格式的新增块级节点并移除或后移生成状态，其余节点保持不变
 
 ### Requirement: First token upgrades the thinking bubble in place
 
@@ -433,7 +520,7 @@ Agent composer MUST 展示可读的当前模型名；点击后弹出纵向分组
 
 ### Requirement: Long writing drafts open in review surface
 
-写作模式生成的长文稿 SHOULD 默认进入右侧审阅区，而不是只留在聊天气泡内。
+写作模式生成的长文稿 MUST 默认进入右侧审阅区，而不是只留在聊天气泡内。
 
 #### Scenario: Long output becomes draft
 
@@ -482,3 +569,35 @@ Agent 输入框上方 MUST NOT 渲染工作提示 / 「本轮带上」勾选条�
 
 - **WHEN** 本轮未注入任何个性化条目
 - **THEN** MUST NOT 展示空的沿用提示
+
+### Requirement: Honest read and verify status in assistant surface
+
+助手气泡区域 MUST 诚实展示读取/验证状态与来源：verified、pending、blocked、failed。MUST NOT 在无 ToolLedger ok 与 verified claims 时展示「已读取」「已同步」等绿色成功态徽章或等价误导文案。
+
+#### Scenario: No false read badge without ledger
+
+- **WHEN** 助手输出总结但 ToolLedger 无 required read ok
+- **THEN** UI MUST NOT 显示「已读取」成功徽章
+- **AND** MUST 显示 pending 或 blocked 说明
+
+#### Scenario: Verified summary shows sources affordance
+
+- **WHEN** claims 通过 verifier 且含 evidenceIds
+- **THEN** 助手气泡 MUST 提供「查看来源」或等价入口
+- **AND** 来源列表 MUST 与 ledger provenance 一致
+
+#### Scenario: Blocked output shows next step not fake facts
+
+- **WHEN** OutputGate blocked 编造事实
+- **THEN** 用户可见文案 MUST 说明需先调用何工具或澄清何选项
+- **AND** MUST NOT 同时展示编造议题/日期/责任人
+
+### Requirement: Structured selection UI aligns with ReferenceState
+
+当展示候选列表（会议、文档等）时，UI MUST 与 ReferenceState pendingSelection 同步；用户点选或回复序号 MUST 走 structured binding 路径。
+
+#### Scenario: Click candidate binds ref without NL-only path
+
+- **WHEN** 用户点击候选卡片或发送序号
+- **THEN** 系统 MUST 更新 ReferenceState 绑定
+- **AND** MUST NOT 仅把「2」作为裸 prompt 传给模型而无 binding 事件

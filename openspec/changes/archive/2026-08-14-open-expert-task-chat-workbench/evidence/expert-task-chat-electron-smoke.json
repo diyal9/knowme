@@ -1,0 +1,167 @@
+{
+  "generatedAt": "2026-08-11T05:41:56.333Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "seed-expert",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "id": "task-chat-expert",
+        "manifest": {
+          "version": "1.0.0",
+          "contentHash": "102ae00c52a7dfbe",
+          "name": "架构顾问",
+          "skills": [
+            "humanizer-zh"
+          ],
+          "connectors": [],
+          "updatedAt": "2026-08-11T05:41:52.536Z"
+        },
+        "capabilityManifest": {
+          "schemaVersion": 2,
+          "id": "task-chat-expert",
+          "kind": "expert",
+          "name": "架构顾问",
+          "description": "负责系统架构分析、知识检索与可执行方案设计。",
+          "version": "1.0.0",
+          "dependencies": [
+            {
+              "id": "humanizer-zh",
+              "kind": "skill",
+              "required": true
+            }
+          ],
+          "permissions": {},
+          "inputs": [],
+          "outputs": [],
+          "risk": {
+            "level": "low",
+            "reasons": []
+          },
+          "provenance": {
+            "source": "custom",
+            "trust": "unknown",
+            "ref": "experts/task-chat-expert/EXPERT.md",
+            "contentHash": "102ae00c52a7dfbe",
+            "adaptedFrom": "EXPERT.md"
+          },
+          "metadata": {
+            "legacy": true,
+            "knowme": {
+              "experience": {
+                "tasks": []
+              }
+            }
+          }
+        },
+        "contentHash": "102ae00c52a7dfbe"
+      }
+    },
+    {
+      "id": "direct-task-room",
+      "pass": true,
+      "detail": {
+        "activeId": "session_1786426914345_bd4483f9",
+        "sessionCount": 2,
+        "expertName": "架构顾问",
+        "input": "设计企业知识检索架构，并列出落地步骤",
+        "taskRoomVisible": true,
+        "taskDashboardHidden": true,
+        "layout": "task-room",
+        "agentVisible": true,
+        "hasAttributes": true,
+        "hasCapabilities": true,
+        "hasKnowledge": true,
+        "toolbarKnowledgeVisible": true,
+        "knowledgeRefs": [
+          {
+            "id": "local-default"
+          }
+        ],
+        "graphModalVisible": false
+      }
+    },
+    {
+      "id": "expert-chat-visible",
+      "pass": true,
+      "detail": "架构顾问"
+    },
+    {
+      "id": "goal-prefilled-not-sent",
+      "pass": true,
+      "detail": "设计企业知识检索架构，并列出落地步骤"
+    },
+    {
+      "id": "expert-context-groups",
+      "pass": true,
+      "detail": {
+        "activeId": "session_1786426914345_bd4483f9",
+        "sessionCount": 2,
+        "expertName": "架构顾问",
+        "input": "设计企业知识检索架构，并列出落地步骤",
+        "taskRoomVisible": true,
+        "taskDashboardHidden": true,
+        "layout": "task-room",
+        "agentVisible": true,
+        "hasAttributes": true,
+        "hasCapabilities": true,
+        "hasKnowledge": true,
+        "toolbarKnowledgeVisible": true,
+        "knowledgeRefs": [
+          {
+            "id": "local-default"
+          }
+        ],
+        "graphModalVisible": false
+      }
+    },
+    {
+      "id": "knowledge-selection-persisted",
+      "pass": true,
+      "detail": [
+        {
+          "id": "local-default"
+        }
+      ]
+    },
+    {
+      "id": "persistent-knowledge-control",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "id": "agent-graph-skipped",
+      "pass": true,
+      "detail": false
+    },
+    {
+      "id": "one-session-created",
+      "pass": true,
+      "detail": {
+        "before": 1,
+        "after": 2
+      }
+    },
+    {
+      "id": "knowledge-scope-updates-session",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "recent-task-resumes-same-session",
+      "pass": true,
+      "detail": {
+        "activeId": "session_1786426914345_bd4483f9",
+        "count": 2,
+        "expectedId": "session_1786426914345_bd4483f9"
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "consoleErrors": []
+}

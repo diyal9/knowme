@@ -21,4 +21,4 @@ function requireAsset(file, signature) {
 requireAsset(iconPng, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
 requireAsset(trayIconPng, Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
 requireAsset(iconIco, Buffer.from([0, 0, 1, 0]))
-console.log('prebuild: verified KM brand icons')
+console.log('prebuild: verified KnowMe connected brand icons')

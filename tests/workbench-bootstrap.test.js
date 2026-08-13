@@ -67,6 +67,11 @@ test('deployWorkflows copies game-dev-delivery bundle', () => {
     assert.equal(deploy.ok, true)
     assert.ok(fs.existsSync(path.join(temp, '.cursor/workflows/custom/game-dev-delivery.json')))
     assert.ok(fs.existsSync(path.join(temp, 'tools/knowme/game-dev-deliver.py')))
+    const index = JSON.parse(fs.readFileSync(path.join(temp, '.cursor/workflows/index.json'), 'utf8'))
+    const workflow = index.workflows.find(item => item.id === 'game-dev-delivery')
+    assert.equal(workflow.catalog.visibility, 'deprecated')
+    assert.equal(workflow.catalog.category, 'delivery')
+    assert.equal(workflow.catalog.order, 90)
     const deployState = bootstrap.detectWorkflowDeployState(temp)
     assert.equal(deployState.ok, true)
   } finally {

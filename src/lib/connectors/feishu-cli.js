@@ -1916,6 +1916,7 @@ function buildDraftWrite(args = {}) {
     ok: true,
     draft: {
       id: `draft_${Date.now()}`,
+      kind: 'feishu',
       action: 'create_doc',
       title,
       body,
@@ -1939,6 +1940,7 @@ function buildDraftMinutePermission(args = {}) {
     ok: true,
     draft: {
       id: `draft_${Date.now()}`,
+      kind: 'feishu',
       action: 'apply_minute_permission',
       title: `申请妙记${perm === 'edit' ? '编辑' : '查看'}权限 · ${minuteToken}`,
       minuteToken,
@@ -1978,27 +1980,141 @@ async function applyMinutePermission(draft, opts = {}) {
 }
 
 async function applyFeishuWrite(draft, opts = {}) {
-  if (draft && draft.action === 'apply_minute_permission') {
-    return applyMinutePermission(draft, opts)
-  }
-  if (!draft || draft.action !== 'create_doc') {
+  if (!draft) {
     return { ok: false, code: 'invalid_draft', message: '无效草稿', text: '' }
   }
+  if (draft.action === 'apply_minute_permission') {
+    return applyMinutePermission(draft, opts)
+  }
+  const action = draft.action
   if (opts.dryRun) {
     return {
       ok: true,
       dryRun: true,
-      text: `DRY_RUN: 将创建文档「${draft.title}」（${String(draft.body || '').length} 字）`,
+      text: `DRY_RUN: ${action || 'write'} ${draft.title || draft.target || ''}`.trim(),
     }
   }
-  // Prefer markdown create when available
-  const argv = [
-    'docs', '+create',
-    '--title', String(draft.title || 'KnowMe'),
-    '--markdown', String(draft.body || ''),
-    '--format', 'json',
-  ]
-  return runLarkCli(argv, opts)
+  if (opts.fakeApply) {
+    return { ok: true, text: `FAKE_APPLY: ${action}`, fake: true }
+  }
+  if (action === 'create_doc') {
+    const argv = [
+      'docs', '+create',
+      '--title', String(draft.title || 'KnowMe'),
+      '--markdown', String(draft.body || ''),
+      '--format', 'json',
+    ]
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_send_message') {
+    return sendFeishuText({ chat_id: draft.chatId, text: draft.text }, opts)
+  }
+  if (action === 'draft_create_task') {
+    const argv = ['task', '+create', '--title', String(draft.title || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_update_doc') {
+    const argv = ['docs', '+update', '--doc-token', String(draft.docToken || ''), '--markdown', String(draft.body || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_calendar_event') {
+    const argv = ['calendar', '+create-event', '--summary', String(draft.title || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_drive_upload') {
+    const argv = ['drive', '+upload', '--path', String(draft.filePath || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_wiki_node') {
+    const argv = ['wiki', '+create-node', '--space-id', String(draft.spaceId || ''), '--title', String(draft.title || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  if (action === 'draft_bitable_record') {
+    const argv = ['base', '+create-record', '--app-token', String(draft.appToken || ''), '--table-id', String(draft.tableId || ''), '--format', 'json']
+    return runLarkCli(argv, opts)
+  }
+  return { ok: false, code: 'invalid_draft', message: '无效草稿', text: '' }
+}
+
+function buildGenericFeishuDraft(action, args = {}, textBuilder) {
+  const idempotencyKey = args.idempotencyKey || null
+  const draft = {
+    id: `draft_${Date.now()}`,
+    kind: 'feishu',
+    action,
+    status: 'pending_review',
+    createdAt: new Date().toISOString(),
+    idempotencyKey,
+    ...args,
+  }
+  return {
+    ok: true,
+    draft,
+    text: textBuilder(draft),
+  }
+}
+
+function buildDraftSendMessage(args = {}) {
+  const text = String(args.text || args.message || '').trim()
+  const chatId = String(args.chat_id || args.chatId || '').trim()
+  if (!text) return { ok: false, code: 'invalid_args', message: '需要 text', draft: null }
+  return buildGenericFeishuDraft('draft_send_message', { text, chatId }, (d) =>
+    `已生成 IM 消息草稿（${d.text.length} 字），等待批准。`)
+}
+
+function buildDraftCreateTask(args = {}) {
+  const title = String(args.title || '').trim()
+  if (!title) return { ok: false, code: 'invalid_args', message: '需要 title', draft: null }
+  return buildGenericFeishuDraft('draft_create_task', { title, description: args.description || '' }, (d) =>
+    `已生成任务草稿「${d.title}」，等待批准。`)
+}
+
+function buildDraftUpdateDoc(args = {}) {
+  const docToken = String(args.doc_token || args.docToken || '').trim()
+  const body = String(args.body || args.content || '').trim()
+  if (!docToken || !body) return { ok: false, code: 'invalid_args', message: '需要 doc_token 和 body', draft: null }
+  return buildGenericFeishuDraft('draft_update_doc', { docToken, body, title: args.title || '' }, () =>
+    '已生成文档更新草稿，等待批准。')
+}
+
+function buildDraftCalendarEvent(args = {}) {
+  const title = String(args.title || args.summary || '').trim()
+  if (!title) return { ok: false, code: 'invalid_args', message: '需要 title', draft: null }
+  return buildGenericFeishuDraft('draft_calendar_event', { title, start: args.start, end: args.end }, (d) =>
+    `已生成日历事件草稿「${d.title}」，等待批准。`)
+}
+
+function buildDraftDriveUpload(args = {}) {
+  const filePath = String(args.file_path || args.filePath || '').trim()
+  if (!filePath) return { ok: false, code: 'invalid_args', message: '需要 file_path', draft: null }
+  return buildGenericFeishuDraft('draft_drive_upload', { filePath, folder: args.folder || '' }, () =>
+    '已生成云盘上传草稿，等待批准。')
+}
+
+function buildDraftWikiNode(args = {}) {
+  const spaceId = String(args.space_id || args.spaceId || '').trim()
+  const title = String(args.title || '').trim()
+  if (!spaceId || !title) return { ok: false, code: 'invalid_args', message: '需要 space_id 和 title', draft: null }
+  return buildGenericFeishuDraft('draft_wiki_node', { spaceId, title, parent: args.parent || '' }, (d) =>
+    `已生成 Wiki 节点草稿「${d.title}」，等待批准。`)
+}
+
+function buildDraftBitableRecord(args = {}) {
+  const appToken = String(args.app_token || args.appToken || '').trim()
+  const tableId = String(args.table_id || args.tableId || '').trim()
+  if (!appToken || !tableId) return { ok: false, code: 'invalid_args', message: '需要 app_token 和 table_id', draft: null }
+  return buildGenericFeishuDraft('draft_bitable_record', { appToken, tableId, fields: args.fields || {} }, () =>
+    '已生成多维表格记录草稿，等待批准。')
+}
+
+const FEISHU_EXTENDED_DRAFT_BUILDERS = {
+  'feishu.draft_send_message': buildDraftSendMessage,
+  'feishu.draft_create_task': buildDraftCreateTask,
+  'feishu.draft_update_doc': buildDraftUpdateDoc,
+  'feishu.draft_calendar_event': buildDraftCalendarEvent,
+  'feishu.draft_drive_upload': buildDraftDriveUpload,
+  'feishu.draft_wiki_node': buildDraftWikiNode,
+  'feishu.draft_bitable_record': buildDraftBitableRecord,
 }
 
 const FEISHU_READ_TOOL_DEFS = [
@@ -2216,6 +2332,104 @@ const FEISHU_DRAFT_TOOL_DEFS = [
     },
     _knowme: { source: 'feishu', tier: 'L2', requiresApproval: false },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_send_message',
+      description: 'Draft an IM message. Does NOT send until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { chat_id: { type: 'string' }, text: { type: 'string' }, idempotencyKey: { type: 'string' } },
+        required: ['text'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_create_task',
+      description: 'Draft a Feishu task creation. Does NOT create until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { title: { type: 'string' }, description: { type: 'string' }, idempotencyKey: { type: 'string' } },
+        required: ['title'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_update_doc',
+      description: 'Draft a doc update/append. Does NOT write until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { doc_token: { type: 'string' }, body: { type: 'string' }, idempotencyKey: { type: 'string' } },
+        required: ['doc_token', 'body'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_calendar_event',
+      description: 'Draft a calendar event. Does NOT create until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { title: { type: 'string' }, start: { type: 'string' }, end: { type: 'string' } },
+        required: ['title'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_drive_upload',
+      description: 'Draft a drive upload/move. Does NOT upload until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { file_path: { type: 'string' }, folder: { type: 'string' } },
+        required: ['file_path'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_wiki_node',
+      description: 'Draft wiki node create/move. Does NOT write until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { space_id: { type: 'string' }, title: { type: 'string' }, parent: { type: 'string' } },
+        required: ['space_id', 'title'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'feishu.draft_bitable_record',
+      description: 'Draft bitable record create/update/delete. Does NOT write until user approves.',
+      parameters: {
+        type: 'object',
+        properties: { app_token: { type: 'string' }, table_id: { type: 'string' }, fields: { type: 'object' } },
+        required: ['app_token', 'table_id'],
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L2', requiresApproval: true },
+  },
 ]
 
 module.exports = {
@@ -2259,6 +2473,14 @@ module.exports = {
   softenQueryForRetry,
   buildDraftWrite,
   buildDraftMinutePermission,
+  buildDraftSendMessage,
+  buildDraftCreateTask,
+  buildDraftUpdateDoc,
+  buildDraftCalendarEvent,
+  buildDraftDriveUpload,
+  buildDraftWikiNode,
+  buildDraftBitableRecord,
+  FEISHU_EXTENDED_DRAFT_BUILDERS,
   applyFeishuWrite,
   parseCliJsonOutput,
   parseMissingScopeError,

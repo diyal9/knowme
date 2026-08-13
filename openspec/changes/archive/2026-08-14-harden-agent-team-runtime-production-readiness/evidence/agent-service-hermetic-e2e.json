@@ -1,0 +1,51 @@
+{
+  "at": "2026-08-07T10:40:35.303Z",
+  "mode": "hermetic-loopback-http",
+  "status": "PASS",
+  "hardGate": true,
+  "checks": [
+    {
+      "id": "readiness",
+      "status": "PASS",
+      "negotiatedVersion": 1
+    },
+    {
+      "id": "success",
+      "status": "PASS",
+      "remoteStatus": "completed",
+      "terminalCount": 1
+    },
+    {
+      "id": "failure",
+      "status": "PASS",
+      "remoteStatus": "failed",
+      "terminalCount": 1
+    },
+    {
+      "id": "clarification",
+      "status": "PASS",
+      "remoteStatus": "need_input",
+      "terminalCount": 0
+    },
+    {
+      "id": "recovery",
+      "status": "PASS"
+    },
+    {
+      "id": "cancel",
+      "status": "PASS",
+      "elapsedMs": 1
+    },
+    {
+      "id": "timeout",
+      "status": "PASS",
+      "code": "remote_timeout"
+    },
+    {
+      "id": "disconnect",
+      "status": "PASS",
+      "code": "remote_disconnected"
+    }
+  ],
+  "ok": true
+}

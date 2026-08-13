@@ -1,0 +1,16 @@
+{
+  "name": "numeric-deixis-multiturn",
+  "sessionScript": [
+    {
+      "pendingSelection": {
+        "options": [
+          { "id": "candidate-1", "label": "选项一", "payload": { "minute_token": "a" } },
+          { "id": "candidate-2", "label": "选项二", "payload": { "minute_token": "b" } }
+        ]
+      }
+    }
+  ],
+  "input": { "prompt": "2", "tier": "retrieval", "forceTools": true },
+  "llmScript": [{ "response": { "text": "好的，我将读取所选内容。" } }],
+  "expect": { "terminal": "DONE", "forbiddenClaims": ["议题："] }
+}

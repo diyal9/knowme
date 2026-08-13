@@ -1,0 +1,178 @@
+{
+  "generatedAt": "2026-08-10T07:22:06.033Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "seed-local-agent",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "error": ""
+      }
+    },
+    {
+      "id": "card-identity-mark-is-icon",
+      "pass": true,
+      "detail": {
+        "name": "UI 专家",
+        "badge": "我的智能体",
+        "hasSvgMark": true,
+        "markText": "",
+        "chips": [
+          "1 个技能",
+          "1 个连接器"
+        ],
+        "agentId": "ui-expert"
+      }
+    },
+    {
+      "id": "card-source-badge",
+      "pass": true,
+      "detail": "我的智能体"
+    },
+    {
+      "id": "card-capability-chips",
+      "pass": true,
+      "detail": [
+        "1 个技能",
+        "1 个连接器"
+      ]
+    },
+    {
+      "id": "start-button-focus-ring",
+      "pass": true,
+      "detail": {
+        "focusVisible": true,
+        "outlineWidth": "1.6px",
+        "outlineStyle": "solid"
+      }
+    },
+    {
+      "id": "pending-state-visible",
+      "pass": true,
+      "detail": {
+        "disabled": true,
+        "label": "正在打开…",
+        "busyCard": true
+      }
+    },
+    {
+      "id": "pending-state-released",
+      "pass": true,
+      "detail": {
+        "disabled": false,
+        "label": "开始使用"
+      }
+    },
+    {
+      "id": "double-click-creates-one-session",
+      "pass": true,
+      "detail": {
+        "before": 1,
+        "after": 2
+      }
+    },
+    {
+      "id": "chat-shows-agent-name",
+      "pass": true,
+      "detail": {
+        "chat": "UI 专家",
+        "card": "UI 专家"
+      }
+    },
+    {
+      "id": "chat-shows-source-badge",
+      "pass": true,
+      "detail": "我的智能体"
+    },
+    {
+      "id": "chat-shows-duty",
+      "pass": true,
+      "detail": "UI 专家：聚焦界面视觉生产与交互落地，先收敛约束再结构化出图。"
+    },
+    {
+      "id": "chat-identity-mark-is-icon",
+      "pass": true
+    },
+    {
+      "id": "identity-precedes-generic-copy",
+      "pass": true
+    },
+    {
+      "id": "generic-knowme-copy-replaced",
+      "pass": true,
+      "detail": "说明你的目标与已有材料，它会按自己的方法推进。"
+    },
+    {
+      "id": "degraded-explicitly-permits-chat",
+      "pass": true,
+      "detail": {
+        "limited": 2,
+        "note": "有依赖未就绪，仍可直接对话；需要用到它时再去配置。"
+      }
+    },
+    {
+      "id": "capabilities-precede-composer",
+      "pass": true
+    },
+    {
+      "id": "composer-placeholder-names-agent",
+      "pass": true,
+      "detail": "告诉「UI 专家」你的目标…"
+    },
+    {
+      "id": "rail-switched-to-assistant",
+      "pass": true
+    },
+    {
+      "id": "start-survives-catalog-failure",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "error": ""
+      }
+    },
+    {
+      "id": "identity-survives-catalog-failure",
+      "pass": true,
+      "detail": "UI 专家"
+    },
+    {
+      "id": "missing-agent-fails-once",
+      "pass": true,
+      "detail": {
+        "ok": false,
+        "notified": true,
+        "buttonDisabled": false,
+        "buttonLabel": "开始使用",
+        "workbenchVisible": true
+      }
+    },
+    {
+      "id": "failed-start-restores-button",
+      "pass": true,
+      "detail": {
+        "ok": false,
+        "notified": true,
+        "buttonDisabled": false,
+        "buttonLabel": "开始使用",
+        "workbenchVisible": true
+      }
+    },
+    {
+      "id": "narrow-window-no-h-scroll",
+      "pass": true,
+      "detail": {
+        "scrollWidth": 760,
+        "innerWidth": 760,
+        "cardVisible": true
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "consoleErrors": []
+}

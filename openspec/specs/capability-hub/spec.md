@@ -200,3 +200,142 @@ Capability Hub MUST 在添加能力对话框提供“Cursor 仓库”来源，�
 - **THEN** Hub 不写入能力
 - **AND** 添加对话框保持可恢复状态
 
+### Requirement: Hub exposes capability governance facts
+
+能力详情 MUST 展示统一声明中的 required/optional 依赖、权限、输入、输出、风险、来源证据和信任状态，不得以硬编码空依赖代替真实数据。
+
+#### Scenario: User opens governed capability
+
+- **WHEN** 用户打开具有统一声明的能力详情
+- **THEN** 抽屉 SHALL 展示真实治理字段
+- **AND** legacy 适配字段 SHALL 标明其 provenance
+
+### Requirement: Hub enforces dependencies and risk confirmation
+
+安装或启用能力前，Hub MUST 验证 required dependencies；对 high 或 critical 风险能力 MUST 在写入状态前取得明确确认。
+
+#### Scenario: Required dependency is unavailable
+
+- **WHEN** 用户安装或启用缺少必需依赖的能力
+- **THEN** 操作 MUST 被阻止
+- **AND** UI SHALL 提供缺失依赖 ID 和可操作说明
+
+#### Scenario: User rejects high-risk confirmation
+
+- **WHEN** 用户拒绝 high/critical 能力的风险确认
+- **THEN** install store MUST 保持原状态
+
+#### Scenario: Optional dependency is unavailable
+
+- **WHEN** 能力仅缺少可选依赖
+- **THEN** UI SHALL 显示警告但允许用户继续
+
+### Requirement: Tool contract preview in connector drawer
+
+Capability Hub 连接器/ MCP 详情 MUST 展示 Registry 契约：risk、requiresApproval、scope、timeout、health。
+
+#### Scenario: MCP health degraded
+
+- **WHEN** MCP health=degraded
+- **THEN** 卡片与抽屉展示警告且 Agent 投影 MAY 排除该 connector 工具
+
+### Requirement: Risk confirmation on enable write tools
+
+启用含 `risk=external|destructive` 工具入 allowlist 时，Hub MUST 二次确认。
+
+#### Scenario: Enable feishu IM write
+
+- **WHEN** 用户勾选 feishu.draft_send_message
+- **THEN** 显示风险说明对话框
+- **AND** 确认后才写入 allowlist
+
+### Requirement: Playwright MCP install guidance
+
+当 catalog 含 browser automation pack 时，Hub MUST 提供 Playwright MCP 安装/配置指引链接。
+
+#### Scenario: Missing playwright server
+
+- **WHEN** 无 Playwright MCP connector
+- **THEN** Hub 展示安装步骤而非空列表
+
+### Requirement: Playwright MCP install guidance clickable
+
+Capability Hub 中 Playwright MCP 安装指引 MUST 包含可点击链接或按钮（打开文档或外部安装说明）；health 红灯时 MUST 与安装步骤一致。
+
+#### Scenario: Install link opens
+
+- **WHEN** 用户在 Hub 点击 Playwright 安装指引
+- **THEN** 打开有效 URL 或系统浏览器
+- **AND** 不产生未预期写操作
+
+#### Scenario: Health red matches missing MCP
+
+- **WHEN** Playwright MCP 未配置
+- **THEN** Hub 显示 health 失败与安装指引
+- **AND** 文案与单测 fixture 一致
+
+### Requirement: Agent profile configuration entry
+
+Capability Hub MUST 为已安装 Expert/Agent 提供 Profile 配置入口，并显示其可用 Skill、连接器、输入输出、权限、风险和版本。保存配置后 MUST 能从当前目标或流程上下文继续进入工作台。
+
+#### Scenario: Open Agent profile
+
+- **WHEN** 用户在能力 Hub 打开已安装 Agent
+- **THEN** 详情抽屉提供进入 Profile 配置的入口，并展示真实治理信息
+
+#### Scenario: Return to active goal
+
+- **WHEN** 用户从工作台目标进入 Hub 修改 Agent Profile 并保存
+- **THEN** Hub 返回原目标和流程上下文，不要求用户重新输入目标
+
+### Requirement: Capability to workflow handoff
+
+Capability Hub MUST 支持将已安装 Agent 或 Skill 添加到当前工作流草稿；未安装或未授权能力 MUST 进入安装/授权引导，而不是写入不可执行引用。
+
+#### Scenario: Add capability to workflow
+
+- **WHEN** 用户选择“加入当前工作流”
+- **THEN** 工作台收到带有 capabilityId、版本和当前上下文的结构化引用
+
+#### Scenario: Unavailable capability handoff
+
+- **WHEN** 用户选择未安装或未授权能力
+- **THEN** Hub 显示修复入口，并且不创建不可执行的工作流节点
+
+### Requirement: Capability hub is the sole home for agent authoring
+
+能力界面 MUST 是创建、编辑、调优 Agent（专家）的唯一场所。MUST 区分来源：官方(curated)、自建(local)。MUST 允许为 Agent 配置 Skill、专属知识库范围与 Tool（连接器）。工作台及助理 MUST NOT 再提供 Agent 的创建/编辑/调优入口。
+
+#### Scenario: Create a custom agent
+
+- **WHEN** 用户在能力界面专家页选择「添加自己的专家」
+- **THEN** 进入 Agent 创建表单，可设 persona、Skill、知识库范围与 Tool，保存后作为「自建」出现在专家列表
+
+#### Scenario: Tune an agent
+
+- **WHEN** 用户对某专家点「调优」
+- **THEN** 在能力界面内配置其 Skill / 知识库范围 / Tool，保存后配置随该 Agent 持久化
+
+#### Scenario: Official agents are read-only
+
+- **WHEN** 用户查看 curated 官方专家
+- **THEN** 可「复制为自建」再调优，MUST NOT 直接修改官方版本
+
+### Requirement: Installed agents feed workbench orchestration
+
+在能力界面安装或自建的 Agent MUST 进入统一 Agent store，并作为工作台编排的节点候选。MUST NOT 要求用户在工作台再次登记 Agent。
+
+#### Scenario: Installed agent appears in orchestration
+
+- **WHEN** 用户在能力界面安装或新建一个 Agent，随后进入工作台编排
+- **THEN** 该 Agent 出现在编排节点候选库，可拖入 DAG
+
+### Requirement: Real agent catalog
+
+能力界面专家目录 MUST 反映真实 Agent 数据（本地 + 官方种子），MUST NOT 使用占位 / Mock 数据充数。
+
+#### Scenario: No mock experts
+
+- **WHEN** 用户打开能力界面专家页
+- **THEN** 列表为真实可用/可安装的 Agent，不含仅用于演示的占位条目
+

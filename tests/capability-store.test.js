@@ -32,6 +32,26 @@ describe('capability-store', () => {
     assert.doesNotMatch(raw, /\.tmp/)
   })
 
+  it('retries transient Windows rename locks with a finite bound', () => {
+    let attempts = 0
+    const result = store.renameWithRetrySync('tmp', 'store', {
+      retries: 3,
+      delays: [0],
+      renameSync: () => {
+        attempts += 1
+        if (attempts < 3) {
+          const error = new Error('locked')
+          error.code = 'EPERM'
+          throw error
+        }
+      },
+    })
+
+    assert.equal(result.ok, true)
+    assert.equal(result.attempts, 3)
+    assert.equal(attempts, 3)
+  })
+
   it('installs from staging and computes content hash', () => {
     const staging = path.join(userData, 'stage-skill')
     fs.mkdirSync(staging, { recursive: true })

@@ -1,0 +1,66 @@
+{
+  "generatedAt": "2026-08-07T11:24:23.641Z",
+  "pass": true,
+  "viewports": [
+    {
+      "width": 1360,
+      "height": 860
+    },
+    {
+      "width": 780,
+      "height": 720
+    }
+  ],
+  "checks": [
+    {
+      "id": "user-language-header",
+      "pass": true,
+      "detail": "\n              开始\n              任务\n              团队\n            "
+    },
+    {
+      "id": "goal-first-home",
+      "pass": true,
+      "detail": "今天想完成什么？"
+    },
+    {
+      "id": "mode-is-advanced",
+      "pass": true,
+      "detail": {
+        "modeVisible": false,
+        "advancedModeVisible": true
+      }
+    },
+    {
+      "id": "common-goal-starters",
+      "pass": true,
+      "detail": 4
+    },
+    {
+      "id": "goal-enters-existing-task-path",
+      "pass": true,
+      "detail": {
+        "taskTitle": "浏览全部模板",
+        "goalInModal": "",
+        "goalHint": "目标已记录：整理客户访谈纪要并生成跟进待办 · 选择一个模板继续"
+      }
+    },
+    {
+      "id": "starter-enters-task-path",
+      "pass": true,
+      "detail": "制作宣传图"
+    },
+    {
+      "id": "responsive-no-overflow",
+      "pass": true,
+      "detail": {
+        "headOverflowX": false,
+        "homeOverflowX": false
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

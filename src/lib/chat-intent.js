@@ -1,5 +1,7 @@
 'use strict'
 
+const researchRouting = require('./research-routing')
+
 /**
  * chat-intent — 本地启发式意图分级（零网络/零模型成本）。
  *
@@ -59,7 +61,7 @@ function classifyIntent({ prompt = '', hasNoteContext = false, slashRefs = [], r
     const veryShort = p.length <= VERY_SHORT_CHARS
     if (!veryShort && QUESTION_RE.test(p)) return 'assist'
 
-    return 'chat'
+    return researchRouting.promoteIntentTier('chat', p)
   } catch {
     return 'assist'
   }

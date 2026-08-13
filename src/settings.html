@@ -613,10 +613,34 @@ input:focus,textarea:focus{
 .btn-save{margin-left:auto;min-width:180px;background:#35312d;border-color:#35312d;box-shadow:0 1px 2px rgba(28,25,23,.16);}
 .btn-save:hover{background:#211f1c;border-color:#211f1c;}
 .btn .ico{transition:transform .16s ease;}
+.embedded-settings .titlebar{display:none;}
 .embedded-settings .footer .btn-cancel{display:none;}
 .embedded-settings .footer-inner{justify-content:flex-end;}
 .embedded-settings .footer-status{margin-left:auto;}
 .embedded-settings .btn-save{margin-left:0;}
+/* 嵌入工作台时与助理/工作台内容岛同色，不再用灰画布 */
+.embedded-settings,
+.embedded-settings body{
+  --bg-page:#ffffff;
+  --bg-top:#ffffff;
+  --bg-mid:#f7f6f3;
+  --bg-soft:#f7f6f3;
+  background:#ffffff;
+}
+.embedded-settings body{
+  background:#ffffff;
+}
+.embedded-settings .scroll{
+  background:#ffffff;
+}
+.embedded-settings .section{
+  border:1px solid rgba(50,45,40,.08);
+  box-shadow:none;
+}
+.embedded-settings .footer{
+  background:#ffffff;
+  border-top:1px solid rgba(0,0,0,0.08);
+}
 .footer-status{min-width:64px;}
 .toast-wrap{bottom:70px;}
 
@@ -862,13 +886,13 @@ input:focus,textarea:focus{
     <div class="section legacy-skill-banner" id="legacySkillBanner">
       <div class="section-head">
         <div class="section-title">技能管理已迁移</div>
-        <span class="section-badge">能力 Hub</span>
+        <span class="section-badge">专家库</span>
       </div>
       <p class="kb-intro assistant-intro">
-        旧版 OKF slash 技能入口已迁移至工作台左侧「能力」入口。请在<strong>能力 Hub</strong>中通过 Tab 浏览、安装与管理专家、技能与 MCP 连接器。
+        旧版 OKF slash 技能入口已迁移至工作台左侧「专家库」入口。请在<strong>专家库</strong>中通过 Tab 浏览、安装与管理专家、技能与 MCP 连接器。
       </p>
       <div class="field" style="padding-top:0">
-        <button type="button" class="btn primary" id="btnOpenCapabilityHubFromSettings">打开能力 Hub</button>
+        <button type="button" class="btn primary" id="btnOpenCapabilityHubFromSettings">打开专家库</button>
       </div>
     </div>
     <div class="section assistant-mode-section">
@@ -1049,13 +1073,6 @@ input:focus,textarea:focus{
             <button class="btn-sm" type="button" id="btnSaveFeishuAllowlist">保存高级设置</button>
           </div>
         </details>
-        <div class="connector-card-block">
-          <div class="section-head">
-            <div class="section-title">待确认的飞书写入</div>
-            <span class="section-badge">人在环</span>
-          </div>
-          <div id="connectorDrafts" class="concept-list" style="min-height:32px"></div>
-        </div>
       </div>
       <div id="connectorsList" class="concept-list" style="min-height:48px"></div>
     </div>
@@ -1116,14 +1133,14 @@ input:focus,textarea:focus{
     <div class="section">
       <div class="section-head">
         <div class="section-title">Workbench 部署与兼容</div>
-        <span class="section-badge">Daemon Bootstrap</span>
+        <span class="section-badge">管线服务引导</span>
       </div>
       <p class="kb-intro">配置本机 Workbench 安装目录后，KnowMe 可自动注册 <code>game-dev-delivery</code> 工作流，并在版本匹配时安装 script-only 兼容层（无需手工 patch 外部仓库）。</p>
       <div class="form-grid">
         <div class="field full">
           <label>Workbench 安装目录</label>
           <input id="workbenchInstallPath" placeholder="例如 D:\workflows\workbench 或 KNOWME_WORKBENCH_INSTALL" spellcheck="false">
-          <div class="hint">Daemon 进程使用的 Workbench 仓库根目录；留空则尝试环境变量自动发现。</div>
+          <div class="hint">管线服务进程使用的 Workbench 仓库根目录；留空则尝试环境变量自动发现。</div>
         </div>
       </div>
       <div class="kb-actions">
@@ -1575,6 +1592,7 @@ function selectSettingsTab(id) {
   if (id === 'memory') refreshMemoryOverview()
   if (id === 'sources') refreshSourcesList()
   if (id === 'connectors') refreshConnectorsList()
+  if (embeddedMode) window.parent.postMessage({ type: 'settings-tab-change', tab: id }, '*')
 }
 
 async function refreshConnectorsList() {
@@ -1596,7 +1614,7 @@ async function refreshConnectorsList() {
         return c
       }
     }))
-    const visibleRows = withStatus.filter((c) => c.id !== 'feishu')
+    const visibleRows = withStatus.filter((c) => !['feishu', 'mcp-default'].includes(c.id))
     list.innerHTML = visibleRows.length ? visibleRows.map((c) => {
       const st = c.status || {}
       const state = st.state || (c.enabled ? 'enabled' : 'disabled')
@@ -1629,7 +1647,6 @@ async function refreshConnectorsList() {
       $('feishuAllowlist').value = (feishu.allowlist || []).join(', ')
     }
     updateFeishuQuickCard(feishu)
-    await refreshConnectorDrafts()
   } catch (e) {
     list.innerHTML = `<span class="concept-empty">加载失败：${escHtml(e.message || e)}</span>`
     updateFeishuQuickCard(null)
@@ -1703,35 +1720,6 @@ function updateFeishuQuickCard(feishu) {
   actionBtn.textContent = '一键授权'
   actionBtn.disabled = false
   actionBtn.dataset.mode = 'full-auth'
-}
-
-async function refreshConnectorDrafts() {
-  const box = $('connectorDrafts')
-  if (!box || !window.api?.connectorsDrafts) return
-  try {
-    const r = await window.api.connectorsDrafts()
-    const pending = (r.drafts || []).filter((d) => d.status === 'pending_review').slice(-10).reverse()
-    if (!pending.length) {
-      box.innerHTML = '<span class="concept-empty">暂无待确认草稿。</span>'
-      return
-    }
-    box.innerHTML = pending.map((d) => {
-      const isPermission = d.action === 'apply_minute_permission'
-      const sub = isPermission
-        ? `向妙记 ${d.minuteToken || ''} 所有者申请「${d.perm === 'edit' ? '可编辑' : '可阅读'}」`
-        : String(d.body || '').slice(0, 120)
-      return `<div class="action-row" style="align-items:flex-start">
-      <div class="action-body">
-        <div class="action-label">${escHtml(d.title || '未命名')}</div>
-        <div class="action-sub">${escHtml(sub)}</div>
-      </div>
-      <button type="button" class="btn-sm primary" data-draft-approve="${escHtml(d.id)}" data-draft-kind="${isPermission ? 'permission' : 'doc'}">${isPermission ? '确认申请' : '确认写入'}</button>
-      <button type="button" class="btn-sm" data-draft-reject="${escHtml(d.id)}">拒绝</button>
-    </div>`
-    }).join('')
-  } catch (e) {
-    box.innerHTML = `<span class="concept-empty">加载失败：${escHtml(e.message || e)}</span>`
-  }
 }
 
 $('btnRefreshConnectors')?.addEventListener('click', () => refreshConnectorsList())
@@ -2288,20 +2276,6 @@ $('btnSaveFeishuAllowlist')?.addEventListener('click', async () => {
   if (!r.ok) toast(r.error || '保存失败', 'error')
   else { toast('飞书白名单已保存', 'success'); refreshConnectorsList() }
 })
-$('connectorDrafts')?.addEventListener('click', async (e) => {
-  const approve = e.target.closest('[data-draft-approve]')
-  const reject = e.target.closest('[data-draft-reject]')
-  if (!approve && !reject) return
-  const isReject = Boolean(reject)
-  const draftId = isReject ? reject.dataset.draftReject : approve.dataset.draftApprove
-  const confirmText = approve?.dataset.draftKind === 'permission'
-    ? '确认以当前飞书身份发起权限申请？纪要所有者会收到你的申请。'
-    : '确认以当前飞书身份写入该文档？此操作会修改飞书数据。'
-  if (!isReject && !window.confirm(confirmText)) return
-  const r = await window.api.connectorsApproveDraft({ draftId, reject: isReject })
-  if (!r.ok) toast(r.message || '操作失败', 'error')
-  else { toast(isReject ? '已拒绝' : '已提交写入飞书', 'success'); refreshConnectorDrafts() }
-})
 $('btnSaveMcpConnector')?.addEventListener('click', async () => {
   const command = ($('mcpCommand')?.value || '').trim()
   const args = ($('mcpArgs')?.value || '').trim().split(/\s+/).filter(Boolean)
@@ -2322,7 +2296,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => selectSettingsTab(tab.dataset.tab))
 })
 window.api?.onSelectSettingsTab?.(selectSettingsTab)
-if (initialTabFromQuery) selectSettingsTab(initialTabFromQuery)
+selectSettingsTab(initialTabFromQuery || 'sources')
 
 async function refreshSourcesList() {
   const list = $('sourcesList')
@@ -2569,7 +2543,7 @@ function renderWorkbenchAuthStatus(auth = {}, snapshot = {}) {
   if (!el) return
   const meta = snapshot.workbenchAuth || {}
   if (!auth.authEnabled) {
-    el.textContent = '状态：工作服务未启用授权（可直接启动任务）'
+    el.textContent = '状态：管线服务未启用授权（可直接启动任务）'
     return
   }
   if (auth.configured) {
@@ -2599,11 +2573,11 @@ function renderWorkbenchBootstrapStatus(status = {}) {
   if (status.installPath) parts.push(`目录 ${status.installPath}`)
   if (status.compat?.status) parts.push(`兼容 ${status.compat.status}`)
   if (status.deploy?.ok) parts.push('工作流已部署')
-  else if (status.workflowRegisteredRemote) parts.push('Daemon 已注册 game-dev-delivery')
+  else if (status.workflowRegisteredRemote) parts.push('管线服务已注册 game-dev-delivery')
   if (status.tokenConfigured) parts.push('Token 已配置')
   else parts.push('Token 未配置')
-  if (status.daemonOnline) parts.push('Daemon 在线')
-  else parts.push('Daemon 离线')
+  if (status.daemonOnline) parts.push('管线服务在线')
+  else parts.push('管线服务离线')
   const headline = status.ok ? '就绪' : (status.message || '未就绪')
   el.textContent = `状态：${headline}${parts.length ? ` · ${parts.join(' · ')}` : ''}`
 }

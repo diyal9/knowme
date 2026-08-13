@@ -1,0 +1,66 @@
+{
+  "change": "refine-knowledge-home-workbench",
+  "at": "2026-08-10T09:13:00.026Z",
+  "passed": 6,
+  "total": 6,
+  "ok": true,
+  "checks": [
+    {
+      "id": "search-first-desk-home",
+      "pass": true,
+      "detail": {
+        "title": "我的知识",
+        "search": true,
+        "add": true,
+        "lint": true,
+        "browse": true,
+        "obsidian": true,
+        "tree": true,
+        "graphCanvas": false,
+        "text": "\n        \n          \n          \n          搜索\n        \n        \n          添加资料\n          检查问题\n          浏览全部\n          \n            Obsidian\n          \n          整理资料\n        \n        \n          1 份资料可搜索\n        \n        \n        \n          \n            \n    \n      \n      我的知识本机根目录\n      1\n    \n    \n      \n        \n        \n        资料\n        1\n      \n      \n        \n        \n        \n          资料笔记\n          2026/8/10\n        \n        可编辑\n      \n      \n    \n      \n        \n        \n        已整理知识\n        0\n      \n      \n        \n              还没有已确认的知识\n              \n            \n      \n    \n  \n          \n          \n            \n              1 份资料 · 0 条知识\n              资料空间正常\n            \n            \n              最近更新1\n              \n                资料笔记raw/desk-note.md\n              \n            \n          \n        \n      ",
+        "hasHero": false
+      }
+    },
+    {
+      "id": "no-internal-ops-terms",
+      "pass": true,
+      "detail": {
+        "sample": "\n        \n          \n          \n          搜索\n        \n        \n          添加资料\n          检查问题\n          浏览全部\n          \n            Obsidian\n          \n          整理资料\n        \n        \n          1 份资料可搜索\n        \n        \n        \n          "
+      }
+    },
+    {
+      "id": "obsidian-labeled-no-canvas",
+      "pass": true,
+      "detail": {
+        "obsidian": true,
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "query-shows-user-facing-engine",
+      "pass": true,
+      "detail": {
+        "engine": "本地检索",
+        "hitCount": 1
+      }
+    },
+    {
+      "id": "narrow-layout-no-horizontal-overflow",
+      "pass": true,
+      "detail": {
+        "viewport": 510,
+        "bodyWidth": 510,
+        "deskWidth": 380,
+        "toolbarVisible": true
+      }
+    },
+    {
+      "id": "no-new-renderer-errors",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": []
+      }
+    }
+  ]
+}

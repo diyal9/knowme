@@ -1,5 +1,9 @@
 # Spec: content-sources
 
+## Purpose
+
+定义 KnowMe 本地、GitLab、GitHub 与网页内容源的接入、同步、浏览、激活和路径安全规则，并约束 Agent 文件写入与 artifact 输出始终落在当前活跃内容源允许的作用域内。
+
 ## Source 列表
 - WHEN 用户打开设置「内容源」THEN 可见已添加的 local / gitlab 源列表
 - WHEN 用户添加本地文件夹 THEN 系统弹出目录选择；确认后写入 sources，且 `rootPath` 为绝对路径
@@ -61,3 +65,42 @@
 - **WHEN** 助手调用 `read_file` / `grep_files`
 - **THEN** 返回内容 MUST 来自缓存后的网页正文
 - **AND** MUST NOT 直接把原始 HTML 噪声作为主要阅读内容
+
+### Requirement: Write tools bound to active content source
+
+文件写/删/移动/patch 工具 MUST 仅作用于当前 Session 活跃内容源根；切换内容源后 MUST 重新校验 scope。
+
+#### Scenario: Switch source invalidates pending file draft
+
+- **WHEN** 用户切换活跃内容源且存在 pending file draft
+- **THEN** 系统提示 draft 路径可能失效并需重新预览
+
+### Requirement: Artifacts subdirectory policy
+
+内容源 MAY 配置 `artifacts/` 为默认可写子目录；写工具 MUST 仍拒绝写入 `.git/`、`.knowme/backups` 以外系统敏感路径（由 path policy 定义）。
+
+#### Scenario: Write to artifacts allowed
+
+- **WHEN** 活跃源已启用 artifacts 策略
+- **THEN** create_artifact 落盘 MAY 使用 `<root>/artifacts/` 无需额外批准（若 contract 标记低风险）
+
+#### Scenario: Write to git blocked
+
+- **WHEN** 模型试图 patch `.git/config`
+- **THEN** 返回 `scope_denied`
+
+### Requirement: Content root path resolution hardening
+
+内容源路径解析 MUST 在写/移动/创建目录前使用 `realpath`/`lstat` 验证目标仍在绑定 root 内；symlink/junction 逃逸 MUST 返回 `scope_denied`。
+
+#### Scenario: Parent realpath outside root
+
+- **WHEN** 父路径 realpath 解析到 content root 外
+- **THEN** 工具返回 `scope_denied`
+- **AND** MUST NOT 创建或修改文件
+
+#### Scenario: Windows junction negative test
+
+- **WHEN** 测试 fixture 含指向 root 外的 junction
+- **THEN** resolveUnderRoot MUST 拒绝
+- **AND** 单测 MUST 覆盖该负例

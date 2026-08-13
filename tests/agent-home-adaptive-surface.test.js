@@ -6,6 +6,7 @@ const path = require('node:path')
 const test = require('node:test')
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.html'), 'utf8')
+const workbenchLayout = fs.readFileSync(path.join(__dirname, '..', 'src', 'workbench-layout.css'), 'utf8')
 const workspace = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.js'), 'utf8')
 
 test('Agent 首页无活动文件时隐藏右侧工作区', () => {
@@ -19,8 +20,8 @@ test('Agent 首页无活动文件时隐藏右侧工作区', () => {
 
 test('工作台模式覆盖 Agent 首页的无文件隐藏规则', () => {
   assert.match(
-    html,
-    /\.app\.mode-agent\.mode-workbench:not\(\.agent-has-document\) #workSurfaceWrap\s*\{\s*display:flex/,
+    workbenchLayout,
+    /\.app\.mode-agent\.mode-workbench:not\(\.agent-has-document\) #workSurfaceWrap\s*\{\s*display:\s*flex/,
   )
 })
 

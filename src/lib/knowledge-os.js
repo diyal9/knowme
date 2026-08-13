@@ -10,6 +10,8 @@ const path = require('path')
 const crypto = require('crypto')
 const contextCache = require('./context-cache')
 const knowledgeRank = require('./knowledge-rank')
+const knowledgeSteward = require('./knowledge-steward')
+const llmwikiHarness = require('./llmwiki-harness')
 
 const MAX_INDEX_FILES = 2000
 const MAX_QUERY_HITS = 8
@@ -26,6 +28,20 @@ function resolveUnderRoot(rootPath, relPath) {
   const rootWithSep = root.endsWith(path.sep) ? root : root + path.sep
   if (full !== root && !full.startsWith(rootWithSep)) return null
   return full
+}
+
+function isPathInside(rootPath, targetPath) {
+  const root = path.resolve(rootPath)
+  const target = path.resolve(targetPath)
+  const rel = path.relative(root, target)
+  return rel === '' || (rel && rel !== '..' && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel))
+}
+
+function isAuthorizedInput(absPath, wikiRoot, sources = []) {
+  const roots = [wikiRoot, ...(Array.isArray(sources) ? sources : [])
+    .filter(source => source && source.type === 'local' && source.rootPath)
+    .map(source => source.rootPath)]
+  return roots.some(root => isPathInside(root, absPath))
 }
 
 function knowledgeOsRoot(userData) {
@@ -50,6 +66,8 @@ function ensureDirs(userData) {
   for (const key of ['root', 'wiki', 'knowledge', 'memory', 'raw']) {
     fs.mkdirSync(p[key], { recursive: true })
   }
+  const root = llmwikiHarness.ensureRoot(p.wiki)
+  if (!root.ok) throw new Error(root.error || '根知识库初始化失败')
   const okfIndex = path.join(p.knowledge, 'index.md')
   if (!fs.existsSync(okfIndex)) {
     fs.writeFileSync(
@@ -228,6 +246,7 @@ function listEntries(userData, ctx = {}) {
   // 单一知识根：概念（okf）为 Wiki 根内 concepts/ 下的条目，不再拼接独立 knowledge 根
   const all = (index.entries || []).map((e) => ({
     kind: e.path.startsWith('concepts/') ? 'okf' : 'wiki',
+    editable: e.path.startsWith('raw/'),
     ...e,
   }))
   const wiki = all.filter((e) => e.kind === 'wiki')
@@ -235,12 +254,8 @@ function listEntries(userData, ctx = {}) {
   return { wikiRoot, wiki, okf, indexBuiltAt: index.builtAt }
 }
 
-function query(userData, queryText, ctx = {}) {
-  const q = String(queryText || '').trim().toLowerCase()
+function loadQueryDocuments(userData, ctx = {}) {
   const wikiRoot = resolveWikiRoot(userData, ctx)
-  if (!q) {
-    return { ok: true, hits: [], message: '请输入查询关键词' }
-  }
   // 可选缓存器：ctx.readFile(abs) 优先，否则用模块级 mtime 缓存；异常回退直接读
   const readContent =
     typeof ctx.readFile === 'function'
@@ -264,11 +279,20 @@ function query(userData, queryText, ctx = {}) {
     if (content == null) continue
     docs.push({ title: e.title, path: e.path, content })
   }
+  return { wikiRoot, docs }
+}
+
+function query(userData, queryText, ctx = {}) {
+  const q = String(queryText || '').trim().toLowerCase()
+  if (!q) {
+    return { ok: true, hits: [], message: '请输入查询关键词' }
+  }
+  const { docs } = loadQueryDocuments(userData, ctx)
   const hits = knowledgeRank.rankHits(queryText, docs, { topK: MAX_QUERY_HITS })
   return {
     ok: true,
     hits,
-    message: hits.length ? null : '未找到相关条目，可尝试 ingest 或换关键词',
+    message: hits.length ? null : '没有找到相关资料，可先添加资料或换个关键词',
   }
 }
 
@@ -307,13 +331,10 @@ function ingest(userData, payload = {}, ctx = {}) {
 
   if (payload.text != null && String(payload.text).trim()) {
     const title = String(payload.title || '粘贴条目').trim().slice(0, 80)
-    const rel = `inbox/${slugify(title)}-${Date.now().toString(36)}.md`
-    const abs = resolveUnderRoot(wikiRoot, rel)
-    if (!abs) return { ok: false, error: '无效写入路径' }
-    fs.mkdirSync(path.dirname(abs), { recursive: true })
     const body = `# ${title}\n\n${String(payload.text).trim()}\n`
-    fs.writeFileSync(abs, body, 'utf8')
-    created.push({ path: rel, title })
+    const written = llmwikiHarness.createRaw(wikiRoot, { title, content: body })
+    if (!written.ok) return written
+    created.push({ path: written.path, title })
   }
 
   const files = Array.isArray(payload.files) ? payload.files : []
@@ -321,6 +342,9 @@ function ingest(userData, payload = {}, ctx = {}) {
     const srcAbs = path.resolve(String(f.absPath || f.path || ''))
     if (!srcAbs || !fs.existsSync(srcAbs) || !fs.statSync(srcAbs).isFile()) {
       return { ok: false, error: `文件不存在：${f.absPath || f.path || ''}` }
+    }
+    if (!isAuthorizedInput(srcAbs, wikiRoot, ctx.sources)) {
+      return { ok: false, error: `文件不在知识库或授权内容源内：${f.absPath || f.path || ''}` }
     }
     // Only allow ingest from within wiki root OR explicit allowExternal with content copy from read buffer
     let content
@@ -330,14 +354,14 @@ function ingest(userData, payload = {}, ctx = {}) {
       return { ok: false, error: e.message || String(e) }
     }
     const base = path.basename(srcAbs, path.extname(srcAbs))
-    const rel = `inbox/${slugify(base)}-${crypto.randomBytes(2).toString('hex')}.md`
-    const dest = resolveUnderRoot(wikiRoot, rel)
-    if (!dest) return { ok: false, error: '无效写入路径' }
-    fs.mkdirSync(path.dirname(dest), { recursive: true })
     const title = titleFromContent(content, base)
     const out = content.trimStart().startsWith('#') ? content : `# ${title}\n\n${content}`
-    fs.writeFileSync(dest, out.endsWith('\n') ? out : `${out}\n`, 'utf8')
-    created.push({ path: rel, title })
+    const written = llmwikiHarness.createRaw(wikiRoot, {
+      title,
+      content: out.endsWith('\n') ? out : `${out}\n`,
+    })
+    if (!written.ok) return written
+    created.push({ path: written.path, title })
   }
 
   if (!created.length) return { ok: false, error: '没有可吸收的内容' }
@@ -352,7 +376,13 @@ function ingest(userData, payload = {}, ctx = {}) {
 function lintWiki(userData, ctx = {}) {
   const wikiRoot = resolveWikiRoot(userData, ctx)
   const files = walkTextFiles(wikiRoot)
-  const issues = []
+  const harness = llmwikiHarness.inspectRoot(wikiRoot)
+  const issues = (harness.issues || []).map(issue => ({
+    type: issue.type,
+    path: issue.path,
+    message: issue.message,
+    severity: issue.severity,
+  }))
   const titles = new Map()
 
   for (const f of files) {
@@ -371,6 +401,8 @@ function lintWiki(userData, ctx = {}) {
       issues.push({
         type: 'duplicate_title',
         path: f.rel,
+        canOpen: true,
+        action: 'propose_merge',
         message: `标题与 ${titles.get(title)} 重复：${title}`,
       })
     } else {
@@ -386,6 +418,8 @@ function lintWiki(userData, ctx = {}) {
         issues.push({
           type: 'broken_link',
           path: f.rel,
+          canOpen: true,
+          action: 'propose_fix',
           message: `断链：${href}`,
         })
       }
@@ -406,10 +440,11 @@ function lintWiki(userData, ctx = {}) {
     issues,
     scanned: files.length,
     healthy: issues.length === 0,
+    harness,
   }
 }
 
-function promoteToOkfDraft(userData, payload = {}, ctx = {}) {
+function buildPromoteArtifact(userData, payload = {}, ctx = {}) {
   const wikiRoot = resolveWikiRoot(userData, ctx)
   const rel = String(payload.wikiPath || '').replace(/\\/g, '/')
   const abs = resolveUnderRoot(wikiRoot, rel)
@@ -452,7 +487,57 @@ function promoteToOkfDraft(userData, payload = {}, ctx = {}) {
       targetPath: conceptRel,
       targetAbsHint,
       sourceWikiPath: rel,
+      sourceHash: knowledgeSteward.hashContent(content),
+      rationale: String(payload.rationale || `根据来源「${rel}」生成 OKF 整理提案`),
+      confidence: Number.isFinite(payload.confidence) ? payload.confidence : 0.5,
     },
+  }
+}
+
+function promoteToOkfDraft(userData, payload = {}, ctx = {}) {
+  return buildPromoteArtifact(userData, payload, ctx)
+}
+
+function promoteToOkfDrafts(userData, payload = {}, ctx = {}) {
+  const paths = Array.isArray(payload.wikiPaths)
+    ? payload.wikiPaths
+    : Array.isArray(payload.paths)
+      ? payload.paths
+      : payload.wikiPath
+        ? [payload.wikiPath]
+        : []
+  const artifacts = []
+  const errors = []
+  for (const wikiPath of [...new Set(paths.map(item => String(item || '').trim()).filter(Boolean))]) {
+    const result = buildPromoteArtifact(userData, {
+      ...payload,
+      wikiPath,
+      title: payload.titles?.[wikiPath] || payload.title,
+    }, ctx)
+    if (result.ok) artifacts.push(result.artifact)
+    else errors.push({ path: wikiPath, error: result.error })
+  }
+  return {
+    ok: artifacts.length > 0 && errors.length === 0,
+    artifacts,
+    errors,
+    error: artifacts.length ? null : (errors[0]?.error || '没有可升格的 Wiki 条目'),
+  }
+}
+
+function writeAtomic(abs, content) {
+  const tmp = `${abs}.knowme-${crypto.randomBytes(4).toString('hex')}.tmp`
+  fs.writeFileSync(tmp, content, 'utf8')
+  try {
+    if (!fs.existsSync(abs)) {
+      fs.renameSync(tmp, abs)
+    } else {
+      fs.copyFileSync(tmp, abs)
+      fs.unlinkSync(tmp)
+    }
+  } catch (error) {
+    try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp) } catch { /* ignore cleanup */ }
+    throw error
   }
 }
 
@@ -468,8 +553,18 @@ function acceptWrite(userData, artifact, ctx = {}) {
     const rel = String(artifact.targetPath || '').replace(/\\/g, '/')
     const abs = resolveUnderRoot(wikiRoot, rel)
     if (!abs) return { ok: false, error: '目标路径非法（须在知识库根内）' }
+    if (artifact.sourceWikiPath && artifact.sourceHash) {
+      const sourceAbs = resolveUnderRoot(wikiRoot, artifact.sourceWikiPath)
+      if (!sourceAbs || !fs.existsSync(sourceAbs)) {
+        return { ok: false, error: '来源条目不存在，无法确认提案安全性' }
+      }
+      const currentSource = fs.readFileSync(sourceAbs, 'utf8')
+      if (knowledgeSteward.hashContent(currentSource) !== artifact.sourceHash) {
+        return { ok: false, code: 'source_changed', error: '来源条目已变化，请重新生成整理提案' }
+      }
+    }
     fs.mkdirSync(path.dirname(abs), { recursive: true })
-    fs.writeFileSync(abs, String(artifact.body || ''), 'utf8')
+    writeAtomic(abs, String(artifact.body || artifact.proposedContent || ''))
     refreshIndex(userData, ctx)
     try {
       contextCache.invalidate(abs)
@@ -484,6 +579,16 @@ function readEntry(userData, kind, relPath, ctx = {}) {
   const rel = String(relPath || '').replace(/\\/g, '/')
   // 单一知识根：okf 与 wiki 条目都在 Wiki 根内
   const root = resolveWikiRoot(userData, ctx)
+  if (rel.startsWith('raw/')) {
+    const result = llmwikiHarness.readRaw(root, rel)
+    if (!result.ok) return result
+    return {
+      ...result,
+      title: titleFromContent(result.content, path.basename(rel)),
+      kind: kind || 'wiki',
+      editable: true,
+    }
+  }
   const abs = resolveUnderRoot(root, rel)
   if (!abs || !fs.existsSync(abs)) return { ok: false, error: '条目不存在' }
   try {
@@ -494,9 +599,32 @@ function readEntry(userData, kind, relPath, ctx = {}) {
       kind: kind || 'wiki',
       title: titleFromContent(content, path.basename(rel)),
       content,
+      hash: llmwikiHarness.hashContent(content),
+      editable: false,
     }
   } catch (e) {
     return { ok: false, error: e.message || String(e) }
+  }
+}
+
+function harnessStatus(userData, ctx = {}) {
+  const root = resolveWikiRoot(userData, ctx)
+  return llmwikiHarness.inspectRoot(root)
+}
+
+function saveRaw(userData, payload = {}, ctx = {}) {
+  const root = resolveWikiRoot(userData, ctx)
+  const result = llmwikiHarness.writeRaw(root, payload)
+  if (!result.ok) return result
+  const index = refreshIndex(userData, ctx)
+  const abs = resolveUnderRoot(root, result.path)
+  try {
+    contextCache.invalidate(abs)
+    contextCache.invalidate('kb:')
+  } catch { /* ignore */ }
+  return {
+    ...result,
+    indexedAt: index.builtAt,
   }
 }
 
@@ -511,6 +639,8 @@ function formatQueryContext(hits) {
 module.exports = {
   MAX_INDEX_FILES,
   resolveUnderRoot,
+  isPathInside,
+  isAuthorizedInput,
   knowledgeOsRoot,
   defaultPaths,
   ensureDirs,
@@ -520,11 +650,15 @@ module.exports = {
   buildIndex,
   refreshIndex,
   listEntries,
+  loadQueryDocuments,
   query,
   queryRanked,
   ingest,
   lintWiki,
+  harnessStatus,
+  saveRaw,
   promoteToOkfDraft,
+  promoteToOkfDrafts,
   acceptWrite,
   readEntry,
   formatQueryContext,

@@ -17,7 +17,7 @@
 | Lint | `npm run lint` | **PASS** |
 | 干净环境 Bootstrap | `npm run test:workbench-clean-env` | **PASS**（`workbench-clean-env.json`） |
 | Daemon 真实 E2E | `npm run test:daemon-e2e` | **PASS**（bootstrap 自动 apply + exit 0 + 6 artifacts） |
-| Harness gate | `npm run harness:gate` | 待跑 |
+| Harness gate | `npm run harness:gate` | **PASS** |
 
 ## 干净环境证据要点
 

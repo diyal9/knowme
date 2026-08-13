@@ -11,6 +11,7 @@ const { createMcpHostRegistry } = require('../src/lib/mcp-host')
 const connectorCaps = require('../src/lib/connector-capabilities')
 const { buildConnectorToolSurface } = require('../src/lib/connectors/tool-runtime')
 const store = require('../src/lib/connectors/store')
+const { createCapabilityStore, resolvePaths } = require('../src/lib/capability-store')
 
 function createMockMcpSpawn(toolMap = {}) {
   return () => {
@@ -237,6 +238,36 @@ describe('connector tool-runtime multi MCP integration', () => {
     assert.equal(openChildren, 2)
     await runtime.close()
     assert.equal(openChildren, 0)
+  })
+
+  it('runs a manifest-only connector through the unified store', async () => {
+    const paths = resolvePaths(dir)
+    const connectorDir = path.join(paths.connectors, 'manifest-only')
+    fs.mkdirSync(connectorDir, { recursive: true })
+    fs.writeFileSync(path.join(connectorDir, 'manifest.json'), JSON.stringify({
+      id: 'manifest-only',
+      kind: 'connector',
+      name: 'Manifest Only',
+      version: '1.0.0',
+      type: 'mcp',
+      allowlist: ['echo'],
+      mcp: { command: 'mock', args: [], envKeys: [] },
+    }), 'utf8')
+    createCapabilityStore({ userData: dir }).upsertEntry({
+      id: 'manifest-only',
+      kind: 'connector',
+      source: 'custom',
+      enabled: true,
+      status: 'enabled',
+    })
+
+    const runtime = await buildConnectorToolSurface(dir, {
+      spawnImpl: createMockMcpSpawn({ tools: [{ name: 'echo', description: 'Echo' }] }),
+      ephemeralMcpSessions: true,
+    })
+    const names = runtime.surface.getToolDefinitions().map(d => d.function.name)
+    assert.ok(names.includes('mcp.manifest_only.echo'))
+    await runtime.close()
   })
 
   it('preserves feishu draft approval path alongside MCP tools', async () => {

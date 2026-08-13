@@ -1,0 +1,1687 @@
+{
+  "suite": "tool-surface",
+  "baseline": "v1",
+  "total": 7,
+  "passed": 7,
+  "durationMs": 13,
+  "results": [
+    {
+      "name": "feishu-meeting-pick-2-happy",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 1,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "TOOL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 1,
+        "text": "根据读取结果：议题：版本发布评审；结论：按原计划发布；待办：测试负责人补齐报告。",
+        "durationMs": 9,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "verified",
+          "claims": [
+            {
+              "text": "议题：",
+              "type": "external_fact",
+              "verified": true,
+              "evidenceIds": [
+                "ev_1785948592771_7e282a"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "tool": "feishu.meeting_read",
+              "refId": null,
+              "status": "ok",
+              "truncated": false,
+              "digest": "{\"title\":\"研发评审\",\"body\":\"议题：版本发布评审。结论：按原计划发布。待办：测试负责人补齐报告。会议时间：2026-08-01。参会人：张三、李四。补充说明：本次评审确认发布窗口与回滚预案，无新增阻塞项。\"}"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "truncated": false
+            }
+          ],
+          "violations": [],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.started",
+          "kind": "tool",
+          "title": "飞书：meeting_read",
+          "status": "pending",
+          "summary": "读取指定会议纪要 · min_tok_002",
+          "toolCallId": "call_1_0",
+          "toolName": "feishu.meeting_read",
+          "runPhase": "TOOL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.completed",
+          "kind": "tool",
+          "title": "飞书：meeting_read",
+          "status": "done",
+          "summary": "{\"title\":\"研发评审\",\"body\":\"议题：版本发布评审。结论：按原计划发布。待办：测试负责人补齐报告。会议时间：2026-08-01。参会人：张三、李四。补充说明：本次评审确认发布窗口与回滚预案，无新增阻塞项。\"}",
+          "toolCallId": "call_1_0",
+          "toolName": "feishu.meeting_read",
+          "durationMs": 1,
+          "runPhase": "TOOL",
+          "draftId": null,
+          "requiresApproval": false,
+          "artifactRefs": [],
+          "sources": []
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在继续生成（第 2 轮）…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "type": "grounding-status",
+          "status": "verified",
+          "claims": [
+            {
+              "text": "议题：",
+              "type": "external_fact",
+              "verified": true,
+              "evidenceIds": [
+                "ev_1785948592771_7e282a"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "tool": "feishu.meeting_read",
+              "refId": null,
+              "status": "ok",
+              "truncated": false,
+              "digest": "{\"title\":\"研发评审\",\"body\":\"议题：版本发布评审。结论：按原计划发布。待办：测试负责人补齐报告。会议时间：2026-08-01。参会人：张三、李四。补充说明：本次评审确认发布窗口与回滚预案，无新增阻塞项。\"}"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "truncated": false
+            }
+          ],
+          "violations": [],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": ""
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 1,
+          "metrics": {
+            "rounds": 2,
+            "toolCalls": 1,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 20,
+              "completionTokens": 10,
+              "totalTokens": 30,
+              "source": "provider"
+            },
+            "totalMs": 6
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": "candidate-2",
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [
+              {
+                "kind": "tool_result",
+                "tool": "feishu.meeting_read",
+                "minChars": 80,
+                "forbidTruncated": true
+              }
+            ],
+            "completionConditions": []
+          }
+        },
+        "toolLedger": {
+          "calls": [
+            {
+              "id": "call_1_0",
+              "name": "feishu.meeting_read",
+              "args": {},
+              "status": "ok",
+              "resultRef": null,
+              "error": null,
+              "truncated": false,
+              "durationMs": 1
+            }
+          ],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": [
+            {
+              "id": "ev_1785948592771_7e282a",
+              "source": "tool",
+              "refId": null,
+              "toolCallId": "call_1_0",
+              "status": "ok",
+              "digest": "{\"title\":\"研发评审\",\"body\":\"议题：版本发布评审。结论：按原计划发布。待办：测试负责人补齐报告。会议时间：2026-08-01。参会人：张三、李四。补充说明：本次评审确认发布窗口与回滚预案，无新增阻塞项。\"}",
+              "provenance": {
+                "tool": "feishu.meeting_read",
+                "callId": "call_1_0"
+              },
+              "rawRef": null,
+              "timestamp": "2026-08-05T16:49:52.771Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "feishu-meeting-pick-2-no-tool",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 0,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [
+        "toolChoice: 0 < 1"
+      ],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "FINALIZE",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 0,
+        "text": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+        "durationMs": 2,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "missing_required_evidence",
+              "message": "requiredEvidence 未满足",
+              "unmet": [
+                {
+                  "kind": "tool_result",
+                  "tool": "feishu.meeting_read",
+                  "minChars": 80,
+                  "forbidTruncated": true
+                }
+              ],
+              "userMessage": "工具返回的内容不足，无法据此生成具体事实"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "pending",
+          "runPhase": "FINALIZE"
+        },
+        {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "missing_required_evidence",
+              "message": "requiredEvidence 未满足",
+              "unmet": [
+                {
+                  "kind": "tool_result",
+                  "tool": "feishu.meeting_read",
+                  "minChars": 80,
+                  "forbidTruncated": true
+                }
+              ],
+              "userMessage": "工具返回的内容不足，无法据此生成具体事实"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出已阻断未验证声明",
+          "status": "error",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。"
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 0,
+          "metrics": {
+            "rounds": 1,
+            "toolCalls": 0,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 10,
+              "completionTokens": 5,
+              "totalTokens": 15,
+              "source": "provider"
+            },
+            "totalMs": 2
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": "candidate-2",
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": "feishu-meeting-summary",
+            "skillId": null,
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [
+              {
+                "kind": "tool_result",
+                "tool": "feishu.meeting_read",
+                "minChars": 80,
+                "forbidTruncated": true
+              }
+            ],
+            "completionConditions": [
+              {
+                "type": "tool_success",
+                "tool": "feishu.meeting_read",
+                "kind": null
+              }
+            ]
+          }
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "numeric-deixis-multiturn",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 1,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 0,
+        "text": "好的，我将读取所选内容。",
+        "durationMs": 0,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "verified",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "type": "grounding-status",
+          "status": "verified",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": ""
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 0,
+          "metrics": {
+            "rounds": 1,
+            "toolCalls": 0,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 10,
+              "completionTokens": 5,
+              "totalTokens": 15,
+              "source": "provider"
+            },
+            "totalMs": 0
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": "candidate-2",
+          "pendingSelection": null,
+          "taskFrame": null
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "skill-required-tools-unmet",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 0,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [
+        "toolChoice: 0 < 1"
+      ],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "FINALIZE",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 0,
+        "text": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+        "durationMs": 0,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "pending",
+          "runPhase": "FINALIZE"
+        },
+        {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出已阻断未验证声明",
+          "status": "error",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。"
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 0,
+          "metrics": {
+            "rounds": 1,
+            "toolCalls": 0,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 10,
+              "completionTokens": 5,
+              "totalTokens": 15,
+              "source": "provider"
+            },
+            "totalMs": 0
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": "meeting-summary",
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [],
+            "completionConditions": [
+              {
+                "type": "tool_success",
+                "tool": "feishu.meeting_read",
+                "kind": null
+              }
+            ]
+          }
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "task-switch-stale-facts",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 1,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "FINALIZE",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 0,
+        "text": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+        "durationMs": 0,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "pending",
+          "runPhase": "FINALIZE"
+        },
+        {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [],
+          "toolCalls": [],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出已阻断未验证声明",
+          "status": "error",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。"
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 0,
+          "metrics": {
+            "rounds": 1,
+            "toolCalls": 0,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 10,
+              "completionTokens": 5,
+              "totalTokens": 15,
+              "source": "provider"
+            },
+            "totalMs": 0
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": {
+            "refSetId": "sel_1785948592781_4aff3c",
+            "options": [
+              {
+                "id": "old-1",
+                "label": "旧任务",
+                "payload": {
+                  "minute_token": "old"
+                },
+                "boundTool": null
+              }
+            ],
+            "createdAt": "2026-08-05T16:49:52.781Z"
+          },
+          "taskFrame": {
+            "workflowId": "old-workflow",
+            "skillId": null,
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": []
+        }
+      }
+    },
+    {
+      "name": "thin-body-title-only",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 1,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "TOOL",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "FINALIZE",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 1,
+        "text": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+        "durationMs": 1,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [
+            {
+              "tool": "feishu.meeting_read",
+              "refId": null,
+              "status": "truncated",
+              "truncated": true,
+              "digest": "{\"title\":\"某会议标题\"}"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "truncated": true
+            }
+          ],
+          "violations": [
+            {
+              "code": "missing_required_evidence",
+              "message": "requiredEvidence 未满足",
+              "unmet": [
+                {
+                  "kind": "tool_result",
+                  "tool": "feishu.meeting_read",
+                  "minChars": 80,
+                  "forbidTruncated": true
+                }
+              ],
+              "userMessage": "工具返回的内容不足，无法据此生成具体事实"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.started",
+          "kind": "tool",
+          "title": "飞书：meeting_read",
+          "status": "pending",
+          "summary": "读取指定会议纪要 · thin",
+          "toolCallId": "call_1_0",
+          "toolName": "feishu.meeting_read",
+          "runPhase": "TOOL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.completed",
+          "kind": "tool",
+          "title": "飞书：meeting_read",
+          "status": "done",
+          "summary": "{\"title\":\"某会议标题\"}",
+          "toolCallId": "call_1_0",
+          "toolName": "feishu.meeting_read",
+          "durationMs": 0,
+          "runPhase": "TOOL",
+          "draftId": null,
+          "requiresApproval": false,
+          "artifactRefs": [],
+          "sources": []
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在继续生成（第 2 轮）…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "pending",
+          "runPhase": "FINALIZE"
+        },
+        {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [],
+          "sources": [
+            {
+              "tool": "feishu.meeting_read",
+              "refId": null,
+              "status": "truncated",
+              "truncated": true,
+              "digest": "{\"title\":\"某会议标题\"}"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "feishu.meeting_read",
+              "status": "ok",
+              "truncated": true
+            }
+          ],
+          "violations": [
+            {
+              "code": "missing_required_evidence",
+              "message": "requiredEvidence 未满足",
+              "unmet": [
+                {
+                  "kind": "tool_result",
+                  "tool": "feishu.meeting_read",
+                  "minChars": 80,
+                  "forbidTruncated": true
+                }
+              ],
+              "userMessage": "工具返回的内容不足，无法据此生成具体事实"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出已阻断未验证声明",
+          "status": "error",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。"
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 1,
+          "metrics": {
+            "rounds": 2,
+            "toolCalls": 1,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 20,
+              "completionTokens": 10,
+              "totalTokens": 30,
+              "source": "provider"
+            },
+            "totalMs": 0
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [
+              {
+                "kind": "tool_result",
+                "tool": "feishu.meeting_read",
+                "minChars": 80,
+                "forbidTruncated": true
+              }
+            ],
+            "completionConditions": []
+          }
+        },
+        "toolLedger": {
+          "calls": [
+            {
+              "id": "call_1_0",
+              "name": "feishu.meeting_read",
+              "args": {},
+              "status": "ok",
+              "resultRef": null,
+              "error": null,
+              "truncated": true,
+              "durationMs": 0
+            }
+          ],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": [
+            {
+              "id": "ev_1785948592783_54f97a",
+              "source": "tool",
+              "refId": null,
+              "toolCallId": "call_1_0",
+              "status": "truncated",
+              "digest": "{\"title\":\"某会议标题\"}",
+              "provenance": {
+                "tool": "feishu.meeting_read",
+                "callId": "call_1_0"
+              },
+              "rawRef": null,
+              "timestamp": "2026-08-05T16:49:52.783Z"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "tool-budget-conflict",
+      "passed": true,
+      "dimensions": {
+        "toolChoice": 0,
+        "factFaithfulness": 1,
+        "refusalWhenUnmet": 1,
+        "contextContinuity": 1,
+        "toolArgs": 1,
+        "taskCompletion": 1,
+        "formatUx": 1
+      },
+      "baseline": "v1",
+      "failReasons": [
+        "toolChoice: 0 < 1"
+      ],
+      "report": {
+        "terminal": "DONE",
+        "runPhases": [
+          "PREPARE",
+          "CONTEXT",
+          "MODEL",
+          "TOOL",
+          "VERIFY",
+          "FINALIZE",
+          "GROUND",
+          "VERIFY_CLAIMS",
+          "PERSIST",
+          "DONE"
+        ],
+        "toolCalls": 1,
+        "text": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。",
+        "durationMs": 1,
+        "grounding": {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [
+            {
+              "text": "已读取",
+              "type": "execution",
+              "verified": false,
+              "evidenceIds": [
+                "ev_1785948592784_e27b32"
+              ]
+            },
+            {
+              "text": "议题：",
+              "type": "external_fact",
+              "verified": false,
+              "evidenceIds": [
+                "ev_1785948592784_e27b32"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "tool": "search_knowledge",
+              "refId": null,
+              "status": "ok",
+              "truncated": false,
+              "digest": "unrelated"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "search_knowledge",
+              "status": "ok",
+              "truncated": false
+            }
+          ],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            },
+            {
+              "code": "false_execution_claim",
+              "message": "执行态声明无 ToolLedger 支撑",
+              "userMessage": "当前还没有成功的读取结果，不能声称已完成读取"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        }
+      },
+      "events": [
+        {
+          "id": "stage_prepare",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在准备上下文…",
+          "status": "pending",
+          "runPhase": "PREPARE"
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在等待模型响应…",
+          "status": "pending",
+          "runPhase": "MODEL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.started",
+          "kind": "tool",
+          "title": "搜索知识库",
+          "status": "pending",
+          "summary": "meeting",
+          "toolCallId": "call_1_0",
+          "toolName": "search_knowledge",
+          "runPhase": "TOOL"
+        },
+        {
+          "id": "tool_call_1_0",
+          "type": "tool.completed",
+          "kind": "tool",
+          "title": "搜索知识库",
+          "status": "done",
+          "summary": "unrelated",
+          "toolCallId": "call_1_0",
+          "toolName": "search_knowledge",
+          "durationMs": 0,
+          "runPhase": "TOOL",
+          "draftId": null,
+          "requiresApproval": false,
+          "artifactRefs": [],
+          "sources": []
+        },
+        {
+          "id": "stage_generate",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "pending",
+          "runPhase": "FINALIZE"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在核对依据…",
+          "status": "pending",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_ground",
+          "type": "stage",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "runPhase": "GROUND"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "正在验证输出依据…",
+          "status": "pending",
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "type": "grounding-status",
+          "status": "blocked",
+          "claims": [
+            {
+              "text": "已读取",
+              "type": "execution",
+              "verified": false,
+              "evidenceIds": [
+                "ev_1785948592784_e27b32"
+              ]
+            },
+            {
+              "text": "议题：",
+              "type": "external_fact",
+              "verified": false,
+              "evidenceIds": [
+                "ev_1785948592784_e27b32"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "tool": "search_knowledge",
+              "refId": null,
+              "status": "ok",
+              "truncated": false,
+              "digest": "unrelated"
+            }
+          ],
+          "toolCalls": [
+            {
+              "name": "search_knowledge",
+              "status": "ok",
+              "truncated": false
+            }
+          ],
+          "violations": [
+            {
+              "code": "missing_required_tools",
+              "message": "缺少必需工具调用: feishu.meeting_read",
+              "missingTools": [
+                "feishu.meeting_read"
+              ],
+              "userMessage": "缺少必需读取：飞书会议妙记读取"
+            },
+            {
+              "code": "completion_unmet",
+              "message": "completionConditions 未满足",
+              "unmet": [
+                {
+                  "type": "tool_success",
+                  "tool": "feishu.meeting_read",
+                  "kind": null
+                }
+              ],
+              "userMessage": "任务完成条件尚未满足"
+            },
+            {
+              "code": "false_execution_claim",
+              "message": "执行态声明无 ToolLedger 支撑",
+              "userMessage": "当前还没有成功的读取结果，不能声称已完成读取"
+            }
+          ],
+          "runPhase": "VERIFY_CLAIMS"
+        },
+        {
+          "id": "stage_verify_claims",
+          "type": "stage",
+          "kind": "stage",
+          "title": "输出已阻断未验证声明",
+          "status": "error",
+          "runPhase": "VERIFY_CLAIMS",
+          "summary": "我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「飞书会议妙记读取」，或重新选择候选。"
+        },
+        {
+          "type": "done",
+          "title": "执行完成",
+          "toolCalls": 1,
+          "metrics": {
+            "rounds": 1,
+            "toolCalls": 1,
+            "firstTokenMs": null,
+            "usage": {
+              "promptTokens": 10,
+              "completionTokens": 5,
+              "totalTokens": 15,
+              "source": "provider"
+            },
+            "totalMs": 1
+          },
+          "runPhase": "DONE"
+        }
+      ],
+      "ports": {
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [
+              "feishu.meeting_read"
+            ],
+            "requiredEvidence": [],
+            "completionConditions": [
+              {
+                "type": "tool_success",
+                "tool": "feishu.meeting_read",
+                "kind": null
+              }
+            ]
+          }
+        },
+        "toolLedger": {
+          "calls": [
+            {
+              "id": "call_1_0",
+              "name": "search_knowledge",
+              "args": {},
+              "status": "ok",
+              "resultRef": null,
+              "error": null,
+              "truncated": false,
+              "durationMs": 0
+            }
+          ],
+          "derivedFacts": []
+        },
+        "evidenceLedger": {
+          "runId": "run",
+          "entries": [
+            {
+              "id": "ev_1785948592784_e27b32",
+              "source": "tool",
+              "refId": null,
+              "toolCallId": "call_1_0",
+              "status": "ok",
+              "digest": "unrelated",
+              "provenance": {
+                "tool": "search_knowledge",
+                "callId": "call_1_0"
+              },
+              "rawRef": null,
+              "timestamp": "2026-08-05T16:49:52.784Z"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "baselineConfig": {
+    "version": "v1",
+    "hardDimensions": [
+      "toolChoice",
+      "factFaithfulness",
+      "refusalWhenUnmet",
+      "contextContinuity"
+    ],
+    "thresholds": {
+      "toolChoice": 1,
+      "factFaithfulness": 1,
+      "refusalWhenUnmet": 1,
+      "contextContinuity": 0.9,
+      "toolArgs": 0.8,
+      "taskCompletion": 0.8,
+      "formatUx": 0.7
+    }
+  }
+}

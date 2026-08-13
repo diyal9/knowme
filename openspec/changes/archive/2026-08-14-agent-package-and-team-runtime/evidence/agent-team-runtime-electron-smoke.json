@@ -1,0 +1,90 @@
+{
+  "at": "2026-08-07T09:10:32.809Z",
+  "ok": true,
+  "mode": "electron",
+  "checks": [
+    {
+      "id": "nodeCount",
+      "ok": true
+    },
+    {
+      "id": "hasCancel",
+      "ok": true
+    },
+    {
+      "id": "hasRetry",
+      "ok": true
+    },
+    {
+      "id": "hasResume",
+      "ok": true
+    },
+    {
+      "id": "hasHandoff",
+      "ok": true
+    },
+    {
+      "id": "hasApproval",
+      "ok": true
+    },
+    {
+      "id": "hasArtifact",
+      "ok": true
+    },
+    {
+      "id": "hasEvidence",
+      "ok": true
+    },
+    {
+      "id": "hasBudget",
+      "ok": true
+    },
+    {
+      "id": "hasSecurity",
+      "ok": true
+    },
+    {
+      "id": "parent-terminal-once",
+      "ok": true
+    },
+    {
+      "id": "answer-committed",
+      "ok": true
+    },
+    {
+      "id": "console-error-free",
+      "ok": true
+    }
+  ],
+  "consoleErrors": [],
+  "beforeTerminal": {
+    "nodeCount": 3,
+    "hasCancel": true,
+    "hasRetry": true,
+    "hasResume": true,
+    "hasHandoff": true,
+    "hasApproval": true,
+    "hasArtifact": true,
+    "hasEvidence": true,
+    "hasBudget": true,
+    "hasSecurity": true
+  },
+  "finalState": {
+    "runId": "team_runtime_smoke_1786093834284",
+    "status": "completed",
+    "lastSeq": 10,
+    "terminalType": "run.completed",
+    "frozen": true,
+    "answerHash": "7a29f33b833fb4f9",
+    "answerLength": 36,
+    "answerCommitted": true,
+    "uiCount": 1,
+    "counters": {
+      "duplicate": 0,
+      "late": 0,
+      "gap": 0,
+      "subrunLate": 0
+    },
+    "diagnosticsCount": 0
+  }
+}

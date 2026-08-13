@@ -1,4 +1,7 @@
-const { describe, it } = require('node:test')
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
+const { describe, it, before } = require('node:test')
 const assert = require('node:assert')
 const {
   normalizeMode,
@@ -6,9 +9,18 @@ const {
   buildScenePrompt,
   buildUserPrompt,
   buildSkillPrompt,
+  setPackRuntimeForTests,
 } = require('../src/lib/assistant-prompt-router')
+const { createCapabilityPackRuntime } = require('../src/lib/capability-pack-runtime')
 
 describe('assistant-prompt-router', () => {
+  before(() => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-router-pack-'))
+    const rt = createCapabilityPackRuntime({ userData: tmpDir })
+    rt.installPack('game-studio', 'bundled')
+    setPackRuntimeForTests(rt)
+  })
+
   it('routes casual turns to the assistant scene', () => {
     assert.equal(resolveScene({ mode: 'general', tier: 'chat' }), 'assistant')
     assert.match(buildScenePrompt({ scene: 'assistant' }), /自然对话/)

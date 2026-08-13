@@ -1,0 +1,61 @@
+{
+  "at": "2026-08-05T18:26:33.457Z",
+  "ok": false,
+  "checks": [
+    {
+      "id": "writing-session-created",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "agentId": "writing"
+      }
+    },
+    {
+      "id": "writing-mode-four-tasks-catalog",
+      "pass": true,
+      "detail": {
+        "catalogCount": 4,
+        "missing": []
+      }
+    },
+    {
+      "id": "writing-mode-empty-cards",
+      "pass": false,
+      "detail": [
+        "查文档/知识库文件夹·记忆推荐·最近编辑/阅读",
+        "会议总结为我总结最近三天的会议",
+        "分析跟我相关的聊天今天：私聊/群聊主题与 @我",
+        "需求梳理飞书资料 → 结构化 intake → 可启动工作流"
+      ]
+    },
+    {
+      "id": "writing-material-preflight-blocks",
+      "pass": false,
+      "detail": "\n        \n        KnowMe 工作伙伴\n        从飞书连接开始：查文档、会议、聊天，再整理成可启动工作流的 intake。\n        \n        \n          查文档/知识库文件夹·记忆推荐·最近编辑/阅读\n        \n        \n          会议总结为我总结最近三天的会议\n        \n        \n          分析跟我相关的聊天今天：私聊/群聊主题与 @我\n        \n        \n          需求梳理飞书资料 → 结构化 intake → 可启动工作流\n        \n      "
+    },
+    {
+      "id": "writing-quick-menu-tasks",
+      "pass": true,
+      "detail": "\n          \n            飞书沟通\n            文档读写\n            知识库检索\n            会议记录\n            日程任务\n            组织协同\n          \n          \n            快捷大类\n            \n      \n        \n        办公核心\n      \n    \n      \n        \n        文档与沟通\n      \n    \n          \n          \n            快捷子项\n            \n        \n          \n          会议总结\n        \n      \n        \n          \n          今日优先级\n        \n      \n        \n          \n          查文档/知识库\n        \n      \n        \n          \n          分析跟我相关的聊天\n        \n      \n          \n        "
+    },
+    {
+      "id": "empty-quick-preflight-parity",
+      "pass": false,
+      "detail": {
+        "ok": false,
+        "reason": "missing api"
+      }
+    },
+    {
+      "id": "pack-disable-hides-tasks",
+      "pass": true,
+      "detail": {
+        "disabled": {
+          "ok": true,
+          "packId": "game-studio"
+        },
+        "packTaskCount": 0
+      }
+    }
+  ]
+}

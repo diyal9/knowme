@@ -1,0 +1,25 @@
+{
+  "change": "harden-workbench-tool-surface-runtime",
+  "updatedAt": "2026-08-06T01:50:00+08:00",
+  "P1": {
+    "H1": "PASS",
+    "H2": "PASS",
+    "H3": "PASS",
+    "npmTest": "PASS",
+    "npmLint": "PASS"
+  },
+  "P2": {
+    "M1": "PASS",
+    "M2": "PASS",
+    "M3": "PASS",
+    "M4": "PASS",
+    "M5": "PASS",
+    "M6": "PASS"
+  },
+  "P3": {
+    "L1": "PASS",
+    "L2": "PASS",
+    "L3": "PASS",
+    "L4": "PASS"
+  }
+}

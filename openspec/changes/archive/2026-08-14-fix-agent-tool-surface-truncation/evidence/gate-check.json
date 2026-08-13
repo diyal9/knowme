@@ -1,0 +1,373 @@
+{
+  "gate": "Story 完成门禁",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    }
+  ],
+  "soft": [
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\add-expert-preset-avatars\\code-review.md",
+      "level": "advisory",
+      "change": "add-expert-preset-avatars"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\add-workbench-work-mode-tabs\\code-review.md",
+      "level": "advisory",
+      "change": "add-workbench-work-mode-tabs"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\align-assistant-avatar-with-brand-mark\\code-review.md",
+      "level": "advisory",
+      "change": "align-assistant-avatar-with-brand-mark"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\align-workbench-workflow-catalog\\qa-plan.md",
+      "level": "advisory",
+      "change": "align-workbench-workflow-catalog"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\align-workbench-workflow-catalog\\code-review.md",
+      "level": "advisory",
+      "change": "align-workbench-workflow-catalog"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\cleanup-settings-connector-legacy\\qa-plan.md",
+      "level": "advisory",
+      "change": "cleanup-settings-connector-legacy"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\cleanup-settings-connector-legacy\\code-review.md",
+      "level": "advisory",
+      "change": "cleanup-settings-connector-legacy"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\compact-capability-hub-card-grid\\qa-plan.md",
+      "level": "advisory",
+      "change": "compact-capability-hub-card-grid"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\compact-capability-hub-card-grid\\code-review.md",
+      "level": "advisory",
+      "change": "compact-capability-hub-card-grid"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\complete-workbench-task-lifecycle\\code-review.md",
+      "level": "advisory",
+      "change": "complete-workbench-task-lifecycle"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\connect-expert-hub-to-chat\\code-review.md",
+      "level": "advisory",
+      "change": "connect-expert-hub-to-chat"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\establish-composable-agent-workbench\\code-review.md",
+      "level": "advisory",
+      "change": "establish-composable-agent-workbench"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\establish-single-root-llmwiki\\code-review.md",
+      "level": "advisory",
+      "change": "establish-single-root-llmwiki"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\fabric-governance-and-conflict\\qa-plan.md",
+      "level": "advisory",
+      "change": "fabric-governance-and-conflict"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\feishu-connection-empty-state\\qa-plan.md",
+      "level": "advisory",
+      "change": "feishu-connection-empty-state"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\feishu-connection-empty-state\\code-review.md",
+      "level": "advisory",
+      "change": "feishu-connection-empty-state"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\fix-assistant-mode-picker\\qa-plan.md",
+      "level": "advisory",
+      "change": "fix-assistant-mode-picker"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\fix-assistant-mode-picker\\code-review.md",
+      "level": "advisory",
+      "change": "fix-assistant-mode-picker"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\fix-chat-send-scroll-priority\\qa-plan.md",
+      "level": "advisory",
+      "change": "fix-chat-send-scroll-priority"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\fix-chat-send-scroll-priority\\code-review.md",
+      "level": "advisory",
+      "change": "fix-chat-send-scroll-priority"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\harden-agent-runtime-resilience-and-governance\\qa-plan.md",
+      "level": "advisory",
+      "change": "harden-agent-runtime-resilience-and-governance"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\harden-agent-runtime-resilience-and-governance\\code-review.md",
+      "level": "advisory",
+      "change": "harden-agent-runtime-resilience-and-governance"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\improve-agent-package-onboarding-ux\\qa-plan.md",
+      "level": "advisory",
+      "change": "improve-agent-package-onboarding-ux"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\improve-agent-package-onboarding-ux\\code-review.md",
+      "level": "advisory",
+      "change": "improve-agent-package-onboarding-ux"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\launch-dialog-progressive-disclosure\\code-review.md",
+      "level": "advisory",
+      "change": "launch-dialog-progressive-disclosure"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\load-agent-experts-from-daemon\\qa-plan.md",
+      "level": "advisory",
+      "change": "load-agent-experts-from-daemon"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\load-agent-experts-from-daemon\\code-review.md",
+      "level": "advisory",
+      "change": "load-agent-experts-from-daemon"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\localize-imported-expert-names\\qa-plan.md",
+      "level": "advisory",
+      "change": "localize-imported-expert-names"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\localize-imported-expert-names\\code-review.md",
+      "level": "advisory",
+      "change": "localize-imported-expert-names"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\optimize-capability-hub-rendering\\qa-plan.md",
+      "level": "advisory",
+      "change": "optimize-capability-hub-rendering"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\optimize-capability-hub-rendering\\code-review.md",
+      "level": "advisory",
+      "change": "optimize-capability-hub-rendering"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-agent-chat-response-layout\\qa-plan.md",
+      "level": "advisory",
+      "change": "polish-agent-chat-response-layout"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-agent-chat-response-layout\\code-review.md",
+      "level": "advisory",
+      "change": "polish-agent-chat-response-layout"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-expert-editor-dialog\\qa-plan.md",
+      "level": "advisory",
+      "change": "polish-expert-editor-dialog"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-expert-editor-dialog\\code-review.md",
+      "level": "advisory",
+      "change": "polish-expert-editor-dialog"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-link-preview-toolbar\\code-review.md",
+      "level": "advisory",
+      "change": "polish-link-preview-toolbar"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-workbench-navigation-shell\\qa-plan.md",
+      "level": "advisory",
+      "change": "polish-workbench-navigation-shell"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-workbench-navigation-shell\\code-review.md",
+      "level": "advisory",
+      "change": "polish-workbench-navigation-shell"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-workbench-team-empty-state\\code-review.md",
+      "level": "advisory",
+      "change": "polish-workbench-team-empty-state"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\redesign-agent-chat-empty-state\\qa-plan.md",
+      "level": "advisory",
+      "change": "redesign-agent-chat-empty-state"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\redesign-agent-chat-empty-state\\code-review.md",
+      "level": "advisory",
+      "change": "redesign-agent-chat-empty-state"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\redesign-agent-home-quick-launcher\\qa-plan.md",
+      "level": "advisory",
+      "change": "redesign-agent-home-quick-launcher"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\redesign-agent-home-quick-launcher\\code-review.md",
+      "level": "advisory",
+      "change": "redesign-agent-home-quick-launcher"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\refine-knowledge-home-workbench\\code-review.md",
+      "level": "advisory",
+      "change": "refine-knowledge-home-workbench"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\refine-workbench-guidance-and-header\\code-review.md",
+      "level": "advisory",
+      "change": "refine-workbench-guidance-and-header"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\restructure-workbench-task-workflow-daemon\\qa-plan.md",
+      "level": "advisory",
+      "change": "restructure-workbench-task-workflow-daemon"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\restructure-workbench-task-workflow-daemon\\code-review.md",
+      "level": "advisory",
+      "change": "restructure-workbench-task-workflow-daemon"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\silence-stop-gate-reminder\\qa-plan.md",
+      "level": "advisory",
+      "change": "silence-stop-gate-reminder"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\silence-stop-gate-reminder\\code-review.md",
+      "level": "advisory",
+      "change": "silence-stop-gate-reminder"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\simplify-knowledge-reading-layout\\qa-plan.md",
+      "level": "advisory",
+      "change": "simplify-knowledge-reading-layout"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\simplify-knowledge-reading-layout\\code-review.md",
+      "level": "advisory",
+      "change": "simplify-knowledge-reading-layout"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\split-workbench-into-workflow-and-manage-tabs\\code-review.md",
+      "level": "advisory",
+      "change": "split-workbench-into-workflow-and-manage-tabs"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\standardize-centered-secondary-dialogs\\qa-plan.md",
+      "level": "advisory",
+      "change": "standardize-centered-secondary-dialogs"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\standardize-centered-secondary-dialogs\\code-review.md",
+      "level": "advisory",
+      "change": "standardize-centered-secondary-dialogs"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\unify-knowledge-settings-tabs\\qa-plan.md",
+      "level": "advisory",
+      "change": "unify-knowledge-settings-tabs"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\unify-knowledge-settings-tabs\\code-review.md",
+      "level": "advisory",
+      "change": "unify-knowledge-settings-tabs"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\use-bell-for-assistant-fab\\qa-plan.md",
+      "level": "advisory",
+      "change": "use-bell-for-assistant-fab"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\use-bell-for-assistant-fab\\code-review.md",
+      "level": "advisory",
+      "change": "use-bell-for-assistant-fab"
+    }
+  ],
+  "evidence": {
+    "test_report": "openspec/changes/<name>/evidence/test-report.md",
+    "screenshots": "openspec/changes/<name>/evidence/screenshots/"
+  }
+}

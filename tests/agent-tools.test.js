@@ -5,12 +5,17 @@ const assert = require('node:assert')
 const tools = require('../src/lib/agent-tools')
 
 describe('agent-tools', () => {
-  it('exports search_knowledge OpenAI tool spec', () => {
+  it('exports fabric-aware knowledge tool specs', () => {
     const defs = tools.getToolDefinitions()
-    assert.equal(defs.length, 1)
-    assert.equal(defs[0].type, 'function')
-    assert.equal(defs[0].function.name, 'search_knowledge')
-    assert.deepEqual(defs[0].function.parameters.required, ['query'])
+    assert.ok(defs.length >= 4)
+    const names = defs.map(d => d.function.name)
+    assert.ok(names.includes('search_knowledge'))
+    assert.ok(names.includes('fabric_search'))
+    assert.ok(names.includes('kb_query'))
+    assert.ok(names.includes('kb_get'))
+    const search = defs.find(d => d.function.name === 'search_knowledge')
+    assert.equal(search.type, 'function')
+    assert.deepEqual(search.function.parameters.required, ['query'])
   })
 
   it('blocks unknown tools', () => {
@@ -53,7 +58,7 @@ describe('agent-tools', () => {
     )
   })
 
-  it('registers fetch_web_page through the tool surface', () => {
+  it('registers web search and fetch through the tool surface', () => {
     const webTools = require('../src/lib/agent-web-tools').buildWebTools()
     const surface = tools.createToolSurface({
       extraDefinitions: webTools.definitions,
@@ -61,7 +66,7 @@ describe('agent-tools', () => {
     })
     assert.equal(surface.isAllowedTool('fetch_web_page'), true)
     const names = surface.getToolDefinitions().map(d => d.function.name)
-    assert.deepEqual(names, ['search_knowledge', 'fetch_web_page'])
+    assert.deepEqual(names, ['search_knowledge', 'fabric_search', 'kb_query', 'kb_get', 'search_web', 'fetch_web_page'])
   })
 
   it('requires a non-empty url for fetch_web_page', () => {
@@ -178,4 +183,53 @@ describe('agent-tools', () => {
     assert.equal(formatted.ok, true)
     assert.ok(formatted.text.includes('未找到'))
   })
+})
+
+describe('agent-tools extra projection budget', () => {
+  const def = (name, contract) => ({
+    type: 'function',
+    function: { name, description: name, parameters: { type: 'object', properties: {} } },
+    ...(contract ? { _knowme: contract } : {}),
+  })
+
+  it('keeps the full builtin surface plus connector tools', () => {
+    const builtins = Array.from({ length: 35 }, (_, i) => def(`builtin_${i}`))
+    const connectors = [
+      'feishu.doc_kb_suggest',
+      'feishu.search_docs',
+      'feishu.read_doc',
+      'feishu.list_wiki_spaces',
+      'feishu.get_wiki_node',
+    ].map(name => def(name, { source: 'feishu' }))
+    const surface = tools.createToolSurface({ extraDefinitions: [...builtins, ...connectors] })
+    for (const item of connectors) {
+      assert.equal(surface.isAllowedTool(item.function.name), true, item.function.name)
+    }
+    assert.equal(surface.isAllowedTool('builtin_0'), true)
+  })
+
+  it('drops deferrable orchestration tools before required tools', () => {
+    const deferrable = [...tools.DEFERRABLE_TOOLS].map(name => def(name, { source: 'builtin' }))
+    const filler = Array.from({ length: tools.EXTRA_TOOL_BUDGET + 8 }, (_, i) => def(`filler_${i}`, { source: 'builtin' }))
+    const required = def('feishu.doc_kb_suggest', { source: 'feishu' })
+    const extras = normalizedNames([...deferrable, ...filler, required], ['feishu.doc_kb_suggest'])
+    assert.ok(extras.includes('feishu.doc_kb_suggest'))
+    assert.ok(extras.length <= tools.EXTRA_TOOL_BUDGET)
+    assert.ok(!extras.includes('spawn_sub_run'))
+  })
+
+  it('preserves registration order for kept tools', () => {
+    const extras = normalizedNames(
+      Array.from({ length: tools.EXTRA_TOOL_BUDGET + 5 }, (_, i) => def(`t_${String(i).padStart(3, '0')}`)),
+      [],
+    )
+    const sorted = [...extras].sort()
+    assert.deepEqual(extras, sorted)
+  })
+
+  function normalizedNames(defs, requiredTools) {
+    return tools
+      .normalizeExtraDefinitions(defs, { requiredTools })
+      .map(item => item.function.name)
+  }
 })

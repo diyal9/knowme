@@ -1,0 +1,39 @@
+{
+  "at": "2026-08-07T17:06:12+08:00",
+  "gate": "Story 完成门禁",
+  "change": "agent-package-and-team-runtime",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "1391/1391 pass"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "lint ok; script-scope ok"
+    }
+  ],
+  "soft": [
+    {
+      "id": "qa-plan-smoke-scope",
+      "level": "advisory",
+      "ok": true,
+      "path": "openspec/changes/agent-package-and-team-runtime/qa-plan.md"
+    },
+    {
+      "id": "code-review",
+      "level": "advisory",
+      "ok": true,
+      "path": "openspec/changes/agent-package-and-team-runtime/code-review.md"
+    }
+  ],
+  "notes": [
+    "Harness 返回的其他 advisory 属于仓库中并行进行的 OpenSpec changes；本 change 无 soft advisory。",
+    "制作人验收与测试 QA 均已通过。"
+  ]
+}

@@ -28,3 +28,6 @@ timestamp: 2026-07-01T00:00:00Z
 # Promotion
 
 流程见 `team/evolution/skill-promotion.md`，命令 `/evolve`。
+
+相关口头协作口径：[Dev Collaboration Verbal Cues](dev-collaboration-verbal-cues.md)。  
+MCP 深验 / GitNexus 入口：[MCP UI Deep Verify And Code Explore](mcp-ui-and-code-explore-playbook.md)。

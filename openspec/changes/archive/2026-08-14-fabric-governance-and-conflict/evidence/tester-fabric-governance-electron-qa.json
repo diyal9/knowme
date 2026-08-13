@@ -1,0 +1,120 @@
+{
+  "change": "fabric-governance-and-conflict",
+  "role": "tester",
+  "at": "2026-08-08T15:27:15.599Z",
+  "passed": 9,
+  "total": 10,
+  "ok": false,
+  "blockingFails": [
+    "S5-console-clean"
+  ],
+  "checks": [
+    {
+      "id": "S1-governance-tab-empty",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "hasRunBtn": true,
+        "hasSsot": true,
+        "hasConnect": true,
+        "emptyCopy": "尚未运行体检。点击「运行体检」开始扫描。"
+      }
+    },
+    {
+      "id": "S2-checkup-report",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "hasSummary": true,
+        "issueCount": 4,
+        "chips": 3,
+        "ssotLabel": "整体健康 80% · Wiki 扫描 4 份 · SSOT：标记",
+        "btnText": "运行体检",
+        "btnDisabled": false
+      }
+    },
+    {
+      "id": "S4-ssot-block-mode",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "mode": "block",
+        "toast": "已更新 SSOT 策略"
+      }
+    },
+    {
+      "id": "S3-ignore-action",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "issuesBefore": 4,
+        "afterIgnore": {
+          "issues": 3,
+          "btnDisabled": false
+        }
+      }
+    },
+    {
+      "id": "broken-stale-detected",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "categories": [
+          "Wiki 体检",
+          "悬空锚点",
+          "概念冲突"
+        ]
+      }
+    },
+    {
+      "id": "conflict-reflux-visible",
+      "pass": true,
+      "severity": "major",
+      "detail": {
+        "categories": [
+          "Wiki 体检",
+          "悬空锚点",
+          "概念冲突"
+        ]
+      }
+    },
+    {
+      "id": "regression-weave-button",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "btn": "织入当前库",
+        "disabled": false
+      }
+    },
+    {
+      "id": "regression-retrieve",
+      "pass": true,
+      "severity": "blocking",
+      "detail": {
+        "hits": 2,
+        "btn": "检索",
+        "disabled": false
+      }
+    },
+    {
+      "id": "narrow-viewport-governance",
+      "pass": true,
+      "severity": "minor",
+      "detail": {
+        "overflowX": false,
+        "withinViewport": true
+      }
+    },
+    {
+      "id": "S5-console-clean",
+      "pass": false,
+      "severity": "blocking",
+      "detail": {
+        "consoleErrors": [
+          "pageerror:Identifier 'api' has already been declared"
+        ]
+      }
+    }
+  ]
+}

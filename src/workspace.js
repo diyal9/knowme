@@ -1,13 +1,15 @@
 'use strict'
-/* 工作台壳：项目/文件树 + 标签页 + 分屏（editor-pane.html iframe）+ 右侧抽屉（版本 diff / 最终提示词 / 知识库）。 */
+/* 工作台壳：项目/文件树 + 标签页 + 分屏（editor-pane.html iframe）+ 一级整页与居中二级弹窗。 */
 
 function mountIcons(root) { if (window.StickyIcons) StickyIcons.mount(root || document) }
 
 const treeEl = document.getElementById('tree')
 const searchEl = document.getElementById('search')
 const drawer = document.getElementById('drawer')
+const drawerBackdrop = document.getElementById('drawerBackdrop')
 const drawerTitle = document.getElementById('drawerTitle')
 const drawerBody = document.getElementById('drawerBody')
+const drawerSurfaceTabs = document.getElementById('drawerSurfaceTabs')
 const toastWrap = document.getElementById('toastWrap')
 const toastEl = document.getElementById('toast')
 
@@ -35,6 +37,8 @@ let expandedChains = new Set()
 let focusedProject = null
 /** 侧栏模式：sources（内容源文件）| notes（遗留便签） */
 let treeMode = 'sources'
+/** 文件中心分层：hub（源中心）| tree（当前源文件树） */
+let fileCenterLayer = 'tree'
 /** 左侧文件栏是否收起（Obsidian ribbon 开关）；Agent 模式默认收起 */
 let sideCollapsed = true
 /** 工作区模式：agent（默认）| edit */
@@ -45,10 +49,59 @@ let workbenchOn = false
 let workbenchAutomationOn = false
 let workbenchTaskActive = false
 let workbenchPage = 'home'
-/** 右侧抽屉类型：'', 'settings', 'capability-hub' */
+let workbenchTaskContextKind = ''
+/** 共用面板类型：'', 'secondary', 'knowledge', 'settings', 'capability-hub' */
 let drawerKind = ''
+let drawerReturnFocus = null
 /** Capability Hub 当前 Tab：experts | skills | connectors */
 let capabilityHubTab = 'experts'
+/** 关闭专家库后保留 iframe，避免二次打开冷启动 */
+let capabilityHubPark = null
+const KNOWLEDGE_SURFACE_TABS = [
+  { id: 'status', label: '我的知识' },
+  { id: 'review', label: '待我确认' },
+  { id: 'connect', label: '来源' },
+]
+const KNOWLEDGE_SURFACE_PRIMARY_TAB_IDS = new Set(KNOWLEDGE_SURFACE_TABS.map(tab => tab.id))
+const KNOWLEDGE_SURFACE_ROUTE_ALIASES = {
+  sources: 'connect',
+}
+const KNOWLEDGE_SURFACE_SECONDARY_ROUTES = new Set([
+  'browse',
+  'health',
+  'organize',
+  'retrieve',
+  'fabric',
+  'governance',
+])
+function normalizeKnowledgeSurfaceRoute(tab) {
+  const key = String(tab || '').trim()
+  if (!key) return 'status'
+  if (KNOWLEDGE_SURFACE_PRIMARY_TAB_IDS.has(key)) return key
+  const aliased = KNOWLEDGE_SURFACE_ROUTE_ALIASES[key]
+  if (aliased) return aliased
+  if (KNOWLEDGE_SURFACE_SECONDARY_ROUTES.has(key)) return key
+  return 'status'
+}
+function primaryKnowledgeSurfaceTab(route) {
+  const normalized = normalizeKnowledgeSurfaceRoute(route)
+  if (KNOWLEDGE_SURFACE_PRIMARY_TAB_IDS.has(normalized)) return normalized
+  if (normalized === 'browse') return 'status'
+  if (normalized === 'health' || normalized === 'organize') return 'status'
+  if (normalized === 'fabric' || normalized === 'retrieve' || normalized === 'governance') return 'status'
+  return 'status'
+}
+const SETTINGS_SURFACE_TABS = [
+  { id: 'sources', label: '内容源' },
+  { id: 'ai', label: 'AI 接口' },
+  { id: 'assistant', label: '助手模式' },
+  { id: 'system', label: '系统配置' },
+  { id: 'connectors', label: '连接器' },
+  { id: 'memory', label: '我的记忆' },
+  { id: 'about', label: '关于' },
+]
+const SETTINGS_SURFACE_TAB_IDS = new Set(SETTINGS_SURFACE_TABS.map(tab => tab.id))
+let settingsSurfaceTab = 'sources'
 /** 进入 Agent 前文件栏是否收起（切回编辑时恢复） */
 let sideCollapsedBeforeAgent = false
 let splitOn = false
@@ -380,30 +433,83 @@ function resetSourceLazyState(fileTree, sourceId) {
   if (sourceId && fileTree?.lazy) seedUnloadedDirsCollapsed(sourceId, fileTree.nodes)
 }
 
+function showFileCenterHub() {
+  fileCenterLayer = 'hub'
+  renderTree()
+}
+
+function showFileCenterTree() {
+  fileCenterLayer = 'tree'
+  renderTree()
+}
+
+function resolveFileCenterLayer(src) {
+  if (!src) return 'hub'
+  return fileCenterLayer === 'hub' ? 'hub' : 'tree'
+}
+
+function openActiveWorkspace() {
+  const src = activeSource()
+  if (!src) return
+  const target = sourceWorkspaceOpenTarget(src)
+  if (/^https?:\/\//i.test(target)) {
+    window.api.openExternal(target).catch(() => {})
+    return
+  }
+  window.api.sourcesOpenRoot(src.id).catch(() => {})
+}
+
+function syncFileCenterChrome(layer, src) {
+  const setHidden = (id, hidden) => {
+    const el = document.getElementById(id)
+    if (el) el.hidden = !!hidden
+  }
+  const inSources = treeMode === 'sources'
+  const onTree = inSources && layer === 'tree' && !!src
+  const onHub = inSources && layer === 'hub'
+  setHidden('btnOpenWorkspace', !onTree)
+  setHidden('btnSwitchSource', !onTree)
+  setHidden('btnAddSource', !onHub)
+  setHidden('btnSourceSettings', !onHub)
+  setHidden('btnRefreshSources', !inSources)
+  setHidden('btnCollapseAll', true)
+  setHidden('fileActionsWrap', true)
+  const openBtn = document.getElementById('btnOpenWorkspace')
+  if (openBtn && src) {
+    openBtn.title = sourceWorkspaceOpenHint(src)
+  }
+}
+
 function renderSourceTree() {
   const src = activeSource()
+  const layer = resolveFileCenterLayer(src)
   const titleEl = document.getElementById('sideTitle')
   const backBtn = document.getElementById('btnProjectBack')
-  if (backBtn) backBtn.hidden = true
-  if (titleEl) titleEl.textContent = '我的空间'
-
   const q = (searchEl.value || '').trim().toLowerCase()
+  if (searchEl) searchEl.placeholder = layer === 'hub' ? '搜索源或生成…' : '搜索文件...'
+  if (titleEl) {
+    titleEl.textContent = layer === 'hub' ? '我的空间' : ''
+  }
+  if (backBtn) {
+    const showBack = layer === 'tree' && !!src
+    backBtn.hidden = !showBack
+    backBtn.title = '返回我的空间'
+    backBtn.setAttribute('aria-label', '返回我的空间')
+  }
+  syncFileCenterChrome(layer, src)
+
   const workspaceAddress = sourceWorkspaceAddress(src)
-  const workspaceOpenTarget = sourceWorkspaceOpenTarget(src)
   const workspaceMeta = src
     ? `${sourceKindLabel(src)}${src.branch ? ` · ${src.branch}` : ''}`
     : ''
   const allSources = data.sources || []
-  const gitSources = allSources.filter(s => s.type === 'gitlab' || s.type === 'github')
-  const webSources = allSources.filter(s => s.type === 'web')
-  const workspaceSources = allSources.filter(s => s.type === 'local')
-  const sourcePurpose = src
-    ? (src.type === 'gitlab' || src.type === 'github'
-      ? '用于浏览仓库代码、规范文件与实现上下文。'
-      : src.type === 'web'
-        ? '用于沉淀外部网页正文，供检索、润色与引用。'
-        : '用于浏览本地文件与工作资料。')
-    : '请选择一个内容源开始工作。'
+  const matchSource = s => !q
+    || String(s.displayName || '').toLowerCase().includes(q)
+    || String(s.rootPath || '').toLowerCase().includes(q)
+    || sourceKindLabel(s).toLowerCase().includes(q)
+  const gitSources = allSources.filter(s => (s.type === 'gitlab' || s.type === 'github') && matchSource(s))
+  const webSources = allSources.filter(s => s.type === 'web' && matchSource(s))
+  const workspaceSources = allSources.filter(s => s.type === 'local' && matchSource(s))
   const renderSourceRows = (sources, emptyText) => {
     if (!sources.length) return `<div class="source-empty">${esc(emptyText)}</div>`
     return sources.map(s => {
@@ -420,21 +526,13 @@ function renderSourceTree() {
       </div>`
     }).join('')
   }
-  const workspaceCard = src
-    ? `<div class="source-workspace-card" title="${esc(workspaceAddress || src.displayName || '')}">
-        <div class="source-workspace-head">
-          <span class="source-workspace-name">${esc(src.displayName || '未命名目录')}</span>
-          <button type="button" class="source-workspace-open" data-open-workspace="${esc(workspaceOpenTarget)}" data-source-id="${esc(src.id)}" title="${esc(sourceWorkspaceOpenHint(src))}">
-            打开
-          </button>
-        </div>
-        <div class="source-workspace-addr">${esc(workspaceAddress || '未配置地址')}</div>
-        <div class="source-workspace-meta">${esc(workspaceMeta)}</div>
-        <div class="source-workspace-purpose">${esc(sourcePurpose)}</div>
-      </div>`
-    : ''
-  const generatedRows = data.generatedArtifacts.length
-    ? data.generatedArtifacts.map(item => {
+  const generatedItems = (data.generatedArtifacts || []).filter(item => {
+    if (!q) return true
+    const hay = [item.title, item.sessionTitle, item.targetPath].filter(Boolean).join(' ').toLowerCase()
+    return hay.includes(q)
+  })
+  const generatedRows = generatedItems.length
+    ? generatedItems.map(item => {
         const meta = window.FileCenterModel?.artifactMetaLabel?.(item) || artifactStatusLabel(item.status)
         const updated = relTime(item.updatedAt)
         const suffix = updated ? ` · ${updated}` : ''
@@ -446,54 +544,62 @@ function renderSourceTree() {
           <span class="file-meta">${esc(meta + suffix)}</span>
         </div>`
       }).join('')
-    : '<div class="source-empty">暂无生成产物</div>'
+    : `<div class="source-empty">${q ? '没有匹配的生成产物' : '暂无生成产物'}</div>`
 
-  const sourcesBar = `<div class="grp source-top" style="margin-bottom:6px">
-    <div class="source-section file-center-section">
-      <div class="source-section-head">
-        <span class="source-section-title">个人知识库</span>
+  if (layer === 'hub') {
+    const sourcesBar = `<div class="grp source-top source-hub" style="margin-bottom:6px">
+      <div class="source-section file-center-section">
+        <div class="source-section-head">
+          <span class="source-section-title">个人知识库</span>
+        </div>
+        <button type="button" class="file head source-entry" data-open-knowledge-center title="打开本地卡帕西 Wiki">
+          <span class="tree-gutter" aria-hidden="true"></span>
+          <span class="ico file-ico" data-icon="bookOpen"></span>
+          <span class="file-name">本地知识库</span>
+          <span class="file-meta">第二大脑</span>
+        </button>
       </div>
-      <button type="button" class="file head source-entry" data-open-knowledge-center title="打开本地卡帕西 Wiki">
-        <span class="tree-gutter" aria-hidden="true"></span>
-        <span class="ico file-ico" data-icon="bookOpen"></span>
-        <span class="file-name">本地知识库</span>
-        <span class="file-meta">第二大脑</span>
-      </button>
-    </div>
-    ${workspaceCard}
-    <div class="source-section">
-      <div class="source-section-head">
-        <span class="source-section-title">代码仓库</span>
-        <button type="button" class="source-manage-btn" data-open-source-settings="sources">管理</button>
+      <div class="source-section">
+        <div class="source-section-head">
+          <span class="source-section-title">代码仓库</span>
+          <button type="button" class="source-manage-btn" data-open-source-settings="sources">管理</button>
+        </div>
+        <div class="grp-items source-pick-list">${renderSourceRows(gitSources, q ? '没有匹配的仓库' : '暂无 GitLab / GitHub 仓库')}</div>
       </div>
-      <div class="grp-items source-pick-list">${renderSourceRows(gitSources, '暂无 GitLab / GitHub 仓库')}</div>
-    </div>
-    <div class="source-section">
-      <div class="source-section-head">
-        <span class="source-section-title">网页资料</span>
+      <div class="source-section">
+        <div class="source-section-head">
+          <span class="source-section-title">网页资料</span>
+        </div>
+        <div class="grp-items source-pick-list">${renderSourceRows(webSources, q ? '没有匹配的网页资料' : '暂无网页资料')}</div>
       </div>
-      <div class="grp-items source-pick-list">${renderSourceRows(webSources, '暂无网页资料')}</div>
-    </div>
-    <div class="source-section">
-      <div class="source-section-head">
-        <span class="source-section-title">其他本地目录</span>
+      <div class="source-section">
+        <div class="source-section-head">
+          <span class="source-section-title">其他本地目录</span>
+        </div>
+        <div class="grp-items source-pick-list">${renderSourceRows(workspaceSources, q ? '没有匹配的本地目录' : '暂无本地目录')}</div>
       </div>
-      <div class="grp-items source-pick-list">${renderSourceRows(workspaceSources, '暂无本地目录')}</div>
-    </div>
-    <div class="source-section">
-      <div class="source-section-head">
-        <span class="source-section-title">AI 生成</span>
-        <span class="source-section-caption">最近 8 项</span>
+      <div class="source-section">
+        <div class="source-section-head">
+          <span class="source-section-title">AI 生成</span>
+          <span class="source-section-caption">最近 8 项</span>
+        </div>
+        <div class="grp-items source-pick-list">${generatedRows}</div>
       </div>
-      <div class="grp-items source-pick-list">${generatedRows}</div>
-    </div>
-  </div>`
-
-  if (!src) {
-    treeEl.innerHTML = sourcesBar + '<div class="tree-empty">当前没有选中的内容源。<br>可从代码仓库、网页资料或本地目录中选择。</div>'
+    </div>`
+    const guide = src
+      ? ''
+      : '<div class="tree-empty">当前没有选中的内容源。<br>可从代码仓库、网页资料或本地目录中选择。</div>'
+    treeEl.innerHTML = sourcesBar + guide
     mountIcons(treeEl)
     return
   }
+
+  const switcher = `<div class="source-switcher" title="${esc(workspaceAddress || src.displayName || '')}">
+    <div class="source-switcher-text">
+      <span class="source-switcher-name">${esc(src.displayName || '未命名目录')}</span>
+      <span class="source-switcher-meta">${esc(workspaceMeta)}</span>
+    </div>
+  </div>`
 
   const nodes = (data.fileTree && data.fileTree.nodes) || []
   let searchPaths = null
@@ -510,7 +616,7 @@ function renderSourceTree() {
     return !sourceAncestorPaths(node.path).some(path => sourceCollapsed.has(sourceDirKey(src.id, path)))
   })
   if (!visibleNodes.length) {
-    treeEl.innerHTML = sourcesBar + (q
+    treeEl.innerHTML = switcher + (q
       ? '<div class="tree-empty">没有匹配的文件。</div>'
       : '<div class="tree-empty">此源下暂无文本文件。<br>可在资源管理器中放入 Markdown 等。</div>')
     mountIcons(treeEl)
@@ -539,13 +645,7 @@ function renderSourceTree() {
   }).join('')
 
   const trunc = data.fileTree?.truncated ? '<div class="tree-empty tiny">部分目录子项过多，已截断</div>' : ''
-  treeEl.innerHTML = sourcesBar + `<div class="source-section current-file-section">
-    <div class="source-section-head">
-      <span class="source-section-title">当前文件</span>
-      <span class="source-section-caption">${esc(src.displayName || '')}</span>
-    </div>
-    <div class="grp"><div class="grp-items">${rows}</div>${trunc}</div>
-  </div>`
+  treeEl.innerHTML = `${switcher}<div class="grp source-tree-list"><div class="grp-items">${rows}</div>${trunc}</div>`
   mountIcons(treeEl)
 }
 
@@ -582,6 +682,13 @@ function isTabActiveAnywhere(id) {
 }
 
 treeEl.addEventListener('click', e => {
+  const hubSwitch = e.target.closest('[data-file-center-hub]')
+  if (hubSwitch) {
+    e.preventDefault()
+    e.stopPropagation()
+    showFileCenterHub()
+    return
+  }
   const knowledgeEntry = e.target.closest('[data-open-knowledge-center]')
   if (knowledgeEntry) {
     e.preventDefault()
@@ -621,6 +728,7 @@ treeEl.addEventListener('click', e => {
   }
   const srcPick = e.target.closest('[data-source-pick]')
   if (srcPick && srcPick.dataset.sourcePick) {
+    fileCenterLayer = 'tree'
     window.api.sourcesSetActive(srcPick.dataset.sourcePick).then(() => reload())
     return
   }
@@ -670,7 +778,19 @@ treeEl.addEventListener('click', e => {
   if (file) openFile(file.dataset.id, activePane)
 })
 searchEl.addEventListener('input', renderTree)
-document.getElementById('btnProjectBack')?.addEventListener('click', clearProjectFocus)
+document.getElementById('btnProjectBack')?.addEventListener('click', () => {
+  if (treeMode === 'sources') {
+    showFileCenterHub()
+    return
+  }
+  clearProjectFocus()
+})
+document.getElementById('btnSwitchSource')?.addEventListener('click', () => {
+  showFileCenterHub()
+})
+document.getElementById('btnOpenWorkspace')?.addEventListener('click', () => {
+  openActiveWorkspace()
+})
 document.getElementById('btnAddSource')?.addEventListener('click', () => openSettingsPanel('sources'))
 document.getElementById('btnSourceSettings')?.addEventListener('click', () => openSettingsPanel('sources'))
 document.getElementById('btnRefreshSources')?.addEventListener('click', async e => {
@@ -783,18 +903,67 @@ function syncWorkbenchRailFromPage(page) {
   workbenchPage = page === 'tasks' || page === 'automation' ? page : 'home'
   workbenchAutomationOn = workbenchPage === 'automation'
   const shell = document.getElementById('appShell')
-  shell?.classList.toggle('workbench-task-active', workbenchOn && !workbenchAutomationOn && workbenchTaskActive && workbenchPage === 'tasks')
+  const taskRoom = workbenchOn && !workbenchAutomationOn && workbenchTaskActive && workbenchPage === 'tasks'
+  shell?.classList.toggle('workbench-task-active', taskRoom)
+  if (shell) {
+    shell.dataset.workbenchLayout = taskRoom ? 'task-room' : 'overview'
+    shell.dataset.workbenchTaskKind = taskRoom ? String(workbenchTaskContextKind || '') : ''
+  }
   syncRailNavigation()
 }
 
-function setWorkbenchTaskView(active, context = {}) {
+function setWorkbenchTaskView(active, context = {}, meta = {}) {
   const wasActive = workbenchTaskActive
-  workbenchTaskActive = !!active
+  const layout = meta && meta.layout === 'task-room' ? 'task-room' : 'overview'
+  workbenchTaskActive = layout === 'task-room' ? true : !!active
+  workbenchTaskContextKind = workbenchTaskActive ? String(context?.kind || '') : ''
   const shell = document.getElementById('appShell')
-  shell?.classList.toggle('workbench-task-active', workbenchOn && !workbenchAutomationOn && workbenchTaskActive && workbenchPage === 'tasks')
-  if (workbenchTaskActive && !wasActive) window.WorkspaceAgent?.enterWorkbenchTask?.(context)
-  else if (workbenchTaskActive) window.WorkspaceAgent?.updateWorkbenchTaskContext?.(context)
-  else window.WorkspaceAgent?.exitWorkbenchTask?.()
+  const taskRoom = workbenchOn && !workbenchAutomationOn && workbenchTaskActive && workbenchPage === 'tasks'
+  shell?.classList.toggle('workbench-task-active', taskRoom)
+  if (shell) {
+    shell.dataset.workbenchLayout = taskRoom ? 'task-room' : 'overview'
+    shell.dataset.workbenchTaskKind = taskRoom ? String(workbenchTaskContextKind || '') : ''
+  }
+  if (workbenchTaskActive && !wasActive) {
+    // 专家/工作流对话房自管 Session，勿再套一层「工作台 ·」指挥会话
+    if (!['expert-chat', 'workflow-chat'].includes(workbenchTaskContextKind)) {
+      window.WorkspaceAgent?.enterWorkbenchTask?.(context)
+    }
+  } else if (workbenchTaskActive) {
+    if (!['expert-chat', 'workflow-chat'].includes(workbenchTaskContextKind)) {
+      window.WorkspaceAgent?.updateWorkbenchTaskContext?.(context)
+    }
+  } else window.WorkspaceAgent?.exitWorkbenchTask?.()
+}
+
+async function startExpertTaskChat({ task, expertId, goal, knowledgeRefs = [] } = {}) {
+  try {
+    const result = await window.WorkspaceAgent?.startExpertChat?.({
+      expertId,
+      goal,
+      knowledgeRefs,
+      surface: 'workbench',
+      taskRef: task?.id ? { kind: 'workbench-task', id: task.id } : null,
+    })
+    if (!result?.ok) return result || { ok: false, error: '无法创建专家对话' }
+    return result
+  } catch (error) {
+    return { ok: false, error: error?.message || '无法创建专家对话' }
+  }
+}
+
+async function resumeExpertTaskChat({ sessionId } = {}) {
+  try {
+    await window.WorkspaceAgent?.setSurfaceMode?.('workbench')
+    const resumed = await window.WorkspaceAgent?.resumeSession?.(sessionId)
+    if (!resumed) return { ok: false, error: '原专家对话不存在或无法恢复' }
+    const result = await window.api?.agentSessionGet?.(sessionId)
+    return result?.ok
+      ? { ok: true, session: result.session }
+      : { ok: false, error: result?.error || '无法读取专家对话' }
+  } catch (error) {
+    return { ok: false, error: error?.message || '无法恢复专家对话' }
+  }
 }
 
 /** 工作台：首页全宽；任务工作间显示专属协作对话。 */
@@ -805,8 +974,13 @@ function applyWorkbench() {
   if (shell) {
     shell.classList.toggle('mode-workbench', inWorkbench)
     shell.classList.toggle('mode-automation', inAutomation)
-    shell.classList.toggle('workbench-task-active', inWorkbench && workbenchTaskActive && workbenchPage === 'tasks')
+    const taskRoom = inWorkbench && workbenchTaskActive && workbenchPage === 'tasks'
+    shell.classList.toggle('workbench-task-active', taskRoom)
+    shell.dataset.workbenchLayout = taskRoom ? 'task-room' : 'overview'
+    shell.dataset.workbenchTaskKind = taskRoom ? String(workbenchTaskContextKind || '') : ''
   }
+  // 工作台开启（含专家/工作流对话房、Daemon 任务间）一律走 workbench surface，
+  // 避免任务 Session 泄漏进助理 Tab。
   if (window.WorkspaceAgent?.setSurfaceMode) {
     window.WorkspaceAgent.setSurfaceMode(workbenchOn ? 'workbench' : 'agent')
   }
@@ -818,7 +992,7 @@ function openWorkbenchHome() {
   workbenchOn = true
   workbenchPage = 'home'
   workbenchAutomationOn = false
-  workbenchTaskActive = false
+  setWorkbenchTaskView(false)
   // 进入工作台需保证左侧对话列可见（agent 语义，非 edit）
   if (workspaceMode === 'edit') {
     sideCollapsedBeforeAgent = sideCollapsed
@@ -880,6 +1054,8 @@ function openAgentChat() {
   workspaceMode = 'agent'
   workbenchOn = false
   workbenchAutomationOn = false
+  // 离开工作台进入助理：退出 task-room / 清 Daemon 过程投影，避免与助理空态叠层
+  setWorkbenchTaskView(false)
   applyWorkbench()
   applyWorkspaceMode()
   saveState()
@@ -899,7 +1075,7 @@ document.getElementById('btnRailAutomation')?.addEventListener('click', () => {
   workspaceMode = 'agent'
   workbenchOn = true
   workbenchAutomationOn = true
-  workbenchTaskActive = false
+  setWorkbenchTaskView(false)
   applyWorkspaceMode()
   applyWorkbench()
   window.Workbench?.openPage?.('automation')
@@ -1240,9 +1416,13 @@ document.getElementById('btnBarFinalPrompt')?.addEventListener('click', async ()
   openFinalPrompt({ id, content, category: n.category || n.project || '' })
 })
 
-// ── 右侧抽屉 / 中间面板（知识库·设置） ───────────────────
+// ── 居中二级弹窗 / 一级整页面板（知识库·设置·专家库） ──
 function isCenterSurface() {
   return document.getElementById('appShell')?.classList.contains('mode-center-surface')
+}
+function isSecondaryDialogOpen() {
+  return document.getElementById('appShell')?.classList.contains('mode-secondary-dialog')
+    && drawer?.classList.contains('open')
 }
 function isKnowledgeFullpage() {
   return isCenterSurface() && drawerKind === 'knowledge'
@@ -1275,6 +1455,10 @@ function clearCenterOverlayStyles() {
   drawer.style.borderLeft = ''
   drawer.style.boxShadow = ''
 }
+function railWidthCssValue(shell = document.getElementById('appShell')) {
+  const value = shell ? getComputedStyle(shell).getPropertyValue('--rail-width').trim() : ''
+  return value || '120px'
+}
 /** 中间面板打开后若仍被 width:0 / 布局冲掉，强制恢复 fixed 覆盖层 */
 function healBlankCenterSurface() {
   if (!drawer) return
@@ -1291,12 +1475,13 @@ function healBlankCenterSurface() {
   shell?.classList.add('mode-center-surface')
   shell?.classList.remove('mode-knowledge')
   const rect = drawer.getBoundingClientRect()
+  const centerLeft = railWidthCssValue(shell)
   const broken = rect.width < 80 || rect.height < 80
     || getComputedStyle(drawer).position !== 'fixed'
-    || drawer.style.left !== '44px'
+    || getComputedStyle(drawer).left !== centerLeft
   if (broken) {
     drawer.style.position = 'fixed'
-    drawer.style.left = '44px'
+    drawer.style.left = centerLeft
     drawer.style.top = '0'
     drawer.style.right = '0'
     drawer.style.bottom = '0'
@@ -1331,18 +1516,107 @@ function applyDrawerFallbackLayout(opts = {}) {
     drawer.style.width = '380px'
   }
 }
+function centerSurfaceTabsFor(kind) {
+  if (kind === 'knowledge') return KNOWLEDGE_SURFACE_TABS
+  if (kind === 'settings') return SETTINGS_SURFACE_TABS
+  return []
+}
+function activeCenterSurfaceTab(kind) {
+  if (kind === 'knowledge') return primaryKnowledgeSurfaceTab(knowledgeUi.page)
+  if (kind === 'settings') return settingsSurfaceTab
+  return ''
+}
+function clearCenterSurfaceTabs() {
+  drawerSurfaceTabs?.replaceChildren()
+  drawerSurfaceTabs?.setAttribute('aria-hidden', 'true')
+  drawerBody?.removeAttribute('role')
+  drawerBody?.removeAttribute('aria-labelledby')
+}
+function syncCenterSurfaceTabs(kind, activeTab) {
+  if (!drawerSurfaceTabs) return
+  const definitions = centerSurfaceTabsFor(kind)
+  const active = definitions.some(tab => tab.id === activeTab) ? activeTab : definitions[0]?.id
+  let activeButton = null
+  drawerSurfaceTabs.querySelectorAll('[data-center-surface-tab]').forEach(button => {
+    const selected = button.dataset.centerSurfaceTab === active
+    button.classList.toggle('active', selected)
+    button.setAttribute('aria-selected', selected ? 'true' : 'false')
+    button.tabIndex = selected ? 0 : -1
+    if (selected) activeButton = button
+  })
+  if (activeButton && drawerBody) {
+    drawerBody.setAttribute('role', 'tabpanel')
+    drawerBody.setAttribute('aria-labelledby', activeButton.id)
+  }
+}
+function renderCenterSurfaceTabs(kind, activeTab) {
+  if (!drawerSurfaceTabs) return
+  const definitions = centerSurfaceTabsFor(kind)
+  drawerSurfaceTabs.replaceChildren()
+  if (!definitions.length) {
+    clearCenterSurfaceTabs()
+    return
+  }
+  drawerSurfaceTabs.setAttribute('aria-label', kind === 'knowledge' ? '知识库页面' : '设置页面')
+  drawerSurfaceTabs.setAttribute('aria-hidden', 'false')
+  for (const tab of definitions) {
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'drawer-surface-tab'
+    button.id = `drawerSurfaceTab-${kind}-${tab.id}`
+    button.dataset.centerSurfaceKind = kind
+    button.dataset.centerSurfaceTab = tab.id
+    button.setAttribute('role', 'tab')
+    button.setAttribute('aria-controls', 'drawerBody')
+    button.textContent = tab.label
+    drawerSurfaceTabs.appendChild(button)
+  }
+  syncCenterSurfaceTabs(kind, activeTab)
+}
+drawerSurfaceTabs?.addEventListener('click', event => {
+  const button = event.target.closest('[data-center-surface-tab]')
+  if (!button) return
+  const kind = button.dataset.centerSurfaceKind
+  const tab = button.dataset.centerSurfaceTab
+  if (kind !== drawerKind) return
+  if (kind === 'knowledge') openKnowledgeOsPanel(undefined, tab)
+  if (kind === 'settings') openSettingsPanel(tab)
+})
+drawerSurfaceTabs?.addEventListener('keydown', event => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+  const buttons = [...drawerSurfaceTabs.querySelectorAll('[data-center-surface-tab]')]
+  const current = buttons.indexOf(document.activeElement)
+  if (current < 0 || !buttons.length) return
+  event.preventDefault()
+  let next = current
+  if (event.key === 'Home') next = 0
+  else if (event.key === 'End') next = buttons.length - 1
+  else next = (current + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length
+  buttons[next].focus()
+  buttons[next].click()
+})
 function openCenterSurface(title, kind) {
   if (!drawer || !drawerTitle) return
   const shell = document.getElementById('appShell')
+  drawerReturnFocus = null
+  shell?.classList.remove('mode-secondary-dialog')
   shell?.classList.remove('mode-knowledge')
   shell?.classList.add('mode-center-surface')
+  drawerBackdrop?.classList.remove('open')
+  drawerBackdrop?.setAttribute('aria-hidden', 'true')
   drawerKind = kind || ''
+  drawer.classList.remove('secondary-dialog', 'drawer-capability-hub-detail')
   drawer.classList.toggle('drawer-settings', drawerKind === 'settings')
   drawer.classList.toggle('drawer-capability-hub', drawerKind === 'capability-hub')
+  drawer.classList.toggle('drawer-tabbed-surface', drawerKind === 'knowledge' || drawerKind === 'settings')
   drawer.classList.add('open')
+  drawer.removeAttribute('role')
+  drawer.removeAttribute('aria-modal')
+  drawer.removeAttribute('aria-labelledby')
+  drawer.setAttribute('aria-hidden', 'false')
   // 固定覆盖层：盖住主区，不依赖 flex 展开，彻底避免白屏
   drawer.style.position = 'fixed'
-  drawer.style.left = '44px'
+  drawer.style.left = railWidthCssValue(shell)
   drawer.style.top = '0'
   drawer.style.right = '0'
   drawer.style.bottom = '0'
@@ -1359,7 +1633,10 @@ function openCenterSurface(title, kind) {
   drawer.style.borderLeft = '1px solid rgba(0,0,0,0.08)'
   drawer.style.boxShadow = 'none'
   drawerTitle.textContent = title
-  console.error('[center-surface] open-fixed', JSON.stringify({
+  drawerTitle.hidden = true
+  if (drawer.classList.contains('drawer-tabbed-surface')) renderCenterSurfaceTabs(drawerKind, activeCenterSurfaceTab(drawerKind))
+  else clearCenterSurfaceTabs()
+  console.debug('[center-surface] open-fixed', JSON.stringify({
     title,
     kind: drawerKind,
     open: drawer.classList.contains('open'),
@@ -1377,32 +1654,71 @@ function openDrawer(title, opts = {}) {
     openCenterSurface(title, opts.kind || (opts.fullpage ? 'knowledge' : ''))
     return
   }
+  // 二级弹窗会覆写 drawerBody；先 park 专家库，避免误销毁
+  parkCapabilityHubFrame()
   const shell = document.getElementById('appShell')
+  drawerReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
   shell?.classList.remove('mode-center-surface')
   shell?.classList.remove('mode-knowledge')
+  shell?.classList.add('mode-secondary-dialog')
   clearCenterOverlayStyles()
-  drawerKind = opts.kind || ''
-  drawer.classList.toggle('drawer-settings', drawerKind === 'settings')
+  drawerKind = opts.kind || 'secondary'
+  drawer.classList.remove('drawer-settings', 'drawer-capability-hub', 'drawer-tabbed-surface')
+  clearCenterSurfaceTabs()
+  drawer.classList.add('secondary-dialog')
   drawer.classList.add('open')
-  applyDrawerFallbackLayout(opts)
+  drawer.setAttribute('role', 'dialog')
+  drawer.setAttribute('aria-modal', 'true')
+  drawer.setAttribute('aria-labelledby', 'drawerTitle')
+  drawer.setAttribute('aria-hidden', 'false')
+  drawerBackdrop?.classList.add('open')
+  drawerBackdrop?.setAttribute('aria-hidden', 'false')
   drawerTitle.textContent = title
+  drawerTitle.hidden = false
   ensureShellLayoutInvariant()
   syncRailNavigation()
+  requestAnimationFrame(() => document.getElementById('drawerClose')?.focus())
 }
 function closeDrawer() {
   if (!drawer) return
+  if (drawerKind === 'knowledge' && !confirmDiscardKnowledgeRawEdit()) return
+  if (drawerKind === 'knowledge') clearKnowledgeRawEditorState()
+  if (isCapabilityHubDrawerKind()) parkCapabilityHubFrame()
   const shell = document.getElementById('appShell')
+  const closedKind = drawerKind
+  const wasSecondary = isSecondaryDialogOpen() || drawerKind === 'capability-hub-detail'
+  const returnFocus = drawerReturnFocus
+  drawerReturnFocus = null
   drawer.classList.remove('open')
   drawer.classList.remove('drawer-settings')
   drawer.classList.remove('drawer-capability-hub')
+  drawer.classList.remove('drawer-capability-hub-detail')
+  drawer.classList.remove('drawer-tabbed-surface')
+  drawer.classList.remove('secondary-dialog')
+  drawer.setAttribute('aria-hidden', 'true')
+  drawer.removeAttribute('role')
+  drawer.removeAttribute('aria-modal')
+  drawer.removeAttribute('aria-labelledby')
+  drawerBackdrop?.classList.remove('open')
+  drawerBackdrop?.setAttribute('aria-hidden', 'true')
+  drawerTitle.hidden = false
+  clearCenterSurfaceTabs()
   clearCenterOverlayStyles()
   drawerKind = ''
   shell?.classList.remove('mode-center-surface')
   shell?.classList.remove('mode-knowledge')
+  shell?.classList.remove('mode-secondary-dialog')
   ensureShellLayoutInvariant()
   syncRailNavigation()
+  if (wasSecondary && returnFocus?.isConnected) requestAnimationFrame(() => returnFocus.focus())
+  try {
+    window.dispatchEvent(new CustomEvent('knowme-drawer-closed', { detail: { kind: closedKind } }))
+  } catch { /* ignore */ }
 }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer)
+drawerBackdrop?.addEventListener('click', () => {
+  if (isSecondaryDialogOpen()) closeDrawer()
+})
 
 function withTimeout(promise, ms, label) {
   return new Promise((resolve, reject) => {
@@ -1462,6 +1778,7 @@ async function openFinalPrompt(payload) {
 }
 
 const knowledgeUi = {
+  page: 'status',
   filter: 'all',
   query: '',
   selectedPath: null,
@@ -1472,7 +1789,21 @@ const knowledgeUi = {
   activeProvider: null,
   collapsedDirs: new Set(),
   seededCollapse: false,
+  taskSnapshot: { tasks: [], proposals: [] },
+  selectedProposalId: null,
+  fabricSnapshot: null,
+  fabricQuery: '',
+  fabricHits: [],
+  fabricRoute: null,
+  fabricSearchAttempted: false,
+  weaveProposals: [],
+  governanceReport: null,
+  governanceProposals: [],
+  rawEditorPath: null,
+  rawEditorHash: null,
+  rawEditorDirty: false,
 }
+let knowledgeOpenSequence = 0
 
 function knowledgeBasename(relPath) {
   const parts = String(relPath || '').split('/').filter(Boolean)
@@ -1529,6 +1860,22 @@ function knowledgeBuildTree(entries) {
   return root
 }
 
+function knowledgeBuildRootIndex(entries) {
+  const root = knowledgeBuildTree(entries)
+  for (const dir of ['raw', 'concepts']) {
+    if (!root.children.has(dir)) {
+      root.children.set(dir, {
+        name: dir,
+        path: dir,
+        type: 'dir',
+        children: new Map(),
+        entry: null,
+      })
+    }
+  }
+  return root
+}
+
 function knowledgeSortTreeNodes(nodes) {
   return [...nodes].sort((a, b) => {
     if (a.type !== b.type) return a.type === 'dir' ? -1 : 1
@@ -1536,11 +1883,83 @@ function knowledgeSortTreeNodes(nodes) {
   })
 }
 
+function knowledgeTreeFileCount(node) {
+  if (node.type === 'file') return 1
+  let total = 0
+  for (const child of node.children.values()) total += knowledgeTreeFileCount(child)
+  return total
+}
+
+function knowledgeRootDirectoryLabel(node) {
+  if (node.path === 'raw') return '资料'
+  if (node.path === 'concepts') return '已整理知识'
+  if (node.path === 'inbox') return '待整理资料'
+  return node.name
+}
+
+function knowledgeRootIndexHtml(entries) {
+  const tree = knowledgeBuildRootIndex(entries)
+  const renderNode = (node, depth) => {
+    if (node.type === 'file' && node.entry) {
+      const item = node.entry
+      const updated = item.updatedAt
+        ? new Date(item.updatedAt).toLocaleDateString('zh-CN')
+        : ''
+      return `<button type="button" class="knowledge-index-entry" data-knowledge-index-entry="${esc(item.path)}" data-knowledge-index-kind="${esc(item.kind)}" style="--index-depth:${depth}" title="${esc(item.path)}">
+        <span class="knowledge-index-entry-mark" aria-hidden="true"></span>
+        <span class="knowledge-index-entry-copy">
+          <strong>${esc(item.title || knowledgeBasename(item.path))}</strong>
+          <small>${esc(updated || (item.kind === 'okf' ? '已整理知识' : '资料'))}</small>
+        </span>
+        <span class="knowledge-index-entry-type">${item.kind === 'okf' ? '知识' : item.editable ? '可编辑' : '资料'}</span>
+      </button>`
+    }
+    const children = knowledgeSortTreeNodes(node.children.values())
+    const count = knowledgeTreeFileCount(node)
+    const label = depth === 0 ? knowledgeRootDirectoryLabel(node) : node.name
+    const emptyCopy = node.path === 'raw'
+      ? '还没有资料'
+      : node.path === 'concepts'
+        ? '还没有已确认的知识'
+        : '目录为空'
+    return `<details class="knowledge-index-directory" data-knowledge-index-dir="${esc(node.path)}" style="--index-depth:${depth}"${depth <= 1 ? ' open' : ''}>
+      <summary>
+        <span class="knowledge-index-directory-twist" aria-hidden="true"></span>
+        <span class="knowledge-index-directory-icon" aria-hidden="true"></span>
+        <strong>${esc(label)}</strong>
+        <span>${count}</span>
+      </summary>
+      <div class="knowledge-index-directory-children">
+        ${children.length
+          ? children.map(child => renderNode(child, depth + 1)).join('')
+          : `<div class="knowledge-index-directory-empty" style="--index-depth:${depth + 1}">
+              <span>${emptyCopy}</span>
+              ${node.path === 'raw' ? '<button type="button" id="indexEmptyAdd">添加第一份资料</button>' : ''}
+            </div>`}
+      </div>
+    </details>`
+  }
+  const rootPriority = new Map([['raw', 0], ['concepts', 1]])
+  const roots = knowledgeSortTreeNodes(tree.children.values()).sort((a, b) => {
+    const pa = rootPriority.has(a.path) ? rootPriority.get(a.path) : 2
+    const pb = rootPriority.has(b.path) ? rootPriority.get(b.path) : 2
+    return pa - pb
+  })
+  return `<div class="knowledge-index-tree" aria-label="真实知识目录">
+    <div class="knowledge-index-root">
+      <span class="knowledge-index-root-icon" aria-hidden="true"></span>
+      <div><strong>我的知识</strong><small>本机根目录</small></div>
+      <b>${entries.length}</b>
+    </div>
+    <div class="knowledge-index-root-children">${roots.map(node => renderNode(node, 0)).join('')}</div>
+  </div>`
+}
+
 function knowledgeTopbarHtml({ name, kind, root, stats = {}, remote = false }) {
   return `<header class="knowledge-topbar">
     <div class="knowledge-heading">
-      <div class="knowledge-heading-row"><h2>${esc(name)}</h2><span class="knowledge-kind">${remote ? 'AI 检索源' : kind}</span></div>
-      <div class="knowledge-root" title="${esc(root || '')}">${esc(root || (remote ? '通过远程端点检索，不同步原始文件' : '未绑定目录'))}</div>
+      <div class="knowledge-heading-row"><h2>${esc(name)}</h2><span class="knowledge-kind">${remote ? '外部来源' : '本地保存'}</span></div>
+      <div class="knowledge-root" title="${esc(root || '')}">${remote ? '只检索命中内容，不同步原始文件' : '资料保存在本机，可随时打开编辑'}</div>
     </div>
     ${remote ? '' : `<div class="knowledge-stats">
       <div class="knowledge-stat"><strong>${stats.total || 0}</strong><span>条目</span></div>
@@ -1548,10 +1967,17 @@ function knowledgeTopbarHtml({ name, kind, root, stats = {}, remote = false }) {
       <div class="knowledge-stat"><strong>${stats.okf || 0}</strong><span>已整理</span></div>
     </div>`}
     <div class="knowledge-toolbar">
-      <button type="button" class="knowledge-btn" id="kbSourcesOpen">知识源</button>
+      <button type="button" class="knowledge-btn" id="kbSourcesOpen">来源</button>
       ${remote
-        ? '<button type="button" class="knowledge-btn" id="ragConfigure">配置知识源</button>'
-        : '<button type="button" class="knowledge-btn obsidian" id="obsidianOpen">在 Obsidian 打开</button><button type="button" class="knowledge-btn" id="kosRefresh">刷新</button><button type="button" class="knowledge-btn" id="kosLint">一键知识体检</button>'}
+        ? '<button type="button" class="knowledge-btn" id="ragConfigure">配置来源</button>'
+        : `<button type="button" class="knowledge-btn" id="kosRefresh">重新读取</button>
+          <details class="knowledge-more">
+            <summary aria-label="更多知识操作">更多</summary>
+            <div class="knowledge-more-menu">
+              <button type="button" id="kosLint">检查问题</button>
+              <button type="button" id="obsidianOpen">用 Obsidian 打开</button>
+            </div>
+          </details>`}
     </div>
   </header>`
 }
@@ -1622,13 +2048,14 @@ function knowledgeEntryListHtml() {
         <span class="knowledge-tree-gutter" aria-hidden="true"></span>
         <span class="knowledge-tree-ico knowledge-tree-ico-file" aria-hidden="true"></span>
         <span class="knowledge-tree-label">${esc(item.title || fileName)}</span>
-        <span class="knowledge-tree-badge">${item.kind === 'okf' ? '已整理' : '资料'}</span>
+        <span class="knowledge-tree-badge">${item.kind === 'okf' ? '已整理' : item.editable || String(item.path || '').startsWith('raw/') ? '可编辑' : '资料'}</span>
       </button>`
     }
     const children = knowledgeSortTreeNodes(node.children.values())
       .filter(child => !keepPaths || keepPaths.has(child.path))
     if (!children.length) return ''
     const open = searching || !knowledgeUi.collapsedDirs.has(node.path)
+    const label = depth === 0 ? knowledgeRootDirectoryLabel(node) : node.name
     const countFiles = node => {
       if (node.type === 'file') return 1
       let total = 0
@@ -1640,7 +2067,7 @@ function knowledgeEntryListHtml() {
       <button type="button" class="knowledge-tree-row knowledge-tree-folder" data-kos-toggle-dir="${esc(node.path)}" style="--kos-depth:${depth}" title="${esc(node.path)}" aria-expanded="${open ? 'true' : 'false'}">
         <span class="knowledge-tree-twist" aria-hidden="true">${open ? '▾' : '▸'}</span>
         <span class="knowledge-tree-ico knowledge-tree-ico-folder" aria-hidden="true"></span>
-        <span class="knowledge-tree-label">${esc(node.name)}</span>
+        <span class="knowledge-tree-label">${esc(label)}</span>
         <span class="knowledge-tree-count">${count}</span>
       </button>
       ${open ? `<div class="knowledge-tree-children">${children.map(child => renderNode(child, depth + 1)).join('')}</div>` : ''}
@@ -1707,7 +2134,110 @@ function refreshKnowledgeEntryList(onFileClick, onFileDblClick) {
   else wireKnowledgeEntries()
 }
 
+function confirmDiscardKnowledgeRawEdit(nextPath = '') {
+  if (!knowledgeUi.rawEditorDirty) return true
+  if (nextPath && nextPath === knowledgeUi.rawEditorPath) return true
+  return window.confirm('当前资料有未保存修改。放弃修改并继续吗？')
+}
+
+function clearKnowledgeRawEditorState() {
+  knowledgeUi.rawEditorPath = null
+  knowledgeUi.rawEditorHash = null
+  knowledgeUi.rawEditorDirty = false
+}
+
+function renderKnowledgeRawEditor(reader, result, meta = {}) {
+  let savedContent = String(result.content || '')
+  let currentHash = result.hash || ''
+  knowledgeUi.rawEditorPath = result.path
+  knowledgeUi.rawEditorHash = currentHash
+  knowledgeUi.rawEditorDirty = false
+  const updated = result.updatedAt
+    ? new Date(result.updatedAt).toLocaleString('zh-CN')
+    : meta.updatedAt
+      ? new Date(meta.updatedAt).toLocaleString('zh-CN')
+      : '未知'
+  reader.innerHTML = `<article class="knowledge-reader-inner knowledge-raw-document">
+    <header class="knowledge-doc-head knowledge-raw-head">
+      <div>
+        <div class="knowledge-panel-kicker">可编辑资料</div>
+        <h1>${esc(result.title || meta.title || '未命名资料')}</h1>
+        <div class="knowledge-doc-path">${esc(result.path)}</div>
+        <div class="knowledge-doc-meta"><span>保存在本机</span><span>${Number(result.bytes || savedContent.length).toLocaleString()} 字节</span><span>更新于 ${esc(updated)}</span></div>
+        ${knowledgeDocActionsHtml({ editable: true })}
+      </div>
+      <div class="knowledge-raw-actions">
+        <span class="knowledge-save-state" id="kosRawSaveState">已保存</span>
+        <button type="button" class="knowledge-btn primary" id="kosRawSave" disabled>保存</button>
+      </div>
+    </header>
+    <div class="knowledge-raw-editor-grid">
+      <section class="knowledge-raw-editor-pane">
+        <label for="kosRawEditor">正文</label>
+        <textarea class="knowledge-raw-editor" id="kosRawEditor" spellcheck="true">${esc(savedContent)}</textarea>
+      </section>
+      <section class="knowledge-raw-preview-pane">
+        <span>预览</span>
+        <div class="knowledge-markdown" id="kosRawPreview">${renderKnowledgeMarkdown(savedContent)}</div>
+      </section>
+    </div>
+  </article>`
+  const editor = reader.querySelector('#kosRawEditor')
+  const preview = reader.querySelector('#kosRawPreview')
+  const saveButton = reader.querySelector('#kosRawSave')
+  const saveState = reader.querySelector('#kosRawSaveState')
+  const syncDirtyState = () => {
+    const dirty = editor.value !== savedContent
+    knowledgeUi.rawEditorDirty = dirty
+    saveButton.disabled = !dirty
+    saveState.textContent = dirty ? '未保存' : '已保存'
+    saveState.classList.toggle('dirty', dirty)
+    saveState.classList.remove('error')
+    preview.innerHTML = renderKnowledgeMarkdown(editor.value)
+  }
+  const save = async () => {
+    if (!knowledgeUi.rawEditorDirty || saveButton.disabled) return
+    saveButton.disabled = true
+    saveButton.textContent = '保存中…'
+    saveState.textContent = '正在安全保存'
+    const response = await window.api.knowledgeOsSaveRaw({
+      path: result.path,
+      content: editor.value,
+      expectedHash: currentHash,
+    })
+    saveButton.textContent = '保存'
+    if (!response?.ok) {
+      saveButton.disabled = false
+      saveState.textContent = response?.code === 'stale_content'
+        ? '磁盘内容已变化，请重新载入'
+        : (response?.error || '保存失败')
+      saveState.classList.add('error')
+      toast(response?.error || '资料保存失败', 'error')
+      return
+    }
+    savedContent = editor.value
+    currentHash = response.hash
+    knowledgeUi.rawEditorHash = currentHash
+    knowledgeUi.rawEditorDirty = false
+    saveButton.disabled = true
+    saveState.textContent = '已安全保存'
+    saveState.classList.remove('dirty', 'error')
+    toast('资料已保存并更新搜索', 'success', 1500)
+  }
+  wireKnowledgeDocActions(reader)
+  editor.addEventListener('input', syncDirtyState)
+  editor.addEventListener('keydown', event => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
+      event.preventDefault()
+      save()
+    }
+  })
+  saveButton.addEventListener('click', save)
+}
+
 async function openKnowledgeEntry(kind, entryPath) {
+  if (!confirmDiscardKnowledgeRawEdit(entryPath)) return
+  if (knowledgeUi.rawEditorPath !== entryPath) clearKnowledgeRawEditorState()
   knowledgeUi.selectedPath = entryPath
   refreshKnowledgeEntryList()
   const reader = document.getElementById('kosReader')
@@ -1719,62 +2249,64 @@ async function openKnowledgeEntry(kind, entryPath) {
     return
   }
   const meta = knowledgeUi.entries.find(item => item.path === entryPath) || {}
+  if (r.editable || meta.editable || String(entryPath || '').startsWith('raw/')) {
+    renderKnowledgeRawEditor(reader, r, meta)
+    return
+  }
+  clearKnowledgeRawEditorState()
   const updated = meta.updatedAt ? new Date(meta.updatedAt).toLocaleString('zh-CN') : '未知'
   reader.innerHTML = `<article class="knowledge-reader-inner">
     <header class="knowledge-doc-head">
       <h1>${esc(r.title || meta.title || '未命名条目')}</h1>
       <div class="knowledge-doc-path">${esc(entryPath)}</div>
-      <div class="knowledge-doc-meta"><span>${kind === 'okf' ? '已整理知识' : '知识资料'}</span><span>${Number(meta.chars || String(r.content || '').length).toLocaleString()} 字符</span><span>更新于 ${esc(updated)}</span></div>
+      <div class="knowledge-doc-meta"><span>${kind === 'okf' ? '已整理知识' : '知识资料'}</span><span>${Number(meta.chars || String(r.content || '').length).toLocaleString()} 字符</span><span>更新于 ${esc(updated)}</span><span>只读阅读</span></div>
+      ${knowledgeDocActionsHtml({ editable: knowledgeEntryEditable(meta) })}
     </header>
     <div class="knowledge-markdown">${renderKnowledgeMarkdown(r.content || '')}</div>
   </article>`
+  wireKnowledgeDocActions(reader)
 }
 
 function renderKnowledgeWelcome() {
   const reader = document.getElementById('kosReader')
   if (!reader) return
+  clearKnowledgeRawEditorState()
   const materialCount = knowledgeUi.entries.filter(item => item.kind === 'wiki').length
   const organizedCount = knowledgeUi.entries.filter(item => item.kind === 'okf').length
-  reader.innerHTML = `<div class="knowledge-reader-inner knowledge-home">
-    <section class="knowledge-home-hero">
-      <div class="knowledge-panel-kicker">Knowledge workspace</div>
-      <h1>${knowledgeUi.entries.length ? '让知识持续可用，而不是越存越乱' : '从一份资料开始，建立可被 AI 使用的知识库'}</h1>
-      <p>KnowMe 帮你发现重复、失效和缺少来源的内容；所有整理结果都由你确认后才会写入。</p>
+  reader.innerHTML = `<div class="knowledge-reader-inner llmwiki-welcome">
+    <div class="knowledge-reader-empty">
+      <div class="knowledge-reader-empty-mark" aria-hidden="true">W</div>
+      <h3>${knowledgeUi.entries.length ? '从左侧选择一份资料' : '你的 LLMWiki 还没有资料'}</h3>
+      <p>${knowledgeUi.entries.length
+        ? '阅读已整理知识，或打开 raw 资料继续编辑。'
+        : '把文件放进资料目录，或直接添加第一份资料。'}</p>
       <div class="knowledge-home-actions">
-        <button type="button" class="knowledge-btn primary" id="welcomeAi">让 AI 帮我整理</button>
-        <button type="button" class="knowledge-btn" id="welcomeHealth">一键知识体检</button>
-        <button type="button" class="knowledge-btn" id="welcomeBrowse">浏览知识</button>
+        <button type="button" class="knowledge-btn primary" id="welcomeAdd">添加资料</button>
+        <span class="llmwiki-welcome-count">${materialCount} 份资料 · ${organizedCount} 条已整理知识</span>
       </div>
-    </section>
-    <section class="knowledge-home-status" aria-label="当前知识状态">
-      <div><span>知识资料</span><strong>${materialCount}</strong><small>已收集的原始内容</small></div>
-      <div><span>已整理知识</span><strong>${organizedCount}</strong><small>可稳定复用的内容</small></div>
-      <div><span>待处理问题</span><strong class="pending">待体检</strong><small>点击体检后给出建议</small></div>
-    </section>
-    <section class="knowledge-home-flow" aria-label="知识整理流程">
-      <h2>一份资料如何变成 AI 能用的知识</h2>
-      <div class="knowledge-flow-steps">
-        <div><b>1</b><strong>添加资料</strong><span>绑定现有文件夹</span></div>
-        <div><b>2</b><strong>AI 整理</strong><span>发现重复与冲突</span></div>
-        <div><b>3</b><strong>你来确认</strong><span>预览差异后决定</span></div>
-        <div><b>4</b><strong>随时可用</strong><span>对话检索更准确</span></div>
-      </div>
-    </section>
-    <button type="button" class="knowledge-home-bind" id="welcomeBind">管理资料目录</button>
+    </div>
   </div>`
-  reader.querySelector('#welcomeBind')?.addEventListener('click', renderLocalConfigModal)
-  reader.querySelector('#welcomeBrowse')?.addEventListener('click', () => document.getElementById('kosSearch')?.focus())
-  reader.querySelector('#welcomeHealth')?.addEventListener('click', event => renderHealthPanel(event.currentTarget))
-  reader.querySelector('#welcomeAi')?.addEventListener('click', () => {
-    openAgentChat()
-    requestAnimationFrame(() => {
-      const input = document.getElementById('agentInput')
-      if (!input) return
-      input.value = '请帮我检查并整理当前知识库：先找出重复、冲突、失效链接和缺少来源的内容，给出整理建议。任何文件修改都先让我预览并确认。'
-      input.dispatchEvent(new Event('input', { bubbles: true }))
-      input.focus()
-    })
-  })
+  reader.querySelector('#welcomeAdd')?.addEventListener('click', openKnowledgeAddModal)
+}
+
+function knowledgeEntryEditable(item) {
+  return Boolean(item?.editable || String(item?.path || '').startsWith('raw/'))
+}
+
+/** 条目动作行：跟着文档头走，不再单独占一栏。 */
+function knowledgeDocActionsHtml({ editable = false } = {}) {
+  return `<div class="knowledge-doc-actions">
+    <button type="button" class="knowledge-doc-action" id="kosDocOrganize">交给 AI 整理</button>
+    <button type="button" class="knowledge-doc-action" id="kosDocReview">查看提案</button>
+    ${editable ? '<button type="button" class="knowledge-doc-action" id="kosDocHealth">检查问题</button>' : ''}
+  </div>`
+}
+
+function wireKnowledgeDocActions(host) {
+  if (!host) return
+  host.querySelector('#kosDocOrganize')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'organize'))
+  host.querySelector('#kosDocReview')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'review'))
+  host.querySelector('#kosDocHealth')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
 }
 
 function knowledgeIssueLabel(type) {
@@ -1784,6 +2316,14 @@ function knowledgeIssueLabel(type) {
     broken_link: '链接已经失效',
     unreadable: '文件无法读取',
     limit: '资料较多，未全部检查',
+    missing_directory: '资料目录缺失',
+    missing_manifest: '资料空间信息缺失',
+    invalid_manifest: '资料空间信息损坏',
+    unsupported_schema: '资料空间版本不兼容',
+    unsupported_file_type: '文件类型不支持',
+    symlink_forbidden: '链接目录不安全',
+    scan_limit: '资料较多，未全部检查',
+    harness_unavailable: '知识保护未连接',
   })[type] || '需要关注'
 }
 
@@ -1793,7 +2333,7 @@ async function renderHealthPanel(trigger) {
   const originalText = trigger?.textContent || ''
   if (trigger) { trigger.disabled = true; trigger.textContent = '正在体检…' }
   reader.innerHTML = '<div class="knowledge-reader-inner"><div class="knowledge-reader-empty"><p>正在检查空内容、重复标题和失效链接…</p></div></div>'
-  const r = await window.api.knowledgeOsLint()
+  const r = await (window.api.knowledgeCheck || window.api.knowledgeOsLint)()
   if (trigger) { trigger.disabled = false; trigger.textContent = originalText }
   if (!r?.ok) {
     reader.innerHTML = `<div class="knowledge-reader-inner"><div class="knowledge-result error">${esc(r?.error || '知识体检失败')}</div></div>`
@@ -1804,11 +2344,19 @@ async function renderHealthPanel(trigger) {
     <div class="knowledge-panel-kicker">Knowledge checkup</div><h2>${r.healthy ? '知识状态良好' : `发现 ${r.issueCount} 个需要关注的地方`}</h2>
     <p class="knowledge-panel-desc">已检查 ${r.scanned} 份资料。你可以先查看建议，再决定是否让 AI 协助整理。</p>
     <div class="knowledge-result ${r.healthy ? 'ok' : ''}">${issues.length
-      ? issues.map(i => `<div class="knowledge-issue"><strong>${esc(knowledgeIssueLabel(i.type))}</strong> · ${esc(i.path || '整个知识库')}<br>${esc(i.message)}</div>`).join('')
+      ? issues.map((i, index) => `<div class="knowledge-issue"><button type="button" class="knowledge-issue-open" data-kos-issue-index="${index}" data-kos-issue-path="${esc(i.path || '')}"><strong>${esc(knowledgeIssueLabel(i.type))}</strong> · ${esc(i.path || '整个知识库')}</button><span>${esc(i.message)}</span></div>`).join('')
       : '暂未发现空内容、重复标题或失效链接。'}</div>
     ${issues.length ? '<div class="knowledge-form-actions"><button type="button" class="knowledge-btn primary" id="healthAskAi">让 AI 给出整理方案</button><button type="button" class="knowledge-btn" id="healthBackHome">返回整理首页</button></div>' : '<div class="knowledge-form-actions"><button type="button" class="knowledge-btn" id="healthBackHome">返回整理首页</button></div>'}
   </section></div>`
-  reader.querySelector('#healthBackHome')?.addEventListener('click', renderKnowledgeWelcome)
+  reader.querySelectorAll('[data-kos-issue-path]').forEach(button => {
+    button.addEventListener('click', () => {
+      const issuePath = button.dataset.kosIssuePath
+      if (!issuePath) return
+      knowledgeUi.selectedPath = issuePath
+      openKnowledgeOsPanel(undefined, 'browse')
+    })
+  })
+  reader.querySelector('#healthBackHome')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'status'))
   reader.querySelector('#healthAskAi')?.addEventListener('click', () => {
     openAgentChat()
     requestAnimationFrame(() => {
@@ -1845,11 +2393,11 @@ document.addEventListener('keydown', event => {
   if (event.key === 'Escape' && document.getElementById('knowledgeModalBackdrop')) closeKnowledgeModal()
 })
 
-function renderKnowledgeSourcesModal() {
-  const rows = knowledgeUi.providers.map(provider => {
+function knowledgeProviderRowsHtml() {
+  return knowledgeUi.providers.map(provider => {
     const remote = provider.kind === 'remote-rag'
     const active = provider.id === knowledgeUi.activeId
-    return `<button type="button" class="knowledge-provider${active ? ' active' : ''}" data-modal-provider="${esc(provider.id)}">
+    return `<button type="button" class="knowledge-provider${active ? ' active' : ''}" data-knowledge-provider="${esc(provider.id)}">
       <span class="knowledge-provider-icon">${remote ? 'R' : 'W'}</span>
       <span class="knowledge-provider-copy">
         <span class="knowledge-provider-name">${esc(provider.displayName || (remote ? 'AI 检索源' : '本地知识库'))}${active ? ' · 当前' : ''}</span>
@@ -1858,18 +2406,22 @@ function renderKnowledgeSourcesModal() {
       <span aria-hidden="true">${active ? '✓' : '›'}</span>
     </button>`
   }).join('')
-  const modal = openKnowledgeModal('知识源', `<section class="knowledge-panel">
-    <p class="knowledge-panel-desc">选择当前对话和检索使用的知识库。目录与连接配置仅在需要时打开，不占用工作台空间。</p>
-    <div style="display:grid;gap:5px;margin-top:16px">${rows}</div>
-    <div class="knowledge-form-actions" style="margin-top:18px">
-      <button type="button" class="knowledge-btn" id="modalAddRemote">添加 AI 检索源</button>
-      <button type="button" class="knowledge-btn" id="modalManageLocal">管理本地目录</button>
-    </div>
-  </section>`)
-  if (!modal) return
-  modal.querySelectorAll('[data-modal-provider]').forEach(button => {
+}
+
+function resetKnowledgeBrowseState() {
+  knowledgeUi.selectedPath = null
+  knowledgeUi.selectedProposalId = null
+  knowledgeUi.query = ''
+  knowledgeUi.filter = 'all'
+  knowledgeUi.seededCollapse = false
+  knowledgeUi.collapsedDirs = new Set()
+  knowledgeUi.wikiRoot = null
+}
+
+function wireKnowledgeProviderRows(root) {
+  root?.querySelectorAll('[data-knowledge-provider]').forEach(button => {
     button.addEventListener('click', async () => {
-      const provider = knowledgeUi.providers.find(item => item.id === button.dataset.modalProvider)
+      const provider = knowledgeUi.providers.find(item => item.id === button.dataset.knowledgeProvider)
       if (!provider) return
       if (provider.id === knowledgeUi.activeId) {
         closeKnowledgeModal()
@@ -1881,15 +2433,294 @@ function renderKnowledgeSourcesModal() {
       const result = await window.api.knowledgeProviderSetActive(provider.id)
       if (!result?.ok) { toast(result?.error || '切换失败', 'error'); button.disabled = false; return }
       closeKnowledgeModal()
-      knowledgeUi.selectedPath = null
-      knowledgeUi.query = ''
-      knowledgeUi.filter = 'all'
-      knowledgeUi.seededCollapse = false
-      knowledgeUi.collapsedDirs = new Set()
-      knowledgeUi.wikiRoot = null
-      openKnowledgeOsPanel()
+      resetKnowledgeBrowseState()
+      openKnowledgeOsPanel(undefined, knowledgeUi.page)
     })
   })
+}
+
+function renderKnowledgeSourcesPage() {
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    <main class="knowledge-page-main">
+      <div class="knowledge-reader-inner">
+        <section class="knowledge-panel">
+          <div class="knowledge-panel-kicker">可选扩展</div>
+          <h2>资料来源</h2>
+          <p class="knowledge-panel-desc">“我的知识”始终可用。只有需要搜索其他系统时，才在这里添加外部来源。</p>
+          <div class="knowledge-source-list">${knowledgeProviderRowsHtml()}</div>
+          <div class="knowledge-form-actions" style="margin-top:18px">
+            <button type="button" class="knowledge-btn primary" id="pageAddRemote">添加外部搜索来源</button>
+            <button type="button" class="knowledge-btn" id="pageManageLocal">高级目录设置</button>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>`
+  wireKnowledgeProviderRows(drawerBody)
+  drawerBody.querySelector('#pageAddRemote')?.addEventListener('click', () => renderRemoteRagModal(null))
+  drawerBody.querySelector('#pageManageLocal')?.addEventListener('click', renderLocalConfigModal)
+}
+
+async function renderKnowledgeHealthWorkspace(active, list) {
+  const stats = {
+    total: (list.wiki?.length || 0) + (list.okf?.length || 0),
+    wiki: list.wiki?.length || 0,
+    okf: list.okf?.length || 0,
+  }
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({ name: '检查问题', kind: '安全检查', root: list.wikiRoot, stats })}
+    <main class="knowledge-page-main">
+      <div class="knowledge-reader-inner knowledge-panel">
+        <div class="knowledge-panel-kicker">正在检查</div>
+        <h2>查看资料是否可以安全读取和整理</h2>
+        <div class="knowledge-result">正在检查目录、文件、重复标题和失效链接…</div>
+      </div>
+    </main>
+  </div>`
+  const [lint, harness] = await Promise.all([
+    (window.api.knowledgeCheck || window.api.knowledgeOsLint)?.(),
+    loadKnowledgeHarnessStatus(),
+  ])
+  const issues = Array.isArray(lint?.issues) ? [...lint.issues] : []
+  if (harness?.unavailable) {
+    issues.unshift({
+      type: 'harness_unavailable',
+      path: '',
+      message: harness.error || '知识保护状态暂不可用，请重启 KnowMe',
+    })
+  }
+  const healthy = lint?.ok && harness?.ok === true && !issues.length
+  const main = drawerBody.querySelector('.knowledge-page-main')
+  if (!main) return
+  main.innerHTML = `<div class="knowledge-reader-inner knowledge-panel">
+    <div class="knowledge-panel-kicker">${healthy ? '检查完成' : '发现需要处理的内容'}</div>
+    <h2>${healthy ? '你的知识空间状态正常' : `发现 ${issues.length || harness?.issues?.length || 1} 个问题`}</h2>
+    <p class="knowledge-panel-desc">${healthy
+      ? '资料路径、可编辑边界和知识内容检查均已通过。'
+      : 'KnowMe 不会自动覆盖有问题的文件。你可以先打开资料确认，再决定如何处理。'}</p>
+    <div class="knowledge-form-actions">
+      <button type="button" class="knowledge-btn primary" id="healthBackHome">返回我的知识</button>
+      <button type="button" class="knowledge-btn" id="healthRunAgain">重新检查</button>
+    </div>
+    <div class="knowledge-health-list">
+      ${healthy
+        ? '<div class="knowledge-result ok">没有发现空内容、重复标题、失效链接或目录安全问题。</div>'
+        : issues.map(issue => `<article class="knowledge-health-item">
+            <span>${esc(knowledgeIssueLabel(issue.type))}</span>
+            <strong>${esc(issue.path || '资料空间')}</strong>
+            <p>${esc(issue.message || '需要检查')}</p>
+            ${issue.path ? `<button type="button" data-health-entry="${esc(issue.path)}">打开资料</button>` : ''}
+          </article>`).join('')}
+    </div>
+  </div>`
+  main.querySelector('#healthBackHome')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'status'))
+  main.querySelector('#healthRunAgain')?.addEventListener('click', () => renderKnowledgeHealthWorkspace(active, list))
+  main.querySelectorAll('[data-health-entry]').forEach(button => {
+    button.addEventListener('click', () => {
+      knowledgeUi.selectedPath = button.dataset.healthEntry
+      openKnowledgeOsPanel(undefined, 'browse')
+    })
+  })
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  drawerBody.querySelector('#kosRefresh')?.addEventListener('click', () => renderKnowledgeHealthWorkspace(active, list))
+  drawerBody.querySelector('#kosLint')?.addEventListener('click', () => renderKnowledgeHealthWorkspace(active, list))
+}
+
+function governanceCategoryLabel(cat) {
+  return ({
+    wiki_lint: 'Wiki 体检',
+    okf_lint: 'OKF 体检',
+    broken_anchor: '悬空锚点',
+    stale_anchor: '待重织',
+    conflict: '概念冲突',
+    duplicate_title: '重复标题',
+  }[cat] || cat)
+}
+
+function governanceIssueActionLabel(action) {
+  return ({
+    locate: '定位来源',
+    propose_cleanup: '清理提案',
+    propose_relocate: '重定位提案',
+    propose_reconcile: '调和提案',
+    propose_fix: '修复提案',
+    reweave: '重织',
+    ignore: '忽略',
+  }[action] || action)
+}
+
+function governanceHealthBar(score) {
+  const pct = Math.round((Number(score) || 0) * 100)
+  const cls = pct >= 80 ? 'good' : pct >= 50 ? 'warn' : 'bad'
+  return `<div class="knowledge-gov-health-bar ${cls}" role="meter" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><span style="width:${pct}%"></span></div><strong>${pct}%</strong>`
+}
+
+function governanceIssueRowsHtml(issues = []) {
+  if (!issues.length) return ''
+  return issues.slice(0, 80).map((issue, idx) => {
+    const actions = (issue.actions || []).map(act => `<button type="button" class="knowledge-btn knowledge-btn-sm" data-gov-action="${esc(act)}" data-gov-issue-index="${idx}">${esc(governanceIssueActionLabel(act))}</button>`).join('')
+    return `<article class="knowledge-gov-issue ${esc(issue.severity || 'warn')}" data-gov-issue-index="${idx}">
+      <header><span class="knowledge-gov-issue-cat">${esc(governanceCategoryLabel(issue.category))}</span><strong>${esc(issue.title || issue.path || issue.nodeId || '问题')}</strong></header>
+      <p>${esc(issue.message || '')}</p>
+      <div class="knowledge-form-actions knowledge-gov-issue-actions">${actions}</div>
+    </article>`
+  }).join('')
+}
+
+function governanceProposalRowsHtml(proposals = []) {
+  const pending = proposals.filter(p => p.status === 'pending')
+  if (!pending.length) return '<p class="knowledge-muted">暂无待审治理提案</p>'
+  return pending.map(p => `<div class="knowledge-fabric-proposal" data-gov-proposal-id="${esc(p.id)}">
+    <strong>${esc(p.title)}</strong><span class="knowledge-fabric-tag">${esc(p.type)}</span>
+    <p>${esc(p.rationale || '')}</p>
+    <div class="knowledge-form-actions">
+      <button type="button" class="knowledge-btn primary knowledge-btn-sm" data-gov-proposal-apply="${esc(p.id)}">确认</button>
+      <button type="button" class="knowledge-btn knowledge-btn-sm" data-gov-proposal-reject="${esc(p.id)}">拒绝</button>
+    </div>
+  </div>`).join('')
+}
+
+async function renderKnowledgeGovernanceWorkspace(active, list) {
+  const { stats } = applyLocalKnowledgeWorkspaceState(active, list)
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({ name: active.displayName || '本地知识库', kind: '知识治理', root: list.wikiRoot, stats })}
+    <main class="knowledge-page-main knowledge-governance-page" id="knowledgeGovernanceMain">
+      <section class="knowledge-panel">
+        <div class="knowledge-panel-kicker">Fabric governance</div>
+        <h2>联合体检</h2>
+        <p class="knowledge-panel-desc">跨库 lint、悬空锚点、新鲜度、冲突与 SSOT 重复，一键扫描并生成可执行提案。</p>
+        <div class="knowledge-form-actions">
+          <button type="button" class="knowledge-btn primary" id="govRunCheckup">运行体检</button>
+          <button type="button" class="knowledge-btn" id="govProcessReweave">处理重织队列</button>
+          <button type="button" class="knowledge-btn" id="govOpenConnect">连接更多库</button>
+        </div>
+        <div class="knowledge-gov-ssot-mode">
+          <label for="govSsotMode">SSOT 强度</label>
+          <select class="knowledge-select" id="govSsotMode">
+            <option value="mark">允许但标记冲突</option>
+            <option value="block">阻断重复入库</option>
+          </select>
+        </div>
+      </section>
+      <div id="govReportHost"><div class="knowledge-reader-empty"><p>尚未运行体检。点击「运行体检」开始扫描。</p></div></div>
+    </main>
+  </div>`
+  const cfg = await window.api.fabricGovernanceConfig?.()
+  const modeSel = drawerBody.querySelector('#govSsotMode')
+  if (modeSel && cfg?.config?.ssotMode) modeSel.value = cfg.config.ssotMode
+  modeSel?.addEventListener('change', async () => {
+    await window.api.fabricGovernanceConfig?.({ ssotMode: modeSel.value })
+    toast('已更新 SSOT 策略', 'success', 1400)
+  })
+  drawerBody.querySelector('#govOpenConnect')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#govProcessReweave')?.addEventListener('click', e => {
+    runAsyncKnowledgeButton(e.currentTarget, { busyLabel: '重织中…', idleLabel: '处理重织队列' }, async () => {
+      const r = await window.api.fabricReweaveRun?.({ max: 2 })
+      if (!r?.ok) { toast(r?.error || '重织失败', 'error'); return }
+      toast(r.processed?.length ? `已处理 ${r.processed.length} 个库的重织` : '重织队列为空', 'success')
+      await refreshGovernanceReport()
+    })
+  })
+  drawerBody.querySelector('#govRunCheckup')?.addEventListener('click', e => {
+    runAsyncKnowledgeButton(e.currentTarget, { busyLabel: '体检中…', idleLabel: '运行体检' }, refreshGovernanceReport)
+  })
+  wireGovernanceReportActions(drawerBody)
+  if (knowledgeUi.governanceReport?.ok) renderGovernanceReportHost(knowledgeUi.governanceReport)
+}
+
+async function refreshGovernanceReport() {
+  const [report, proposals] = await Promise.all([
+    window.api.fabricGovernanceCheckup?.(),
+    window.api.fabricGovernanceProposals?.(),
+  ])
+  if (!report?.ok) { toast(report?.error || '体检失败', 'error'); return }
+  knowledgeUi.governanceReport = report
+  knowledgeUi.governanceProposals = proposals?.proposals || []
+  renderGovernanceReportHost(report)
+  wireGovernanceReportActions(drawerBody)
+}
+
+function renderGovernanceReportHost(report) {
+  const host = document.getElementById('govReportHost')
+  if (!host) return
+  const categories = report.categories || {}
+  const catChips = Object.entries(categories).map(([k, n]) => `<span class="knowledge-gov-chip">${esc(governanceCategoryLabel(k))} ${n}</span>`).join('')
+  const kbHealth = report.kbHealth || {}
+  const kbRows = Object.entries(kbHealth).map(([kbId, score]) => `<div class="knowledge-gov-kb-row"><span>${esc(kbId)}</span>${governanceHealthBar(score)}</div>`).join('')
+  const emptyAction = report.healthy
+    ? '<p class="knowledge-muted">知识织网状态良好。可定期运行体检或连接更多外挂库。</p>'
+    : ''
+  host.innerHTML = `<section class="knowledge-panel knowledge-gov-summary">
+    <h2>${report.healthy ? '状态良好' : `发现 ${report.issueCount} 项需关注`}</h2>
+    <p class="knowledge-panel-desc">整体健康 ${Math.round((report.overallHealth || 0) * 100)}% · Wiki 扫描 ${report.wikiScanned || 0} 份 · SSOT：${report.ssotMode === 'block' ? '阻断' : '标记'}</p>
+    <div class="knowledge-gov-overall">${governanceHealthBar(report.overallHealth || 1)}</div>
+    ${catChips ? `<div class="knowledge-gov-chips">${catChips}</div>` : ''}
+    ${kbRows ? `<div class="knowledge-gov-kb-health"><h3>各库健康分</h3>${kbRows}</div>` : ''}
+    ${emptyAction}
+  </section>
+  <section class="knowledge-panel"><h3>待审治理提案</h3>${governanceProposalRowsHtml(knowledgeUi.governanceProposals)}</section>
+  <section class="knowledge-panel"><h3>问题清单</h3><div class="knowledge-gov-issues">${report.issues?.length
+    ? governanceIssueRowsHtml(report.issues)
+    : `<div class="knowledge-fabric-empty compact"><strong>暂无问题</strong><p>可连接更多资料库或定期运行体检。</p><button type="button" class="knowledge-btn" id="govEmptyConnect">连接资料</button></div>`}</div></section>`
+  host.querySelector('#govEmptyConnect')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+}
+
+function wireGovernanceReportActions(root = drawerBody) {
+  root?.querySelectorAll('[data-gov-proposal-apply]').forEach(btn => {
+    btn.addEventListener('click', () => runAsyncKnowledgeButton(btn, { busyLabel: '…', idleLabel: '确认' }, async () => {
+      const r = await window.api.fabricGovernanceProposalApply?.(btn.dataset.govProposalApply)
+      if (!r?.ok) { toast(r?.error || '应用失败', 'error'); return }
+      toast('已应用治理提案', 'success')
+      await refreshGovernanceReport()
+    }))
+  })
+  root?.querySelectorAll('[data-gov-proposal-reject]').forEach(btn => {
+    btn.addEventListener('click', () => runAsyncKnowledgeButton(btn, { busyLabel: '…', idleLabel: '拒绝' }, async () => {
+      const r = await window.api.fabricGovernanceProposalReject?.(btn.dataset.govProposalReject)
+      if (!r?.ok) { toast(r?.error || '拒绝失败', 'error'); return }
+      toast('已拒绝提案', 'success')
+      await refreshGovernanceReport()
+    }))
+  })
+  root?.querySelectorAll('[data-gov-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = Number(btn.dataset.govIssueIndex)
+      const issue = knowledgeUi.governanceReport?.issues?.[idx]
+      const action = btn.dataset.govAction
+      if (!issue) return
+      if (action === 'locate') {
+        if (issue.path) {
+          knowledgeUi.selectedPath = issue.path
+          openKnowledgeOsPanel(undefined, 'browse')
+        } else if (issue.kbId) {
+          openKnowledgeOsPanel(undefined, 'fabric')
+        } else {
+          toast('请从织网或整理页查看节点', 'info')
+        }
+        return
+      }
+      runAsyncKnowledgeButton(btn, { busyLabel: '…', idleLabel: btn.textContent }, async () => {
+        const r = await window.api.fabricGovernanceAction?.({ issue, action })
+        if (!r?.ok) { toast(r?.error || '操作失败', 'error'); return }
+        toast(action === 'ignore' ? '已忽略该项' : '已生成提案', 'success')
+        await refreshGovernanceReport()
+      })
+    })
+  })
+}
+
+function renderKnowledgeSourcesModal() {
+  const modal = openKnowledgeModal('知识源', `<section class="knowledge-panel">
+    <p class="knowledge-panel-desc">选择当前对话和检索使用的知识库。目录与连接配置仅在需要时打开，不占用工作台空间。</p>
+    <div class="knowledge-source-list">${knowledgeProviderRowsHtml()}</div>
+    <div class="knowledge-form-actions" style="margin-top:18px">
+      <button type="button" class="knowledge-btn" id="modalAddRemote">添加 AI 检索源</button>
+      <button type="button" class="knowledge-btn" id="modalManageLocal">管理本地目录</button>
+    </div>
+  </section>`)
+  if (!modal) return
+  wireKnowledgeProviderRows(modal)
   modal.querySelector('#modalAddRemote')?.addEventListener('click', () => { closeKnowledgeModal(); renderRemoteRagModal(null) })
   modal.querySelector('#modalManageLocal')?.addEventListener('click', () => { closeKnowledgeModal(); renderLocalConfigModal() })
 }
@@ -1907,7 +2738,7 @@ async function renderLocalConfigModal() {
   if (!body) return
   body.innerHTML = `<section class="knowledge-panel">
     <div class="knowledge-panel-kicker">Local Source</div>
-    <p class="knowledge-panel-desc">可直接选择 <code>D:\\workflows\\workbench\\server-src\\llm-wiki</code>，或从已有内容源中选择空间并指定子目录。</p>
+    <p class="knowledge-panel-desc">选择已有内容源中的 LLM Wiki 空间，或直接绑定一个本地文件夹并指定子目录。</p>
     <div class="knowledge-form">
       <div class="knowledge-form-row"><label for="locSpace">内容源空间</label><select class="knowledge-select" id="locSpace">${options}</select></div>
       <div class="knowledge-form-row"><label for="locSubDir">子目录（相对空间根，可留空）</label><input class="knowledge-input" id="locSubDir" value="${esc(cfg.subDir || '')}" placeholder="例如：wiki"></div>
@@ -1916,7 +2747,7 @@ async function renderLocalConfigModal() {
         <button type="button" class="knowledge-btn" id="locPick">选择本地文件夹…</button>
       </div>
     </div>
-    <div class="knowledge-result">目录安全：子目录不得越出空间根。绑定仓库根可同时浏览 raw/ 与 wiki/；只绑定 wiki 子目录则得到更聚焦的阅读体验。</div>
+    <div class="knowledge-result">目录安全：子目录不得越出空间根。绑定 LLM Wiki 根可同时浏览资料与已整理知识；只绑定聚焦目录可减少首次分析范围。</div>
   </section>`
   body.querySelector('#locSave')?.addEventListener('click', async e => {
     e.currentTarget.disabled = true
@@ -1929,7 +2760,7 @@ async function renderLocalConfigModal() {
     knowledgeUi.selectedPath = null
     closeKnowledgeModal()
     toast('已更新本地知识库绑定', 'success')
-    openKnowledgeOsPanel()
+    openKnowledgeOsPanel(undefined, knowledgeUi.page)
   })
   body.querySelector('#locPick')?.addEventListener('click', async e => {
     e.currentTarget.disabled = true
@@ -1941,7 +2772,7 @@ async function renderLocalConfigModal() {
     knowledgeUi.selectedPath = null
     closeKnowledgeModal()
     toast('已绑定所选知识资料目录', 'success')
-    openKnowledgeOsPanel()
+    openKnowledgeOsPanel(undefined, knowledgeUi.page)
   })
 }
 
@@ -1986,7 +2817,7 @@ async function renderObsidianBridgeModal() {
       ${installed && !directGraph ? '<button type="button" class="knowledge-btn" id="obsidianBridgeSetup">启用图谱直达</button>' : ''}
     </div>
     <div class="obsidian-handoff-boundary">
-      <div><strong>KnowMe</strong><span>知识整理 · AI 检索 · 冲突与长期维护</span></div>
+      <div><strong>KnowMe</strong><span>懂你的知识网 · AI 检索 · 冲突与长期维护</span></div>
       <div><strong>Obsidian</strong><span>人工编辑 · 双链浏览 · 全局图谱</span></div>
     </div>
   </section>`
@@ -2056,7 +2887,264 @@ async function renderObsidianBridgeModal() {
   })
 }
 
-function renderLocalKnowledgeWorkspace(active, providers, list) {
+function knowledgeLatestTask() {
+  return [...(knowledgeUi.taskSnapshot?.tasks || [])]
+    .sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))[0] || null
+}
+
+function knowledgePendingProposals() {
+  return (knowledgeUi.taskSnapshot?.proposals || []).filter(item => item.status === 'draft')
+}
+
+function knowledgeTaskStatusLabel(status) {
+  return ({
+    idle: '待开始',
+    scanning: '扫描资料',
+    analyzing: 'AI 分析中',
+    review: '等待审核',
+    committing: '正在写入',
+    completed: '已完成',
+    failed: '处理失败',
+    cancelled: '已取消',
+  })[status] || '待处理'
+}
+
+function knowledgeOrganizerHtml(active, list) {
+  const latest = knowledgeLatestTask()
+  const pending = knowledgePendingProposals()
+  const wikiCount = list.wiki?.length || 0
+  const okfCount = list.okf?.length || 0
+  const nextTitle = pending.length
+    ? `有 ${pending.length} 条整理提案等待确认`
+    : latest?.status === 'completed'
+      ? '继续整理新增或变更资料'
+      : wikiCount
+        ? '让 AI 先分析这份 LLM Wiki'
+        : '先绑定一份 LLM Wiki'
+  return `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({
+      name: active.displayName || '本地 LLM Wiki',
+      kind: 'AI 知识整理',
+      root: list.wikiRoot,
+      stats: { total: wikiCount + okfCount, wiki: wikiCount, okf: okfCount },
+    })}
+    <main class="knowledge-page-main">
+      <div class="knowledge-reader-inner knowledge-organizer">
+        <section class="knowledge-organizer-hero">
+          <div class="knowledge-panel-kicker">AI knowledge steward</div>
+          <h1>${esc(nextTitle)}</h1>
+          <p>KnowMe 会读取 LLM Wiki，生成带来源的整理提案。原始资料不会被覆盖，只有你确认后才会写入正式知识。</p>
+          <div class="knowledge-organizer-actions">
+            ${pending.length
+              ? '<button type="button" class="knowledge-btn primary" id="kosReviewPending">查看待审核提案</button>'
+              : '<button type="button" class="knowledge-btn primary" id="kosStartAi">开始 AI 整理</button>'}
+            <button type="button" class="knowledge-btn" id="kosBrowseMaterials">浏览资料</button>
+            <button type="button" class="knowledge-btn" id="kosHealth">先做体检</button>
+          </div>
+        </section>
+        <section class="knowledge-organizer-stats" aria-label="知识状态">
+          <div><span>原始资料</span><strong>${wikiCount}</strong><small>来自当前 LLM Wiki</small></div>
+          <div><span>已整理知识</span><strong>${okfCount}</strong><small>可稳定复用的概念</small></div>
+          <div><span>待审核</span><strong class="${pending.length ? 'attention' : ''}">${pending.length}</strong><small>${pending.length ? '需要你的确认' : '暂无待处理提案'}</small></div>
+        </section>
+        <section class="knowledge-organizer-task">
+          <div class="knowledge-organizer-section-head"><div><div class="knowledge-panel-kicker">Start a task</div><h2>选择整理范围</h2></div><span>默认只处理新增或变更资料</span></div>
+          <div class="knowledge-scope-options" role="radiogroup" aria-label="整理范围">
+            <label class="knowledge-scope-option active"><input type="radio" name="kosScope" value="changed" checked><strong>新增或变更</strong><span>优先处理最近更新的资料</span></label>
+            <label class="knowledge-scope-option"><input type="radio" name="kosScope" value="all"><strong>全部资料</strong><span>重新分析当前 LLM Wiki</span></label>
+            <label class="knowledge-scope-option"><input type="radio" name="kosScope" value="topic"><strong>指定主题</strong><span>按标题或目录筛选</span></label>
+          </div>
+          <input class="knowledge-input" id="kosTopic" placeholder="指定主题时输入关键词，例如：Agent Runtime" disabled>
+          <div class="knowledge-form-actions"><button type="button" class="knowledge-btn primary" id="kosStartAiSecondary">开始整理</button><button type="button" class="knowledge-btn" id="kosSources">管理知识源</button></div>
+        </section>
+        <section class="knowledge-organizer-task-state" aria-live="polite">
+          <div class="knowledge-organizer-section-head"><div><div class="knowledge-panel-kicker">Latest task</div><h2>最近一次整理</h2></div>${latest ? `<span class="knowledge-task-status ${latest.status}">${esc(knowledgeTaskStatusLabel(latest.status))}</span>` : '<span>尚未开始</span>'}</div>
+          ${latest
+          ? `<div class="knowledge-task-progress"><div class="knowledge-task-progress-row"><strong>${esc(knowledgeTaskStatusLabel(latest.status))}</strong><span>${latest.analyzed || 0}/${latest.total || 0} 份资料 · ${latest.proposalCount || 0} 条提案</span></div><div class="knowledge-progress-track"><i style="width:${latest.total ? Math.min(100, Math.round((latest.analyzed || 0) / latest.total * 100)) : latest.status === 'completed' ? 100 : 0}%"></i></div>${latest.error ? `<p class="knowledge-task-error">${esc(latest.error)}</p>` : ''}<div class="knowledge-form-actions">${['scanning', 'analyzing'].includes(latest.status) ? '<button type="button" class="knowledge-btn" id="kosCancelTask">取消任务</button>' : ''}${['failed', 'cancelled'].includes(latest.status) ? '<button type="button" class="knowledge-btn" id="kosRetryTask">继续任务</button>' : ''}${latest.status === 'review' ? '<button type="button" class="knowledge-btn" id="kosReviewTask">打开审核</button>' : ''}</div></div>`
+            : '<div class="knowledge-task-empty">还没有整理任务。建议先从“新增或变更”开始。</div>'}
+        </section>
+      </div>
+    </main>
+  </div>`
+}
+
+async function loadKnowledgeTaskSnapshot() {
+  const result = await window.api.knowledgeStewardTaskList?.()
+  knowledgeUi.taskSnapshot = result?.ok
+    ? { tasks: result.tasks || [], proposals: result.proposals || [] }
+    : { tasks: [], proposals: [] }
+  return knowledgeUi.taskSnapshot
+}
+
+async function loadKnowledgeHarnessStatus() {
+  if (typeof window.api?.knowledgeOsHarnessStatus !== 'function') {
+    return { ok: null, unavailable: true, error: '知识保护状态暂不可用，请重启 KnowMe' }
+  }
+  try {
+    return await window.api.knowledgeOsHarnessStatus()
+  } catch (error) {
+    console.warn('[knowledge] harness status unavailable', error?.message || String(error))
+    return { ok: null, unavailable: true, error: '知识保护状态暂不可用，请重启 KnowMe' }
+  }
+}
+
+async function startKnowledgeOrganization() {
+  const selected = document.querySelector('input[name="kosScope"]:checked')?.value || 'changed'
+  const topic = document.getElementById('kosTopic')?.value?.trim() || ''
+  if (selected === 'topic' && !topic) {
+    toast('请先输入要整理的主题', 'info')
+    document.getElementById('kosTopic')?.focus()
+    return
+  }
+  const buttons = [...drawerBody.querySelectorAll('#kosStartAi,#kosStartAiSecondary')]
+  buttons.forEach(button => { button.disabled = true; button.textContent = '正在分析…' })
+  const result = await window.api.knowledgeStewardTaskCreate?.({
+    scope: { mode: selected, topic },
+  })
+  buttons.forEach(button => { button.disabled = false; button.textContent = button.id === 'kosStartAi' ? '开始 AI 整理' : '开始整理' })
+  if (!result?.ok) {
+    toast(result?.error || '整理任务启动失败', 'error')
+    return
+  }
+  toast(result.proposals?.length ? `已生成 ${result.proposals.length} 条整理提案` : '整理任务已完成，暂无新提案', 'success')
+  await openKnowledgeOsPanel(undefined, result.proposals?.length ? 'review' : 'organize')
+}
+
+function wireKnowledgeOrganizer() {
+  drawerBody.querySelector('#kosStartAi')?.addEventListener('click', startKnowledgeOrganization)
+  drawerBody.querySelector('#kosStartAiSecondary')?.addEventListener('click', startKnowledgeOrganization)
+  drawerBody.querySelector('#kosReviewPending')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'review'))
+  drawerBody.querySelector('#kosReviewTask')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'review'))
+  drawerBody.querySelector('#kosBrowseMaterials')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'browse'))
+  drawerBody.querySelector('#kosHealth')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
+  drawerBody.querySelector('#kosSources')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#kosRetryTask')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true
+    const latest = knowledgeLatestTask()
+    const result = await window.api.knowledgeStewardTaskRetry?.(latest?.id)
+    if (!result?.ok) toast(result?.error || '重试失败', 'error')
+    await openKnowledgeOsPanel(undefined, result?.proposals?.length ? 'review' : 'organize')
+  })
+  drawerBody.querySelector('#kosCancelTask')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true
+    const latest = knowledgeLatestTask()
+    const result = await window.api.knowledgeStewardTaskCancel?.(latest?.id)
+    if (!result?.ok) toast(result?.error || '取消失败', 'error')
+    await openKnowledgeOsPanel(undefined, 'organize')
+  })
+  drawerBody.querySelectorAll('input[name="kosScope"]').forEach(input => {
+    input.addEventListener('change', () => {
+      drawerBody.querySelectorAll('.knowledge-scope-option').forEach(option => option.classList.toggle('active', option.querySelector('input') === input))
+      const topic = document.getElementById('kosTopic')
+      if (topic) {
+        topic.disabled = input.value !== 'topic'
+        if (input.value !== 'topic') topic.value = ''
+      }
+    })
+  })
+}
+
+async function renderKnowledgeOrganizerWorkspace(active, list) {
+  await loadKnowledgeTaskSnapshot()
+  drawerBody.innerHTML = knowledgeOrganizerHtml(active, list)
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  drawerBody.querySelector('#kosRefresh')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'organize'))
+  drawerBody.querySelector('#kosLint')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
+  wireKnowledgeOrganizer()
+}
+
+function knowledgeProposalListHtml(proposals) {
+  if (!proposals.length) return '<div class="knowledge-task-empty">没有等待确认的建议。AI 整理不会直接改写稳定知识。</div>'
+  return proposals.map(item => `<button type="button" class="knowledge-proposal-row${item.id === knowledgeUi.selectedProposalId ? ' active' : ''}" data-kos-proposal="${esc(item.id)}">
+    <span class="knowledge-proposal-main"><strong>${esc(item.title || '未命名提案')}</strong><small>${esc(item.sourcePath || '未知来源')}</small></span>
+    <span class="knowledge-proposal-confidence">${Math.round((Number(item.confidence) || 0) * 100)}%</span>
+  </button>`).join('')
+}
+
+function renderKnowledgeProposalReader(proposal) {
+  const reader = document.getElementById('kosProposalReader')
+  if (!reader) return
+  if (!proposal) {
+    reader.innerHTML = '<div class="knowledge-reader-empty"><h3>没有需要处理的内容</h3><p>AI 产生整理建议后，会先放在这里等你决定。</p></div>'
+    return
+  }
+  reader.innerHTML = `<article class="knowledge-proposal-detail">
+    <div class="knowledge-panel-kicker">整理建议</div>
+    <h1>${esc(proposal.title || '未命名建议')}</h1>
+    <div class="knowledge-proposal-meta"><span>来自：${esc(proposal.sourcePath || '未知资料')}</span><span>建议保存为：${esc(proposal.targetPath || '新知识')}</span><span>参考可信度：${Math.round((Number(proposal.confidence) || 0) * 100)}%</span></div>
+    <p class="knowledge-proposal-rationale">${esc(proposal.rationale || '暂无说明')}</p>
+    <details class="knowledge-proposal-source"><summary>查看来源条目</summary><pre id="kosSourcePreview">正在读取来源…</pre></details>
+    <div class="knowledge-proposal-content"><label class="knowledge-proposal-edit-label" for="kosProposalDraft">整理后的知识内容，可在接受前编辑</label><textarea class="knowledge-textarea knowledge-proposal-editor" id="kosProposalDraft">${esc(proposal.proposedContent || proposal.body || '')}</textarea></div>
+    <div class="knowledge-form-actions"><button type="button" class="knowledge-btn primary" id="kosAcceptProposal">接受并写入</button><button type="button" class="knowledge-btn" id="kosSnoozeProposal">稍后处理</button><button type="button" class="knowledge-btn" id="kosRejectProposal">拒绝</button><button type="button" class="knowledge-btn" id="kosOpenProposalSource">查看来源</button></div>
+  </article>`
+  window.api.knowledgeOsRead?.({ kind: 'wiki', path: proposal.sourcePath }).then(result => {
+    const source = document.getElementById('kosSourcePreview')
+    if (source) source.textContent = result?.ok ? result.content : (result?.error || '来源读取失败')
+  }).catch(() => {
+    const source = document.getElementById('kosSourcePreview')
+    if (source) source.textContent = '来源读取失败'
+  })
+  reader.querySelector('#kosAcceptProposal')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true
+    const result = await window.api.knowledgeStewardProposalAccept?.({
+      id: proposal.id,
+      content: document.getElementById('kosProposalDraft')?.value || '',
+    })
+    if (!result?.ok) {
+      toast(result?.error || '提案写入失败', 'error')
+      event.currentTarget.disabled = false
+      return
+    }
+    toast('提案已接受并写入知识库', 'success')
+    await openKnowledgeOsPanel(undefined, 'review')
+  })
+  reader.querySelector('#kosSnoozeProposal')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true
+    const result = await window.api.knowledgeStewardProposalSnooze?.(proposal.id)
+    if (!result?.ok) toast(result?.error || '暂存失败', 'error')
+    await openKnowledgeOsPanel(undefined, 'review')
+  })
+  reader.querySelector('#kosRejectProposal')?.addEventListener('click', async event => {
+    event.currentTarget.disabled = true
+    const result = await window.api.knowledgeStewardProposalReject?.(proposal.id)
+    if (!result?.ok) toast(result?.error || '拒绝提案失败', 'error')
+    await openKnowledgeOsPanel(undefined, 'review')
+  })
+  reader.querySelector('#kosOpenProposalSource')?.addEventListener('click', () => {
+    knowledgeUi.selectedPath = proposal.sourcePath
+    openKnowledgeOsPanel(undefined, 'browse')
+  })
+}
+
+async function renderKnowledgeReviewWorkspace(active, list) {
+  await loadKnowledgeTaskSnapshot()
+  const proposals = knowledgePendingProposals()
+  if (!knowledgeUi.selectedProposalId || !proposals.some(item => item.id === knowledgeUi.selectedProposalId)) {
+    knowledgeUi.selectedProposalId = proposals[0]?.id || null
+  }
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({ name: '待我确认', kind: '整理建议', root: list.wikiRoot, stats: { total: (list.wiki?.length || 0) + (list.okf?.length || 0), wiki: list.wiki?.length || 0, okf: list.okf?.length || 0 } })}
+    <div class="knowledge-review-grid">
+      <section class="knowledge-proposal-list"><div class="knowledge-browser-head"><div class="knowledge-panel-kicker">AI 整理建议</div><h2>等待你的决定 <span>${proposals.length}</span></h2></div><div class="knowledge-entry-list" id="kosProposalList">${knowledgeProposalListHtml(proposals)}</div></section>
+      <main class="knowledge-reader" id="kosProposalReader"></main>
+    </div>
+  </div>`
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  drawerBody.querySelector('#kosRefresh')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'review'))
+  drawerBody.querySelector('#kosLint')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
+  drawerBody.querySelectorAll('[data-kos-proposal]').forEach(button => {
+    button.addEventListener('click', () => {
+      knowledgeUi.selectedProposalId = button.dataset.kosProposal
+      drawerBody.querySelectorAll('[data-kos-proposal]').forEach(item => item.classList.toggle('active', item === button))
+      renderKnowledgeProposalReader(proposals.find(item => item.id === knowledgeUi.selectedProposalId))
+    })
+  })
+  renderKnowledgeProposalReader(proposals.find(item => item.id === knowledgeUi.selectedProposalId))
+}
+
+function applyLocalKnowledgeWorkspaceState(active, list) {
   const entries = [...(list.wiki || []).map(x => ({ ...x, kind: 'wiki' })), ...(list.okf || []).map(x => ({ ...x, kind: 'okf' }))]
   if (knowledgeUi.wikiRoot !== list.wikiRoot) {
     knowledgeUi.wikiRoot = list.wikiRoot
@@ -2067,26 +3155,153 @@ function renderLocalKnowledgeWorkspace(active, providers, list) {
   knowledgeUi.localList = list
   knowledgeUi.activeProvider = active
   const stats = { total: entries.length, wiki: list.wiki?.length || 0, okf: list.okf?.length || 0 }
+  return { entries, stats }
+}
+
+async function saveKnowledgeMaterial({ text, title } = {}) {
+  const body = String(text || '').trim()
+  if (!body) return { ok: false, error: '请输入内容' }
+  const addMaterial = window.api.knowledgeAddMaterial || window.api.knowledgeOsIngest
+  if (!addMaterial) return { ok: false, error: '无法保存资料' }
+  const r = await addMaterial({ text: body, title: title ? String(title).trim() : undefined })
+  if (r?.ok) await window.api.knowledgeOsRefresh?.()
+  return r
+}
+
+function renderKnowledgeFirstTouchDone(host) {
+  if (!host) { openKnowledgeOsPanel(undefined, 'status'); return }
+  host.innerHTML = `<div class="knowledge-firsttouch-done">
+    <span class="knowledge-firsttouch-check" aria-hidden="true"></span>
+    <h2>已保存到你的知识</h2>
+    <p>要我把它整理成知识吗？整理成什么样，都由你确认。</p>
+    <div class="knowledge-firsttouch-actions">
+      <button type="button" class="knowledge-btn primary" id="firstTouchOrganize">整理</button>
+      <button type="button" class="knowledge-btn" id="firstTouchLater">以后再说</button>
+    </div>
+  </div>`
+  host.querySelector('#firstTouchOrganize')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'organize'))
+  host.querySelector('#firstTouchLater')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'status'))
+}
+
+function renderKnowledgeEmptyWelcome() {
+  drawerBody.innerHTML = `<div class="knowledge-workspace knowledge-empty-workspace">
+    <main class="knowledge-page-main">
+      <section class="knowledge-firsttouch" id="knowledgeFirstTouch">
+        <div class="knowledge-firsttouch-brand">
+          <span class="knowledge-firsttouch-logo" aria-hidden="true"></span>
+          <h1>你的知识网</h1>
+        </div>
+        <p class="knowledge-firsttouch-lede">把资料放进来，AI 帮你理成能查的知识，怎么整理，你说了算。</p>
+        <ol class="knowledge-firsttouch-steps" aria-label="使用方式">
+          <li><span class="knowledge-firsttouch-step-ico" aria-hidden="true"></span><strong>放进来</strong></li>
+          <li aria-hidden="true" class="knowledge-firsttouch-arrow">→</li>
+          <li><span class="knowledge-firsttouch-step-ico" aria-hidden="true"></span><strong>AI 整理</strong></li>
+          <li aria-hidden="true" class="knowledge-firsttouch-arrow">→</li>
+          <li><span class="knowledge-firsttouch-step-ico" aria-hidden="true"></span><strong>随时查</strong></li>
+        </ol>
+        <div class="knowledge-firsttouch-input">
+          <textarea id="firstTouchBody" rows="4" placeholder="粘贴一段文字，或写点笔记…" aria-label="第一份资料内容"></textarea>
+        </div>
+        <div class="knowledge-firsttouch-actions">
+          <button type="button" class="knowledge-btn primary" id="firstTouchAdd">+ 添加第一份资料</button>
+          <button type="button" class="knowledge-btn" id="firstTouchPickFile">选择文件</button>
+        </div>
+        <button type="button" class="knowledge-firsttouch-connect" id="firstTouchConnect">已有飞书 / 文件夹？ 连接来源</button>
+      </section>
+    </main>
+  </div>`
+  const body = drawerBody.querySelector('#firstTouchBody')
+  body?.focus()
+  drawerBody.querySelector('#firstTouchPickFile')?.addEventListener('click', () => openKnowledgeAddModal('status'))
+  drawerBody.querySelector('#firstTouchConnect')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#firstTouchAdd')?.addEventListener('click', e => {
+    runAsyncKnowledgeButton(e.currentTarget, { busyLabel: '保存中…', idleLabel: '+ 添加第一份资料' }, async () => {
+      const text = body?.value?.trim()
+      if (!text) { toast('先粘贴或写一点内容', 'error'); body?.focus(); return }
+      const r = await saveKnowledgeMaterial({ text })
+      if (!r?.ok) { toast(r?.error || '写入失败', 'error'); return }
+      renderKnowledgeFirstTouchDone(drawerBody.querySelector('#knowledgeFirstTouch'))
+    })
+  })
+}
+
+async function renderKnowledgeStatusWorkspace(active, list) {
+  const { entries, stats } = applyLocalKnowledgeWorkspaceState(active, list)
+  drawerBody.innerHTML = `<div class="knowledge-workspace llmwiki-workspace">
+    ${knowledgeTopbarHtml({ name: '我的知识', kind: '本地知识', root: list.wikiRoot, stats })}
+    <main class="llmwiki-workbench" aria-label="我的知识工作台">
+      <section class="llmwiki-pane llmwiki-tree-pane" aria-label="资料树">
+        <header class="llmwiki-pane-head">
+          <div><h1>我的资料</h1><span class="llmwiki-pane-eyebrow">${stats.total || 0} 个条目</span></div>
+          <button type="button" class="knowledge-btn primary knowledge-btn-sm" id="llmwikiAddMaterial">添加</button>
+        </header>
+        ${knowledgeBrowserHtml()}
+      </section>
+      <main class="knowledge-reader llmwiki-reader-pane" id="kosReader" aria-label="阅读与编辑"></main>
+    </main>
+  </div>`
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  drawerBody.querySelector('#kosRefresh')?.addEventListener('click', async e => {
+    if (!confirmDiscardKnowledgeRawEdit()) return
+    e.currentTarget.disabled = true
+    e.currentTarget.textContent = '刷新中…'
+    const r = await window.api.knowledgeOsRefresh()
+    if (!r?.ok) {
+      toast(r?.error || '重新读取失败', 'error')
+      e.currentTarget.disabled = false
+      e.currentTarget.textContent = '重新读取'
+      return
+    }
+    toast(`已重新读取 ${r.scanned || 0} 个条目`, 'success')
+    clearKnowledgeRawEditorState()
+    openKnowledgeOsPanel(undefined, 'status')
+  })
+  drawerBody.querySelector('#kosLint')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
+  drawerBody.querySelector('#llmwikiAddMaterial')?.addEventListener('click', () => openKnowledgeAddModal('status'))
+  wireKnowledgeEntries()
+  drawerBody.querySelector('#kosSearch')?.addEventListener('input', e => {
+    knowledgeUi.query = e.target.value
+    refreshKnowledgeEntryList()
+  })
+  drawerBody.querySelectorAll('[data-kos-filter]').forEach(el => {
+    el.addEventListener('click', () => {
+      knowledgeUi.filter = el.dataset.kosFilter
+      drawerBody.querySelectorAll('[data-kos-filter]').forEach(btn => btn.classList.toggle('active', btn === el))
+      refreshKnowledgeEntryList()
+    })
+  })
+  if (knowledgeUi.selectedPath && entries.some(item => item.path === knowledgeUi.selectedPath)) {
+    const item = entries.find(x => x.path === knowledgeUi.selectedPath)
+    openKnowledgeEntry(item.kind, item.path)
+  } else {
+    knowledgeUi.selectedPath = null
+    renderKnowledgeWelcome()
+  }
+}
+
+function renderLocalKnowledgeWorkspace(active, providers, list) {
+  const { entries, stats } = applyLocalKnowledgeWorkspaceState(active, list)
   const documentView = `${knowledgeBrowserHtml()}<main class="knowledge-reader" id="kosReader"></main>`
   drawerBody.innerHTML = `<div class="knowledge-workspace">
-    ${knowledgeTopbarHtml({ name: active.displayName || '本地知识库', kind: '本地知识资料', root: list.wikiRoot, stats })}
+    ${knowledgeTopbarHtml({ name: '我的知识', kind: '本地知识', root: list.wikiRoot, stats })}
     <div class="knowledge-grid">
       ${documentView}
     </div>
   </div>`
-  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', renderKnowledgeSourcesModal)
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
   drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
   drawerBody.querySelector('#kosRefresh')?.addEventListener('click', async e => {
+    if (!confirmDiscardKnowledgeRawEdit()) return
     e.currentTarget.disabled = true
     e.currentTarget.textContent = '刷新中…'
     const r = await window.api.knowledgeOsRefresh()
-    if (!r?.ok) { toast(r?.error || '刷新失败', 'error'); e.currentTarget.disabled = false; e.currentTarget.textContent = '刷新'; return }
-    toast(`已刷新 ${r.scanned || 0} 个条目`, 'success')
-    openKnowledgeOsPanel()
+    if (!r?.ok) { toast(r?.error || '重新读取失败', 'error'); e.currentTarget.disabled = false; e.currentTarget.textContent = '重新读取'; return }
+    toast(`已重新读取 ${r.scanned || 0} 个条目`, 'success')
+    clearKnowledgeRawEditorState()
+    openKnowledgeOsPanel(undefined, 'browse')
   })
-  drawerBody.querySelector('#kosLint')?.addEventListener('click', e => {
-    renderHealthPanel(document.getElementById('kosLint') || e.currentTarget)
-  })
+  drawerBody.querySelector('#kosLint')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'health'))
   wireKnowledgeEntries()
   drawerBody.querySelector('#kosSearch')?.addEventListener('input', e => { knowledgeUi.query = e.target.value; refreshKnowledgeEntryList() })
   drawerBody.querySelectorAll('[data-kos-filter]').forEach(el => {
@@ -2131,7 +3346,7 @@ function renderRemoteRagWorkspace(prov) {
       </section></div></main>
     </div>
   </div>`
-  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', renderKnowledgeSourcesModal)
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
   drawerBody.querySelector('#ragConfigure')?.addEventListener('click', () => renderRemoteRagModal(p))
   drawerBody.querySelector('#ragReaderConfigure')?.addEventListener('click', () => renderRemoteRagModal(p))
   drawerBody.querySelector('#ragTest')?.addEventListener('click', async e => {
@@ -2191,7 +3406,7 @@ function renderRemoteRagModal(prov) {
     if (!r) return
     closeKnowledgeModal()
     toast('AI 检索源已保存', 'success')
-    openKnowledgeOsPanel()
+    openKnowledgeOsPanel(undefined, knowledgeUi.page)
   })
   modal.querySelector('#ragRemove')?.addEventListener('click', async e => {
     if (!window.confirm(`删除远程知识源“${p.displayName}”？`)) return
@@ -2200,40 +3415,326 @@ function renderRemoteRagModal(prov) {
     if (!r?.ok) { toast(r?.error || '删除失败', 'error'); e.currentTarget.disabled = false; return }
     closeKnowledgeModal()
     toast('远程知识源已删除', 'success')
-    openKnowledgeOsPanel()
+    openKnowledgeOsPanel(undefined, knowledgeUi.page)
   })
 }
 
-async function openKnowledgeOsPanel(title) {
+function fabricEdgeLabel(type) {
+  return ({
+    refines: '细化',
+    coversTopic: '覆盖主题',
+    relatesTo: '相关',
+    contradicts: '冲突',
+    alias: '别名',
+    ownedBy: '归属',
+  })[type] || type
+}
+
+/** 异步按钮：await 前缓存引用，finally 恢复，避免 DOM 重建后 currentTarget 为 null。 */
+async function runAsyncKnowledgeButton(button, { busyLabel, idleLabel }, task) {
+  if (!button || button.disabled) return
+  const idle = idleLabel || button.textContent || ''
+  button.disabled = true
+  if (busyLabel) button.textContent = busyLabel
+  try {
+    await task()
+  } finally {
+    if (button.isConnected) {
+      button.disabled = false
+      if (idleLabel) button.textContent = idle
+    }
+  }
+}
+
+function fabricGraphListHtml(graph) {
+  const nodes = graph?.nodes || []
+  const edges = graph?.edges || []
+  if (!nodes.length) {
+    return `<div class="knowledge-fabric-empty">
+      <strong>知识织网还是空的</strong>
+      <p>连接资料后会自动从 Wiki 生成概念节点；挂载外挂库后可一键织网。</p>
+      <button type="button" class="knowledge-btn primary" id="fabricEmptyConnect">连接资料</button>
+      <button type="button" class="knowledge-btn" id="fabricEmptyWeave">生成织网提案</button>
+    </div>`
+  }
+  const conceptRows = nodes.filter(n => n.kind === 'concept').slice(0, 40).map(n => `
+    <div class="knowledge-fabric-node concept">
+      <span class="knowledge-fabric-node-kind">概念</span>
+      <strong>${esc(n.title)}</strong>
+      <span class="knowledge-fabric-node-meta">authority ${n.authority || 2}${n.path ? ` · ${esc(n.path)}` : ''}</span>
+      ${n.summary ? `<p>${esc(n.summary.slice(0, 120))}${n.summary.length > 120 ? '…' : ''}</p>` : ''}
+    </div>`).join('')
+  const anchorRows = nodes.filter(n => n.kind === 'anchor').slice(0, 40).map(n => `
+    <div class="knowledge-fabric-node anchor${n.stale ? ' stale' : ''}">
+      <span class="knowledge-fabric-node-kind">锚点</span>
+      <strong>${esc(n.title)}</strong>
+      <span class="knowledge-fabric-node-meta">${esc(n.kbId || '')}${n.extRef ? ` · ${esc(n.extRef)}` : ''}${n.stale ? ' · 待重织' : ''}</span>
+    </div>`).join('')
+  const edgeRows = edges.slice(0, 60).map(e => {
+    const from = nodes.find(n => n.id === e.from)
+    const to = nodes.find(n => n.id === e.to)
+    return `<div class="knowledge-fabric-edge"><span class="knowledge-fabric-edge-type">${esc(fabricEdgeLabel(e.type))}</span><span>${esc(from?.title || e.from)} → ${esc(to?.title || e.to)}</span></div>`
+  }).join('')
+  return `<div class="knowledge-fabric-graph">
+    <section><h3>概念节点 ${nodes.filter(n => n.kind === 'concept').length}</h3>${conceptRows || '<p class="knowledge-muted">暂无概念</p>'}</section>
+    <section><h3>外挂锚点 ${nodes.filter(n => n.kind === 'anchor').length}</h3>${anchorRows || '<p class="knowledge-muted">挂载外挂库后织网生成锚点</p>'}</section>
+    <section><h3>关系边 ${edges.length}</h3>${edgeRows || '<p class="knowledge-muted">织网后会连接概念与锚点</p>'}</section>
+  </div>`
+}
+
+function fabricHitRowsHtml(hits = [], opts = {}) {
+  const searched = !!opts.searched
+  if (!hits.length) {
+    if (searched) {
+      return `<div class="knowledge-fabric-empty compact" data-fabric-no-hit="1">
+        <strong>未找到相关知识</strong>
+        <p>试试更短或更通用的关键词，或先补充资料再检索。</p>
+        <div class="knowledge-form-actions">
+          <button type="button" class="knowledge-btn" id="fabricNoHitConnect">连接知识库</button>
+          <button type="button" class="knowledge-btn" id="fabricNoHitIngest">吸收资料</button>
+          <button type="button" class="knowledge-btn" id="fabricNoHitFabric">去织网整理</button>
+        </div>
+      </div>`
+    }
+    return `<div class="knowledge-fabric-empty compact">
+      <strong>输入问题试试根优先检索</strong>
+      <p>会先查根 Fabric，再按路由选择性召回外挂库。</p>
+    </div>`
+  }
+  return hits.map((hit, i) => {
+    const prov = hit.provenance || {}
+    const kb = prov.kbId || hit.kbId || 'root'
+    const auth = prov.authority ?? hit.authority ?? 2
+    return `<article class="knowledge-fabric-hit">
+      <header><span class="knowledge-fabric-hit-rank">${i + 1}</span><strong>${esc(hit.title || '未命名')}</strong>
+        <span class="knowledge-fabric-tag">${esc(kb)}</span><span class="knowledge-fabric-tag authority" title="权威级 ${auth}/5">A${auth}</span></header>
+      <div class="knowledge-fabric-hit-path">${esc(hit.path || hit.nodeId || '')}</div>
+      ${hit.snippet ? `<p>${esc(hit.snippet)}</p>` : ''}
+      ${hit.conflict?.message ? `<div class="knowledge-fabric-conflict">⚠ ${esc(hit.conflict.message)}</div>` : ''}
+    </article>`
+  }).join('')
+}
+
+function wireFabricRetrieveEmptyActions(root = drawerBody) {
+  root?.querySelector('#fabricNoHitConnect')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  root?.querySelector('#fabricNoHitIngest')?.addEventListener('click', () => openFabricIngestModal())
+  root?.querySelector('#fabricNoHitFabric')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'fabric'))
+}
+
+async function renderKnowledgeFabricWorkspace(active, list) {
+  const { stats } = applyLocalKnowledgeWorkspaceState(active, list)
+  const snap = await window.api.fabricGraph?.()
+  knowledgeUi.fabricSnapshot = snap?.ok ? snap : null
+  const weave = await window.api.fabricWeaveList?.()
+  knowledgeUi.weaveProposals = weave?.proposals || []
+  const engine = await window.api.fabricEngineStatus?.()
+  const gstats = snap?.stats || {}
+  const pendingWeave = knowledgeUi.weaveProposals.filter(p => p.status === 'pending')
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({ name: active.displayName || '本地知识库', kind: '知识织网', root: list.wikiRoot, stats })}
+    <main class="knowledge-page-main knowledge-fabric-page">
+      <section class="knowledge-panel">
+        <div class="knowledge-panel-kicker">Knowledge Fabric</div>
+        <h2>结构总览</h2>
+        <p class="knowledge-panel-desc">根 Fabric 维护概念、锚点与关系边。检索引擎：${esc(engine?.engine || 'fallback')}${engine?.qmdEnabled ? '（qmd 已启用）' : '（词面 fallback）'}。</p>
+        <div class="knowledge-home-status fabric-stats">
+          <div><span>概念</span><strong>${gstats.concepts || 0}</strong></div>
+          <div><span>锚点</span><strong>${gstats.anchors || 0}</strong></div>
+          <div><span>关系</span><strong>${gstats.edges || 0}</strong></div>
+        </div>
+        <div class="knowledge-form-actions">
+          <button type="button" class="knowledge-btn primary" id="fabricWeaveRun">织入当前库</button>
+          <button type="button" class="knowledge-btn" id="fabricRefreshGraph">刷新图谱</button>
+          <button type="button" class="knowledge-btn" id="fabricOpenRetrieve">打开检索台</button>
+        </div>
+      </section>
+      ${fabricGraphListHtml(snap?.graph)}
+      <section class="knowledge-panel">
+        <div class="knowledge-panel-kicker">Weave proposals</div>
+        <h2>织网提案 ${pendingWeave.length ? `(${pendingWeave.length} 待审核)` : ''}</h2>
+        ${pendingWeave.length
+          ? pendingWeave.map(p => `<div class="knowledge-fabric-proposal">
+              <strong>${esc(p.title)}</strong>
+              <p>${esc(p.rationale || '')}</p>
+              <div class="knowledge-form-actions">
+                <button type="button" class="knowledge-btn primary" data-fabric-apply="${esc(p.id)}">确认织入</button>
+                <button type="button" class="knowledge-btn" data-fabric-reject="${esc(p.id)}">拒绝</button>
+              </div>
+            </div>`).join('')
+          : '<div class="knowledge-fabric-empty compact"><strong>暂无待审核织网提案</strong><p>点击「织入当前库」从资料抽取锚点并匹配概念。</p></div>'}
+      </section>
+    </main>
+  </div>`
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  drawerBody.querySelector('#fabricEmptyConnect')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#fabricEmptyWeave')?.addEventListener('click', () => drawerBody.querySelector('#fabricWeaveRun')?.click())
+  drawerBody.querySelector('#fabricOpenRetrieve')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'retrieve'))
+  drawerBody.querySelector('#fabricRefreshGraph')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'fabric'))
+  drawerBody.querySelector('#fabricWeaveRun')?.addEventListener('click', e => {
+    const btn = e.currentTarget
+    runAsyncKnowledgeButton(btn, { busyLabel: '织网中…', idleLabel: '织入当前库' }, async () => {
+      const r = await window.api.fabricWeaveRun?.({ kbId: active.id, autoApply: false })
+      if (!r?.ok) { toast(r?.error || '织网失败', 'error'); return }
+      toast('已生成织网提案，请审核后确认', 'success')
+      await openKnowledgeOsPanel(undefined, 'fabric')
+    })
+  })
+  drawerBody.querySelectorAll('[data-fabric-apply]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      runAsyncKnowledgeButton(btn, { busyLabel: '写入中…', idleLabel: '确认织入' }, async () => {
+        const r = await window.api.fabricWeaveApply?.(btn.dataset.fabricApply)
+        if (!r?.ok) { toast(r?.error || '应用失败', 'error'); return }
+        toast('织网已写入 Fabric', 'success')
+        await openKnowledgeOsPanel(undefined, 'fabric')
+      })
+    })
+  })
+  drawerBody.querySelectorAll('[data-fabric-reject]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      runAsyncKnowledgeButton(btn, { busyLabel: '处理中…', idleLabel: '拒绝' }, async () => {
+        await window.api.fabricWeaveReject?.(btn.dataset.fabricReject)
+        toast('已拒绝该提案', 'success', 1200)
+        await openKnowledgeOsPanel(undefined, 'fabric')
+      })
+    })
+  })
+}
+
+async function renderKnowledgeRetrieveWorkspace(active, list) {
+  const { stats } = applyLocalKnowledgeWorkspaceState(active, list)
+  drawerBody.innerHTML = `<div class="knowledge-workspace">
+    ${knowledgeTopbarHtml({ name: active.displayName || '本地知识库', kind: '检索台', root: list.wikiRoot, stats })}
+    <main class="knowledge-page-main knowledge-retrieve-page">
+      <section class="knowledge-panel">
+        <div class="knowledge-panel-kicker">Root-first retrieval</div>
+        <h2>知识检索台</h2>
+        <p class="knowledge-panel-desc">根优先命中 → 路由扇出 → 跨库融合。结果带来源库与 authority；冲突会单独提示。</p>
+        <div class="knowledge-form">
+          <div class="knowledge-form-row">
+            <label for="fabricSearchQ">查询</label>
+            <input class="knowledge-input" id="fabricSearchQ" value="${esc(knowledgeUi.fabricQuery)}" placeholder="例如：Electron IPC 便签同步">
+          </div>
+          <div class="knowledge-form-actions">
+            <button type="button" class="knowledge-btn primary" id="fabricSearchRun">检索</button>
+            <button type="button" class="knowledge-btn" id="fabricIngestOpen">吸收资料到 Wiki</button>
+          </div>
+        </div>
+        <div class="knowledge-fabric-route" id="fabricRouteMeta">${knowledgeUi.fabricRoute
+          ? `路由：${knowledgeUi.fabricRoute.shortCircuit ? '根覆盖短路' : knowledgeUi.fabricRoute.broadFanout ? '广扇出' : '选择性召回'} · 根覆盖 ${Number(knowledgeUi.fabricRoute.rootCoverage || 0).toFixed(1)}`
+          : '等待检索…'}</div>
+      </section>
+      <div class="knowledge-fabric-hits" id="fabricHitList">${fabricHitRowsHtml(knowledgeUi.fabricHits, { searched: knowledgeUi.fabricSearchAttempted })}</div>
+    </main>
+  </div>`
+  drawerBody.querySelector('#kbSourcesOpen')?.addEventListener('click', () => openKnowledgeOsPanel(undefined, 'connect'))
+  drawerBody.querySelector('#obsidianOpen')?.addEventListener('click', renderObsidianBridgeModal)
+  wireFabricRetrieveEmptyActions(drawerBody)
+  const runSearch = async () => {
+    const q = document.getElementById('fabricSearchQ')?.value?.trim() || ''
+    knowledgeUi.fabricQuery = q
+    if (!q) { toast('请输入查询词', 'error'); return }
+    const btn = document.getElementById('fabricSearchRun')
+    await runAsyncKnowledgeButton(btn, { busyLabel: '检索中…', idleLabel: '检索' }, async () => {
+      const r = await window.api.fabricQuery?.(q)
+      if (!r?.ok) { toast(r?.message || r?.error || '检索失败', 'error'); return }
+      knowledgeUi.fabricSearchAttempted = true
+      knowledgeUi.fabricHits = r.hits || []
+      knowledgeUi.fabricRoute = r.route || null
+      const routeEl = document.getElementById('fabricRouteMeta')
+      if (routeEl && r.route) {
+        routeEl.textContent = `路由：${r.route.shortCircuit ? '根覆盖短路' : r.route.broadFanout ? '广扇出' : '选择性召回'} · 根覆盖 ${Number(r.route.rootCoverage || 0).toFixed(1)} · 引擎 ${r.engine || 'fallback'}`
+      } else if (routeEl) {
+        routeEl.textContent = knowledgeUi.fabricHits.length ? '检索完成' : '未命中 · 可换关键词或补充资料'
+      }
+      const listEl = document.getElementById('fabricHitList')
+      if (listEl) {
+        listEl.innerHTML = fabricHitRowsHtml(knowledgeUi.fabricHits, { searched: true })
+        wireFabricRetrieveEmptyActions(drawerBody)
+      }
+    })
+  }
+  drawerBody.querySelector('#fabricSearchRun')?.addEventListener('click', runSearch)
+  drawerBody.querySelector('#fabricSearchQ')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); runSearch() }
+  })
+  drawerBody.querySelector('#fabricIngestOpen')?.addEventListener('click', () => openFabricIngestModal())
+}
+
+function openKnowledgeAddModal(returnRoute = 'browse') {
+  const modal = openKnowledgeModal('添加资料', `<section class="knowledge-panel">
+    <div class="knowledge-panel-kicker">保存在我的知识</div>
+    <h2>新建一份可编辑资料</h2>
+    <p class="knowledge-panel-desc">粘贴 Markdown 或纯文本。保存后可以直接编辑、搜索，也可以交给 KnowMe 整理。</p>
+    <div class="knowledge-form">
+      <div class="knowledge-form-row"><label for="fabricIngestTitle">标题</label><input class="knowledge-input" id="fabricIngestTitle" placeholder="可选"></div>
+      <div class="knowledge-form-row"><label for="fabricIngestBody">内容</label><textarea class="knowledge-input" id="fabricIngestBody" rows="8" placeholder="粘贴 Markdown 或纯文本…"></textarea></div>
+      <div class="knowledge-form-actions"><button type="button" class="knowledge-btn primary" id="fabricIngestSave">保存资料</button></div>
+    </div>
+  </section>`)
+  modal?.querySelector('#fabricIngestSave')?.addEventListener('click', e => {
+    const saveBtn = e.currentTarget
+    runAsyncKnowledgeButton(saveBtn, { busyLabel: '保存中…', idleLabel: '保存资料' }, async () => {
+      const body = document.getElementById('fabricIngestBody')?.value?.trim()
+      if (!body) { toast('请输入内容', 'error'); return }
+      const title = document.getElementById('fabricIngestTitle')?.value?.trim()
+      const r = await saveKnowledgeMaterial({ text: body, title })
+      if (!r?.ok) { toast(r?.error || '写入失败', 'error'); return }
+      closeKnowledgeModal()
+      toast('资料已保存到我的知识', 'success')
+      if (returnRoute === 'browse') {
+        knowledgeUi.selectedPath = r.created?.[0]?.path || null
+      }
+      await openKnowledgeOsPanel(undefined, returnRoute)
+    })
+  })
+}
+
+function openFabricIngestModal() {
+  openKnowledgeAddModal('fabric')
+}
+
+async function openKnowledgeOsPanel(title, tab = 'status') {
+  const safeTab = normalizeKnowledgeSurfaceRoute(tab)
+  if (safeTab !== 'browse' && !confirmDiscardKnowledgeRawEdit()) return
+  if (safeTab !== 'browse') clearKnowledgeRawEditorState()
+  const requestId = ++knowledgeOpenSequence
+  knowledgeUi.page = safeTab
   const t0 = Date.now()
-  console.error('[kb-debug] open:start', {
-    title: title || '知识库',
+  console.debug('[kb-debug] open:start', {
+    title: title || '我的知识',
+    tab: safeTab,
     hasApi: !!window.api,
     drawerOpen: !!drawer?.classList?.contains('open'),
     center: isCenterSurface(),
   })
-  openDrawer(title || '知识库', { kind: 'knowledge', center: true })
-  drawerBody.innerHTML = '<div class="knowledge-workspace"><div class="knowledge-reader-empty"><p style="color:#1c1917;font-size:16px;font-weight:600">正在打开知识工作台…</p><p style="margin-top:8px;font-size:12px;color:#57534e">加载中，请稍候</p></div></div>'
+  openDrawer(title || '我的知识', { kind: 'knowledge', center: true })
+  parkCapabilityHubFrame()
+  drawerBody.innerHTML = '<div class="knowledge-workspace"><div class="knowledge-reader-empty"><p style="color:#1c1917;font-size:16px;font-weight:600">正在打开我的知识…</p><p style="margin-top:8px;font-size:12px;color:#57534e">加载中，请稍候</p></div></div>'
   try {
     if (!window.api?.knowledgeProviderList) throw new Error('知识库 API 不可用，请重启应用')
     const provs = await withTimeout(window.api.knowledgeProviderList(), 6000, '读取知识源超时')
-    console.error('[kb-debug] providers:ok', {
+    if (requestId !== knowledgeOpenSequence || drawerKind !== 'knowledge' || knowledgeUi.page !== safeTab) return
+    console.debug('[kb-debug] providers:ok', {
       activeProviderId: provs?.activeProviderId || '',
       providerCount: provs?.providers?.length || 0,
       costMs: Date.now() - t0,
     })
-    const providers = provs?.providers?.length ? provs.providers : [{ id: 'local-default', kind: 'local', displayName: '本地知识库' }]
+    const providers = provs?.providers?.length ? provs.providers : [{ id: 'local-default', kind: 'local', displayName: '我的知识' }]
     const activeId = provs?.activeProviderId || 'local-default'
-    const active = providers.find(p => p.id === activeId) || providers[0]
+    const selectedProvider = providers.find(p => p.id === activeId) || providers[0]
+    const active = providers.find(p => p.id === 'local-default' || p.kind === 'local') || providers[0]
     knowledgeUi.providers = providers
-    knowledgeUi.activeId = active.id
-    if (active.kind === 'remote-rag') {
-      renderRemoteRagWorkspace(active)
-      console.error('[kb-debug] open:remote-ok', { costMs: Date.now() - t0 })
+    knowledgeUi.activeId = selectedProvider.id
+    knowledgeUi.activeProvider = selectedProvider
+    if (safeTab === 'connect') {
+      renderKnowledgeSourcesPage()
+      toast('资料来源已打开', 'success', 1200)
       return
     }
     const list = await withTimeout(window.api.knowledgeOsList(), 6000, '读取知识条目超时')
-    console.error('[kb-debug] list:ok', {
+    if (requestId !== knowledgeOpenSequence || drawerKind !== 'knowledge' || knowledgeUi.page !== safeTab) return
+    console.debug('[kb-debug] list:ok', {
       ok: !!list?.ok,
       wiki: list?.wiki?.length || 0,
       okf: list?.okf?.length || 0,
@@ -2244,11 +3745,41 @@ async function openKnowledgeOsPanel(title) {
       syncRailNavigation()
       return
     }
+    if (safeTab === 'fabric') {
+      await renderKnowledgeFabricWorkspace(active, list)
+      return
+    }
+    if (safeTab === 'retrieve') {
+      await renderKnowledgeRetrieveWorkspace(active, list)
+      return
+    }
+    if (safeTab === 'health') {
+      await renderKnowledgeHealthWorkspace(active, list)
+      return
+    }
+    if (safeTab === 'governance') {
+      await renderKnowledgeGovernanceWorkspace(active, list)
+      return
+    }
+    if (safeTab === 'organize' || safeTab === 'review') {
+      if (active.kind === 'remote-rag') {
+        renderRemoteRagWorkspace(active)
+      } else if (safeTab === 'review') {
+        await renderKnowledgeReviewWorkspace(active, list)
+      } else {
+        await renderKnowledgeOrganizerWorkspace(active, list)
+      }
+      return
+    }
+    if (safeTab === 'status') {
+      await renderKnowledgeStatusWorkspace(active, list)
+      return
+    }
     renderLocalKnowledgeWorkspace(active, providers, list)
     const shell = document.getElementById('appShell')
     const rect = drawer.getBoundingClientRect()
     const bodyRect = drawerBody.getBoundingClientRect()
-    console.error('[kb-debug] open:success', JSON.stringify({
+    console.debug('[kb-debug] open:success', JSON.stringify({
       costMs: Date.now() - t0,
       shellClass: shell?.className || '',
       drawerClass: drawer.className,
@@ -2258,17 +3789,17 @@ async function openKnowledgeOsPanel(title) {
       bodyH: Math.round(bodyRect.height),
       bodyHtmlLen: (drawerBody.innerHTML || '').length,
     }))
-    toast('知识库已打开', 'success', 1600)
+    toast('我的知识已打开', 'success', 1600)
   } catch (e) {
     console.error('[kb-debug] open:catch', e?.stack || e?.message || String(e))
     drawerBody.innerHTML = `<div class="knowledge-workspace"><div class="knowledge-reader-inner"><div class="knowledge-result error">${esc(e?.message || '知识库加载失败')}</div><div class="knowledge-form-actions" style="padding:12px 0 0"><button type="button" class="knowledge-btn" id="kbRetryOpen">重试打开</button></div></div></div>`
-    document.getElementById('kbRetryOpen')?.addEventListener('click', () => openKnowledgeOsPanel(title))
+    document.getElementById('kbRetryOpen')?.addEventListener('click', () => openKnowledgeOsPanel(title, safeTab))
     syncRailNavigation()
   }
 }
 
 document.getElementById('btnKnowledgeOs')?.addEventListener('click', () => {
-  console.error('[kb-debug] click', {
+  console.debug('[kb-debug] click', {
     center: isCenterSurface(),
     drawerOpen: drawer.classList.contains('open'),
     drawerKind,
@@ -2281,13 +3812,14 @@ document.getElementById('btnKnowledgeOs')?.addEventListener('click', () => {
 })
 
 function openSettingsPanel(tab = '') {
-  const safeTab = String(tab || '').trim()
-  console.error('[settings-debug] open', { tab: safeTab })
+  const requestedTab = String(tab || '').trim()
+  const safeTab = SETTINGS_SURFACE_TAB_IDS.has(requestedTab) ? requestedTab : 'sources'
+  settingsSurfaceTab = safeTab
+  console.debug('[settings-debug] open', { tab: safeTab })
   // 与知识库一致：在中间主区展示，而不是二级独立窗口
   openDrawer('设置', { kind: 'settings', center: true })
-  const src = safeTab
-    ? `settings.html?embedded=1&tab=${encodeURIComponent(safeTab)}`
-    : 'settings.html?embedded=1'
+  parkCapabilityHubFrame()
+  const src = `settings.html?embedded=1&tab=${encodeURIComponent(safeTab)}`
   drawerBody.innerHTML = `<iframe class="drawer-settings-frame" src="${src}" title="设置"></iframe>`
   syncRailNavigation()
 }
@@ -2309,19 +3841,202 @@ document.querySelectorAll('[data-capability-hub-tab]').forEach((button) => {
   })
 })
 
-function openCapabilityHub(tab = 'experts') {
-  capabilityHubTab = CAPABILITY_HUB_TABS.has(tab) ? tab : 'experts'
-  mountIcons(drawer)
-  if (drawerKind === 'capability-hub' && drawer.classList.contains('open')) {
-    const frame = drawerBody.querySelector('.capability-hub-frame')
-    const nextSrc = `capability-hub.html?embedded=1&tab=${encodeURIComponent(capabilityHubTab)}`
-    if (frame && frame.getAttribute('src') !== nextSrc) frame.src = nextSrc
+function isCapabilityHubDrawerKind(kind = drawerKind) {
+  return kind === 'capability-hub' || kind === 'capability-hub-detail'
+}
+
+function buildCapabilityHubSrc(tab, {
+  expertId = '',
+  surface = 'capability',
+  presentation = 'hub',
+} = {}) {
+  const params = new URLSearchParams({
+    embedded: '1',
+    tab: CAPABILITY_HUB_TABS.has(tab) ? tab : 'experts',
+    surface: surface === 'workbench' ? 'workbench' : 'capability',
+    presentation: presentation === 'detail' ? 'detail' : 'hub',
+  })
+  const id = String(expertId || '').trim()
+  if (id) params.set('expertId', id)
+  return `capability-hub.html?${params.toString()}`
+}
+
+function ensureCapabilityHubPark() {
+  if (capabilityHubPark?.isConnected) return capabilityHubPark
+  const park = document.createElement('div')
+  park.id = 'capabilityHubPark'
+  park.hidden = true
+  park.setAttribute('aria-hidden', 'true')
+  park.style.cssText = 'position:fixed;width:0;height:0;overflow:hidden;pointer-events:none'
+  document.body.appendChild(park)
+  capabilityHubPark = park
+  return park
+}
+
+function parkCapabilityHubFrame() {
+  const frame = drawerBody?.querySelector?.('.capability-hub-frame')
+  if (!frame) return null
+  ensureCapabilityHubPark().appendChild(frame)
+  return frame
+}
+
+function getParkedCapabilityHubFrame() {
+  const frame = capabilityHubPark?.querySelector?.('.capability-hub-frame')
+    || document.querySelector('#capabilityHubPark .capability-hub-frame')
+  if (!frame) return null
+  if (!frame.contentWindow) {
+    frame.remove()
+    return null
+  }
+  return frame
+}
+
+function resumeCapabilityHubFrame(frame, {
+  tab,
+  expertId = '',
+  surface = 'capability',
+  presentation = 'hub',
+} = {}) {
+  if (!frame?.contentWindow) return
+  try {
+    frame.contentWindow.postMessage({
+      type: 'capability-hub-resume',
+      tab,
+      expertId,
+      surface,
+      presentation: presentation === 'detail' ? 'detail' : 'hub',
+    }, '*')
+  } catch { /* noop */ }
+}
+
+function openCapabilityHubDetailSurface() {
+  if (!drawer || !drawerTitle) return
+  const shell = document.getElementById('appShell')
+  drawerReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  shell?.classList.remove('mode-center-surface', 'mode-knowledge', 'mode-secondary-dialog')
+  drawerKind = 'capability-hub-detail'
+  drawer.classList.remove('drawer-settings', 'drawer-tabbed-surface', 'secondary-dialog')
+  drawer.classList.add('drawer-capability-hub', 'drawer-capability-hub-detail', 'open')
+  clearCenterSurfaceTabs()
+  drawerBackdrop?.classList.remove('open')
+  drawerBackdrop?.setAttribute('aria-hidden', 'true')
+  drawer.removeAttribute('role')
+  drawer.removeAttribute('aria-modal')
+  drawer.removeAttribute('aria-labelledby')
+  drawer.setAttribute('aria-hidden', 'false')
+  drawer.style.position = 'fixed'
+  drawer.style.left = railWidthCssValue(shell)
+  drawer.style.top = '0'
+  drawer.style.right = '0'
+  drawer.style.bottom = '0'
+  drawer.style.zIndex = '240'
+  drawer.style.flex = 'none'
+  drawer.style.flexBasis = 'auto'
+  drawer.style.width = 'auto'
+  drawer.style.minWidth = '0'
+  drawer.style.maxWidth = 'none'
+  drawer.style.height = 'auto'
+  drawer.style.opacity = '1'
+  drawer.style.visibility = 'visible'
+  drawer.style.background = 'transparent'
+  drawer.style.borderLeft = 'none'
+  drawer.style.boxShadow = 'none'
+  drawerTitle.textContent = '专家详情'
+  drawerTitle.hidden = true
+  ensureShellLayoutInvariant()
+  syncRailNavigation()
+}
+
+function capabilityHubSrcMismatch(frame, nextSrc) {
+  if (!frame) return true
+  try {
+    const current = frame.getAttribute('src') || frame.dataset.hubSrc || ''
+    if (!current) return true
+    const a = new URL(current, window.location.href)
+    const b = new URL(nextSrc, window.location.href)
+    // park/reuse 后参数不一致时，仅靠 postMessage 在部分时序下会卡在 hub 目录页（工作台 detail 入口 → 整页专家库的错觉）
+    return ['tab', 'surface', 'presentation', 'expertId'].some(
+      key => (a.searchParams.get(key) || '') !== (b.searchParams.get(key) || ''),
+    )
+  } catch {
+    return true
+  }
+}
+
+function mountCapabilityHubFrame(nextSrc, { tab, expertId, surface, presentation }) {
+  const resumeOpts = { tab, expertId, surface, presentation }
+  const reloadIfMismatch = (frame) => {
+    if (!frame || !capabilityHubSrcMismatch(frame, nextSrc)) return false
+    frame.src = nextSrc
+    frame.dataset.hubSrc = nextSrc
+    return true
+  }
+
+  const activeFrame = drawerBody?.querySelector?.('.capability-hub-frame')
+  if (activeFrame?.contentWindow && isCapabilityHubDrawerKind()) {
+    if (!reloadIfMismatch(activeFrame)) {
+      resumeCapabilityHubFrame(activeFrame, resumeOpts)
+      activeFrame.dataset.hubSrc = nextSrc
+    }
     syncRailNavigation()
     return
   }
-  openDrawer('能力 Hub', { kind: 'capability-hub', center: true })
-  drawerBody.innerHTML = `<iframe class="capability-hub-frame" src="capability-hub.html?embedded=1&tab=${encodeURIComponent(capabilityHubTab)}" title="能力 Hub"></iframe>`
+  if (activeFrame && isCapabilityHubDrawerKind()) {
+    activeFrame.src = nextSrc
+    activeFrame.dataset.hubSrc = nextSrc
+    syncRailNavigation()
+    return
+  }
+
+  const reused = getParkedCapabilityHubFrame()
+  if (reused) {
+    while (drawerBody.firstChild) drawerBody.removeChild(drawerBody.firstChild)
+    drawerBody.appendChild(reused)
+    if (!reloadIfMismatch(reused)) {
+      reused.dataset.hubSrc = nextSrc
+      resumeCapabilityHubFrame(reused, resumeOpts)
+    }
+    syncRailNavigation()
+    return
+  }
+
+  parkCapabilityHubFrame()
+  drawerBody.innerHTML = `<iframe class="capability-hub-frame" src="${nextSrc}" title="专家库"></iframe>`
   syncRailNavigation()
+}
+
+function openCapabilityHub(tab = 'experts', opts = {}) {
+  const options = opts && typeof opts === 'object' && !Array.isArray(opts) ? opts : {}
+  const expertId = String(options.expertId || '').trim()
+  const surface = options.surface === 'workbench' ? 'workbench' : 'capability'
+  const presentation = options.presentation === 'detail' ? 'detail' : 'hub'
+  capabilityHubTab = CAPABILITY_HUB_TABS.has(tab) ? tab : 'experts'
+  mountIcons(drawer)
+  const nextSrc = buildCapabilityHubSrc(capabilityHubTab, { expertId, surface, presentation })
+  const resumeOpts = { tab: capabilityHubTab, expertId, surface, presentation }
+
+  if (presentation === 'detail') {
+    if (drawerKind === 'capability-hub' && drawer.classList.contains('open')) {
+      parkCapabilityHubFrame()
+    }
+    if (drawerKind !== 'capability-hub-detail' || !drawer.classList.contains('open')) {
+      openCapabilityHubDetailSurface()
+    }
+    mountCapabilityHubFrame(nextSrc, resumeOpts)
+    return
+  }
+
+  if (drawerKind === 'capability-hub-detail' && drawer.classList.contains('open')) {
+    parkCapabilityHubFrame()
+  }
+
+  if (drawerKind === 'capability-hub' && drawer.classList.contains('open')) {
+    mountCapabilityHubFrame(nextSrc, resumeOpts)
+    return
+  }
+
+  openDrawer('专家库', { kind: 'capability-hub', center: true })
+  mountCapabilityHubFrame(nextSrc, resumeOpts)
 }
 
 function toggleCapabilityHubRail() {
@@ -2338,22 +4053,200 @@ window.openCapabilityHub = openCapabilityHub
 
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return
-  if (drawerKind === 'capability-hub' && drawer.classList.contains('open')) {
+  if (isSecondaryDialogOpen() || (isCapabilityHubDrawerKind() && drawer.classList.contains('open'))) {
     e.preventDefault()
     closeDrawer()
   }
 })
 
 // ── 来自编辑器 iframe 的消息 ───────────────────────────────
-window.addEventListener('message', e => {
+window.addEventListener('message', async e => {
   const d = e.data || {}
+  const capabilityFrame = isCapabilityHubDrawerKind()
+    ? drawerBody.querySelector('.capability-hub-frame')
+    : null
+  const isCapabilityHubSource = !!capabilityFrame && e.source === capabilityFrame.contentWindow
+  const settingsFrame = drawerKind === 'settings'
+    ? drawerBody.querySelector('.drawer-settings-frame')
+    : null
+  const isSettingsSource = !!settingsFrame && e.source === settingsFrame.contentWindow
   if (d.type === 'capability-hub-close') {
-    if (drawerKind === 'capability-hub') closeDrawer()
+    if (!isCapabilityHubSource) return
+    // detail-dismiss：仅关闭工作台透明叠层；整页专家库内关详情不得连带退出专家库
+    if (d.reason === 'detail-dismiss') {
+      if (drawerKind === 'capability-hub-detail') closeDrawer()
+      return
+    }
+    if (isCapabilityHubDrawerKind()) closeDrawer()
     return
   }
   if (d.type === 'capability-hub-tab' && CAPABILITY_HUB_TABS.has(d.tab)) {
+    if (!isCapabilityHubSource) return
     capabilityHubTab = d.tab
     syncRailNavigation()
+    return
+  }
+  if (d.type === 'capability-hub-start-expert') {
+    if (!isCapabilityHubSource) return
+    const requestId = String(d.requestId || '')
+    const expertId = String(d.expertId || '').trim()
+    const startSurface = String(d.surface || '').trim() === 'workbench'
+      || drawerKind === 'capability-hub-detail'
+      ? 'workbench'
+      : 'capability'
+    const reply = payload => {
+      try {
+        e.source?.postMessage({
+          type: 'capability-hub-start-expert-result',
+          requestId,
+          ...payload,
+        }, '*')
+      } catch { /* Hub 可能已关闭 */ }
+    }
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,127}$/.test(expertId)) {
+      reply({ ok: false, error: '专家 ID 无效' })
+      return
+    }
+    try {
+      // 工作台启动 = 任务：铺开 task-room，写入最近任务；不与助理 Session Tab 混为同一入口
+      if (startSurface === 'workbench') {
+        if (typeof window.Workbench?.startExpertTaskDirect !== 'function') {
+          throw new Error('工作台任务服务未就绪')
+        }
+        if (!workbenchOn) {
+          workbenchOn = true
+          workbenchAutomationOn = false
+          workbenchPage = 'tasks'
+          applyWorkbench()
+        } else if (workbenchPage !== 'tasks') {
+          workbenchPage = 'tasks'
+          applyWorkbench()
+        }
+        const result = await window.Workbench.startExpertTaskDirect({ expertId })
+        if (!result?.ok) throw new Error(result?.error || '无法创建专家任务对话')
+        reply({ ok: true, sessionId: result.session?.id || '', taskId: result.task?.id || '' })
+        if (drawerKind === 'capability-hub-detail' || isCapabilityHubDrawerKind()) closeDrawer()
+        setTimeout(() => document.getElementById('agentInput')?.focus(), 150)
+        return
+      }
+      const result = await window.WorkspaceAgent?.startExpertChat?.(expertId)
+      if (!result?.ok) throw new Error(result?.error || '无法创建专家对话')
+      reply({ ok: true, sessionId: result.session?.id || '' })
+      if (drawerKind === 'capability-hub-detail') closeDrawer()
+      setTimeout(openAgentChat, 0)
+      setTimeout(() => document.getElementById('agentInput')?.focus(), 150)
+    } catch (error) {
+      reply({ ok: false, error: error?.message || '无法创建专家对话' })
+    }
+    return
+  }
+  if (d.type === 'capability-hub-start-skill') {
+    if (!isCapabilityHubSource) return
+    const requestId = String(d.requestId || '')
+    const skillId = String(d.skillId || '').trim()
+    const reply = payload => {
+      try {
+        e.source?.postMessage({
+          type: 'capability-hub-start-skill-result',
+          requestId,
+          ...payload,
+        }, '*')
+      } catch { /* Hub 可能已关闭 */ }
+    }
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._/-]{0,127}$/.test(skillId)) {
+      reply({ ok: false, error: '技能 ID 无效' })
+      return
+    }
+    try {
+      const result = await window.WorkspaceAgent?.startSkillChat?.({
+        skillId,
+        prompt: String(d.prompt || '').slice(0, 4000),
+        title: String(d.title || '').slice(0, 160),
+      })
+      if (!result?.ok) throw new Error(result?.error || '无法开始技能试用')
+      reply({ ok: true, sessionId: result.session?.id || '' })
+      setTimeout(openAgentChat, 0)
+      setTimeout(() => document.getElementById('agentInput')?.focus(), 150)
+    } catch (error) {
+      reply({ ok: false, error: error?.message || '无法开始技能试用' })
+    }
+    return
+  }
+  if (d.type === 'capability-hub-add-expert-to-workbench') {
+    if (!isCapabilityHubSource) return
+    const requestId = String(d.requestId || '')
+    const expertId = String(d.expertId || '').trim()
+    const reply = payload => {
+      try {
+        e.source?.postMessage({
+          type: 'capability-hub-add-expert-to-workbench-result',
+          requestId,
+          ...payload,
+        }, '*')
+      } catch { /* Hub 可能已关闭 */ }
+    }
+    if (!requestId || requestId.length > 160 || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(expertId)) {
+      reply({ ok: false, error: '添加请求或专家 ID 无效' })
+      return
+    }
+    try {
+      if (!window.api?.workbenchModeBindExpert) throw new Error('工作模式服务暂不可用')
+      const result = await window.api.workbenchModeBindExpert({ expertId })
+      if (!result?.ok) throw new Error(result?.error || '无法添加到工作台')
+      const refreshResult = await window.Workbench?.refreshModes?.()
+      if (refreshResult?.ok === false) throw new Error(refreshResult.error || '已添加，但工作台刷新失败')
+      reply({
+        ok: true,
+        modeId: result.modeId || result.activeModeId || '',
+        modeName: result.modeName || '当前工作台',
+        alreadyBound: result.alreadyBound === true,
+      })
+    } catch (error) {
+      reply({ ok: false, error: error?.message || '无法添加到工作台' })
+    }
+    return
+  }
+  if (d.type === 'capability-hub-remove-expert-from-workbench') {
+    if (!isCapabilityHubSource) return
+    const requestId = String(d.requestId || '')
+    const expertId = String(d.expertId || '').trim()
+    const reply = payload => {
+      try {
+        e.source?.postMessage({
+          type: 'capability-hub-remove-expert-from-workbench-result',
+          requestId,
+          ...payload,
+        }, '*')
+      } catch { /* Hub 可能已关闭 */ }
+    }
+    if (!requestId || requestId.length > 160 || !/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(expertId)) {
+      reply({ ok: false, error: '撤回请求或专家 ID 无效' })
+      return
+    }
+    try {
+      if (!window.api?.workbenchModeUnbindExpert) throw new Error('工作模式服务暂不可用')
+      const result = await window.api.workbenchModeUnbindExpert({ expertId })
+      if (!result?.ok) throw new Error(result?.error || '无法从工作台撤回')
+      const refreshResult = await window.Workbench?.refreshModes?.()
+      if (refreshResult?.ok === false) throw new Error(refreshResult.error || '已撤回，但工作台刷新失败')
+      try { await window.Workbench?.load?.() } catch { /* 可选刷新完整目录 */ }
+      reply({
+        ok: true,
+        modeId: result.modeId || result.activeModeId || '',
+        modeName: result.modeName || '当前工作台',
+      })
+    } catch (error) {
+      reply({ ok: false, error: error?.message || '无法从工作台撤回' })
+    }
+    return
+  }
+  if (d.type === 'capability-hub-expert-uninstalled') {
+    if (!isCapabilityHubSource) return
+    // 专家卸载后主进程已清绑定；同步刷新工作台列表与模式，去掉幽灵快捷卡
+    try {
+      await window.Workbench?.refreshModes?.()
+      await window.Workbench?.load?.()
+    } catch { /* 工作台可能未挂载 */ }
     return
   }
   if (d.type === 'open-capability-hub') {
@@ -2361,7 +4254,14 @@ window.addEventListener('message', e => {
     openCapabilityHub(String(d.tab || 'experts'))
     return
   }
+  if (d.type === 'settings-tab-change' && SETTINGS_SURFACE_TAB_IDS.has(d.tab)) {
+    if (!isSettingsSource) return
+    settingsSurfaceTab = d.tab
+    syncCenterSurfaceTabs('settings', settingsSurfaceTab)
+    return
+  }
   if (d.type === 'close-settings-inline') {
+    if (!isSettingsSource) return
     if (drawerKind === 'settings') closeDrawer()
     return
   }
@@ -2464,6 +4364,7 @@ async function reload() {
   }
   // 文件中心始终是统一入口；没有本地源时仍展示知识库与 AI 生成分组。
   treeMode = 'sources'
+  if (!data.activeSourceId) fileCenterLayer = 'hub'
   resetSourceLazyState(data.fileTree, data.activeSourceId)
   renderTree()
   if (workbenchOn && window.Workbench) window.Workbench.load()
@@ -2500,6 +4401,8 @@ async function init() {
     toast,
     onViewChange: setWorkbenchTaskView,
     onPageChange: syncWorkbenchRailFromPage,
+    onExpertTaskStart: startExpertTaskChat,
+    onExpertTaskResume: resumeExpertTaskChat,
   })
   const r = await reload()
   await hydrateGeneratedArtifacts()
@@ -2606,7 +4509,7 @@ const workSurfaceHost = (() => {
   function renderLinkPreview(link) {
     if (!bodyEl || !actionsEl) return
     const href = esc(link.href)
-    const canEmbed = ['https:', 'http:', 'file:'].includes(String(link.protocol || '').toLowerCase())
+    const canEmbed = ['https:', 'http:'].includes(String(link.protocol || '').toLowerCase())
     const previewBody = canEmbed
       ? `<webview class="work-link-webview" src="${href}" partition="persist:knowme-preview"></webview>`
       : `<div class="work-link-preview-note">该链接不适合在应用内预览，请在系统浏览器或默认应用中打开。</div>`

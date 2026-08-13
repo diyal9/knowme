@@ -11,6 +11,13 @@ const {
   loadInstallStore,
   resolvePaths,
 } = require('./capability-store')
+const {
+  SIDECAR_FILE,
+  adaptLegacyCapability,
+  validateAndNormalizeManifest,
+} = require('./capability-manifest-v2')
+const { parseSkillFrontmatter } = require('./skill-runtime')
+const { parseExpertFrontmatter } = require('./expert-runtime')
 
 const CATALOG_VERSION = 1
 
@@ -42,6 +49,8 @@ function normalizeCatalogEntry(raw = {}) {
     id,
     kind,
     name: String(raw.name || id).trim(),
+    originName: String(raw.originName || '').trim(),
+    nameSource: String(raw.nameSource || '').trim(),
     description: String(raw.description || '').trim(),
     version: String(raw.version || '1.0.0').trim(),
     source: String(raw.source || 'curated').trim(),
@@ -51,7 +60,70 @@ function normalizeCatalogEntry(raw = {}) {
     featured: raw.featured === true,
     bundlePath: String(raw.bundlePath || '').trim(),
     contentHash: String(raw.contentHash || '').trim(),
+    manifest: raw.manifest && typeof raw.manifest === 'object' ? raw.manifest : null,
+    dependencies: Array.isArray(raw.dependencies) ? raw.dependencies : [],
+    permissions: raw.permissions && typeof raw.permissions === 'object' ? raw.permissions : {},
+    inputs: Array.isArray(raw.inputs) ? raw.inputs : [],
+    outputs: Array.isArray(raw.outputs) ? raw.outputs : [],
+    risk: raw.risk && typeof raw.risk === 'object' ? raw.risk : { level: 'low', reasons: [] },
+    provenance: raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : {},
   }
+}
+
+function loadBundledEntryManifest(bundledRoot, entry) {
+  if (!entry.bundlePath) return null
+  const bundleRoot = path.resolve(bundledRoot, entry.bundlePath)
+  const rel = path.relative(path.resolve(bundledRoot), bundleRoot)
+  if (rel.startsWith('..') || path.isAbsolute(rel)) return null
+  const sidecar = readJson(path.join(bundleRoot, SIDECAR_FILE))
+  if (sidecar) {
+    const normalized = validateAndNormalizeManifest(sidecar, {
+      id: entry.id,
+      kind: entry.kind,
+      name: entry.name,
+      description: entry.description,
+      version: entry.version,
+    })
+    if (normalized.ok) return normalized.manifest
+  }
+
+  let raw = {}
+  if (entry.kind === 'skill') {
+    const file = path.join(bundleRoot, 'SKILL.md')
+    if (fs.existsSync(file)) {
+      const parsed = parseSkillFrontmatter(fs.readFileSync(file, 'utf8'))
+      raw = parsed.frontmatter || {}
+      raw.name = parsed.name || entry.name
+      raw.description = parsed.description || entry.description
+      raw.hasScripts = fs.existsSync(path.join(bundleRoot, 'scripts'))
+    }
+  } else if (entry.kind === 'expert') {
+    const file = path.join(bundleRoot, 'EXPERT.md')
+    if (fs.existsSync(file)) {
+      const parsed = parseExpertFrontmatter(fs.readFileSync(file, 'utf8'))
+      raw = {
+        ...parsed.frontmatter,
+        name: parsed.name || entry.name,
+        description: parsed.description || entry.description,
+        skills: parsed.skills,
+        connectors: parsed.connectors,
+      }
+    }
+  } else if (entry.kind === 'connector') {
+    raw = readJson(path.join(bundleRoot, 'manifest.json')) || {}
+  }
+  const adapted = adaptLegacyCapability(entry.kind, raw, {
+    id: entry.id,
+    name: entry.name,
+    description: entry.description,
+    version: entry.version,
+    source: entry.source,
+    ref: entry.bundlePath.replace(/\\/g, '/'),
+    trust: entry.trust,
+    contentHash: entry.contentHash,
+    hasScripts: raw.hasScripts === true,
+  })
+  return adapted.ok ? adapted.manifest : null
 }
 
 function loadBundledCatalog(bundledRoot = defaultBundledRoot()) {
@@ -61,7 +133,18 @@ function loadBundledCatalog(bundledRoot = defaultBundledRoot()) {
   const list = Array.isArray(raw?.entries) ? raw.entries : []
   for (const item of list) {
     const normalized = normalizeCatalogEntry(item)
-    if (normalized) entries.push(normalized)
+    if (normalized) {
+      normalized.manifest = loadBundledEntryManifest(bundledRoot, normalized)
+      if (normalized.manifest) {
+        normalized.dependencies = normalized.manifest.dependencies
+        normalized.permissions = normalized.manifest.permissions
+        normalized.inputs = normalized.manifest.inputs
+        normalized.outputs = normalized.manifest.outputs
+        normalized.risk = normalized.manifest.risk
+        normalized.provenance = normalized.manifest.provenance
+      }
+      entries.push(normalized)
+    }
   }
   return {
     version: Number(raw?.version) || CATALOG_VERSION,
@@ -141,6 +224,8 @@ function mergeCatalog(bundled, overlay, installStore) {
       id: installed.id,
       kind: installed.kind,
       name: installed.name || installed.id,
+      originName: installed.originName || '',
+      nameSource: installed.nameSource || '',
       description: installed.description || '',
       version: installed.version || '1.0.0',
       source: installed.source || 'local',
@@ -150,6 +235,13 @@ function mergeCatalog(bundled, overlay, installStore) {
       featured: false,
       bundlePath: '',
       contentHash: installed.contentHash || '',
+      manifest: installed.manifest || null,
+      dependencies: installed.dependencies || [],
+      permissions: installed.permissions || {},
+      inputs: installed.inputs || [],
+      outputs: installed.outputs || [],
+      risk: installed.risk || { level: 'low', reasons: [] },
+      provenance: installed.provenance || {},
       catalogLayer: 'installed',
     })
   }
@@ -163,6 +255,16 @@ function mergeCatalog(bundled, overlay, installStore) {
     )
     merged.push({
       ...entry,
+      name: installed?.name || entry.name,
+      originName: installed?.originName || entry.originName || '',
+      nameSource: installed?.nameSource || entry.nameSource || '',
+      manifest: installed?.manifest || entry.manifest || null,
+      dependencies: installed?.manifest?.dependencies || installed?.dependencies || entry.manifest?.dependencies || entry.dependencies || [],
+      permissions: installed?.manifest?.permissions || installed?.permissions || entry.manifest?.permissions || entry.permissions || {},
+      inputs: installed?.manifest?.inputs || installed?.inputs || entry.manifest?.inputs || entry.inputs || [],
+      outputs: installed?.manifest?.outputs || installed?.outputs || entry.manifest?.outputs || entry.outputs || [],
+      risk: installed?.manifest?.risk || installed?.risk || entry.manifest?.risk || entry.risk || { level: 'low', reasons: [] },
+      provenance: installed?.manifest?.provenance || installed?.provenance || entry.manifest?.provenance || entry.provenance || {},
       installed: Boolean(installed),
       enabled: installed ? installed.enabled !== false : false,
       installStatus: installed?.status || 'available',
@@ -294,4 +396,5 @@ module.exports = {
   getBundledInstallSource,
   resolveBundlePath,
   createCapabilityCatalog,
+  loadBundledEntryManifest,
 }

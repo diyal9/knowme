@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "office-document",
+  "kind": "skill",
+  "name": "写办公文档",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "writingOfficeDoc",
+          "title": "写办公文档",
+          "subtitle": "通知、汇报、周报、纪要等成稿",
+          "icon": "chat",
+          "group": "writing-docs",
+          "modes": ["writing"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请作为办公文档搭档，根据我提供的场景和材料写成可发送文稿。",
+          "preflight": {
+            "type": "material",
+            "message": "要写哪类办公文档、给谁看、核心信息是什么？发一句话或粘贴要点，我立刻成稿。"
+          }
+        }]
+      }
+    }
+  }
+}

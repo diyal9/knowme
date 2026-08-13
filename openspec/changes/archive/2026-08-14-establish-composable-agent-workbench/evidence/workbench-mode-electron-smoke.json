@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-08-07T10:04:43.733Z",
+  "pass": true,
+  "viewport": {
+    "width": 1360,
+    "height": 860
+  },
+  "expert": {
+    "id": "office-partner",
+    "name": "办公伙伴"
+  },
+  "checks": [
+    {
+      "id": "three-built-in-modes",
+      "pass": true,
+      "detail": [
+        "office",
+        "engineering",
+        "visual"
+      ]
+    },
+    {
+      "id": "office-default",
+      "pass": true,
+      "detail": "office"
+    },
+    {
+      "id": "engineering-positioning",
+      "pass": true,
+      "detail": "软件研发"
+    },
+    {
+      "id": "engineering-honest-workflow-state",
+      "pass": true,
+      "detail": {
+        "engineeringWorkflowCount": 3,
+        "copy": "\n        \n          \n          \n            产品体验 · 需求澄清\n            用于「产品体验 · 需求澄清」的完整工作流，选择后查看流程说明与执行拓扑\n          \n          \n        \n        \n          \n          \n            文档到实施计划\n            用于「文档到实施计划」的完整工作流，选择后查看流程说明与执行拓扑\n          \n          \n        \n        \n          \n          \n            特性编码（轻量后端）\n            用于「特性编码（轻量后端）」的完整工作流，选择后查看流程说明与执行拓扑\n          \n          \n        "
+      }
+    },
+    {
+      "id": "hub-adds-expert-to-current-mode",
+      "pass": true,
+      "detail": {
+        "id": "office-partner",
+        "name": "办公伙伴"
+      }
+    },
+    {
+      "id": "visual-honest-empty-state",
+      "pass": true,
+      "detail": "还没有可运行的专业流程先添加适合这个岗位的 Agent；工作流接入后会在这里出现。"
+    },
+    {
+      "id": "active-mode-survives-reload",
+      "pass": true,
+      "detail": {
+        "activeBeforeReload": "visual",
+        "activeAfterReload": "visual"
+      }
+    },
+    {
+      "id": "overview-no-horizontal-overflow",
+      "pass": true,
+      "detail": {
+        "overflowX": false,
+        "width": 1144
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

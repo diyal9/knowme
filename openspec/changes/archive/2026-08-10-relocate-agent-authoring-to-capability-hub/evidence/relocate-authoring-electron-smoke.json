@@ -1,0 +1,149 @@
+{
+  "at": "2026-08-10T09:48:54.421Z",
+  "ok": true,
+  "consoleErrors": [],
+  "checks": [
+    {
+      "id": "no-mode-tabs",
+      "ok": true
+    },
+    {
+      "id": "no-agent-shelf",
+      "ok": true
+    },
+    {
+      "id": "shelf-active",
+      "ok": true
+    },
+    {
+      "id": "shelf-has-cards-or-empty",
+      "ok": true
+    },
+    {
+      "id": "domain-filter-visible",
+      "ok": true
+    },
+    {
+      "id": "new-workflow-entry",
+      "ok": true
+    },
+    {
+      "id": "no-workbench-agent-form",
+      "ok": true
+    },
+    {
+      "id": "provenance-badges-present",
+      "ok": true,
+      "cards": 5,
+      "provenance": [
+        "团队",
+        "我的",
+        "我的",
+        "团队",
+        "团队"
+      ],
+      "domainVisible": true,
+      "newWorkflow": true,
+      "agentForm": false
+    },
+    {
+      "id": "studio-surface-active",
+      "ok": true
+    },
+    {
+      "id": "studio-agent-candidates",
+      "ok": true,
+      "active": true,
+      "agents": 7,
+      "tuneLink": false,
+      "manageAgent": false,
+      "saveAgent": false
+    },
+    {
+      "id": "studio-no-agent-body-config",
+      "ok": true
+    },
+    {
+      "id": "studio-back-to-shelf",
+      "ok": true
+    },
+    {
+      "id": "manage-menu-two-panels",
+      "ok": true
+    },
+    {
+      "id": "manage-tabs-two-panels",
+      "ok": true
+    },
+    {
+      "id": "no-agent-manage-panel",
+      "ok": true
+    },
+    {
+      "id": "manage-drawer-opens",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-daemon",
+      "ok": true
+    },
+    {
+      "id": "manage-panel-automation",
+      "ok": true
+    },
+    {
+      "id": "hub-add-button-visible",
+      "ok": true
+    },
+    {
+      "id": "hub-expert-dialog-opens",
+      "ok": true,
+      "open": true,
+      "title": "添加自己的专家",
+      "bodyFields": 52
+    },
+    {
+      "id": "hub-expert-form-fields",
+      "ok": true,
+      "open": true,
+      "title": "添加自己的专家",
+      "bodyFields": 52
+    },
+    {
+      "id": "assistant-expert-btn-readonly-label",
+      "ok": true
+    },
+    {
+      "id": "assistant-expert-pop-visible",
+      "ok": true
+    },
+    {
+      "id": "narrow-no-horizontal-overflow",
+      "ok": true,
+      "overflow": 0
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "errors": []
+    },
+    {
+      "id": "agent-detail-no-profile-edit",
+      "ok": true,
+      "profileButton": false,
+      "tuneButton": true,
+      "tuneText": "前往能力界面调优 Agent",
+      "profileFields": 0,
+      "saveProfile": false
+    },
+    {
+      "id": "agent-detail-tune-link",
+      "ok": true,
+      "profileButton": false,
+      "tuneButton": true,
+      "tuneText": "前往能力界面调优 Agent",
+      "profileFields": 0,
+      "saveProfile": false
+    }
+  ]
+}

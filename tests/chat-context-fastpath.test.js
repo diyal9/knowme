@@ -29,6 +29,12 @@ describe('chat-intent classifyIntent', () => {
     assert.equal(classifyIntent({ prompt: '公司报销流程是什么样的' }), 'assist')
   })
 
+  it('routes time-sensitive public research above chat', () => {
+    assert.equal(classifyIntent({ prompt: '帮我看下今天关于 AI 的资讯' }), 'assist')
+    assert.equal(classifyIntent({ prompt: '最近 OpenAI 有什么新闻动态' }), 'assist')
+    assert.equal(classifyIntent({ prompt: '实现动态规划算法' }), 'assist')
+  })
+
   it('routes open-file context to assist even without work verb', () => {
     assert.equal(classifyIntent({ prompt: '你觉得呢', hasNoteContext: true }), 'assist')
   })

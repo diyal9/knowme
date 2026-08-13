@@ -1,0 +1,62 @@
+{
+  "at": "2026-08-05T16:49:41.455Z",
+  "role": "producer",
+  "ok": true,
+  "checks": [
+    {
+      "id": "legacy-flag-off",
+      "pass": true
+    },
+    {
+      "id": "legacy-no-write-tools",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "v1-flag-on",
+      "pass": true
+    },
+    {
+      "id": "v1-has-file-write-tools",
+      "pass": true,
+      "detail": [
+        "search_knowledge",
+        "read_file",
+        "list_dir",
+        "grep_files",
+        "write_file",
+        "create_file",
+        "apply_patch",
+        "move_path",
+        "copy_path",
+        "delete_path",
+        "mkdir"
+      ]
+    },
+    {
+      "id": "process-tools-exported",
+      "pass": true
+    },
+    {
+      "id": "write-creates-draft",
+      "pass": true
+    },
+    {
+      "id": "reject-no-side-effect",
+      "pass": true
+    },
+    {
+      "id": "reject-draft-ok",
+      "pass": true
+    },
+    {
+      "id": "traversal-user-error",
+      "pass": true,
+      "detail": {
+        "ok": false,
+        "code": "scope_denied",
+        "text": "路径 traversal 被拒绝"
+      }
+    }
+  ]
+}

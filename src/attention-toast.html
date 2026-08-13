@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+  <title>通知</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .card {
+      box-sizing: border-box;
+      height: 100%;
+      margin: 4px;
+      padding: 12px 14px 12px 12px;
+      border-radius: 12px;
+      background: #2b2f36;
+      color: #f3f5f8;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .38);
+      display: grid;
+      grid-template-columns: 40px 1fr 18px;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+    }
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(145deg, #e8789a, #8b6cf0);
+    }
+    .copy { min-width: 0; }
+    .title {
+      font-size: 13px;
+      font-weight: 650;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .body {
+      margin-top: 3px;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #c4cad4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .close {
+      align-self: start;
+      width: 18px;
+      height: 18px;
+      border: 0;
+      padding: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: #d7dbe3;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .close:hover { background: rgba(255,255,255,.08); }
+  </style>
+</head>
+<body>
+  <div class="card" id="card" role="button" tabindex="0">
+    <div class="avatar" id="avatar" aria-hidden="true">知</div>
+    <div class="copy">
+      <div class="title" id="title">需要关注</div>
+      <div class="body" id="body"></div>
+    </div>
+    <button type="button" class="close" id="close" aria-label="关闭">×</button>
+  </div>
+  <script>
+    const api = window.api || {}
+    const titleEl = document.getElementById('title')
+    const bodyEl = document.getElementById('body')
+    const avatarEl = document.getElementById('avatar')
+    const card = document.getElementById('card')
+    const closeBtn = document.getElementById('close')
+
+    function apply(payload) {
+      if (!payload) return
+      titleEl.textContent = payload.title || '需要关注'
+      bodyEl.textContent = payload.body || ''
+      avatarEl.textContent = payload.avatarText || '知'
+    }
+
+    if (api.onAttentionToastInit) {
+      api.onAttentionToastInit(apply)
+    }
+
+    function activate() {
+      try { api.attentionToastActivate && api.attentionToastActivate() } catch {}
+    }
+    function dismiss(e) {
+      e.stopPropagation()
+      try { api.attentionToastDismiss && api.attentionToastDismiss() } catch {}
+    }
+
+    card.addEventListener('click', activate)
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        activate()
+      }
+    })
+    closeBtn.addEventListener('click', dismiss)
+  </script>
+</body>
+</html>

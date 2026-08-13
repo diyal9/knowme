@@ -1,0 +1,47 @@
+{
+  "generatedAt": "2026-08-07T08:55:19.559Z",
+  "gate": "Story 完成门禁",
+  "ok": true,
+  "blocking": false,
+  "change": "enable-grounded-realtime-research",
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "1385/1385 pass"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "lint ok; script-scope ok"
+    }
+  ],
+  "soft": [
+    {
+      "id": "qa-plan-smoke-scope",
+      "ok": true,
+      "detail": "4/4 executed"
+    },
+    {
+      "id": "code-review",
+      "ok": true,
+      "detail": "code-review.md PASS"
+    },
+    {
+      "id": "producer-acceptance",
+      "ok": true,
+      "detail": "PASS"
+    },
+    {
+      "id": "tester-qa",
+      "ok": true,
+      "detail": "PASS; no BLOCKING"
+    }
+  ],
+  "notes": [
+    "Harness reported advisory items for other active changes; none belongs to enable-grounded-realtime-research.",
+    "Real LLM multi-turn E2E and enabled-Feishu mixed-source manual testing remain documented non-blocking advisories."
+  ]
+}

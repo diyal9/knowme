@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-08-06T10:43:46.039Z",
+  "ok": true,
+  "mode": "electron",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-stream-visibility-NtKkIt",
+  "checks": [
+    {
+      "id": "unfinished-heading-hidden",
+      "pass": true
+    },
+    {
+      "id": "stable-heading-formatted-directly",
+      "pass": true
+    },
+    {
+      "id": "incomplete-protocol-zero-leak",
+      "pass": true
+    },
+    {
+      "id": "incomplete-suggestion-zero-leak",
+      "pass": true
+    },
+    {
+      "id": "unclosed-code-fence-buffered",
+      "pass": true
+    },
+    {
+      "id": "unfinished-link-buffered",
+      "pass": true
+    },
+    {
+      "id": "stable-list-formatted-directly",
+      "pass": true
+    },
+    {
+      "id": "incomplete-table-buffered",
+      "pass": true
+    },
+    {
+      "id": "stable-table-formatted-directly",
+      "pass": true
+    },
+    {
+      "id": "completion-keeps-stable-shell",
+      "pass": true
+    },
+    {
+      "id": "cancelled-tail-remains-hidden",
+      "pass": true
+    },
+    {
+      "id": "v2-ipc-and-scroll-stay-stable",
+      "pass": true,
+      "scrollBefore": 1418.4000244140625,
+      "scrollAfter": 1418.4000244140625,
+      "driftPx": 0
+    }
+  ],
+  "screenshots": {
+    "pending": "screenshots/buffered-pending-content.png",
+    "stable": "screenshots/stable-stream-content.png"
+  }
+}

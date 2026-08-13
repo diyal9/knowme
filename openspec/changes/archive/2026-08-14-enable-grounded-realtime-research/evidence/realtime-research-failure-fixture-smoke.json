@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-08-07T08:54:08.080Z",
+  "ok": true,
+  "mode": "electron-fixture-failure",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-research-fail-zvzNVn",
+  "checks": [
+    {
+      "id": "prompt-visible",
+      "pass": true
+    },
+    {
+      "id": "search-timeline-started",
+      "pass": true
+    },
+    {
+      "id": "search-failure-visible",
+      "pass": true
+    },
+    {
+      "id": "honest-failure-reason",
+      "pass": true
+    },
+    {
+      "id": "no-fabricated-news",
+      "pass": true
+    },
+    {
+      "id": "no-source-links-on-failure",
+      "pass": true
+    },
+    {
+      "id": "no-single-feishu-choice",
+      "pass": true
+    },
+    {
+      "id": "no-console-errors",
+      "pass": true
+    }
+  ],
+  "consoleErrors": [],
+  "screenshot": "screenshots/realtime-research-search-failure.png",
+  "boundary": "Deterministic Output Protocol injection; not real LLM or live provider."
+}

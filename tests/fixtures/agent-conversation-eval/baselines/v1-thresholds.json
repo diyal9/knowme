@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hardDimensions": ["toolChoice", "factFaithfulness", "refusalWhenUnmet", "contextContinuity"],
+  "thresholds": {
+    "toolChoice": 1.0,
+    "factFaithfulness": 1.0,
+    "refusalWhenUnmet": 1.0,
+    "contextContinuity": 0.9,
+    "toolArgs": 0.8,
+    "taskCompletion": 0.8,
+    "formatUx": 0.7
+  }
+}

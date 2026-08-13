@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "game-studio",
+  "name": "游戏研发能力包",
+  "description": "手机游戏工作室垂直能力：策划需求、研发交付、测试验收、制作推进与管线服务工作流。",
+  "version": "1.2.0",
+  "expert": "game-studio-partner",
+  "skills": [
+    "game-requirement-doc",
+    "game-dev-delivery",
+    "game-qa-acceptance",
+    "game-production",
+    "code-review",
+    "knowledge-steward"
+  ],
+  "connectors": ["feishu"],
+  "workflows": ["game-dev-delivery"],
+  "defaultWorkflow": "game-dev-delivery",
+  "requirementSchema": "requirement-schema.json",
+  "scenesFile": "scenes.json",
+  "dependencies": [],
+  "permissions": {
+    "connectors": {
+      "feishu": ["read", "write_draft"]
+    }
+  },
+  "knowledge": {
+    "schema": "okf-v0.1",
+    "seed": "knowledge/"
+  },
+  "acceptance": {
+    "daemonWorkflow": "game-dev-delivery",
+    "deliveryArtifactCount": 6
+  },
+  "ui": {
+    "emptyStateKicker": "游戏工作室",
+    "emptyStateHero": "KnowMe 游戏伙伴",
+    "emptyStateSub": "策划、研发、测试与制作场景；飞书办公入口请启用「智能办公能力包」。"
+  },
+  "bundledCapabilities": {
+    "expert": "game-studio-partner",
+    "catalogRoot": "../../catalog"
+  }
+}

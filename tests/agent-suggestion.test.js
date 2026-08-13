@@ -265,17 +265,21 @@ describe('agent-suggestion', () => {
     assert.ok(agent.includes('function setQuickMenuOpen(open)'), 'workspace synchronizes quick menu state')
     for (const page of [html, editorHtml, noteHtml]) {
       assert.ok(!page.includes('<span>优化提示词</span>'), 'quick menu is not positioned around prompts')
-      // 快捷操作对齐“飞书能力驱动办公助理”定位：沟通 / 文档 / 知识 / 会议 / 日程任务 / 组织协同
+      assert.ok(page.includes('aria-expanded="false"'), 'quick menu trigger exposes collapsed state')
+      assert.ok(page.includes('aria-hidden="true"'), 'quick menu exposes hidden state')
+      assert.ok(!page.includes('<span>改写清晰</span>'), 'quick menu drops generic rewrite action')
+      assert.ok(!page.includes('<span>查歧义</span>'), 'quick menu drops generic ambiguity action')
+    }
+    assert.ok(html.includes('id="agentQuickSearch"'), 'workspace quick launcher is searchable')
+    assert.ok(!html.includes('快捷大类') && !html.includes('快捷子项'), 'workspace launcher hides internal categories')
+    for (const page of [editorHtml, noteHtml]) {
+      // 窄编辑器继续使用紧凑飞书能力菜单；工作台改由搜索式命令面板承载。
       assert.ok(page.includes('<span>飞书沟通</span>'), 'quick menu covers instant communication')
       assert.ok(page.includes('<span>文档读写</span>'), 'quick menu covers Feishu docs and drive')
       assert.ok(page.includes('<span>知识库检索</span>'), 'quick menu covers wiki and base')
       assert.ok(page.includes('<span>会议记录</span>'), 'quick menu covers minutes and meeting notes')
       assert.ok(page.includes('<span>日程任务</span>'), 'quick menu covers calendar and tasks')
       assert.ok(page.includes('<span>组织协同</span>'), 'quick menu covers org collaboration')
-      assert.ok(page.includes('aria-expanded="false"'), 'quick menu trigger exposes collapsed state')
-      assert.ok(page.includes('aria-hidden="true"'), 'quick menu exposes hidden state')
-      assert.ok(!page.includes('<span>改写清晰</span>'), 'quick menu drops generic rewrite action')
-      assert.ok(!page.includes('<span>查歧义</span>'), 'quick menu drops generic ambiguity action')
     }
   })
 })

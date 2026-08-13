@@ -1,0 +1,37 @@
+{
+  "name": "plan-incomplete",
+  "input": { "prompt": "执行计划", "tier": "retrieval" },
+  "forceTools": true,
+  "budget": { "maxRounds": 2, "maxToolCalls": 2 },
+  "plan": {
+    "version": 1,
+    "updatedAt": "2026-08-04T00:00:00.000Z",
+    "items": [
+      { "id": "p1", "title": "步骤一", "status": "done" },
+      { "id": "p2", "title": "步骤二", "status": "pending" }
+    ]
+  },
+  "llmScript": [
+    {
+      "response": {
+        "text": "",
+        "toolCalls": [{ "name": "search_knowledge", "arguments": "{\"query\":\"a\"}" }]
+      }
+    },
+    {
+      "response": {
+        "text": "",
+        "toolCalls": [{ "name": "search_knowledge", "arguments": "{\"query\":\"b\"}" }]
+      }
+    },
+    { "response": { "text": "计划部分完成，步骤二尚未执行。" } }
+  ],
+  "toolScript": [
+    { "ok": true, "text": "结果 a", "preview": "结果 a" },
+    { "ok": true, "text": "结果 b", "preview": "结果 b" }
+  ],
+  "expect": {
+    "terminal": "DONE",
+    "phases": ["PREPARE", "CONTEXT", "MODEL", "TOOL", "VERIFY", "PERSIST", "DONE"],
+    "toolCalls": 2
+  }}

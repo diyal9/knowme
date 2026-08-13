@@ -314,6 +314,9 @@ function listChildren(rootPath, relPath = '', opts = {}) {
   return { ok: true, nodes, truncated, rootPath: root, parentPath: rel };
 }
 
+/** 单文件同步读取上限，避免主进程被超大文件拖死 */
+const MAX_READ_BYTES = 2 * 1024 * 1024;
+
 function readFileUnder(rootPath, relPath) {
   const full = resolveUnderRoot(rootPath, relPath);
   if (!full) return { ok: false, error: '非法路径' };
@@ -321,8 +324,18 @@ function readFileUnder(rootPath, relPath) {
     if (!fs.existsSync(full) || !fs.statSync(full).isFile()) {
       return { ok: false, error: '文件不存在' };
     }
+    const size = fs.statSync(full).size;
+    if (size > MAX_READ_BYTES) {
+      return {
+        ok: false,
+        error: `文件过大（>${Math.round(MAX_READ_BYTES / 1024 / 1024)}MB），请缩小后再读`,
+        code: 'too_large',
+        size,
+        maxBytes: MAX_READ_BYTES,
+      };
+    }
     const content = fs.readFileSync(full, 'utf8');
-    return { ok: true, content, path: relPath, absPath: full };
+    return { ok: true, content, path: relPath, absPath: full, size };
   } catch (e) {
     return { ok: false, error: e.message || '读取失败' };
   }
@@ -359,6 +372,7 @@ module.exports = {
   MAX_DEPTH,
   MAX_NODES,
   MAX_CHILDREN,
+  MAX_READ_BYTES,
   newId,
   normalizeRoot,
   resolveUnderRoot,

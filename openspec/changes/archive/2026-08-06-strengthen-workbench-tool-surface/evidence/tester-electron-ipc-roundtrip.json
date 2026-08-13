@@ -1,0 +1,65 @@
+{
+  "at": "2026-08-05T16:54:28.712Z",
+  "role": "tester",
+  "change": "strengthen-workbench-tool-surface",
+  "ok": true,
+  "checks": [
+    {
+      "id": "preload-apis",
+      "pass": true,
+      "detail": {
+        "approve": true,
+        "create": true,
+        "list": true
+      }
+    },
+    {
+      "id": "create-draft-via-ipc",
+      "pass": true,
+      "detail": {
+        "draftId": "draft_1785948867060",
+        "ok": true
+      }
+    },
+    {
+      "id": "draft-visible-in-main",
+      "pass": true,
+      "detail": {
+        "count": 5,
+        "draftId": "draft_1785948867060"
+      }
+    },
+    {
+      "id": "reject-ipc-roundtrip",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "rejected": true,
+        "message": "已拒绝草稿"
+      }
+    },
+    {
+      "id": "approve-ipc-roundtrip-fakeApply",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "text": "FAKE_APPLY: create_doc",
+        "fake": true
+      }
+    },
+    {
+      "id": "double-click-approve-race",
+      "pass": true,
+      "detail": {
+        "d1": "not_pending",
+        "d2": "not_pending"
+      }
+    },
+    {
+      "id": "screenshot",
+      "pass": true,
+      "path": "screenshots/tester-ipc-roundtrip.png"
+    }
+  ],
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-tester-ipc-HDjuFx"
+}

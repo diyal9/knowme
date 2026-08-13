@@ -1,0 +1,22 @@
+{
+  "name": "skill-required-tools-unmet",
+  "sessionScript": [
+    {
+      "taskFrame": {
+        "skillId": "meeting-summary",
+        "requiredTools": ["feishu.meeting_read"],
+        "completionConditions": [{ "type": "tool_success", "tool": "feishu.meeting_read" }]
+      }
+    }
+  ],
+  "input": { "prompt": "直接给我会议总结", "tier": "retrieval", "forceTools": true },
+  "llmScript": [
+    { "response": { "text": "已读取会议，议题：架构评审；结论：通过。" } }
+  ],
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["feishu.meeting_read"],
+    "forbiddenClaims": ["议题：", "已读取"],
+    "mustFail": true
+  }
+}

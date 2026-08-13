@@ -1,5 +1,7 @@
 'use strict'
 
+const fs = require('fs')
+const path = require('path')
 const { spawn } = require('child_process')
 const readline = require('readline')
 let logger = null
@@ -303,6 +305,147 @@ function createMcpHostRegistry() {
 
 const defaultRegistry = createMcpHostRegistry()
 
+function oauthDir(userData) {
+  return path.join(String(userData || ''), 'mcp-oauth')
+}
+
+function schemaCacheDir(userData) {
+  return path.join(String(userData || ''), 'mcp-schemas')
+}
+
+function loadOAuthTokens(userData, connectorId) {
+  try {
+    const file = path.join(oauthDir(userData), `${sanitizeConnectorId(connectorId)}.json`)
+    return JSON.parse(fs.readFileSync(file, 'utf8'))
+  } catch {
+    return null
+  }
+}
+
+function saveOAuthTokens(userData, connectorId, tokens = {}) {
+  const dir = oauthDir(userData)
+  fs.mkdirSync(dir, { recursive: true })
+  const file = path.join(dir, `${sanitizeConnectorId(connectorId)}.json`)
+  fs.writeFileSync(file, JSON.stringify({ ...tokens, updatedAt: new Date().toISOString() }, null, 2), 'utf8')
+}
+
+async function refreshOAuthToken(userData, connectorId, refreshFn) {
+  const current = loadOAuthTokens(userData, connectorId)
+  if (!current?.refresh_token || typeof refreshFn !== 'function') return current
+  try {
+    const next = await refreshFn(current)
+    if (next?.access_token) saveOAuthTokens(userData, connectorId, { ...current, ...next })
+    return next || current
+  } catch {
+    return current
+  }
+}
+
+function loadSchemaCache(userData, connectorId) {
+  try {
+    const file = path.join(schemaCacheDir(userData), `${sanitizeConnectorId(connectorId)}.json`)
+    const raw = JSON.parse(fs.readFileSync(file, 'utf8'))
+    return Array.isArray(raw?.tools) ? raw.tools : []
+  } catch {
+    return null
+  }
+}
+
+function saveSchemaCache(userData, connectorId, tools = []) {
+  const dir = schemaCacheDir(userData)
+  fs.mkdirSync(dir, { recursive: true })
+  const file = path.join(dir, `${sanitizeConnectorId(connectorId)}.json`)
+  fs.writeFileSync(file, JSON.stringify({ tools, cachedAt: new Date().toISOString() }, null, 2), 'utf8')
+}
+
+/**
+ * Streamable HTTP MCP session (fake-friendly for tests via fetchImpl).
+ */
+function createStreamableHttpSession(opts = {}) {
+  const baseUrl = String(opts.url || opts.baseUrl || '').trim().replace(/\/$/, '')
+  const fetchImpl = typeof opts.fetchImpl === 'function' ? opts.fetchImpl : global.fetch
+  const timeoutMs = Number.isFinite(opts.timeoutMs) ? opts.timeoutMs : DEFAULT_TIMEOUT_MS
+  const headers = { ...(opts.headers || {}) }
+  if (opts.accessToken) headers.Authorization = `Bearer ${opts.accessToken}`
+
+  async function rpc(method, params = {}) {
+    if (!baseUrl) return { ok: false, code: 'unconfigured', message: 'MCP HTTP URL 未配置' }
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const res = await fetchImpl(`${baseUrl}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...headers },
+        body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }),
+        signal: controller.signal,
+      })
+      clearTimeout(timer)
+      const body = await res.json()
+      if (body.error) {
+        return { ok: false, code: 'mcp_error', message: body.error.message || 'MCP HTTP error' }
+      }
+      return { ok: true, result: body.result }
+    } catch (err) {
+      clearTimeout(timer)
+      return { ok: false, code: 'mcp_error', message: String(err?.message || err).slice(0, 400) }
+    }
+  }
+
+  return {
+    transport: 'streamable-http',
+    async listTools() {
+      const r = await rpc('tools/list', {})
+      if (!r.ok) return { ok: false, code: r.code, message: r.message, tools: [] }
+      const tools = Array.isArray(r.result?.tools) ? r.result.tools : []
+      return { ok: true, tools }
+    },
+    async callTool(name, args = {}) {
+      const r = await rpc('tools/call', { name: String(name || ''), arguments: args })
+      if (!r.ok) return { ok: false, code: r.code, message: r.message, text: r.message }
+      const content = Array.isArray(r.result?.content) ? r.result.content : []
+      const text = content.map((c) => (c?.type === 'text' ? c.text : JSON.stringify(c))).join('\n').slice(0, 24000)
+      return { ok: !r.result?.isError, text: text || JSON.stringify(r.result || {}) }
+    },
+    async healthCheck() {
+      const r = await rpc('ping', {})
+      return { ok: r.ok, transport: 'streamable-http', url: baseUrl }
+    },
+    async close() {},
+  }
+}
+
+function createMcpSessionForTransport(mcpConfig = {}, opts = {}) {
+  const transport = String(mcpConfig.transport || 'stdio').trim().toLowerCase()
+  if (transport === 'streamable-http' || transport === 'http') {
+    return createStreamableHttpSession({
+      url: mcpConfig.url,
+      accessToken: opts.accessToken,
+      fetchImpl: opts.fetchImpl,
+      timeoutMs: opts.timeoutMs,
+      headers: opts.headers,
+    })
+  }
+  return createMcpSession({
+    command: mcpConfig.command,
+    args: mcpConfig.args,
+    cwd: mcpConfig.cwd,
+    envKeys: mcpConfig.envKeys,
+    spawnImpl: opts.spawnImpl,
+    timeoutMs: opts.timeoutMs,
+  })
+}
+
+async function checkMcpHealth(session) {
+  if (!session) return { ok: false, code: 'not_connected', message: 'MCP 未连接' }
+  if (typeof session.healthCheck === 'function') return session.healthCheck()
+  try {
+    const listed = await session.listTools()
+    return { ok: listed.ok, toolCount: (listed.tools || []).length }
+  } catch (err) {
+    return { ok: false, code: 'health_failed', message: String(err?.message || err) }
+  }
+}
+
 module.exports = {
   DEFAULT_TIMEOUT_MS,
   sanitizeConnectorId,
@@ -310,7 +453,17 @@ module.exports = {
   parseMcpAgentToolName,
   mcpConfigKey,
   createMcpSession,
+  createStreamableHttpSession,
+  createMcpSessionForTransport,
   projectMcpTools,
   createMcpHostRegistry,
   defaultRegistry,
+  oauthDir,
+  schemaCacheDir,
+  loadOAuthTokens,
+  saveOAuthTokens,
+  refreshOAuthToken,
+  loadSchemaCache,
+  saveSchemaCache,
+  checkMcpHealth,
 }

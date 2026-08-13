@@ -1,6 +1,14 @@
 'use strict'
 
 const gameStudio = require('./game-studio-scenes')
+const { createCapabilityPackRuntime } = require('./capability-pack-runtime')
+
+let packRuntime = createCapabilityPackRuntime()
+
+function setPackRuntimeForTests(next) {
+  packRuntime = next || createCapabilityPackRuntime()
+  gameStudio.setPackRuntimeForTests(packRuntime)
+}
 
 const MODE_IDS = ['general', 'steward', 'writing', 'coding']
 const SCENE_IDS = ['assistant', 'work', 'knowledge', 'writing', 'coding']
@@ -74,6 +82,15 @@ function resolveScene({
   prompt = '',
   explicitScene = '',
 } = {}) {
+  const packResolved = packRuntime.resolveScene({
+    mode,
+    prompt,
+    tier,
+    hasTask: hasTask || hasNoteContext,
+    explicitScene,
+  })
+  if (packResolved) return packResolved.sceneId
+
   const gameScene = gameStudio.resolveGameScene({
     industry,
     mode,
@@ -98,7 +115,12 @@ function resolveScene({
 }
 
 function sceneLabel(scene) {
-  if (gameStudio.SCENE_IDS.includes(scene)) return gameStudio.sceneLabel(scene)
+  if (gameStudio.getSceneIds().includes(scene)) return gameStudio.sceneLabel(scene)
+  for (const pack of packRuntime.listEnabledPacks()) {
+    const record = packRuntime.loadPackRecord(pack.id)
+    const hit = record?.scenes.find(s => s.id === scene)
+    if (hit) return hit.label
+  }
   return SCENE_LABELS[SCENE_IDS.includes(scene) ? scene : 'assistant']
 }
 
@@ -106,9 +128,11 @@ function buildScenePrompt({
   scene = 'assistant',
   mode = 'general',
 } = {}) {
-  if (gameStudio.SCENE_IDS.includes(scene)) {
+  if (gameStudio.getSceneIds().includes(scene)) {
     return gameStudio.buildScenePrompt(scene)
   }
+  const resolved = packRuntime.resolveScene({ explicitScene: scene })
+  if (resolved) return packRuntime.buildScenePrompt(resolved)
   const sceneId = SCENE_IDS.includes(scene) ? scene : 'assistant'
   const modeId = normalizeMode(mode)
   const lines = [
@@ -177,6 +201,7 @@ module.exports = {
   SCENE_FOUNDATION,
   normalizeMode,
   normalizeTier,
+  setPackRuntimeForTests,
   resolveScene,
   sceneLabel,
   buildScenePrompt,

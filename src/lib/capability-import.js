@@ -16,6 +16,7 @@ const {
   clearStaging,
   copyDirectorySafe,
   installFromStaging,
+  loadInstallStore,
   resolvePaths,
 } = require('./capability-store')
 const {
@@ -24,6 +25,14 @@ const {
   getBundledInstallSource,
   isTrustedSource,
 } = require('./capability-catalog')
+const {
+  SIDECAR_FILE,
+  adaptLegacyCapability,
+  checkDependencyGraph,
+  serializeSidecar,
+  validateAndNormalizeManifest,
+} = require('./capability-manifest-v2')
+const { parseExpertFrontmatter } = require('./expert-runtime')
 
 const LIMITS = {
   maxFileBytes: 10 * 1024 * 1024,
@@ -38,6 +47,79 @@ const DEVICE_NAME_RE = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\.|$)/i
 
 function fail(code, message) {
   return { ok: false, code, error: message }
+}
+
+function cleanupStagingPath(stagePath) {
+  const target = String(stagePath || '').trim()
+  if (!target) return
+  try {
+    fs.rmSync(target, { recursive: true, force: true })
+  } catch {
+    // best-effort
+  }
+}
+
+function estimateCost(manifest = {}, limits = {}) {
+  const deps = Array.isArray(manifest.dependencies) ? manifest.dependencies.length : 0
+  const perms = manifest.permissions && typeof manifest.permissions === 'object'
+    ? Object.keys(manifest.permissions).length
+    : 0
+  const risks = Array.isArray(manifest.risk?.reasons) ? manifest.risk.reasons.length : 0
+  const sizeMb = Math.max(0, Number((limits.totalBytes || 0) / (1024 * 1024)).toFixed(2))
+  const score = deps * 2 + perms * 3 + risks * 2 + Math.min(10, Math.ceil(sizeMb))
+  const level = score >= 22 ? 'high' : score >= 10 ? 'medium' : 'low'
+  const bucket = level === 'high' ? '预计较高' : level === 'medium' ? '预计中等' : '预计较低'
+  return {
+    level,
+    score,
+    estimate: bucket,
+    packageSizeMb: sizeMb,
+    fileCount: Number(limits.fileCount || 0),
+  }
+}
+
+function toPrecheckSummary(options = {}) {
+  const manifest = options.manifest || {}
+  const detected = options.detected || {}
+  const dependencies = options.dependencies || { issues: [], warnings: [] }
+  const trust = options.trust || {}
+  const source = String(options.source || 'local')
+  const risk = manifest.risk || { level: 'low', reasons: [] }
+  return {
+    source,
+    id: manifest.id || detected.id || '',
+    kind: manifest.kind || detected.kind || '',
+    name: manifest.name || detected.id || '',
+    version: manifest.version || detected.version || '1.0.0',
+    trust: {
+      required: trust.required === true,
+      status: trust.status || 'unknown',
+      message: trust.message || '',
+      origin: options.originUrl || '',
+    },
+    risk: {
+      level: risk.level || 'low',
+      reasons: Array.isArray(risk.reasons) ? risk.reasons.slice(0, 8) : [],
+      requiresConfirmation: ['high', 'critical'].includes(String(risk.level || '').toLowerCase()),
+    },
+    dependencies: {
+      requiredIssues: Array.isArray(dependencies.issues) ? dependencies.issues : [],
+      optionalWarnings: Array.isArray(dependencies.warnings) ? dependencies.warnings : [],
+    },
+    permissions: manifest.permissions && typeof manifest.permissions === 'object'
+      ? manifest.permissions
+      : {},
+    io: {
+      inputs: Array.isArray(manifest.inputs) ? manifest.inputs : [],
+      outputs: Array.isArray(manifest.outputs) ? manifest.outputs : [],
+    },
+    compatibility: {
+      status: dependencies.ok === false ? 'blocked' : 'compatible',
+      reason: dependencies.ok === false ? (dependencies.issues?.[0]?.message || '依赖不可用') : '',
+    },
+    estimatedCost: estimateCost(manifest, options.limits || {}),
+    rollbackHint: '导入后可在能力详情中禁用或卸载，且不会自动执行包内脚本。',
+  }
 }
 
 function normalizeZipPath(name) {
@@ -149,15 +231,22 @@ function detectKindFromFolder(folderPath) {
   }
 
   if (fs.existsSync(expertMd)) {
-    const parsed = parseFrontmatter(fs.readFileSync(expertMd, 'utf8'))
-    const secretHit = scanSecrets(parsed.frontmatter)
+    const parsed = parseExpertFrontmatter(fs.readFileSync(expertMd, 'utf8'))
+    if (!parsed.ok) return fail('invalid_expert', parsed.error || 'EXPERT.md 无效')
+    const manifest = {
+      ...parsed.frontmatter,
+      skills: parsed.skills,
+      connectors: parsed.connectors,
+      systemPrompt: parsed.systemPrompt,
+    }
+    const secretHit = scanSecrets(manifest)
     if (secretHit) return secretHit
     return {
       ok: true,
       kind: 'expert',
-      id: String(parsed.frontmatter.name || path.basename(root)).trim(),
+      id: String(parsed.name || path.basename(root)).trim(),
       version: String(parsed.frontmatter.version || '1.0.0').trim(),
-      manifest: parsed.frontmatter,
+      manifest,
     }
   }
 
@@ -178,6 +267,80 @@ function detectKindFromFolder(folderPath) {
   }
 
   return fail('missing_manifest', '目录需包含 SKILL.md、EXPERT.md 或 manifest.json')
+}
+
+function buildUnifiedManifest(folderPath, detected, options = {}) {
+  const sidecarPath = path.join(folderPath, SIDECAR_FILE)
+  let normalized
+  if (fs.existsSync(sidecarPath)) {
+    const sidecar = readJsonFile(sidecarPath)
+    if (!sidecar.ok) return sidecar
+    const secretHit = scanSecrets(sidecar.data)
+    if (secretHit) return secretHit
+    normalized = validateAndNormalizeManifest(sidecar.data, {
+      id: options.id || detected.id,
+      kind: detected.kind,
+      version: options.version || detected.version,
+    })
+  } else {
+    normalized = adaptLegacyCapability(detected.kind, detected.manifest || {}, {
+      id: options.id || detected.id,
+      name: detected.manifest?.name || detected.manifest?.title || detected.id,
+      description: detected.manifest?.description || '',
+      version: options.version || detected.version,
+      source: options.source || 'local',
+      ref: options.originUrl || folderPath,
+      trust: options.trust || 'unknown',
+      hasScripts: detected.kind === 'skill' && fs.existsSync(path.join(folderPath, 'scripts')),
+    })
+  }
+  if (!normalized.ok) {
+    return fail('invalid_capability_manifest', normalized.issues?.[0]?.message || '统一能力声明无效')
+  }
+  if (normalized.manifest.id !== String(options.id || detected.id).trim()) {
+    return fail('manifest_id_mismatch', 'v2 manifest id 与能力包 id 不一致')
+  }
+  if (normalized.manifest.kind !== detected.kind) {
+    return fail('manifest_kind_mismatch', 'v2 manifest kind 与能力包类型不一致')
+  }
+  return { ok: true, manifest: normalized.manifest }
+}
+
+function validateInstallDependencies(userData, manifest) {
+  const store = loadInstallStore(userData)
+  const entries = Object.values(store.entries || {})
+  const issues = []
+  const warnings = []
+  for (const dep of manifest.dependencies || []) {
+    const entry = entries.find(item => item.id === dep.id)
+    const unavailable = !entry || entry.enabled === false || ['removed', 'failed', 'available'].includes(entry.status)
+    const wrongKind = entry && dep.kind && entry.kind !== dep.kind
+    if (wrongKind) {
+      const item = { code: 'dependency_kind_mismatch', dependency: dep, message: `依赖 ${dep.id} 类型应为 ${dep.kind}` }
+      if (manifest.kind === 'expert') warnings.push(item)
+      else issues.push(item)
+    } else if (unavailable) {
+      const item = {
+        code: dep.required ? 'missing_dependency' : 'missing_optional_dependency',
+        dependency: dep,
+        message: `缺少${dep.required ? '必需' : '可选'}依赖: ${dep.id}`,
+      }
+      if (dep.required && manifest.kind !== 'expert') issues.push(item)
+      else warnings.push(item)
+    }
+  }
+
+  const graphManifests = [
+    manifest,
+    ...entries.filter(entry => entry.id !== manifest.id && entry.manifest).map(entry => entry.manifest),
+  ]
+  const graph = checkDependencyGraph(graphManifests, {
+    availableIds: new Set(entries.filter(entry => entry.enabled !== false).map(entry => entry.id)),
+  })
+  for (const graphIssue of graph.issues.filter(item => item.code === 'dependency_cycle' && item.cycle?.includes(manifest.id))) {
+    issues.push(graphIssue)
+  }
+  return { ok: issues.length === 0, issues, warnings }
 }
 
 function validateFolderTree(folderPath) {
@@ -398,7 +561,86 @@ function finalizeInstall(userData, detected, options = {}) {
   const trustCheck = ensureTrust(userData, options.trust, options.originUrl, options)
   if (!trustCheck.ok) return trustCheck
 
-  return installFromStaging(userData, {
+  const unified = buildUnifiedManifest(options.stagingPath, detected, {
+    ...options,
+    trust: trustCheck.trust || options.trust,
+  })
+  if (!unified.ok) return unified
+
+  const dependencyCheck = validateInstallDependencies(userData, unified.manifest)
+  if (!dependencyCheck.ok) {
+    if (options.dryRun) {
+      return {
+        ok: true,
+        dryRun: true,
+        preview: toPrecheckSummary({
+          source: options.source || 'local',
+          detected,
+          manifest: unified.manifest,
+          dependencies: dependencyCheck,
+          trust: { required: false, status: trustCheck.trust || options.trust || 'unknown' },
+          originUrl: options.originUrl || '',
+          limits: options.limits || {},
+        }),
+      }
+    }
+    return {
+      ok: false,
+      code: 'dependency_conflict',
+      error: dependencyCheck.issues[0]?.message || '能力依赖不可用',
+      issues: dependencyCheck.issues,
+      warnings: dependencyCheck.warnings,
+      manifest: unified.manifest,
+    }
+  }
+  if (['high', 'critical'].includes(unified.manifest.risk.level) && options.riskConfirmed !== true) {
+    if (options.dryRun) {
+      return {
+        ok: true,
+        dryRun: true,
+        preview: toPrecheckSummary({
+          source: options.source || 'local',
+          detected,
+          manifest: unified.manifest,
+          dependencies: dependencyCheck,
+          trust: { required: false, status: trustCheck.trust || options.trust || 'unknown' },
+          originUrl: options.originUrl || '',
+          limits: options.limits || {},
+        }),
+      }
+    }
+    return {
+      ok: false,
+      code: 'risk_confirmation_required',
+      error: '高风险能力需明确确认后安装',
+      needsRiskConfirmation: true,
+      risk: unified.manifest.risk,
+      manifest: unified.manifest,
+      warnings: dependencyCheck.warnings,
+    }
+  }
+
+  if (options.dryRun) {
+    return {
+      ok: true,
+      dryRun: true,
+      preview: toPrecheckSummary({
+        source: options.source || 'local',
+        detected,
+        manifest: unified.manifest,
+        dependencies: dependencyCheck,
+        trust: { required: false, status: trustCheck.trust || options.trust || 'unknown' },
+        originUrl: options.originUrl || '',
+        limits: options.limits || {},
+      }),
+    }
+  }
+
+  const sidecar = serializeSidecar(unified.manifest)
+  if (!sidecar.ok) return fail('invalid_capability_manifest', sidecar.issues?.[0]?.message || '统一能力声明无效')
+  fs.writeFileSync(path.join(options.stagingPath, SIDECAR_FILE), sidecar.content, 'utf8')
+
+  const installed = installFromStaging(userData, {
     id: options.id || detected.id,
     kind: detected.kind,
     source: options.source || 'local',
@@ -407,7 +649,12 @@ function finalizeInstall(userData, detected, options = {}) {
     originUrl: options.originUrl || '',
     stagingPath: options.stagingPath,
     enabled: options.enabled !== false,
+    name: unified.manifest.name,
+    description: unified.manifest.description,
+    manifest: unified.manifest,
   })
+  if (!installed.ok) return installed
+  return { ...installed, manifest: unified.manifest, warnings: dependencyCheck.warnings }
 }
 
 function importFromFolder(userData, folderPath, options = {}) {
@@ -425,12 +672,16 @@ function importFromFolder(userData, folderPath, options = {}) {
 
   const staged = stageCopy(userData, root, options)
   if (!staged.ok) return staged
-
-  return finalizeInstall(userData, detected, {
-    ...options,
-    source: options.source || 'local',
-    stagingPath: staged.stagingPath,
-  })
+  try {
+    return finalizeInstall(userData, detected, {
+      ...options,
+      source: options.source || 'local',
+      stagingPath: staged.stagingPath,
+      limits,
+    })
+  } finally {
+    if (options.dryRun) cleanupStagingPath(staged.stagingPath)
+  }
 }
 
 function importFromMarkdownFile(userData, filePath, options = {}) {
@@ -450,11 +701,17 @@ function importFromMarkdownFile(userData, filePath, options = {}) {
   const detected = detectKindFromFolder(stageRoot)
   if (!detected.ok) return detected
 
-  return finalizeInstall(userData, detected, {
-    ...options,
-    source: options.source || 'local',
-    stagingPath: stageRoot,
-  })
+  const limits = validateFolderTree(stageRoot)
+  try {
+    return finalizeInstall(userData, detected, {
+      ...options,
+      source: options.source || 'local',
+      stagingPath: stageRoot,
+      limits: limits.ok ? limits : {},
+    })
+  } finally {
+    if (options.dryRun) cleanupStagingPath(stageRoot)
+  }
 }
 
 function importFromJsonFile(userData, filePath, options = {}) {
@@ -474,11 +731,17 @@ function importFromJsonFile(userData, filePath, options = {}) {
   const detected = detectKindFromFolder(stageRoot)
   if (!detected.ok) return detected
 
-  return finalizeInstall(userData, detected, {
-    ...options,
-    source: options.source || 'custom',
-    stagingPath: stageRoot,
-  })
+  const limits = validateFolderTree(stageRoot)
+  try {
+    return finalizeInstall(userData, detected, {
+      ...options,
+      source: options.source || 'custom',
+      stagingPath: stageRoot,
+      limits: limits.ok ? limits : {},
+    })
+  } finally {
+    if (options.dryRun) cleanupStagingPath(stageRoot)
+  }
 }
 
 function importFromZipBuffer(userData, buffer, options = {}) {
@@ -494,11 +757,16 @@ function importFromZipBuffer(userData, buffer, options = {}) {
   const detected = detectKindFromFolder(stageRoot)
   if (!detected.ok) return detected
 
-  return finalizeInstall(userData, detected, {
-    ...options,
-    source: options.source || 'zip',
-    stagingPath: stageRoot,
-  })
+  try {
+    return finalizeInstall(userData, detected, {
+      ...options,
+      source: options.source || 'zip',
+      stagingPath: stageRoot,
+      limits,
+    })
+  } finally {
+    if (options.dryRun) cleanupStagingPath(stageRoot)
+  }
 }
 
 function importFromZipFile(userData, zipPath, options = {}) {
@@ -569,12 +837,15 @@ function installCurated(userData, catalogId, options = {}) {
   })
   if (!staged.ok) return staged
 
-  return installFromStaging(userData, {
+  const detected = detectKindFromFolder(staged.stagingPath)
+  if (!detected.ok) return detected
+  return finalizeInstall(userData, detected, {
     id: entryResult.entry.id,
-    kind: entryResult.entry.kind,
     source: 'curated',
     version: entryResult.entry.version,
     trust: entryResult.entry.trust || 'bundled',
+    trustConfirmed: true,
+    riskConfirmed: options.riskConfirmed === true,
     stagingPath: staged.stagingPath,
     enabled: options.enabled !== false,
   })
@@ -593,6 +864,76 @@ function createCapabilityImport(options = {}) {
     importFromZipBuffer: (buffer, opts) => importFromZipBuffer(getUserData(), buffer, opts),
     importFromHttps: (url, opts) => importFromHttps(getUserData(), url, opts),
     installCurated: (catalogId, opts) => installCurated(getUserData(), catalogId, opts),
+    precheckImport: (payload = {}) => {
+      const source = String(payload.source || 'local').trim()
+      const trustConfirmed = payload.trustConfirmed === true
+      const riskConfirmed = payload.riskConfirmed === true
+      const dryOpts = {
+        dryRun: true,
+        trustConfirmed,
+        riskConfirmed,
+      }
+      if (source === 'local') {
+        const folderPath = String(payload.path || '').trim()
+        if (!folderPath) return fail('invalid_args', '缺少本地目录 path')
+        const result = importFromFolder(getUserData(), folderPath, dryOpts)
+        if (!result.ok && result.code === 'trust_required') {
+          return {
+            ok: true,
+            dryRun: true,
+            preview: {
+              source,
+              trust: { required: true, status: 'untrusted', message: result.error || '未知来源需确认' },
+            },
+            code: 'trust_required',
+          }
+        }
+        return result
+      }
+      if (source === 'zip') {
+        const zipPath = String(payload.path || '').trim()
+        if (!zipPath) return fail('invalid_args', '缺少 ZIP path')
+        const result = importFromZipFile(getUserData(), zipPath, dryOpts)
+        if (!result.ok && result.code === 'trust_required') {
+          return {
+            ok: true,
+            dryRun: true,
+            preview: {
+              source,
+              trust: { required: true, status: 'untrusted', message: result.error || '未知来源需确认' },
+            },
+            code: 'trust_required',
+          }
+        }
+        return result
+      }
+      if (source === 'https') {
+        const url = String(payload.url || '').trim()
+        if (!url) return fail('invalid_args', '缺少 HTTPS URL')
+        return importFromHttps(getUserData(), url, dryOpts)
+      }
+      if (source === 'custom') {
+        return {
+          ok: true,
+          dryRun: true,
+          preview: {
+            source: 'custom',
+            kind: String(payload.kind || 'skill').trim(),
+            id: String(payload.id || '').trim(),
+            name: String(payload.name || '').trim(),
+            trust: { required: false, status: 'trusted_source', message: '' },
+            risk: { level: 'low', reasons: [], requiresConfirmation: false },
+            dependencies: { requiredIssues: [], optionalWarnings: [] },
+            permissions: {},
+            io: { inputs: [], outputs: [] },
+            compatibility: { status: 'compatible', reason: '' },
+            estimatedCost: { level: 'low', score: 0, estimate: '预计较低', packageSizeMb: 0, fileCount: 1 },
+            rollbackHint: '导入后可在能力详情中禁用或卸载。',
+          },
+        }
+      }
+      return fail('unsupported_source', `不支持的预检来源: ${source}`)
+    },
     validateHttpsUrl,
     validateRelativePath,
     parseZipEntries,
@@ -608,6 +949,8 @@ module.exports = {
   scanSecrets,
   validateManifestObject,
   detectKindFromFolder,
+  buildUnifiedManifest,
+  validateInstallDependencies,
   validateFolderTree,
   parseZipEntries,
   extractZipBuffer,

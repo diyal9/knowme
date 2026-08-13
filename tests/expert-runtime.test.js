@@ -46,6 +46,24 @@ systemPrompt: 你是一位耐心的写作教练。
     assert.equal(invalid.ok, false)
   })
 
+  it('parses curated multiline bindings and block system prompt', () => {
+    const parsed = parseExpertFrontmatter(`---
+name: 办公伙伴
+description: 日常办公专家
+skills:
+  - writing-polish
+connectors:
+  - feishu
+systemPrompt: |
+  你是 KnowMe 办公伙伴。
+  回答简洁、可执行。
+---
+`)
+    assert.deepEqual(parsed.skills, ['writing-polish'])
+    assert.deepEqual(parsed.connectors, ['feishu'])
+    assert.equal(parsed.systemPrompt, '你是 KnowMe 办公伙伴。\n回答简洁、可执行。')
+  })
+
   it('saveExpert writes EXPERT.md and manifest atomically', () => {
     const runtime = createExpertRuntime({ capabilitiesRoot })
     const saved = runtime.saveExpert('writing-coach', {
@@ -63,6 +81,13 @@ systemPrompt: 你是一位耐心的写作教练。
     const loaded = runtime.loadExpert('writing-coach')
     assert.equal(loaded.ok, true)
     assert.equal(loaded.systemPrompt, '你是写作教练。')
+
+    const deleted = runtime.deleteExpert('writing-coach')
+    assert.equal(deleted.ok, true)
+    assert.equal(fs.existsSync(path.join(capabilitiesRoot, 'experts', 'writing-coach')), false)
+    const missing = runtime.deleteExpert('writing-coach')
+    assert.equal(missing.ok, false)
+    assert.equal(missing.code, 'not_found')
   })
 
   it('validateBindings reports unknown skill and connector ids', () => {
@@ -104,6 +129,83 @@ systemPrompt: 你是一位耐心的写作教练。
     const persona = runtime.getSessionPersona('session-1')
     assert.equal(persona.source, 'snapshot')
     assert.equal(persona.persona.systemPrompt, 'Persona v1')
+  })
+
+  it('saves and freezes Soul SOP agenticType without hub drift', () => {
+    const runtime = createExpertRuntime({ capabilitiesRoot })
+    const saved = runtime.saveExpert('office', {
+      name: '办公伙伴',
+      description: '办公',
+      soul: '稳重简洁',
+      sop: '先对齐再执行',
+      agenticType: 'planning',
+      agenticConfig: { planFirst: true },
+      skills: [],
+      connectors: [],
+    })
+    assert.equal(saved.ok, true)
+    assert.equal(saved.agenticType, 'planning')
+    const snap = runtime.createSessionSnapshot('s-office', 'office')
+    assert.equal(snap.snapshot.persona.soul, '稳重简洁')
+    assert.equal(snap.snapshot.persona.agenticType, 'planning')
+    runtime.saveExpert('office', {
+      name: '办公伙伴',
+      soul: '改了',
+      sop: '新SOP',
+      agenticType: 'reflection',
+    })
+    const persona = runtime.getSessionPersona('s-office')
+    assert.equal(persona.persona.soul, '稳重简洁')
+    assert.equal(persona.persona.agenticType, 'planning')
+  })
+
+  it('updateSessionBindings overrides snapshot only', () => {
+    const runtime = createExpertRuntime({
+      capabilitiesRoot,
+      getAvailableSkillIds: () => ['writing', 'polish'],
+      getAvailableConnectorIds: () => ['feishu'],
+    })
+    runtime.saveExpert('coach', {
+      name: 'Coach',
+      sop: '教写作',
+      skills: ['writing'],
+      connectors: [],
+    })
+    runtime.createSessionSnapshot('s-bind', 'coach')
+    const updated = runtime.updateSessionBindings('s-bind', {
+      skills: ['writing', 'polish'],
+      connectors: ['feishu'],
+    })
+    assert.equal(updated.ok, true)
+    assert.deepEqual(updated.bindings.skills, ['writing', 'polish'])
+    const loaded = runtime.loadExpert('coach')
+    assert.deepEqual(loaded.skills, ['writing'])
+    assert.deepEqual(loaded.connectors, [])
+  })
+
+  it('creates a persona-only snapshot when required bindings are unavailable', () => {
+    const runtime = createExpertRuntime({
+      capabilitiesRoot,
+      getAvailableSkillIds: () => [],
+      getAvailableConnectorIds: () => ['feishu'],
+    })
+    runtime.saveExpert('blocked-coach', {
+      name: 'Blocked Coach',
+      description: 'Needs writing',
+      skills: ['writing'],
+      connectors: ['feishu'],
+      systemPrompt: 'Coach',
+    })
+
+    const snap = runtime.createSessionSnapshot('session-blocked', 'blocked-coach')
+    assert.equal(snap.ok, true)
+    assert.equal(snap.degraded, true)
+    assert.equal(snap.snapshot.persona.systemPrompt, 'Coach')
+    assert.equal(snap.snapshot.readiness.state, 'limited')
+    assert.deepEqual(
+      snap.snapshot.readiness.items.map(item => [item.id, item.status]),
+      [['writing', 'limited'], ['feishu', 'ready']],
+    )
   })
 
   it('buildTryChatSession returns ephemeral session DTO', () => {

@@ -1,0 +1,58 @@
+{
+  "name": "delegate-evidence-aggregation",
+  "input": {
+    "prompt": "委派给 writer 子 Agent，并基于子 Run 的证据汇总结果。",
+    "tier": "agent",
+    "forceTools": true
+  },
+  "llmScript": [
+    {
+      "response": {
+        "toolCalls": [
+          {
+            "name": "delegate_to_expert",
+            "arguments": {
+              "expertId": "writer",
+              "prompt": "整理已核验结论"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "response": {
+        "text": "子 Agent 已完成整理；结论来自 ev_child_1 的可审计证据。"
+      }
+    }
+  ],
+  "toolScript": {
+    "delegate_to_expert": {
+      "ok": true,
+      "text": "writer 子 Run 已完成",
+      "meta": {
+        "subRunId": "sub_eval_writer",
+        "expertId": "writer",
+        "builderId": "claude-package",
+        "terminal": "COMPLETED",
+        "durationMs": 42,
+        "evidenceRefs": [
+          {
+            "id": "ev_child_1",
+            "status": "ok",
+            "digest": "已核验的子 Run 证据",
+            "provenance": {
+              "builderId": "claude-package"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": [
+      "delegate_to_expert"
+    ],
+    "forbiddenClaims": []
+  }
+}

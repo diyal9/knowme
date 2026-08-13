@@ -1,0 +1,89 @@
+{
+  "generatedAt": "2026-08-07T07:22:58.267Z",
+  "pass": true,
+  "viewport": {
+    "width": 1000,
+    "height": 760
+  },
+  "experts": {
+    "featuredColumns": [
+      "264.525px",
+      "264.538px",
+      "264.525px"
+    ],
+    "catalogColumns": [
+      "264.525px",
+      "264.538px",
+      "264.525px"
+    ],
+    "featuredCards": 2,
+    "catalogCards": 2,
+    "overflowX": false
+  },
+  "skills": {
+    "featuredColumns": [
+      "261.062px",
+      "261.062px",
+      "261.075px"
+    ],
+    "catalogColumns": [
+      "261.062px",
+      "261.062px",
+      "261.075px"
+    ],
+    "featuredCards": 4,
+    "catalogCards": 6,
+    "overflowX": false
+  },
+  "checks": [
+    {
+      "id": "experts-featured-three-columns",
+      "pass": true,
+      "detail": [
+        "264.525px",
+        "264.538px",
+        "264.525px"
+      ]
+    },
+    {
+      "id": "experts-catalog-three-columns",
+      "pass": true,
+      "detail": [
+        "264.525px",
+        "264.538px",
+        "264.525px"
+      ]
+    },
+    {
+      "id": "skills-featured-three-columns",
+      "pass": true,
+      "detail": [
+        "261.062px",
+        "261.062px",
+        "261.075px"
+      ]
+    },
+    {
+      "id": "skills-catalog-three-columns",
+      "pass": true,
+      "detail": [
+        "261.062px",
+        "261.062px",
+        "261.075px"
+      ]
+    },
+    {
+      "id": "experts-no-horizontal-overflow",
+      "pass": true
+    },
+    {
+      "id": "skills-no-horizontal-overflow",
+      "pass": true
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

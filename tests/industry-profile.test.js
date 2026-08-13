@@ -99,6 +99,6 @@ describe('settings / workspace industry wiring', () => {
     assert.ok(agent.includes('IndustryProfile.formatEmptyTodayPriorityBody'))
     assert.ok(agent.includes('允许给出最多 3 条**行业占位示例**'))
     assert.ok(agent.includes('禁止把示例写成推荐任务'))
-    assert.ok(agent.includes('const bar = emptyTodayPriority ? null : parsed.bar'))
+    assert.ok(agent.includes('const bar = emptyTodayPriority ? null : (presetBar || parsed.bar)'), 'empty priority facts hide generated choices')
   })
 })

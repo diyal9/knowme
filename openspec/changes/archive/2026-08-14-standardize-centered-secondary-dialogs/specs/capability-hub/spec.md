@@ -1,0 +1,102 @@
+## MODIFIED Requirements
+
+### Requirement: Hub browse layout matches curated store pattern
+
+Capability Hub MUST 为专家、技能和 MCP 连接器提供统一的 KnowMe 浅色暖灰视觉系统。页面 MUST 包含与工作台一致的单层外部顶部菜单栏、顶部搜索、同页类型 Tab、分类筛选、已安装筛选、可选精选区、响应式能力目录和居中详情弹窗；在桌面常见窗口宽度下 MUST 保持可扫描的信息层级且不产生横向溢出。工作区宿主顶部栏 MUST 按“能力图标与能力 Hub 标题 → 类型 Tab → 右侧操作”的顺序组织，类型 Tab MUST 使用与工作台一级页签一致的分组底板、纯文字标签和绿色实底选中态。Hub 内嵌页面 MUST 隐藏自身重复菜单栏，内容区 MUST NOT 再重复展示英文眉题、当前类型大标题、总数徽标或介绍文案。可交互元素 MUST 提供悬停、按压与键盘焦点反馈，目录加载、无结果及错误 MUST 显示与页面结构匹配的状态。
+
+#### Scenario: Search filters cards
+
+- **WHEN** 用户在 Hub 搜索框输入关键词
+- **THEN** 当前 Tab 下卡片列表按名称/描述/标签过滤
+- **AND** 无匹配时显示带清除筛选或添加能力引导的空状态
+
+#### Scenario: Category chip filters
+
+- **WHEN** 用户点击某分类筛选（如「写作」「飞书」）
+- **THEN** 卡片列表仅显示该分类条目
+- **AND** 当前分类具有可感知的选中态
+
+#### Scenario: Installed filter
+
+- **WHEN** 用户开启「已安装」筛选
+- **THEN** 仅显示 install store 中 status 为 installed/enabled/disabled 的条目
+- **AND** 筛选状态在视觉与无障碍状态上均可识别
+
+#### Scenario: Card opens centered detail dialog
+
+- **WHEN** 用户点击或通过键盘激活某能力卡片
+- **THEN** 居中详情弹窗展示描述、版本、来源、依赖、启用开关与安装/更新/卸载操作
+- **AND** 弹窗与当前目录保持一致的主题和信息层级
+
+#### Scenario: Catalog is loading
+
+- **WHEN** 当前 Tab 的能力目录正在加载
+- **THEN** 页面显示与精选区及能力卡片形状匹配的骨架占位
+- **AND** 不显示会被误认为真实能力的旧目录内容
+
+#### Scenario: Catalog load fails
+
+- **WHEN** 能力目录请求失败且没有可展示的回退条目
+- **THEN** 页面显示可读错误说明与重试操作
+- **AND** 错误状态不破坏页面布局或关闭入口
+
+#### Scenario: Hub adapts to window width
+
+- **WHEN** Hub 宽度从宽桌面缩小到窄桌面窗口
+- **THEN** 标题、搜索、类型 Tab、筛选和能力目录按可用空间重排
+- **AND** 页面不产生横向滚动，核心操作保持可见
+
+#### Scenario: Capability type tab matches workbench navigation
+
+- **WHEN** 用户查看或切换“专家”“技能”“MCP 连接器”
+- **THEN** 工作区外层顶部栏显示能力图标与“能力 Hub”标题，页签紧随其后并使用与工作台“首页 / 工作流”相同的菜单栏位置、底板、圆角、字号与绿色选中态
+- **AND** 页签仅显示文字且当前项保持正确的 `aria-selected` 状态
+- **AND** 内嵌 Hub 页面不再渲染第二条菜单栏
+- **AND** 搜索与筛选直接位于顶部栏下方，不重复展示当前类型介绍区
+
+### Requirement: Unified capability catalog and install store
+
+系统 MUST 维护统一 capability catalog（内置精选 + 用户安装）与 install store。每条记录 MUST 包含：`id`, `kind`（expert|skill|connector）, `source`, `version`, `enabled`, `status`, `contentHash`, `installedAt`。
+
+#### Scenario: Install curated skill
+
+- **WHEN** 用户在 Hub 对精选技能点击「安装」
+- **THEN** 文件复制到 `%APPDATA%\KnowMe\capabilities\skills\<id>\`
+- **AND** install store 记录 status=installed
+- **AND** 卡片显示「已安装」
+
+#### Scenario: Enable and disable
+
+- **WHEN** 用户在详情弹窗关闭某已安装能力的启用开关
+- **THEN** install store 中 enabled=false
+- **AND** Agent 运行时不再加载该能力（已绑定 Session 快照除外）
+
+#### Scenario: Uninstall removes user copy
+
+- **WHEN** 用户卸载某能力
+- **THEN** 对应目录从 capabilities 下删除（内置 curated 仅移除 install 记录）
+- **AND** install store 移除该条目
+
+#### Scenario: Update replaces content
+
+- **WHEN** 用户对已安装能力执行「更新」且来源有新版本
+- **THEN** 原子替换目录内容并更新 version 与 contentHash
+
+### Requirement: Hub exposes capability governance facts
+
+能力详情 MUST 展示统一声明中的 required/optional 依赖、权限、输入、输出、风险、来源证据和信任状态，不得以硬编码空依赖代替真实数据。
+
+#### Scenario: User opens governed capability
+
+- **WHEN** 用户打开具有统一声明的能力详情
+- **THEN** 居中详情弹窗 SHALL 展示真实治理字段
+- **AND** legacy 适配字段 SHALL 标明其 provenance
+
+### Requirement: Tool contract preview in connector drawer
+
+Capability Hub 连接器/ MCP 居中详情弹窗 MUST 展示 Registry 契约：risk、requiresApproval、scope、timeout、health。
+
+#### Scenario: MCP health degraded
+
+- **WHEN** MCP health=degraded
+- **THEN** 卡片与居中详情弹窗展示警告且 Agent 投影 MAY 排除该 connector 工具

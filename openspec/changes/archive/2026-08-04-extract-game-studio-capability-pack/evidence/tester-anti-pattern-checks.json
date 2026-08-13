@@ -1,0 +1,99 @@
+{
+  "at": "2026-08-04T11:47:46.747Z",
+  "change": "extract-game-studio-capability-pack",
+  "total": 18,
+  "pass": 18,
+  "fail": 0,
+  "checks": [
+    {
+      "id": "invalid-manifest/invalid-schema-version",
+      "ok": true,
+      "detail": "rejected: unsupported_schema"
+    },
+    {
+      "id": "invalid-manifest/invalid-semver",
+      "ok": true,
+      "detail": "rejected: invalid_version"
+    },
+    {
+      "id": "invalid-manifest/missing-description",
+      "ok": true,
+      "detail": "rejected: missing_description"
+    },
+    {
+      "id": "invalid-manifest/invalid-id-kebab",
+      "ok": true,
+      "detail": "rejected: invalid_id"
+    },
+    {
+      "id": "path-traversal/readPackFile",
+      "ok": true,
+      "detail": "文件不存在或路径非法"
+    },
+    {
+      "id": "third-party/installFromDirectory",
+      "ok": true,
+      "detail": "installed evil-pack"
+    },
+    {
+      "id": "path-traversal/imported-pack",
+      "ok": true,
+      "detail": "能力包不存在"
+    },
+    {
+      "id": "dependency-missing/game-studio",
+      "ok": true,
+      "detail": "dependency_conflict: 缺少依赖: game-studio-partner, game-requirement-doc, game-dev-delivery, game-qa-acceptance, game-production, feishu"
+    },
+    {
+      "id": "legacy-migration/idempotent",
+      "ok": true,
+      "detail": "first=true second=true enabled=true"
+    },
+    {
+      "id": "legacy-migration/non-game-skip",
+      "ok": true,
+      "detail": "non-game does not enable extra packs"
+    },
+    {
+      "id": "persistence/disable-survives-restart",
+      "ok": true,
+      "detail": "enabled=false"
+    },
+    {
+      "id": "persistence/enable-survives-restart",
+      "ok": true,
+      "detail": "enabled=true"
+    },
+    {
+      "id": "persistence/scenes-after-restart",
+      "ok": true,
+      "detail": "scenes=4"
+    },
+    {
+      "id": "generic-routing/pack-disabled",
+      "ok": true,
+      "detail": "software/general → assistant, writing unchanged"
+    },
+    {
+      "id": "generic-routing/pack-enabled-non-game",
+      "ok": true,
+      "detail": "no game-design/dev leak for software/general industry"
+    },
+    {
+      "id": "generic-routing/game-when-enabled",
+      "ok": true,
+      "detail": "game industry routes to game-design as expected"
+    },
+    {
+      "id": "legacy-session/mode-mapping",
+      "ok": true,
+      "detail": "writing→game-design, coding→game-dev, general→game-production, steward→game-knowledge"
+    },
+    {
+      "id": "third-party/example-minimal",
+      "ok": true,
+      "detail": "empty state group present"
+    }
+  ]
+}

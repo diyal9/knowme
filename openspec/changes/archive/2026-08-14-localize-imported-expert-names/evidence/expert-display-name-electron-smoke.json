@@ -1,0 +1,125 @@
+{
+  "generatedAt": "2026-08-11T06:47:13.494Z",
+  "pass": true,
+  "viewport": {
+    "width": 1100,
+    "height": 820
+  },
+  "checks": [
+    {
+      "id": "card-shows-chinese-name",
+      "pass": true,
+      "detail": {
+        "title": "ArtBundle 专家",
+        "sub": "全部 · Cursor 仓库 · artbundle-expert"
+      }
+    },
+    {
+      "id": "card-sub-shows-origin-slug",
+      "pass": true,
+      "detail": "全部 · Cursor 仓库 · artbundle-expert"
+    },
+    {
+      "id": "store-records-origin-and-source",
+      "pass": true,
+      "detail": {
+        "id": "artbundle-expert",
+        "kind": "expert",
+        "source": "local-repo",
+        "version": "1.0.0",
+        "enabled": true,
+        "status": "enabled",
+        "trust": "user_confirmed",
+        "contentHash": "b5a10ec012b59595",
+        "installedAt": "2026-08-11T06:47:06.269Z",
+        "updatedAt": "2026-08-11T06:47:06.891Z",
+        "error": "",
+        "originUrl": "",
+        "linked": false,
+        "originRoot": "",
+        "originPath": "",
+        "repositoryId": "",
+        "name": "ArtBundle 专家",
+        "originName": "artbundle-expert",
+        "nameSource": "derived",
+        "description": "ArtBundle 专家：负责制品标准化打包、校验、验证与发布前门禁控制。",
+        "manifest": null,
+        "dependencies": [],
+        "permissions": {},
+        "inputs": [],
+        "outputs": [],
+        "risk": {
+          "level": "low",
+          "reasons": []
+        },
+        "provenance": {}
+      }
+    },
+    {
+      "id": "search-by-origin-slug-hits",
+      "pass": true,
+      "detail": {
+        "title": "ArtBundle 专家",
+        "sub": "全部 · Cursor 仓库 · artbundle-expert"
+      }
+    },
+    {
+      "id": "drawer-shows-origin-identifier",
+      "pass": true,
+      "detail": {
+        "title": "ArtBundle 专家",
+        "hasOriginRow": true,
+        "originValue": "artbundle-expert"
+      }
+    },
+    {
+      "id": "rename-updates-card",
+      "pass": true,
+      "detail": {
+        "title": "我的打包专家",
+        "sub": "全部 · Cursor 仓库 · artbundle-expert"
+      }
+    },
+    {
+      "id": "rename-marked-as-user",
+      "pass": true,
+      "detail": {
+        "id": "artbundle-expert",
+        "kind": "expert",
+        "source": "local-repo",
+        "version": "1.0.0",
+        "enabled": true,
+        "status": "enabled",
+        "trust": "user_confirmed",
+        "contentHash": "3fbd950ff72c7e2e",
+        "installedAt": "2026-08-11T06:47:06.269Z",
+        "updatedAt": "2026-08-11T06:47:11.382Z",
+        "error": "",
+        "originUrl": "",
+        "linked": false,
+        "originRoot": "",
+        "originPath": "",
+        "repositoryId": "",
+        "name": "我的打包专家",
+        "originName": "artbundle-expert",
+        "nameSource": "user",
+        "description": "ArtBundle 专家：负责制品标准化打包、校验、验证与发布前门禁控制。",
+        "manifest": null,
+        "dependencies": [],
+        "permissions": {},
+        "inputs": [],
+        "outputs": [],
+        "risk": {
+          "level": "low",
+          "reasons": []
+        },
+        "provenance": {}
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "at": "2026-08-07T08:43:19.569Z",
+  "endpoint": "http://127.0.0.1:8010",
+  "workbenchRoot": "D:\\workflows\\workbench",
+  "bootstrap": {
+    "ok": true,
+    "installPath": "D:\\workflows\\workbench",
+    "steps": [
+      {
+        "step": "deployWorkflows",
+        "ok": true,
+        "dryRun": false,
+        "workflows": [
+          "game-dev-delivery.json"
+        ],
+        "script": "tools/knowme/game-dev-deliver.py",
+        "deployState": {
+          "ok": true,
+          "workflowFile": true,
+          "scriptFile": true,
+          "indexEntry": true,
+          "registryEntry": true
+        }
+      },
+      {
+        "step": "applyCompat",
+        "ok": true,
+        "skipped": true,
+        "state": {
+          "status": "applied",
+          "ok": true,
+          "compatId": "knowme-cli-required-v1",
+          "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+          "message": "兼容层已安装"
+        },
+        "message": "兼容层已存在"
+      }
+    ],
+    "status": {
+      "ok": false,
+      "installPath": "D:\\workflows\\workbench",
+      "compat": {
+        "status": "applied",
+        "ok": true,
+        "compatId": "knowme-cli-required-v1",
+        "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+        "message": "兼容层已安装"
+      },
+      "deploy": {
+        "ok": true,
+        "workflowFile": true,
+        "scriptFile": true,
+        "indexEntry": true,
+        "registryEntry": true
+      },
+      "workflowRegisteredRemote": false,
+      "daemonOnline": false,
+      "tokenConfigured": false,
+      "blockers": [
+        "token",
+        "daemon_offline"
+      ],
+      "compatId": "knowme-cli-required-v1",
+      "anchorCommit": "ae2de9c502dc2b7d96cb3dcdbaaf0173813b914b",
+      "actions": {
+        "canDeployWorkflows": true,
+        "canApplyCompat": false,
+        "canRepair": false
+      },
+      "message": "Workbench 尚未完全就绪",
+      "recovery": []
+    }
+  },
+  "rootCause": {
+    "original": "demo-experience agent workflow failed CLI preflight (missing CURSOR_API_KEY)",
+    "fixed": "game-dev-delivery script workflow + KnowMe bootstrap compat patch (versioned)"
+  },
+  "steps": [
+    {
+      "step": "health+workflows",
+      "ok": true,
+      "workflowCount": 13,
+      "hasGameDevDelivery": false
+    },
+    {
+      "step": "buildHandoff",
+      "ok": true,
+      "workflow": "inruntime-cases",
+      "slug": "game-req-6jop",
+      "code": null,
+      "contextKeys": [
+        "meta"
+      ]
+    },
+    {
+      "step": "failurePath.clientValidation",
+      "ok": true,
+      "code": "invalid_intent",
+      "error": "请填写任务目标"
+    },
+    {
+      "step": "failurePath.createShortBrief",
+      "ok": true,
+      "slug": "fail-brief-ip6jop"
+    },
+    {
+      "step": "failurePath.executorFail",
+      "ok": true,
+      "state": "finished",
+      "returncode": 2,
+      "reason": "parked (waiting for human / quota / error — see log)",
+      "scriptExitCode": 1,
+      "logTail": "[08:43:23] CLI preflight: cache-only miss (cursor-agent 预检缓存不可用（无 cli-runtime.json 或二进制已变更）。 请先运行: python -m tools.workflow_runner.daemon doctor --task fail-brief-ip6jop); lazy init on first dispatch\n[08:43:23] daemon start: task=fail-brief-ip6jop workflow=game-dev-delivery agent=cursor-agent\n[08:43:23]   cursor CLI: configured via .nine/.env.local (69 chars)\n[08:43:23]   飞书通知: 本次跳过\n[08:43:23] action[1]: run_script node=n-deliver\n[08:43:29] action[2]: script_failed node=n-deliver\n[08:43:29] retry script n-deliver (attempt 1/2)\n[08:43:34] action[3]: script_failed node=n-deliver\n[08:43:34] retry script n-deliver (attempt 2/2)\n[08:43:40] action[4]: script_failed node=n-deliver\n[08:43:40] ALERT: 🔧 脚本失败待决策 · fail-brief-ip6jop — **脚本节点**：`n-deliver` (`knowme-game-dev-deliver`) | **报告**：`workflow-spec/fail-brief-ip6jop/artifacts/delivery-pack-report.md` | **选项**：retry / abort / goto —\n[08:43:40] ALERT: ⏸ Workflow 暂停待人工 · fail-brief-ip6jop — **节点**：`n-deliver` | **原因**：script n-deliver 重试 2 次仍失败 | **恢复**：修复后重跑 `run --workflow game-dev-delivery --task fail-brief-ip6jop`（resume）\n",
+      "reportTail": "# Game Dev Delivery Report\r\n\r\n- status: **FAILED**\r\n- script_id: `knowme-game-dev-deliver`\r\n- cwd: `.`\r\n- command: `python tools/knowme/game-dev-deliver.py --task fail-brief-ip6jop`\r\n- exit_code: 1\r\n- finished_at: 2026-08-07T08:43:35Z\r\n\r\n## stdout (tail)\r\n```\r\n(empty)\r\n```\r\n\r\n## stderr (tail)\r\n```\r\n需求案内容过短（10 字符，至少需要 40）：请通过 KnowMe handoff 写入完整结构化需求案后再重试\r\n\r\n```\r\n"
+    },
+    {
+      "step": "successPath.createAndRun",
+      "ok": true,
+      "slug": "game-req-6jop",
+      "workflow": "inruntime-cases",
+      "error": null
+    },
+    {
+      "step": "successPath.terminal",
+      "ok": false,
+      "logTail": "[08:43:45] daemon start: task=game-req-6jop workflow=inruntime-cases engine=cursor-agent bin=C:\\Users\\Administrator\\AppData\\Local\\cursor-agent\\cursor-agent.CMD version=2026.07.23-e383d2b （已探测 --version）\n[08:43:45]   auth: configured via .nine/.env.local (69 chars)\n[08:43:45]   飞书通知: 本次跳过\n[08:43:49] action[1]: dispatch node=n1-inruntime-cases\n[08:43:49] dispatch n1-inruntime-cases: cursor-agent (model=composer-2.5-fast)\n[08:45:15] action[2]: need_input node=n1-inruntime-cases\n[08:45:15] need_input n1-inruntime-cases: awaiting .clarifications/n1-inruntime-cases.md (timeout 14400s)\n"
+    },
+    {
+      "step": "successPath.artifacts",
+      "ok": false,
+      "fileCount": 3,
+      "sample": "artifacts/ingest-normalized/brief.md artifacts/ingest-normalized/normalize-report.md ingest/brief.md"
+    }
+  ],
+  "ok": false,
+  "summary": {
+    "workflow": "inruntime-cases",
+    "successSlug": "game-req-6jop",
+    "failSlug": "fail-brief-ip6jop",
+    "artifactFiles": 3
+  }
+}

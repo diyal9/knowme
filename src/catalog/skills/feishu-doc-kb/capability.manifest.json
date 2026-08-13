@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "id": "feishu-doc-kb",
+  "kind": "skill",
+  "name": "查文档/知识库",
+  "version": "1.0.0",
+  "dependencies": [{ "id": "feishu", "kind": "connector", "required": true }],
+  "permissions": { "tools": ["feishu.doc_kb_suggest"] },
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "docKbSuggest",
+          "title": "查文档/知识库",
+          "subtitle": "文件夹·记忆推荐·最近编辑/阅读",
+          "icon": "note",
+          "group": "knowledge-collab",
+          "modes": ["general"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请查文档/知识库。",
+          "preflight": {
+            "type": "connector-auth",
+            "connector": "feishu",
+            "message": "要查文档/知识库，我得先连上飞书读取你的文件夹与知识空间。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「查文档/知识库」。"
+          },
+          "requiredTools": ["feishu.doc_kb_suggest"],
+          "templateVars": { "days": 30 }
+        }]
+      }
+    }
+  }
+}

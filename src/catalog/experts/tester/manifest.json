@@ -1,0 +1,7 @@
+{
+  "id": "tester",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["game-qa-acceptance", "code-review"],
+  "connectors": []
+}

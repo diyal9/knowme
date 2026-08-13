@@ -1,0 +1,112 @@
+{
+  "generatedAt": "2026-08-07T10:00:21.850Z",
+  "ok": true,
+  "mode": "electron-fixture",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-execution-progress-QzXNKD",
+  "checks": [
+    {
+      "id": "initial-single-waiting-surface",
+      "pass": true,
+      "value": {
+        "waitingCount": 1,
+        "timelineCount": 0
+      }
+    },
+    {
+      "id": "tool-detail-open-state-survives-timer",
+      "pass": true,
+      "value": {
+        "initiallyOpen": false,
+        "openAfterTimerTick": true
+      }
+    },
+    {
+      "id": "timeline-replaces-waiting-surface",
+      "pass": true,
+      "value": {
+        "timelineCount": 1,
+        "waitingCount": 0,
+        "executionMetaCount": 1,
+        "pendingCount": 1,
+        "traceMetaCount": 1,
+        "resultLabel": "查看 5 条资料",
+        "duration": "313ms",
+        "organizingCount": 1,
+        "titleRect": {
+          "left": 276.8000183105469,
+          "right": 1002.3625183105469,
+          "top": 192.65000915527344,
+          "bottom": 208.8500099182129
+        },
+        "metaRect": {
+          "left": 1010.3624877929688,
+          "right": 1118.3999862670898,
+          "top": 193.66250610351562,
+          "bottom": 207.8375062942505
+        }
+      }
+    },
+    {
+      "id": "single-running-copy-and-total-time",
+      "pass": true,
+      "value": {
+        "organizingCount": 1,
+        "executionMetaCount": 1
+      }
+    },
+    {
+      "id": "aligned-step-metadata",
+      "pass": true,
+      "value": {
+        "resultLabel": "查看 5 条资料",
+        "duration": "313ms",
+        "titleRect": {
+          "left": 276.8000183105469,
+          "right": 1002.3625183105469,
+          "top": 192.65000915527344,
+          "bottom": 208.8500099182129
+        },
+        "metaRect": {
+          "left": 1010.3624877929688,
+          "right": 1118.3999862670898,
+          "top": 193.66250610351562,
+          "bottom": 207.8375062942505
+        }
+      }
+    },
+    {
+      "id": "single-current-step",
+      "pass": true,
+      "value": 1
+    },
+    {
+      "id": "narrow-metadata-does-not-overlap",
+      "pass": true,
+      "value": {
+        "titleRect": {
+          "left": 210.40000915527344,
+          "right": 646.4000091552734,
+          "top": 192.65000915527344,
+          "bottom": 208.8500099182129
+        },
+        "metaRect": {
+          "left": 210.40000915527344,
+          "right": 318.43750762939453,
+          "top": 209.85000610351562,
+          "bottom": 224.0250062942505
+        },
+        "gridColumnStart": "2"
+      }
+    },
+    {
+      "id": "no-console-errors",
+      "pass": true,
+      "value": []
+    }
+  ],
+  "consoleErrors": [],
+  "screenshots": [
+    "screenshots/execution-progress-desktop.png",
+    "screenshots/execution-progress-narrow.png"
+  ]
+}

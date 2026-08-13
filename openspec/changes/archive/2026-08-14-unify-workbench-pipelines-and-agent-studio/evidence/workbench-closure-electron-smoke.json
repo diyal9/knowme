@@ -1,0 +1,1100 @@
+{
+  "at": "2026-08-09T04:51:06.222Z",
+  "ok": true,
+  "mode": "electron",
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-closure-smoke-BtZysE",
+  "daemonPort": 3737,
+  "llmPort": 3738,
+  "artifactPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-closure-smoke-BtZysE\\artifacts\\closure-result.md",
+  "checks": [
+    {
+      "id": "primary-tabs-work-resource-compose",
+      "ok": true,
+      "detail": {
+        "primaryTabs": [
+          "工作",
+          "资源",
+          "编排"
+        ],
+        "auxHidden": true,
+        "drawerHasGoalForm": true,
+        "legacyGoalPathsHidden": true
+      }
+    },
+    {
+      "id": "aux-run-tab-hidden",
+      "ok": true,
+      "detail": true
+    },
+    {
+      "id": "drawer-is-goal-form-entry",
+      "ok": true,
+      "detail": true
+    },
+    {
+      "id": "readiness-office-blocked",
+      "ok": true,
+      "detail": {
+        "domain": "office",
+        "ready": false,
+        "blocked": true,
+        "label": "需配置"
+      }
+    },
+    {
+      "id": "readiness-engineering-ready",
+      "ok": true,
+      "detail": {
+        "domain": "engineering",
+        "ready": true,
+        "blocked": false,
+        "label": "已就绪"
+      }
+    },
+    {
+      "id": "readiness-visual-blocked",
+      "ok": true,
+      "detail": {
+        "domain": "visual",
+        "ready": false,
+        "blocked": true,
+        "label": "需配置"
+      }
+    },
+    {
+      "id": "engineering-pipeline-runnable",
+      "ok": true,
+      "detail": "新建运行"
+    },
+    {
+      "id": "task-room-uses-work-queue-detail",
+      "ok": true,
+      "detail": {
+        "queueVisible": true,
+        "detailVisible": true,
+        "queuedRuns": 1,
+        "workTabActive": true
+      }
+    },
+    {
+      "id": "pipeline-launch-has-slug-or-root",
+      "ok": true,
+      "detail": {
+        "draft": {
+          "version": 1,
+          "goal": "开发一个功能并完成测试验证",
+          "workflowId": "engineering-delivery",
+          "modeId": "engineering",
+          "agentIds": [],
+          "slug": "fixture-flow-0809-1251",
+          "phase": "running",
+          "executionSource": "daemon",
+          "goalId": "fixture-flow-0809-1251",
+          "workflowVersion": "",
+          "compositionId": "",
+          "rootRunId": "fixture-flow-0809-1251",
+          "profileIds": [],
+          "skillRefs": [],
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "pipeline",
+            "resourceId": "engineering-delivery",
+            "goal": "开发一个功能并完成测试验证",
+            "inputRefs": [],
+            "backend": "daemon",
+            "runId": "fixture-flow-0809-1251",
+            "rootRunId": "fixture-flow-0809-1251",
+            "slug": "fixture-flow-0809-1251",
+            "executionSource": "daemon",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "flows",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "pipeline",
+              "resourceId": "engineering-delivery",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:11.063Z"
+          },
+          "updatedAt": "2026-08-09T04:51:11.064Z"
+        },
+        "context": {
+          "version": 1,
+          "goalId": "fixture-flow-0809-1251",
+          "goal": "开发一个功能并完成测试验证",
+          "workflowId": "engineering-delivery",
+          "workflowVersion": "",
+          "compositionId": "",
+          "compositionHash": "",
+          "rootRunId": "fixture-flow-0809-1251",
+          "executionSource": "daemon",
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "pipeline",
+            "resourceId": "engineering-delivery",
+            "goal": "开发一个功能并完成测试验证",
+            "inputRefs": [],
+            "backend": "daemon",
+            "runId": "fixture-flow-0809-1251",
+            "rootRunId": "fixture-flow-0809-1251",
+            "slug": "fixture-flow-0809-1251",
+            "executionSource": "daemon",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "flows",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "pipeline",
+              "resourceId": "engineering-delivery",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:11.059Z"
+          },
+          "updatedAt": "2026-08-09T04:51:11.059Z"
+        },
+        "runnerMeta": "进行中"
+      }
+    },
+    {
+      "id": "pipeline-launch-daemon-slug",
+      "ok": true,
+      "detail": {
+        "slug": "fixture-flow-0809-1251",
+        "executionSource": "daemon"
+      }
+    },
+    {
+      "id": "daemon-run-completed-with-artifact",
+      "ok": true,
+      "detail": {
+        "status": "任务已结束任务已跑完，但流程明细未能加载。如需回看每一步，请在设置的内容源里确认对应来源后刷新。",
+        "artifactCount": 1,
+        "actions": [
+          "open-sources",
+          "refresh-task",
+          "back"
+        ]
+      }
+    },
+    {
+      "id": "task-room-return-resource-filter",
+      "ok": true,
+      "detail": {
+        "runnerHidden": true,
+        "taskPageActive": true,
+        "filterVisible": true,
+        "taskCount": 1,
+        "recentNote": "软件研发 · 已筛选 需求 → 实现 → 测试 → 交付"
+      }
+    },
+    {
+      "id": "task-room-back-restores-list-context",
+      "ok": true,
+      "detail": {
+        "listContext": {
+          "capturedScrollTop": 360
+        },
+        "persistedReturnState": {
+          "surface": "tasks",
+          "sourceSurface": "tasks",
+          "contentPage": "workflow",
+          "domain": "engineering",
+          "resourceType": "pipeline",
+          "resourceId": "fixture-flow",
+          "runId": "fixture-flow-0809-1251",
+          "selectedFlowId": "engineering-delivery",
+          "selectedStudioWorkflowId": "",
+          "selectedStudioNodeId": "",
+          "flowLibraryQuery": "",
+          "workflowQuery": "",
+          "scrollTop": 360,
+          "sourceScrollTop": 360
+        },
+        "restoredContext": {
+          "runnerHidden": true,
+          "taskPageActive": true,
+          "engineeringActive": true,
+          "filterVisible": true,
+          "scrollTop": 360
+        }
+      }
+    },
+    {
+      "id": "restart-recovers-run-or-draft",
+      "ok": true,
+      "detail": {
+        "draft": {
+          "version": 1,
+          "goal": "开发一个功能并完成测试验证",
+          "workflowId": "fixture-flow",
+          "modeId": "engineering",
+          "agentIds": [],
+          "slug": "fixture-flow-0809-1251",
+          "phase": "completed",
+          "executionSource": "daemon",
+          "goalId": "fixture-flow-0809-1251",
+          "workflowVersion": "",
+          "compositionId": "",
+          "rootRunId": "fixture-flow-0809-1251",
+          "profileIds": [],
+          "skillRefs": [],
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "pipeline",
+            "resourceId": "engineering-delivery",
+            "goal": "开发一个功能并完成测试验证",
+            "inputRefs": [],
+            "backend": "daemon",
+            "runId": "fixture-flow-0809-1251",
+            "rootRunId": "fixture-flow-0809-1251",
+            "slug": "fixture-flow-0809-1251",
+            "executionSource": "daemon",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "tasks",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "pipeline",
+              "resourceId": "fixture-flow",
+              "runId": "fixture-flow-0809-1251",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 360,
+              "sourceScrollTop": 360
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:27.194Z"
+          },
+          "updatedAt": "2026-08-09T04:51:30.230Z"
+        },
+        "runnerVisible": true,
+        "runStatus": "任务已结束任务已跑完，但流程明细未能加载。如需回看每一步，请在设置的内容源里确认对应来源后刷新。"
+      }
+    },
+    {
+      "id": "restart-no-duplicate-create",
+      "ok": true,
+      "detail": {
+        "before": 1,
+        "after": 1,
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/tasks"
+          }
+        ]
+      }
+    },
+    {
+      "id": "narrow-primary-tabs-visible",
+      "ok": true,
+      "detail": [
+        {
+          "text": "工作",
+          "visible": true
+        },
+        {
+          "text": "资源",
+          "visible": true
+        },
+        {
+          "text": "编排",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "narrow-all-four-domains-visible",
+      "ok": true,
+      "detail": [
+        {
+          "id": "all",
+          "visible": true
+        },
+        {
+          "id": "office",
+          "visible": true
+        },
+        {
+          "id": "engineering",
+          "visible": true
+        },
+        {
+          "id": "visual",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "narrow-no-page-overflow",
+      "ok": true,
+      "detail": {
+        "primaryTabs": [
+          {
+            "text": "工作",
+            "visible": true
+          },
+          {
+            "text": "资源",
+            "visible": true
+          },
+          {
+            "text": "编排",
+            "visible": true
+          }
+        ],
+        "domains": [
+          {
+            "id": "all",
+            "visible": true
+          },
+          {
+            "id": "office",
+            "visible": true
+          },
+          {
+            "id": "engineering",
+            "visible": true
+          },
+          {
+            "id": "visual",
+            "visible": true
+          }
+        ],
+        "horizontalOverflow": false
+      }
+    },
+    {
+      "id": "office-ready-launch-creates-run",
+      "ok": true,
+      "detail": {
+        "route": "confirm-agent-graph",
+        "rootRunId": "workbench_graph_1786251095031_c79c0b",
+        "planIssues": [],
+        "startError": ""
+      }
+    },
+    {
+      "id": "visual-ready-launch-creates-run",
+      "ok": true,
+      "detail": {
+        "route": "confirm-agent-graph",
+        "rootRunId": "workbench_graph_1786251095184_339d79",
+        "planIssues": [],
+        "startError": ""
+      }
+    },
+    {
+      "id": "agent-profile-target-visible",
+      "ok": true,
+      "detail": {
+        "id": "producer",
+        "roster": false,
+        "asset": true
+      }
+    },
+    {
+      "id": "agent-resource-uses-list-detail",
+      "ok": true,
+      "detail": {
+        "listVisible": true,
+        "detailVisible": true,
+        "primaryCount": 1,
+        "hasProfileRun": true,
+        "hasSecondaryChat": true
+      }
+    },
+    {
+      "id": "agent-profile-plan-modal",
+      "ok": true,
+      "detail": {
+        "mode": "modal",
+        "hint": "本地 Agent Graph 将由已安装能力协作执行",
+        "confirm": "确认并启动",
+        "bodyPreview": "\n      \n        本地 Agent Graph\n        先确认协作角色和交接关系，确认后才会创建本地 Team Run。\n      \n      \n        目标\n        开发一个功能并完成测试验证\n      \n      \n        协作节点\n        \n     "
+      }
+    },
+    {
+      "id": "agent-profile-launch-rootRunId",
+      "ok": true,
+      "detail": {
+        "draft": {
+          "version": 1,
+          "goal": "开发一个功能并完成测试验证",
+          "workflowId": "",
+          "modeId": "engineering",
+          "agentIds": [],
+          "slug": "",
+          "phase": "completed",
+          "executionSource": "agent-graph",
+          "goalId": "producer",
+          "workflowVersion": "",
+          "compositionId": "",
+          "rootRunId": "workbench_graph_1786251098367_f29ed0",
+          "composition": {
+            "profileIds": [
+              "producer-profile"
+            ],
+            "id": "producer-profile",
+            "agentId": "producer",
+            "version": "1.0.0",
+            "contentHash": "",
+            "skillRefs": [],
+            "connectorRefs": [],
+            "permissions": {
+              "files": "workspace"
+            },
+            "outputContract": {
+              "format": "markdown"
+            }
+          },
+          "profileIds": [
+            "producer-profile"
+          ],
+          "skillRefs": [],
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "agent",
+            "resourceId": "producer",
+            "goal": "开发一个功能并完成测试验证",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251098367_f29ed0",
+            "rootRunId": "workbench_graph_1786251098367_f29ed0",
+            "slug": "",
+            "executionSource": "local-team",
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:38.434Z"
+          },
+          "updatedAt": "2026-08-09T04:51:38.461Z"
+        },
+        "context": {
+          "version": 1,
+          "goalId": "producer",
+          "goal": "开发一个功能并完成测试验证",
+          "workflowId": "",
+          "workflowVersion": "",
+          "compositionId": "",
+          "compositionHash": "",
+          "rootRunId": "workbench_graph_1786251098367_f29ed0",
+          "executionSource": "local-team",
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "agent",
+            "resourceId": "producer",
+            "goal": "开发一个功能并完成测试验证",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251098367_f29ed0",
+            "rootRunId": "workbench_graph_1786251098367_f29ed0",
+            "slug": "",
+            "executionSource": "local-team",
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:38.431Z"
+          },
+          "updatedAt": "2026-08-09T04:51:38.458Z"
+        },
+        "runnerMeta": "本地 Team Runtime · 已完成 · 自动推进"
+      }
+    },
+    {
+      "id": "agent-profile-local-team-source",
+      "ok": true,
+      "detail": "agent-graph"
+    },
+    {
+      "id": "graph-modal-with-save",
+      "ok": true,
+      "detail": {
+        "goal": "调研资料并整理成可交付方案"
+      }
+    },
+    {
+      "id": "graph-saved-as-personal-workflow",
+      "ok": true,
+      "detail": {
+        "action": "save-graph-clicked"
+      }
+    },
+    {
+      "id": "graph-first-rootRunId",
+      "ok": true,
+      "detail": {
+        "draft": {
+          "version": 1,
+          "goal": "调研资料并整理成可交付方案",
+          "workflowId": "",
+          "modeId": "engineering",
+          "agentIds": [],
+          "slug": "",
+          "phase": "running",
+          "executionSource": "agent-graph",
+          "goalId": "producer",
+          "workflowVersion": "",
+          "compositionId": "producer",
+          "rootRunId": "workbench_graph_1786251100045_e04ae9",
+          "composition": {
+            "profileIds": [
+              "producer-profile"
+            ],
+            "id": "producer-profile",
+            "agentId": "producer",
+            "version": "1.0.0",
+            "contentHash": "",
+            "skillRefs": [],
+            "connectorRefs": [],
+            "permissions": {
+              "files": "workspace"
+            },
+            "outputContract": {
+              "format": "markdown"
+            }
+          },
+          "profileIds": [
+            "producer-profile"
+          ],
+          "skillRefs": [],
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "graph",
+            "resourceId": "producer",
+            "goal": "调研资料并整理成可交付方案",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251100045_e04ae9",
+            "rootRunId": "workbench_graph_1786251100045_e04ae9",
+            "slug": "",
+            "executionSource": "agent-graph",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "tasks",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "graph",
+              "resourceId": "producer",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:40.116Z"
+          },
+          "updatedAt": "2026-08-09T04:51:40.116Z"
+        },
+        "context": {
+          "version": 1,
+          "goalId": "producer",
+          "goal": "调研资料并整理成可交付方案",
+          "workflowId": "",
+          "workflowVersion": "",
+          "compositionId": "producer",
+          "compositionHash": "",
+          "rootRunId": "workbench_graph_1786251100045_e04ae9",
+          "executionSource": "local-team",
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "graph",
+            "resourceId": "producer",
+            "goal": "调研资料并整理成可交付方案",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251100045_e04ae9",
+            "rootRunId": "workbench_graph_1786251100045_e04ae9",
+            "slug": "",
+            "executionSource": "agent-graph",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "tasks",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "graph",
+              "resourceId": "producer",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:40.112Z"
+          },
+          "updatedAt": "2026-08-09T04:51:40.209Z"
+        },
+        "runnerMeta": "本地 Team Runtime · 执行中 · 自动推进"
+      }
+    },
+    {
+      "id": "graph-second-rootRunId",
+      "ok": true,
+      "detail": {
+        "draft": {
+          "version": 1,
+          "goal": "调研资料并整理成可交付方案",
+          "workflowId": "my-mslbs94x",
+          "modeId": "engineering",
+          "agentIds": [],
+          "slug": "",
+          "phase": "running",
+          "executionSource": "local-team",
+          "goalId": "my-mslbs94x",
+          "workflowVersion": "",
+          "compositionId": "",
+          "rootRunId": "workbench_graph_1786251100634_53facc",
+          "composition": {
+            "profileIds": [
+              "producer-profile"
+            ],
+            "id": "producer-profile",
+            "agentId": "producer",
+            "version": "1.0.0",
+            "contentHash": "",
+            "skillRefs": [],
+            "connectorRefs": [],
+            "permissions": {
+              "files": "workspace"
+            },
+            "outputContract": {
+              "format": "markdown"
+            }
+          },
+          "profileIds": [
+            "producer-profile"
+          ],
+          "skillRefs": [],
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "pipeline",
+            "resourceId": "my-mslbs94x",
+            "goal": "调研资料并整理成可交付方案",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251100634_53facc",
+            "rootRunId": "workbench_graph_1786251100634_53facc",
+            "slug": "",
+            "executionSource": "local-team",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "studio",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "pipeline",
+              "resourceId": "my-mslbs94x",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "my-mslbs94x",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:40.710Z"
+          },
+          "updatedAt": "2026-08-09T04:51:40.710Z"
+        },
+        "context": {
+          "version": 1,
+          "goalId": "my-mslbs94x",
+          "goal": "调研资料并整理成可交付方案",
+          "workflowId": "my-mslbs94x",
+          "workflowVersion": "",
+          "compositionId": "",
+          "compositionHash": "",
+          "rootRunId": "workbench_graph_1786251100634_53facc",
+          "executionSource": "local-team",
+          "artifactRefs": [],
+          "launchIntent": {
+            "version": 1,
+            "step": "launch",
+            "domain": "engineering",
+            "resourceType": "pipeline",
+            "resourceId": "my-mslbs94x",
+            "goal": "调研资料并整理成可交付方案",
+            "inputRefs": [],
+            "backend": "local-team",
+            "profileSnapshot": {
+              "profileIds": [
+                "producer-profile"
+              ],
+              "id": "producer-profile",
+              "agentId": "producer",
+              "version": "1.0.0",
+              "contentHash": "",
+              "skillRefs": [],
+              "connectorRefs": [],
+              "permissions": {
+                "files": "workspace"
+              },
+              "outputContract": {
+                "format": "markdown"
+              }
+            },
+            "runId": "workbench_graph_1786251100634_53facc",
+            "rootRunId": "workbench_graph_1786251100634_53facc",
+            "slug": "",
+            "executionSource": "local-team",
+            "returnState": {
+              "surface": "tasks",
+              "sourceSurface": "studio",
+              "contentPage": "workflow",
+              "domain": "engineering",
+              "resourceType": "pipeline",
+              "resourceId": "my-mslbs94x",
+              "runId": "",
+              "selectedFlowId": "engineering-delivery",
+              "selectedStudioWorkflowId": "my-mslbs94x",
+              "selectedStudioNodeId": "",
+              "flowLibraryQuery": "",
+              "workflowQuery": "",
+              "scrollTop": 0,
+              "sourceScrollTop": 0
+            },
+            "status": "launched",
+            "updatedAt": "2026-08-09T04:51:40.707Z"
+          },
+          "updatedAt": "2026-08-09T04:51:40.800Z"
+        },
+        "runnerMeta": "本地 Team Runtime · 执行中 · 自动推进"
+      }
+    },
+    {
+      "id": "graph-rootRunId-differs",
+      "ok": true,
+      "detail": {
+        "rootRunId1": "workbench_graph_1786251100045_e04ae9",
+        "rootRunId2": "workbench_graph_1786251100634_53facc"
+      }
+    },
+    {
+      "id": "run-directory-daemon-source",
+      "ok": true,
+      "detail": [
+        {
+          "id": "workbench_graph_1786251100634_53facc",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251100045_e04ae9",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251098367_f29ed0",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251095184_339d79",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251095031_c79c0b",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "fixture-flow-0809-1251",
+          "executionSource": "daemon",
+          "title": "开发一个功能并完成测试验证"
+        }
+      ]
+    },
+    {
+      "id": "run-directory-local-team-source",
+      "ok": true,
+      "detail": [
+        {
+          "id": "workbench_graph_1786251100634_53facc",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251100045_e04ae9",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251098367_f29ed0",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251095184_339d79",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "workbench_graph_1786251095031_c79c0b",
+          "executionSource": "local-team",
+          "title": "未命名运行"
+        },
+        {
+          "id": "fixture-flow-0809-1251",
+          "executionSource": "daemon",
+          "title": "开发一个功能并完成测试验证"
+        }
+      ]
+    },
+    {
+      "id": "automation-workflow-bound-option",
+      "ok": true,
+      "detail": "engineering-delivery"
+    },
+    {
+      "id": "automation-run-action-visible",
+      "ok": true,
+      "detail": "\n          \n            闭环烟测自动化\n            已启用\n          \n          触发：每天 09:00\n          上次：未执行 · 未执行\n          下次：2026/8/10 09:00:00\n          \n          \n            停用\n            立即执行\n            编辑\n            删除\n          \n        "
+    },
+    {
+      "id": "automation-runNow-creates-run",
+      "ok": true,
+      "detail": {
+        "before": 1,
+        "after": 1,
+        "beforeRunId": "workbench_graph_1786251100634_53facc",
+        "afterRunId": "workbench_graph_1786251101699_b5e184",
+        "executionSource": "agent-graph",
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/api/tasks"
+          },
+          {
+            "method": "POST",
+            "path": "/api/tasks/fixture-flow-0809-1251/run"
+          },
+          {
+            "method": "POST",
+            "path": "/api/tasks/fixture-flow-0809-1251/gate"
+          },
+          {
+            "method": "POST",
+            "path": "/api/tasks/fixture-flow-0809-1251/clarify"
+          }
+        ]
+      }
+    },
+    {
+      "id": "completed-run-artifact-visible",
+      "ok": true,
+      "detail": "closure-result.md用于新运行"
+    },
+    {
+      "id": "completed-run-artifact-openable",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-closure-smoke-BtZysE\\artifacts\\closure-result.md"
+      }
+    },
+    {
+      "id": "artifact-ref-in-drawer",
+      "ok": true,
+      "detail": [
+        {
+          "id": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-closure-smoke-BtZysE\\artifacts\\closure-result.md",
+          "kind": "file",
+          "version": "",
+          "hash": "",
+          "title": "closure-result.md",
+          "inputPath": true
+        }
+      ]
+    },
+    {
+      "id": "renderer-console-errors-zero",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "failures": [],
+  "consoleErrors": [],
+  "readiness": {
+    "items": [
+      {
+        "domain": "office",
+        "ready": false,
+        "blocked": true,
+        "label": "需配置"
+      },
+      {
+        "domain": "engineering",
+        "ready": true,
+        "blocked": false,
+        "label": "已就绪"
+      },
+      {
+        "domain": "visual",
+        "ready": false,
+        "blocked": true,
+        "label": "需配置"
+      }
+    ]
+  },
+  "daemonSlug": "fixture-flow-0809-1251",
+  "daemonComplete": {
+    "status": "任务已结束任务已跑完，但流程明细未能加载。如需回看每一步，请在设置的内容源里确认对应来源后刷新。",
+    "artifactCount": 1,
+    "actions": [
+      "open-sources",
+      "refresh-task",
+      "back"
+    ]
+  },
+  "agentProfileTarget": {
+    "id": "producer",
+    "roster": false,
+    "asset": true
+  },
+  "agentLaunchState": {
+    "mode": "modal",
+    "hint": "本地 Agent Graph 将由已安装能力协作执行",
+    "confirm": "确认并启动",
+    "bodyPreview": "\n      \n        本地 Agent Graph\n        先确认协作角色和交接关系，确认后才会创建本地 Team Run。\n      \n      \n        目标\n        开发一个功能并完成测试验证\n      \n      \n        协作节点\n        \n     "
+  },
+  "agentRootRunId": "workbench_graph_1786251098367_f29ed0",
+  "rootRunId1": "workbench_graph_1786251100045_e04ae9",
+  "rootRunId2": "workbench_graph_1786251100634_53facc",
+  "passCount": 39,
+  "failCount": 0
+}

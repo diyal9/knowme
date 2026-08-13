@@ -1,0 +1,110 @@
+{
+  "generatedAt": "2026-08-10T05:14:46.142Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "plus-menu-lists-only-four-builtin-modes",
+      "pass": true,
+      "detail": {
+        "ids": [
+          "general",
+          "steward",
+          "writing",
+          "coding"
+        ]
+      }
+    },
+    {
+      "id": "writing-empty-cards-render",
+      "pass": true,
+      "detail": {
+        "label": "写作模式入口",
+        "cardCount": 4,
+        "titles": [
+          "写需求文档",
+          "写办公文档",
+          "按提纲成稿",
+          "排版定稿"
+        ],
+        "stewardCount": 0,
+        "shortcutCount": 4
+      }
+    },
+    {
+      "id": "writing-empty-input-asks-for-material-without-sending",
+      "pass": true,
+      "detail": {
+        "trail": "写需求文档前，用一句话告诉我要写什么需求（目标 + 背景 + 关键约束），或直接粘贴/@ 已有材料，我就开始。",
+        "userBubbles": 0
+      }
+    },
+    {
+      "id": "writing-after-material-enters-send-flow",
+      "pass": true,
+      "detail": {
+        "userBubbles": 1,
+        "launch": false
+      }
+    },
+    {
+      "id": "coding-empty-cards-render",
+      "pass": true,
+      "detail": {
+        "label": "编程模式入口",
+        "cardCount": 4,
+        "titles": [
+          "解释代码",
+          "修复报错",
+          "实现方案",
+          "生成改动草案"
+        ],
+        "stewardCount": 0,
+        "shortcutCount": 4
+      }
+    },
+    {
+      "id": "coding-empty-input-asks-for-material-without-sending",
+      "pass": true,
+      "detail": {
+        "trail": "请把要解释的代码贴进输入框（或 @ 文件），我再讲清它的职责、流程与风险。",
+        "userBubbles": 0
+      }
+    },
+    {
+      "id": "general-feishu-task-asks-for-auth-without-sending",
+      "pass": true,
+      "detail": {
+        "trail": "要做会议总结，我得先连上飞书读取你的会议记录。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「会议总结」。",
+        "userBubbles": 0
+      }
+    },
+    {
+      "id": "steward-empty-cards-render",
+      "pass": true,
+      "detail": {
+        "label": "知识管家入口",
+        "cardCount": 4,
+        "titles": [
+          "整理本地 Wiki",
+          "知识健康检查",
+          "升格 OKF",
+          "检索远程知识库"
+        ],
+        "stewardCount": 4,
+        "shortcutCount": 0
+      }
+    },
+    {
+      "id": "steward-lint-runs-local-ipc-and-reports",
+      "pass": true,
+      "detail": {
+        "trail": "知识健康检查通过（扫描 0 个文件）。"
+      }
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

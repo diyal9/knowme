@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "office-document-finalize",
+  "kind": "skill",
+  "name": "排版定稿",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "writingFinalize",
+          "title": "排版定稿",
+          "subtitle": "统一结构、列表、行动项与可发送版本",
+          "icon": "check",
+          "group": "writing-refine",
+          "modes": ["writing"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请把我提供的草稿整理成可直接发送/评审的定稿。",
+          "preflight": {
+            "type": "material",
+            "message": "请把要定稿的草稿贴进输入框（或 @ 文件），我来统一结构、列表与可发送版本。"
+          }
+        }]
+      }
+    }
+  }
+}

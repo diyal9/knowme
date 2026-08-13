@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-08-06T08:51:43.550Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "primary-surface-preserved",
+      "pass": true,
+      "detail": {
+        "left": 44,
+        "top": 0,
+        "right": 1266.4000244140625,
+        "bottom": 738.4000244140625,
+        "viewportWidth": 1266,
+        "viewportHeight": 738,
+        "transform": "none"
+      }
+    },
+    {
+      "id": "hub-detail-centered",
+      "pass": true,
+      "detail": {
+        "left": 266,
+        "top": 48.61249923706055,
+        "width": 680,
+        "height": 597.1749877929688,
+        "centerX": 606,
+        "centerY": 347.1999931335449,
+        "viewportWidth": 1212,
+        "viewportHeight": 694,
+        "position": "fixed",
+        "overflow": "hidden"
+      }
+    },
+    {
+      "id": "stable-header-body-footer",
+      "pass": true,
+      "detail": {
+        "footerVisible": true,
+        "bodyOverflow": "auto"
+      }
+    },
+    {
+      "id": "close-restores-card-focus",
+      "pass": true
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

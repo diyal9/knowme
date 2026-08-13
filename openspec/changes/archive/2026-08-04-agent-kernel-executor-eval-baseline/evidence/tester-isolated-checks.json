@@ -1,0 +1,18 @@
+{
+  "at": "2026-08-04T11:44:27.365Z",
+  "checks": [
+    {
+      "id": "SEC-no-api-key-isolated",
+      "ok": false,
+      "errorText": "",
+      "enumInTimeline": false
+    },
+    {
+      "id": "A5-runPhase-fresh-session",
+      "ok": true,
+      "enumInTimeline": false,
+      "timelineSample": "✓\n执行过程\n2 步"
+    }
+  ],
+  "ok": false
+}

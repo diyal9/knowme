@@ -11,6 +11,16 @@ const fs = require('fs')
 const path = require('path')
 const knowledgeRank = require('./knowledge-rank')
 const productKnowledge = require('./product-knowledge')
+const {
+  SIDECAR_FILE,
+  adaptLegacyCapability,
+  validateAndNormalizeManifest,
+} = require('./capability-manifest-v2')
+const groundingRuntime = require('./agent-grounding-runtime')
+const {
+  toDisplaySafeTask,
+  computeTasksRevision,
+} = require('./skill-experience')
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/
 const DEFAULT_L1_BUDGET = 12000
@@ -47,6 +57,89 @@ function parseInlineList(value) {
       .filter(Boolean)
   }
   return [stripQuotes(raw)].filter(Boolean)
+}
+
+const GROUNDING_BLOCK_KEYS = new Set(['requiredTools', 'requiredEvidence', 'completionConditions'])
+
+/**
+ * 解析 design D4 块级 YAML：requiredTools / requiredEvidence / completionConditions 列表。
+ * 与 inline `[a,b]` 格式互补；后者由主解析器处理。
+ */
+function parseGroundingBlocksFromRaw(raw) {
+  const lines = String(raw || '').split(/\r?\n/)
+  const result = {}
+  let i = 0
+  while (i < lines.length) {
+    const line = lines[i]
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#')) { i++; continue }
+
+    const topMatch = line.match(/^([a-zA-Z0-9_.-]+):\s*(.*)$/)
+    if (!topMatch || /^\s/.test(line)) { i++; continue }
+
+    const key = topMatch[1]
+    const inlineVal = topMatch[2].trim()
+    if (!GROUNDING_BLOCK_KEYS.has(key)) { i++; continue }
+    if (inlineVal) { i++; continue }
+
+    i++
+    const items = []
+    while (i < lines.length) {
+      const cur = lines[i]
+      const curTrim = cur.trim()
+      if (!curTrim || curTrim.startsWith('#')) { i++; continue }
+
+      const nextTop = cur.match(/^([a-zA-Z0-9_.-]+):\s*(.*)$/)
+      if (nextTop && !/^\s/.test(cur)) break
+
+      const dashMatch = cur.match(/^(\s*)-\s+(.*)$/)
+      if (!dashMatch) { i++; continue }
+
+      const dashContent = dashMatch[2].trim()
+      const objFieldMatch = dashContent.match(/^([a-zA-Z0-9_.-]+):\s*(.*)$/)
+
+      if (objFieldMatch && !/^['"].*['"]$/.test(dashContent)) {
+        const obj = {}
+        obj[objFieldMatch[1]] = coerceScalar(objFieldMatch[2])
+        i++
+        const baseIndent = dashMatch[1].length
+        while (i < lines.length) {
+          const cont = lines[i]
+          if (/^\s*-\s/.test(cont)) break
+          const contTop = cont.match(/^([a-zA-Z0-9_.-]+):\s*(.*)$/)
+          if (contTop && !/^\s/.test(cont)) break
+          const contField = cont.match(/^\s+([a-zA-Z0-9_.-]+):\s*(.*)$/)
+          const contIndent = cont.match(/^(\s*)/)[1].length
+          if (contField && contIndent > baseIndent) {
+            obj[contField[1]] = coerceScalar(contField[2])
+            i++
+          } else {
+            break
+          }
+        }
+        items.push(obj)
+      } else {
+        items.push(coerceScalar(dashContent))
+        i++
+      }
+    }
+
+    if (items.length) result[key] = items
+  }
+  return result
+}
+
+function mergeGroundingFrontmatter(frontmatter, raw) {
+  const blocks = parseGroundingBlocksFromRaw(raw)
+  for (const [key, val] of Object.entries(blocks)) {
+    const existing = frontmatter[key]
+    const existingEmpty = existing == null
+      || existing === ''
+      || (Array.isArray(existing) && existing.length === 0)
+    if (existingEmpty && Array.isArray(val) && val.length) {
+      frontmatter[key] = val
+    }
+  }
 }
 
 /**
@@ -123,6 +216,8 @@ function parseSkillFrontmatter(content) {
   if (metadata.knowme && typeof metadata.knowme === 'object') {
     frontmatter.metadata = { ...frontmatter.metadata, knowme: metadata.knowme }
   }
+
+  mergeGroundingFrontmatter(frontmatter, raw)
 
   const disable = parseBool(frontmatter['disable-model-invocation'])
   const slash =
@@ -233,6 +328,8 @@ function createSkillRuntime(deps = {}) {
   const fsImpl = deps.fsImpl || fs
   const getInstallStore =
     typeof deps.getInstallStore === 'function' ? deps.getInstallStore : () => ({ skills: {} })
+  const getPackSkillSources =
+    typeof deps.getPackSkillSources === 'function' ? deps.getPackSkillSources : null
   const runScript = typeof deps.runScript === 'function' ? deps.runScript : null
   const l1Budget = Number.isFinite(deps.l1Budget) ? deps.l1Budget : DEFAULT_L1_BUDGET
 
@@ -251,6 +348,33 @@ function createSkillRuntime(deps = {}) {
     if (!fsImpl.existsSync(absPath)) return null
     const content = fsImpl.readFileSync(absPath, 'utf8')
     return parseSkillFrontmatter(content)
+  }
+
+  function loadSkillCapabilityManifest(id, dir, parsed, source, entry = {}) {
+    const sidecarPath = dir ? path.join(dir, SIDECAR_FILE) : ''
+    if (sidecarPath && fsImpl.existsSync(sidecarPath)) {
+      try {
+        const normalized = validateAndNormalizeManifest(JSON.parse(fsImpl.readFileSync(sidecarPath, 'utf8')), {
+          id,
+          kind: 'skill',
+          name: parsed?.name || entry.name || id,
+          description: parsed?.description || entry.description || '',
+        })
+        if (normalized.ok) return normalized.manifest
+      } catch { /* use legacy adapter */ }
+    }
+    const adapted = adaptLegacyCapability('skill', parsed?.frontmatter || {}, {
+      id,
+      name: parsed?.name || entry.name || id,
+      description: parsed?.description || entry.description || '',
+      version: entry.version || '1.0.0',
+      source,
+      ref: entry.originPath || (dir ? path.join('skills', id, 'SKILL.md').replace(/\\/g, '/') : id),
+      trust: entry.trust || (source === 'standard' ? 'managed' : 'unknown'),
+      contentHash: entry.contentHash || '',
+      hasScripts: Boolean(dir && fsImpl.existsSync(path.join(dir, SCRIPT_DIR))),
+    })
+    return adapted.ok ? adapted.manifest : null
   }
 
   function resolveLinkedSkillDir(entry) {
@@ -281,6 +405,11 @@ function createSkillRuntime(deps = {}) {
       const skillMd = path.join(linked.dir, 'SKILL.md')
       const parsed = readSkillMd(skillMd)
       if (!parsed?.ok) continue
+      const hash = contentHash(fsImpl.readFileSync(skillMd, 'utf8'))
+      const capabilityManifest = loadSkillCapabilityManifest(entry.id, linked.dir, parsed, 'linked-repo', {
+        ...entry,
+        contentHash: hash,
+      })
       out.push({
         id: normalizeSkillId(entry.id),
         source: 'linked-repo',
@@ -291,15 +420,50 @@ function createSkillRuntime(deps = {}) {
         description: parsed.description || entry.description || '',
         disableModelInvocation: parsed.disableModelInvocation,
         slash: parsed.slash || entry.id,
-        contentHash: contentHash(fsImpl.readFileSync(skillMd, 'utf8')),
+        contentHash: hash,
+        capabilityManifest,
       })
     }
     return out
   }
 
+  function scanPackSkills(existingIds = new Set()) {
+    if (!getPackSkillSources) return { records: [], issues: [] }
+    const payload = getPackSkillSources()
+    const sources = Array.isArray(payload) ? payload : (payload?.sources || [])
+    const extraIssues = Array.isArray(payload?.issues) ? payload.issues : []
+    const out = []
+    for (const src of sources) {
+      const id = normalizeSkillId(src?.id)
+      if (!id || existingIds.has(id)) continue
+      if (!src?.dir || !fsImpl.existsSync(path.join(src.dir, 'SKILL.md'))) continue
+      const parsed = readSkillMd(path.join(src.dir, 'SKILL.md'))
+      if (!parsed?.ok) continue
+      out.push({
+        id,
+        source: 'pack',
+        dir: src.dir,
+        ownerPackId: src.ownerPackId || src.provenance?.ownerPackId || '',
+        name: parsed.name || src.name || id,
+        description: parsed.description || src.description || '',
+        disableModelInvocation: parsed.disableModelInvocation,
+        slash: parsed.slash || src.slash || id,
+        contentHash: src.contentHash || contentHash(fsImpl.readFileSync(path.join(src.dir, 'SKILL.md'), 'utf8')),
+        capabilityManifest: src.capabilityManifest || loadSkillCapabilityManifest(id, src.dir, parsed, 'pack', {
+          ...src,
+          contentHash: src.contentHash,
+        }),
+        provenance: src.provenance || {},
+      })
+      existingIds.add(id)
+    }
+    return { records: out, issues: extraIssues }
+  }
+
   function scanStandardSkills() {
     const root = skillsRoot()
     const out = []
+    const seenIds = new Set()
     if (fsImpl.existsSync(root)) {
       for (const name of fsImpl.readdirSync(root)) {
         const dir = path.join(root, name)
@@ -315,6 +479,10 @@ function createSkillRuntime(deps = {}) {
         const parsed = readSkillMd(skillMd)
         if (!parsed) continue
         const id = normalizeSkillId(name)
+        const hash = contentHash(fsImpl.readFileSync(skillMd, 'utf8'))
+        const capabilityManifest = loadSkillCapabilityManifest(id, dir, parsed, 'standard', {
+          contentHash: hash,
+        })
         out.push({
           id,
           source: 'standard',
@@ -323,29 +491,41 @@ function createSkillRuntime(deps = {}) {
           description: parsed.description,
           disableModelInvocation: parsed.disableModelInvocation,
           slash: parsed.slash || id,
-          contentHash: contentHash(fsImpl.readFileSync(skillMd, 'utf8')),
+          contentHash: hash,
+          capabilityManifest,
         })
+        seenIds.add(id)
       }
     }
-    const ids = new Set(out.map((item) => item.id))
-    out.push(...scanLinkedSkills(ids))
+    out.push(...scanLinkedSkills(seenIds))
+    const packScan = scanPackSkills(seenIds)
+    out.push(...packScan.records)
     return out.sort((a, b) => a.id.localeCompare(b.id))
   }
 
   function scanLegacyOkfSkills() {
     if (!knowledgeDir || !fsImpl.existsSync(knowledgeDir)) return []
     const legacy = productKnowledge.listSkills(knowledgeDir)
-    return legacy.map((item) => ({
-      id: `${LEGACY_PREFIX}${item.id}`,
-      source: 'legacy-okf',
-      conceptId: item.id,
-      dir: null,
-      name: item.title,
-      description: item.description || '',
-      disableModelInvocation: false,
-      slash: item.slash,
-      contentHash: contentHash(`${item.id}:${item.title}:${item.description || ''}`),
-    }))
+    return legacy.map((item) => {
+      const id = `${LEGACY_PREFIX}${item.id}`
+      const hash = contentHash(`${item.id}:${item.title}:${item.description || ''}`)
+      return {
+        id,
+        source: 'legacy-okf',
+        conceptId: item.id,
+        dir: null,
+        name: item.title,
+        description: item.description || '',
+        disableModelInvocation: false,
+        slash: item.slash,
+        contentHash: hash,
+        capabilityManifest: loadSkillCapabilityManifest(id, null, {
+          frontmatter: {},
+          name: item.title,
+          description: item.description || '',
+        }, 'legacy-okf', { contentHash: hash, trust: 'legacy' }),
+      }
+    })
   }
 
   function scanAllSkills({ includeLegacy = true } = {}) {
@@ -381,6 +561,12 @@ function createSkillRuntime(deps = {}) {
       disableModelInvocation: rec.disableModelInvocation,
       source: rec.source,
       slash: rec.slash,
+      dependencies: rec.capabilityManifest?.dependencies || [],
+      permissions: rec.capabilityManifest?.permissions || {},
+      inputs: rec.capabilityManifest?.inputs || [],
+      outputs: rec.capabilityManifest?.outputs || [],
+      risk: rec.capabilityManifest?.risk || { level: 'low', reasons: [] },
+      provenance: rec.capabilityManifest?.provenance || {},
     }))
   }
 
@@ -419,6 +605,41 @@ function createSkillRuntime(deps = {}) {
       truncated: truncated.truncated,
       source: record.source,
     }
+  }
+
+  function loadSkillGroundingContract(skillId, options = {}) {
+    const id = normalizeSkillId(skillId)
+    const allow = options.allowedIds ? new Set(options.allowedIds.map(normalizeSkillId)) : null
+    if (allow && !allow.has(id)) {
+      return { ok: false, code: 'not_allowed', message: `技能未绑定到当前 Session: ${id}`, contract: null, issues: [] }
+    }
+    const record = findSkillRecord(id)
+    if (!record) return { ok: false, code: 'not_found', message: `技能不存在: ${id}`, contract: null, issues: [] }
+    if (!isSkillEnabled(id)) {
+      return { ok: false, code: 'disabled', message: `技能已禁用: ${id}`, contract: null, issues: [] }
+    }
+    if (record.source === 'legacy-okf') {
+      return { ok: true, contract: null, issues: [] }
+    }
+    const parsed = readSkillMd(path.join(record.dir, 'SKILL.md'))
+    if (!parsed?.ok) {
+      return { ok: false, code: 'parse_failed', message: parsed?.error || 'parse failed', contract: null, issues: [] }
+    }
+    const contract = groundingRuntime.parseSkillGroundingContract(parsed.frontmatter)
+    const experienceTasks = record.capabilityManifest?.metadata?.knowme?.experience?.tasks
+    const requestedTaskId = String(options.taskId || '').trim()
+    const experienceRequiredTools = Array.isArray(experienceTasks)
+      ? experienceTasks
+        .filter(task => requestedTaskId && task?.id === requestedTaskId)
+        .flatMap(task => Array.isArray(task?.requiredTools) ? task.requiredTools : [])
+      : []
+    contract.requiredTools = [...new Set([
+      ...(contract.requiredTools || []),
+      ...experienceRequiredTools,
+    ].map(tool => String(tool || '').trim()).filter(Boolean))]
+    contract.skillId = id
+    const validation = groundingRuntime.validateGroundingContract(contract, parsed.frontmatter)
+    return { ok: validation.ok, contract, issues: validation.issues }
   }
 
   function readSkillResource(skillId, relativePath, options = {}) {
@@ -559,6 +780,12 @@ function createSkillRuntime(deps = {}) {
       slash: rec.slash,
       source: rec.source,
       legacy: rec.source === 'legacy-okf',
+      dependencies: rec.capabilityManifest?.dependencies || [],
+      permissions: rec.capabilityManifest?.permissions || {},
+      inputs: rec.capabilityManifest?.inputs || [],
+      outputs: rec.capabilityManifest?.outputs || [],
+      risk: rec.capabilityManifest?.risk || { level: 'low', reasons: [] },
+      provenance: rec.capabilityManifest?.provenance || {},
     }))
   }
 
@@ -608,9 +835,58 @@ function createSkillRuntime(deps = {}) {
     }
   }
 
+  function listSkillTasks(options = {}) {
+    const records = filterEnabled(scanAllSkills({ includeLegacy: options.includeLegacy !== false }), options)
+    const issues = []
+    const revisionParts = []
+    const seenTaskIds = new Map()
+
+    if (getPackSkillSources) {
+      const payload = getPackSkillSources()
+      if (Array.isArray(payload?.issues)) issues.push(...payload.issues)
+    }
+
+    const sourceRank = { standard: 0, 'linked-repo': 1, pack: 2, 'legacy-okf': 3 }
+
+    for (const rec of records) {
+      revisionParts.push(`${rec.id}:${rec.contentHash || ''}`)
+      const experienceTasks = rec.capabilityManifest?.metadata?.knowme?.experience?.tasks
+      if (!Array.isArray(experienceTasks) || !experienceTasks.length) continue
+
+      for (const task of experienceTasks) {
+        const dto = toDisplaySafeTask(task, {
+          skillId: rec.id,
+          source: rec.source,
+          ownerPackId: rec.ownerPackId || rec.provenance?.ownerPackId || undefined,
+        })
+        const existing = seenTaskIds.get(dto.id)
+        if (existing) {
+          issues.push({
+            code: 'duplicate_task_id',
+            message: `重复 task.id: ${dto.id}（${existing.skillId} / ${dto.skillId}）`,
+            taskId: dto.id,
+            skillId: rec.id,
+            existingSkillId: existing.skillId,
+          })
+          if ((sourceRank[existing.source] ?? 99) <= (sourceRank[dto.source] ?? 99)) continue
+        }
+        seenTaskIds.set(dto.id, dto)
+        revisionParts.push(`${dto.id}:${dto.skillId}:${rec.contentHash || ''}`)
+      }
+    }
+
+    return {
+      tasks: [...seenTaskIds.values()].sort((a, b) => a.id.localeCompare(b.id)),
+      issues,
+      revision: computeTasksRevision(revisionParts.sort()),
+    }
+  }
+
   return {
     listSkillsL0,
+    listSkillTasks,
     loadSkillL1,
+    loadSkillGroundingContract,
     readSkillResource,
     runSkillScript,
     autoMatchSkills,
@@ -622,9 +898,19 @@ function createSkillRuntime(deps = {}) {
   }
 }
 
+function parseSkillGroundingFromContent(content) {
+  const parsed = parseSkillFrontmatter(content)
+  if (!parsed.ok) return { ok: false, contract: null, issues: [{ message: parsed.error || 'parse failed' }] }
+  const contract = groundingRuntime.parseSkillGroundingContract(parsed.frontmatter)
+  const validation = groundingRuntime.validateGroundingContract(contract, parsed.frontmatter)
+  return { ok: validation.ok, contract, issues: validation.issues }
+}
+
 module.exports = {
   createSkillRuntime,
   parseSkillFrontmatter,
+  parseGroundingBlocksFromRaw,
+  parseSkillGroundingFromContent,
   resolveSafePath,
   truncateText,
   contentHash,

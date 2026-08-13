@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "parentRunId": "run_smoke_1785952321078",
+  "cancelled": [
+    "sub_smoke_1"
+  ],
+  "elapsedMs": 0,
+  "withinBudget": true,
+  "leakCount": 0,
+  "at": "2026-08-05T17:52:01.078Z"
+}

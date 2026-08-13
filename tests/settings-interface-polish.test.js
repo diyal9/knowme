@@ -15,6 +15,12 @@ describe('settings interface polish', () => {
     assert.match(settings, /if \(embeddedMode\)[\s\S]*close-settings-inline/)
   })
 
+  it('uses white content-island canvas when embedded in workspace', () => {
+    assert.match(settings, /\.embedded-settings[\s\S]*?--bg-page:#ffffff/)
+    assert.match(settings, /\.embedded-settings body\s*\{\s*background:#ffffff/)
+    assert.match(settings, /\.embedded-settings \.scroll\s*\{\s*background:#ffffff/)
+  })
+
   it('uses accessible icons for close and save actions', () => {
     assert.match(settings, /id="btnCancel"[^>]*title="关闭设置"/)
     assert.match(settings, /data-icon="close"/)

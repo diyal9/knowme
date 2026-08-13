@@ -1,0 +1,68 @@
+{
+  "startedAt": "2026-08-10T19:43:42.350Z",
+  "checks": [
+    {
+      "id": "hub-confirm-shell",
+      "ok": true,
+      "note": "统一确认弹窗已就位"
+    },
+    {
+      "id": "hub-expert-composition",
+      "ok": true,
+      "note": "专家详情展示装配的技能与连接器",
+      "sample": "办公 · 精选\n\n面向日常办公场景的多能力专家，绑定写作润色与飞书连接器。\n\n已安装\n元信息\n版本\nv1.0.0\n来源\n精选\n分类\n办公\n状态\nenabled\nHash\nsha256:abdd2…\n安装于\n2026-08-04T02:47:52.990Z\n装配\n技能 1\nwriting-polish\n连接器 1\nfei"
+    },
+    {
+      "id": "hub-skill-tasks",
+      "ok": true,
+      "note": "技能详情展示“可以做什么”与试用入口",
+      "hasTryButton": true,
+      "hasUsage": true,
+      "sample": "开发 · 精选\n\n按最小改动原则审查 diff，关注回归风险、边界条件与可测试性。\n\n精选\n元信息\n版本\nv1.0.0\n来源\n精选\n分类\n开发\n状态\navailable\n可以做什么\n\n这项技能没有声明现成任务。你可以直接试用并描述需求，或把它装配给某位专家后在对话中调用。\n\n装配它的专家\n\n还没有专家装配这项技能。在专家编辑中勾选它，之后该专家就能调用。\n\n依赖\n\n无依赖\n\n权限\n\n未声明额外权限"
+    },
+    {
+      "id": "studio-open",
+      "ok": true,
+      "note": "可进入编排界面"
+    },
+    {
+      "id": "studio-skill-picker",
+      "ok": true,
+      "note": "检查器内可直接配置技能",
+      "checkboxes": 38
+    },
+    {
+      "id": "studio-skill-written",
+      "ok": true,
+      "note": "勾选技能后写入节点并回显数量",
+      "sample": "1 artbundle-expert 点击后填写本步骤目标 · 1 个 Skill ×"
+    },
+    {
+      "id": "studio-keyboard-reorder",
+      "ok": true,
+      "note": "Alt+↓ 调整顺序并把焦点留在被移动的步骤",
+      "firstBefore": "node-artbundle-expert",
+      "firstAfter": "node-office-partner",
+      "focusedNode": "node-artbundle-expert"
+    },
+    {
+      "id": "studio-narrow-inspector",
+      "ok": true,
+      "note": "1080px 宽度下检查器仍可见"
+    },
+    {
+      "id": "studio-dirty-guard",
+      "ok": true,
+      "note": "有未保存改动时返回会先确认"
+    },
+    {
+      "id": "studio-dirty-discard",
+      "ok": true,
+      "note": "放弃修改后离开编排"
+    }
+  ],
+  "consoleErrors": [],
+  "ok": true,
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-uxpolish-tVAoni",
+  "finishedAt": "2026-08-10T19:44:05.540Z"
+}

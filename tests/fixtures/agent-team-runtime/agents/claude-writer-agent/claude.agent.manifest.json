@@ -1,0 +1,55 @@
+{
+  "agent_id": "claude-writer-agent",
+  "display_name": "Claude Writer Agent",
+  "version": "1.0.0",
+  "builderProtocolVersion": 1,
+  "role": "交付写作 Agent",
+  "tools": ["team-developer"],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "brief": { "type": "string" },
+      "research": {
+        "type": "object",
+        "properties": {
+          "summary": { "type": "string" },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "claim": { "type": "string" },
+                "evidenceRef": { "type": "string" }
+              },
+              "required": ["claim", "evidenceRef"]
+            }
+          }
+        },
+        "required": ["summary", "findings"]
+      }
+    },
+    "required": ["brief", "research"]
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "document": { "type": "string" },
+      "sections": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "title": { "type": "string" },
+            "body": { "type": "string" }
+          },
+          "required": ["title", "body"]
+        }
+      }
+    },
+    "required": ["document", "sections"]
+  },
+  "compatibility": {
+    "builders": ["claude"],
+    "fallbackLocal": false
+  }
+}

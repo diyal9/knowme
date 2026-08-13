@@ -64,6 +64,27 @@ describe('agent-recovery retry policy', () => {
     assert.equal(recovery.planRetry({ category: 'network', attempt: 2, maxRetries: 2 }).retry, false)
     assert.equal(recovery.planRetry({ category: 'permission', attempt: 0, maxRetries: 2 }).retry, false)
   })
+
+  it('uses longer exponential backoff for timeout category', () => {
+    assert.deepEqual(recovery.planRetry({ category: 'timeout', attempt: 0, maxRetries: 2 }), { retry: true, delayMs: 2000 })
+    assert.deepEqual(recovery.planRetry({ category: 'timeout', attempt: 1, maxRetries: 2 }), { retry: true, delayMs: 4000 })
+    assert.deepEqual(recovery.planRetry({ category: 'network', attempt: 1, maxRetries: 2 }), { retry: true, delayMs: 800 })
+  })
+
+  it('formats timeout and retry summaries for timeline', () => {
+    assert.match(recovery.formatToolTimeoutSummary({ argsSummary: '{cwd}', timeoutSec: 45 }), /超时（45s）/)
+    assert.match(
+      recovery.formatToolRetrySummary({ argsSummary: '{cwd}', attempt: 1, delayMs: 2000, reason: 'timeout' }),
+      /超时，2s 后第 1 次重试/,
+    )
+  })
+
+  it('planRetry respects explicit base/cap overrides', () => {
+    assert.deepEqual(
+      recovery.planRetry({ category: 'timeout', attempt: 0, maxRetries: 2, base: 100, cap: 500 }),
+      { retry: true, delayMs: 100 },
+    )
+  })
 })
 
 describe('agent-recovery alternative tool + param correction', () => {

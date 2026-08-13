@@ -1,0 +1,59 @@
+{
+  "at": "2026-08-07T09:03:22.380Z",
+  "ok": true,
+  "mode": "loopback-http-agent-service",
+  "endpoint": "http://127.0.0.1:2432",
+  "checks": [
+    {
+      "id": "versioned-handshake",
+      "ok": true
+    },
+    {
+      "id": "remote-run-terminal",
+      "ok": true
+    },
+    {
+      "id": "remote-status",
+      "ok": true
+    },
+    {
+      "id": "remote-resume",
+      "ok": true
+    },
+    {
+      "id": "remote-cancel-budget",
+      "ok": true
+    },
+    {
+      "id": "http-boundaries-exercised",
+      "ok": true
+    }
+  ],
+  "cancelElapsedMs": 2,
+  "requestAudit": [
+    {
+      "method": "POST",
+      "path": "/agent/v1/handshake"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/handshake"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/runs"
+    },
+    {
+      "method": "GET",
+      "path": "/agent/v1/runs/daemon_e2e_1786093402415"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/runs/daemon_e2e_1786093402415/resume"
+    },
+    {
+      "method": "POST",
+      "path": "/agent/v1/runs/daemon_e2e_1786093402415/cancel"
+    }
+  ]
+}

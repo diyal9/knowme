@@ -1,0 +1,44 @@
+{
+  "at": "2026-08-05T16:07:38.146Z",
+  "writeBlocked": true,
+  "mode": "read-only-probe",
+  "auth": {
+    "source": "feishu-status",
+    "userReady": true,
+    "state": "online"
+  },
+  "candidates": {
+    "ok": true,
+    "days": 14,
+    "candidateCount": 7,
+    "withMinuteToken": 7,
+    "tokens": [
+      {
+        "titleHash": "3b4ff44ef11b4ce7",
+        "minuteTokenHash": "3d0783151bb88291"
+      },
+      {
+        "titleHash": "dbf5f651bb09cc5f",
+        "minuteTokenHash": "fda4ada262622863"
+      },
+      {
+        "titleHash": "11fb682be0a0233d",
+        "minuteTokenHash": "5f9862f34999f365"
+      }
+    ],
+    "code": null
+  },
+  "readAttempts": [
+    {
+      "minuteTokenHash": "fda4ada262622863",
+      "titleHash": "dbf5f651bb09cc5f",
+      "ok": true,
+      "code": null,
+      "bodyLen": 8635,
+      "hasMeetingKeywords": true,
+      "metaWorkflow": "meeting_read",
+      "note": "只读成功；正文未落盘"
+    }
+  ],
+  "ok": true
+}

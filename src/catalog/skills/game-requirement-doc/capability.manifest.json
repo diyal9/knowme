@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 2,
+  "id": "game-requirement-doc",
+  "kind": "skill",
+  "name": "游戏需求案",
+  "version": "1.0.0",
+  "dependencies": [{ "id": "feishu", "kind": "connector", "required": false }],
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "gameRequirementDoc",
+          "title": "策划需求",
+          "subtitle": "背景、玩法、数值、埋点与验收",
+          "icon": "note",
+          "group": "game-design",
+          "modes": ["writing"],
+          "surfaces": ["scene"],
+          "prompt": "帮我撰写手机游戏需求案，包含背景、玩法、数值、埋点与验收标准。"
+        }]
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "scenes": [
+    {
+      "id": "workflow-intake",
+      "label": "需求梳理",
+      "description": "飞书资料 → 结构化 intake → 可启动工作流",
+      "skillId": "game-requirement-doc",
+      "expertId": "game-studio-partner",
+      "connectors": ["feishu"],
+      "legacyModes": [],
+      "keywords": "(需求梳理|intake|ingest|工作流准备|启动工作流|整理需求)",
+      "defaultWorkflow": "game-dev-delivery",
+      "emptyPrompt": "请帮我做工作流需求梳理（intake / ingest）：先检查飞书授权，必要时用 feishu.doc_kb_suggest、会议与聊天线索收集相关材料；再整理成可启动管线服务工作流的结构化 intake。",
+      "showInEmptyState": false
+    },
+    {
+      "id": "game-design",
+      "label": "策划需求",
+      "description": "撰写结构化游戏需求案，引用飞书资料并走审批写入",
+      "skillId": "game-requirement-doc",
+      "expertId": "game-studio-partner",
+      "connectors": ["feishu"],
+      "legacyModes": ["writing"],
+      "keywords": "(需求案|策划|玩法|数值|埋点|prd|gdd|game design|验收标准|活动配置)",
+      "emptyPrompt": "帮我撰写手机游戏需求案，包含背景、玩法、数值、埋点与验收标准",
+      "showInEmptyState": false
+    },
+    {
+      "id": "game-dev",
+      "label": "研发实现",
+      "description": "从需求案启动管线服务工作流并形成可审阅交付",
+      "skillId": "game-dev-delivery",
+      "expertId": "game-studio-partner",
+      "connectors": ["feishu"],
+      "legacyModes": ["coding"],
+      "keywords": "(开发|实现|客户端|服务端|代码|接口|联调|daemon|工作流|workflow|交付)",
+      "defaultWorkflow": "game-dev-delivery",
+      "emptyPrompt": "基于已批准需求案，准备交接研发工作流并列出验收清单",
+      "showInEmptyState": false
+    },
+    {
+      "id": "game-qa",
+      "label": "测试验收",
+      "description": "对照需求验收标准执行 QA 与反模式审查",
+      "skillId": "game-qa-acceptance",
+      "expertId": "game-studio-partner",
+      "connectors": [],
+      "legacyModes": [],
+      "keywords": "(测试|qa|验收|回归|用例|反模式|缺陷|bug)",
+      "emptyPrompt": "对照游戏需求案列出测试矩阵、反模式与阻塞项",
+      "showInEmptyState": false
+    },
+    {
+      "id": "game-production",
+      "label": "制作推进",
+      "description": "版本里程碑、风险清单与跨职能推进",
+      "skillId": "game-production",
+      "expertId": "game-studio-partner",
+      "connectors": ["feishu"],
+      "legacyModes": ["general"],
+      "keywords": "(版本|里程碑|排期|风险|制作人|项目推进|上线|发版)",
+      "emptyPrompt": "整理本版本里程碑、依赖与风险清单",
+      "showInEmptyState": false
+    },
+    {
+      "id": "game-knowledge",
+      "label": "项目知识",
+      "description": "Wiki/OKF 整理与项目上下文维护",
+      "skillId": "knowledge-steward",
+      "expertId": "game-studio-partner",
+      "connectors": [],
+      "legacyModes": ["steward"],
+      "keywords": "(知识库|wiki|okf|整理|升格|健康检查|kb-ingest|kb-lint)",
+      "emptyPrompt": "帮我整理项目 Wiki/OKF：先查现有证据，再给出 ingest 或 lint 建议",
+      "showInEmptyState": false
+    }
+  ],
+  "scenePrompts": {
+    "workflow-intake": "你是 KnowMe，工作流 intake / ingest 协作伙伴。\n优先基于飞书文档、会议与聊天事实整理结构化 intake。",
+    "game-design": "你是 KnowMe，手机游戏工作室的策划协作伙伴。\n优先输出结构化游戏需求案。",
+    "game-dev": "你是 KnowMe，手机游戏研发协作伙伴。\n从已批准的需求案出发，明确开发任务与验收清单。",
+    "game-qa": "你是 KnowMe，手机游戏 QA 协作伙伴。\n对照需求验收标准列出测试矩阵与反模式。",
+    "game-production": "你是 KnowMe，手机游戏制作/项目推进伙伴。\n围绕版本目标整理里程碑、依赖与风险。",
+    "game-knowledge": "你是 KnowMe，项目知识管家。\n优先基于已有 Wiki/OKF 证据回答；可建议 kb-ingest / kb-lint 路径。"
+  },
+  "legacyModeMap": {
+    "general": "game-production",
+    "steward": "game-knowledge",
+    "writing": "game-design",
+    "coding": "game-dev"
+  }
+}

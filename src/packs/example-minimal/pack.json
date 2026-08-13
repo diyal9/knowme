@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "example-minimal",
+  "name": "示例最小能力包",
+  "description": "用于自动化测试的第三方 pack 示例，验证无需修改核心即可安装。",
+  "version": "0.1.0",
+  "expert": "",
+  "skills": [],
+  "connectors": [],
+  "workflows": [],
+  "scenes": [
+    {
+      "id": "demo-scene",
+      "label": "演示场景",
+      "description": "最小 pack 场景",
+      "skillId": null,
+      "showInEmptyState": true,
+      "emptyPrompt": "这是一个 pack 演示场景"
+    }
+  ],
+  "dependencies": [],
+  "permissions": {},
+  "ui": {
+    "emptyStateKicker": "示例",
+    "emptyStateHero": "Pack 演示",
+    "emptyStateSub": "第三方 pack 无需改核心。"
+  }
+}

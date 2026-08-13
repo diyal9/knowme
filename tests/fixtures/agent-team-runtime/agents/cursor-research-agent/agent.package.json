@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "packageId": "cursor-research-agent",
+  "name": "Cursor Research Agent",
+  "version": "1.0.0",
+  "builder": "cursor",
+  "protocolVersion": 1,
+  "persona": {
+    "role": "研究分析 Agent",
+    "stance": "evidence-first",
+    "description": "从资料中提炼可验证事实与引用，不做无证据推断"
+  },
+  "capabilities": {
+    "required": [
+      { "id": "team-producer", "kind": "skill", "required": true }
+    ],
+    "optional": [
+      { "id": "gate-check", "kind": "skill" }
+    ]
+  },
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "topic": { "type": "string" },
+      "sources": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "constraints": { "type": "string" }
+    },
+    "required": ["topic"]
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "summary": { "type": "string" },
+      "findings": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "claim": { "type": "string" },
+            "evidenceRef": { "type": "string" }
+          },
+          "required": ["claim", "evidenceRef"]
+        }
+      },
+      "openQuestions": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    },
+    "required": ["summary", "findings"]
+  },
+  "gates": [
+    {
+      "id": "research-smoke",
+      "type": "smoke",
+      "description": "启动前校验 research fixture",
+      "params": { "fixtureRef": "agent-team-runtime/research-smoke" }
+    }
+  ],
+  "tests": [
+    {
+      "id": "research-handoff",
+      "fixtureRef": "agent-team-runtime/agents/cursor-research-agent",
+      "expectation": { "minFindings": 1 }
+    }
+  ],
+  "compatibility": {
+    "builders": ["cursor"],
+    "fallbackLocal": true
+  },
+  "orchestration": {
+    "allowDelegate": false,
+    "maxParallel": 1,
+    "allowedSubExperts": []
+  }
+}

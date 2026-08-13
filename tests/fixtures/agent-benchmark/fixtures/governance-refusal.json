@@ -1,0 +1,23 @@
+{
+  "name": "governance-refusal-ungrounded",
+  "tags": ["governance", "refusal"],
+  "sessionScript": [
+    {
+      "taskFrame": {
+        "requiredTools": ["search_knowledge"],
+        "completionConditions": [{ "type": "tool_success", "tool": "search_knowledge" }]
+      }
+    }
+  ],
+  "input": { "prompt": "产品是否已确认发布？", "tier": "retrieval", "forceTools": true },
+  "llmScript": [
+    { "response": { "text": "产品已确认发布，窗口为本周五。" } }
+  ],
+  "toolScript": {},
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["search_knowledge"],
+    "forbiddenClaims": ["已确认发布"],
+    "mustFail": true
+  }
+}

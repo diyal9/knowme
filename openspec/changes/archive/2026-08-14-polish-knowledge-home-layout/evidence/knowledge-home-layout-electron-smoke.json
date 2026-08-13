@@ -1,0 +1,60 @@
+{
+  "change": "polish-knowledge-home-layout",
+  "at": "2026-08-10T09:25:46.192Z",
+  "passed": 5,
+  "total": 5,
+  "ok": true,
+  "checks": [
+    {
+      "id": "coherent-knowledge-workspace",
+      "pass": true,
+      "detail": {
+        "search": true,
+        "add": true,
+        "lint": true,
+        "browse": true,
+        "obsidian": true,
+        "tree": true,
+        "command": true,
+        "bodyHeight": 508,
+        "deskHeight": 626,
+        "text": "\n        \n          \n            \n            \n            搜索\n          \n          \n            \n              添加\n            \n            \n              全部资料\n            \n            \n              检查\n            \n            \n              Obsidian\n            \n            整理资料\n          \n        \n        \n        \n        \n          \n            \n    \n      \n      我的知识本机根目录\n      1\n    \n    \n      \n        \n        \n        资料\n        1\n      \n      \n        \n        \n        \n          资料笔记\n          2026/8/10\n        \n        可编辑\n      \n      \n    \n      \n        \n        \n        已整理知识\n        0\n      \n      \n        \n              还没有已确认的知识\n              \n            \n      \n    \n  \n          \n          \n            \n              1 份资料 · 0 条知识\n              正常\n            \n            \n              最近更新1\n              \n                资料笔记raw/desk-note.md\n              \n            \n          \n        \n      ",
+        "hasHero": false,
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "no-internal-graph-surface",
+      "pass": true,
+      "detail": {
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "search-remains-functional",
+      "pass": true,
+      "detail": {
+        "engine": "本地检索",
+        "hitCount": 1
+      }
+    },
+    {
+      "id": "narrow-layout-no-horizontal-overflow",
+      "pass": true,
+      "detail": {
+        "viewport": 510,
+        "bodyWidth": 510,
+        "toolbarVisible": true,
+        "treeVisible": true
+      }
+    },
+    {
+      "id": "no-new-renderer-errors",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": []
+      }
+    }
+  ]
+}

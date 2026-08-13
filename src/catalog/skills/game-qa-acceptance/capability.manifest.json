@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "game-qa-acceptance",
+  "kind": "skill",
+  "name": "游戏测试验收",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "gameQaAcceptance",
+          "title": "测试验收",
+          "subtitle": "测试矩阵、反模式与阻塞项",
+          "icon": "check",
+          "group": "game-qa",
+          "modes": ["general"],
+          "surfaces": ["scene"],
+          "prompt": "对照游戏需求案列出测试矩阵、反模式检查与阻塞项。"
+        }]
+      }
+    }
+  }
+}

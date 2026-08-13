@@ -1,0 +1,54 @@
+{
+  "name": "feishu-meeting-pick-2-no-tool",
+  "sessionScript": [
+    {
+      "pendingSelection": {
+        "refSetId": "meeting-set-accident",
+        "options": [
+          {
+            "id": "candidate-1",
+            "label": "产品周会",
+            "boundTool": "feishu.meeting_read",
+            "payload": { "minute_token": "min_tok_001", "title": "产品周会" }
+          },
+          {
+            "id": "candidate-2",
+            "label": "研发评审",
+            "boundTool": "feishu.meeting_read",
+            "payload": { "minute_token": "min_tok_002", "title": "研发评审" }
+          }
+        ]
+      },
+      "taskFrame": {
+        "workflowId": "feishu-meeting-summary",
+        "requiredTools": ["feishu.meeting_read"],
+        "requiredEvidence": [
+          { "kind": "tool_result", "tool": "feishu.meeting_read", "minChars": 80, "forbidTruncated": true }
+        ],
+        "completionConditions": [
+          { "type": "tool_success", "tool": "feishu.meeting_read" }
+        ]
+      }
+    }
+  ],
+  "input": {
+    "prompt": "2",
+    "tier": "retrieval",
+    "bindRef": "candidate-2",
+    "forceTools": true
+  },
+  "llmScript": [
+    {
+      "response": {
+        "text": "已读取研发评审会议。议题：发布节奏调整；负责人：张三；日期：2026-08-01；待办：补齐测试报告。"
+      }
+    }
+  ],
+  "toolScript": {},
+  "expect": {
+    "terminal": "DONE",
+    "requiredToolCalls": ["feishu.meeting_read"],
+    "forbiddenClaims": ["议题：", "负责人：", "已读取"],
+    "mustFail": true
+  }
+}

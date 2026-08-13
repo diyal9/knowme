@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-KnowMe icon — refinement of the two chosen directions.
+Build the approved KnowMe connected application mark.
 
-  mono : concept 1 pushed toward a knowledge-graph feel but kept ICON-like —
-         solid KM letter strokes with node "beads" on terminals/joints, one coral
-         focal node (connect-the-dots wordmark, not a scattered diagram).
-
-  note : concept 4 refined — a cleaner, more structured KM knockout inside the
-         note/speech card; the coral dot now lives ON a connection joint of the
-         letterform instead of floating.
+The production mark is one navy rounded carrier, one ivory five-node path, and
+one coral origin — same brand as always. The connected graph is scaled up about
+the plate center so it reads fuller and sharper on Windows taskbar / tray sizes.
+Every raster output is rendered directly from normalized geometry so native
+Windows frames do not depend on downscaling the 1024 px master.
 
 Usage:
-  python scripts/build-icon-refine.py                # comparison board
-  python scripts/build-icon-refine.py --ship mono    # ship to src/assets
-  python scripts/build-icon-refine.py --ship note
+  python scripts/build-icon-refine.py --ship          # ship all app icon assets
+  python scripts/build-icon-refine.py --taskbar-fill  # dark-taskbar strip preview
+  python scripts/build-icon-refine.py                  # legacy comparison board
 """
 
 from __future__ import annotations
@@ -249,39 +247,39 @@ def render_note_fill(ss=6, scale=1.5, bg=IVORY, navy=NAVY, ivory=IVORY, coral=CO
     return canvas.resize((BASE, BASE), Image.LANCZOS)
 
 
-# small-size lockup: navy tile + bold ivory KM (no layered cards / moat / beads)
-KM_SMALL_SCALE = 1.62
-KM_SMALL_STROKE = 96
+# small-size lockup: preserve the double-layer speech bubble, but simplify the
+# KM nodes and strengthen its strokes so the shared brand mark survives at 16px.
+NOTE_SMALL_SCALE = 1.64
+NOTE_SMALL_STROKE = 90
+WINDOWS_SMALL_SAFE_AREA = 0.0625
 
 
-def render_km_small(ss=8, scale=KM_SMALL_SCALE, bg=NAVY, stroke=IVORY, coral=CORAL,
-                    stroke_w=KM_SMALL_STROKE, show_coral=True):
-    """Simplified high-contrast lockup for tiny sizes (taskbar / tray / .ico):
-    full dark tile + bold KM with NO node beads; optional single coral accent."""
-    size = BASE * ss
-    canvas, mask = _tile(ss, bg, circle=False)
-    mark = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    accent = coral if show_coral else None
-    paint_mono(ImageDraw.Draw(mark), ss, stroke, accent, scale=scale, beads=False,
-               stroke_w=stroke_w)
-    clip = Image.new("RGBA", (size, size), (0, 0, 0, 0)); clip.paste(mark, (0, 0), mask)
-    canvas.alpha_composite(clip)
-    return canvas.resize((BASE, BASE), Image.LANCZOS)
-
-
-def render_small_px(size, show_coral=None):
-    """Render the high-contrast small variant at an exact pixel size."""
-    if show_coral is None:
-        show_coral = size >= 32
+def render_small_px(size):
+    """Render the unified speech-bubble brand mark at an exact pixel size."""
     ss = max(8, min(16, size * 2))
-    src = render_km_small(ss=ss, show_coral=show_coral)
+    src = render_note_fill(
+        ss=ss,
+        scale=NOTE_SMALL_SCALE,
+        beads=False,
+        kw=NOTE_SMALL_STROKE,
+    )
     return src.resize((size, size), Image.LANCZOS)
 
 
+def render_windows_small_px(size):
+    """Center the unified brand mark inside the Windows native-icon safe area."""
+    inset = max(1, round(size * WINDOWS_SMALL_SAFE_AREA))
+    inner_size = size - inset * 2
+    mark = render_small_px(inner_size)
+    frame = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    frame.alpha_composite(mark, (inset, inset))
+    return frame
+
+
 def render_old_small_px(size):
-    """Previous small treatment: ivory tile + bead-free note bubble (for comparison)."""
+    """Previous divergent treatment: a navy tile with an isolated KM mark."""
     ss = max(8, min(16, size * 2))
-    src = render_note_fill(ss=ss, scale=NOTE_SHIP_SCALE, beads=False, kw=78)
+    src = render_mono(ss=ss, shadow=False, bg=NAVY, navy=IVORY)
     return src.resize((size, size), Image.LANCZOS)
 
 
@@ -344,8 +342,8 @@ def taskbar_clarity_board():
 
     bd = Image.new("RGBA", (W, H), (28, 28, 30, 255))
     d = ImageDraw.Draw(bd)
-    d.text((pad, 6), "OLD (ivory bubble, bead-free KM)", fill=(180, 180, 185, 255))
-    d.text((pad, label_h + row_h + pad + 6), "NEW (navy fill + bold ivory KM)",
+    d.text((pad, 6), "OLD (isolated KM lockup)", fill=(180, 180, 185, 255))
+    d.text((pad, label_h + row_h + pad + 6), "NEW (unified speech-bubble mark)",
            fill=(180, 180, 185, 255))
 
     def _row(y0, renderer):
@@ -365,37 +363,146 @@ def taskbar_clarity_board():
             bx += px + pad
 
     _row(label_h, render_old_small_px)
-    _row(label_h + row_h + pad, render_small_px)
+    _row(label_h + row_h + pad, render_windows_small_px)
     out = PREVIEW / "taskbar-clarity-board.png"
     bd.save(out)
     print("wrote", out)
 
 
-def ship(which):
+# ========================================================= connected production
+# Original brand palette (navy plate / ivory path / coral origin). The five-node
+# graph is scaled about the plate center so the mark fills the slot better on
+# Windows taskbar — no recolor or redesign.
+CONNECTED_INSET = 24 / BASE
+CONNECTED_RADIUS = 196 / BASE
+CONNECTED_MARK_SCALE = 1.42
+CONNECTED_LINE_WIDTH = 68 / BASE
+CONNECTED_CARRIER = NAVY
+CONNECTED_PATH = IVORY
+CONNECTED_ORIGIN = CORAL
+# Pre-scale base geometry (legacy approved coords at scale 1.0).
+_CONNECTED_BASE_POINTS = {
+    "origin": (273 / BASE, 285 / BASE),
+    "left": (273 / BASE, 718 / BASE),
+    "center": (545 / BASE, 509 / BASE),
+    "upper_right": (750 / BASE, 279 / BASE),
+    "lower_right": (750 / BASE, 724 / BASE),
+}
+_CONNECTED_BASE_RADII = {
+    "origin": 53 / BASE,
+    "left": 66 / BASE,
+    "center": 76 / BASE,
+    "upper_right": 66 / BASE,
+    "lower_right": 66 / BASE,
+}
+
+
+def _scale_connected(pt):
+    cx, cy = 0.5, 0.5
+    return (
+        cx + (pt[0] - cx) * CONNECTED_MARK_SCALE,
+        cy + (pt[1] - cy) * CONNECTED_MARK_SCALE,
+    )
+
+
+CONNECTED_POINTS = {name: _scale_connected(pt) for name, pt in _CONNECTED_BASE_POINTS.items()}
+CONNECTED_NODE_RADII = {
+    name: r * CONNECTED_MARK_SCALE for name, r in _CONNECTED_BASE_RADII.items()
+}
+
+
+def render_connected_px(size):
+    """Render the approved connected mark directly at one native output size."""
+    ss = 16 if size <= 64 else 8 if size <= 256 else 4
+    work = size * ss
+    canvas = Image.new("RGBA", (work, work), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+
+    inset = max(1, int(size * CONNECTED_INSET + 0.5))
+    edge = (size - inset) * ss - 1
+    draw.rounded_rectangle(
+        (inset * ss, inset * ss, edge, edge),
+        radius=round(size * CONNECTED_RADIUS * ss),
+        fill=CONNECTED_CARRIER,
+    )
+
+    def point(name):
+        x, y = CONNECTED_POINTS[name]
+        return (round(x * size * ss), round(y * size * ss))
+
+    line_width = max(1.5, size * CONNECTED_LINE_WIDTH)
+    width = round(line_width * ss)
+    draw.line(
+        [point("origin"), point("left"), point("center")],
+        fill=CONNECTED_PATH,
+        width=width,
+        joint="curve",
+    )
+    draw.line(
+        [point("center"), point("upper_right")],
+        fill=CONNECTED_PATH,
+        width=width,
+    )
+    draw.line(
+        [point("center"), point("lower_right")],
+        fill=CONNECTED_PATH,
+        width=width,
+    )
+
+    def node(name, color):
+        cx, cy = point(name)
+        radius = max(1.35 if name == "origin" else 1.6, size * CONNECTED_NODE_RADII[name]) * ss
+        draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=color)
+
+    for name in ("left", "center", "upper_right", "lower_right"):
+        node(name, CONNECTED_PATH)
+    node("origin", CONNECTED_ORIGIN)
+    output = canvas.resize((size, size), Image.Resampling.LANCZOS)
+    # LANCZOS can leave sub-pixel alpha outside the intended native safe area.
+    # Clear the edge explicitly so Windows never sees clipped artwork.
+    edge_draw = ImageDraw.Draw(output)
+    edge_draw.rectangle((0, 0, size - 1, inset - 1), fill=(0, 0, 0, 0))
+    edge_draw.rectangle((0, size - inset, size - 1, size - 1), fill=(0, 0, 0, 0))
+    edge_draw.rectangle((0, 0, inset - 1, size - 1), fill=(0, 0, 0, 0))
+    edge_draw.rectangle((size - inset, 0, size - 1, size - 1), fill=(0, 0, 0, 0))
+    return output
+
+
+def ship():
     ASSETS.mkdir(parents=True, exist_ok=True)
-    if which == "mono":
-        app = render_mono(ss=8, shadow=True)
-        flat = render_mono(ss=8, shadow=False)
-        app.save(ASSETS / "icon.png")
-        app.save(ASSETS / "icon.ico",
-                 sizes=[(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (24, 24), (16, 16)])
-        flat.resize((256, 256), Image.LANCZOS).save(ASSETS / "tray-icon.png")
-    else:
-        # ≥64px → filled speech-bubble with graph beads (detailed)
-        # ≤48px → navy tile + bold ivory KM (high-contrast, no layers/moat/beads)
-        app = render_note_fill(ss=8, scale=NOTE_SHIP_SCALE)
-        app.save(ASSETS / "icon.png")
-        ico = [app.resize((s, s), Image.LANCZOS) for s in (256, 128, 64)]
-        ico += [render_small_px(s) for s in (48, 32, 24, 16)]
-        ico[0].save(ASSETS / "icon.ico", format="ICO", append_images=ico[1:])
-        # tray renders at ~16–32px → high-contrast navy lockup
-        render_small_px(32).resize((256, 256), Image.LANCZOS).save(ASSETS / "tray-icon.png")
-    print("shipped", which, "to", ASSETS)
+    render_connected_px(BASE).save(ASSETS / "icon.png")
+    sizes = (256, 128, 64, 48, 32, 24, 16)
+    ico = [render_connected_px(size) for size in sizes]
+    ico[0].save(ASSETS / "icon.ico", format="ICO", append_images=ico[1:])
+    # 32 physical pixels presented as 16 DIP by Electron on Windows.
+    render_connected_px(32).save(ASSETS / "tray-icon.png")
+    print("shipped connected mark to", ASSETS)
+
+
+def taskbar_fill_board():
+    """Dark-taskbar strip for the scaled original mark."""
+    PREVIEW.mkdir(parents=True, exist_ok=True)
+    strip_h = 96
+    sizes = (48, 32, 24, 16)
+    bd = Image.new("RGBA", (520, strip_h + 48), (28, 28, 30, 255))
+    d = ImageDraw.Draw(bd)
+    d.text((16, 10), "navy original mark, scaled fill", fill=(190, 190, 195, 255))
+    bx = 24
+    for s in sizes:
+        icon = render_connected_px(s)
+        bd.alpha_composite(icon, (bx, 36 + (strip_h - 36 - s) // 2))
+        d.text((bx, strip_h + 20), f"{s}", fill=(140, 140, 145, 255))
+        bx += s + 28
+    out = PREVIEW / "taskbar-scaled-fill-board.png"
+    bd.save(out)
+    print("wrote", out)
 
 
 if __name__ == "__main__":
     if "--ship" in sys.argv:
-        ship(sys.argv[sys.argv.index("--ship") + 1])
+        ship()
+    elif "--taskbar-fill" in sys.argv:
+        taskbar_fill_board()
     elif "--clarity" in sys.argv:
         taskbar_clarity_board()
     elif "--fill" in sys.argv:

@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-08-06T05:08:51.446Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "install-game-studio",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "packId": "game-studio",
+        "version": "1.1.0"
+      }
+    },
+    {
+      "id": "home-four-recommendations",
+      "pass": true,
+      "detail": [
+        "\n          查文档/知识库文件夹·记忆推荐·最近编辑/阅读\n        ",
+        "\n          会议总结为我总结最近三天的会议\n        ",
+        "\n          分析跟我相关的聊天今天：私聊/群聊主题与 @我\n        ",
+        "\n          今日优先级基于飞书日程/待办直接出 Top3\n        "
+      ]
+    },
+    {
+      "id": "workflow-intake-separated",
+      "pass": true,
+      "detail": "\n            ↗\n            \n              启动工作流\n              需求梳理\n              飞书资料 → 结构化 intake → 可启动工作流\n            \n            \n          "
+    },
+    {
+      "id": "launcher-opens-focused-without-internal-categories",
+      "pass": true,
+      "detail": {
+        "focusedId": "agentQuickSearch",
+        "launcherText": "\n          \n            \n            \n            Esc\n          \n          \n            快捷操作\n            4 项可用任务\n          \n          \n      \n        \n        \n          会议总结\n          为我总结最近三天的会议\n        \n        办公核心\n      \n    \n      \n        \n        \n          今日优先级\n          基于飞书日程/待办直接出 Top3\n        \n        办公核心\n      \n    \n      \n        \n        \n          查文档/知识库\n          文件夹·记忆推荐·最近编辑/阅读\n        \n        文档与沟通\n      \n    \n      \n        \n        \n          分析跟我相关的聊天\n          今天：私聊/"
+      }
+    },
+    {
+      "id": "launcher-filters-results",
+      "pass": true,
+      "detail": [
+        "\n        \n        \n          会议总结\n          为我总结最近三天的会议\n        \n        办公核心\n      "
+      ]
+    },
+    {
+      "id": "launcher-preserves-composer-draft",
+      "pass": true,
+      "detail": "这段草稿必须保留"
+    },
+    {
+      "id": "launcher-empty-result",
+      "pass": true
+    },
+    {
+      "id": "escape-closes-and-restores-composer",
+      "pass": true
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

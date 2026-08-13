@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "office-requirement-doc",
+  "kind": "skill",
+  "name": "写需求文档",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "writingRequirementsDoc",
+          "title": "写需求文档",
+          "subtitle": "背景、范围、验收标准、风险",
+          "icon": "note",
+          "group": "writing-docs",
+          "modes": ["writing"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请作为需求文档搭档，根据我提供的材料产出需求文档初稿。",
+          "preflight": {
+            "type": "material",
+            "message": "写需求文档前，用一句话告诉我要写什么需求（目标 + 背景 + 关键约束），或直接粘贴/@ 已有材料，我就开始。"
+          }
+        }]
+      }
+    }
+  }
+}

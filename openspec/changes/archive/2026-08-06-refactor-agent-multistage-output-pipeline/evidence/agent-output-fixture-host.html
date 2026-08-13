@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Agent Output Fixture Host</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #111; color: #eee; }
+    #agentCol { max-width: 720px; margin: 0 auto; padding: 16px; }
+    #agentChatLog {
+      height: 520px;
+      overflow: auto;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 12px;
+      background: #1a1a1a;
+    }
+    .agent-bubble { margin: 10px 0; }
+    .agent-bubble.user { opacity: 0.8; }
+    .agent-bubble.assistant { border: 1px solid #2d2d2d; border-radius: 10px; padding: 10px; }
+    .agent-structured-ui { margin-top: 8px; }
+    .agent-suggest-item { display: block; margin-top: 6px; }
+    .agent-tool-approval-actions button { margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <div id="agentCol" aria-label="助手对话">
+    <div id="agentChatLog"></div>
+    <textarea id="agentInput" hidden></textarea>
+    <button id="agentSend" type="button" hidden></button>
+  </div>
+  <script>
+    localStorage.setItem('__knowme_agent_output_fixture', '1')
+    window.api = {
+      getSettings: () => ({ industry: 'general' }),
+      connectorsStatus: async () => ({ connector: {} }),
+      agentSessionList: async () => ({ ok: true, sessions: [], ui: {} }),
+      agentSessionGet: async () => ({ ok: false }),
+      agentSessionNew: async () => ({ ok: true, session: { id: 'fixture', messages: [] } }),
+      agentSessionSetUi: async () => ({ ok: true }),
+      agentRunUpdate: async () => ({ ok: true, session: { id: 'fixture', messages: [] } }),
+      listSkills: async () => ({ ok: true, skills: [] }),
+      expertList: async () => ({ ok: true, experts: [] }),
+      copyToClipboard: () => {},
+      openExternal: async () => false,
+    }
+  </script>
+  <script src="/src/lib/agent-message-state.js"></script>
+  <script src="/src/lib/assistant-output-style.js"></script>
+  <script src="/src/lib/agent-suggestion.js"></script>
+  <script src="/src/lib/conversation-grounding.js"></script>
+  <script src="/src/lib/agent-grounding-labels.js"></script>
+  <script src="/src/workspace-agent.js"></script>
+  <script>
+    WorkspaceAgent.init({
+      getEditorContext: async () => ({ ok: false }),
+      applyToEditor: async () => false,
+      toast: () => {},
+    })
+  </script>
+</body>
+</html>

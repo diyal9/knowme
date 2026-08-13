@@ -1,0 +1,224 @@
+{
+  "generatedAt": "2026-08-11T08:42:20.705Z",
+  "pass": true,
+  "checks": [
+    {
+      "id": "no-tool-unavailable",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "id": "no-generic-fallback-as-sole-error",
+      "pass": true,
+      "detail": "ok"
+    },
+    {
+      "id": "has-assistant-text",
+      "pass": true,
+      "detail": {
+        "textLen": 660
+      }
+    },
+    {
+      "id": "called-feishu-doc-kb-suggest",
+      "pass": true,
+      "detail": {
+        "toolNames": [
+          "feishu.doc_kb_suggest"
+        ],
+        "toolsUsed": [
+          "wiki.query",
+          "feishu.doc_kb_suggest"
+        ],
+        "textHead": "已按规范完成阶段一：候选 suggest。结果如下（严格复述工具返回，无编造、无推测）：\n\n---\n\n## 文档 / 知识库候选（当前授权用户 · 近 30 天）\n\n### 个人文件夹  \n- 个人私密 · `VUBmf5KUSloPPrd9uDmc786Ynae`  \n- 飞书 aily · `JHEPfsDwHlyiD1d355Icutglnvh`  \n- workflows · `QDB8f"
+      }
+    },
+    {
+      "id": "no-business-console-errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "id": "run-terminal",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "runId": "smoke_dockb_1786437748370",
+        "parentRunId": null,
+        "rootRunId": "smoke_dockb_1786437748370",
+        "status": "done",
+        "phase": "RUNNING",
+        "terminal": "done",
+        "stopReason": null,
+        "durationMs": 34801,
+        "expertId": null,
+        "builderId": "knowme-local",
+        "summary": "已按规范完成阶段一：候选 suggest。结果如下（严格复述工具返回，无编造、无推测）：\n\n---\n\n## 文档 / 知识库候选（当前授权用户 · 近 30 天）\n\n### 个人文件夹  \n- 个人私密 · `VUBmf5KUSloPPrd9uDmc786Ynae`  \n- 飞书 aily · `JHEPfsDwHlyiD1d355Icutglnvh`  \n- workflows · `QDB8fT9FOl1TgldhbY3cn7ElnXg`  \n- tech · `Nei3ft9w0lL2bId0rhZcpcoDnhb`  \n\n### 知识库空间  \n- （暂无可见知识库空间）  \n\n### 可能需要的文件（依据个人记忆）  \n- （无匹配项；未命中飞书文档）  \n\n### 最近自己编辑的文件  \n- （近 30 天内无编辑记录）  \n\n### 最近自己阅读的文件  \n- （近 30 天内无阅读记录）  \n\n---\n\n当前无自动可读正文内容；所有候选均为元数据级路径/ID，尚未读取任何文档正文。\n\n请从上述**个人文件夹**中选择一个目标（例如「tech」或「workflows」），或提供具体关键词/文档名，我将立即执行：\n- `feishu.list_wiki_nodes`（若选知识库空间）  \n- `feishu.read_doc`（若提供 doc_token 或 URL）  \n- `feishu.search_docs`（若需按关键词检索）\n\n如需进一步筛选或导出该列表为本地清单，也可告知。",
+        "metrics": {
+          "rounds": 2,
+          "toolCalls": 1,
+          "firstTokenMs": 2601,
+          "bufferedDraftsDiscarded": 1,
+          "answerCommitMs": 34689,
+          "bufferMs": 32088,
+          "outputDiagnostics": [
+            {
+              "runId": "smoke_dockb_1786437748370",
+              "round": 1,
+              "phase": "MODEL",
+              "code": "buffered_draft_discarded",
+              "reason": "tool_round",
+              "length": 350,
+              "count": 1
+            },
+            {
+              "runId": "smoke_dockb_1786437748370",
+              "round": 2,
+              "phase": "VERIFY_CLAIMS",
+              "code": "answer_committed",
+              "hash": "a0eb319bed6c0f7f",
+              "length": 660,
+              "timingMs": 34689,
+              "count": 1
+            }
+          ],
+          "usage": {
+            "promptTokens": 3943,
+            "completionTokens": 0,
+            "totalTokens": 3943,
+            "source": "estimate"
+          },
+          "contextTokens": 3943,
+          "totalMs": 34781
+        }
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "result": {
+    "error": null,
+    "cancelled": null,
+    "sessionId": "session_1786437748404_49fb5f66",
+    "runId": "smoke_dockb_1786437748370",
+    "toolsUsed": [
+      "wiki.query",
+      "feishu.doc_kb_suggest"
+    ],
+    "toolNames": [
+      "feishu.doc_kb_suggest"
+    ],
+    "textHead": "已按规范完成阶段一：候选 suggest。结果如下（严格复述工具返回，无编造、无推测）：\n\n---\n\n## 文档 / 知识库候选（当前授权用户 · 近 30 天）\n\n### 个人文件夹  \n- 个人私密 · `VUBmf5KUSloPPrd9uDmc786Ynae`  \n- 飞书 aily · `JHEPfsDwHlyiD1d355Icutglnvh`  \n- workflows · `QDB8fT9FOl1TgldhbY3cn7ElnXg`  \n- tech · `Nei3ft9w0lL2bId0rhZcpcoDnhb`  \n\n### 知识库空间  \n- （暂无可见知识库空间）  \n\n### 可能需要的文件（依据个人记忆）  \n- （无匹配项；未命中飞书文档）  \n\n### 最近自己编辑的文件  \n- （近 30 天内无编辑记录）  \n\n### 最近自己阅读的文件  \n- （近 30 天内无阅读记录）  \n\n---\n\n当前无自动可读正文内容；所有候选均为元数据级路径/ID，尚未读取任何文档正文。\n\n请从上述**个人文件夹**中选择一个目标（例如「tech」或「workflows」），或提供具体关键词/文档名，我将立即执行：\n- `feishu.list_wiki_nodes`（若选知识库空间）  \n- `feishu.read_doc`（若提供 doc_token 或 URL）  \n- `feishu.search_docs`（若需按关键词检索）\n\n如需进一步筛选或导出该列表为本地清单，也可告知。",
+    "events": [
+      {
+        "type": "stage",
+        "stage": "stage_prepare",
+        "status": "pending",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "stage": "stage_retrieval",
+        "status": "pending",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "stage": "stage_retrieval",
+        "status": "done",
+        "text": "命中 8 条",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "stage": "stage_prepare",
+        "status": "done",
+        "text": "路由规则：dashscope_heavy",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "stage": "stage_prepare",
+        "status": "done",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "tool.started",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "tool.completed",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "grounding-status",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "stage",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "answer.committed",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "choice.ready",
+        "text": "",
+        "toolName": null
+      },
+      {
+        "type": "run.completed",
+        "text": "",
+        "toolName": null
+      }
+    ]
+  }
+}

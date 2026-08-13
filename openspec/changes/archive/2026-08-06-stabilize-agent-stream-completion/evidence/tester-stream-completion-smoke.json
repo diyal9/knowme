@@ -1,0 +1,88 @@
+{
+  "mode": "tester-fixture-contract-anti-pattern",
+  "at": "2026-08-06T08:47:03.146Z",
+  "change": "stabilize-agent-stream-completion",
+  "role": "tester",
+  "limitations": [
+    "npm start 占用 Electron 单实例锁，未并行 Playwright 真机 smoke。",
+    "无在线 LLM API Key，多 chunk / 长 Markdown 滚动以契约 + fixture 等价验证。",
+    "取消态 IPC 真机证据沿用 dev cancel-ipc-smoke.json（开发自测时无并发实例）。"
+  ],
+  "contractTests": {
+    "pass": true,
+    "stdoutTail": "✔ agent streaming tool timeline integration (9.8934ms)\nℹ tests 26\nℹ suites 3\nℹ pass 26\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 226.7924\n"
+  },
+  "smokeScope": [
+    {
+      "id": "multi-chunk-no-flash-replay",
+      "pass": true,
+      "method": "contract + source",
+      "liveLlm": "skipped-no-api-key"
+    },
+    {
+      "id": "tool-timeline-expand-then-collapse",
+      "pass": true,
+      "method": "fixture"
+    },
+    {
+      "id": "single-flush-no-replay",
+      "pass": true,
+      "method": "contract"
+    },
+    {
+      "id": "pending-review-stays-visible",
+      "pass": true,
+      "method": "fixture"
+    },
+    {
+      "id": "user-reexpand-timeline",
+      "pass": true,
+      "method": "details-semantics + source"
+    },
+    {
+      "id": "long-markdown-completion-stable",
+      "pass": true,
+      "method": "static-contract",
+      "liveLlm": "skipped-no-api-key",
+      "note": "表格尾 plain-text、完成 reconcile、近底滚动逻辑存在；未 Electron 截图验证滚动跳跃。"
+    },
+    {
+      "id": "cancel-no-ipc-clone-error",
+      "pass": true,
+      "method": "dev-electron-evidence"
+    }
+  ],
+  "antiPatterns": [
+    {
+      "id": "no-full-answer-vanish-retype",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    },
+    {
+      "id": "collapse-does-not-move-final-answer",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    },
+    {
+      "id": "patch-does-not-force-reopen",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    },
+    {
+      "id": "pending-review-not-auto-hidden",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    },
+    {
+      "id": "cancel-no-kernel-spread-over-ipc",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    },
+    {
+      "id": "no-raw-cot",
+      "pass": true,
+      "severity": "BLOCKING-if-fail"
+    }
+  ],
+  "ok": true
+}

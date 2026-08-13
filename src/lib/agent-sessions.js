@@ -19,6 +19,29 @@ const DEFAULT_TITLE = '新助手'
 const MAX_OPEN_TABS = 24
 const MAX_HISTORY = 30
 const MAX_TRACE_EVENTS = 40
+const MAX_KNOWLEDGE_REFS = 16
+
+function normalizeKnowledgeRefs(raw, max = MAX_KNOWLEDGE_REFS) {
+  const out = []
+  const seen = new Set()
+  for (const value of Array.isArray(raw) ? raw : []) {
+    const item = typeof value === 'string'
+      ? { id: value }
+      : (value && typeof value === 'object' ? value : null)
+    const itemId = String(item?.id || '').trim().slice(0, 80)
+    if (!itemId || seen.has(itemId)) continue
+    seen.add(itemId)
+    out.push({ id: itemId })
+    if (out.length >= max) break
+  }
+  return out
+}
+
+function normalizeTaskRef(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const id = String(raw.id || '').trim().slice(0, 80)
+  return id ? { id } : null
+}
 
 function newId(prefix = 's') {
   return `${prefix}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
@@ -34,6 +57,8 @@ function createSession(agentId = 'general', index = 1, runOpts = {}) {
     capabilitySnapshotId: String(runOpts.capabilitySnapshotId || '').trim(),
     snapshotPath: String(runOpts.snapshotPath || '').trim(),
     ephemeral: runOpts.ephemeral === true,
+    taskRef: normalizeTaskRef(runOpts.taskRef),
+    knowledgeRefs: normalizeKnowledgeRefs(runOpts.knowledgeRefs),
     title: DEFAULT_TITLE,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -59,7 +84,47 @@ function normalizeTraceEvent(raw) {
   if (raw.toolCallId) event.toolCallId = String(raw.toolCallId).slice(0, 160)
   if (raw.toolName) event.toolName = String(raw.toolName).slice(0, 120)
   if (Number.isFinite(duration) && duration >= 0) event.durationMs = Math.min(duration, 3_600_000)
+  if (raw.requiresApproval === true) event.requiresApproval = true
+  if (raw.draftId) event.draftId = String(raw.draftId).slice(0, 180)
+  if (raw.draftStatus) event.draftStatus = String(raw.draftStatus).slice(0, 40)
+  if (raw.evidenceStatus) event.evidenceStatus = String(raw.evidenceStatus).slice(0, 40)
+  if (Array.isArray(raw.artifactRefs)) event.artifactRefs = raw.artifactRefs.slice(0, 8)
+  if (Array.isArray(raw.sources)) event.sources = raw.sources.slice(0, 8)
+  if (raw.subRunId) event.subRunId = String(raw.subRunId).slice(0, 160)
+  if (raw.parentRunId) event.parentRunId = String(raw.parentRunId).slice(0, 160)
+  if (raw.expertId) event.expertId = String(raw.expertId).slice(0, 120)
+  if (raw.builderId) event.builderId = String(raw.builderId).slice(0, 80)
+  if (raw.phase) event.phase = String(raw.phase).slice(0, 40)
+  if (raw.stopReason) event.stopReason = String(raw.stopReason).slice(0, 500)
+  if (raw.terminal) event.terminal = String(raw.terminal).slice(0, 40)
   return event
+}
+
+const { ALLOWED: ALLOWED_ACTIONS } = require('./agent-suggestion')
+
+function normalizeStructuredUi(raw) {
+  const allowedActions = ALLOWED_ACTIONS
+  return (Array.isArray(raw) ? raw : []).slice(0, 6).map((entry, entryIndex) => {
+    const items = (Array.isArray(entry?.items) ? entry.items : []).slice(0, 8)
+      .map((item, itemIndex) => {
+        const action = String(item?.action || '')
+        if (!allowedActions.has(action)) return null
+        return {
+          id: String(item?.id || `choice_${entryIndex}_${itemIndex}`).slice(0, 120),
+          label: String(item?.label || '').slice(0, 160),
+          description: String(item?.description || '').slice(0, 500),
+          action,
+          payload: String(item?.payload || '').slice(0, 4000),
+        }
+      })
+      .filter(item => item?.label)
+    if (!items.length) return null
+    return {
+      kind: entry?.kind === 'choice' ? 'choice' : 'choice',
+      title: String(entry?.title || '').slice(0, 160),
+      items,
+    }
+  }).filter(Boolean)
 }
 
 function normalizeMessage(raw) {
@@ -70,9 +135,16 @@ function normalizeMessage(raw) {
   const trace = Array.isArray(raw.trace)
     ? raw.trace.map(normalizeTraceEvent).filter(Boolean).slice(-MAX_TRACE_EVENTS)
     : []
-  if (!text.trim() && !trace.length) return null
+  const ui = role === 'assistant' ? normalizeStructuredUi(raw.ui) : []
+  if (!text.trim() && !trace.length && !ui.length) return null
   const message = { role, text }
-  if (trace.length && role === 'assistant') message.trace = trace
+  if (role === 'assistant') {
+    if (trace.length) message.trace = trace
+    if (ui.length) message.ui = ui
+    const protocolVersion = Number(raw.protocolVersion)
+    if (Number.isInteger(protocolVersion) && protocolVersion > 0) message.protocolVersion = protocolVersion
+    if (raw.answerHash) message.answerHash = String(raw.answerHash).slice(0, 128)
+  }
   if (role === 'tool') {
     message.toolCallId = String(raw.toolCallId || '').slice(0, 160)
     message.toolName = String(raw.toolName || 'tool').slice(0, 120)
@@ -103,6 +175,8 @@ function normalizeSession(raw, fallbackIndex = 1) {
     capabilitySnapshotId: String(raw?.capabilitySnapshotId || raw?.snapshotId || '').trim(),
     snapshotPath: String(raw?.snapshotPath || '').trim(),
     ephemeral: raw?.ephemeral === true,
+    taskRef: normalizeTaskRef(raw?.taskRef),
+    knowledgeRefs: normalizeKnowledgeRefs(raw?.knowledgeRefs),
     title: title.slice(0, 80) || DEFAULT_TITLE,
     summary: String(raw?.summary || '').slice(0, 12000),
     displayTitle: String(raw?.displayTitle || '').slice(0, 80),
@@ -325,6 +399,9 @@ module.exports = {
   MAX_OPEN_TABS,
   MAX_HISTORY,
   MAX_TRACE_EVENTS,
+  MAX_KNOWLEDGE_REFS,
+  normalizeKnowledgeRefs,
+  normalizeTaskRef,
   createSession,
   normalizeMessage,
   normalizeTraceEvent,

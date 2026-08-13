@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>任务卡片三列预览</title>
+  <link rel="stylesheet" href="workbench-layout.css" />
+  <style>
+    :root { --ui: "Segoe UI", system-ui, sans-serif; --mono: ui-monospace, Consolas, monospace; }
+    body { margin:0; background:#f3f1eb; font:13px var(--ui); color:#2f322e; }
+    .frame { max-width:1080px; margin:24px auto; padding:0 16px; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <section class="wb-task-home-panel wb-task-recent">
+      <div class="wb-task-home-head">
+        <div>
+          <div class="wb-section-label">最近任务</div>
+          <h2>你的任务</h2>
+        </div>
+        <button type="button" class="wb-task-home-link">定时任务</button>
+      </div>
+      <div class="wb-task-recent-list">
+        <article class="wb-task-card">
+          <button type="button" class="wb-task-card-main">
+            <span class="wb-task-card-top">
+              <span class="wb-task-state-dot running"></span>
+              <span class="wb-task-state">进行中</span>
+            </span>
+            <span class="wb-task-name">会议纪要与待办</span>
+            <span class="wb-task-summary">进行中：整理今天的会议纪要并生成待办清单</span>
+            <span class="wb-task-intent"><span>办公伙伴</span><span class="wb-task-intent-sep">·</span><span>刚刚</span></span>
+          </button>
+          <button type="button" class="wb-task-schedule-btn">定时</button>
+        </article>
+        <article class="wb-task-card">
+          <button type="button" class="wb-task-card-main">
+            <span class="wb-task-card-top">
+              <span class="wb-task-state-dot running"></span>
+              <span class="wb-task-state">进行中</span>
+            </span>
+            <span class="wb-task-name">会议纪要与待办</span>
+            <span class="wb-task-summary">进行中：提炼决议与负责人，输出可跟进的行动项</span>
+            <span class="wb-task-intent"><span>办公伙伴</span><span class="wb-task-intent-sep">·</span><span>1 小时前</span></span>
+          </button>
+          <button type="button" class="wb-task-schedule-btn">定时</button>
+        </article>
+        <article class="wb-task-card">
+          <button type="button" class="wb-task-card-main">
+            <span class="wb-task-card-top">
+              <span class="wb-task-state-dot running"></span>
+              <span class="wb-task-state">进行中</span>
+            </span>
+            <span class="wb-task-name">会议纪要与待办</span>
+            <span class="wb-task-summary">进行中：汇总讨论结论，标出阻塞项与下一步</span>
+            <span class="wb-task-intent"><span>办公伙伴</span><span class="wb-task-intent-sep">·</span><span>1 小时前</span></span>
+          </button>
+          <button type="button" class="wb-task-schedule-btn">定时</button>
+        </article>
+      </div>
+      <button class="wb-list-toggle wb-task-recent-toggle" type="button">
+        <span class="wb-list-toggle-text">更多（17）</span>
+        <span class="wb-list-toggle-mark" aria-hidden="true"></span>
+      </button>
+    </section>
+  </div>
+</body>
+</html>

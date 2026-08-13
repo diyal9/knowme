@@ -1,0 +1,49 @@
+{
+  "at": "2026-08-07T10:47:44.363Z",
+  "ok": true,
+  "authority": "AgentRunManager+AgentRunStore",
+  "resources": {
+    "activeRuns": 0,
+    "activeLaunches": 0,
+    "waiters": 0,
+    "abortControllers": 0,
+    "cancelOperations": 0,
+    "resourceLeakCount": 0
+  },
+  "queues": {
+    "depth": 0,
+    "ready": 0,
+    "waiting": 0,
+    "blocked": 0,
+    "retry": 0
+  },
+  "metrics": {
+    "version": 1,
+    "at": "2026-08-07T10:47:44.363Z",
+    "counters": {
+      "cancel_total": 2,
+      "duplicate_cancel_total": 1
+    },
+    "gauges": {
+      "active_runs": 0,
+      "active_launches": 0,
+      "waiter_count": 0,
+      "queue_depth": 0,
+      "resource_leak_count": 0
+    },
+    "histograms": {
+      "cancel_latency_ms": {
+        "count": 2,
+        "max": 18,
+        "p50": 8,
+        "p95": 18
+      }
+    },
+    "lastEvents": {
+      "cancel_total": {
+        "at": "2026-08-07T10:47:44.362Z",
+        "outcome": "cancelled"
+      }
+    }
+  }
+}

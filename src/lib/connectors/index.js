@@ -2,6 +2,7 @@
 
 const store = require('./store')
 const normalize = require('./normalize')
+const { createUnifiedConnectorStore } = require('./unified-store')
 const { probeFeishuStatus } = require('./feishu-status')
 const { planFeishuScopeRequest, summarizeFeishuCapabilityReadiness } = require('./feishu-auth')
 
@@ -12,9 +13,22 @@ function createConnectorsApi(deps = {}) {
   const probeFeishu = typeof deps.probeFeishu === 'function'
     ? deps.probeFeishu
     : probeFeishuStatus
+  const connectorStore = deps.connectorStore || createUnifiedConnectorStore({
+    getUserData,
+    mode: deps.storeMode,
+  })
+  let migrated = false
+
+  function ensureMigrated() {
+    if (!migrated) {
+      connectorStore.migrateLegacy()
+      migrated = true
+    }
+  }
 
   function listConnectors() {
-    const connectors = store.loadConnectors(getUserData())
+    ensureMigrated()
+    const connectors = connectorStore.loadConnectors()
     return {
       ok: true,
       connectors: connectors.map((c) => normalize.publicConnectorView(c)),
@@ -23,7 +37,8 @@ function createConnectorsApi(deps = {}) {
   }
 
   async function getConnectorStatus(connectorId) {
-    const connectors = store.loadConnectors(getUserData())
+    ensureMigrated()
+    const connectors = connectorStore.loadConnectors()
     const conn = connectors.find((c) => c.id === String(connectorId || '').trim())
     if (!conn) return { ok: false, code: 'not_found', message: '连接器不存在' }
 
@@ -83,12 +98,15 @@ function createConnectorsApi(deps = {}) {
   }
 
   function upsertConnector(patch) {
-    const list = store.upsertConnector(getUserData(), patch)
+    ensureMigrated()
+    const list = connectorStore.upsertConnector(patch)
+    if (!Array.isArray(list)) return list
     return { ok: true, connectors: list.map((c) => normalize.publicConnectorView(c)) }
   }
 
   function setAllowlist(connectorId, allowlist) {
-    const result = store.setAllowlist(getUserData(), connectorId, allowlist)
+    ensureMigrated()
+    const result = connectorStore.setAllowlist(connectorId, allowlist)
     return {
       ...result,
       connectors: (result.connectors || []).map((c) => normalize.publicConnectorView(c)),
@@ -96,7 +114,8 @@ function createConnectorsApi(deps = {}) {
   }
 
   function getProjectedAllowlist() {
-    const connectors = store.loadConnectors(getUserData())
+    ensureMigrated()
+    const connectors = connectorStore.loadConnectors()
     const names = []
     for (const conn of connectors) {
       names.push(...normalize.projectedToolNames(conn))
@@ -109,14 +128,22 @@ function createConnectorsApi(deps = {}) {
     getConnectorStatus,
     upsertConnector,
     setAllowlist,
+    setEnabled: (id, enabled) => connectorStore.setEnabled(id, enabled),
+    removeConnector: (id) => connectorStore.removeConnector(id),
+    migrateLegacy: () => connectorStore.migrateLegacy(),
     getProjectedAllowlist,
-    loadConnectors: () => store.loadConnectors(getUserData()),
+    loadConnectors: () => {
+      ensureMigrated()
+      return connectorStore.loadConnectors()
+    },
+    connectorStore,
   }
 }
 
 module.exports = {
   createConnectorsApi,
   store,
+  createUnifiedConnectorStore,
   normalize,
   probeFeishuStatus,
 }

@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "style": "knowme-flat-vector-v1",
+  "sizePx": 256,
+  "fallback": "other/partner",
+  "note": "Source of truth mirrored to src/assets/avatars/ for runtime packaging.",
+  "presets": [
+    { "id": "game/producer", "file": "game/producer.png", "label": "游戏制作" },
+    { "id": "game/planner", "file": "game/planner.png", "label": "产品策划" },
+    { "id": "game/designer", "file": "game/designer.png", "label": "游戏策划" },
+    { "id": "game/client", "file": "game/client.png", "label": "客户端工程师" },
+    { "id": "game/server", "file": "game/server.png", "label": "服务端工程师" },
+    { "id": "game/engineer", "file": "game/engineer.png", "label": "游戏研发" },
+    { "id": "game/ui", "file": "game/ui.png", "label": "UI 设计" },
+    { "id": "game/vfx", "file": "game/vfx.png", "label": "特效" },
+    { "id": "game/qa", "file": "game/qa.png", "label": "游戏测试" },
+    { "id": "office/writer", "file": "office/writer.png", "label": "办公写作" },
+    { "id": "office/collaborator", "file": "office/collaborator.png", "label": "办公协作" },
+    { "id": "office/knowledge", "file": "office/knowledge.png", "label": "知识管家" },
+    { "id": "other/partner", "file": "other/partner.png", "label": "通用搭档" }
+  ]
+}

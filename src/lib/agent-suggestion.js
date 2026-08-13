@@ -269,6 +269,106 @@
     return out.trim()
   }
 
+  function isThinkingProtocolData(data, lang = '') {
+    const langTag = String(lang || '').toLowerCase()
+    if (/(thinking|reasoning|analysis|thought|思考|推理)/i.test(langTag)) return true
+    if (!data || typeof data !== 'object') return false
+    if (Array.isArray(data)) return data.some(item => isThinkingProtocolData(item))
+    const typeLike = `${data.type || ''} ${data.kind || ''} ${data.stage || ''} ${data.category || ''}`
+    if (/(thinking|reasoning|analysis|thought|思考|推理|分析)/i.test(typeLike)) return true
+    const keys = Object.keys(data).map(key => key.toLowerCase())
+    const strongMarkers = new Set([
+      'thinking', 'reasoning', 'thought', 'thoughts', 'chain_of_thought', 'internal_reasoning',
+    ])
+    if (keys.some(key => strongMarkers.has(key))) return true
+    const markers = new Set([
+      'thinking', 'reasoning', 'analysis', 'thought', 'thoughts',
+      'steps', 'assumptions', 'risks', 'observations', 'next_action', 'nextstep',
+    ])
+    return keys.reduce((count, key) => count + (markers.has(key) ? 1 : 0), 0) >= 2
+  }
+
+  function stripThinkingProtocolBlocks(text) {
+    const src = String(text || '')
+    let out = src.replace(/```([a-zA-Z0-9_:+\-]*)[ \t]*\r?\n([\s\S]*?)```/g, (block, lang, inner) => {
+      let data = null
+      try { data = JSON.parse(String(inner || '').trim()) } catch { /* explicit thinking tags still strip */ }
+      if (!isThinkingProtocolData(data, lang)) return block
+      return ''
+    })
+
+    const incomplete = /```(?:thinking|reasoning|analysis|thought|思考|推理)[^\r\n]*\r?\n?[\s\S]*$/i
+    out = out.replace(incomplete, '')
+
+    const trimmedEnd = out.replace(/\s+$/, '')
+    const candidates = []
+    for (let i = 0; i < trimmedEnd.length; i++) {
+      const ch = trimmedEnd[i]
+      if ((ch === '{' || ch === '[') && (i === 0 || trimmedEnd[i - 1] === '\n')) {
+        candidates.push(i)
+      }
+    }
+    for (let i = candidates.length - 1; i >= 0; i--) {
+      const start = candidates[i]
+      let data = null
+      const candidate = trimmedEnd.slice(start)
+      try { data = JSON.parse(candidate) } catch {
+        const hasStrongKey = /"(?:thinking|reasoning|thought|thoughts|chain_of_thought|internal_reasoning)"\s*:/i.test(candidate)
+        const hasTypedMarker = /"(?:type|kind|stage|category)"\s*:\s*"(?:thinking|reasoning|analysis|thought|思考|推理|分析)/i.test(candidate)
+        if (!hasStrongKey && !hasTypedMarker) continue
+        out = stripRange(trimmedEnd, start, trimmedEnd.length)
+        break
+      }
+      if (!isThinkingProtocolData(data)) continue
+      out = stripRange(trimmedEnd, start, trimmedEnd.length)
+      break
+    }
+
+    return out.replace(/\n{3,}/g, '\n\n').trim()
+  }
+
+  function stripMalformedSuggestionBlocks(text) {
+    let out = String(text || '')
+    if (!out) return out
+
+    if (hasIncompleteSuggestionFence(out)) {
+      const parsed = parseSuggestionBlock(out)
+      if (parsed.bar) {
+        out = parsed.bodyWithoutBlock
+      } else {
+        const lower = out.toLowerCase()
+        const marker = '```suggestion'
+        const start = lower.indexOf(marker)
+        if (start >= 0) {
+          let stripStart = start
+          if (stripStart > 0 && (out[stripStart - 1] === '"' || out[stripStart - 1] === "'")) {
+            const prev = out[stripStart - 2]
+            if (stripStart - 1 === 0 || prev === '\n' || prev === '\r' || /\s/.test(prev || '')) {
+              stripStart -= 1
+            }
+          }
+          out = `${out.slice(0, stripStart)}`.replace(/\n{3,}/g, '\n\n').trim()
+        }
+      }
+    }
+
+    const fencedInvalid = /```suggestion[\s\S]*?```/gi
+    out = out.replace(fencedInvalid, (block) => {
+      const bar = parseSuggestionBlock(block).bar
+      if (bar) return ''
+      return ''
+    })
+
+    return out.replace(/\n{3,}/g, '\n\n').trim()
+  }
+
+  /** Strip thinking/reasoning protocol and malformed suggestion fences for display. */
+  function stripDisplayProtocolText(text) {
+    let body = stripMalformedSuggestionBlocks(String(text || ''))
+    body = stripThinkingProtocolBlocks(body)
+    return body.replace(/\n{3,}/g, '\n\n').trim()
+  }
+
   return {
     ALLOWED,
     MAX_ITEMS,
@@ -277,5 +377,8 @@
     resolveOpenTarget,
     payloadNeedsUserEdit,
     applyUserInputToPayload,
+    stripDisplayProtocolText,
+    stripThinkingProtocolBlocks,
+    stripMalformedSuggestionBlocks,
   }
 })

@@ -1,0 +1,73 @@
+{
+  "gate": "Story 完成门禁",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    }
+  ],
+  "soft": [
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\align-workbench-workflow-catalog\\qa-plan.md",
+      "level": "advisory",
+      "change": "align-workbench-workflow-catalog"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\align-workbench-workflow-catalog\\code-review.md",
+      "level": "advisory",
+      "change": "align-workbench-workflow-catalog"
+    },
+    {
+      "id": "SMOKE-SCOPE-EMPTY",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\feishu-connection-empty-state\\qa-plan.md",
+      "level": "advisory",
+      "change": "feishu-connection-empty-state"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\feishu-connection-empty-state\\code-review.md",
+      "level": "advisory",
+      "change": "feishu-connection-empty-state"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\launch-dialog-progressive-disclosure\\code-review.md",
+      "level": "advisory",
+      "change": "launch-dialog-progressive-disclosure"
+    },
+    {
+      "id": "QA-PLAN-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\load-agent-experts-from-daemon\\qa-plan.md",
+      "level": "advisory",
+      "change": "load-agent-experts-from-daemon"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\load-agent-experts-from-daemon\\code-review.md",
+      "level": "advisory",
+      "change": "load-agent-experts-from-daemon"
+    },
+    {
+      "id": "CODE-REVIEW-MISSING",
+      "path": "D:\\aispace\\sticky-notes\\openspec\\changes\\polish-link-preview-toolbar\\code-review.md",
+      "level": "advisory",
+      "change": "polish-link-preview-toolbar"
+    }
+  ],
+  "evidence": {
+    "test_report": "openspec/changes/<name>/evidence/test-report.md",
+    "screenshots": "openspec/changes/<name>/evidence/screenshots/"
+  }
+}

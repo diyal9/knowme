@@ -1,0 +1,7 @@
+{
+  "id": "producer",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["game-production"],
+  "connectors": []
+}

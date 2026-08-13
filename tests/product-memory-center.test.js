@@ -5,6 +5,7 @@ const path = require('path');
 const os = require('os');
 
 const memory = require('../src/lib/product-memory');
+const { readMainIpcBundle } = require('./helpers/main-ipc-bundle');
 
 const TMP = path.join(os.tmpdir(), `knowme-product-memory-${Date.now()}`);
 
@@ -111,10 +112,7 @@ describe('personal memory center', () => {
   });
 
   it('does not retain raw AI prompts in the capture summary', () => {
-    const main = fs.readFileSync(
-      path.join(__dirname, '..', 'src', 'main.js'),
-      'utf8'
-    );
+    const main = readMainIpcBundle()
     assert.ok(main.includes("summary: '完成一次 AI 对话'"));
     assert.ok(!main.includes('summary: `AI 生成：${prompt.slice'));
   });

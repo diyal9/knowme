@@ -1,0 +1,233 @@
+{
+  "at": "2026-08-10T09:39:23.951Z",
+  "ok": false,
+  "consoleErrors": [],
+  "checks": [
+    {
+      "id": "p0-tune-hidden-without-node",
+      "ok": true,
+      "tuneLink": false,
+      "inspectorText": "点击步骤中的 Agent，设置本步骤目标与角色。"
+    },
+    {
+      "id": "p0-studio-has-agent-candidates",
+      "ok": true,
+      "addCount": 6
+    },
+    {
+      "id": "p0-tune-visible-with-node",
+      "ok": true,
+      "tuneLink": true,
+      "tuneText": "前往能力界面调优 Agent",
+      "agentId": "artbundle-expert"
+    },
+    {
+      "id": "p0-tune-label-correct",
+      "ok": true,
+      "tuneLink": true,
+      "tuneText": "前往能力界面调优 Agent",
+      "agentId": "artbundle-expert"
+    },
+    {
+      "id": "studio-back-to-shelf",
+      "ok": true
+    },
+    {
+      "id": "p0-legacy-restore-no-crash",
+      "ok": true,
+      "errors": [],
+      "before": 4,
+      "shelfVisible": true,
+      "tabCount": 0,
+      "cards": 4,
+      "gridEmpty": "会议资料 → 纪要与待办\n        团队\n      \n      会议纪要、决策与待办\n      \n        需要会议资料\n        步骤"
+    },
+    {
+      "id": "p0-legacy-restore-shelf-visible",
+      "ok": true,
+      "errors": [],
+      "before": 4,
+      "shelfVisible": true,
+      "tabCount": 0,
+      "cards": 4,
+      "gridEmpty": "会议资料 → 纪要与待办\n        团队\n      \n      会议纪要、决策与待办\n      \n        需要会议资料\n        步骤"
+    },
+    {
+      "id": "p0-legacy-no-mode-tabs",
+      "ok": true,
+      "errors": [],
+      "before": 4,
+      "shelfVisible": true,
+      "tabCount": 0,
+      "cards": 4,
+      "gridEmpty": "会议资料 → 纪要与待办\n        团队\n      \n      会议纪要、决策与待办\n      \n        需要会议资料\n        步骤"
+    },
+    {
+      "id": "p0-legacy-shelf-not-blank",
+      "ok": true,
+      "errors": [],
+      "before": 4,
+      "shelfVisible": true,
+      "tabCount": 0,
+      "cards": 4,
+      "gridEmpty": "会议资料 → 纪要与待办\n        团队\n      \n      会议纪要、决策与待办\n      \n        需要会议资料\n        步骤"
+    },
+    {
+      "id": "p0-empty-state-honest",
+      "ok": true,
+      "hasSearch": true,
+      "emptyVisible": true,
+      "emptyCopy": "没有找到匹配能力",
+      "bodyCopy": "还没有符合条件的专家。你可以调整筛选，或添加自己的专家。",
+      "ctaVisible": true,
+      "ctaText": "添加能力"
+    },
+    {
+      "id": "p0-empty-cta-clickable",
+      "ok": true,
+      "hasSearch": true,
+      "emptyVisible": true,
+      "emptyCopy": "没有找到匹配能力",
+      "bodyCopy": "还没有符合条件的专家。你可以调整筛选，或添加自己的专家。",
+      "ctaVisible": true,
+      "ctaText": "添加能力"
+    },
+    {
+      "id": "p0-empty-installed-filter-honest",
+      "ok": false,
+      "tried": true,
+      "emptyVisible": false,
+      "emptyCopy": "",
+      "addExpertCta": false
+    },
+    {
+      "id": "office-partner-copy-ioep",
+      "ok": true,
+      "open": true,
+      "title": "复制为自建专家",
+      "name": "办公伙伴（我的）"
+    },
+    {
+      "id": "p0-e2e-expert-saved-in-hub",
+      "ok": false,
+      "testExpertId": "qa-copy-n1ip1s",
+      "savedInHub": 0
+    },
+    {
+      "id": "p0-e2e-agent-in-candidates",
+      "ok": true,
+      "testExpertId": "qa-copy-n1ip1s",
+      "listed": true,
+      "ids": [
+        "artbundle-expert",
+        "office-partner",
+        "qa-copy-n1fa1g",
+        "qa-copy-n1ip1s",
+        "th-bi-b34eeabc8d",
+        "th-config-b5e2031ece",
+        "ui-expert"
+      ]
+    },
+    {
+      "id": "p0-e2e-workflow-on-shelf",
+      "ok": true,
+      "onShelf": true,
+      "newCardAdded": true,
+      "mineCount": 2,
+      "provenance": "我的",
+      "shelfActive": true,
+      "toastHint": "已保存到「我的」工作流",
+      "agentId": "qa-copy-n1ip1s"
+    },
+    {
+      "id": "p0-e2e-shelf-mine-tag",
+      "ok": true,
+      "onShelf": true,
+      "newCardAdded": true,
+      "mineCount": 2,
+      "provenance": "我的",
+      "shelfActive": true,
+      "toastHint": "已保存到「我的」工作流",
+      "agentId": "qa-copy-n1ip1s"
+    },
+    {
+      "id": "p0-assistant-no-crud-buttons",
+      "ok": true,
+      "count": 10,
+      "ids": [
+        "general",
+        "steward",
+        "writing",
+        "coding",
+        "artbundle-expert",
+        "office-partner",
+        "qa-copy-n1fa1g",
+        "th-bi-b34eeabc8d",
+        "th-config-b5e2031ece",
+        "ui-expert"
+      ],
+      "hasCrud": false,
+      "hasAddButton": false
+    },
+    {
+      "id": "p0-assistant-has-experts",
+      "ok": true,
+      "count": 10,
+      "ids": [
+        "general",
+        "steward",
+        "writing",
+        "coding",
+        "artbundle-expert",
+        "office-partner",
+        "qa-copy-n1fa1g",
+        "th-bi-b34eeabc8d",
+        "th-config-b5e2031ece",
+        "ui-expert"
+      ],
+      "hasCrud": false,
+      "hasAddButton": false
+    },
+    {
+      "id": "p0-assistant-hub-id-overlap",
+      "ok": true,
+      "hubCount": 5,
+      "assistantCount": 10,
+      "overlap": [
+        "artbundle-expert",
+        "office-partner",
+        "th-bi-b34eeabc8d",
+        "th-config-b5e2031ece",
+        "ui-expert"
+      ]
+    },
+    {
+      "id": "anti-no-wb-agent-form",
+      "ok": true,
+      "agentForm": false,
+      "modeTabs": 0,
+      "studioManage": false,
+      "studioSaveAgent": false,
+      "inspectorSkillField": false
+    },
+    {
+      "id": "anti-no-studio-agent-body",
+      "ok": true,
+      "agentForm": false,
+      "modeTabs": 0,
+      "studioManage": false,
+      "studioSaveAgent": false,
+      "inspectorSkillField": false
+    },
+    {
+      "id": "regression-narrow-no-overflow",
+      "ok": true,
+      "overflow": 0
+    },
+    {
+      "id": "console-error-free",
+      "ok": true,
+      "errors": []
+    }
+  ]
+}

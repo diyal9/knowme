@@ -1,0 +1,233 @@
+{
+  "generatedAt": "2026-08-06T08:59:34.648Z",
+  "pass": true,
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-expert-loop-lS0xZL",
+  "checks": [
+    {
+      "id": "available-cta",
+      "pass": true,
+      "detail": "安装并开始"
+    },
+    {
+      "id": "hub-closed",
+      "pass": true
+    },
+    {
+      "id": "expert-identity-visible",
+      "pass": true,
+      "detail": "office-partner"
+    },
+    {
+      "id": "degraded-bindings-visible",
+      "pass": true,
+      "detail": 2
+    },
+    {
+      "id": "configure-entry-visible",
+      "pass": true
+    },
+    {
+      "id": "composer-focused",
+      "pass": true,
+      "detail": {
+        "id": "agentInput",
+        "tag": "TEXTAREA",
+        "activeClass": "",
+        "inputDisabled": false,
+        "inputRect": {
+          "width": 902.4000244140625,
+          "height": 84
+        },
+        "inputDisplay": "block",
+        "inputVisibility": "visible"
+      }
+    },
+    {
+      "id": "durable-expert-session",
+      "pass": true,
+      "detail": {
+        "sessionId": "session_1786006769935_e10aae06",
+        "detail": {
+          "ok": true,
+          "session": {
+            "id": "session_1786006769935_e10aae06",
+            "agentId": "general",
+            "expertId": "office-partner",
+            "capabilitySnapshotId": "session_1786006769935_e10aae06:office-partner",
+            "snapshotPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-expert-loop-lS0xZL\\capabilities\\snapshots\\session_1786006769935_e10aae06\\manifest.json",
+            "ephemeral": false,
+            "title": "新助手",
+            "createdAt": "2026-08-06T08:59:29.936Z",
+            "updatedAt": "2026-08-06T08:59:29.936Z",
+            "summary": "",
+            "messages": [],
+            "pinned": false,
+            "run": {
+              "goal": "",
+              "role": "general",
+              "status": "active",
+              "toolsUsed": [],
+              "steps": [],
+              "artifacts": [],
+              "applyLog": []
+            },
+            "displayTitle": "",
+            "labels": [],
+            "grounding": "",
+            "expertName": "office-partner",
+            "expert": {
+              "id": "office-partner",
+              "name": "office-partner",
+              "description": "日常办公多能力专家，擅长写作润色与飞书上下文协作",
+              "avatar": "office",
+              "bindings": {
+                "skills": [
+                  "writing-polish"
+                ],
+                "connectors": [
+                  "feishu"
+                ]
+              },
+              "readiness": {
+                "state": "limited",
+                "items": [
+                  {
+                    "id": "writing-polish",
+                    "kind": "skill",
+                    "status": "limited",
+                    "reason": "技能未安装或已停用"
+                  },
+                  {
+                    "id": "feishu",
+                    "kind": "connector",
+                    "status": "limited",
+                    "reason": "连接器未安装或已停用"
+                  }
+                ],
+                "issues": [
+                  {
+                    "code": "unavailable_skill",
+                    "dependency": {
+                      "id": "writing-polish",
+                      "kind": "skill"
+                    },
+                    "message": "技能未安装或已停用: writing-polish"
+                  },
+                  {
+                    "code": "unavailable_connector",
+                    "dependency": {
+                      "id": "feishu",
+                      "kind": "connector"
+                    },
+                    "message": "连接器未安装或已停用: feishu"
+                  }
+                ]
+              },
+              "source": "snapshot"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "snapshot-survives-uninstall",
+      "pass": true,
+      "detail": {
+        "removed": {
+          "ok": true,
+          "removed": true
+        },
+        "detail": {
+          "ok": true,
+          "session": {
+            "id": "session_1786006769935_e10aae06",
+            "agentId": "general",
+            "expertId": "office-partner",
+            "capabilitySnapshotId": "session_1786006769935_e10aae06:office-partner",
+            "snapshotPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-expert-loop-lS0xZL\\capabilities\\snapshots\\session_1786006769935_e10aae06\\manifest.json",
+            "ephemeral": false,
+            "title": "新助手",
+            "createdAt": "2026-08-06T08:59:29.936Z",
+            "updatedAt": "2026-08-06T08:59:29.936Z",
+            "summary": "",
+            "messages": [],
+            "pinned": false,
+            "run": {
+              "goal": "",
+              "role": "general",
+              "status": "active",
+              "toolsUsed": [],
+              "steps": [],
+              "artifacts": [],
+              "applyLog": []
+            },
+            "displayTitle": "",
+            "labels": [],
+            "grounding": "",
+            "expertName": "office-partner",
+            "expert": {
+              "id": "office-partner",
+              "name": "office-partner",
+              "description": "日常办公多能力专家，擅长写作润色与飞书上下文协作",
+              "avatar": "office",
+              "bindings": {
+                "skills": [
+                  "writing-polish"
+                ],
+                "connectors": [
+                  "feishu"
+                ]
+              },
+              "readiness": {
+                "state": "limited",
+                "items": [
+                  {
+                    "id": "writing-polish",
+                    "kind": "skill",
+                    "status": "limited",
+                    "reason": "技能未安装或已停用"
+                  },
+                  {
+                    "id": "feishu",
+                    "kind": "connector",
+                    "status": "limited",
+                    "reason": "连接器未安装或已停用"
+                  }
+                ],
+                "issues": [
+                  {
+                    "code": "unavailable_skill",
+                    "dependency": {
+                      "id": "writing-polish",
+                      "kind": "skill"
+                    },
+                    "message": "技能未安装或已停用: writing-polish"
+                  },
+                  {
+                    "code": "unavailable_connector",
+                    "dependency": {
+                      "id": "feishu",
+                      "kind": "connector"
+                    },
+                    "message": "连接器未安装或已停用: feishu"
+                  }
+                ]
+              },
+              "source": "snapshot"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "restart-restores-expert-snapshot",
+      "pass": true,
+      "detail": "office-partner"
+    },
+    {
+      "id": "renderer-console-errors",
+      "pass": true,
+      "detail": []
+    }
+  ]
+}

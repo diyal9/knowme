@@ -9,6 +9,8 @@ window.WorkspaceAgent = (function () {
   const aiInput = document.getElementById('agentInput')
   const aiSend = document.getElementById('agentSend')
   const aiComposer = document.getElementById('agentComposer')
+  const agentCol = document.getElementById('agentCol')
+  const agentFoot = aiComposer?.closest('.agent-col-foot') || null
   const aiQuickBtn = document.getElementById('agentQuickBtn')
   const aiQuickMenu = document.getElementById('agentQuickMenu')
   const slashMenu = document.getElementById('agentSlashMenu')
@@ -24,7 +26,13 @@ window.WorkspaceAgent = (function () {
   const aiModelUsage = document.getElementById('agentModelUsage')
   const aiModelMenu = document.getElementById('agentModelMenu')
   const aiContextPanel = document.getElementById('agentContextPanel')
+  const aiKnowledgeWrap = document.getElementById('agentSessionKnowledgeWrap')
+  const aiKnowledgeBtn = document.getElementById('agentSessionKnowledgeBtn')
+  const aiKnowledgeLabel = document.getElementById('agentSessionKnowledgeLabel')
+  const aiKnowledgeMenu = document.getElementById('agentSessionKnowledgeMenu')
   const sessionTabsEl = document.getElementById('agentSessionTabs')
+  const sessionTabScrollEl = sessionTabsEl?.closest('.agent-tab-scroll')
+    || document.querySelector('.agent-tab-scroll')
   const btnHistory = document.getElementById('agentHistoryBtn')
   const btnMore = document.getElementById('agentMoreBtn')
   const btnExpert = document.getElementById('agentExpertBtn')
@@ -32,8 +40,10 @@ window.WorkspaceAgent = (function () {
   const historyPop = document.getElementById('agentHistoryPop')
   const morePop = document.getElementById('agentMorePop')
   const tabCtxPop = document.getElementById('agentTabCtxPop')
-  const quickCatsHost = document.getElementById('agentQuickCats')
+  const quickSearchInput = document.getElementById('agentQuickSearch')
   const quickItemsHost = document.getElementById('agentQuickItems')
+  const quickSummary = document.getElementById('agentQuickSummary')
+  const quickEmpty = document.getElementById('agentQuickEmpty')
   const feishuLinkMenu = document.getElementById('feishuLinkMenu')
   const agentImageViewer = document.getElementById('agentImageViewer')
   const agentImageViewerImg = document.getElementById('agentImageViewerImg')
@@ -41,8 +51,14 @@ window.WorkspaceAgent = (function () {
 
   let chatHistory = []
   let runArtifacts = []
+  let daemonProcessCache = null
   let agents = []
   let catalogExperts = []
+  let knowledgeProviders = []
+  let activeKnowledgeProviderId = ''
+  let knowledgeCatalogState = 'idle'
+  let knowledgeUpdatePending = false
+  let knowledgeMenuOpen = false
   let sessions = []
   let openSessionIds = []
   let activeAgentId = 'general'
@@ -51,9 +67,9 @@ window.WorkspaceAgent = (function () {
   let slashOpen = false
   let slashActive = 0
   let slashQuery = ''
-  let quickCatActive = 0
   let quickActive = 0
-  let quickFocus = 'items'
+  let quickCommands = []
+  let quickQuery = ''
   let atOpen = false
   let atActive = 0
   let atQuery = ''
@@ -66,9 +82,13 @@ window.WorkspaceAgent = (function () {
   let surfaceMode = 'agent'
   let workbenchTaskContext = null
   let sessionsLoaded = false
+  let sessionsLoadPromise = null
   let surfaceSwitchNonce = 0
   let activeRunId = ''
+  /** sessionId → 生成中 chatHistory 数组引用；切面后仍接收流事件，切回时优先恢复 */
+  const inflightChatBySession = new Map()
   let runPermissionPrompted = new Set()
+  const runActionState = new Map()
 
   const RUN_PERMISSION_LABELS = {
     network: 'network（联网）',
@@ -99,6 +119,10 @@ window.WorkspaceAgent = (function () {
     } catch { /* ignore */ }
   }
   let thinkingTicker = 0
+  /** 对话 stick-to-bottom：发送后强制跟随；用户上滑则解除，滚回近底再恢复 */
+  let chatStickToBottom = true
+  let chatProgrammaticScroll = false
+  const CHAT_NEAR_BOTTOM_PX = 96
   const SURFACE_UI_KEY = 'knowme.agent.surfaceUi.v2'
   const LEGACY_SURFACE_SESSION_KEY = 'knowme.agent.surfaceSessions.v1'
   const WORKBENCH_SESSION_GOAL = '当前工作'
@@ -142,6 +166,121 @@ window.WorkspaceAgent = (function () {
   let pendingSuggestionPayload = null
   /** 所有对话推荐、快捷入口和能力入口的统一执行器 */
   let actionDispatcher = null
+  let packEmptyGroups = []
+  let skillTaskCatalog = { tasks: [], issues: [], revision: '' }
+  let skillTaskMap = new Map()
+  const skillTaskUi = window.SkillTaskUi || {}
+
+  async function refreshSkillTaskCatalog() {
+    const api = window.knowme?.skill?.tasks || window.api?.skillTaskList
+    if (!api) return false
+    try {
+      const res = await api()
+      if (res?.ok === false) return false
+      const tasks = Array.isArray(res?.tasks) ? res.tasks : []
+      skillTaskCatalog = {
+        tasks,
+        issues: Array.isArray(res?.issues) ? res.issues : [],
+        revision: String(res?.revision || ''),
+      }
+      skillTaskMap = skillTaskUi.buildTaskMap
+        ? skillTaskUi.buildTaskMap(tasks)
+        : new Map(tasks.filter(t => t?.id).map(t => [t.id, t]))
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  async function refreshPackEmptyGroups() {
+    try {
+      const api = window.knowme?.capabilityPackEmptyState || window.api?.capabilityPackEmptyState
+      if (!api) { packEmptyGroups = [] }
+      else {
+        const res = await api()
+        packEmptyGroups = Array.isArray(res?.groups) ? res.groups : []
+      }
+    } catch {
+      packEmptyGroups = []
+    }
+    await refreshSkillTaskCatalog()
+  }
+
+  function emptyShortcutIcon(taskId = '') {
+    const id = String(taskId || '').toLowerCase()
+    if (/meeting|summary|writing|draft|polish|requirement|document/.test(id)) return 'note'
+    if (/priority|schedule|workflow|release|implement/.test(id)) return 'automation'
+    if (/doc|knowledge|wiki|search|explain/.test(id)) return 'bookOpen'
+    if (/chat|message|related/.test(id)) return 'chat'
+    if (/code|debug|fix|review/.test(id)) return 'code'
+    if (/skill|capability/.test(id)) return 'capabilityStack'
+    return 'optimize'
+  }
+
+  function renderEmptyActionCard(card, attributes = '') {
+    const id = card?.id || card?.sceneId || ''
+    return `<button type="button" class="agent-empty-act" data-auto-send="1" ${attributes}>
+      <span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="${emptyShortcutIcon(id)}"></span></span>
+      <span class="agent-empty-act-copy"><strong>${escHtml(card?.title || '开始任务')}</strong><span>${escHtml(card?.subtitle || '说明你的目标，KnowMe 会继续推进')}</span></span>
+    </button>`
+  }
+
+  const DEFAULT_LAUNCH_INTRO = '把你的问题或任务交给 KnowMe，它来帮你完成。'
+
+  function renderLaunchIntroHtml(sectionMeta = '', intro = '') {
+    const copy = String(intro || '').trim() || DEFAULT_LAUNCH_INTRO
+    return `<div class="agent-launch-intro">
+      <div class="agent-empty-sub">${escHtml(copy)}</div>
+    </div>
+    <div class="agent-home-composer-mount" data-agent-composer-mount></div>
+    <div class="agent-launch-section">
+      <span>开始使用</span>
+      ${sectionMeta ? `<small>${escHtml(sectionMeta)}</small>` : ''}
+    </div>`
+  }
+
+  function renderPackEmptyStateHtml() {
+    if (!packEmptyGroups.length) return ''
+    return packEmptyGroups.map(group => {
+      const cards = skillTaskUi.resolvePackEmptyCards
+        ? skillTaskUi.resolvePackEmptyCards(group, skillTaskMap)
+        : (group.scenes || []).map(card => ({
+            sceneId: card.id,
+            title: card.title,
+            subtitle: card.subtitle,
+            prompt: card.prompt,
+            dynamic: false,
+          }))
+      const home = skillTaskUi.partitionPackHomeCards
+        ? skillTaskUi.partitionPackHomeCards(cards, 4)
+        : { recommendations: cards.slice(0, 4), workflow: null, overflow: cards.slice(4) }
+      const renderCardAttributes = card => card.dynamic
+        ? `data-pack-id="${escHtml(group.packId)}" data-shortcut="${escHtml(card.id)}"`
+        : `data-pack-id="${escHtml(group.packId)}" data-pack-scene="${escHtml(card.sceneId || card.id)}" data-prompt="${escHtml(card.prompt || '')}"`
+      const cardsHtml = home.recommendations
+        .map(card => renderEmptyActionCard(card, renderCardAttributes(card)))
+        .join('')
+      const workflowHtml = home.workflow
+        ? `<button type="button" class="agent-empty-act agent-workflow-entry" data-auto-send="1"
+            ${renderCardAttributes(home.workflow)}>
+            <span class="agent-workflow-mark" aria-hidden="true"><span class="agent-workflow-glyph">↗</span></span>
+            <span class="agent-workflow-copy">
+              <small>启动工作流</small>
+              <strong>${escHtml(home.workflow.title)}</strong>
+              <span>${escHtml(home.workflow.subtitle)}</span>
+            </span>
+            <span class="ico agent-workflow-arrow" data-icon="chevronRight" aria-hidden="true"></span>
+          </button>`
+        : ''
+      const kicker = String(group.kicker || '').trim()
+      const ariaLabel = kicker ? `${kicker}任务入口` : `${group.hero || '工作伙伴'}任务入口`
+      return `<div class="agent-empty-tips agent-empty-home agent-empty-pack" aria-label="${escHtml(ariaLabel)}" data-pack-id="${escHtml(group.packId)}">
+        ${renderLaunchIntroHtml(kicker || group.hero || 'KnowMe 工作伙伴')}
+        <div class="agent-empty-actions">${cardsHtml}</div>
+        ${workflowHtml}
+      </div>`
+    }).join('')
+  }
   /** @type {null | ((title?: string) => void)} */
   let openKnowledgePanel = null
   let workSurface = null
@@ -189,6 +328,54 @@ window.WorkspaceAgent = (function () {
     return 'chat'
   }
 
+  /** 内置模式与专家会话共用的身份 payload，供预设头像解析 */
+  function agentMarkPayload(agentId, sessionMeta = null) {
+    const expertId = String(sessionMeta?.expertId || '').trim()
+    if (expertId) {
+      const catalog = (Array.isArray(catalogExperts) ? catalogExperts : [])
+        .find(item => String(item.id || '') === expertId) || {}
+      const expert = sessionMeta.expert || {}
+      return {
+        id: expertId,
+        name: sessionMeta.expertName || expert.name || catalog.name || expertId,
+        description: expert.description || catalog.description || '',
+        avatar: expert.avatar || expert.persona?.avatar || catalog.avatar || '',
+        skills: expert.bindings?.skills || catalog.skills,
+      }
+    }
+    const id = String(agentId || sessionMeta?.agentId || '').trim()
+    if (id === 'writing') return { id, name: '写作专家', description: '写作润色与办公文档', avatar: 'office/writer' }
+    if (id === 'steward') return { id, name: '知识管家', description: '知识库与 Wiki', avatar: 'office/knowledge' }
+    if (id === 'coding') return { id, name: '研发助手', description: '研发与代码交付', avatar: 'game/engineer' }
+    if (id === 'general') return { id, name: '通用助手', description: '通用搭档', avatar: 'other/partner' }
+    const catalog = (Array.isArray(catalogExperts) ? catalogExperts : [])
+      .find(item => String(item.id || '') === id) || {}
+    if (catalog.id) {
+      return {
+        id: catalog.id,
+        name: catalog.name || id,
+        description: catalog.description || '',
+        avatar: catalog.avatar || '',
+        skills: catalog.skills,
+      }
+    }
+    return { id: id || 'general', name: id || '助手', avatar: 'other/partner' }
+  }
+
+  function agentAvatarMarkHtml(payload, { size = 16, className = '' } = {}) {
+    const identity = window.AgentIdentity
+    const src = identity && typeof identity.identityAvatarSrc === 'function'
+      ? identity.identityAvatarSrc(payload)
+      : ''
+    if (src) {
+      return `<img class="agent-avatar-photo${className ? ` ${className}` : ''}" src="${escHtml(src)}" alt="" width="${size}" height="${size}" decoding="async">`
+    }
+    const icon = identity && typeof identity.identityIcon === 'function'
+      ? identity.identityIcon(payload)
+      : iconForAgent(payload?.id)
+    return `<span class="ico${className ? ` ${className}` : ''}" data-icon="${escHtml(icon)}" style="width:${size}px;height:${size}px;flex-shrink:0"></span>`
+  }
+
   function currentAgentModeId() {
     const raw = String(activeSession?.agentId || activeAgentId || 'general').trim()
     if (raw === 'steward' || raw === 'writing' || raw === 'coding') return raw
@@ -196,13 +383,34 @@ window.WorkspaceAgent = (function () {
   }
 
   function currentComposerPlaceholder() {
-    if (surfaceMode === 'workbench') return '补充任务要求或材料；进度与审批请看右侧流程… @ 选文件'
+    if (surfaceMode === 'workbench') {
+      const waiting = String(workbenchTaskContext?.waitingKind || '')
+      if (waiting === 'clarification') {
+        const display = window.WorkbenchTaskBrief?.resolveClarificationDisplay?.(workbenchTaskContext.clarification || {})
+        if (display?.hasExplicitQuestion) {
+          return '直接写出澄清答案并发送；若只是询问要填什么，会先由助手说明…'
+        }
+        return '可先问助手要补充什么；准备好答案后点卡片「提交澄清」…'
+      }
+      if (waiting === 'gate') return '可在上方卡片选择通过 / 修订 / 打回；也可补充说明… @ 选文件'
+      return '补充任务要求或材料… @ 选文件'
+    }
     const mode = currentAgentModeId()
     return MODE_INPUT_EXPERIENCE[mode]?.placeholder || MODE_INPUT_EXPERIENCE.general.placeholder
   }
 
   function currentComposerIdleMeta() {
-    if (surfaceMode === 'workbench') return 'Enter 发送 · Shift+Enter 换行 · @ 引用文件'
+    if (surfaceMode === 'workbench') {
+      const waiting = String(workbenchTaskContext?.waitingKind || '')
+      if (waiting === 'clarification') {
+        const display = window.WorkbenchTaskBrief?.resolveClarificationDisplay?.(workbenchTaskContext.clarification || {})
+        return display?.hasExplicitQuestion
+          ? '发送即提交澄清答案；询问类问题会交给助手'
+          : '发送先问助手；点卡片「提交澄清」才会继续任务'
+      }
+      if (waiting === 'gate') return '请在对话卡片完成审批'
+      return 'Enter 发送 · Shift+Enter 换行 · @ 引用文件'
+    }
     const mode = currentAgentModeId()
     return MODE_INPUT_EXPERIENCE[mode]?.idleMeta || MODE_INPUT_EXPERIENCE.general.idleMeta
   }
@@ -303,10 +511,14 @@ window.WorkspaceAgent = (function () {
     writingOfficeDoc: { need: 'material', ask: '要写哪类办公文档、给谁看、核心信息是什么？发一句话或粘贴要点，我立刻成稿。' },
     writingOutlineDraft: { need: 'material', ask: '请把提纲或标题贴进输入框（或 @ 文件），我再扩写成完整文稿。' },
     writingFinalize: { need: 'material', ask: '请把要定稿的草稿贴进输入框（或 @ 文件），我来统一结构、列表与可发送版本。' },
+    writingHumanize: { need: 'material', ask: '请把要去 AI 味的文本贴进输入框（或 @ 文件），我再消减套话并保留事实与术语。' },
     codingExplain: { need: 'material', ask: '请把要解释的代码贴进输入框（或 @ 文件），我再讲清它的职责、流程与风险。' },
     codingFix: { need: 'material', ask: '请把报错信息连同相关代码贴进输入框（或 @ 文件），我来定位根因并给最小修复。' },
     codingImplement: { need: 'material', ask: '请用一句话说明要实现的需求（目标 + 约束），需要的话 @ 相关文件，我就给方案。' },
     codingDraftPatch: { need: 'material', ask: '请说明要改什么、涉及哪些文件（可 @ 文件），我再按文件产出改动草案与回归清单。' },
+    codingDebug: { need: 'material', ask: '请把报错信息或问题现象贴进输入框（或 @ 文件），我再给根因假设与验证步骤。' },
+    codingReview: { need: 'material', ask: '请把要评审的改动或代码贴进输入框（或 @ 文件），我再看回归风险、异常处理与测试覆盖。' },
+    codingRelease: { need: 'material', ask: '请说明本次交付改了什么（可 @ 文件或粘贴变更清单），我再写成可同步团队的发布说明。' },
   }
 
   // 由 prompt 文本反查任务 id，供快捷菜单复用同一套 preflight
@@ -429,17 +641,22 @@ window.WorkspaceAgent = (function () {
     ],
   }
 
-  function availableExperts() {
+  function availableAssistantModes() {
     const base = Array.isArray(agents) && agents.length ? agents : fallbackExperts
+    return base.map(item => ({
+      id: String(item.id || ''),
+      name: String(item.name || item.title || item.id || '未命名助手'),
+      description: String(item.description || '处理相关工作任务'),
+      source: 'agent',
+    })).filter(item => item.id)
+  }
+
+  function availableExperts() {
+    const base = availableAssistantModes()
     const hubExperts = Array.isArray(catalogExperts) ? catalogExperts : []
     const merged = new Map()
     for (const item of base) {
-      merged.set(String(item.id || ''), {
-        id: String(item.id || ''),
-        name: String(item.name || item.title || item.id || '未命名专家'),
-        description: String(item.description || item.persona?.role || '处理相关工作任务'),
-        source: 'agent',
-      })
+      merged.set(item.id, item)
     }
     for (const item of hubExperts) {
       const id = String(item.id || '').trim()
@@ -448,32 +665,38 @@ window.WorkspaceAgent = (function () {
         id,
         name: String(item.name || id),
         description: String(item.description || ''),
+        avatar: String(item.avatar || ''),
+        skills: Array.isArray(item.skills) ? item.skills : undefined,
         source: 'expert',
       })
     }
     return [...merged.values()].filter(item => item.id)
   }
 
+  function isBuiltinAssistantMode(id) {
+    const key = String(id || '').trim()
+    return !!key && availableAssistantModes().some(item => item.id === key)
+  }
+
+  // 加号菜单只负责换模式。专家包的浏览与启动在专家库，混进来会让两种
+  // 语义都失真，也曾让内置模式被当成专家包去加载而报「专家不存在」。
   function renderExpertPop() {
     if (!expertPop) return
-    expertPop.innerHTML = availableExperts().map(item => `
+    expertPop.innerHTML = availableAssistantModes().map(item => `
       <button type="button" class="agent-pop-item agent-expert-item${item.id === activeAgentId ? ' active' : ''}" data-expert-id="${escHtml(item.id)}">
-        <span class="ico" data-icon="${iconForAgent(item.id)}" style="width:14px;height:14px;flex-shrink:0"></span>
+        ${agentAvatarMarkHtml(agentMarkPayload(item.id, { agentId: item.id, name: item.name, description: item.description }), { size: 18 })}
         <span class="expert-copy"><span class="expert-name">${escHtml(item.name)}</span><span class="expert-desc">${escHtml(item.description)}</span></span>
       </button>`).join('')
     if (window.StickyIcons) window.StickyIcons.mount(expertPop)
   }
 
   async function selectExpert(agentId) {
-    const expert = availableExperts().find(item => item.id === agentId)
-    if (!expert) return
+    const mode = availableAssistantModes().find(item => item.id === agentId)
+    if (!mode) return
     if (aiSend?.disabled) { toastFn('当前助手正在生成，请稍候'); return }
     hideHeadPops()
-    await createNewAgent(expert.source === 'expert'
-      ? { agentId: 'general', expertId: expert.id }
-      : { agentId: expert.id })
-    renderQuickMenuForAgent(expert.source === 'expert' ? 'general' : expert.id)
-    toastFn(`已切换到${expert.name}`)
+    const result = await startModeChat(mode.id)
+    if (result.ok) toastFn(`已切换到${mode.name}`)
   }
 
   function tabTitle(sessionMeta) {
@@ -491,6 +714,7 @@ window.WorkspaceAgent = (function () {
     if (/(今日优先级|today_priority)/i.test(text)) return '今日优先级'
     if (/(查文档\/知识库|doc_kb_suggest|知识库空间|最近自己编辑|最近自己阅读)/i.test(text)) return '查文档/知识库'
     if (/(相关的聊天|related_chats|@我)/i.test(text)) return '分析相关聊天'
+    if (/(需求梳理|workflow-intake|intake\s*\/\s*ingest|可启动\s*(管线服务|Daemon)\s*工作流)/i.test(text)) return '需求梳理'
     if (/(需求文档搭档|需求文档初稿|非目标|验收标准)/i.test(text)) return '写需求文档'
     if (/(办公文档搭档|通知|汇报|周报|方案同步|会议纪要)/i.test(text)) return '写办公文档'
     if (/(根据我提供的标题|提纲和要点扩写|提纲成稿|大纲成稿)/i.test(text)) return '按提纲成稿'
@@ -513,6 +737,7 @@ window.WorkspaceAgent = (function () {
     if (/(今日优先级|today_priority)/i.test(text)) return '今日优先级'
     if (/(查文档\/知识库|doc_kb_suggest|知识库空间|最近自己编辑|最近自己阅读)/i.test(text)) return '查文档/知识库'
     if (/(相关的聊天|related_chats|@我)/i.test(text)) return '分析相关聊天'
+    if (/(需求梳理|workflow-intake|intake\s*\/\s*ingest|可启动\s*(管线服务|Daemon)\s*工作流)/i.test(text)) return '需求梳理'
     if (/(需求文档搭档|需求文档初稿|非目标|验收标准)/i.test(text)) return '写需求文档'
     if (/(办公文档搭档|通知|汇报|周报|方案同步|会议纪要)/i.test(text)) return '写办公文档'
     if (/(根据我提供的标题|提纲和要点扩写|提纲成稿|大纲成稿)/i.test(text)) return '按提纲成稿'
@@ -632,8 +857,32 @@ window.WorkspaceAgent = (function () {
       : '.agent-bubble.user'
     const firstBubble = chatLog.querySelector(targetSelector) || chatLog.querySelector('.agent-bubble.user')
     if (!firstBubble) return
+    chatStickToBottom = false
     const top = Math.max(0, (firstBubble.offsetTop || 0) - 8)
+    beginProgrammaticChatScroll()
     chatLog.scrollTo({ top, behavior: 'smooth' })
+  }
+
+  function isChatNearBottom(threshold = CHAT_NEAR_BOTTOM_PX) {
+    if (!chatLog) return true
+    return chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < threshold
+  }
+
+  function beginProgrammaticChatScroll() {
+    chatProgrammaticScroll = true
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { chatProgrammaticScroll = false })
+    })
+  }
+
+  function pinChatToBottom() {
+    chatStickToBottom = true
+    scrollChatToBottomIfNeeded(true)
+  }
+
+  function syncChatStickFromUserScroll() {
+    if (!chatLog || chatProgrammaticScroll) return
+    chatStickToBottom = isChatNearBottom()
   }
 
   function sortOpenTabs(ids) {
@@ -658,7 +907,7 @@ window.WorkspaceAgent = (function () {
       const pinned = !!meta.pinned
       const pinIcon = pinned
         ? '<span class="ico tab-pin" data-icon="pin" title="已固定"></span>'
-        : `<span class="ico" data-icon="${iconForAgent(meta.agentId)}"></span>`
+        : agentAvatarMarkHtml(agentMarkPayload(meta.agentId, meta), { size: 16, className: 'tab-agent-avatar' })
       return `<div class="agent-session-tab${active ? ' active' : ''}${pinned ? ' pinned' : ''}" data-session-id="${escHtml(id)}" role="tab" aria-selected="${active}" tabindex="0" title="${escHtml(label)}">
         ${pinIcon}
         <span class="tab-label">${escHtml(label)}</span>
@@ -721,15 +970,24 @@ window.WorkspaceAgent = (function () {
     activeSession = result.session
     activeAgentId = activeSession.agentId || 'general'
     renderQuickMenuForAgent(activeAgentId)
-    chatHistory = (activeSession.messages || []).map(m => ({
-      role: m.role,
-      text: m.text,
-      trace: Array.isArray(m.trace) ? m.trace.map(item => ({ ...item })) : [],
-      toolCallId: m.toolCallId,
-      toolName: m.toolName,
-      status: m.status,
-      durationMs: m.durationMs,
-    }))
+    const inflightHistory = inflightChatBySession.get(sessionId)
+    if (inflightHistory) {
+      // 生成中切面再回来：复用同一数组，避免磁盘半持久化覆盖 streaming 气泡
+      chatHistory = inflightHistory
+    } else {
+      chatHistory = (activeSession.messages || []).map(m => hydrateLegacyAssistantMessage({
+        role: m.role,
+        text: m.text,
+        trace: Array.isArray(m.trace) ? m.trace.map(item => ({ ...item })) : [],
+        toolCallId: m.toolCallId,
+        toolName: m.toolName,
+        status: m.status,
+        durationMs: m.durationMs,
+        protocolVersion: m.protocolVersion,
+        answerHash: m.answerHash,
+        ui: Array.isArray(m.ui) ? m.ui.map(item => ({ ...item, items: Array.isArray(item.items) ? item.items.map(it => ({ ...it })) : [] })) : undefined,
+      }))
+    }
     runArtifacts = Array.isArray(activeSession.run?.artifacts)
       ? activeSession.run.artifacts.map(a => ({ ...a }))
       : []
@@ -740,7 +998,9 @@ window.WorkspaceAgent = (function () {
     }
     restoreDraft()
     renderSessionTabs()
+    chatStickToBottom = true
     renderChat()
+    pinChatToBottom()
     return true
   }
 
@@ -768,7 +1028,28 @@ window.WorkspaceAgent = (function () {
       workSurface.openReview(artifactId, runArtifacts)
       return true
     }
-    toastFn('当前版本暂不支持产物审阅', 'error')
+    const art = (Array.isArray(runArtifacts) ? runArtifacts : [])
+      .find(item => String(item?.id || '') === String(artifactId))
+    const href = String(art?.url || art?.href || art?.openUrl || '').trim()
+    if (href && window.api?.openExternal) {
+      const opened = await window.api.openExternal(href)
+      if (opened?.ok) {
+        toastFn('已在外部打开产物')
+        return true
+      }
+    }
+    const text = String(art?.content || art?.body || art?.text || art?.markdown || '').trim()
+    if (text) {
+      const title = String(art?.title || art?.type || '产物').slice(0, 80)
+      chatHistory.push({
+        role: 'system-note',
+        text: `【${title}】\n${text.slice(0, 4000)}${text.length > 4000 ? '\n…' : ''}`,
+      })
+      renderChat()
+      toastFn('已在对话中展示产物内容')
+      return true
+    }
+    toastFn('暂无可打开的产物视图', 'error')
     return false
   }
 
@@ -784,7 +1065,10 @@ window.WorkspaceAgent = (function () {
     activeAgentId = activeSession.agentId || 'general'
     renderQuickMenuForAgent(activeAgentId)
     runArtifacts = Array.isArray(activeSession.run?.artifacts) ? [...activeSession.run.artifacts] : []
-    const agentLabel = availableExperts().find(item => item.id === activeSession.agentId)?.name
+    const selectedExpertId = activeSession.expertId || activeSession.agentId
+    const agentLabel = activeSession.expertName
+      || activeSession.expert?.name
+      || availableExperts().find(item => item.id === selectedExpertId)?.name
       || (activeSession.agentId === 'steward' ? '知识管家' : '新助手')
     sessions = [
       {
@@ -810,17 +1094,133 @@ window.WorkspaceAgent = (function () {
     return activeSession
   }
 
+  async function startModeChat(modeId) {
+    const mode = availableAssistantModes().find(item => item.id === String(modeId || '').trim())
+    if (!mode) return { ok: false, error: '助手模式不存在' }
+    if (aiSend?.disabled) return { ok: false, error: '当前助手正在生成，请稍候' }
+    if (!sessionsLoaded && sessionsLoadPromise) await sessionsLoadPromise
+
+    const previousSurface = surfaceMode
+    if (surfaceMode !== 'agent' && activeSession?.id) updateCurrentSurfaceUi(activeSession.id)
+    surfaceMode = 'agent'
+    const created = await createNewAgent({ agentId: mode.id })
+    if (!created) {
+      surfaceMode = previousSurface
+      return { ok: false, error: '无法开始对话', notified: true }
+    }
+
+    requestAnimationFrame(() => {
+      aiInput?.focus()
+      resizeAiInput()
+    })
+    return { ok: true, session: created }
+  }
+
+  async function startExpertChat(expertIdOrOptions) {
+    const options = expertIdOrOptions && typeof expertIdOrOptions === 'object'
+      ? expertIdOrOptions
+      : { expertId: expertIdOrOptions }
+    const id = String(options.expertId || '').trim()
+    if (!id) return { ok: false, error: '缺少专家 ID' }
+    // 内置模式没有对应的专家包目录，交给 loadExpert 只会得到 not_found。
+    if (isBuiltinAssistantMode(id)) return startModeChat(id)
+    if (aiSend?.disabled) return { ok: false, error: '当前助手正在生成，请稍候' }
+    if (!sessionsLoaded && sessionsLoadPromise) await sessionsLoadPromise
+    await ensureExpertCatalog()
+    // 目录缓存只用来取显示名。它加载失败时会被静默置空，若拿它当准入判据，
+    // 用户就会遇到「卡片看得见、点了没反应」；权威校验交给主进程 loadExpert。
+    const expert = catalogExperts.find(item => String(item.id || '') === id) || null
+
+    const targetSurface = options.surface === 'workbench' ? 'workbench' : 'agent'
+    const previousSurface = surfaceMode
+    if (surfaceMode !== targetSurface && activeSession?.id) updateCurrentSurfaceUi(activeSession.id)
+    surfaceMode = targetSurface
+    const knowledgeRefs = Array.isArray(options.knowledgeRefs)
+      ? [...new Set(options.knowledgeRefs.map(item => String(item?.id || item?.providerId || item || '').trim()).filter(Boolean))]
+      : []
+    const created = await createNewAgent({
+      agentId: 'general',
+      expertId: id,
+      goal: String(options.goal || '').trim(),
+      knowledgeRefs,
+      taskRef: options.taskRef || null,
+    })
+    if (!created) {
+      surfaceMode = previousSurface
+      return { ok: false, error: '无法开始对话', notified: true }
+    }
+
+    const draft = String(options.goal || '').trim()
+    if (aiInput && draft) {
+      aiInput.value = draft
+      draftsBySession.set(created.id, draft)
+      syncComposerPlaceholder({ force: true })
+    }
+    renderQuickMenuForAgent('general')
+    renderExpertPop()
+    void ensureKnowledgeCatalog({ rerender: true })
+    requestAnimationFrame(() => {
+      aiInput?.focus()
+      resizeAiInput()
+    })
+    toastFn(`已开始与${created.expertName || created.expert?.name || expert?.name || id}对话`)
+    return { ok: true, session: created }
+  }
+
+  async function startSkillChat({ skillId, prompt = '', title = '' } = {}) {
+    const id = String(skillId || '').trim()
+    if (!id) return { ok: false, error: '缺少技能 ID' }
+    if (aiSend?.disabled) return { ok: false, error: '当前助手正在生成，请稍候' }
+    if (!sessionsLoaded && sessionsLoadPromise) await sessionsLoadPromise
+
+    const previousSurface = surfaceMode
+    if (surfaceMode !== 'agent' && activeSession?.id) updateCurrentSurfaceUi(activeSession.id)
+    surfaceMode = 'agent'
+    const created = await createNewAgent({ agentId: 'general' })
+    if (!created) {
+      surfaceMode = previousSurface
+      return { ok: false, error: '无法开始对话', notified: true }
+    }
+
+    // 任务提示词只做预填：它是模板，用户通常还要补上自己的上下文再发送。
+    const draft = String(prompt || '').trim()
+    if (aiInput && draft) {
+      aiInput.value = draft
+      draftsBySession.set(created.id, draft)
+      syncComposerPlaceholder({ force: true })
+    }
+    requestAnimationFrame(() => {
+      aiInput?.focus()
+      resizeAiInput()
+    })
+    toastFn(`已带上「${title || id}」，确认内容后发送`)
+    return { ok: true, session: created }
+  }
+
+  /** 同步恢复目标 surface 的打开集合并重绘 Tab（须在任何 await 之前调用，避免跨面闪签） */
+  function paintSurfaceTabs(mode) {
+    const state = surfaceUi[mode] || { openIds: [], activeId: '' }
+    openSessionIds = (state.openIds || []).filter(id => sessions.some(s => s.id === id))
+    const savedId = sessions.some(s => s.id === state.activeId) ? state.activeId : ''
+    if (savedId && !openSessionIds.includes(savedId)) openSessionIds.unshift(savedId)
+    renderSessionTabs()
+    return savedId || openSessionIds[0] || ''
+  }
+
   async function activateSurfaceSession(mode, fallbackId = '') {
     if (!sessionsLoaded) return
     const nonce = ++surfaceSwitchNonce
-    const state = surfaceUi[mode]
-    openSessionIds = state.openIds.filter(id => sessions.some(s => s.id === id))
+    const state = surfaceUi[mode] || { openIds: [], activeId: '' }
+    paintSurfaceTabs(mode)
     const savedId = sessions.some(s => s.id === state.activeId) ? state.activeId : ''
     const targetId = savedId
       || openSessionIds[0]
       || (mode === 'agent' && sessions.some(s => s.id === fallbackId) ? fallbackId : '')
     if (targetId) {
-      if (!openSessionIds.includes(targetId)) openSessionIds.unshift(targetId)
+      if (!openSessionIds.includes(targetId)) {
+        openSessionIds.unshift(targetId)
+        renderSessionTabs()
+      }
       await activateSession(targetId)
       if (nonce !== surfaceSwitchNonce) return
       return
@@ -897,39 +1297,30 @@ window.WorkspaceAgent = (function () {
     }
 
     if (kind === 'ingest') {
-      openKnowledgePanel?.('知识库 · 整理 Wiki')
+      openKnowledgePanel?.('知识库 · AI 整理', 'organize')
       chatHistory.push({
         role: 'system-note',
-        text: '请在知识库面板粘贴文本并「吸收到 Wiki」，或先在面板查看现有条目。',
+        text: '已打开 AI 整理工作台。请选择全部资料、新增资料或指定主题，生成整理提案后再审核写入。',
       })
       renderChat()
       return
     }
 
     if (kind === 'promote') {
-      const list = await window.api.knowledgeOsList()
-      const first = (list.wiki || [])[0]
-      if (!first) {
-        toastFn('暂无 Wiki 条目，请先整理/吸收', 'error')
-        openKnowledgePanel?.()
+      const started = await window.api.knowledgeStewardTaskCreate?.({
+        scope: { mode: 'changed' },
+      })
+      if (!started?.ok) {
+        toastFn(started?.error || '整理任务启动失败', 'error')
         return
       }
-      const promo = await window.api.knowledgeOsPromote({ wikiPath: first.path, title: first.title })
-      if (!promo?.ok) { toastFn(promo?.error || '升格失败', 'error'); return }
-      const added = await window.api.agentArtifactAdd({
-        sessionId: activeSession.id,
-        artifact: promo.artifact,
-      })
-      if (!added?.ok) { toastFn(added?.error || '写入产物失败', 'error'); return }
-      runArtifacts = added.session?.run?.artifacts || [promo.artifact]
-      await window.api.agentRunUpdate({
-        sessionId: activeSession.id,
-        toolsUsed: ['okf.promote'],
-      })
       chatHistory.push({
         role: 'system-note',
-        text: `已为「${first.title}」生成 OKF 升格提案，请在右侧审阅后接受或拒绝。`,
+        text: started.proposals?.length
+          ? `已生成 ${started.proposals.length} 条整理提案，请在知识库审核区逐条确认。`
+          : '当前没有新的整理提案，请先检查资料范围或刷新知识源。',
       })
+      openKnowledgePanel?.('知识库 · 待审核提案', 'review')
       renderChat()
     }
   }
@@ -1150,7 +1541,7 @@ window.WorkspaceAgent = (function () {
       const label = tabTitle(s)
       const when = s.updatedAt ? new Date(s.updatedAt).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
       return `<button type="button" class="agent-pop-item${activeSession?.id === s.id ? ' active' : ''}" data-reopen="${escHtml(s.id)}">
-        <span class="ico" data-icon="${iconForAgent(s.agentId)}" style="width:14px;height:14px;flex-shrink:0"></span>
+        ${agentAvatarMarkHtml(agentMarkPayload(s.agentId, s), { size: 18 })}
         <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(label)}</span>
         <span class="pop-meta">${open ? '已打开' : escHtml(when)}</span>
       </button>`
@@ -1371,6 +1762,52 @@ window.WorkspaceAgent = (function () {
     }
   }
 
+  function isWorkbenchOwnedSession(sessionMeta) {
+    if (!sessionMeta || typeof sessionMeta !== 'object') return false
+    const taskKind = String(sessionMeta.taskRef?.kind || '')
+    if (taskKind === 'workbench-task' || taskKind === 'workflow-chat' || taskKind === 'expert-chat') {
+      return true
+    }
+    const goal = String(
+      sessionMeta.run?.goal
+      || sessionMeta.displayTitle
+      || sessionMeta.title
+      || ''
+    ).trim()
+    if (goal === WORKBENCH_SESSION_GOAL) return true
+    // 「工作台 ·」「工作台 -」「工作台—」等历史/展示变体均视为工作台归属
+    if (/^工作台\s*[·\-—–]/.test(goal) || goal.startsWith('工作台·')) return true
+    return false
+  }
+
+  function relocateWorkbenchSessionsFromAgentSurface() {
+    const byId = new Map(sessions.map(session => [session.id, session]))
+    const keepAgent = []
+    const moveIds = []
+    for (const id of surfaceUi.agent.openIds) {
+      const meta = byId.get(id)
+      if (meta && isWorkbenchOwnedSession(meta)) moveIds.push(id)
+      else keepAgent.push(id)
+    }
+    if (!moveIds.length) {
+      if (surfaceUi.agent.activeId && byId.has(surfaceUi.agent.activeId)
+        && isWorkbenchOwnedSession(byId.get(surfaceUi.agent.activeId))) {
+        surfaceUi.agent.activeId = keepAgent[0] || ''
+        persistSurfaceUi()
+      }
+      return
+    }
+    surfaceUi.agent.openIds = keepAgent
+    if (!keepAgent.includes(surfaceUi.agent.activeId)) {
+      surfaceUi.agent.activeId = keepAgent[0] || ''
+    }
+    surfaceUi.workbench.openIds = [...new Set([...moveIds, ...surfaceUi.workbench.openIds])]
+    if (!surfaceUi.workbench.activeId || !surfaceUi.workbench.openIds.includes(surfaceUi.workbench.activeId)) {
+      surfaceUi.workbench.activeId = surfaceUi.workbench.openIds[0] || ''
+    }
+    persistSurfaceUi()
+  }
+
   async function loadSessions() {
     if (!window.api?.agentSessionList) return
     const result = await window.api.agentSessionList()
@@ -1379,13 +1816,27 @@ window.WorkspaceAgent = (function () {
     const persistedOpenIds = result.ui?.openSessionIds || []
     const activeId = result.ui?.activeSessionId || persistedOpenIds[0]
     sessionsLoaded = true
+    relocateWorkbenchSessionsFromAgentSurface()
     const workbenchIds = new Set(surfaceUi.workbench.openIds)
     if (surfaceUi.workbench.activeId) workbenchIds.add(surfaceUi.workbench.activeId)
+    for (const id of persistedOpenIds) {
+      const meta = sessions.find(session => session.id === id)
+      if (meta && isWorkbenchOwnedSession(meta)) workbenchIds.add(id)
+    }
+    surfaceUi.workbench.openIds = [...workbenchIds]
     if (!surfaceUi.agent.openIds.length) {
       surfaceUi.agent.openIds = persistedOpenIds.filter(id => !workbenchIds.has(id))
+    } else {
+      surfaceUi.agent.openIds = surfaceUi.agent.openIds.filter(id => !workbenchIds.has(id))
+    }
+    if (surfaceUi.agent.activeId && workbenchIds.has(surfaceUi.agent.activeId)) {
+      surfaceUi.agent.activeId = surfaceUi.agent.openIds[0] || ''
     }
     if (!surfaceUi.agent.activeId && activeId && !workbenchIds.has(activeId)) {
       surfaceUi.agent.activeId = activeId
+    }
+    if (!surfaceUi.workbench.activeId && surfaceUi.workbench.openIds.length) {
+      surfaceUi.workbench.activeId = surfaceUi.workbench.openIds[0]
     }
     persistSurfaceUi()
     await activateSurfaceSession(surfaceMode, activeId)
@@ -1638,55 +2089,20 @@ window.WorkspaceAgent = (function () {
     return out.join('')
   }
 
-  /** 流式：稳定块走 MD；未闭合围栏 / 未完成表格 / 半行暂挂纯文本，减轻表格回流闪屏 */
+  /** 流式：只返回可安全格式化的稳定块；未完成尾部不进入可见 DOM。 */
   function splitStreamingMarkdown(src) {
-    const text = String(src || '')
-    const lines = text.replace(/\r\n/g, '\n').split('\n')
-    let splitAt = lines.length
-
-    let fenceCount = 0
-    let openFenceAt = -1
-    for (let i = 0; i < lines.length; i++) {
-      if (/^\s*```/.test(lines[i])) {
-        fenceCount++
-        if (fenceCount % 2 === 1) openFenceAt = i
-      }
-    }
-    if (fenceCount % 2 === 1 && openFenceAt >= 0) {
-      splitAt = Math.min(splitAt, openFenceAt)
-    }
-
-    // 尾部连续表格行且尚未以空行结束 → 整段表格暂挂
-    let end = lines.length - 1
-    if (end >= 0 && !String(lines[end] || '').trim() && end > 0) {
-      // 末尾空行：其前的表格视为已闭合，不暂挂
-    } else {
-      let tableStart = -1
-      let i = end
-      while (i >= 0 && /^\s*\|.+\|\s*$/.test(lines[i])) {
-        tableStart = i
-        i--
-      }
-      if (tableStart >= 0) splitAt = Math.min(splitAt, tableStart)
-    }
-
-    // 不以换行结尾：最后一行仍在输入中
-    if (text.length && !text.endsWith('\n') && lines.length) {
-      splitAt = Math.min(splitAt, lines.length - 1)
-    }
-
-    if (splitAt < 0) splitAt = 0
-    return {
-      stable: lines.slice(0, splitAt).join('\n'),
-      tail: lines.slice(splitAt).join('\n'),
-    }
+    const split = window.AgentStreamVisibility?.splitStreamingMarkdown
+    if (typeof split === 'function') return split(src)
+    return { stable: '', pending: Boolean(String(src || '')) }
   }
 
   function renderStreamingMarkdown(src) {
-    const { stable, tail } = splitStreamingMarkdown(src)
+    const { stable, pending } = splitStreamingMarkdown(src)
     const md = stable ? renderMarkdown(stable) : ''
-    const tailHtml = tail ? `<span class="md-stream-tail">${escHtml(tail)}</span>` : ''
-    return `<div class="chat-text agent-md">${md}${tailHtml}</div>`
+    const pendingHtml = pending
+      ? '<span class="md-stream-pending" role="status" aria-label="正在整理回答"><span aria-hidden="true">正在整理…</span></span>'
+      : ''
+    return `<div class="chat-text agent-md">${md}${pendingHtml}</div>`
   }
 
   const FEISHU_AUTH_DEEP_LINK_RE = /^knowme:\/\/feishu\/auth(?:[/?#]|$)/i
@@ -1846,6 +2262,186 @@ window.WorkspaceAgent = (function () {
     </div>`
   }
 
+  function resolveMessageChoiceBar(message) {
+    if (!message || message.role !== 'assistant') return null
+    if (Array.isArray(message.ui) && message.ui.length) {
+      const choice = message.ui.find(item => item && item.kind === 'choice')
+      if (choice?.items?.length) {
+        return { title: choice.title || '', items: choice.items }
+      }
+    }
+    return null
+  }
+
+  function hydrateLegacyAssistantMessage(message) {
+    if (!message || message.role !== 'assistant' || message.streaming) return message
+    if (resolveMessageChoiceBar(message)) {
+      if (Array.isArray(message.ui) && message.ui.length) return message
+    }
+    const parse = (window.AgentSuggestion && window.AgentSuggestion.parseSuggestionBlock)
+      ? window.AgentSuggestion.parseSuggestionBlock
+      : null
+    if (!parse) return message
+    const strip = window.AgentSuggestion?.stripDisplayProtocolText
+    const normalizedText = normalizeAssistantOutput(
+      strip ? strip(message.text) : message.text,
+    )
+    const parsed = parse(normalizedText)
+    if (parsed.bar?.items?.length) {
+      message.text = parsed.bodyWithoutBlock
+      message.ui = [{ kind: 'choice', title: parsed.bar.title || '', items: parsed.bar.items }]
+    } else if (parsed.bodyWithoutBlock !== normalizedText) {
+      message.text = parsed.bodyWithoutBlock
+    } else if (strip && normalizedText !== String(message.text || '')) {
+      message.text = normalizedText
+    }
+    return message
+  }
+
+  function renderStructuredUiRegion(message, messageIdx = -1, forceShell = false) {
+    const bar = resolveMessageChoiceBar(message)
+    if (!bar && !forceShell) return ''
+    const content = bar ? renderSuggestionBar(bar, message.suggestionChosenIndex) : ''
+    return `<div class="agent-structured-ui" data-structured-ui="1">${content}</div>`
+  }
+
+  function patchAssistantStructuredUi(bubble, message, messageIdx) {
+    if (!bubble || !message) return
+    const html = renderStructuredUiRegion(message, messageIdx, message.protocolVersion === 2)
+    const current = bubble.querySelector('[data-structured-ui="1"]')
+    if (!html) {
+      current?.remove()
+      return
+    }
+    if (!current) {
+      const body = bubble.querySelector('[data-assistant-body="1"]')
+      const wrap = document.createElement('div')
+      wrap.innerHTML = html
+      const node = wrap.firstElementChild
+      if (body && node) body.after(node)
+      else if (node) bubble.appendChild(node)
+      return
+    }
+    const wrap = document.createElement('div')
+    wrap.innerHTML = html
+    const next = wrap.firstElementChild
+    if (next && current.innerHTML !== next.innerHTML) current.innerHTML = next.innerHTML
+  }
+
+  function patchAssistantResponseBody(bubble, message, messageIdx) {
+    if (!bubble || !message) return
+    const body = bubble.querySelector('[data-assistant-body="1"]')
+    if (!body) return
+    const html = assistantBodyHtml(message, messageIdx)
+    const next = document.createElement('div')
+    next.innerHTML = html
+    reconcileCompletedAssistantBody(body, next)
+    bubble.classList.toggle('related-chats-result', isRelatedChatsResult(message))
+  }
+
+  function applyV2StreamEvent(event, messageIdx, message) {
+    const reducer = window.AgentMessageState
+    if (!reducer || !event || typeof event !== 'object') return false
+    if (event.version == null) return false
+    if (!message.messageState) {
+      message.messageState = reducer.createMessageState(message.runId || event.runId)
+    }
+    const reduced = reducer.reduceMessageEvent(message.messageState, event)
+    if (!reduced.changed) return false
+    message.messageState = reduced.state
+    reducer.applyStateToMessage(message, reduced.state)
+
+    // 离屏保活：只更新消息对象，禁止用其它 Session 的 chatHistory 误 render
+    if (chatHistory[messageIdx] !== message) return true
+
+    const bubble = chatLog?.querySelector(`[data-idx="${messageIdx}"]`)
+    const type = String(event.type || '')
+
+    if (reduced.ignored === 'unsupported_version' || (message.messageState?.frozen && message.messageState?.status === 'failed' && !message.v2AnswerCommitted)) {
+      message.streaming = false
+      if (bubble) {
+        patchAssistantResponseBody(bubble, message, messageIdx)
+        patchAssistantStructuredUi(bubble, message, messageIdx)
+        refreshAssistantProgress(messageIdx)
+      } else {
+        renderChat()
+      }
+      return true
+    }
+
+    if (type === 'answer.committed') {
+      if (bubble) {
+        upgradeThinkingBubble(bubble, message, assistantBodyHtml(message, messageIdx))
+        patchAssistantResponseBody(bubble, message, messageIdx)
+        bubble.querySelector(':scope > .stream-cursor')?.remove()
+      } else {
+        renderChat()
+      }
+      scrollChatToBottomIfNeeded(false)
+      return true
+    }
+
+    if (type === 'choice.ready') {
+      if (bubble) patchAssistantStructuredUi(bubble, message, messageIdx)
+      else renderChat()
+      scrollChatToBottomIfNeeded(false)
+      return true
+    }
+
+    if (type === 'run.completed' || type === 'run.cancelled' || type === 'run.failed') {
+      message.streaming = false
+      message.activity = message.activity || ''
+      void syncPersistedRunTree(message)
+      if (bubble) {
+        if (message.v2AnswerCommitted || String(message.text || '').trim()) {
+          patchAssistantResponseBody(bubble, message, messageIdx)
+        }
+        patchAssistantStructuredUi(bubble, message, messageIdx)
+        refreshAssistantProgress(messageIdx)
+      } else {
+        renderChat()
+      }
+      return true
+    }
+
+    if (type.startsWith('subrun.')) {
+      if (bubble) refreshAssistantProgress(messageIdx)
+      else renderChat()
+      scrollChatToBottomIfNeeded(false)
+      return true
+    }
+
+    if (type === 'tool.started' || type === 'tool.completed' || type === 'tool.failed') {
+      if (type === 'tool.failed' && event.payload?.needsPermission) {
+        void maybeOfferRunPermissionUpgrade({
+          toolName: event.payload.toolName,
+          needsPermission: event.payload.needsPermission,
+          summary: event.payload.summary,
+        })
+      }
+      refreshAssistantProgress(messageIdx)
+      return true
+    }
+
+    if (type === 'stage' || type === 'plan.updated') {
+      if (event.payload?.contextInfo && typeof event.payload.contextInfo === 'object') {
+        lastContextInfo = event.payload.contextInfo
+        renderModelUsage()
+      }
+    }
+
+    if (type === 'grounding-status') {
+      if (bubble && message.groundingStatus && window.GroundingUI?.patchAssistantGroundingMeta) {
+        window.GroundingUI.patchAssistantGroundingMeta(bubble, message.groundingStatus, escHtml)
+      }
+      refreshAssistantProgress(messageIdx)
+      return true
+    }
+
+    refreshAssistantProgress(messageIdx)
+    return true
+  }
+
   function isWorkflowReturnChoice(button, payload) {
     const buttonText = String(button?.textContent || '')
     const hint = `${buttonText}\n${String(payload || '')}`
@@ -1878,70 +2474,78 @@ window.WorkspaceAgent = (function () {
         && typeof item.label === 'string')
   }
 
-  function isThinkingJson(data, lang = '') {
-    if (!data || typeof data !== 'object' || isSuggestionLikeJson(data)) return false
-    const langTag = String(lang || '').toLowerCase()
-    if (/(thinking|reasoning|analysis|thought|mind|思考|推理)/i.test(langTag)) return true
+  const STREAM_LAYOUT_SENTINEL = '\uE000knowme-stream-end\uE001'
 
-    const typeLike = `${data.type || ''} ${data.kind || ''} ${data.stage || ''} ${data.category || ''}`
-    if (/(thinking|reasoning|analysis|thought|思考|推理|分析)/i.test(typeLike)) return true
-
-    const titleLike = `${data.title || ''} ${data.name || ''} ${data.label || ''}`
-    if (/(thinking|reasoning|analysis|thought|思考|推理|分析)/i.test(titleLike)) return true
-
-    const keys = Object.keys(data).map(k => k.toLowerCase())
-    const markers = new Set([
-      'thinking', 'reasoning', 'analysis', 'thought', 'thoughts',
-      'steps', 'plan', 'assumptions', 'risks', 'observations',
-      'next_action', 'nextaction', 'nextstep',
-    ])
-    const hitCount = keys.reduce((count, key) => count + (markers.has(key) ? 1 : 0), 0)
-    return hitCount >= 2
-  }
-
-  function deriveThinkingTitle(data) {
-    if (!data || typeof data !== 'object') return '思考过程 JSON'
-    const candidate = String(data.title || data.name || data.phase || data.stage || '').trim()
-    if (!candidate) return '思考过程 JSON'
-    const clipped = candidate.slice(0, 42)
-    return clipped || '思考过程 JSON'
-  }
-
-  function parseThinkingBlocks(src) {
-    const text = String(src || '')
-    const re = /```([a-zA-Z0-9_:+\-]*)[ \t]*\r?\n([\s\S]*?)```/g
-    const blocks = []
-    let m
-    while ((m = re.exec(text))) {
-      const lang = String(m[1] || '').trim()
-      const inner = String(m[2] || '').trim()
-      if (!inner) continue
-      const data = tryParseJson(inner)
-      if (!isThinkingJson(data, lang)) continue
-      blocks.push({
-        start: m.index,
-        end: m.index + m[0].length,
-        title: deriveThinkingTitle(data),
-        data,
-      })
+  function assistantDisplayText(m, { preserveStreamingLayout = false } = {}) {
+    const strip = window.AgentSuggestion?.stripDisplayProtocolText
+    const sourceText = String(m?.text || '')
+    const stripInput = preserveStreamingLayout
+      ? `${sourceText}${STREAM_LAYOUT_SENTINEL}`
+      : sourceText
+    const stripped = strip ? strip(stripInput) : stripInput
+    let displayText = stripped
+    if (preserveStreamingLayout) {
+      const hasSentinel = String(stripped || '').includes(STREAM_LAYOUT_SENTINEL)
+      displayText = String(stripped || '').replace(STREAM_LAYOUT_SENTINEL, '')
+      if (!hasSentinel && displayText && sourceText.startsWith(displayText)
+        && sourceText.slice(displayText.length).startsWith('\n')) {
+        displayText = `${displayText}\n`
+      }
     }
-    if (!blocks.length) return { bodyWithoutThinking: text, blocks: [] }
-    let body = text
-    for (let i = blocks.length - 1; i >= 0; i--) {
-      const block = blocks[i]
-      body = `${body.slice(0, block.start)}${body.slice(block.end)}`
-    }
-    body = body.replace(/\n{3,}/g, '\n\n').trim()
-    return { bodyWithoutThinking: body, blocks }
+    const normalizedText = normalizeAssistantOutput(
+      displayText,
+    )
+    return isRelatedChatsResult(m)
+      ? normalizeRelatedChatsResultMarkdown(normalizedText)
+      : normalizedText
   }
 
-  function renderThinkingBlock(block) {
-    const title = escHtml(block?.title || '思考过程 JSON')
-    const json = escHtml(JSON.stringify(block?.data || {}, null, 2))
-    return `<details class="agent-thinking-json" open>
-      <summary><span class="agent-thinking-badge">思考过程</span><span class="agent-thinking-title">${title}</span></summary>
-      <pre>${json}</pre>
-    </details>`
+  function settleCancelledAssistantText(message) {
+    if (!message || message.protocolVersion === 2) {
+      if (message && !String(message.text || '').trim()) message.text = '已停止生成'
+      return
+    }
+    const safeStreamText = assistantDisplayText(message, { preserveStreamingLayout: true })
+    const { stable } = splitStreamingMarkdown(safeStreamText)
+    message.text = String(stable || '').trim() || '已停止生成'
+  }
+
+  function assistantBodyHtml(m, messageIdx = -1) {
+    const normalizedText = assistantDisplayText(m, {
+      preserveStreamingLayout: Boolean(m.streaming && m.protocolVersion !== 2),
+    })
+    if (m.streaming && m.protocolVersion === 2) {
+      if (!m.v2AnswerCommitted || !String(normalizedText || '').trim()) return ''
+      const bodyMarkdown = normalizedText
+      return bodyMarkdown
+        ? `<div class="chat-text agent-md">${renderMarkdown(bodyMarkdown)}</div>`
+        : ''
+    }
+    if (m.streaming) {
+      return renderStreamingMarkdown(normalizedText)
+    }
+    const parse = (window.AgentSuggestion && window.AgentSuggestion.parseSuggestionBlock)
+      ? window.AgentSuggestion.parseSuggestionBlock
+      : (t) => ({ bodyWithoutBlock: t, bar: null })
+    const emptyTodayPriority = hasEmptyTodayPriorityFacts(m)
+    const presetBar = resolveMessageChoiceBar(m)
+    const parsed = presetBar ? { bodyWithoutBlock: normalizedText, bar: null } : parse(normalizedText)
+    const bodyWithoutBlock = emptyTodayPriority
+      ? emptyTodayPriorityBody()
+      : parsed.bodyWithoutBlock
+    const bar = emptyTodayPriority ? null : (presetBar || parsed.bar)
+    const bodyMarkdown = isRelatedChatsResult(m)
+      ? normalizeRelatedChatsResultMarkdown(bodyWithoutBlock)
+      : bodyWithoutBlock
+    const md = bodyMarkdown
+      ? `<div class="chat-text agent-md">${renderMarkdown(bodyMarkdown)}</div>`
+      : ''
+    const fallback = md
+      ? ''
+      : renderAssistantEmptyResultFallback(m)
+    const followups = renderModeFollowups(m, messageIdx, !!bar)
+    const inlineBar = m.protocolVersion === 2 ? '' : renderSuggestionBar(bar, m.suggestionChosenIndex)
+    return `${md}${fallback}${followups}${inlineBar}`
   }
 
   function looksLikeRelatedChatsMarkdown(text = '') {
@@ -2001,38 +2605,6 @@ window.WorkspaceAgent = (function () {
     return '## 今日优先级\n飞书今天没有返回可排序的日程或未完成待办。\n\n请告诉我你今天最想推进的 1 个真实工作目标，我再帮你拆成第一步。'
   }
 
-  function assistantBodyHtml(m, messageIdx = -1) {
-    const normalizedText = normalizeAssistantOutput(m.text)
-    if (m.streaming) {
-      const streamText = isRelatedChatsResult(m)
-        ? normalizeRelatedChatsResultMarkdown(normalizedText)
-        : normalizedText
-      return renderStreamingMarkdown(streamText)
-    }
-    const parse = (window.AgentSuggestion && window.AgentSuggestion.parseSuggestionBlock)
-      ? window.AgentSuggestion.parseSuggestionBlock
-      : (t) => ({ bodyWithoutBlock: t, bar: null })
-    const emptyTodayPriority = hasEmptyTodayPriorityFacts(m)
-    const parsed = parse(normalizedText)
-    const bodyWithoutBlock = emptyTodayPriority
-      ? emptyTodayPriorityBody()
-      : parsed.bodyWithoutBlock
-    const bar = emptyTodayPriority ? null : parsed.bar
-    const { bodyWithoutThinking, blocks } = parseThinkingBlocks(bodyWithoutBlock)
-    const thinking = blocks.map(renderThinkingBlock).join('')
-    const bodyMarkdown = isRelatedChatsResult(m)
-      ? normalizeRelatedChatsResultMarkdown(bodyWithoutThinking)
-      : bodyWithoutThinking
-    const md = bodyMarkdown
-      ? `<div class="chat-text agent-md">${renderMarkdown(bodyMarkdown)}</div>`
-      : ''
-    const fallback = md
-      ? ''
-      : renderAssistantEmptyResultFallback(m)
-    const followups = renderModeFollowups(m, messageIdx, !!bar)
-    return `${thinking}${md}${fallback}${followups}${renderSuggestionBar(bar, m.suggestionChosenIndex)}`
-  }
-
   function renderAssistantEmptyResultFallback(m) {
     const trace = Array.isArray(m?.trace) ? m.trace : []
     if (!trace.length) return ''
@@ -2080,8 +2652,53 @@ window.WorkspaceAgent = (function () {
   }
 
   function toolTimelineTitle(item, status) {
+    const name = String(item.toolName || '')
+    if (item.kind === 'subrun' || item.delegation) {
+      if (item.timelineTitle) return item.timelineTitle
+      const expert = item.expertId || 'Expert'
+      const builder = builderBadgeLabel(item.builderId)
+      const base = `委派 · ${expert} · ${builder}`
+      if (status === 'pending') return `${base} · 进行中`
+      if (status === 'cancelled') return `${base} · 已取消`
+      if (status === 'error') return `${base} · ${stopReasonText(item.stopReason, 'failed')}`
+      return `${base} · 已完成`
+    }
+    const args = item.args || item.toolArgs || {}
+    const draft = item.draft || {}
+    if (item.timelineTitle) return item.timelineTitle
+    if (name === 'write_file' || name === 'create_file' || name === 'apply_patch') {
+      const p = args.path || draft.path || ''
+      const label = name === 'apply_patch' ? '补丁' : name === 'create_file' ? '新建' : '写入'
+      const base = p ? `${label} ${p}` : `${label}文件`
+      if (status === 'error') return `${base}失败`
+      if (status === 'pending') return `等待批准 · ${base}`
+      return base
+    }
+    if (name === 'move_path') {
+      const from = args.from || draft.from || ''
+      const to = args.to || draft.to || ''
+      const base = from && to ? `移动 ${from} → ${to}` : '移动路径'
+      if (status === 'error') return `${base}失败`
+      if (status === 'pending') return `等待批准 · ${base}`
+      return base
+    }
+    if (name === 'mkdir') {
+      const p = args.path || draft.path || ''
+      if (item.meta?.lowRiskDirect || (item.summary || '').includes('低风险直建')) {
+        return p ? `已创建目录 ${p} · 低风险直建` : '已创建目录 · 低风险直建'
+      }
+      const base = p ? `创建目录 ${p}` : '创建目录'
+      if (status === 'pending') return `等待批准 · ${base}`
+      return base
+    }
+    if (name.startsWith('feishu.draft')) {
+      const title = draft.title || args.title || item.summary || '飞书文档'
+      if (status === 'pending') return `等待批准 · 飞书：${String(title).slice(0, 60)}`
+      return `飞书文档：${String(title).slice(0, 60)}`
+    }
     const labels = {
       'search_knowledge': { pending: '正在查找知识库资料', done: '资料查找完成', error: '资料查找失败' },
+      'search_web': { pending: '正在搜索公开网络', done: '网络搜索完成', error: '网络搜索失败' },
       'fetch_web_page': { pending: '正在读取网页', done: '网页读取完成', error: '网页读取失败' },
       'feishu.meeting_candidates': { pending: '正在查找会议候选', done: '会议候选已找到', error: '会议候选查找失败' },
       'feishu.related_chats': { pending: '正在分析相关聊天', done: '相关聊天已汇总', error: '相关聊天分析失败' },
@@ -2093,10 +2710,301 @@ window.WorkspaceAgent = (function () {
     }
     const known = labels[String(item.toolName || '')]
     if (known) return known[status] || known.pending
+    const summaryText = String(item.summary || '')
+    if (/超时|重试/.test(summaryText)) {
+      const toolLabel = name || '工具'
+      if (status === 'error' || (/超时/.test(summaryText) && !/重试/.test(summaryText))) {
+        return `工具超时 · ${toolLabel}`
+      }
+      if (status === 'pending' && /重试/.test(summaryText)) {
+        return `等待重试 · ${toolLabel}`
+      }
+    }
     const raw = String(item.title || item.toolName || '工具调用').trim()
     if (status === 'error') return `${raw}失败`
     if (status === 'done') return raw
     return raw.startsWith('正在') ? raw : `正在${raw}`
+  }
+
+  function messageStateApi() {
+    return window.AgentMessageState || null
+  }
+
+  function redactDisplayValue(value) {
+    const api = messageStateApi()
+    if (api?.redactSensitiveFields && value && typeof value === 'object') {
+      return api.redactSensitiveFields(value)
+    }
+    return value
+  }
+
+  function redactDisplayText(text) {
+    const raw = String(text || '')
+    if (!raw) return ''
+    return raw
+      .replace(/Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi, '[REDACTED]')
+      .replace(/("?(?:token|authorization|password|secret|apikey|api_key|credential)"?\s*:\s*")([^"]+)(")/gi, '$1[REDACTED]$3')
+  }
+
+  function builderBadgeLabel(builderId) {
+    const api = messageStateApi()
+    return api?.builderLabel ? api.builderLabel(builderId) : String(builderId || '本地')
+  }
+
+  function stopReasonText(stopReason, terminal) {
+    const api = messageStateApi()
+    return api?.stopReasonLabel ? api.stopReasonLabel(stopReason, terminal) : String(stopReason || terminal || '已终止')
+  }
+
+  function runTreeNodes(message) {
+    const nodes = message?.runTree?.nodes
+    return nodes && typeof nodes === 'object' ? Object.values(nodes) : []
+  }
+
+  function actionLabel(action) {
+    const map = {
+      retry: '重试',
+      resume: '恢复',
+      review_draft: '查看审批草稿',
+      reject: '拒绝草稿',
+      provide_input: '补充输入',
+      wait_children: '等待子 Run',
+      switch_to_local: '切换本地执行',
+      reduce_scope: '缩小任务范围',
+      open_permission_settings: '调整权限',
+      switch_backend: '切换后端',
+      update_package: '更新能力包',
+      provide_more_context: '补充上下文',
+      cancel: '取消运行',
+      retry_after_approval: '审批后重试',
+    }
+    return map[String(action || '')] || String(action || '')
+  }
+
+  function computeRunGuidance(message) {
+    const rootRunId = String(message?.runTree?.rootRunId || message?.runId || '')
+    const actionState = rootRunId ? runActionState.get(rootRunId) : null
+    if (actionState?.phase === 'cancel_requested') {
+      return {
+        tone: 'info',
+        title: '取消请求已发送',
+        detail: '正在通知并收敛子 Run，请稍候。若长时间未收敛可再次点击取消。',
+        recommended: 'wait_children',
+        alternatives: ['resume'],
+      }
+    }
+    const nodes = runTreeNodes(message)
+    const waitingNode = nodes.find(node => String(node.status || '').toLowerCase() === 'waiting')
+    if (waitingNode) {
+      return {
+        tone: 'info',
+        title: waitingNode.waitingFor === 'approval' ? '等待审批确认' : '运行暂时等待中',
+        detail: waitingNode.summary || stopReasonText(waitingNode.stopReason, waitingNode.terminal),
+        recommended: waitingNode.recommendedAction || (waitingNode.waitingFor === 'approval' ? 'review_draft' : 'provide_input'),
+        alternatives: Array.isArray(waitingNode.alternativeActions) ? waitingNode.alternativeActions : [],
+        estimatedWait: waitingNode.estimatedWait || null,
+      }
+    }
+    const failedNode = nodes.find(node => String(node.status || '').toLowerCase() === 'failed' || String(node.terminal || '').toLowerCase() === 'failed')
+    if (failedNode) {
+      return {
+        tone: 'warning',
+        title: '检测到子 Run 失败',
+        detail: failedNode.summary || stopReasonText(failedNode.stopReason, failedNode.terminal),
+        recommended: failedNode.recommendedAction || 'retry',
+        alternatives: Array.isArray(failedNode.alternativeActions) ? failedNode.alternativeActions : ['provide_more_context'],
+        estimatedWait: failedNode.estimatedWait || null,
+      }
+    }
+    return null
+  }
+
+  function renderRunGuidancePanel(message) {
+    const guidance = computeRunGuidance(message)
+    if (!guidance) return ''
+    const alternatives = Array.isArray(guidance.alternatives) ? guidance.alternatives.filter(Boolean).slice(0, 2) : []
+    return `<div class="agent-run-guidance ${escHtml(guidance.tone || 'info')}">
+      <div class="agent-run-guidance-title">${escHtml(guidance.title || '下一步')}</div>
+      <div class="agent-run-guidance-detail">${escHtml(guidance.detail || '')}</div>
+      <div class="agent-run-guidance-actions">
+        <span class="agent-run-guidance-pill">推荐：${escHtml(actionLabel(guidance.recommended))}</span>
+        ${alternatives.map(item => `<span class="agent-run-guidance-pill alt">备选：${escHtml(actionLabel(item))}</span>`).join('')}
+        ${guidance.estimatedWait ? `<span class="agent-run-guidance-pill wait">预计：${escHtml(String(guidance.estimatedWait))}</span>` : ''}
+      </div>
+    </div>`
+  }
+
+  function canRetrySubRun(node) {
+    if (!node) return false
+    const terminal = String(node.terminal || node.status || '').toLowerCase()
+    return Boolean(node.retriable) || terminal === 'failed' || terminal === 'error'
+  }
+
+  function canResumeSubRun(node, message) {
+    if (!node) return false
+    if (message?.resumeAvailable) return true
+    const reason = String(node.stopReason || '').toLowerCase()
+    return reason === 'interrupted' || reason === 'recovering' || node.status === 'recovering'
+  }
+
+  function renderRunTreeActions(node) {
+    if (!node?.subRunId) return ''
+    const status = String(node.status || '').toLowerCase()
+    const terminal = String(node.terminal || '').toLowerCase()
+    const running = status === 'running' || status === 'waiting' || status === 'preparing'
+    const cancelBtn = running
+      ? `<button type="button" class="agent-run-action cancel" data-run-cancel="${escHtml(node.subRunId)}" title="取消子 Run">取消</button>`
+      : ''
+    const retryBtn = !running && canRetrySubRun(node)
+      ? `<button type="button" class="agent-run-action retry" data-run-retry="${escHtml(node.subRunId)}" title="重试子 Run">重试</button>`
+      : ''
+    const resumeBtn = canResumeSubRun(node)
+      ? `<button type="button" class="agent-run-action resume" data-run-resume="${escHtml(node.subRunId)}" title="恢复子 Run">恢复</button>`
+      : ''
+    if (!cancelBtn && !retryBtn && !resumeBtn) return ''
+    return `<div class="agent-run-actions">${cancelBtn}${retryBtn}${resumeBtn}</div>`
+  }
+
+  function renderRunTreeMetaSection(title, items, renderItem) {
+    const list = Array.isArray(items) ? items.filter(Boolean) : []
+    if (!list.length) return ''
+    return `<div class="agent-run-meta-section"><div class="agent-run-meta-title">${escHtml(title)}</div>${list.map(renderItem).join('')}</div>`
+  }
+
+  function renderRunTreeNode(node) {
+    if (!node?.subRunId) return ''
+    const status = node.status === 'running' || node.status === 'waiting' ? 'pending'
+      : node.status === 'failed' || node.terminal === 'failed' ? 'error'
+        : node.status === 'cancelled' || node.terminal === 'cancelled' ? 'cancelled'
+          : 'done'
+    const builder = builderBadgeLabel(node.builderId)
+    const expert = escHtml(node.expertId || 'Expert')
+    const phase = node.phase ? `<span class="agent-run-phase">${escHtml(node.phase)}</span>` : ''
+    const stop = node.stopReason || node.terminal
+      ? `<span class="agent-run-stop">${escHtml(stopReasonText(node.stopReason, node.terminal))}</span>`
+      : ''
+    const summary = redactDisplayText(String(node.summary || '').trim())
+    const phases = Array.isArray(node.phases) ? node.phases.slice(-4) : []
+    const phaseRows = phases.map(item => `<div class="agent-run-phase-row"><span>${escHtml(item.phase || '阶段')}</span>${item.durationMs ? `<span class="agent-run-phase-time">${escHtml(formatElapsed(item.durationMs))}</span>` : ''}${item.summary ? `<span class="agent-run-phase-summary">${escHtml(redactDisplayText(item.summary))}</span>` : ''}</div>`).join('')
+    const handoffs = renderRunTreeMetaSection('Handoff', node.handoffs, (item) =>
+      `<div class="agent-run-meta-row"><span>${escHtml(item.sourceExpertId || '父 Run')}</span><span>→</span><span>${escHtml(item.targetExpertId || item.summary || '子 Run')}</span></div>`)
+    const approvals = renderRunTreeMetaSection('审批', node.approvals, (item) => {
+      const pending = item.pending && item.approved == null
+      return `<div class="agent-run-meta-row approval${pending ? ' pending' : ''}"><span>${escHtml(item.summary || item.draftId || '草稿')}</span><span>${pending ? '待确认' : item.approved ? '已批准' : '已拒绝'}</span></div>`
+    })
+    const artifacts = renderRunTreeMetaSection('产物', (node.artifacts || []).filter(item => !item.inputPath), (item) =>
+      `<div class="agent-run-meta-row"><span class="agent-artifact-kind">${escHtml(item.kind || 'artifact')}</span><span>${escHtml(item.title || item.id)}</span></div>`)
+    const evidence = renderRunTreeMetaSection('证据', node.evidence, (item) =>
+      `<div class="agent-run-meta-row"><span>${escHtml(item.summary || '摘要')}</span>${item.digest ? `<span class="agent-run-digest">${escHtml(String(item.digest).slice(0, 16))}</span>` : ''}</div>`)
+    const budgetEntries = node.budget && typeof node.budget === 'object'
+      ? Object.entries(redactDisplayValue(node.budget)).filter(([, v]) => v != null && v !== '')
+      : []
+    const budget = budgetEntries.length
+      ? `<div class="agent-run-meta-section"><div class="agent-run-meta-title">预算</div>${budgetEntries.map(([k, v]) => `<div class="agent-run-meta-row"><span>${escHtml(k)}</span><span>${escHtml(String(v))}</span></div>`).join('')}</div>`
+      : ''
+    const security = Array.isArray(node.diagnostics) && node.diagnostics.some(item => item?.code === 'prompt_injection_suspected')
+      ? '<div class="agent-run-meta-section"><div class="agent-run-meta-title">安全</div><div class="agent-run-meta-row approval pending"><span>检测到疑似提示词注入，子 Run 输出按不可信内容处理</span></div></div>'
+      : ''
+    const actions = renderRunTreeActions(node)
+    return `<details class="agent-run-node ${status}" data-subrun-id="${escHtml(node.subRunId)}">
+      <summary class="agent-run-node-summary">
+        <span class="agent-run-mark">${traceStatusIcon(status === 'cancelled' ? 'done' : status)}</span>
+        <span class="agent-run-node-title">${expert}</span>
+        <span class="agent-run-builder">${escHtml(builder)}</span>
+        ${phase}
+        ${stop}
+        ${actions}
+      </summary>
+      ${summary ? `<div class="agent-run-summary">${escHtml(summary)}</div>` : ''}
+      ${phaseRows ? `<div class="agent-run-phase-list">${phaseRows}</div>` : ''}
+      ${handoffs}${approvals}${artifacts}${evidence}${budget}${security}
+    </details>`
+  }
+
+  function renderRunTreePanel(message) {
+    const nodes = runTreeNodes(message)
+    if (!nodes.length) return ''
+    const runningCount = nodes.filter(node => node.status === 'running' || node.status === 'waiting').length
+    const errorCount = nodes.filter(node => node.terminal === 'failed' || node.status === 'failed').length
+    const meta = `${nodes.length} 个子 Run${runningCount ? ` · ${runningCount} 进行中` : ''}${errorCount ? ` · ${errorCount} 异常` : ''}`
+    const resumeRoot = message?.resumeAvailable
+      ? `<div class="agent-run-resume-banner"><span>检测到可恢复的团队工作流</span><button type="button" class="agent-run-action resume" data-run-resume="${escHtml(message.runId || message.runTree?.rootRunId || '')}">恢复</button></div>`
+      : ''
+    const guidancePanel = renderRunGuidancePanel(message)
+    return `<details class="agent-run-tree">
+      <summary class="agent-run-tree-summary"><span class="agent-run-tree-title">Run 树</span><span class="agent-run-tree-meta">${escHtml(meta)}</span></summary>
+      ${guidancePanel}
+      ${resumeRoot}
+      <div class="agent-run-tree-list">${nodes.map(renderRunTreeNode).join('')}</div>
+    </details>`
+  }
+
+  async function syncPersistedRunTree(message) {
+    const rootRunId = message?.runTree?.rootRunId || message?.runId
+    const api = window.api?.agentRunTree
+    if (!rootRunId || typeof api !== 'function') return
+    try {
+      const snapshot = await api(rootRunId)
+      if (!snapshot?.ok || !snapshot.tree) return
+      const reducer = messageStateApi()
+      if (!reducer?.mergeRunTreeSnapshot) return
+      if (!message.messageState) {
+        message.messageState = reducer.createMessageState(message.runId || rootRunId)
+      }
+      reducer.mergeRunTreeSnapshot(message.messageState, snapshot.tree)
+      reducer.applyStateToMessage(message, message.messageState)
+      const rootRunIdForState = String(message.runTree?.rootRunId || message.runId || '')
+      if (rootRunIdForState) {
+        const nodes = runTreeNodes(message)
+        const running = nodes.some(node => ['running', 'waiting', 'preparing'].includes(String(node.status || '').toLowerCase()))
+        if (!running) runActionState.delete(rootRunIdForState)
+      }
+      renderChat()
+    } catch {
+      // best-effort; main IPC may not be wired yet
+    }
+  }
+
+  async function handleRunTreeAction(kind, runId) {
+    const id = String(runId || '').trim()
+    if (!id) return
+    const rootRunId = (() => {
+      const direct = chatHistory.find(message => message?.runId === id || message?.runTree?.rootRunId === id)
+      if (direct?.runTree?.rootRunId) return String(direct.runTree.rootRunId)
+      const parent = chatHistory.find(message => Boolean(message?.runTree?.nodes?.[id]))
+      return String(parent?.runTree?.rootRunId || parent?.runId || id)
+    })()
+    const apiName = kind === 'cancel'
+      ? 'agentRunCancel'
+      : kind === 'retry'
+        ? 'agentRunRetry'
+        : 'agentRunResume'
+    const api = window.api?.[apiName]
+    if (typeof api !== 'function') {
+      if (kind === 'cancel' && typeof window.api?.aiCancelRun === 'function') {
+        await window.api.aiCancelRun(id)
+      }
+      return
+    }
+    const result = kind === 'resume'
+      ? await api(id, 'continue')
+      : kind === 'retry'
+        ? await api(id, { force: false })
+        : await api(id)
+    if (result?.ok === false) {
+      toastFn(result.message || result.error || `${kind === 'cancel' ? '取消' : kind === 'retry' ? '重试' : '恢复'}失败`, 'error')
+      return
+    }
+    if (rootRunId) {
+      if (kind === 'cancel') runActionState.set(rootRunId, { phase: 'cancel_requested', at: Date.now() })
+      else runActionState.delete(rootRunId)
+    }
+    const affected = chatHistory.filter(message => {
+      if (message?.runId === id || message?.runTree?.rootRunId === id) return true
+      return Boolean(message?.runTree?.nodes?.[id])
+    })
+    for (const message of affected) await syncPersistedRunTree(message)
+    renderChat()
   }
 
   function workbenchTaskDone() {
@@ -2226,10 +3134,62 @@ window.WorkspaceAgent = (function () {
     return `<div class="agent-plan-checklist" data-agent-plan="1" aria-label="执行计划"><div class="agent-plan-head">计划 · 剩余 ${remaining}</div><ul class="agent-plan-list">${rows}</ul></div>`
   }
 
+  function draftApprovalSummary(item) {
+    const name = String(item.toolName || '')
+    const args = item.args || item.toolArgs || {}
+    const draft = item.draft || {}
+    if (name === 'move_path') {
+      const from = args.from || draft.from || ''
+      const to = args.to || draft.to || ''
+      return from && to ? `${from} → ${to}` : '移动路径'
+    }
+    if (name.startsWith('feishu.draft')) {
+      return draft.title || args.title || item.summary || '飞书写入'
+    }
+    return args.path || draft.path || draft.title || item.summary || ''
+  }
+
+  function hasPendingReview(message) {
+    const terminal = new Set(['applied', 'approved', 'rejected'])
+    return (Array.isArray(message?.trace) ? message.trace : []).some((item) => {
+      if (!item?.requiresApproval) return false
+      return !terminal.has(String(item.draftStatus || '').toLowerCase())
+    })
+  }
+
+  function renderToolApprovalCard(item) {
+    if (!item?.draftId && !item?.requiresApproval) return ''
+    const draftId = escHtml(item.draftId || '')
+    const summary = escHtml(String(draftApprovalSummary(item) || '').slice(0, 120))
+    const applied = item.draftStatus === 'applied' || item.status === 'done' && !item.requiresApproval
+    const rollbackBtn = applied && item.draftId
+      ? `<button type="button" class="agent-draft-rollback" data-draft-rollback="${draftId}">回滚到备份</button>`
+      : ''
+    return `<div class="agent-tool-approval" data-draft-id="${draftId}">
+      <span class="agent-tool-approval-badge">待确认</span>
+      ${summary ? `<span class="agent-tool-approval-target" title="${summary}">${summary}</span>` : ''}
+      <span class="agent-tool-approval-hint">写入操作需批准后才会执行</span>
+      <div class="agent-tool-approval-actions">
+        <button type="button" class="agent-draft-approve" data-draft-approve="${draftId}">批准</button>
+        <button type="button" class="agent-draft-reject" data-draft-reject="${draftId}">拒绝</button>
+        ${rollbackBtn}
+      </div>
+    </div>`
+  }
+
+  function renderArtifactCards(refs = []) {
+    const list = Array.isArray(refs) ? refs.filter(r => r && r.id) : []
+    if (!list.length) return ''
+    return `<div class="agent-artifact-cards">${list.map(r =>
+      `<div class="agent-artifact-card" data-artifact-id="${escHtml(r.id)}"><span class="agent-artifact-kind">${escHtml(r.kind || 'artifact')}</span><span class="agent-artifact-title">${escHtml(r.title || r.id)}</span></div>`,
+    ).join('')}</div>`
+  }
+
   function renderExecutionTimeline(m) {
     const trace = Array.isArray(m.trace) ? m.trace : []
     const planHtml = renderPlanChecklist(m.plan)
-    if (!trace.length && !planHtml) return ''
+    const runTreeHtml = renderRunTreePanel(m)
+    if (!trace.length && !planHtml && !runTreeHtml) return ''
     const elapsedMs = Number.isFinite(m.elapsedMs)
       ? m.elapsedMs
       : (m.streaming && Number.isFinite(m.startedAt) ? Date.now() - m.startedAt : 0)
@@ -2237,8 +3197,10 @@ window.WorkspaceAgent = (function () {
     const errorCount = trace.filter(item => item.status === 'error').length
     const rounds = new Set(trace.map(item => Number(item.round)).filter(Number.isFinite))
     const pending = trace.some(item => item.status === 'pending') || (m.plan?.items || []).some(item => item.status === 'pending' || item.status === 'doing')
-    const summaryTitle = pending ? '执行进度' : '执行过程'
-    const summaryMeta = pending
+    const running = Boolean(m.streaming) || pending
+    const pendingReview = hasPendingReview(m)
+    const summaryTitle = running ? '执行进度' : '执行过程'
+    const summaryMeta = running
       ? (elapsedMs > 0 ? formatElapsed(elapsedMs) : '')
       : `${trace.length} 步${rounds.size > 1 ? ` / ${rounds.size} 轮` : ''}${toolCount ? ` / ${toolCount} 项操作` : ''}${errorCount ? ` / ${errorCount} 项未完成` : ''}`
     let lastRound = null
@@ -2251,12 +3213,16 @@ window.WorkspaceAgent = (function () {
       const duration = Number.isFinite(item.durationMs) && item.durationMs > 0
         ? `<span class="agent-trace-time">${item.durationMs < 1000 ? `${Math.round(item.durationMs)}ms` : `${(item.durationMs / 1000).toFixed(1)}s`}</span>`
         : ''
-      const status = item.status === 'error' ? 'error' : item.status === 'pending' ? 'pending' : 'done'
+      const status = item.status === 'error' ? 'error' : item.status === 'pending' ? 'pending' : item.status === 'cancelled' ? 'cancelled' : 'done'
       const friendlyTitle = item.kind === 'tool'
         ? toolTimelineTitle(item, status)
-        : groundingApi().userStatusLabel(item.title || '正在处理', status)
+        : item.kind === 'subrun'
+          ? toolTimelineTitle(item, status)
+          : groundingApi().userStatusLabel(item.title || '正在处理', status)
       const head = `<span class="agent-trace-mark">${traceStatusIcon(status)}</span><span class="agent-trace-title">${escHtml(friendlyTitle)}</span>`
       const detail = String(item.summary || '').trim()
+      const draftPending = item.requiresApproval && String(item.draftStatus || '').toLowerCase() === 'pending_review'
+      const safeDetail = draftPending ? '等待批准，预览已隐藏' : redactDisplayText(detail)
       const sources = Array.isArray(item.sources) ? item.sources.filter(source => source && typeof source === 'object').slice(0, 8) : []
       const sourceCards = sources.length
         ? `<div class="agent-source-results" aria-label="检索到的资料">${sources.map((source, index) => `
@@ -2269,16 +3235,31 @@ window.WorkspaceAgent = (function () {
               ${source.snippet ? `<div class="agent-source-snippet">${escHtml(source.snippet)}</div>` : ''}
             </div>`).join('')}</div>`
         : ''
-      if (item.kind === 'tool' && detail) {
-        const resultLabel = status === 'error' ? '查看错误' : sources.length ? `查看 ${sources.length} 条资料` : '查看结果'
-        return `${roundLabel}${withSig(`<details class="agent-trace-row tool ${status}"><summary aria-label="${escHtml(`${friendlyTitle}，${status === 'pending' ? '进行中' : status === 'error' ? '未完成' : '已完成'}`)}">${head}<span class="agent-trace-result-label">${escHtml(resultLabel)}</span>${duration}</summary><pre>${escHtml(detail)}</pre>${sourceCards}</details>`)}`
+      const approvalCard = renderToolApprovalCard(item)
+      const artifactCards = renderArtifactCards(item.artifactRefs)
+      if (item.kind === 'subrun') {
+        const node = m.runTree?.nodes?.[item.subRunId]
+        const subDetail = node ? renderRunTreeNode(node) : ''
+        const meta = duration ? `<span class="agent-trace-meta">${duration}</span>` : ''
+        return `${roundLabel}${withSig(`<details class="agent-trace-row subrun ${status}"><summary aria-label="${escHtml(friendlyTitle)}">${head}${meta}</summary>${subDetail ? `<div class="agent-run-inline">${subDetail}</div>` : (safeDetail ? `<span class="agent-trace-hint">${escHtml(safeDetail)}</span>` : '')}</details>`)}`
       }
-      return `${roundLabel}${withSig(`<div class="agent-trace-row ${item.kind} ${status}" aria-label="${escHtml(`${friendlyTitle}，${status === 'pending' ? '进行中' : status === 'error' ? '未完成' : '已完成'}`)}">${head}${duration}${detail ? `<span class="agent-trace-hint">${escHtml(detail)}</span>` : ''}${sourceCards}</div>`)}`
+      if (item.kind === 'tool' && safeDetail && !draftPending) {
+        const resultLabel = status === 'error' ? '查看详情' : item.requiresApproval ? '查看预览' : sources.length ? `查看 ${sources.length} 条资料` : '查看结果'
+        const meta = `<span class="agent-trace-meta"><span class="agent-trace-result-label">${escHtml(resultLabel)}</span>${duration}</span>`
+        const statusHint = (status === 'pending' && /超时|重试|已等待/.test(safeDetail))
+          || (status === 'error' && safeDetail)
+          ? `<span class="agent-trace-hint">${escHtml(safeDetail.slice(0, 160))}</span>`
+          : ''
+        return `${roundLabel}${withSig(`<details class="agent-trace-row tool ${status}${item.requiresApproval ? ' pending-review' : ''}"><summary aria-label="${escHtml(`${friendlyTitle}，${status === 'pending' ? '进行中' : status === 'error' ? '未完成' : '已完成'}`)}">${head}${meta}${statusHint}</summary><pre>${escHtml(safeDetail)}</pre>${approvalCard}${artifactCards}${sourceCards}</details>`)}`
+      }
+      const meta = duration ? `<span class="agent-trace-meta">${duration}</span>` : ''
+      return `${roundLabel}${withSig(`<div class="agent-trace-row ${item.kind} ${status}${item.requiresApproval ? ' pending-review' : ''}" aria-label="${escHtml(`${friendlyTitle}，${status === 'pending' ? '进行中' : status === 'error' ? '未完成' : '已完成'}`)}">${head}${meta}${safeDetail ? `<span class="agent-trace-hint">${escHtml(safeDetail)}</span>` : ''}${approvalCard}${artifactCards}${sourceCards}</div>`)}`
     }).join('')
-    const keepExpanded = pending || m.streaming
-    return `<details class="agent-execution${pending ? ' is-running' : ''}" data-execution-timeline="1"${keepExpanded ? ' open' : ''}>
-      <summary class="agent-execution-summary">${pending ? '<span class="agent-execution-orb" aria-hidden="true"></span>' : '<span class="agent-execution-check" aria-hidden="true">✓</span>'}<span class="agent-execution-title">${escHtml(summaryTitle)}</span>${summaryMeta ? `<span class="agent-execution-meta">${escHtml(summaryMeta)}</span>` : ''}</summary>
+    const keepExpanded = running || pendingReview
+    return `<details class="agent-execution${running ? ' is-running' : ''}" data-execution-timeline="1"${keepExpanded ? ' open' : ''}>
+      <summary class="agent-execution-summary">${running ? '<span class="agent-execution-orb" aria-hidden="true"></span>' : '<span class="agent-execution-check" aria-hidden="true">✓</span>'}<span class="agent-execution-title">${escHtml(summaryTitle)}</span>${summaryMeta ? `<span class="agent-execution-meta">${escHtml(summaryMeta)}</span>` : ''}</summary>
       ${planHtml}
+      ${runTreeHtml}
       <div class="agent-execution-list" role="log" aria-live="polite">${rows}</div>
     </details>`
   }
@@ -2323,6 +3304,8 @@ window.WorkspaceAgent = (function () {
     const nextList = next.querySelector(':scope > .agent-execution-list')
     const curPlan = current.querySelector(':scope > .agent-plan-checklist')
     const nextPlan = next.querySelector(':scope > .agent-plan-checklist')
+    const curRunTree = current.querySelector(':scope > .agent-run-tree')
+    const nextRunTree = next.querySelector(':scope > .agent-run-tree')
     if (curPlan && nextPlan) {
       syncTextNode(curPlan.querySelector('.agent-plan-head'), nextPlan.querySelector('.agent-plan-head'))
       reconcileKeyedChildren(curPlan.querySelector('.agent-plan-list'), nextPlan.querySelector('.agent-plan-list'))
@@ -2332,10 +3315,26 @@ window.WorkspaceAgent = (function () {
       curPlan.remove()
     }
 
+    if (curRunTree && nextRunTree) {
+      syncTextNode(curRunTree.querySelector('.agent-run-tree-meta'), nextRunTree.querySelector('.agent-run-tree-meta'))
+      reconcileKeyedChildren(curRunTree.querySelector('.agent-run-tree-list'), nextRunTree.querySelector('.agent-run-tree-list'))
+    } else if (nextRunTree) {
+      current.insertBefore(nextRunTree, curList || null)
+    } else if (curRunTree) {
+      curRunTree.remove()
+    }
+
     if (curList && nextList) reconcileKeyedChildren(curList, nextList)
     else if (nextList) current.appendChild(nextList)
     else curList?.remove()
     return true
+  }
+
+  function renderThinkingStatus(message) {
+    const elapsed = Number.isFinite(message?.elapsedMs)
+      ? message.elapsedMs
+      : (Number.isFinite(message?.startedAt) ? Math.max(0, Date.now() - message.startedAt) : 0)
+    return `<span class="thinking-status" data-thinking-status role="status"><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span data-thinking-label>${escHtml(groundingApi().userStatusLabel(message?.activity || '正在处理'))}${elapsed > 0 ? ` · ${formatElapsed(elapsed)}` : ''}</span></span>`
   }
 
   function updateThinkingStatus(bubble, message) {
@@ -2367,8 +3366,16 @@ window.WorkspaceAgent = (function () {
           else bubble.prepend(next)
         }
       }
+      bubble.querySelector('[data-thinking-status]')?.remove()
+      bubble.classList.add('has-execution')
     } else {
       timeline?.remove()
+      bubble.classList.remove('has-execution')
+      if (!bubble.querySelector('[data-thinking-status]')) {
+        const wrap = document.createElement('div')
+        wrap.innerHTML = renderThinkingStatus(message)
+        if (wrap.firstElementChild) bubble.appendChild(wrap.firstElementChild)
+      }
     }
 
     const meta = bubble.querySelector('.agent-execution-meta')
@@ -2379,6 +3386,32 @@ window.WorkspaceAgent = (function () {
     }
     updateThinkingStatus(bubble, message)
     return true
+  }
+
+  function renderGroundingStatusMeta(m) {
+    if (m?.streaming) return ''
+    const gs = m?.groundingStatus
+    if (!gs) return ''
+    const render = window.GroundingUI?.renderGroundingStatusMetaHtml
+    if (render) return render(gs, escHtml)
+    return ''
+  }
+
+  function renderWorkbenchCitationsMeta(m) {
+    if (m?.streaming) return ''
+    if (surfaceMode !== 'workbench') return ''
+    const citations = Array.isArray(m?.workbenchCitations) ? m.workbenchCitations.filter(c => c && c.label) : []
+    if (!citations.length) return ''
+    const items = citations.slice(0, 8).map((item) => {
+      const detail = String(item.detail || '').trim()
+      return `<li><span class="agent-workbench-cite-label">${escHtml(item.label)}</span>${
+        detail ? `<span class="agent-workbench-cite-detail">${escHtml(detail)}</span>` : ''
+      }</li>`
+    }).join('')
+    return `<details class="agent-workbench-citations">
+      <summary>引用来源（${citations.length}）</summary>
+      <ul>${items}</ul>
+    </details>`
   }
 
   function renderPersonalizationMeta(m) {
@@ -2409,27 +3442,413 @@ window.WorkspaceAgent = (function () {
     return apply ? `<div class="agent-chat-actions">${apply}</div>` : ''
   }
 
+  function activeExpertProjection() {
+    const expertId = String(activeSession?.expertId || '').trim()
+    if (!expertId) return null
+    const catalog = catalogExperts.find(item => String(item.id || '') === expertId) || {}
+    const sessionExpert = activeSession?.expert || {}
+    const bindings = sessionExpert.bindings || {
+      skills: Array.isArray(catalog.skills) ? catalog.skills : [],
+      connectors: Array.isArray(catalog.connectors) ? catalog.connectors : [],
+    }
+    return {
+      id: expertId,
+      name: activeSession.expertName || sessionExpert.name || catalog.name || expertId,
+      description: sessionExpert.description || catalog.description || '使用该专家的方法与能力处理工作任务。',
+      role: sessionExpert.role || sessionExpert.persona?.role || catalog.persona?.role || catalog.role || '专业 Agent',
+      avatar: sessionExpert.avatar || sessionExpert.persona?.avatar || catalog.avatar || catalog.persona?.avatar || '',
+      attributes: sessionExpert.attributes || catalog.attributes || {},
+      professionalCapabilities: sessionExpert.professionalCapabilities || catalog.display?.capabilities || catalog.capabilities || catalog.skills || [],
+      origin: sessionExpert.origin || sessionExpert.source || catalog.origin || catalog.source || 'local',
+      soul: sessionExpert.soul || catalog.soul || '',
+      sop: sessionExpert.sop || catalog.sop || sessionExpert.systemPrompt || catalog.systemPrompt || '',
+      agenticType: sessionExpert.agenticType || catalog.agenticType || 'react',
+      bindings,
+      readiness: sessionExpert.readiness || null,
+    }
+  }
+
+  /** 会话首屏的身份区：与工作台卡片共用图标语义，让「点开始使用」是同一对象的延续 */
+  function renderExpertIdentityHtml(expert) {
+    const identity = window.AgentIdentity || null
+    const icon = identity ? identity.identityIcon(expert) : 'users'
+    const badge = identity ? identity.identitySourceLabel(expert) : '我的专家'
+    const avatarSrc = identity && typeof identity.identityAvatarSrc === 'function'
+      ? identity.identityAvatarSrc(expert)
+      : ''
+    const mark = avatarSrc
+      ? `<img class="agent-expert-identity-photo" src="${escHtml(avatarSrc)}" alt="" width="34" height="34" decoding="async">`
+      : `<span class="ico" data-icon="${escHtml(icon)}"></span>`
+    return `<div class="agent-expert-identity">
+      <span class="agent-expert-identity-mark${avatarSrc ? ' has-photo' : ''}" aria-hidden="true">${mark}</span>
+      <div class="agent-expert-identity-copy">
+        <div class="agent-expert-identity-name">
+          <strong>${escHtml(expert.name)}</strong>
+          <span class="agent-expert-identity-badge">${escHtml(badge)}</span>
+        </div>
+        <p>${escHtml(expert.description)}</p>
+      </div>
+    </div>`
+  }
+
+  function renderExpertKnowledgeHtml() {
+    const selected = new Set(sessionKnowledgeRefs())
+    const canUpdateKnowledge = typeof window.api?.agentSessionContextUpdate === 'function'
+    let options = ''
+    if (!canUpdateKnowledge) {
+      options = '<span class="agent-expert-capability limited">本次对话知识库范围由系统管理</span>'
+    } else if (knowledgeCatalogState === 'loading' || knowledgeCatalogState === 'idle') {
+      options = '<button type="button" class="agent-expert-knowledge" disabled>正在读取知识库…</button>'
+    } else if (knowledgeCatalogState === 'error') {
+      options = '<span class="agent-expert-capability limited">知识库暂不可用</span><button type="button" class="agent-expert-knowledge-retry" data-knowledge-retry>重试</button>'
+    } else {
+      const known = new Set(knowledgeProviders.map(item => String(item.id || '')))
+      const defaultLabel = activeKnowledgeProviderId
+        ? (knowledgeProviders.find(item => String(item.id || '') === activeKnowledgeProviderId)?.displayName
+          || knowledgeProviders.find(item => String(item.id || '') === activeKnowledgeProviderId)?.name
+          || activeKnowledgeProviderId)
+        : '系统默认'
+      const defaultOption = `<button type="button" class="agent-expert-knowledge${selected.size ? '' : ' selected'}" data-knowledge-default="1"${knowledgeUpdatePending ? ' disabled' : ''}>跟随默认 · ${escHtml(defaultLabel)}</button>`
+      const providerOptions = knowledgeProviders.map(provider => {
+        const id = String(provider.id || '')
+        const unavailable = provider.enabled === false
+        return `<button type="button" class="agent-expert-knowledge${selected.has(id) ? ' selected' : ''}${unavailable ? ' limited' : ''}" data-knowledge-provider="${escHtml(id)}"${unavailable || knowledgeUpdatePending ? ' disabled' : ''}>${escHtml(provider.displayName || provider.name || id)}</button>`
+      }).join('')
+      const missing = [...selected].filter(id => !known.has(id))
+        .map(id => `<button type="button" class="agent-expert-knowledge limited selected" data-knowledge-provider="${escHtml(id)}"${knowledgeUpdatePending ? ' disabled' : ''}>${escHtml(id)} · 已失效</button>`)
+        .join('')
+      options = defaultOption + providerOptions + missing
+    }
+    return `<section class="agent-expert-section">
+      <div class="agent-expert-section-head"><span>知识库</span><small>${selected.size ? `本次仅使用 ${selected.size} 个` : '沿用当前默认范围'}</small></div>
+      <div class="agent-expert-knowledge-options">${options}</div>
+    </section>`
+  }
+
+  function renderKnowledgeToolbarMenu() {
+    if (!aiKnowledgeMenu) return
+    const selected = new Set(sessionKnowledgeRefs())
+    const canUpdateKnowledge = typeof window.api?.agentSessionContextUpdate === 'function'
+    let options = ''
+    if (!canUpdateKnowledge) {
+      options = '<span class="agent-expert-capability limited">本次对话知识库范围由系统管理</span>'
+    } else if (knowledgeCatalogState === 'loading' || knowledgeCatalogState === 'idle') {
+      options = '<button type="button" class="agent-expert-knowledge" disabled>正在读取知识库…</button>'
+    } else if (knowledgeCatalogState === 'error') {
+      options = '<span class="agent-expert-capability limited">知识库暂不可用</span><button type="button" class="agent-expert-knowledge-retry" data-knowledge-retry>重试</button>'
+    } else {
+      const known = new Set(knowledgeProviders.map(item => String(item.id || '')))
+      const defaultProvider = knowledgeProviders.find(item => String(item.id || '') === activeKnowledgeProviderId)
+      const defaultLabel = defaultProvider?.displayName || defaultProvider?.name || activeKnowledgeProviderId || '系统默认'
+      options = `<button type="button" class="agent-expert-knowledge${selected.size ? '' : ' selected'}" data-knowledge-default="1"${knowledgeUpdatePending ? ' disabled' : ''}>跟随默认 · ${escHtml(defaultLabel)}</button>`
+      options += knowledgeProviders.map(provider => {
+        const id = String(provider.id || '')
+        return `<button type="button" class="agent-expert-knowledge${selected.has(id) ? ' selected' : ''}" data-knowledge-provider="${escHtml(id)}"${provider.enabled === false || knowledgeUpdatePending ? ' disabled' : ''}>${escHtml(provider.displayName || provider.name || id)}</button>`
+      }).join('')
+      options += [...selected].filter(id => !known.has(id))
+        .map(id => `<button type="button" class="agent-expert-knowledge limited selected" data-knowledge-provider="${escHtml(id)}"${knowledgeUpdatePending ? ' disabled' : ''}>${escHtml(id)} · 已失效</button>`)
+        .join('')
+    }
+    aiKnowledgeMenu.innerHTML = `<div class="agent-knowledge-menu-head"><strong>本次对话知识库</strong><span>${selected.size ? `已选 ${selected.size}` : '跟随默认'}</span></div><div class="agent-expert-knowledge-options">${options}</div>`
+  }
+
+  function hideKnowledgeMenu() {
+    knowledgeMenuOpen = false
+    aiKnowledgeMenu?.classList.remove('show')
+    aiKnowledgeBtn?.setAttribute('aria-expanded', 'false')
+  }
+
+  function syncKnowledgeToolbar() {
+    if (!aiKnowledgeWrap) return
+    const expert = activeExpertProjection()
+    aiKnowledgeWrap.hidden = !expert
+    if (!expert) {
+      hideKnowledgeMenu()
+      return
+    }
+    const refs = sessionKnowledgeRefs()
+    if (aiKnowledgeLabel) {
+      aiKnowledgeLabel.textContent = refs.length ? `${refs.length} 个知识库` : '默认知识库'
+    }
+    if (knowledgeMenuOpen) renderKnowledgeToolbarMenu()
+  }
+
+  /** 工作台专家任务间：属性落右侧详情；左侧用「协作首屏」而非助手通用入口 */
+  function isWorkbenchExpertTaskRoomActive() {
+    const shell = document.getElementById('appShell')
+    const room = document.getElementById('wbExpertTaskRoom')
+    return !!(
+      shell?.classList.contains('mode-workbench')
+      && shell?.dataset.workbenchLayout === 'task-room'
+      && room
+      && !room.hidden
+    )
+  }
+
+  function expertReadinessItems(expert) {
+    const fallbackItems = [
+      ...(expert.bindings?.skills || []).map(id => ({
+        id,
+        kind: 'skill',
+        status: skillCatalog.some(item => String(item.id || '') === String(id)) ? 'ready' : 'limited',
+      })),
+      ...(expert.bindings?.connectors || []).map(id => ({ id, kind: 'connector', status: 'ready' })),
+    ]
+    const readinessItems = Array.isArray(expert.readiness?.items)
+      ? expert.readiness.items.map(item => ({ ...item }))
+      : fallbackItems
+    for (const item of readinessItems) {
+      if (item.kind === 'connector' && /feishu|lark/i.test(String(item.id || '')) && !/^可/.test(feishuUsageHint)) {
+        item.status = 'limited'
+        item.reason = feishuUsageHint
+      }
+    }
+    return readinessItems
+  }
+
+  function expertCollabCapabilityTags(expert) {
+    const api = window.WorkbenchPresenter
+    if (api && typeof api.capabilityTags === 'function') {
+      return api.capabilityTags(expert, 3)
+    }
+    const role = String(expert.role || '').trim()
+    return role ? [role] : []
+  }
+
+  /** 仅工作台专家任务间：强调「与该 Agent 深入协作」，不复用助手通用 launch intro */
+  function renderExpertCollabEmptyState(expert) {
+    const identity = window.AgentIdentity || null
+    const avatarSrc = identity && typeof identity.identityAvatarSrc === 'function'
+      ? identity.identityAvatarSrc(expert)
+      : ''
+    const icon = identity && typeof identity.identityIcon === 'function'
+      ? identity.identityIcon(expert)
+      : 'users'
+    const mark = avatarSrc
+      ? `<img class="agent-collab-photo" src="${escHtml(avatarSrc)}" alt="" width="56" height="56" decoding="async">`
+      : `<span class="ico" data-icon="${escHtml(icon)}"></span>`
+    const tags = expertCollabCapabilityTags(expert)
+    const tagsHtml = tags.length
+      ? `<div class="agent-collab-caps">${tags.map(t => `<span>${escHtml(t)}</span>`).join('')}</div>`
+      : ''
+    const skillsCount = (expert.bindings?.skills || []).length
+    const connectorCount = (expert.bindings?.connectors || []).length
+    const metaBits = []
+    if (expert.agenticType) {
+      const typeLabels = {
+        reflection: '反射',
+        tool_use: '工具优先',
+        react: 'ReAct',
+        planning: '规划',
+        multi_agent: '多智能体',
+      }
+      metaBits.push(typeLabels[expert.agenticType] || expert.agenticType)
+    }
+    if (skillsCount) metaBits.push(`${skillsCount} 技能`)
+    if (connectorCount) metaBits.push(`${connectorCount} 连接`)
+    const sopHint = String(expert.sop || '').trim().split(/\n/).map(s => s.trim()).filter(Boolean)[0] || ''
+    const metaHtml = metaBits.length
+      ? `<div class="agent-collab-meta">${metaBits.map(b => `<span>${escHtml(b)}</span>`).join('')}</div>`
+      : ''
+    const sopHtml = sopHint
+      ? `<p class="agent-collab-sop">${escHtml(sopHint.slice(0, 120))}${sopHint.length > 120 ? '…' : ''}</p>`
+      : ''
+    const group = packEmptyGroups.find(item => String(item.packId || '') === expert.id)
+    const packCards = group
+      ? (skillTaskUi.resolvePackEmptyCards
+          ? skillTaskUi.resolvePackEmptyCards(group, skillTaskMap)
+          : (group.scenes || []).map(card => ({
+              sceneId: card.id,
+              title: card.title,
+              subtitle: card.subtitle,
+              prompt: card.prompt,
+              dynamic: false,
+            })))
+      : []
+    let actionsHtml = ''
+    if (packCards.length) {
+      actionsHtml = packCards.slice(0, 3).map(card => {
+        const attrs = card.dynamic
+          ? `data-pack-id="${escHtml(group.packId)}" data-shortcut="${escHtml(card.id)}"`
+          : `data-pack-id="${escHtml(group.packId)}" data-pack-scene="${escHtml(card.sceneId || card.id)}" data-prompt="${escHtml(card.prompt || '')}"`
+        return `<button type="button" class="agent-collab-act" data-auto-send="1" ${attrs}>
+          <strong>${escHtml(card.title || '协作')}</strong>
+          <span>${escHtml(card.subtitle || '')}</span>
+        </button>`
+      }).join('')
+    } else {
+      actionsHtml = `
+        <button type="button" class="agent-collab-act" data-auto-send="1" data-prompt="${escHtml(`请以${expert.name}的身份开始协作。先复述你理解的目标、缺口信息与可立即推进的第一步。`)}">
+          <strong>对齐目标</strong>
+          <span>复述目标 · 缺口 · 下一步</span>
+        </button>
+        <button type="button" class="agent-collab-act" data-auto-send="1" data-prompt="${escHtml(`请按${expert.name}的方法列出你最适合接手的 3 类任务，并各给一个我可以直接粘贴的示例请求。`)}">
+          <strong>擅长什么</strong>
+          <span>3 类任务 + 示例请求</span>
+        </button>
+        <button type="button" class="agent-collab-act" data-auto-send="1" data-prompt="${escHtml(`我有一批材料尚未整理。请以${expert.name}身份告诉我：需要哪些文件/数据，以及拿到后会怎么处理。`)}">
+          <strong>带上材料</strong>
+          <span>需要什么 · 如何处理</span>
+        </button>`
+    }
+    const readinessItems = expertReadinessItems(expert)
+    const limited = readinessItems.some(item => item.status !== 'ready')
+    return `<div class="agent-empty-tips agent-empty-expert-collab" aria-label="${escHtml(expert.name)}协作入口">
+      <div class="agent-collab-head">
+        <span class="agent-collab-mark${avatarSrc ? ' has-photo' : ''}" aria-hidden="true">${mark}</span>
+        <div class="agent-collab-copy">
+          <span class="agent-collab-kicker">专家协作</span>
+          <strong>${escHtml(expert.name)}</strong>
+          ${tagsHtml}
+          ${metaHtml}
+          ${sopHtml}
+        </div>
+      </div>
+      <div class="agent-home-composer-mount" data-agent-composer-mount></div>
+      <div class="agent-collab-section"><span>一起开始</span></div>
+      <div class="agent-collab-actions">${actionsHtml}</div>
+      ${limited ? '<p class="agent-collab-hint">部分能力待配置，仍可先对话推进。</p>' : ''}
+    </div>`
+  }
+
+  /** 专家多出的上下文：属性 / 能力 / 技能 / 知识库（助理模式：对话右侧） */
+  function renderExpertContextPanelHtml(expert, { includeKnowledge = true } = {}) {
+    const readinessItems = expertReadinessItems(expert)
+    const readinessHtml = readinessItems.length
+      ? readinessItems.map(item => {
+          const ready = item.status === 'ready'
+          const kind = item.kind === 'connector' ? '连接器' : '技能'
+          return `<span class="agent-expert-capability${ready ? ' ready' : ' limited'}">
+            ${escHtml(kind)} · ${escHtml(item.id)} · ${ready ? '已就绪' : escHtml(item.reason || '暂不可用')}
+          </span>`
+        }).join('')
+      : '<span class="agent-expert-capability ready">专家方法 · 已就绪</span>'
+    const limitedConnectors = readinessItems.filter(item => item.kind === 'connector' && item.status !== 'ready')
+    const configureHtml = limitedConnectors.length
+      ? '<button type="button" class="agent-expert-config" data-expert-config>去配置连接器</button>'
+      : ''
+    const capabilityCount = readinessItems.length
+    const attributes = expert.attributes && typeof expert.attributes === 'object'
+      ? Object.values(expert.attributes).map(String).filter(Boolean).slice(0, 3)
+      : []
+    const attributeText = attributes.length
+      ? attributes.join(' · ')
+      : `${expert.origin === 'local' ? '本地专家' : '已安装专家'} · ${capabilityCount || 1} 项能力`
+    const professional = Array.isArray(expert.professionalCapabilities)
+      ? expert.professionalCapabilities.map(item => String(item?.label || item?.name || item || '')).filter(Boolean).slice(0, 5)
+      : []
+    const professionalText = professional.length ? professional.join('、') : expert.description
+    return `<div class="agent-expert-context">
+      <div class="agent-expert-context-grid">
+        <section class="agent-expert-context-card"><span>专家属性</span><strong>${escHtml(expert.role)}<br>${escHtml(attributeText)}</strong></section>
+        <section class="agent-expert-context-card"><span>专业能力</span><p>${escHtml(professionalText)}</p></section>
+      </div>
+      <section class="agent-expert-section">
+        <div class="agent-expert-section-head"><span>技能与连接器</span><small>${capabilityCount ? `${capabilityCount} 项绑定` : '内置方法'}</small></div>
+        <div class="agent-expert-readiness" aria-label="专家能力状态">${readinessHtml}${configureHtml}</div>
+      </section>
+      ${includeKnowledge ? renderExpertKnowledgeHtml() : ''}
+    </div>`
+  }
+
+  function renderExpertEmptyState(expert) {
+    // 工作台任务间：专用协作首屏（不与助手通用 launch 混用）
+    if (isWorkbenchExpertTaskRoomActive()) {
+      return renderExpertCollabEmptyState(expert)
+    }
+    const group = packEmptyGroups.find(item => String(item.packId || '') === expert.id)
+    const cards = group
+      ? (skillTaskUi.resolvePackEmptyCards
+          ? skillTaskUi.resolvePackEmptyCards(group, skillTaskMap)
+          : (group.scenes || []).map(card => ({
+              sceneId: card.id,
+              title: card.title,
+              subtitle: card.subtitle,
+              prompt: card.prompt,
+              dynamic: false,
+            })))
+      : []
+    const cardsHtml = cards.slice(0, 4).map(card => {
+      const attrs = card.dynamic
+        ? `data-pack-id="${escHtml(group.packId)}" data-shortcut="${escHtml(card.id)}"`
+        : `data-pack-id="${escHtml(group.packId)}" data-pack-scene="${escHtml(card.sceneId || card.id)}" data-prompt="${escHtml(card.prompt || '')}"`
+      return renderEmptyActionCard(card, attrs)
+    }).join('') || `
+      <button type="button" class="agent-empty-act" data-auto-send="1" data-prompt="${escHtml(`请以${expert.name}的身份开始协作。先确认我的目标和已有材料，再给出最短可执行步骤。`)}">
+        <span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="play"></span></span>
+        <span class="agent-empty-act-copy"><strong>开始一个任务</strong><span>说明目标与已有材料，专家会直接推进</span></span>
+      </button>
+      <button type="button" class="agent-empty-act" data-auto-send="1" data-prompt="${escHtml(`请介绍你作为${expert.name}最适合处理的任务，并给我 3 个具体示例。`)}">
+        <span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="capabilityStack"></span></span>
+        <span class="agent-empty-act-copy"><strong>看看能做什么</strong><span>了解适用场景和协作方式</span></span>
+      </button>`
+
+    const readinessItems = expertReadinessItems(expert)
+    // 受限项要读起来像「解释降级」而不是「功能失效」：明确许可用户先聊起来
+    const degradedHtml = readinessItems.some(item => item.status !== 'ready')
+      ? '<p class="agent-expert-degraded">有依赖未就绪，仍可直接对话；需要用到它时再去配置。</p>'
+      : ''
+    // 助理模式：引导 + Composer 位 + 快捷任务；属性并排在对话右侧
+    const mainHtml = `${renderLaunchIntroHtml(expert.name, '说明你的目标与已有材料，它会按自己的方法推进。')}
+      <div class="agent-empty-actions">${cardsHtml}</div>`
+    const sideHtml = `${renderExpertIdentityHtml(expert)}
+      ${renderExpertContextPanelHtml(expert)}
+      ${degradedHtml}`
+    return `<div class="agent-empty-tips agent-empty-home agent-empty-expert agent-empty-expert-split" aria-label="${escHtml(expert.name)}专家入口">
+      <div class="agent-empty-expert-main">${mainHtml}</div>
+      <aside class="agent-empty-expert-side" aria-label="专家属性与能力">${sideHtml}</aside>
+    </div>`
+  }
+
   function renderEmptyState() {
     const renderShortcutCards = mode => {
-      const cards = Array.isArray(EMPTY_SHORTCUT_PRESETS[mode]) ? EMPTY_SHORTCUT_PRESETS[mode] : []
-      return cards.map(card => `
-        <button type="button" class="agent-empty-act" data-auto-send="1" data-shortcut="${escHtml(card.id)}">
-          <strong>${escHtml(card.title)}</strong><span>${escHtml(card.subtitle)}</span>
-        </button>`).join('')
+      const cards = skillTaskUi.resolveEmptyStateCards
+        ? skillTaskUi.resolveEmptyStateCards(mode, EMPTY_SHORTCUT_PRESETS, skillTaskMap)
+        : (Array.isArray(EMPTY_SHORTCUT_PRESETS[mode]) ? EMPTY_SHORTCUT_PRESETS[mode] : [])
+      return cards.slice(0, 4)
+        .map(card => renderEmptyActionCard(card, `data-shortcut="${escHtml(card.id)}"`))
+        .join('')
     }
     if (surfaceMode === 'workbench') {
       const task = workbenchTaskContext || {}
+      const kind = String(task.kind || task.runMode || '')
+      if (kind === 'expert-chat' || (isWorkbenchExpertTaskRoomActive() && kind !== 'workflow-chat' && String(task.runMode || '') !== 'daemon')) {
+        const activeExpert = activeExpertProjection()
+        if (activeExpert) return renderExpertCollabEmptyState(activeExpert)
+      }
       const goal = task.intent || task.name || task.slug || '当前工作'
+      const artifacts = Array.isArray(task.artifacts) ? task.artifacts : []
+      const resultSummary = String(task.resultSummary || '').trim()
+      if (workbenchTaskDone()) {
+        const artifactHtml = artifacts.length
+          ? `<div class="agent-workbench-results">${artifacts.slice(0, 6).map((item, index) => {
+              const source = item && typeof item === 'object' ? item : {}
+              const title = String(source.title || source.name || source.label || source.path || source.url || item || `产物 ${index + 1}`)
+              return `<div class="agent-workbench-result"><span class="ico" data-icon="fileText"></span><span>${escHtml(title)}</span></div>`
+            }).join('')}</div>`
+          : ''
+        const summaryHtml = resultSummary
+          ? `<div class="agent-workbench-result-summary">${escHtml(resultSummary)}</div>`
+          : ''
+        const emptyText = !artifacts.length && !resultSummary
+          ? '<div class="agent-empty-sub">本次运行已结束，但没有返回结果或可打开产物。可在右侧查看执行过程，或调整输入后再跑一次。</div>'
+          : ''
+        return `<div class="agent-empty-tips agent-empty-workbench is-completed" aria-label="任务结果">
+          <div class="agent-empty-kicker">任务结果</div>
+          <div class="agent-empty-hero">${escHtml(goal)}</div>
+          <div class="agent-empty-sub">${artifacts.length ? `已完成 · ${artifacts.length} 个产物` : '已完成 · 无可打开产物'}</div>
+          ${summaryHtml}
+          ${artifactHtml}
+          ${emptyText}
+        </div>`
+      }
       const workflow = task.workflowName || task.workflow || '待确认流程'
       const current = task.currentNode || '流程执行中'
       const agents = Array.isArray(task.agents) && task.agents.length
         ? task.agents.join(' · ')
         : '由流程按需调度'
-      const statusLines = String(task.factualBrief || '').trim()
-        ? String(task.factualBrief).split('\n').slice(0, 4).map(line => `<div class="agent-empty-tip"><span class="tip-label">事实</span><span class="tip-key">${escHtml(line)}</span></div>`).join('')
-        : ''
       return `<div class="agent-empty-tips agent-empty-workbench" aria-label="任务协作入口">
-        <div class="agent-empty-kicker">当前工作</div>
+        <div class="agent-empty-kicker is-secondary">协作引导</div>
         <div class="agent-empty-hero">${escHtml(goal)}</div>
         <div class="agent-empty-sub">进度与审批请在右侧流程面板操作。这里只补充要求、附材料或调用 Agent，不臆造流程外角色。</div>
         <div class="agent-workbench-steps">
@@ -2437,46 +3856,31 @@ window.WorkspaceAgent = (function () {
           <div><span>02</span><strong>当前节点</strong><small>${escHtml(current)}</small></div>
           <div><span>03</span><strong>参与助手</strong><small>${escHtml(agents)}</small></div>
         </div>
-        ${statusLines}
         <div class="agent-empty-tip"><span class="tip-label">推进任务</span><span class="tip-key">右侧 · 通过/修订/澄清</span></div>
         <div class="agent-empty-tip"><span class="tip-label">补充材料</span><span class="tip-key">@ 文件</span></div>
         <div class="agent-empty-tip"><span class="tip-label">飞书查询</span><span class="tip-key">${escHtml(feishuUsageHint)}</span></div>
       </div>`
     }
-    if (currentIndustry() === 'game') {
-      const gameCards = [
-        { id: 'game-design', title: '策划需求', subtitle: '结构化需求案 · 飞书引用', prompt: '帮我撰写手机游戏需求案，包含背景、玩法、数值、埋点与验收标准' },
-        { id: 'game-dev', title: '研发实现', subtitle: '交接 Workbench · 真实 Daemon', prompt: '基于已批准需求案，准备交接研发工作流并列出验收清单' },
-        { id: 'game-qa', title: '测试验收', subtitle: '对照需求做 QA', prompt: '对照游戏需求案列出测试矩阵、反模式与阻塞项' },
-        { id: 'game-production', title: '制作推进', subtitle: '版本里程碑与风险', prompt: '整理本版本里程碑、依赖与风险清单' },
-      ]
-      const cardsHtml = gameCards.map(card => `
-        <button type="button" class="agent-empty-act" data-auto-send="1" data-game-scene="${escHtml(card.id)}" data-prompt="${escHtml(card.prompt)}">
-          <strong>${escHtml(card.title)}</strong><span>${escHtml(card.subtitle)}</span>
-        </button>`).join('')
-      return `<div class="agent-empty-tips agent-empty-home agent-empty-game-studio" aria-label="游戏工作室任务入口">
-        <div class="agent-empty-kicker">游戏工作室</div>
-        <div class="agent-empty-hero">KnowMe 工作伙伴</div>
-        <div class="agent-empty-sub">选择任务场景立即开工；左侧 Rail 与工作台流程保持不变。</div>
-        <div class="agent-empty-actions">${cardsHtml}</div>
-      </div>`
-    }
+    const activeExpert = activeExpertProjection()
+    if (activeExpert) return renderExpertEmptyState(activeExpert)
+    const packHtml = activeSession?.agentId === 'general'
+      ? renderPackEmptyStateHtml()
+      : ''
+    if (packHtml) return packHtml
     if (activeSession?.agentId === 'steward') {
       return `<div class="agent-empty-tips agent-empty-home agent-empty-steward" aria-label="知识管家入口">
-        <div class="agent-empty-hero">公司知识协作</div>
-        <div class="agent-empty-sub">先查约定、整理 Wiki，再对话。也可直接输入问题。</div>
+        ${renderLaunchIntroHtml('知识管家 · 公司知识协作')}
         <div class="agent-empty-actions">
-          <button type="button" class="agent-empty-act" data-steward="ingest"><strong>整理本地 Wiki</strong><span>吸收材料到知识根</span></button>
-          <button type="button" class="agent-empty-act" data-steward="lint"><strong>知识健康检查</strong><span>断链 / 空文 / 重复标题</span></button>
-          <button type="button" class="agent-empty-act" data-steward="promote"><strong>升格 OKF</strong><span>Wiki → 可交换概念（需审阅）</span></button>
-          <button type="button" class="agent-empty-act" data-steward="remote-rag"><strong>检索远程知识库</strong><span>MCP 读取 RAG 知识库</span></button>
+          <button type="button" class="agent-empty-act" data-steward="ingest"><span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="bookOpen"></span></span><span class="agent-empty-act-copy"><strong>整理本地 Wiki</strong><span>吸收材料到知识根</span></span></button>
+          <button type="button" class="agent-empty-act" data-steward="lint"><span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="clipboardCheck"></span></span><span class="agent-empty-act-copy"><strong>知识健康检查</strong><span>断链 / 空文 / 重复标题</span></span></button>
+          <button type="button" class="agent-empty-act" data-steward="promote"><span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="database"></span></span><span class="agent-empty-act-copy"><strong>升格 OKF</strong><span>Wiki → 可交换概念（需审阅）</span></span></button>
+          <button type="button" class="agent-empty-act" data-steward="remote-rag"><span class="agent-empty-act-mark" aria-hidden="true"><span class="ico" data-icon="searchLine"></span></span><span class="agent-empty-act-copy"><strong>检索远程知识库</strong><span>MCP 读取 RAG 知识库</span></span></button>
         </div>
       </div>`
     }
     if (activeSession?.agentId === 'coding') {
       return `<div class="agent-empty-tips agent-empty-home" aria-label="编程模式入口">
-      <div class="agent-empty-hero">编程协作搭档</div>
-      <div class="agent-empty-sub">点一个研发任务立即开工；也可直接贴代码或报错。</div>
+      ${renderLaunchIntroHtml('研发助手 · 编程协作')}
       <div class="agent-empty-actions">
         ${renderShortcutCards('coding')}
       </div>
@@ -2484,16 +3888,14 @@ window.WorkspaceAgent = (function () {
     }
     if (activeSession?.agentId === 'writing') {
       return `<div class="agent-empty-tips agent-empty-home" aria-label="写作模式入口">
-      <div class="agent-empty-hero">写作办公搭档</div>
-      <div class="agent-empty-sub">点一个日常文档任务立即开工；也可直接贴提纲、草稿或材料。</div>
+      ${renderLaunchIntroHtml('写作专家 · 文档协作')}
       <div class="agent-empty-actions">
         ${renderShortcutCards('writing')}
       </div>
     </div>`
     }
     return `<div class="agent-empty-tips agent-empty-home" aria-label="任务入口">
-      <div class="agent-empty-hero">智能办公搭档</div>
-      <div class="agent-empty-sub">点一个任务立即开工；也可直接输入你的目标。</div>
+      ${renderLaunchIntroHtml('智能办公搭档')}
       <div class="agent-empty-actions">
         ${renderShortcutCards('general')}
       </div>
@@ -2504,7 +3906,8 @@ window.WorkspaceAgent = (function () {
     if (!button || !button.dataset) return ''
     const shortcutId = String(button.dataset.shortcut || '').trim()
     if (shortcutId && EMPTY_SHORTCUT_PROMPTS[shortcutId]) return String(EMPTY_SHORTCUT_PROMPTS[shortcutId]).trim()
-    return String(button.dataset.p || '').trim()
+    const fromPrompt = String(button.dataset.prompt || button.dataset.p || '').trim()
+    return fromPrompt
   }
 
   function deriveFeishuUsageHint(connector = null) {
@@ -2527,7 +3930,7 @@ window.WorkspaceAgent = (function () {
     if (/(消息|聊天|会话|群|im|发消息|回复)/i.test(src)) return { mentions: true, kind: 'im' }
     if (/(日历|会议|日程|calendar)/i.test(src)) return { mentions: true, kind: 'calendar' }
     if (/(任务|待办|task)/i.test(src)) return { mentions: true, kind: 'task' }
-    if (/(智能体|bot|助手|agent)/i.test(src)) return { mentions: true, kind: 'agent' }
+    if (/(专家|智能体|bot|助手|agent)/i.test(src)) return { mentions: true, kind: 'agent' }
     // 仅提到飞书，但未给出明确能力类型
     if (/飞书|feishu|lark/i.test(low)) return { mentions: true, kind: 'unknown' }
     return { mentions: true, kind: 'unknown' }
@@ -2611,9 +4014,47 @@ window.WorkspaceAgent = (function () {
     </div>`
   }
 
+  function dockComposerAfterChat() {
+    if (!agentCol || !chatLog || !agentFoot) return
+    if (chatLog.nextElementSibling !== agentFoot) {
+      chatLog.insertAdjacentElement('afterend', agentFoot)
+    }
+    agentCol.classList.remove('agent-launch-state')
+    // Remeasure after leaving the larger launch state, then apply collab chrome.
+    resizeAiInput()
+    agentCol.classList.toggle('is-expert-collab', isWorkbenchExpertTaskRoomActive())
+  }
+
+  function mountComposerInLaunchState() {
+    if (!agentCol || !chatLog || !agentFoot || surfaceMode === 'workbench') return false
+    const mount = chatLog.querySelector('[data-agent-composer-mount]')
+    if (!mount) return false
+    mount.appendChild(agentFoot)
+    agentCol.classList.add('agent-launch-state')
+    const collab = isWorkbenchExpertTaskRoomActive()
+    agentCol.classList.toggle('is-expert-collab', collab)
+    if (aiInput) {
+      // 专家会话里输入框也要点名对象，否则首屏刚建立的身份感又被通用文案冲掉
+      const expert = activeExpertProjection()
+      if (collab && expert) {
+        aiInput.placeholder = `与「${expert.name}」协作：目标 / 材料 / 约束… @ 选文件`
+      } else {
+        aiInput.placeholder = expert ? `告诉「${expert.name}」你的目标…` : '给 KnowMe 发送消息…'
+      }
+    }
+    return true
+  }
+
   function renderChat() {
-    const shouldFollow = !chatLog
-      || chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight < 96
+    // The launch state temporarily owns the real Composer. Dock it before
+    // replacing chatLog.innerHTML so its event handlers and draft survive.
+    dockComposerAfterChat()
+    if (chatLog && isChatNearBottom()) chatStickToBottom = true
+    const shouldFollow = !chatLog || chatStickToBottom
+    const savedScrollTop = chatLog ? chatLog.scrollTop : 0
+    const groundingDetailsOpen = (chatLog && window.GroundingUI?.captureGroundingDetailsOpenState)
+      ? window.GroundingUI.captureGroundingDetailsOpenState(chatLog)
+      : {}
     if (streamPaintRaf) {
       cancelAnimationFrame(streamPaintRaf)
       streamPaintRaf = 0
@@ -2622,17 +4063,26 @@ window.WorkspaceAgent = (function () {
     lastStreamHtml = ''
     if (!chatHistory.length && !runArtifacts.length) {
       chatLog.innerHTML = renderEmptyState()
+      restoreDaemonProcessFeedAfterChatRender()
+      mountComposerInLaunchState()
+      syncKnowledgeToolbar()
+      if (!agentCol?.classList.contains('agent-launch-state')) {
+        syncComposerPlaceholder({ force: true })
+      }
       if (topicNav) topicNav.innerHTML = ''
+      if (window.StickyIcons) window.StickyIcons.mount(chatLog)
       syncConversationAnchorPosition()
       updateContextMeter()
       syncThinkingTicker()
       syncWorkSurface({ autoOpen: false })
       return
     }
+    syncComposerPlaceholder({ force: true })
     const artHtml = runArtifacts.map((a, i) => renderArtifactCard(a, i)).join('')
     const userTurns = chatHistory.reduce((count, msg) => count + (msg.role === 'user' ? 1 : 0), 0)
     const metaHtml = userTurns > 0 ? renderConversationMeta() : ''
     const msgHtml = chatHistory.map((m, i) => {
+      if (m.role === 'assistant' && !m.streaming) hydrateLegacyAssistantMessage(m)
       if (m.role === 'loading') return `<div class="agent-bubble assistant loading">${escHtml(m.text)}</div>`
       if (m.role === 'error') return `<div class="agent-bubble assistant err">${escHtml(m.text)}</div>`
       if (m.role === 'user') {
@@ -2645,31 +4095,42 @@ window.WorkspaceAgent = (function () {
       if (m.role === 'system-note') {
         return `<div class="agent-trail">${escHtml(m.text)}</div>`
       }
+      if (m.role === 'daemon-hitl') {
+        return renderDaemonHitlBubble(m)
+      }
       if (m.role === 'tool') return ''
       const streamCls = m.streaming ? ' streaming' : ''
       const waiting = m.streaming && !String(m.text || '').trim()
       if (waiting) {
-        const hasTrace = Array.isArray(m.trace) && m.trace.length > 0
-        const elapsed = Number.isFinite(m.elapsedMs)
-          ? m.elapsedMs
-          : (Number.isFinite(m.startedAt) ? Math.max(0, Date.now() - m.startedAt) : 0)
-        const status = hasTrace
-          ? ''
-          : `<span class="thinking-status" data-thinking-status role="status"><span class="thinking-dots" aria-hidden="true"><i></i><i></i><i></i></span><span data-thinking-label>${escHtml(groundingApi().userStatusLabel(m.activity || '正在处理'))}${elapsed > 0 ? ` · ${formatElapsed(elapsed)}` : ''}</span></span>`
-        return `<div class="agent-bubble assistant streaming thinking${hasTrace ? ' has-execution' : ''}" data-idx="${i}" aria-busy="true">${renderExecutionTimeline(m)}${status}</div>`
+        const timelineHtml = renderExecutionTimeline(m)
+        const hasExecution = Boolean(timelineHtml)
+        const status = hasExecution ? '' : renderThinkingStatus(m)
+        return `<div class="agent-bubble assistant streaming thinking${hasExecution ? ' has-execution' : ''}" data-idx="${i}" aria-busy="true">${timelineHtml}<div class="agent-response-body" data-assistant-body="1">${assistantBodyHtml(m, i)}</div>${renderStructuredUiRegion(m, i, m.protocolVersion === 2)}${status}</div>`
       }
       const cursor = m.streaming ? '<span class="stream-cursor">▍</span>' : ''
       const personalization = (!m.streaming && m.text) ? renderPersonalizationMeta(m) : ''
+      const groundingMeta = (!m.streaming && m.text) ? renderGroundingStatusMeta(m) : ''
+      const workbenchCite = (!m.streaming && m.text) ? renderWorkbenchCitationsMeta(m) : ''
       const actions = (!m.streaming && m.text) ? assistantActionsHtml(i) : ''
-      const body = assistantBodyHtml(m, i)
+      const body = `<div class="agent-response-body" data-assistant-body="1">${assistantBodyHtml(m, i)}</div>${renderStructuredUiRegion(m, i, m.protocolVersion === 2)}`
       const resultCls = isRelatedChatsResult(m) ? ' related-chats-result' : ''
-      return `<div class="agent-bubble assistant${streamCls}${resultCls}" data-idx="${i}">${renderExecutionTimeline(m)}${body}${cursor}${personalization}${actions}</div>`
+      return `<div class="agent-bubble assistant${streamCls}${resultCls}" data-idx="${i}">${renderExecutionTimeline(m)}${body}${cursor}${workbenchCite}${groundingMeta}${personalization}${actions}</div>`
     }).join('')
     chatLog.innerHTML = `${artHtml}${msgHtml}`
+    restoreDaemonProcessFeedAfterChatRender()
+    syncKnowledgeToolbar()
+    if (window.GroundingUI?.restoreGroundingDetailsOpenState) {
+      window.GroundingUI.restoreGroundingDetailsOpenState(chatLog, groundingDetailsOpen)
+    }
     if (topicNav) topicNav.innerHTML = metaHtml
     if (window.StickyIcons) window.StickyIcons.mount(chatLog)
     syncConversationAnchorPosition()
-    scrollChatToBottomIfNeeded(shouldFollow)
+    if (shouldFollow) {
+      scrollChatToBottomIfNeeded(true)
+    } else {
+      beginProgrammaticChatScroll()
+      chatLog.scrollTop = savedScrollTop
+    }
     updateContextMeter()
     syncThinkingTicker()
     syncWorkSurface({ autoOpen: true })
@@ -2677,12 +4138,15 @@ window.WorkspaceAgent = (function () {
 
   function scrollChatToBottomIfNeeded(force) {
     if (!chatLog) return
-    if (force) {
+    if (force || chatStickToBottom) {
+      beginProgrammaticChatScroll()
       chatLog.scrollTop = chatLog.scrollHeight
       return
     }
-    const gap = chatLog.scrollHeight - chatLog.scrollTop - chatLog.clientHeight
-    if (gap < 96) chatLog.scrollTop = chatLog.scrollHeight
+    if (isChatNearBottom()) {
+      beginProgrammaticChatScroll()
+      chatLog.scrollTop = chatLog.scrollHeight
+    }
   }
 
   function estimateTokens(text) {
@@ -2824,11 +4288,11 @@ window.WorkspaceAgent = (function () {
   let streamPaintIdx = null
   let lastStreamHtml = ''
 
-  function isStreamTail(node) {
-    return node?.nodeType === Node.ELEMENT_NODE && node.classList.contains('md-stream-tail')
+  function isStreamPending(node) {
+    return node?.nodeType === Node.ELEMENT_NODE && node.classList.contains('md-stream-pending')
   }
 
-  /** 逐个子节点比对，只替换变化的块；尾行走 textContent 原地更新，避免整块重排闪屏 */
+  /** 逐个子节点比对，只替换变化的块；pending 状态原地复用，避免整块重排闪屏。 */
   function reconcileStreamChildren(container, nextContainer) {
     const olds = Array.from(container.childNodes)
     const nexts = Array.from(nextContainer.childNodes)
@@ -2840,10 +4304,7 @@ window.WorkspaceAgent = (function () {
         if (cur.nodeValue !== next.nodeValue) cur.nodeValue = next.nodeValue
         continue
       }
-      if (isStreamTail(cur) && isStreamTail(next)) {
-        if (cur.textContent !== next.textContent) cur.textContent = next.textContent
-        continue
-      }
+      if (isStreamPending(cur) && isStreamPending(next)) continue
       if (cur.nodeType === Node.ELEMENT_NODE && next.nodeType === Node.ELEMENT_NODE
         && cur.outerHTML === next.outerHTML) continue
       cur.replaceWith(next)
@@ -2853,18 +4314,27 @@ window.WorkspaceAgent = (function () {
 
   /** 首个正文 token 到达：就地把思考气泡升级为正文气泡，避免整页重绘 */
   function upgradeThinkingBubble(bubble, m, html) {
+    bubble.classList.remove('thinking', 'has-execution')
+    if (isRelatedChatsResult(m)) bubble.classList.add('related-chats-result')
+    bubble.querySelector('[data-thinking-status]')?.remove()
+    let body = bubble.querySelector('[data-assistant-body="1"]')
+    if (!body) {
+      body = document.createElement('div')
+      body.className = 'agent-response-body'
+      body.dataset.assistantBody = '1'
+      bubble.appendChild(body)
+    }
     const wrap = document.createElement('div')
     wrap.innerHTML = html
     const textNode = wrap.firstElementChild
     if (!textNode) return false
-    bubble.classList.remove('thinking', 'has-execution')
-    if (isRelatedChatsResult(m)) bubble.classList.add('related-chats-result')
-    bubble.querySelector('[data-thinking-status]')?.remove()
-    bubble.appendChild(textNode)
-    const cursor = document.createElement('span')
-    cursor.className = 'stream-cursor'
-    cursor.textContent = '▍'
-    bubble.appendChild(cursor)
+    body.replaceChildren(textNode)
+    if (!bubble.querySelector(':scope > .stream-cursor')) {
+      const cursor = document.createElement('span')
+      cursor.className = 'stream-cursor'
+      cursor.textContent = '▍'
+      bubble.appendChild(cursor)
+    }
     if (window.StickyIcons) window.StickyIcons.mount(bubble)
     return true
   }
@@ -2875,8 +4345,9 @@ window.WorkspaceAgent = (function () {
     if (!m?.streaming) return
     if (!bubble) { renderChat(); return }
     const textEl = bubble.querySelector('.chat-text')
+    const visibleText = assistantDisplayText(m, { preserveStreamingLayout: true })
     if (!textEl || bubble.classList.contains('thinking')) {
-      const firstHtml = renderStreamingMarkdown(m.text)
+      const firstHtml = renderStreamingMarkdown(visibleText)
       if (!textEl && upgradeThinkingBubble(bubble, m, firstHtml)) {
         lastStreamHtml = firstHtml
         scrollChatToBottomIfNeeded(false)
@@ -2886,7 +4357,7 @@ window.WorkspaceAgent = (function () {
       renderChat()
       return
     }
-    const html = renderStreamingMarkdown(m.text)
+    const html = renderStreamingMarkdown(visibleText)
     if (lastStreamHtml === html) {
       scrollChatToBottomIfNeeded(false)
       return
@@ -2929,6 +4400,104 @@ window.WorkspaceAgent = (function () {
     return true
   }
 
+  function reconcileCompletedAssistantBody(current, next) {
+    const currentText = current?.querySelector(':scope > .chat-text')
+    const nextText = next?.querySelector(':scope > .chat-text')
+    if (currentText && nextText) {
+      const nextCls = nextText.getAttribute('class') || ''
+      if (currentText.getAttribute('class') !== nextCls) currentText.setAttribute('class', nextCls)
+      reconcileStreamChildren(currentText, nextText)
+      nextText.replaceWith(currentText)
+    }
+    current.replaceChildren(...Array.from(next.childNodes))
+  }
+
+  function syncRunArtifactCards() {
+    if (!chatLog) return
+    const current = Array.from(chatLog.querySelectorAll(':scope > .agent-artifact.summary'))
+    const wrap = document.createElement('div')
+    wrap.innerHTML = runArtifacts.map((artifact, index) => renderArtifactCard(artifact, index)).join('')
+    const next = Array.from(wrap.children)
+    const firstMessage = chatLog.querySelector(':scope > .agent-bubble, :scope > .agent-trail')
+    for (let i = 0; i < next.length; i++) {
+      if (!current[i]) {
+        chatLog.insertBefore(next[i], firstMessage)
+      } else if (current[i].outerHTML !== next[i].outerHTML) {
+        current[i].replaceWith(next[i])
+      }
+    }
+    for (let i = next.length; i < current.length; i++) current[i].remove()
+  }
+
+  /** 将 streaming 气泡原地收尾；不替换 chatLog、历史消息或已显示的正文容器。 */
+  function completeAssistantBubble(idx) {
+    const message = chatHistory[idx]
+    const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+    if (!message || !bubble) {
+      renderChat()
+      return false
+    }
+    if (streamPaintRaf && streamPaintIdx === idx) {
+      cancelAnimationFrame(streamPaintRaf)
+      streamPaintRaf = 0
+      streamPaintIdx = null
+    }
+    lastStreamHtml = ''
+
+    bubble.classList.remove('streaming', 'thinking', 'has-execution')
+    bubble.classList.toggle('related-chats-result', isRelatedChatsResult(message))
+    bubble.removeAttribute('aria-busy')
+    bubble.querySelector('[data-thinking-status]')?.remove()
+
+    const currentTimeline = bubble.querySelector('[data-execution-timeline]')
+    const nextTimeline = buildExecutionTimelineNode(message)
+    let timeline = currentTimeline
+    if (nextTimeline) {
+      if (!timeline) {
+        bubble.prepend(nextTimeline)
+        timeline = nextTimeline
+      } else if (!patchExecutionTimeline(timeline, nextTimeline)) {
+        timeline.replaceWith(nextTimeline)
+        timeline = nextTimeline
+      }
+      if (hasPendingReview(message)) timeline.setAttribute('open', '')
+      else timeline.removeAttribute('open')
+    } else {
+      timeline?.remove()
+    }
+
+    const nextBody = document.createElement('div')
+    nextBody.className = 'agent-response-body'
+    nextBody.dataset.assistantBody = '1'
+    nextBody.innerHTML = assistantBodyHtml(message, idx)
+    const currentBody = bubble.querySelector('[data-assistant-body="1"]')
+    if (currentBody) {
+      reconcileCompletedAssistantBody(currentBody, nextBody)
+    } else if (timeline) {
+      timeline.after(nextBody)
+    } else {
+      bubble.prepend(nextBody)
+    }
+    patchAssistantStructuredUi(bubble, message, idx)
+
+    bubble.querySelector(':scope > .stream-cursor')?.remove()
+    bubble.querySelectorAll(':scope > .agent-grounding-meta, :scope > .agent-workbench-citations, :scope > .agent-personalization, :scope > .agent-chat-actions')
+      .forEach(node => node.remove())
+    if (message.text) {
+      bubble.insertAdjacentHTML(
+        'beforeend',
+        `${renderWorkbenchCitationsMeta(message)}${renderGroundingStatusMeta(message)}${renderPersonalizationMeta(message)}${assistantActionsHtml(idx)}`
+      )
+    }
+    syncRunArtifactCards()
+    if (window.StickyIcons) window.StickyIcons.mount(chatLog)
+    scrollChatToBottomIfNeeded(false)
+    updateContextMeter()
+    syncThinkingTicker()
+    syncWorkSurface({ autoOpen: true })
+    return true
+  }
+
   function setQuickMenuOpen(open) {
     const next = !!open
     aiQuickMenu?.classList.toggle('show', next)
@@ -2938,6 +4507,7 @@ window.WorkspaceAgent = (function () {
 
   function hideAiMenus() {
     setQuickMenuOpen(false)
+    hideKnowledgeMenu()
     hideHeadPops()
   }
 
@@ -3088,13 +4658,9 @@ window.WorkspaceAgent = (function () {
     aiInput.dispatchEvent(new Event('input'))
   }
 
-  function quickCats() {
-    return aiQuickMenu ? Array.from(aiQuickMenu.querySelectorAll('[data-quick-cat-key]')) : []
-  }
-
   function quickItems() {
     return aiQuickMenu
-      ? Array.from(aiQuickMenu.querySelectorAll('[data-quick-cat][data-p], [data-quick-cat][data-steward]'))
+      ? Array.from(aiQuickMenu.querySelectorAll('[data-quick-command]'))
       : []
   }
 
@@ -3102,24 +4668,56 @@ window.WorkspaceAgent = (function () {
     return QUICK_MENU_PROFILES[String(agentId || '').trim()] || QUICK_MENU_PROFILES.general
   }
 
-  function renderQuickMenuForAgent(agentId = activeAgentId) {
-    if (!quickCatsHost || !quickItemsHost) return
-    const sections = quickMenuSectionsForAgent(agentId)
-    quickCatsHost.innerHTML = sections.map((section, index) => `
-      <button class="agent-menu-item" type="button" role="menuitem" data-quick-cat-key="${escHtml(section.key)}" data-quick-cat-index="${index}">
-        <span class="ico" data-icon="${escHtml(section.icon || 'list')}" style="width:14px;height:14px"></span>
-        <span>${escHtml(section.label)}</span>
+  function filteredQuickCommands() {
+    return skillTaskUi.filterQuickCommands
+      ? skillTaskUi.filterQuickCommands(quickCommands, quickQuery)
+      : quickCommands.filter(command => {
+          const q = String(quickQuery || '').trim().toLowerCase()
+          return !q || `${command.label || ''} ${command.description || ''} ${command.groupLabel || ''}`.toLowerCase().includes(q)
+        })
+  }
+
+  function renderQuickResults() {
+    if (!quickItemsHost) return
+    const commands = filteredQuickCommands()
+    if (quickActive >= commands.length) quickActive = Math.max(0, commands.length - 1)
+    quickItemsHost.innerHTML = commands.map((item, index) => `
+      <button class="agent-command-item${index === quickActive ? ' active' : ''}" type="button" role="option"
+        aria-selected="${index === quickActive ? 'true' : 'false'}" data-quick-command="1"
+        data-quick-label="${escHtml(item.label || '快捷操作')}"
+        ${item.taskId ? `data-task-id="${escHtml(item.taskId)}"` : ''}
+        ${item.prompt ? `data-p="${escHtml(item.prompt)}"` : ''}
+        ${item.steward ? `data-steward="${escHtml(item.steward)}"` : ''}>
+        <span class="ico" data-icon="${escHtml(item.icon || 'note')}" aria-hidden="true"></span>
+        <span class="agent-command-copy">
+          <strong>${escHtml(item.label || '快捷操作')}</strong>
+          <small>${escHtml(item.description || '立即开始这个任务')}</small>
+        </span>
+        <span class="agent-command-group">${escHtml(item.groupLabel || '推荐操作')}</span>
       </button>
     `).join('')
-    quickItemsHost.innerHTML = sections.flatMap(section =>
-      (section.items || []).map(item => `
-        <button class="agent-menu-item" type="button" role="menuitem" data-quick-cat="${escHtml(section.key)}" data-quick-label="${escHtml(item.label || '快捷操作')}" ${item.prompt ? `data-p="${escHtml(item.prompt)}"` : ''} ${item.steward ? `data-steward="${escHtml(item.steward)}"` : ''}>
-          <span class="ico" data-icon="${escHtml(item.icon || 'note')}" style="width:14px;height:14px"></span>
-          <span>${escHtml(item.label || '快捷操作')}</span>
-        </button>
-      `)
-    ).join('')
+    quickEmpty?.classList.toggle('show', commands.length === 0)
+    if (quickSummary) {
+      quickSummary.textContent = quickQuery
+        ? `${commands.length} 项匹配`
+        : `${commands.length} 项可用任务`
+    }
     if (window.StickyIcons) StickyIcons.mount(aiQuickMenu)
+  }
+
+  function renderQuickMenuForAgent(agentId = activeAgentId) {
+    if (!quickItemsHost) return
+    const sections = skillTaskUi.mergeQuickMenuSections
+      ? skillTaskUi.mergeQuickMenuSections(agentId, QUICK_MENU_PROFILES, skillTaskMap, PROMPT_TO_TASK)
+      : quickMenuSectionsForAgent(agentId)
+    quickCommands = skillTaskUi.flattenQuickMenuSections
+      ? skillTaskUi.flattenQuickMenuSections(sections)
+      : sections.flatMap(section => (section.items || []).map(item => ({
+          ...item,
+          description: item.description || item.subtitle || item.task?.subtitle || section.label,
+          groupLabel: section.label,
+        })))
+    renderQuickResults()
   }
 
   function runQuickAction(btn) {
@@ -3133,100 +4731,48 @@ window.WorkspaceAgent = (function () {
     const prompt = String(btn.dataset.p || '').trim()
     if (!prompt) return
     const label = btn.dataset.quickLabel || btn.querySelector('span:last-child')?.textContent || ''
-    const taskId = PROMPT_TO_TASK.get(prompt)
-    if (taskId && TASK_PREFLIGHT[taskId]) {
+    const taskId = String(btn.dataset.taskId || '').trim() || PROMPT_TO_TASK.get(prompt)
+    if (taskId && (skillTaskMap.has(taskId) || TASK_PREFLIGHT[taskId] || EMPTY_SHORTCUT_PROMPTS[taskId] || QUICK_ACTION_PROMPTS[taskId])) {
       void runTaskCard(taskId, label)
       return
     }
     void runOfficeShortcut(prompt, label)
   }
 
-  function currentQuickCatKey() {
-    const cats = quickCats()
-    if (!cats.length) return ''
-    if (quickCatActive < 0) quickCatActive = cats.length - 1
-    if (quickCatActive >= cats.length) quickCatActive = 0
-    return String(cats[quickCatActive].dataset.quickCatKey || '')
-  }
-
   function visibleQuickItems() {
-    return quickItems().filter(btn => !btn.hidden)
+    return quickItems()
   }
 
   function renderQuickActive() {
-    const cats = quickCats()
-    const catKey = currentQuickCatKey()
-    if (aiQuickMenu) {
-      aiQuickMenu.classList.toggle('quick-focus-cats', quickFocus === 'cats')
-      aiQuickMenu.classList.toggle('quick-focus-items', quickFocus === 'items')
-    }
-    cats.forEach((cat, idx) => {
-      const selected = idx === quickCatActive
-      cat.classList.toggle('active', selected && quickFocus === 'cats')
-      cat.classList.remove('is-current')
-    })
-
-    const allItems = quickItems()
-    allItems.forEach(btn => {
-      const belongs = String(btn.dataset.quickCat || '') === catKey
-      btn.hidden = !belongs
-    })
-
     const items = visibleQuickItems()
     if (!items.length) return
     if (quickActive < 0) quickActive = items.length - 1
     if (quickActive >= items.length) quickActive = 0
     items.forEach((item, idx) => {
       const selected = idx === quickActive
-      item.classList.toggle('active', selected && quickFocus === 'items')
-      item.classList.remove('is-current')
+      item.classList.toggle('active', selected)
+      item.setAttribute('aria-selected', String(selected))
     })
+    items[quickActive]?.scrollIntoView({ block: 'nearest' })
   }
 
   function handleQuickMenuKeydown(e) {
     if (!aiQuickMenu?.classList.contains('show')) return false
-    const cats = quickCats()
     const items = visibleQuickItems()
     if (e.key === 'ArrowDown') {
       e.preventDefault()
-      if (quickFocus === 'cats') {
-        quickCatActive = (quickCatActive + 1) % Math.max(cats.length, 1)
-        quickActive = 0
-      }
-      else quickActive = (quickActive + 1) % Math.max(items.length, 1)
+      if (items.length) quickActive = (quickActive + 1) % items.length
       renderQuickActive()
       return true
     }
     if (e.key === 'ArrowUp') {
       e.preventDefault()
-      if (quickFocus === 'cats') {
-        quickCatActive = (quickCatActive - 1 + Math.max(cats.length, 1)) % Math.max(cats.length, 1)
-        quickActive = 0
-      }
-      else quickActive = (quickActive - 1 + Math.max(items.length, 1)) % Math.max(items.length, 1)
-      renderQuickActive()
-      return true
-    }
-    if (e.key === 'ArrowLeft') {
-      e.preventDefault()
-      quickFocus = 'cats'
-      renderQuickActive()
-      return true
-    }
-    if (e.key === 'ArrowRight') {
-      e.preventDefault()
-      quickFocus = 'items'
+      if (items.length) quickActive = (quickActive - 1 + items.length) % items.length
       renderQuickActive()
       return true
     }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (quickFocus === 'cats') {
-        quickFocus = 'items'
-        quickActive = 0
-        renderQuickActive()
-        return true
-      }
       const active = items[quickActive] || items[0]
       if (active) runQuickAction(active)
       return true
@@ -3234,6 +4780,7 @@ window.WorkspaceAgent = (function () {
     if (e.key === 'Escape') {
       e.preventDefault()
       hideAiMenus()
+      aiInput?.focus()
       return true
     }
     return false
@@ -3850,7 +5397,7 @@ window.WorkspaceAgent = (function () {
   async function dispatchAgentAction(input, context = {}) {
     const dispatcher = getActionDispatcher()
     if (!dispatcher) {
-      toastFn('当前版本暂不支持该建议动作', 'error')
+      toastFn('建议动作暂不可用，请刷新后再试', 'error')
       return { ok: false, status: 'error', code: 'dispatcher_unavailable' }
     }
     const result = await dispatcher.dispatch(input, { context })
@@ -3871,39 +5418,89 @@ window.WorkspaceAgent = (function () {
     if (spec.need === 'material') {
       return { ok: shortcutHasMaterial(), reason: 'material' }
     }
-    if (spec.need === 'feishuAuth') {
+    if (spec.need === 'feishuAuth' || (spec.need === 'connectorAuth' && spec.connector === 'feishu')) {
       const connector = await readFeishuConnector()
       const status = connector?.status || {}
       const state = String(status.state || '').toLowerCase()
       const ready = !!connector?.enabled && state !== 'auth_required' && status.userReady !== false
       return { ok: ready, reason: 'feishuAuth' }
     }
+    // 其它 connector 暂无 Renderer 侧 readiness API；依赖 main 侧 connector 策略
     return { ok: true }
   }
 
   // 缺内容时：推一句话询问（不调用 LLM），并按需暂存任务，等用户补齐后自动执行
-  function askForTaskContent(spec, prompt, label) {
-    if (spec?.reason === 'material' || spec?.need === 'material') {
-      pendingShortcut = { prompt: String(prompt || '').trim(), label: String(label || '').trim() }
+  function askForTaskContent(spec, prompt, label, taskMeta = null) {
+    const isMaterial = spec?.reason === 'material' || spec?.need === 'material'
+    if (isMaterial) {
+      pendingShortcut = {
+        prompt: String(prompt || '').trim(),
+        label: String(label || '').trim(),
+        taskId: taskMeta?.taskId || '',
+        skillRefs: Array.isArray(taskMeta?.skillRefs) ? [...taskMeta.skillRefs] : [],
+        dynamic: !!taskMeta?.dynamic,
+      }
     } else {
       pendingShortcut = null
     }
-    chatHistory.push({ role: 'system-note', text: String(spec?.ask || '请补充需要的内容后再试。') })
+    chatHistory.push({ role: 'system-note', text: String(spec?.ask || spec?.message || '请补充需要的内容后再试。') })
     renderChat()
     try { aiInput?.focus() } catch { /* noop */ }
   }
 
-  // 任务卡片统一入口：先 preflight，齐备则走增强执行路径，缺内容就一句话询问
+  async function runDynamicTask(task, label = '') {
+    const prompt = skillTaskUi.buildDynamicTaskPrompt
+      ? skillTaskUi.buildDynamicTaskPrompt(task)
+      : String(task?.prompt || '').trim()
+    if (!prompt) return
+    const displayPrompt = compactShortcutDisplayPrompt(label || task.title || '', prompt)
+    const skillRefs = skillTaskUi.resolveTaskSkillRefs
+      ? skillTaskUi.resolveTaskSkillRefs(task)
+      : (task.skillId ? [String(task.skillId).trim()] : [])
+    // requiredTools 可用性由 main Skill grounding / Registry 阻断；Renderer 不假定成功
+    await runAI({ promptText: prompt, displayPrompt, skillRefs, taskId: task.id })
+  }
+
+  // 任务卡片统一入口：先查 dynamic map，再 preflight，齐备则走动态或 legacy 执行路径
   async function runTaskCard(taskId, label = '') {
     hideAiMenus()
     if (aiSend?.disabled) { toastFn('当前助手正在生成，请稍候'); return }
-    const prompt = String(EMPTY_SHORTCUT_PROMPTS[taskId] || QUICK_ACTION_PROMPTS[taskId] || '').trim()
+    const dynamicTask = skillTaskMap.get(taskId)
+    const useDynamic = dynamicTask
+      && skillTaskUi.canActivateDynamicTask
+      && skillTaskUi.canActivateDynamicTask(dynamicTask)
+
+    if (useDynamic) {
+      const spec = skillTaskUi.resolveTaskPreflight
+        ? skillTaskUi.resolveTaskPreflight(dynamicTask, taskId, TASK_PREFLIGHT)
+        : TASK_PREFLIGHT[taskId]
+      if (spec) {
+        const ready = await taskContextReady(spec)
+        if (!ready.ok) {
+          askForTaskContent(
+            { ...spec, reason: ready.reason },
+            skillTaskUi.buildDynamicTaskPrompt ? skillTaskUi.buildDynamicTaskPrompt(dynamicTask) : dynamicTask.prompt,
+            label || dynamicTask.title || taskId,
+            {
+              taskId,
+              skillRefs: skillTaskUi.resolveTaskSkillRefs ? skillTaskUi.resolveTaskSkillRefs(dynamicTask) : [],
+              dynamic: true,
+            },
+          )
+          return
+        }
+      }
+      await runDynamicTask(dynamicTask, label || dynamicTask.title || taskId)
+      return
+    }
+
+    const prompt = String(EMPTY_SHORTCUT_PROMPTS[taskId] || QUICK_ACTION_PROMPTS[taskId] || dynamicTask?.prompt || '').trim()
     if (!prompt) return
     const spec = TASK_PREFLIGHT[taskId]
     if (spec) {
       const ready = await taskContextReady(spec)
       if (!ready.ok) {
-        askForTaskContent({ ...spec, reason: ready.reason }, prompt, label)
+        askForTaskContent({ ...spec, reason: ready.reason }, prompt, label, { taskId, dynamic: false })
         return
       }
     }
@@ -3953,13 +5550,13 @@ window.WorkspaceAgent = (function () {
 
   function showQuickMenu() {
     if (!aiQuickMenu) return
+    quickQuery = ''
+    quickActive = 0
+    if (quickSearchInput) quickSearchInput.value = ''
     renderQuickMenuForAgent(activeAgentId)
     setQuickMenuOpen(true)
-    quickCatActive = 0
-    quickActive = 0
-    quickFocus = 'cats'
     renderQuickActive()
-    aiInput.focus()
+    requestAnimationFrame(() => quickSearchInput?.focus())
   }
 
   async function ensureExpertCatalog() {
@@ -3988,6 +5585,94 @@ window.WorkspaceAgent = (function () {
       skillCatalog = r.ok ? (r.skills || []) : []
     } catch { skillCatalog = [] }
     return skillCatalog
+  }
+
+  async function ensureKnowledgeCatalog({ force = false, rerender = false } = {}) {
+    if (!force && knowledgeCatalogState === 'ready') return knowledgeProviders
+    if (!window.api?.knowledgeProviderList) {
+      knowledgeCatalogState = 'error'
+      return []
+    }
+    knowledgeCatalogState = 'loading'
+    if (rerender && !chatHistory.length) renderChat()
+    try {
+      const result = await window.api.knowledgeProviderList()
+      if (result?.ok === false) throw new Error(result.error || '知识库读取失败')
+      knowledgeProviders = Array.isArray(result?.providers)
+        ? result.providers.filter(item => item && item.id)
+        : []
+      activeKnowledgeProviderId = String(result?.activeProviderId || '')
+      knowledgeCatalogState = 'ready'
+    } catch {
+      knowledgeProviders = []
+      activeKnowledgeProviderId = ''
+      knowledgeCatalogState = 'error'
+    }
+    if (rerender && !chatHistory.length) renderChat()
+    return knowledgeProviders
+  }
+
+  function sessionKnowledgeRefs() {
+    const refs = activeSession?.knowledgeRefs
+      || activeSession?.knowledgeScope?.refs
+      || activeSession?.knowledge?.refs
+      || []
+    return Array.isArray(refs)
+      ? [...new Set(refs.map(item => String(item?.id || item?.providerId || item || '').trim()).filter(Boolean))]
+      : []
+  }
+
+  async function updateSessionKnowledgeRefs(nextRefs) {
+    if (!activeSession?.id || knowledgeUpdatePending) return false
+    const refs = [...new Set((Array.isArray(nextRefs) ? nextRefs : [])
+      .map(item => String(item || '').trim())
+      .filter(Boolean))]
+    const api = window.api?.agentSessionContextUpdate
+    if (typeof api !== 'function') {
+      toastFn('知识库范围暂不可调整', 'error')
+      return false
+    }
+    knowledgeUpdatePending = true
+    renderChat()
+    try {
+      const result = await api(activeSession.id, { knowledgeRefs: refs })
+      if (!result?.ok || !result.session) throw new Error(result?.error || '知识库更新失败')
+      activeSession = { ...activeSession, ...result.session }
+      sessions = sessions.map(item => item.id === activeSession.id
+        ? { ...item, knowledgeRefs: refs, updatedAt: activeSession.updatedAt || item.updatedAt }
+        : item)
+      window.Workbench?.updateExpertTaskRoom?.(activeSession)
+      toastFn(refs.length ? `本次对话已限定 ${refs.length} 个知识库` : '已恢复跟随默认知识库')
+      return true
+    } catch (error) {
+      toastFn(error?.message || '知识库更新失败', 'error')
+      return false
+    } finally {
+      knowledgeUpdatePending = false
+      renderChat()
+    }
+  }
+
+  async function handleKnowledgeControl(target) {
+    if (!target?.closest) return false
+    if (target.closest('[data-knowledge-retry]')) {
+      await ensureKnowledgeCatalog({ force: true, rerender: true })
+      renderKnowledgeToolbarMenu()
+      return true
+    }
+    if (target.closest('[data-knowledge-default]')) {
+      await updateSessionKnowledgeRefs([])
+      return true
+    }
+    const providerButton = target.closest('[data-knowledge-provider]')
+    if (!providerButton) return false
+    const providerId = String(providerButton.dataset.knowledgeProvider || '').trim()
+    if (!providerId) return true
+    const selected = new Set(sessionKnowledgeRefs())
+    if (selected.has(providerId)) selected.delete(providerId)
+    else selected.add(providerId)
+    await updateSessionKnowledgeRefs([...selected])
+    return true
   }
 
   function getSlashContext() {
@@ -4077,6 +5762,10 @@ window.WorkspaceAgent = (function () {
       summary: event.summary ? String(event.summary) : '',
       toolCallId: event.toolCallId,
       toolName: event.toolName,
+      draftId: event.draftId,
+      draftStatus: event.draftStatus,
+      requiresApproval: Boolean(event.requiresApproval),
+      artifactRefs: Array.isArray(event.artifactRefs) ? event.artifactRefs.slice(0, 8) : undefined,
       round: Number.isFinite(event.round) ? event.round : undefined,
       durationMs: Number.isFinite(event.durationMs) ? event.durationMs : undefined,
       sources: Array.isArray(event.sources)
@@ -4092,18 +5781,28 @@ window.WorkspaceAgent = (function () {
     message.trace = trace.slice(-40)
   }
 
+  let pendingBindRef = ''
+
   async function runAI(options = {}) {
     if (activeRunId) {
       await window.api.aiCancelRun?.(activeRunId)
       return
     }
+    const bindRef = String(options?.bindRef || pendingBindRef || '').trim()
+    pendingBindRef = ''
     let promptText = String(options?.promptText || '').trim()
     let displayPromptOpt = String(options?.displayPrompt || '')
+    let explicitSkillRefs = Array.isArray(options?.skillRefs) ? [...options.skillRefs] : []
+    let explicitTaskId = String(options?.taskId || '').trim()
     // 手动发送时若存在暂存的快捷任务且已补齐素材，则自动带上该任务指令继续
     if (!promptText) {
       if (pendingShortcut && String(aiInput?.value || '').trim()) {
         promptText = pendingShortcut.prompt
         displayPromptOpt = pendingShortcut.label
+        if (!explicitSkillRefs.length && Array.isArray(pendingShortcut.skillRefs)) {
+          explicitSkillRefs = [...pendingShortcut.skillRefs]
+        }
+        if (!explicitTaskId) explicitTaskId = String(pendingShortcut.taskId || '').trim()
         pendingShortcut = null
       } else {
         pendingShortcut = null
@@ -4116,6 +5815,47 @@ window.WorkspaceAgent = (function () {
       : composerDraft
     let prompt = rawPrompt
     if (!prompt) return
+
+    // Daemon 澄清：仅在有明确问题且内容不是「元问题」时自动提交；否则走助手说明
+    if (
+      !isShortcutRun
+      && surfaceMode === 'workbench'
+      && workbenchTaskContext
+      && String(workbenchTaskContext.waitingKind || '') === 'clarification'
+      && String(workbenchTaskContext.runMode || '') === 'daemon'
+    ) {
+      const briefApi = window.WorkbenchTaskBrief
+      const shouldSubmit = briefApi?.shouldAutoSubmitDaemonClarification
+        ? briefApi.shouldAutoSubmitDaemonClarification(prompt, workbenchTaskContext.clarification || {})
+        : false
+      if (shouldSubmit) {
+        chatHistory.push({ role: 'user', text: prompt })
+        aiInput.value = ''
+        clearAttachment()
+        resizeAiInput()
+        if (slashOpen) hideSlashMenu()
+        if (atOpen) hideAtMenu()
+        renderChat()
+        const clarifyRes = await submitDaemonClarificationAnswer(prompt)
+        if (!clarifyRes.ok) {
+          chatHistory.push({ role: 'error', text: clarifyRes.error || '提交回答失败' })
+          renderChat()
+          toastFn(clarifyRes.error || '提交回答失败', 'error')
+          return
+        }
+        chatHistory.push({ role: 'system-note', text: '已提交澄清回答，任务继续执行' })
+        renderChat()
+        syncComposerPlaceholder({ force: true })
+        updateComposerMeta()
+        toastFn('已提交回答', 'success')
+        return
+      }
+      if (briefApi?.looksLikeClarificationMetaQuestion?.(prompt)) {
+        toastFn('这像是在询问要填什么，先由助手说明；确认答案后点卡片「提交澄清」', 'info')
+      }
+      // fall through → 普通对话，让助手解释要补充什么
+    }
+
     if (!isShortcutRun && pendingSuggestionPayload) {
       const merge = (window.AgentSuggestion && typeof window.AgentSuggestion.applyUserInputToPayload === 'function')
         ? window.AgentSuggestion.applyUserInputToPayload
@@ -4130,6 +5870,7 @@ window.WorkspaceAgent = (function () {
 
     const attachment = attachedFile
     const runId = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+    const runSessionId = String(activeSession?.id || '').trim()
     activeRunId = runId
     runPermissionPrompted = new Set()
     setPresenceState('thinking')
@@ -4148,13 +5889,19 @@ window.WorkspaceAgent = (function () {
       text: '',
       streaming: true,
       runId,
+      protocolVersion: 2,
+      messageState: window.AgentMessageState?.createMessageState(runId) || null,
+      v2AnswerCommitted: false,
       activity: '正在准备上下文…',
       startedAt: Date.now(),
       elapsedMs: 0,
       trace: [],
     })
     const assistantIdx = chatHistory.length - 1
+    if (runSessionId) inflightChatBySession.set(runSessionId, chatHistory)
+    chatStickToBottom = true
     renderChat()
+    pinChatToBottom()
     setSendButtonMode('running')
     updateComposerMeta()
     aiInput.value = ''
@@ -4165,11 +5912,13 @@ window.WorkspaceAgent = (function () {
 
     const ctx = await getEditorContext()
     if (!ctx.ok && ctx.error) {
-      chatHistory.splice(assistantIdx, 1)
-      chatHistory.push({ role: 'error', text: ctx.error })
-      renderChat()
+      const history = (runSessionId && inflightChatBySession.get(runSessionId)) || chatHistory
+      if (history[assistantIdx]?.runId === runId) history.splice(assistantIdx, 1)
+      history.push({ role: 'error', text: ctx.error })
+      if (history === chatHistory) renderChat()
       setPresenceState('error')
       if (activeRunId === runId) activeRunId = ''
+      if (runSessionId) inflightChatBySession.delete(runSessionId)
       setSendButtonMode('send')
       updateComposerMeta()
       return
@@ -4186,147 +5935,126 @@ window.WorkspaceAgent = (function () {
       attachment: attachment?.text || '',
     })
 
-    let gotStream = false
-    let streamUpdateCount = 0
+    let gotNonEmptyStream = false
     const resolveAssistantRef = () => {
-      for (let i = chatHistory.length - 1; i >= 0; i--) {
-        const message = chatHistory[i]
-        if (message?.role === 'assistant' && message.runId === runId) return { idx: i, message }
+      const histories = [chatHistory]
+      for (const hist of inflightChatBySession.values()) {
+        if (hist !== chatHistory) histories.push(hist)
+      }
+      for (const history of histories) {
+        for (let i = history.length - 1; i >= 0; i--) {
+          const message = history[i]
+          if (message?.role === 'assistant' && message.runId === runId) {
+            return { idx: i, message, history }
+          }
+        }
       }
       return null
+    }
+    const paintAssistantIfOnScreen = (assistantRef) => {
+      if (!assistantRef) return false
+      if (assistantRef.history !== chatHistory) return false
+      if (completeAssistantBubble(assistantRef.idx)) return true
+      renderChat()
+      return true
     }
     const offEvent = window.api.onAiStreamEvent
       ? window.api.onAiStreamEvent(event => {
           if (!event || event.runId !== runId) return
+          if (event.version == null) return
           const assistantRef = resolveAssistantRef()
           if (!assistantRef) return
           const { idx: messageIdx, message } = assistantRef
-          if (event.type === 'content') {
-            gotStream = true
-            streamUpdateCount++
-            message.text = String(event.text || '')
-            message.activity = '正在生成回答…'
-            if (Number.isFinite(message.startedAt)) message.elapsedMs = Math.max(0, Date.now() - message.startedAt)
-            updateStreamText(messageIdx)
-            return
+          if (event.payload?.contextInfo && typeof event.payload.contextInfo === 'object') {
+            lastContextInfo = event.payload.contextInfo
+            renderModelUsage()
           }
-          if (event.type === 'stage' || event.type === 'fallback') {
-            if (event.contextInfo && typeof event.contextInfo === 'object') {
-              lastContextInfo = event.contextInfo
-              renderModelUsage()
+          if (applyV2StreamEvent(event, messageIdx, message)) {
+            if (message.v2AnswerCommitted) gotNonEmptyStream = true
+            if (Number.isFinite(message.startedAt)) {
+              message.elapsedMs = Math.max(0, Date.now() - message.startedAt)
             }
-            message.activity = groundingApi().userStatusLabel(String(event.title || event.activity || '正在处理…'))
-            if (Number.isFinite(message.startedAt)) message.elapsedMs = Math.max(0, Date.now() - message.startedAt)
-            upsertAssistantTrace(message, {
-              id: event.id || `stage_${event.stage || 'working'}`,
-              kind: 'stage',
-              title: event.title || event.activity || '正在处理',
-              status: event.status || 'pending',
-              summary: event.summary,
-              durationMs: event.durationMs,
-            })
-            refreshAssistantProgress(messageIdx)
-            return
-          }
-          if (event.type === 'plan.updated') {
-            message.plan = event.plan && typeof event.plan === 'object'
-              ? {
-                  version: event.plan.version,
-                  updatedAt: event.plan.updatedAt,
-                  remaining: event.plan.remaining,
-                  items: Array.isArray(event.plan.items) ? event.plan.items.slice(0, 12) : [],
-                }
-              : message.plan
-            message.activity = '正在按计划执行…'
-            refreshAssistantProgress(messageIdx)
-            return
-          }
-          if (event.type === 'tool.started' || event.type === 'tool.completed' || event.type === 'tool.failed') {
-            const failed = event.type === 'tool.failed'
-            const pending = event.type === 'tool.started'
-            if (failed && event.needsPermission) {
-              void maybeOfferRunPermissionUpgrade(event)
-            }
-            message.activity = pending
-              ? toolTimelineTitle({
-                  toolName: event.toolName,
-                  title: String(event.title || '正在处理相关操作'),
-                }, 'pending')
-              : message.activity
-            if (Number.isFinite(message.startedAt)) message.elapsedMs = Math.max(0, Date.now() - message.startedAt)
-            upsertAssistantTrace(message, {
-              id: event.id || event.toolCallId,
-              kind: 'tool',
-              title: event.title || event.toolName || '工具调用',
-              status: pending ? 'pending' : failed ? 'error' : 'done',
-              summary: event.summary,
-              toolCallId: event.toolCallId,
-              toolName: event.toolName,
-              durationMs: event.durationMs,
-            })
-            refreshAssistantProgress(messageIdx)
-            return
-          }
-          if (event.type === 'done' || event.type === 'error' || event.type === 'cancelled') {
-            message.activity = event.type === 'cancelled' ? '已停止生成' : ''
-            if (Number.isFinite(message.startedAt)) message.elapsedMs = Math.max(0, Date.now() - message.startedAt)
-            for (const item of message.trace || []) {
-              if (item.status === 'pending') item.status = event.type === 'error' ? 'error' : 'done'
-            }
-            renderChat()
+            updateComposerMeta()
           }
         })
       : () => {}
-    const offChunk = window.api.onAiStreamChunk(({ text }) => {
-      gotStream = true
-      streamUpdateCount++
-      const assistantRef = resolveAssistantRef()
-      if (!assistantRef) return
-      assistantRef.message.text = text
-      updateStreamText(assistantRef.idx)
-    })
-    const priorHistory = chatHistory.slice(0, -2)
+    const priorHistory = ((runSessionId && inflightChatBySession.get(runSessionId)) || chatHistory)
+      .slice(0, -2)
       .filter(m => (m.role === 'user' || m.role === 'assistant') && m.text && !m.streaming)
       .map(m => ({ role: m.role, text: m.text }))
-    const skillRefs = [...prompt.matchAll(/(^|\s)\/([a-z0-9][a-z0-9\-]{0,31})\b/gi)].map(m => m[2].toLowerCase())
+    const skillRefs = skillTaskUi.mergeSkillRefs
+      ? skillTaskUi.mergeSkillRefs(explicitSkillRefs, prompt)
+      : [...new Set([
+        ...explicitSkillRefs.map(r => String(r || '').trim().toLowerCase()).filter(Boolean),
+        ...[...prompt.matchAll(/(^|\s)\/([a-z0-9][a-z0-9\-]{0,31})\b/gi)].map(m => m[2].toLowerCase()),
+      ])]
 
     try {
       const attachedContext = attachment
         ? `\n\n[用户附加文件：${attachment.name || '未命名文件'}]\n${attachment.text}\n[附加文件结束]`
         : ''
-      const taskContext = surfaceMode === 'workbench' && workbenchTaskContext
-        ? `\n\n${workbenchContextText(workbenchTaskContext)}\n\n`
+      let workbenchBundle = null
+      if (surfaceMode === 'workbench' && workbenchTaskContext) {
+        workbenchBundle = workbenchContextText(workbenchTaskContext, {
+          attachmentName: attachment?.name || '',
+        })
+        const assistantRef = resolveAssistantRef()
+        if (assistantRef?.message && Array.isArray(workbenchBundle.citations)) {
+          assistantRef.message.workbenchCitations = workbenchBundle.citations
+        }
+      }
+      const taskContext = workbenchBundle?.text
+        ? `\n\n${workbenchBundle.text}\n\n`
         : ''
       const result = await window.api.aiGenerate({
         prompt,
         displayPrompt,
+        bindRef: bindRef || undefined,
         context: `${taskContext}${(ctx.content || '').trim()}${attachedContext}`.trim() || null,
         history: priorHistory,
         noteId: ctx.noteId,
         category: ctx.category || '',
         skillRefs,
+        taskId: explicitTaskId || undefined,
         contentGrounding,
-        sessionId: activeSession?.id,
+        sessionId: runSessionId || activeSession?.id,
         agentId: activeAgentId,
         runId,
       })
       offEvent()
-      offChunk()
       if (result.error) {
         if (result.cancelled) {
           const assistantRef = resolveAssistantRef()
           if (assistantRef) {
+            settleCancelledAssistantText(assistantRef.message)
             assistantRef.message.streaming = false
             assistantRef.message.activity = '已停止生成'
-            renderChat()
+            if (!paintAssistantIfOnScreen(assistantRef)) { /* off-screen state kept */ }
           }
-            setPresenceState('error')
+          setPresenceState('error')
           return
         }
+        const friendly = (window.AgentErrorHumanize?.humanizeAgentError
+          || (e => String(e || '生成失败')))(result.error)
         const assistantRef = resolveAssistantRef()
-        if (assistantRef) chatHistory.splice(assistantRef.idx, 1)
-        chatHistory.push({ role: 'error', text: result.error })
-        renderChat()
+        if (assistantRef) {
+          assistantRef.message.streaming = false
+          assistantRef.message.activity = '生成失败'
+          assistantRef.message.terminalStatus = 'failed'
+          if (!assistantRef.message.v2AnswerCommitted || !String(assistantRef.message.text || '').trim()) {
+            // 运行时给了可执行原因（缺工具、连接器未启用等）就必须展示，通用文案只做兜底。
+            assistantRef.message.text = assistantRef.message.text
+              || friendly
+              || (assistantRef.message.protocolVersion === 2 ? '未能收到完整答复，请重试。' : '生成失败')
+          }
+          if (!paintAssistantIfOnScreen(assistantRef)) { /* off-screen state kept */ }
+        } else if (((runSessionId && inflightChatBySession.get(runSessionId)) || chatHistory) === chatHistory) {
+          chatHistory.push({ role: 'error', text: friendly })
+          renderChat()
+        } else {
+          const history = inflightChatBySession.get(runSessionId)
+          if (history) history.push({ role: 'error', text: friendly })
+        }
         setPresenceState('error')
         return
       }
@@ -4335,74 +6063,140 @@ window.WorkspaceAgent = (function () {
       if (latestSession?.ok && latestSession.session?.run) {
         runArtifacts = Array.isArray(latestSession.session.run.artifacts) ? [...latestSession.session.run.artifacts] : runArtifacts
       }
-      const streamedButSingleFlush = !!result.streamed && streamUpdateCount <= 1
       let assistantRef = resolveAssistantRef()
       if (!assistantRef) return
-      if ((!gotStream || streamedButSingleFlush) && finalText) {
-        await revealTypewriter(assistantRef.idx, finalText, runId)
-        assistantRef = resolveAssistantRef()
-        if (!assistantRef) return
-      } else {
-        assistantRef.message.text = finalText
+      if (!assistantRef.message.v2AnswerCommitted) {
+        if (assistantRef.message.protocolVersion === 2) {
+          assistantRef.message.text = assistantRef.message.text || '未能收到完整答复，请重试。'
+          assistantRef.message.activity = assistantRef.message.activity || '输出未完成'
+        } else if (!gotNonEmptyStream && finalText) {
+          if (assistantRef.history === chatHistory) {
+            await revealTypewriter(assistantRef.idx, finalText, runId)
+            assistantRef = resolveAssistantRef()
+            if (!assistantRef) return
+          } else {
+            assistantRef.message.text = finalText
+          }
+        } else if (finalText) {
+          assistantRef.message.text = finalText
+        }
       }
       assistantRef.message.streaming = false
       assistantRef.message.activity = ''
       if (Number.isFinite(assistantRef.message.startedAt)) {
         assistantRef.message.elapsedMs = Math.max(0, Date.now() - assistantRef.message.startedAt)
       }
+      if (assistantRef.message.answerHash == null && result.answerHash) {
+        assistantRef.message.answerHash = result.answerHash
+      }
+      if (!assistantRef.message.ui?.length && latestSession?.ok) {
+        const persisted = [...(latestSession.session?.messages || [])].reverse()
+          .find(item => item.role === 'assistant' && item.answerHash === result.answerHash)
+        if (persisted?.ui?.length) assistantRef.message.ui = persisted.ui
+      }
+      hydrateLegacyAssistantMessage(assistantRef.message)
       if (Array.isArray(result.personalization?.applied) && result.personalization.applied.length) {
         assistantRef.message.personalization = {
           applied: result.personalization.applied,
           omitted: Array.isArray(result.personalization.omitted) ? result.personalization.omitted : [],
         }
       }
-      if (activeSession) {
-        activeSession.messages = chatHistory
+      const targetSessionId = runSessionId || result.sessionId || activeSession?.id || ''
+      const historyForPersist = assistantRef.history
+      if (targetSessionId) {
+        const nextMessages = historyForPersist
           .filter(m => m.role === 'user' || m.role === 'assistant')
-          .map(m => ({ role: m.role, text: m.text }))
-        activeSession.updatedAt = new Date().toISOString()
-        const firstUser = activeSession.messages.find(m => m.role === 'user')
+          .map(m => ({
+            role: m.role,
+            text: m.text,
+            ...(m.role === 'assistant' && Array.isArray(m.trace) ? { trace: m.trace.map(item => ({ ...item })) } : {}),
+            ...(m.role === 'assistant' && m.protocolVersion ? { protocolVersion: m.protocolVersion } : {}),
+            ...(m.role === 'assistant' && m.answerHash ? { answerHash: m.answerHash } : {}),
+            ...(m.role === 'assistant' && Array.isArray(m.ui) && m.ui.length
+              ? { ui: m.ui.map(item => ({ ...item, items: Array.isArray(item.items) ? item.items.map(it => ({ ...it })) : [] })) }
+              : {}),
+          }))
+        const updatedAt = new Date().toISOString()
+        const firstUser = nextMessages.find(m => m.role === 'user')
         const previewRaw = contentGrounding.active
           ? contentGrounding.title
           : (firstUser ? String(firstUser.text).replace(/\s+/g, ' ').trim().slice(0, 28) : '新助手')
         const preview = compactSessionDisplayTitle(previewRaw) || '新助手'
-        sessions = sessions.map(s => s.id === activeSession.id
+        sessions = sessions.map(s => s.id === targetSessionId
           ? {
               ...s,
               displayTitle: preview,
               labels: contentGrounding.labels || [],
               grounding: contentGrounding.text || '',
-              updatedAt: activeSession.updatedAt,
-              messageCount: activeSession.messages.length,
+              updatedAt,
+              messageCount: nextMessages.length,
             }
           : s)
-        activeSession = {
-          ...activeSession,
-          displayTitle: preview,
-          labels: contentGrounding.labels || [],
-          grounding: contentGrounding.text || '',
+        if (activeSession?.id === targetSessionId) {
+          activeSession = {
+            ...activeSession,
+            messages: nextMessages,
+            updatedAt,
+            displayTitle: preview,
+            labels: contentGrounding.labels || [],
+            grounding: contentGrounding.text || '',
+          }
         }
         renderSessionTabs()
       }
-      renderChat()
+      paintAssistantIfOnScreen(assistantRef)
       setPresenceState('success')
     } catch (err) {
       offEvent()
-      offChunk()
+      const friendly = (window.AgentErrorHumanize?.humanizeAgentError
+        || (e => String(e?.message || e || '生成失败')))(err)
       const assistantRef = resolveAssistantRef()
-      if (assistantRef) chatHistory.splice(assistantRef.idx, 1)
-      chatHistory.push({ role: 'error', text: err.message || '生成失败' })
-      renderChat()
+      if (assistantRef) {
+        assistantRef.message.streaming = false
+        assistantRef.message.activity = '生成失败'
+        assistantRef.message.terminalStatus = 'failed'
+        if (!assistantRef.message.v2AnswerCommitted || !String(assistantRef.message.text || '').trim()) {
+          assistantRef.message.text = assistantRef.message.text
+            || friendly
+            || (assistantRef.message.protocolVersion === 2 ? '未能收到完整答复，请重试。' : '生成失败')
+        }
+        if (!paintAssistantIfOnScreen(assistantRef)) { /* off-screen state kept */ }
+      } else if (((runSessionId && inflightChatBySession.get(runSessionId)) || chatHistory) === chatHistory) {
+        chatHistory.push({ role: 'error', text: friendly })
+        renderChat()
+      } else {
+        const history = inflightChatBySession.get(runSessionId)
+        if (history) history.push({ role: 'error', text: friendly })
+      }
       setPresenceState('error')
     } finally {
       offEvent()
       if (activeRunId === runId) activeRunId = ''
+      if (runSessionId) inflightChatBySession.delete(runSessionId)
       setSendButtonMode('send')
       updateComposerMeta()
     }
   }
 
   function bindEvents() {
+    aiKnowledgeBtn?.addEventListener('click', e => {
+      e.stopPropagation()
+      if (knowledgeMenuOpen) {
+        hideKnowledgeMenu()
+        return
+      }
+      renderKnowledgeToolbarMenu()
+      knowledgeMenuOpen = true
+      aiKnowledgeMenu?.classList.add('show')
+      aiKnowledgeBtn.setAttribute('aria-expanded', 'true')
+    })
+    aiKnowledgeMenu?.addEventListener('click', async e => {
+      if (await handleKnowledgeControl(e.target)) {
+        e.preventDefault()
+        e.stopPropagation()
+        renderKnowledgeToolbarMenu()
+      }
+    })
     aiModelBtn?.addEventListener('click', e => {
       e.stopPropagation()
       if (e.target.closest('#agentModelUsage')) {
@@ -4420,6 +6214,7 @@ window.WorkspaceAgent = (function () {
     document.addEventListener('click', e => {
       if (modelMenuOpen && !e.target.closest('#agentModelMenu') && !e.target.closest('#agentModelBtn')) hideModelMenu()
       if (contextPanelOpen && !e.target.closest('#agentContextPanel') && !e.target.closest('#agentModelUsage')) hideContextPanel()
+      if (knowledgeMenuOpen && !e.target.closest('#agentSessionKnowledgeMenu') && !e.target.closest('#agentSessionKnowledgeBtn')) hideKnowledgeMenu()
     })
     topicNav?.addEventListener('click', e => {
       const anchorBtn = e.target.closest('[data-conversation-anchor]')
@@ -4429,6 +6224,51 @@ window.WorkspaceAgent = (function () {
       jumpToConversationAnchor(Number.isInteger(userMsgIdx) ? userMsgIdx : null)
     })
     chatLog?.addEventListener('click', async e => {
+      const runCancelBtn = e.target.closest('[data-run-cancel]')
+      const runRetryBtn = e.target.closest('[data-run-retry]')
+      const runResumeBtn = e.target.closest('[data-run-resume]')
+      if (runCancelBtn || runRetryBtn || runResumeBtn) {
+        e.preventDefault()
+        const btn = runCancelBtn || runRetryBtn || runResumeBtn
+        if (btn.disabled) return
+        btn.disabled = true
+        const kind = runCancelBtn ? 'cancel' : runRetryBtn ? 'retry' : 'resume'
+        await handleRunTreeAction(kind, btn.dataset.runCancel || btn.dataset.runRetry || btn.dataset.runResume)
+        btn.disabled = false
+        return
+      }
+      const approveBtn = e.target.closest('[data-draft-approve]')
+      const rejectBtn = e.target.closest('[data-draft-reject]')
+      const rollbackBtn = e.target.closest('[data-draft-rollback]')
+      if (rollbackBtn) {
+        e.preventDefault()
+        const draftId = rollbackBtn.dataset.draftRollback
+        const api = window.api?.toolRollbackDraft
+        if (typeof api === 'function') {
+          rollbackBtn.disabled = true
+          const r = await api({ draftId })
+          rollbackBtn.textContent = r?.ok ? '已回滚' : '回滚失败'
+        }
+        return
+      }
+      if (approveBtn || rejectBtn) {
+        e.preventDefault()
+        const btn = approveBtn || rejectBtn
+        if (btn.disabled || btn.classList.contains('is-loading')) return
+        const card = e.target.closest('.agent-tool-approval')
+        const approve = card?.querySelector('[data-draft-approve]')
+        const reject = card?.querySelector('[data-draft-reject]')
+        ;[approve, reject].forEach((b) => { if (b) { b.disabled = true; b.classList.add('is-loading') } })
+        const draftId = btn.dataset.draftApprove || btn.dataset.draftReject
+        const api = window.api?.toolApproveDraft
+        if (typeof api === 'function') {
+          const r = await api({ draftId, reject: Boolean(rejectBtn) })
+          if (card) {
+            card.innerHTML = `<span class="agent-tool-approval-badge">${r?.rejected ? '已拒绝' : r?.ok ? '已批准' : (r?.code === 'not_pending' ? '已处理' : '失败')}</span>`
+          }
+        }
+        return
+      }
       const anchorBtn = e.target.closest('[data-conversation-anchor]')
       if (anchorBtn) {
         e.preventDefault()
@@ -4479,6 +6319,7 @@ window.WorkspaceAgent = (function () {
             })()
         const act = picked.action
         const payload = picked.payload
+        pendingBindRef = String(sugBtn.dataset.actionId || '').trim()
         const label = sugBtn.querySelector('strong')?.textContent?.trim() || '建议动作'
         await dispatchAgentAction({
           id: `suggestion-${msgIdx}-${chosenIndex}`,
@@ -4493,13 +6334,24 @@ window.WorkspaceAgent = (function () {
         })
         return
       }
+      const expertConfigBtn = e.target.closest('[data-expert-config]')
+      if (expertConfigBtn) {
+        e.preventDefault()
+        if (typeof window.openCapabilityHub === 'function') window.openCapabilityHub('connectors')
+        else toastFn('请前往专家库 → MCP 连接器完成配置')
+        return
+      }
+      if (await handleKnowledgeControl(e.target)) {
+        e.preventDefault()
+        return
+      }
       const officeBtn = e.target.closest('.agent-empty-act[data-auto-send="1"]')
       if (officeBtn) {
         e.preventDefault()
         const shortcutId = String(officeBtn.dataset.shortcut || '').trim()
         const title = officeBtn.querySelector('strong')?.textContent?.trim() || ''
-        const sub = officeBtn.querySelector(':scope > span')?.textContent?.trim() || ''
-        if (shortcutId && (EMPTY_SHORTCUT_PROMPTS[shortcutId] || QUICK_ACTION_PROMPTS[shortcutId])) {
+        const sub = officeBtn.querySelector('.agent-empty-act-copy > span, .agent-workflow-copy > span')?.textContent?.trim() || ''
+        if (shortcutId && (skillTaskMap.has(shortcutId) || EMPTY_SHORTCUT_PROMPTS[shortcutId] || QUICK_ACTION_PROMPTS[shortcutId])) {
           await runTaskCard(shortcutId, sub || title)
           return
         }
@@ -4612,6 +6464,7 @@ window.WorkspaceAgent = (function () {
     })
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && agentImageViewer?.classList.contains('show')) closeImageViewer()
+      if (e.key === 'Escape' && knowledgeMenuOpen) hideKnowledgeMenu()
     })
     document.addEventListener('click', () => {
       document.querySelectorAll('.agent-apply-wrap.open').forEach(el => el.classList.remove('open'))
@@ -4630,6 +6483,16 @@ window.WorkspaceAgent = (function () {
       if (aiSend.disabled) { toastFn('当前助手正在生成，请稍候'); return }
       await activateSession(id)
     })
+    sessionTabScrollEl?.addEventListener('wheel', e => {
+      const maxScroll = sessionTabScrollEl.scrollWidth - sessionTabScrollEl.clientWidth
+      if (maxScroll <= 0) return
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY
+      if (!delta) return
+      const next = Math.max(0, Math.min(maxScroll, sessionTabScrollEl.scrollLeft + delta))
+      if (next === sessionTabScrollEl.scrollLeft) return
+      e.preventDefault()
+      sessionTabScrollEl.scrollLeft = next
+    }, { passive: false })
     sessionTabsEl?.addEventListener('keydown', e => {
       const tab = e.target.closest('.agent-session-tab')
       if (!tab || e.target !== tab || !['Enter', ' '].includes(e.key)) return
@@ -4697,6 +6560,7 @@ window.WorkspaceAgent = (function () {
     })
 
     aiSend.addEventListener('click', runAI)
+    chatLog?.addEventListener('scroll', syncChatStickFromUserScroll, { passive: true })
     aiAttach?.addEventListener('click', () => aiFileInput?.click())
     aiFileInput?.addEventListener('change', async () => {
       const file = aiFileInput.files?.[0]
@@ -4716,49 +6580,32 @@ window.WorkspaceAgent = (function () {
     aiAttachmentRemove?.addEventListener('click', clearAttachment)
     aiQuickBtn?.addEventListener('click', e => {
       e.stopPropagation()
-      if (aiQuickMenu?.classList.contains('show')) setQuickMenuOpen(false)
+      if (aiQuickMenu?.classList.contains('show')) {
+        setQuickMenuOpen(false)
+        aiInput?.focus()
+      }
       else showQuickMenu()
     })
     aiQuickMenu?.addEventListener('click', e => {
       e.stopPropagation()
-      const catBtn = e.target.closest('[data-quick-cat-key]')
-      if (catBtn) {
-        const cats = quickCats()
-        const idx = cats.indexOf(catBtn)
-        if (idx >= 0) {
-          quickCatActive = idx
-          quickActive = 0
-          quickFocus = 'items'
-          renderQuickActive()
-        }
-        return
-      }
-      const btn = e.target.closest('[data-quick-cat][data-p], [data-quick-cat][data-steward]')
+      const btn = e.target.closest('[data-quick-command]')
       if (btn) runQuickAction(btn)
     })
     aiQuickMenu?.addEventListener('mousemove', e => {
-      const catBtn = e.target.closest('[data-quick-cat-key]')
-      if (catBtn) {
-        const cats = quickCats()
-        const idx = cats.indexOf(catBtn)
-        if (idx >= 0 && idx !== quickCatActive) {
-          quickCatActive = idx
-          quickActive = 0
-          renderQuickActive()
-        }
-        quickFocus = 'cats'
-        return
-      }
-      const btn = e.target.closest('[data-quick-cat][data-p], [data-quick-cat][data-steward]')
-      if (btn && !btn.hidden) {
+      const btn = e.target.closest('[data-quick-command]')
+      if (btn) {
         const items = visibleQuickItems()
         const idx = items.indexOf(btn)
         if (idx >= 0 && idx !== quickActive) {
           quickActive = idx
           renderQuickActive()
         }
-        quickFocus = 'items'
       }
+    })
+    quickSearchInput?.addEventListener('input', () => {
+      quickQuery = quickSearchInput.value
+      quickActive = 0
+      renderQuickResults()
     })
     aiComposer?.addEventListener('click', e => e.stopPropagation())
     document.addEventListener('click', () => hideAiMenus())
@@ -4802,7 +6649,10 @@ window.WorkspaceAgent = (function () {
       if ((e.ctrlKey || e.metaKey) && String(e.key || '').toLowerCase() === 'k') {
         if (document.getElementById('appShell')?.classList.contains('mode-edit')) return
         e.preventDefault()
-        if (aiQuickMenu?.classList.contains('show')) setQuickMenuOpen(false)
+        if (aiQuickMenu?.classList.contains('show')) {
+          setQuickMenuOpen(false)
+          aiInput?.focus()
+        }
         else showQuickMenu()
       }
     })
@@ -4941,15 +6791,292 @@ window.WorkspaceAgent = (function () {
       })
     }
     bindEvents()
+    bindDaemonProcessFeedOnce()
+    bindDaemonHitlOnce()
     renderQuickMenuForAgent(activeAgentId)
+    void refreshPackEmptyGroups().then(() => { if (typeof renderChat === 'function') renderChat() })
     if (window.api?.listSkills || window.knowme?.skill?.list) ensureSkillCatalog()
     if (window.knowme?.expert?.list || window.api?.expertList) ensureExpertCatalog()
+    if (window.api?.knowledgeProviderList) void ensureKnowledgeCatalog({ rerender: true })
     refreshFeishuUsageHint({ rerender: true })
     window.addEventListener('focus', () => { refreshFeishuUsageHint({ rerender: true }) })
     if (window.StickyIcons) StickyIcons.mount(document.getElementById('agentCol'))
     updateComposerMeta()
     loadLlmProfile()
-    loadSessions()
+    sessionsLoadPromise = loadSessions()
+    installAgentOutputFixture()
+  }
+
+  function installAgentOutputFixture() {
+    if (localStorage.getItem('__knowme_agent_output_fixture') !== '1') return
+    if (window.__KnowMeAgentOutputFixture) return
+
+    const ipcWaiters = new Map()
+    let fixtureIpcListenerOff = null
+
+    function readFixtureState(message) {
+      const state = message?.messageState
+      if (!state) return null
+      return {
+        runId: state.runId,
+        status: state.status,
+        lastSeq: state.lastSeq,
+        terminalType: state.terminalType,
+        frozen: state.frozen,
+        answerHash: state.answer?.hash || '',
+        answerLength: String(state.answer?.text || '').length,
+        answerCommitted: Boolean(state.answer?.committed),
+        uiCount: Array.isArray(state.ui) ? state.ui.length : 0,
+        counters: { ...(state.counters || {}) },
+        diagnosticsCount: Array.isArray(state.diagnostics) ? state.diagnostics.length : 0,
+      }
+    }
+
+    function resolveAssistantIndex(runId) {
+      return chatHistory.findIndex(item => item.role === 'assistant' && item.runId === runId)
+    }
+
+    function captureDispatchRefs(idx) {
+      const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+      return {
+        bodyBefore: bubble?.querySelector('[data-assistant-body="1"]') || null,
+        structuredUiBefore: bubble?.querySelector('[data-structured-ui="1"]') || null,
+        bubbleBefore: bubble || null,
+        historyNodes: Array.from(chatLog?.querySelectorAll('[data-idx]') || [])
+          .map(node => ({ idx: Number(node.getAttribute('data-idx')), node })),
+      }
+    }
+
+    function buildDispatchResult(idx, refs, changed, extra = {}) {
+      const message = chatHistory[idx]
+      const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+      const bodyAfter = bubble?.querySelector('[data-assistant-body="1"]') || null
+      const structuredUiAfter = bubble?.querySelector('[data-structured-ui="1"]') || null
+      const bubbleAfter = bubble || null
+      const bodyBefore = refs.bodyBefore
+      const structuredUiBefore = refs.structuredUiBefore
+      const bubbleBefore = refs.bubbleBefore
+      const sameBodyNode = Boolean(bodyBefore && bodyAfter && bodyBefore === bodyAfter)
+      const sameStructuredUiNode = Boolean(
+        structuredUiBefore && structuredUiAfter && structuredUiBefore === structuredUiAfter,
+      )
+      return {
+        ok: true,
+        changed,
+        sameBodyNode,
+        sameStructuredUiNode,
+        sameBubbleNode: bubbleBefore && bubbleAfter ? bubbleBefore === bubbleAfter : Boolean(bubbleAfter),
+        historySameNodes: refs.historyNodes.every(item => {
+          const current = chatLog?.querySelector(`[data-idx="${item.idx}"]`)
+          return current && current === item.node
+        }),
+        state: readFixtureState(message),
+        ...extra,
+      }
+    }
+
+    function ensureFixtureIpcListener() {
+      if (fixtureIpcListenerOff || !window.api?.onAiStreamEvent) return
+      fixtureIpcListenerOff = window.api.onAiStreamEvent((incoming) => {
+        if (!incoming || incoming.version == null) return
+        const key = `${incoming.runId}:${incoming.seq}`
+        const waiter = ipcWaiters.get(key)
+        if (!waiter) return
+        ipcWaiters.delete(key)
+        const idx = resolveAssistantIndex(incoming.runId)
+        if (idx < 0) {
+          waiter.reject(new Error('assistant_not_found'))
+          return
+        }
+        const message = chatHistory[idx]
+        let changed = false
+        try {
+          changed = applyV2StreamEvent(incoming, idx, message)
+          waiter.resolve({ changed, event: incoming })
+        } catch (err) {
+          waiter.reject(err)
+        }
+      })
+    }
+
+    function waitForFixtureIpcSeq(runId, seq, timeoutMs = 8000) {
+      const key = `${runId}:${seq}`
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          ipcWaiters.delete(key)
+          reject(new Error('ipc_seq_timeout'))
+        }, timeoutMs)
+        ipcWaiters.set(key, {
+          resolve: (value) => {
+            clearTimeout(timer)
+            resolve(value)
+          },
+          reject: (err) => {
+            clearTimeout(timer)
+            ipcWaiters.delete(key)
+            reject(err)
+          },
+        })
+      })
+    }
+
+    window.__KnowMeAgentOutputFixture = {
+      mount(options = {}) {
+        const runId = String(options.runId || `run_fixture_${Date.now()}`)
+        const history = Array.isArray(options.history) ? options.history.map(item => ({ ...item })) : []
+        chatHistory = history.concat([{
+          role: 'assistant',
+          text: '',
+          streaming: true,
+          runId,
+          protocolVersion: 2,
+          messageState: window.AgentMessageState?.createMessageState(runId) || null,
+          v2AnswerCommitted: false,
+          activity: '正在准备上下文…',
+          startedAt: Date.now(),
+          elapsedMs: 0,
+          trace: [],
+        }])
+        chatStickToBottom = true
+        renderChat()
+        if (window.api?.agentOutputFixtureRun) ensureFixtureIpcListener()
+        return { runId, assistantIdx: chatHistory.length - 1, historyCount: history.length }
+      },
+      mountLegacyStream(options = {}) {
+        const runId = String(options.runId || `run_legacy_fixture_${Date.now()}`)
+        const history = Array.isArray(options.history) ? options.history.map(item => ({ ...item })) : []
+        chatHistory = history.concat([{
+          role: 'assistant',
+          text: '',
+          streaming: true,
+          runId,
+          protocolVersion: 1,
+          activity: '正在生成回答…',
+          startedAt: Date.now(),
+          elapsedMs: 0,
+          trace: [],
+        }])
+        chatStickToBottom = true
+        renderChat()
+        return { runId, assistantIdx: chatHistory.length - 1, historyCount: history.length }
+      },
+      stepLegacyStream(assistantIdx, text, options = {}) {
+        const idx = Number(assistantIdx)
+        const message = chatHistory[idx]
+        if (!message?.streaming) return { ok: false, error: 'legacy_stream_not_found' }
+        const refs = captureDispatchRefs(idx)
+        message.text = options.append === false
+          ? String(text || '')
+          : `${String(message.text || '')}${String(text || '')}`
+        paintStreamText(idx)
+        const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+        return buildDispatchResult(idx, refs, true, {
+          visibleText: bubble?.innerText || '',
+          rawHtml: bubble?.innerHTML || '',
+        })
+      },
+      completeLegacyStream(assistantIdx, options = {}) {
+        const idx = Number(assistantIdx)
+        const message = chatHistory[idx]
+        if (!message) return { ok: false, error: 'legacy_stream_not_found' }
+        const refs = captureDispatchRefs(idx)
+        if (options.cancelled === true) settleCancelledAssistantText(message)
+        message.streaming = false
+        const changed = completeAssistantBubble(idx)
+        const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+        return buildDispatchResult(idx, refs, changed, {
+          visibleText: bubble?.innerText || '',
+          rawHtml: bubble?.innerHTML || '',
+        })
+      },
+      dispatch(event) {
+        const runId = String(event?.runId || '')
+        const idx = resolveAssistantIndex(runId)
+        if (idx < 0) return { ok: false, error: 'assistant_not_found' }
+        const message = chatHistory[idx]
+        const refs = captureDispatchRefs(idx)
+        const changed = applyV2StreamEvent(event, idx, message)
+        return buildDispatchResult(idx, refs, changed, { ipcPath: false })
+      },
+      async dispatchViaIpc(event) {
+        if (!window.api?.agentOutputFixtureRun) {
+          return { ok: false, error: 'ipc_fixture_unavailable', ipcPath: false }
+        }
+        const runId = String(event?.runId || '')
+        const seq = Number(event?.seq)
+        if (!runId || !Number.isInteger(seq) || seq < 1) {
+          return { ok: false, error: 'invalid_event', ipcPath: false }
+        }
+        const idx = resolveAssistantIndex(runId)
+        if (idx < 0) return { ok: false, error: 'assistant_not_found', ipcPath: false }
+        ensureFixtureIpcListener()
+        const refs = captureDispatchRefs(idx)
+        const waitPromise = waitForFixtureIpcSeq(runId, seq)
+        let invokeResult
+        try {
+          invokeResult = await window.api.agentOutputFixtureRun({ runId, events: [event] })
+        } catch (err) {
+          ipcWaiters.delete(`${runId}:${seq}`)
+          return { ok: false, error: String(err?.message || err), ipcPath: false }
+        }
+        if (!invokeResult?.ok) {
+          ipcWaiters.delete(`${runId}:${seq}`)
+          return { ok: false, error: invokeResult?.error || 'ipc_invoke_failed', ipcPath: false }
+        }
+        try {
+          const applied = await waitPromise
+          return buildDispatchResult(idx, refs, applied.changed, { ipcPath: true })
+        } catch (err) {
+          return { ok: false, error: String(err?.message || err), ipcPath: false }
+        }
+      },
+      getDomRefs(assistantIdx) {
+        const idx = Number(assistantIdx)
+        const bubble = chatLog?.querySelector(`[data-idx="${idx}"]`)
+        return {
+          bubble: Boolean(bubble),
+          body: Boolean(bubble?.querySelector('[data-assistant-body="1"]')),
+          structuredUi: Boolean(bubble?.querySelector('[data-structured-ui="1"]')),
+          timelineOpen: Boolean(bubble?.querySelector('[data-execution-timeline="1"]')?.open),
+          approveVisible: Boolean(bubble?.querySelector('.agent-draft-approve')),
+          rejectVisible: Boolean(bubble?.querySelector('.agent-draft-reject')),
+          choiceInStructuredUi: Boolean(bubble?.querySelector('[data-structured-ui="1"] .agent-suggest-item')),
+        }
+      },
+      getMessage(assistantIdx) {
+        const message = chatHistory[Number(assistantIdx)]
+        if (!message) return null
+        return {
+          textLength: String(message.text || '').length,
+          answerHash: message.answerHash || '',
+          v2AnswerCommitted: Boolean(message.v2AnswerCommitted),
+          streaming: Boolean(message.streaming),
+          uiCount: Array.isArray(message.ui) ? message.ui.length : 0,
+          traceCount: Array.isArray(message.trace) ? message.trace.length : 0,
+          state: readFixtureState(message),
+        }
+      },
+      scrollUp(pixels = 120) {
+        if (!chatLog) return 0
+        chatStickToBottom = false
+        const next = Math.max(0, chatLog.scrollTop - Math.max(0, Number(pixels) || 0))
+        beginProgrammaticChatScroll()
+        chatLog.scrollTop = next
+        return chatLog.scrollTop
+      },
+      getScrollTop() {
+        return chatLog ? chatLog.scrollTop : 0
+      },
+      getVisibleText() {
+        return chatLog?.innerText || ''
+      },
+      getRawHtml() {
+        return chatLog?.innerHTML || ''
+      },
+      reset() {
+        resetChat()
+      },
+    }
   }
 
   function resetChat() {
@@ -4959,7 +7086,7 @@ window.WorkspaceAgent = (function () {
     renderChat()
   }
 
-  function workbenchContextText(context = {}) {
+  function workbenchContextText(context = {}, extras = {}) {
     const presenter = window.WorkbenchPresenter
     const agents = Array.isArray(context.agents) ? context.agents.filter(Boolean).join('、') : ''
     const briefApi = window.WorkbenchTaskBrief
@@ -4993,39 +7120,56 @@ window.WorkspaceAgent = (function () {
             degradedReason: context.degradedReason,
             waitingKind: context.waitingKind,
             gate: context.waitingKind === 'gate' ? { title: context.waitingTitle, node: context.currentNode } : null,
-            clarification: context.waitingKind === 'clarification' ? { question: context.waitingTitle } : null,
+            clarification: context.waitingKind === 'clarification'
+              ? (context.clarification || { question: context.waitingTitle })
+              : null,
           }).factualBrief
         : '')
+    const contextForCite = { ...context, factualBrief }
+    const citations = briefApi?.buildWorkbenchCitations
+      ? briefApi.buildWorkbenchCitations(contextForCite, extras)
+      : []
+    const citationsPrompt = briefApi?.formatWorkbenchCitationsForPrompt
+      ? briefApi.formatWorkbenchCitationsForPrompt(citations)
+      : ''
     const grounding = briefApi
       ? briefApi.workbenchGroundingRules()
       : [
           '【工作台任务事实门禁 · 必须遵守】',
           '只能引用下方任务事实；禁止编造财务/法务/运营等未声明角色；不足则说明本地工作流未提供。',
-          '禁止把任务输入路径当作产物推荐。',
+          '用第一性原则：事实 → 缺口 → 可验证下一步；禁止无来源断言。',
         ].join('\n')
-    return [
-      '[工作台任务上下文]',
-      `任务：${context.slug || context.name || '当前任务'}`,
-      `目标：${context.intent || context.name || '围绕当前工作流完成交付'}`,
-      `工作流：${context.workflowName || context.workflow || '未命名工作流'}`,
-      agents ? `参与助手：${agents}` : '参与助手：未声明具体角色时禁止臆造',
-      artifacts ? `产物：${artifacts}` : '产物：暂无或未同步',
-      context.degraded ? '流程详情：暂不可用（请引导用户检查内容源设置）' : '',
-      '',
-      '【任务事实】',
-      factualBrief || `状态：${context.status || '进行中'}\n当前节点：${context.currentNode || '流程执行中'}`,
-      '',
-      grounding,
-      '',
-      '请围绕该任务协助：优先引导用户在流程面板完成审批/澄清；对话侧只处理补充要求、材料与助手调用。',
-      '禁止建议用户查看 ingest/ 等任务输入路径作为产物。',
-      '[工作台任务上下文结束]',
-    ].filter((line) => line !== undefined && line !== null && line !== '').join('\n')
+    return {
+      text: [
+        '[工作台任务上下文]',
+        `任务：${context.slug || context.name || '当前任务'}`,
+        `目标：${context.intent || context.name || '围绕当前工作流完成交付'}`,
+        `工作流：${context.workflowName || context.workflow || '未命名工作流'}`,
+        agents ? `参与助手：${agents}` : '参与助手：未声明具体角色时禁止臆造',
+        artifacts ? `产物：${artifacts}` : '产物：暂无或未同步',
+        context.degraded ? '流程详情：暂不可用（请引导用户检查内容源设置）' : '',
+        '',
+        '【任务事实】',
+        factualBrief || `状态：${context.status || '进行中'}\n当前节点：${context.currentNode || '流程执行中'}`,
+        '',
+        citationsPrompt,
+        '',
+        grounding,
+        '',
+        '请围绕该任务协助：需要审批/澄清时引导用户在本对话卡片或输入框完成；也可协助补充材料与解释状态。',
+        '禁止建议用户查看 ingest/ 等任务输入路径作为产物。',
+        '回答涉及工作内容时，正文用「依据：来源名」标注，并与上方可用来源对应。',
+        '[工作台任务上下文结束]',
+      ].filter((line) => line !== undefined && line !== null && line !== '').join('\n'),
+      citations,
+    }
   }
 
   async function enterWorkbenchTask(context = {}) {
     workbenchTaskContext = { ...context }
     if (surfaceMode !== 'workbench') return
+    // 专家/工作流对话房已有绑定 Session，禁止再 fork「工作台 ·」指挥 Tab
+    if (['expert-chat', 'workflow-chat'].includes(String(context.kind || ''))) return
     await activateSurfaceSession('workbench')
     if (!activeSession?.id) return
     const goal = `工作台 · ${context.intent || context.name || context.slug || '任务协作'}`
@@ -5050,6 +7194,7 @@ window.WorkspaceAgent = (function () {
     sessions = sessions.map(session => session.id === activeSession.id
       ? { ...session, displayTitle: goal }
       : session)
+    syncDaemonHitlFromContext()
     syncComposerPlaceholder({ force: true })
     renderSessionTabs()
     renderChat()
@@ -5062,13 +7207,444 @@ window.WorkspaceAgent = (function () {
         syncComposerPlaceholder({ force: true })
       }
       updateComposerMeta()
-      if (!chatHistory.length) renderChat()
+      const hitlChanged = syncDaemonHitlFromContext()
+      if (hitlChanged || !chatHistory.length) renderChat()
     }
   }
 
   function exitWorkbenchTask() {
     workbenchTaskContext = null
+    setDaemonProcessFeed(null)
     if (surfaceMode === 'workbench') renderChat()
+  }
+
+  function daemonHitlNodeOf(payload) {
+    if (!payload || typeof payload !== 'object') return ''
+    return String(payload.node || payload.node_id || payload.nodeId || payload.id || '').trim()
+  }
+
+  function daemonHitlKey(kind, slug, node) {
+    return `${String(slug || '').trim()}|${String(kind || '').trim()}|${String(node || '').trim()}`
+  }
+
+  function notifyDaemonHitlSubmitted(detail = {}) {
+    try {
+      window.dispatchEvent(new CustomEvent('knowme-daemon-hitl-submitted', { detail }))
+    } catch { /* ignore */ }
+  }
+
+  function resolveOpenDaemonHitl(exceptKey = '') {
+    let changed = false
+    for (const message of chatHistory) {
+      if (message?.role !== 'daemon-hitl' || message.resolved) continue
+      if (exceptKey && message.hitlKey === exceptKey) continue
+      message.resolved = true
+      message.statusText = message.statusText || '已处理'
+      changed = true
+    }
+    return changed
+  }
+
+  function syncDaemonHitlFromContext() {
+    if (surfaceMode !== 'workbench' || !workbenchTaskContext) {
+      return resolveOpenDaemonHitl()
+    }
+    if (String(workbenchTaskContext.runMode || '') !== 'daemon') {
+      return resolveOpenDaemonHitl()
+    }
+    const kind = String(workbenchTaskContext.waitingKind || 'none')
+    if (kind !== 'gate' && kind !== 'clarification') {
+      return resolveOpenDaemonHitl()
+    }
+    const slug = String(workbenchTaskContext.slug || '').trim()
+    const payload = kind === 'gate' ? workbenchTaskContext.gate : workbenchTaskContext.clarification
+    const node = daemonHitlNodeOf(payload)
+    const briefApi = window.WorkbenchTaskBrief
+    const clarifyDisplay = kind === 'clarification' && briefApi?.resolveClarificationDisplay
+      ? briefApi.resolveClarificationDisplay(payload || {})
+      : null
+    const questions = Array.isArray(clarifyDisplay?.questions)
+      ? clarifyDisplay.questions.map(item => String(item || '').trim()).filter(Boolean)
+      : []
+    const title = kind === 'gate'
+      ? String(payload?.title || workbenchTaskContext.waitingTitle || '需要你确认').trim()
+      : String(
+        questions.length > 1
+          ? '待处理事项 · 请逐条回答'
+          : (clarifyDisplay?.title || payload?.question || workbenchTaskContext.waitingTitle || '请补充任务所需信息'),
+      ).trim()
+    const detail = kind === 'clarification'
+      ? String(clarifyDisplay?.detail || (questions.length === 1 ? '' : clarifyDisplay?.question || '')).trim()
+      : String(workbenchTaskContext.waitingDetail || '').trim()
+    const question = kind === 'clarification' ? String(clarifyDisplay?.question || '').trim() : ''
+    const key = daemonHitlKey(kind, slug, node || title)
+    let changed = resolveOpenDaemonHitl(key)
+    const existing = chatHistory.find(message => message?.role === 'daemon-hitl' && message.hitlKey === key)
+    if (existing) {
+      if (existing.resolved) {
+        existing.resolved = false
+        existing.statusText = ''
+        changed = true
+      }
+      if (existing.title !== title) {
+        existing.title = title
+        changed = true
+      }
+      if (existing.detail !== detail) {
+        existing.detail = detail
+        changed = true
+      }
+      if (existing.question !== question) {
+        existing.question = question
+        changed = true
+      }
+      const prevQuestions = Array.isArray(existing.questions) ? existing.questions.join('\n') : ''
+      const nextQuestions = questions.join('\n')
+      if (prevQuestions !== nextQuestions) {
+        existing.questions = questions.slice()
+        changed = true
+      }
+      if (existing.node !== node) {
+        existing.node = node
+        changed = true
+      }
+      return changed
+    }
+    chatHistory.push({
+      role: 'daemon-hitl',
+      hitlKey: key,
+      kind,
+      slug,
+      node,
+      title,
+      question,
+      questions,
+      detail,
+      resolved: false,
+      statusText: '',
+      text: title,
+    })
+    return true
+  }
+
+  function renderDaemonHitlBubble(message) {
+    const kind = message.kind === 'gate' ? 'gate' : 'clarification'
+    const resolved = !!message.resolved
+    const questions = Array.isArray(message.questions)
+      ? message.questions.map(item => String(item || '').trim()).filter(Boolean)
+      : []
+    const kicker = kind === 'gate' ? '需要你确认' : '待处理事项'
+    const nodeMeta = (kind === 'clarification' && message.node)
+      ? `<div class="agent-daemon-hitl-meta">节点 ${escHtml(message.node)}</div>`
+      : ''
+    let bodyHtml = ''
+    if (!resolved && kind === 'clarification' && questions.length > 1) {
+      bodyHtml = `<ol class="agent-daemon-hitl-questions">${
+        questions.map(q => `<li>${escHtml(q)}</li>`).join('')
+      }</ol>`
+    } else if (!resolved && kind === 'clarification' && questions.length === 1) {
+      bodyHtml = `<div class="agent-daemon-hitl-title">${escHtml(questions[0]).replace(/\n/g, '<br>')}</div>`
+    } else {
+      const title = escHtml(message.title || (kind === 'gate' ? '需要你确认' : '请补充任务所需信息')).replace(/\n/g, '<br>')
+      bodyHtml = `<div class="agent-daemon-hitl-title">${title}</div>`
+      if (!resolved && message.detail) {
+        bodyHtml += `<p class="agent-daemon-hitl-detail">${escHtml(message.detail).replace(/\n/g, '<br>')}</p>`
+      }
+    }
+    let actions = ''
+    if (!resolved && kind === 'gate') {
+      actions = `<div class="agent-daemon-hitl-actions">
+        <button type="button" class="agent-daemon-hitl-btn primary" data-daemon-hitl-decision="approve" data-hitl-key="${escHtml(message.hitlKey || '')}">通过</button>
+        <button type="button" class="agent-daemon-hitl-btn" data-daemon-hitl-decision="revise" data-hitl-key="${escHtml(message.hitlKey || '')}">修订</button>
+        <button type="button" class="agent-daemon-hitl-btn" data-daemon-hitl-decision="reject" data-hitl-key="${escHtml(message.hitlKey || '')}">打回</button>
+      </div>`
+    } else if (!resolved && kind === 'clarification') {
+      actions = `<label class="agent-daemon-hitl-answer">
+        <span class="agent-daemon-hitl-answer-label">你的答复</span>
+        <textarea class="agent-daemon-hitl-input" rows="4" data-daemon-hitl-input="${escHtml(message.hitlKey || '')}" placeholder="逐条回答上面的问题，或写一段完整说明"></textarea>
+      </label>
+      <div class="agent-daemon-hitl-actions">
+        <button type="button" class="agent-daemon-hitl-btn primary" data-daemon-hitl-clarify-submit="1" data-hitl-key="${escHtml(message.hitlKey || '')}">提交答复</button>
+      </div>
+      <p class="agent-daemon-hitl-hint">也可在底部输入框写好后点「提交答复」。仅询问「要补充什么」不会自动提交。</p>`
+    } else if (resolved) {
+      actions = `<p class="agent-daemon-hitl-hint">${escHtml(message.statusText || '已提交')}</p>`
+    }
+    return `<div class="agent-bubble assistant agent-daemon-hitl" data-hitl-key="${escHtml(message.hitlKey || '')}" data-hitl-kind="${kind}">
+      <div class="agent-daemon-hitl-kicker">${kicker}</div>
+      ${nodeMeta}
+      ${bodyHtml}
+      ${actions}
+    </div>`
+  }
+
+  async function submitDaemonClarificationAnswer(answer) {
+    const context = workbenchTaskContext || {}
+    const clarification = context.clarification || {}
+    const slug = String(context.slug || '').trim()
+    const node = daemonHitlNodeOf(clarification)
+    const text = String(answer || '').trim()
+    if (!slug) return { ok: false, error: '当前任务缺少标识，无法提交回答' }
+    if (!node) return { ok: false, error: '当前澄清节点缺少标识，无法提交回答' }
+    if (!text) return { ok: false, error: '请先填写回答内容' }
+    if (window.WorkbenchTaskBrief?.looksLikeClarificationMetaQuestion?.(text)) {
+      return { ok: false, error: '这像是在询问要填什么，请先让助手说明，或直接写出要提交的答案后再点「提交澄清」' }
+    }
+    let res
+    try {
+      res = await window.api.workbenchDaemonClarify(slug, { node, answer: text })
+    } catch (error) {
+      res = { ok: false, error: error.message || '提交回答失败' }
+    }
+    if (!res || !res.ok) return { ok: false, error: (res && res.error) || '提交回答失败' }
+    const key = daemonHitlKey('clarification', slug, node || clarification.question || '')
+    for (const message of chatHistory) {
+      if (message?.role === 'daemon-hitl' && message.hitlKey === key) {
+        message.resolved = true
+        message.statusText = '已提交回答，任务继续执行'
+      }
+    }
+    notifyDaemonHitlSubmitted({ kind: 'clarification', slug, node, answer: text })
+    return { ok: true }
+  }
+
+  async function submitDaemonGateDecision(decision, hitlKey = '') {
+    const context = workbenchTaskContext || {}
+    const gate = context.gate || {}
+    const slug = String(context.slug || '').trim()
+    const node = daemonHitlNodeOf(gate)
+    const value = String(decision || '').trim()
+    if (!slug) return { ok: false, error: '当前任务缺少标识，无法提交决定' }
+    if (!node) return { ok: false, error: '当前审批节点缺少标识，无法提交决定' }
+    if (!['approve', 'revise', 'reject'].includes(value)) {
+      return { ok: false, error: '无效的审批决定' }
+    }
+    let res
+    try {
+      res = await window.api.workbenchDaemonGate(slug, { node, decision: value })
+    } catch (error) {
+      res = { ok: false, error: error.message || '提交决定失败' }
+    }
+    if (!res || !res.ok) return { ok: false, error: (res && res.error) || '提交决定失败' }
+    const label = { approve: '通过', revise: '修订', reject: '打回' }[value] || value
+    const key = hitlKey || daemonHitlKey('gate', slug, node)
+    for (const message of chatHistory) {
+      if (message?.role === 'daemon-hitl' && (!key || message.hitlKey === key)) {
+        message.resolved = true
+        message.statusText = `已提交：${label}`
+      }
+    }
+    chatHistory.push({ role: 'user', text: `审批决定：${label}` })
+    chatHistory.push({ role: 'system-note', text: `已提交 Gate 决定 · ${node} · ${label}` })
+    notifyDaemonHitlSubmitted({ kind: 'gate', slug, node, decision: value })
+    return { ok: true }
+  }
+
+  function bindDaemonHitlOnce() {
+    if (bindDaemonHitlOnce.bound) return
+    bindDaemonHitlOnce.bound = true
+    document.addEventListener('click', (event) => {
+      const clarifyBtn = event.target.closest('[data-daemon-hitl-clarify-submit]')
+      if (clarifyBtn) {
+        event.preventDefault()
+        if (clarifyBtn.disabled) return
+        const card = clarifyBtn.closest('.agent-daemon-hitl')
+        const cardInput = card?.querySelector('[data-daemon-hitl-input]')
+        const draft = String(cardInput?.value || aiInput?.value || '').trim()
+        if (!draft) {
+          toastFn('请先填写要提交的澄清内容', 'info')
+          ;(cardInput || aiInput)?.focus()
+          return
+        }
+        clarifyBtn.disabled = true
+        void submitDaemonClarificationAnswer(draft).then((res) => {
+          if (!res.ok) {
+            clarifyBtn.disabled = false
+            toastFn(res.error || '提交回答失败', 'error')
+            return
+          }
+          chatHistory.push({ role: 'user', text: draft })
+          chatHistory.push({ role: 'system-note', text: '已提交澄清回答，任务继续执行' })
+          if (cardInput) cardInput.value = ''
+          if (aiInput && String(aiInput.value || '').trim() === draft) aiInput.value = ''
+          clearAttachment()
+          resizeAiInput()
+          renderChat()
+          syncComposerPlaceholder({ force: true })
+          updateComposerMeta()
+          toastFn('已提交回答', 'success')
+        })
+        return
+      }
+      const btn = event.target.closest('[data-daemon-hitl-decision]')
+      if (!btn) return
+      event.preventDefault()
+      if (btn.disabled) return
+      const decision = btn.getAttribute('data-daemon-hitl-decision')
+      const hitlKey = btn.getAttribute('data-hitl-key') || ''
+      btn.disabled = true
+      void submitDaemonGateDecision(decision, hitlKey).then((res) => {
+        if (!res.ok) {
+          btn.disabled = false
+          toastFn(res.error || '提交决定失败', 'error')
+          return
+        }
+        renderChat()
+        toastFn('已提交决定', 'success')
+      })
+    })
+  }
+
+  function ensureDaemonProcessFeedMount() {
+    if (!chatLog) return null
+    let feed = document.getElementById('agentDaemonProcessFeed')
+    if (!feed) {
+      feed = document.createElement('div')
+      feed.className = 'agent-daemon-process'
+      feed.id = 'agentDaemonProcessFeed'
+      feed.setAttribute('aria-label', '管线执行过程')
+      feed.hidden = true
+      chatLog.appendChild(feed)
+    } else if (chatLog.lastElementChild !== feed) {
+      // 与 Agent 对话同向：过程块挂在空态/消息之后，贴近输入框
+      chatLog.appendChild(feed)
+    }
+    return feed
+  }
+
+  function scrollDaemonProcessLogToLatest(feed) {
+    if (!feed) return
+    const logBody = feed.querySelector('[data-daemon-process="logs"] .agent-daemon-process-body')
+    if (logBody) logBody.scrollTop = logBody.scrollHeight
+    const progressBody = feed.querySelector('#agentDaemonProcessProgress')
+    if (progressBody) progressBody.scrollTop = progressBody.scrollHeight
+  }
+
+  function paintDaemonProcessFeed(transcript, options = {}) {
+    const feed = ensureDaemonProcessFeedMount()
+    if (!feed) return
+    // 过程投影仅属工作台 Daemon 运行间；助理 surface 一律清空，避免与「开始使用」叠层
+    if (surfaceMode !== 'workbench' || !transcript) {
+      daemonProcessCache = null
+      feed.hidden = true
+      feed.innerHTML = ''
+      agentCol?.classList.remove('has-daemon-process')
+      return
+    }
+    daemonProcessCache = { transcript, options }
+    agentCol?.classList.add('has-daemon-process')
+    feed.hidden = false
+
+    if (transcript.kind === 'chat-progress' || options.compact) {
+      const ratio = Math.max(0, Math.min(100, Number(transcript.ratio) || 0))
+      const barWidth = Math.max(ratio, ratio > 0 || transcript.done ? ratio : 4)
+      const tip = String(transcript.tip || '').trim()
+      const showTip = tip && transcript.statusLabel !== '已完成' && transcript.statusLabel !== '失败'
+      feed.innerHTML = `
+        <article class="agent-daemon-progress-card" aria-label="${escHtml(transcript.title || '管线进度')}">
+          <div class="agent-daemon-progress-head">
+            <strong>${escHtml(transcript.currentLabel || '管线任务')}</strong>
+            <span class="agent-daemon-progress-status">${escHtml(transcript.statusLabel || '')}</span>
+          </div>
+          <div class="agent-daemon-progress-meta">${escHtml(transcript.progressLine || '')}</div>
+          <div class="agent-daemon-progress-bar" aria-hidden="true"><span style="width:${barWidth}%"></span></div>
+          ${showTip ? `<p class="agent-daemon-progress-tip">${escHtml(tip)}</p>` : ''}
+          <div class="agent-daemon-progress-actions">
+            <button type="button" class="agent-daemon-progress-link" data-daemon-open-logs="1">查看过程日志</button>
+          </div>
+        </article>`
+      if (chatStickToBottom) scrollChatToBottomIfNeeded(true)
+      return
+    }
+
+    const progressCollapsed = !!options.progressCollapsed
+    const logsCollapsed = !!options.logsCollapsed
+    const progressBody = transcript.progress?.empty
+      ? `<div class="agent-daemon-process-empty">${escHtml(transcript.progress.emptyLabel)}</div>`
+      : `<pre class="agent-daemon-process-pre">${escHtml(transcript.progress?.text || '')}</pre>`
+    const logBody = transcript.logs?.empty
+      ? `<div class="agent-daemon-process-empty">${escHtml(transcript.logs.emptyLabel)}</div>`
+      : `<div class="agent-daemon-process-log-lines">${
+        (transcript.logs?.lines || []).map(line => `<div class="agent-daemon-process-log-line">${escHtml(line)}</div>`).join('')
+      }</div>`
+    feed.innerHTML = `
+      <article class="agent-daemon-process-card agent-msg" aria-label="管线进度摘要">
+        <div class="agent-daemon-process-tip">${escHtml(transcript.tip || '')}</div>
+        <section class="agent-daemon-process-block${progressCollapsed ? ' is-collapsed' : ''}" data-daemon-process="progress">
+          <header class="agent-daemon-process-head">
+            <strong>${escHtml(transcript.progress?.title || '过程')}</strong>
+            <button type="button" class="agent-daemon-process-toggle" data-daemon-process-toggle="progress">
+              ${progressCollapsed ? '展开摘要' : '收起摘要'}
+            </button>
+          </header>
+          <div class="agent-daemon-process-body" id="agentDaemonProcessProgress">${progressBody}</div>
+        </section>
+        <section class="agent-daemon-process-block${logsCollapsed ? ' is-collapsed' : ''}" data-daemon-process="logs" id="agentDaemonProcessLogs">
+          <header class="agent-daemon-process-head">
+            <strong>${escHtml(transcript.logs?.title || '运行日志')}</strong>
+            <button type="button" class="agent-daemon-process-toggle" data-daemon-process-toggle="logs">
+              ${logsCollapsed ? '展开' : '收起'}
+            </button>
+          </header>
+          <div class="agent-daemon-process-body">${logBody}</div>
+        </section>
+      </article>`
+    scrollDaemonProcessLogToLatest(feed)
+    if (options.focusLogs) {
+      feed.querySelector('#agentDaemonProcessLogs')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    } else if (chatStickToBottom) {
+      scrollChatToBottomIfNeeded(true)
+    }
+  }
+
+  /**
+   * Daemon 左栏过程投影：紧凑「管线进度」卡；全文日志仍在右侧「过程日志」Tab。
+   */
+  function setDaemonProcessFeed(transcript, options = {}) {
+    paintDaemonProcessFeed(transcript, options)
+  }
+
+  function restoreDaemonProcessFeedAfterChatRender() {
+    if (surfaceMode !== 'workbench' || !daemonProcessCache) {
+      paintDaemonProcessFeed(null)
+      return
+    }
+    paintDaemonProcessFeed(daemonProcessCache.transcript, {
+      ...daemonProcessCache.options,
+      focusLogs: false,
+    })
+  }
+
+  function bindDaemonProcessFeedOnce() {
+    if (bindDaemonProcessFeedOnce.bound) return
+    bindDaemonProcessFeedOnce.bound = true
+    document.addEventListener('click', e => {
+      const openLogs = e.target.closest('[data-daemon-open-logs]')
+      if (openLogs) {
+        e.preventDefault()
+        try {
+          window.dispatchEvent(new CustomEvent('knowme-daemon-open-process-logs'))
+        } catch { /* ignore */ }
+        return
+      }
+      const btn = e.target.closest('[data-daemon-process-toggle]')
+      if (!btn) return
+      const kind = btn.getAttribute('data-daemon-process-toggle')
+      const block = btn.closest('.agent-daemon-process-block')
+      if (!block) return
+      block.classList.toggle('is-collapsed')
+      const collapsed = block.classList.contains('is-collapsed')
+      btn.textContent = kind === 'progress'
+        ? (collapsed ? '展开摘要' : '收起摘要')
+        : (collapsed ? '展开' : '收起')
+      if (daemonProcessCache) {
+        daemonProcessCache.options = {
+          ...daemonProcessCache.options,
+          progressCollapsed: kind === 'progress' ? collapsed : !!daemonProcessCache.options.progressCollapsed,
+          logsCollapsed: kind === 'logs' ? collapsed : !!daemonProcessCache.options.logsCollapsed,
+        }
+      }
+    })
   }
 
   function setSurfaceMode(mode) {
@@ -5076,12 +7652,19 @@ window.WorkspaceAgent = (function () {
     if (sessionsLoaded && activeSession?.id && nextMode !== surfaceMode) {
       updateCurrentSurfaceUi(activeSession.id)
     }
+    const switched = nextMode !== surfaceMode
     surfaceMode = nextMode
+    // 切到助理时先丢掉 Daemon 过程投影，避免 renderChat restore 把过程卡叠回空态
+    if (surfaceMode === 'agent') setDaemonProcessFeed(null)
     const agentCol = document.getElementById('agentCol')
     if (agentCol) agentCol.setAttribute('aria-label', surfaceMode === 'workbench' ? '工作台任务指挥' : '助手对话')
+    // 先同步画出目标面 Tab，再灌内容；避免工作台→助理时闪现任务多签页
+    if (sessionsLoaded && switched) paintSurfaceTabs(surfaceMode)
     syncComposerPlaceholder({ force: true })
     renderChat()
-    if (surfaceMode === 'agent') activateSurfaceSession(surfaceMode)
+    // 助理 / 工作台各自恢复本面打开集合，避免任务 Session 残留在助理 Tab
+    if (sessionsLoaded && switched) return activateSurfaceSession(surfaceMode)
+    return Promise.resolve()
   }
 
   return {
@@ -5089,11 +7672,14 @@ window.WorkspaceAgent = (function () {
     resetChat,
     renderChat,
     resumeSession,
+    startExpertChat,
+    startSkillChat,
     openArtifact,
     runStewardTemplate,
     setSurfaceMode,
     enterWorkbenchTask,
     updateWorkbenchTaskContext,
     exitWorkbenchTask,
+    setDaemonProcessFeed,
   }
 })()

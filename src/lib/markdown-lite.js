@@ -75,8 +75,56 @@
     return html.replace(/\u0000MDLITE(\d+)\u0000/g, (_m, idx) => tokens[Number(idx)]())
   }
 
+  function looksLikeTableRow(line) {
+    const t = String(line || '').trim()
+    if (!t.includes('|')) return false
+    const cells = splitTableCells(t)
+    return cells.length >= 2
+  }
+
+  function isTableSeparator(line) {
+    const cells = splitTableCells(line)
+    if (!cells.length) return false
+    return cells.every(cell => /^:?-{3,}:?$/.test(String(cell || '').trim()))
+  }
+
+  function splitTableCells(line) {
+    let t = String(line || '').trim()
+    if (!t) return []
+    if (t.startsWith('|')) t = t.slice(1)
+    if (t.endsWith('|')) t = t.slice(0, -1)
+    return t.split('|').map(cell => cell.trim())
+  }
+
+  function alignmentFromSeparator(cell) {
+    const t = String(cell || '').trim()
+    const left = t.startsWith(':')
+    const right = t.endsWith(':')
+    if (left && right) return 'center'
+    if (right) return 'right'
+    if (left) return 'left'
+    return ''
+  }
+
+  function renderTable(headerCells, alignments, bodyRows, inline) {
+    const th = headerCells.map((cell, i) => {
+      const align = alignments[i] || ''
+      const style = align ? ` style="text-align:${align}"` : ''
+      return `<th${style}>${inline(cell)}</th>`
+    }).join('')
+    const body = bodyRows.map(row => {
+      const tds = headerCells.map((_, i) => {
+        const align = alignments[i] || ''
+        const style = align ? ` style="text-align:${align}"` : ''
+        return `<td${style}>${inline(row[i] == null ? '' : row[i])}</td>`
+      }).join('')
+      return `<tr>${tds}</tr>`
+    }).join('')
+    return `<div class="md-table-wrap"><table class="md-table"><thead><tr>${th}</tr></thead><tbody>${body}</tbody></table></div>`
+  }
+
   /**
-   * 块级结构：标题 / 有序与无序列表 / 围栏代码块 / 段落。
+   * 块级结构：标题 / 有序与无序列表 / 围栏代码块 / GFM 表格 / 段落。
    *
    * @param {string} src
    * @param {{ inline?: (text: string) => string }} [options] inline 可替换整套行内渲染
@@ -91,7 +139,8 @@
 
     const closeList = () => { if (list) { out.push(`</${list}>`); list = null } }
 
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i]
       if (/^\s*```/.test(line)) {
         if (inCode) {
           out.push(`<pre><code>${escapeHtml(codeBuf.join('\n'))}</code></pre>`)
@@ -105,6 +154,24 @@
       }
       if (inCode) { codeBuf.push(line); continue }
       if (!line.trim()) { closeList(); continue }
+
+      // GFM table: header + separator + body rows
+      if (looksLikeTableRow(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+        closeList()
+        const headerCells = splitTableCells(line)
+        const alignments = splitTableCells(lines[i + 1]).map(alignmentFromSeparator)
+        const bodyRows = []
+        i += 2
+        while (i < lines.length && looksLikeTableRow(lines[i]) && !isTableSeparator(lines[i])) {
+          const cells = splitTableCells(lines[i])
+          const row = headerCells.map((_, idx) => (cells[idx] == null ? '' : cells[idx]))
+          bodyRows.push(row)
+          i += 1
+        }
+        i -= 1
+        out.push(renderTable(headerCells, alignments, bodyRows, inline))
+        continue
+      }
 
       const heading = line.match(/^(#{1,4})\s+(.*)$/)
       if (heading) {

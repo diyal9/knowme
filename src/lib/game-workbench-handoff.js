@@ -28,7 +28,7 @@ function assessDaemonReadiness(daemonOverview = {}, options = {}) {
     return {
       ready: false,
       code: 'offline',
-      message: '无法读取 Workbench 服务状态，请确认 Daemon 已启动',
+      message: '无法读取 Workbench 服务状态，请确认管线服务已启动',
       recovery: ['打开设置 → Workbench 连接', '确认本机 127.0.0.1:8010 或配置的 HTTPS 端点可达', '检查 Bearer Token 是否有效'],
     }
   }
@@ -40,7 +40,7 @@ function assessDaemonReadiness(daemonOverview = {}, options = {}) {
         ready: false,
         code: 'auth_required',
         message: 'Workbench 需要登录后才能启动工作流',
-        recovery: ['在工作台点击「连接工作服务」完成认证'],
+        recovery: ['在工作台点击「连接管线服务」完成认证'],
       }
     }
   }
@@ -49,10 +49,79 @@ function assessDaemonReadiness(daemonOverview = {}, options = {}) {
       ready: false,
       code: daemonOverview.code || 'offline',
       message: daemonOverview.error || 'Workbench 服务未就绪',
-      recovery: ['启动本机 Workbench Daemon', '检查防火墙与端口占用', '验证 endpoint 配置'],
+      recovery: ['启动本机 Workbench 管线服务', '检查防火墙与端口占用', '验证 endpoint 配置'],
     }
   }
   return { ready: true, code: 'ready', message: 'Workbench 已就绪', recovery: [] }
+}
+
+/**
+ * Launch-time preflight for Daemon compose / handoff.
+ * CLI workflows require cursor API key + executor heartbeat.
+ */
+function assessLaunchPreflight({ daemon = {}, workflow = null, executorReady, cursorApiKeyReady } = {}) {
+  const overview = daemon && typeof daemon === 'object' ? daemon : {}
+  const readiness = assessDaemonReadiness(overview)
+  if (!readiness.ready) {
+    return {
+      ok: false,
+      code: readiness.code,
+      message: readiness.message,
+      recovery: readiness.recovery || [],
+    }
+  }
+  if (!workflow || !workflow.id) {
+    return {
+      ok: false,
+      code: 'no_workflow',
+      message: '请选择交付路径',
+      recovery: ['在创建表单选择一条可用交付路径'],
+    }
+  }
+  if (workflow.locked) {
+    return {
+      ok: false,
+      code: 'path_locked',
+      message: '该交付路径已锁定，暂不可启动',
+      recovery: ['选择其他未锁定的交付路径'],
+    }
+  }
+  if (!workflowNeedsCli(workflow)) {
+    return { ok: true, code: 'ready', message: '可启动（脚本工作流无需 CLI）', recovery: [] }
+  }
+
+  const keyReady = cursorApiKeyReady !== undefined
+    ? cursorApiKeyReady !== false
+    : overview.cursorApiKeyReady !== false
+  const execReady = executorReady !== undefined
+    ? executorReady !== false
+    : overview.executorReady !== false
+
+  if (keyReady === false) {
+    return {
+      ok: false,
+      code: 'cursor_api_key',
+      message: '当前工作流需要 Cursor Agent CLI，但未检测到 CURSOR_API_KEY',
+      recovery: [
+        '在管线服务仓库 .nine/.env.local 配置 CURSOR_API_KEY（或 CURSOR_API）',
+        '重启管线服务后再试',
+      ],
+    }
+  }
+  if (execReady === false) {
+    const detail = overview.executor?.message || '管线执行器未就绪'
+    return {
+      ok: false,
+      code: 'executor_not_ready',
+      message: detail,
+      recovery: [
+        '确认 Daemon executor 进程在线',
+        '检查 .nine/.env.local 中的 CURSOR_API_KEY',
+        '运行 python -m tools.workflow_runner.daemon doctor 自检',
+      ],
+    }
+  }
+  return { ok: true, code: 'ready', message: '可启动', recovery: [] }
 }
 
 function resolveRepoContext(repo = null) {
@@ -114,7 +183,7 @@ function buildHandoff({
     return {
       ok: false,
       code: 'no_workflow',
-      error: 'Daemon 未返回可用工作流，无法交接研发任务',
+      error: '管线服务未返回可用工作流，无法交接研发任务',
       recovery: ['确认激活内容源包含 .cursor/workflows/', '运行 npm run workbench:sync 注册 game-dev-delivery'],
       requirement: { id: doc.id, title: doc.title, validation },
       blocked: true,
@@ -125,12 +194,30 @@ function buildHandoff({
     return {
       ok: false,
       code: 'executor_not_ready',
-      error: '当前工作流需要 Cursor Agent CLI，但 Daemon 执行器未就绪（缺少 CURSOR_API_KEY）',
+      error: '当前工作流需要 Cursor Agent CLI，但管线服务执行器未就绪（缺少 CURSOR_API_KEY）',
       recovery: [
         '在 Workbench 仓库 .nine/.env.local 配置 CURSOR_API_KEY',
         '或改用「手机游戏研发交付」(game-dev-delivery) 脚本工作流',
         '运行 python -m tools.workflow_runner.daemon doctor 自检',
       ],
+      requirement: { id: doc.id, title: doc.title, validation },
+      workflow: workflow.id,
+      blocked: true,
+    }
+  }
+
+  const launchPreflight = assessLaunchPreflight({
+    daemon: daemonOverview,
+    workflow,
+    executorReady,
+    cursorApiKeyReady: daemonOverview.cursorApiKeyReady,
+  })
+  if (!launchPreflight.ok) {
+    return {
+      ok: false,
+      code: launchPreflight.code,
+      error: launchPreflight.message,
+      recovery: launchPreflight.recovery,
       requirement: { id: doc.id, title: doc.title, validation },
       workflow: workflow.id,
       blocked: true,
@@ -202,6 +289,7 @@ function formatTaskTrace(handoff = {}, session = {}) {
 module.exports = {
   slugify,
   assessDaemonReadiness,
+  assessLaunchPreflight,
   workflowNeedsCli,
   resolveRepoContext,
   pickWorkflow,

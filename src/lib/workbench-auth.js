@@ -1,5 +1,7 @@
 'use strict'
 
+const { parseDaemonError } = require('./workbench-daemon-errors')
+
 const DEFAULT_WORKBENCH_AUTH = {
   endpoint: 'http://127.0.0.1:8010',
   tenantId: '',
@@ -88,15 +90,6 @@ function isAuthFailure(statusCode, message = '') {
   return /授权|auth|login|未登录|guest|token|permission denied/.test(text)
 }
 
-function errorMessage(body, fallback) {
-  if (!body || typeof body !== 'object') return fallback
-  const detail = body.detail
-  if (typeof detail === 'string') return detail
-  if (detail && typeof detail.message === 'string') return detail.message
-  if (typeof body.message === 'string') return body.message
-  return fallback
-}
-
 async function login(payload = {}, options = {}) {
   let endpoint
   try {
@@ -130,11 +123,13 @@ async function login(payload = {}, options = {}) {
       body = {}
     }
     if (!response.ok) {
-      const message = errorMessage(body, `授权失败（${response.status}）`)
+      const parsed = parseDaemonError(body, response.status, `授权失败（${response.status}）`, {
+        isAuthFailure,
+      })
       return {
         ok: false,
-        code: isAuthFailure(response.status, message) ? 'auth_required' : 'http_error',
-        error: message,
+        code: parsed.code,
+        error: parsed.message,
         status: response.status,
       }
     }

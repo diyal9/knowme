@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "id": "feishu-related-chats",
+  "kind": "skill",
+  "name": "相关聊天",
+  "version": "1.0.0",
+  "dependencies": [{ "id": "feishu", "kind": "connector", "required": true }],
+  "permissions": { "tools": ["feishu.related_chats"] },
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "relatedChats",
+          "title": "分析跟我相关的聊天",
+          "subtitle": "今天：私聊/群聊主题与 @我",
+          "icon": "chat",
+          "group": "knowledge-collab",
+          "modes": ["general"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请分析跟我相关的聊天。",
+          "preflight": {
+            "type": "connector-auth",
+            "connector": "feishu",
+            "message": "要分析跟你相关的聊天，我得先连上飞书读取你今天的会话。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「分析跟我相关的聊天」。"
+          },
+          "requiredTools": ["feishu.related_chats"],
+          "templateVars": { "days": 1 }
+        }]
+      }
+    }
+  }
+}

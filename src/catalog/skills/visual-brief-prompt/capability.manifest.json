@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "visual-brief-prompt",
+  "kind": "skill",
+  "name": "视觉 Brief 出图",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "visualBriefPrompt",
+          "title": "Brief 出图提示",
+          "subtitle": "文案方向 + 图像 prompt + 审阅清单",
+          "icon": "image",
+          "group": "visual",
+          "modes": ["general", "writing"],
+          "surfaces": ["workflow"],
+          "prompt": "请把视觉 Brief 整理为受众卖点、文案方向与可迭代图像提示词，并给出审阅清单。"
+        }]
+      }
+    }
+  }
+}

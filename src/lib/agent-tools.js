@@ -7,15 +7,95 @@
  * 投影 Connector / MCP 工具。
  */
 
+let logger = null
+try { logger = require('./logger') } catch { /* logger optional */ }
+
 const MAX_TOOL_RESULT_CHARS = 24000
 const MAX_UI_PREVIEW_CHARS = 1200
 const TRUNCATION_SUFFIX = '\n\n[结果已截断]'
+
+// 投影预算需容纳完整 v1 内建工具面 + 已启用连接器工具；超限时按优先级裁剪并告警。
+const EXTRA_TOOL_BUDGET = 64
+
+// 预算不足时最先让位的工具：多 Agent 编排与子 Run 管理，单轮对话极少用到。
+const DEFERRABLE_TOOLS = new Set([
+  'delegate_to_expert',
+  'spawn_sub_run',
+  'await_sub_run',
+  'get_sub_run_status',
+  'cancel_sub_run',
+  'send_run_message',
+  'handoff_artifact',
+])
+
+const CONNECTOR_SOURCES = new Set(['feishu', 'mcp', 'connector', 'skill'])
+
+const FABRIC_SEARCH_TOOL = {
+  type: 'function',
+  function: {
+    name: 'fabric_search',
+    description: 'Root-first Knowledge Fabric search: queries the root graph, routes to mounted libraries, merges results with authority weighting.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Non-empty search query.' },
+      },
+      required: ['query'],
+      additionalProperties: false,
+    },
+  },
+  _knowme: {
+    source: 'builtin',
+    capability: 'knowledge-search',
+    risk: 'read',
+    sideEffects: false,
+    requiresApproval: false,
+    scope: 'content-source',
+    timeoutMs: 30000,
+    research: { kind: 'knowledge-search', scope: 'knowledge', label: '知识织网检索' },
+  },
+}
+
+const KB_QUERY_TOOL = {
+  type: 'function',
+  function: {
+    name: 'kb_query',
+    description: 'Query a specific knowledge library collection by id.',
+    parameters: {
+      type: 'object',
+      properties: {
+        collection: { type: 'string', description: 'KB id or qmd collection id.' },
+        query: { type: 'string', description: 'Search query.' },
+      },
+      required: ['collection', 'query'],
+      additionalProperties: false,
+    },
+  },
+  _knowme: { source: 'builtin', capability: 'knowledge-search', risk: 'read', sideEffects: false },
+}
+
+const KB_GET_TOOL = {
+  type: 'function',
+  function: {
+    name: 'kb_get',
+    description: 'Fetch full text for a knowledge anchor/ref.',
+    parameters: {
+      type: 'object',
+      properties: {
+        ref: { type: 'string', description: 'Anchor id, path, or external ref.' },
+      },
+      required: ['ref'],
+      additionalProperties: false,
+    },
+  },
+  _knowme: { source: 'builtin', capability: 'knowledge-search', risk: 'read', sideEffects: false },
+}
 
 const SEARCH_KNOWLEDGE_TOOL = {
   type: 'function',
   function: {
     name: 'search_knowledge',
-    description: 'Search the active knowledge base for relevant passages. Use when you need factual context from the user knowledge library.',
+    description: 'Search the active knowledge base (Fabric-aware root-first retrieval). Prefer when you need factual context from the user knowledge library.',
     parameters: {
       type: 'object',
       properties: {
@@ -28,9 +108,25 @@ const SEARCH_KNOWLEDGE_TOOL = {
       additionalProperties: false,
     },
   },
+  _knowme: {
+    source: 'builtin',
+    capability: 'knowledge-search',
+    risk: 'read',
+    sideEffects: false,
+    requiresApproval: false,
+    scope: 'content-source',
+    timeoutMs: 30000,
+    idempotencySupported: false,
+    rollbackSupported: false,
+    research: {
+      kind: 'knowledge-search',
+      scope: 'knowledge',
+      label: '当前知识库检索',
+    },
+  },
 }
 
-const ALLOWED_TOOL_NAMES = new Set(['search_knowledge'])
+const ALLOWED_TOOL_NAMES = new Set(['search_knowledge', 'fabric_search', 'kb_query', 'kb_get'])
 
 function parseToolArguments(raw) {
   if (raw == null || raw === '') return { ok: true, args: {} }
@@ -64,11 +160,15 @@ function formatSearchHits(hits = []) {
   list.forEach((hit, i) => {
     const title = String(hit.title || hit.name || `结果 ${i + 1}`).trim()
     const path = String(hit.path || hit.url || hit.source || '').trim()
+    const kb = hit.provenance?.kbId || hit.kbId || ''
+    const auth = hit.provenance?.authority ?? hit.authority
     const snippet = String(hit.snippet || hit.text || hit.content || '')
       .replace(/\s+/g, ' ')
       .trim()
+    const tags = [kb ? `库:${kb}` : '', Number.isFinite(auth) ? `authority:${auth}` : ''].filter(Boolean).join(' · ')
     const head = path ? `${i + 1}. ${title} (${path})` : `${i + 1}. ${title}`
-    lines.push(head)
+    lines.push(tags ? `${head} [${tags}]` : head)
+    if (hit.conflict?.message) lines.push(`   ⚠ ${hit.conflict.message}`)
     if (snippet) lines.push(`   ${snippet}`)
   })
   return lines.join('\n')
@@ -107,9 +207,25 @@ function formatToolError(code, message) {
 }
 
 function summarizeToolArgs(name, args) {
-  if (name === 'search_knowledge' && args?.query) {
+  if ((name === 'search_knowledge' || name === 'fabric_search') && args?.query) {
     const q = String(args.query).replace(/\s+/g, ' ').trim()
     return q.length > 80 ? `${q.slice(0, 77)}…` : q
+  }
+  if (name === 'kb_query' && args?.query) {
+    const c = String(args.collection || '').slice(0, 24)
+    const q = String(args.query).replace(/\s+/g, ' ').trim().slice(0, 40)
+    return `${c} · ${q}`
+  }
+  if (name === 'kb_get' && args?.ref) {
+    return String(args.ref).slice(0, 80)
+  }
+  if (name === 'search_web' && args?.query) {
+    const q = String(args.query).replace(/\s+/g, ' ').trim()
+    const mode = args.mode === 'news' ? '新闻' : '网页'
+    const recency = Number(args.recency_days)
+    const suffix = Number.isFinite(recency) ? ` · 近 ${recency} 天` : ''
+    const label = `${mode} · ${q}${suffix}`
+    return label.length > 100 ? `${label.slice(0, 97)}…` : label
   }
   if (name === 'fetch_web_page' && args?.url) {
     const raw = String(args.url).trim()
@@ -165,41 +281,119 @@ function summarizeToolArgs(name, args) {
   return ''
 }
 
-function normalizeExtraDefinitions(extraDefinitions = []) {
+/**
+ * 投影优先级：越小越先入选。必需工具 > 连接器/技能工具 > 普通内建 > 可延后的编排工具。
+ */
+function extraToolPriority(name, contract, requiredTools) {
+  if (requiredTools.has(name)) return 0
+  if (DEFERRABLE_TOOLS.has(name)) return 3
+  const source = String(contract?.source || '').trim().toLowerCase()
+  if (CONNECTOR_SOURCES.has(source) || name.includes('.')) return 1
+  return 2
+}
+
+/**
+ * @param {object[]} [extraDefinitions]
+ * @param {{ requiredTools?: string[], budget?: number }} [options]
+ */
+function normalizeExtraDefinitions(extraDefinitions = [], options = {}) {
   const list = Array.isArray(extraDefinitions) ? extraDefinitions : []
-  const out = []
-  const seen = new Set(['search_knowledge'])
+  const required = new Set(
+    (Array.isArray(options.requiredTools) ? options.requiredTools : [])
+      .map(item => String(item || '').trim())
+      .filter(Boolean),
+  )
+  const budget = Number.isFinite(Number(options.budget)) && Number(options.budget) > 0
+    ? Math.floor(Number(options.budget))
+    : EXTRA_TOOL_BUDGET
+  const candidates = []
+  const seen = new Set(['search_knowledge', 'fabric_search', 'kb_query', 'kb_get'])
   for (const def of list) {
     const name = String(def?.function?.name || def?.name || '').trim()
     if (!name || seen.has(name)) continue
     seen.add(name)
-    out.push({
-      type: 'function',
-      function: {
-        name,
-        description: String(def.function?.description || name).slice(0, 500),
-        parameters: def.function?.parameters || { type: 'object', properties: {} },
+    const contract = def._knowme || {}
+    candidates.push({
+      priority: extraToolPriority(name, contract, required),
+      order: candidates.length,
+      def: {
+        type: 'function',
+        function: {
+          name,
+          description: String(def.function?.description || name).slice(0, 500),
+          parameters: def.function?.parameters || { type: 'object', properties: {} },
+        },
+        _knowme: contract,
       },
-      _knowme: def._knowme || {},
     })
-    if (out.length >= 32) break
   }
-  return out
+  if (candidates.length <= budget) return candidates.map(item => item.def)
+
+  candidates.sort((a, b) => a.priority - b.priority || a.order - b.order)
+  const kept = candidates.slice(0, budget)
+  const dropped = candidates.slice(budget)
+  const keptNames = new Set(kept.map(item => item.def.function.name))
+  const droppedNames = dropped.map(item => item.def.function.name)
+  logger?.warn?.('system', 'tool-surface-truncated', '工具面超出投影预算，已裁剪低优先级工具', {
+    budget,
+    total: candidates.length,
+    dropped: droppedNames.slice(0, 32),
+    missingRequired: [...required].filter(name => !keptNames.has(name)),
+  })
+  // 保持原始注册顺序输出，避免下游依赖排序语义。
+  return candidates
+    .filter(item => keptNames.has(item.def.function.name))
+    .sort((a, b) => a.order - b.order)
+    .map(item => item.def)
 }
 
 /**
  * @param {{
  *   extraDefinitions?: object[],
  *   handlers?: Record<string, (args: object) => Promise<object>>,
+ *   requiredTools?: string[],
+ *   toolBudget?: number,
  * }} [options]
  */
 function createToolSurface(options = {}) {
-  const extras = normalizeExtraDefinitions(options.extraDefinitions)
+  if (options.registry && typeof options.registry.projectToSurface === 'function') {
+    const projected = options.registry.projectToSurface(parseToolArguments)
+    return createToolSurface({
+      extraDefinitions: projected.definitions,
+      handlers: projected.handlers,
+      requiredTools: options.requiredTools,
+      toolBudget: options.toolBudget,
+    })
+  }
+  const extras = normalizeExtraDefinitions(options.extraDefinitions, {
+    requiredTools: options.requiredTools,
+    budget: options.toolBudget,
+  })
   const handlers = options.handlers && typeof options.handlers === 'object' ? options.handlers : {}
-  const allowed = new Set(['search_knowledge', ...extras.map((d) => d.function.name)])
+  const allowed = new Set(['search_knowledge', 'fabric_search', 'kb_query', 'kb_get', ...extras.map((d) => d.function.name)])
 
   function getToolDefinitions() {
-    return [SEARCH_KNOWLEDGE_TOOL, ...extras.map(({ type, function: fn }) => ({ type, function: fn }))]
+    return [
+      { type: SEARCH_KNOWLEDGE_TOOL.type, function: SEARCH_KNOWLEDGE_TOOL.function },
+      { type: FABRIC_SEARCH_TOOL.type, function: FABRIC_SEARCH_TOOL.function },
+      { type: KB_QUERY_TOOL.type, function: KB_QUERY_TOOL.function },
+      { type: KB_GET_TOOL.type, function: KB_GET_TOOL.function },
+      ...extras.map(({ type, function: fn }) => ({ type, function: fn })),
+    ]
+  }
+
+  function getToolRecords() {
+    return [
+      SEARCH_KNOWLEDGE_TOOL,
+      FABRIC_SEARCH_TOOL,
+      KB_QUERY_TOOL,
+      KB_GET_TOOL,
+      ...extras.map(def => ({
+        type: def.type,
+        function: { ...def.function },
+        _knowme: { ...(def._knowme || {}) },
+      })),
+    ]
   }
 
   function isAllowedTool(name) {
@@ -217,12 +411,51 @@ function createToolSurface(options = {}) {
     const parsed = parseToolArguments(rawArgs)
     if (!parsed.ok) return parsed
 
-    if (toolName === 'search_knowledge') {
+    if (toolName === 'search_knowledge' || toolName === 'fabric_search') {
       const query = String(parsed.args.query || '').trim()
       if (!query) {
-        return { ok: false, code: 'invalid_args', message: 'search_knowledge 需要非空 query' }
+        return { ok: false, code: 'invalid_args', message: `${toolName} 需要非空 query` }
       }
       return { ok: true, name: toolName, args: { query } }
+    }
+
+    if (toolName === 'kb_query') {
+      const query = String(parsed.args.query || '').trim()
+      const collection = String(parsed.args.collection || '').trim()
+      if (!query || !collection) {
+        return { ok: false, code: 'invalid_args', message: 'kb_query 需要 collection 与 query' }
+      }
+      return { ok: true, name: toolName, args: { collection, query } }
+    }
+
+    if (toolName === 'kb_get') {
+      const ref = String(parsed.args.ref || '').trim()
+      if (!ref) return { ok: false, code: 'invalid_args', message: 'kb_get 需要 ref' }
+      return { ok: true, name: toolName, args: { ref } }
+    }
+
+    if (toolName === 'search_web') {
+      const query = String(parsed.args.query || '').replace(/\s+/g, ' ').trim()
+      if (!query) {
+        return { ok: false, code: 'invalid_args', message: 'search_web 需要非空 query' }
+      }
+      const mode = parsed.args.mode === 'news' ? 'news' : 'web'
+      const recencyRaw = Number(parsed.args.recency_days)
+      const limitRaw = Number(parsed.args.limit)
+      return {
+        ok: true,
+        name: toolName,
+        args: {
+          query: query.slice(0, 300),
+          mode,
+          ...(Number.isFinite(recencyRaw)
+            ? { recency_days: Math.max(1, Math.min(365, Math.floor(recencyRaw))) }
+            : {}),
+          ...(Number.isFinite(limitRaw)
+            ? { limit: Math.max(1, Math.min(10, Math.floor(limitRaw))) }
+            : {}),
+        },
+      }
     }
 
     if (toolName === 'fetch_web_page') {
@@ -279,6 +512,9 @@ function createToolSurface(options = {}) {
 
   function createToolExecutor(deps = {}) {
     const searchKnowledge = typeof deps.searchKnowledge === 'function' ? deps.searchKnowledge : null
+    const fabricSearch = typeof deps.fabricSearch === 'function' ? deps.fabricSearch : searchKnowledge
+    const kbQuery = typeof deps.kbQuery === 'function' ? deps.kbQuery : null
+    const kbGet = typeof deps.kbGet === 'function' ? deps.kbGet : null
     const signal = deps.signal
 
     async function executeToolCall(toolCall = {}) {
@@ -297,8 +533,9 @@ function createToolSurface(options = {}) {
       }
 
       const argsSummary = summarizeToolArgs(validation.name, validation.args)
-      if (validation.name === 'search_knowledge') {
-        if (!searchKnowledge) {
+      if (validation.name === 'search_knowledge' || validation.name === 'fabric_search') {
+        const runner = fabricSearch || searchKnowledge
+        if (!runner) {
           return {
             ...formatToolError('tool_unavailable', '知识检索执行器未配置'),
             toolName: validation.name,
@@ -306,12 +543,45 @@ function createToolSurface(options = {}) {
           }
         }
         try {
-          const providerResult = await searchKnowledge(validation.args.query, signal)
+          const providerResult = await runner(validation.args.query, signal)
           const formatted = formatProviderResult(providerResult)
           return { ...formatted, toolName: validation.name, argsSummary }
         } catch (err) {
           const msg = String(err?.message || '知识检索失败').slice(0, 500)
           return { ...formatToolError('tool_failed', msg), toolName: validation.name, argsSummary }
+        }
+      }
+
+      if (validation.name === 'kb_query') {
+        if (!kbQuery) {
+          return { ...formatToolError('tool_unavailable', 'kb_query 未配置'), toolName: validation.name, argsSummary }
+        }
+        try {
+          const providerResult = await kbQuery(validation.args.collection, validation.args.query, signal)
+          const formatted = formatProviderResult(providerResult)
+          return { ...formatted, toolName: validation.name, argsSummary }
+        } catch (err) {
+          return { ...formatToolError('tool_failed', String(err?.message || err).slice(0, 500)), toolName: validation.name, argsSummary }
+        }
+      }
+
+      if (validation.name === 'kb_get') {
+        if (!kbGet) {
+          return { ...formatToolError('tool_unavailable', 'kb_get 未配置'), toolName: validation.name, argsSummary }
+        }
+        try {
+          const doc = await kbGet(validation.args.ref, signal)
+          const text = doc?.content || doc?.text || doc?.snippet || JSON.stringify(doc)
+          const truncated = truncateText(String(text || ''), MAX_TOOL_RESULT_CHARS)
+          return {
+            ok: doc?.ok !== false,
+            text: truncated.text,
+            preview: truncated.text.slice(0, MAX_UI_PREVIEW_CHARS),
+            toolName: validation.name,
+            argsSummary,
+          }
+        } catch (err) {
+          return { ...formatToolError('tool_failed', String(err?.message || err).slice(0, 500)), toolName: validation.name, argsSummary }
         }
       }
 
@@ -324,13 +594,17 @@ function createToolSurface(options = {}) {
             const truncated = truncateText(text, MAX_TOOL_RESULT_CHARS)
             const preview = truncateText(truncated.text, MAX_UI_PREVIEW_CHARS, '…').text
             const candidates = Array.isArray(result.meta?.candidates) ? result.meta.candidates : []
-            const sources = candidates.slice(0, 8).map((candidate, index) => ({
+            const resultSources = Array.isArray(result.sources) ? result.sources : []
+            const sourceInput = resultSources.length ? resultSources : candidates
+            const sources = sourceInput.slice(0, 8).map((candidate, index) => ({
               title: String(candidate?.title || candidate?.name || `结果 ${index + 1}`).trim().slice(0, 120),
-              path: String(candidate?.url || candidate?.path || candidate?.token || '').trim().slice(0, 260),
-              snippet: String(candidate?.updatedAt || candidate?.time || candidate?.summary || '')
+              path: String(candidate?.path || candidate?.url || candidate?.token || '').trim().slice(0, 260),
+              snippet: String(candidate?.snippet || candidate?.updatedAt || candidate?.time || candidate?.summary || '')
                 .replace(/\s+/g, ' ')
                 .trim()
                 .slice(0, 280),
+              ...(candidate?.publishedAt ? { publishedAt: String(candidate.publishedAt).slice(0, 80) } : {}),
+              ...(candidate?.retrievedAt ? { retrievedAt: String(candidate.retrievedAt).slice(0, 80) } : {}),
             }))
             return {
               ok: result.ok !== false,
@@ -376,6 +650,7 @@ function createToolSurface(options = {}) {
 
   return {
     getToolDefinitions,
+    getToolRecords,
     isAllowedTool,
     validateToolCall,
     createToolExecutor,
@@ -425,4 +700,6 @@ module.exports = {
   dispatchToolCall,
   createToolSurface,
   normalizeExtraDefinitions,
+  EXTRA_TOOL_BUDGET,
+  DEFERRABLE_TOOLS,
 }

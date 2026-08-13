@@ -44,15 +44,16 @@ describe('feishu authorization confirmation and gap-based completion', () => {
   // `open-external` refuses any non-http scheme, so sending the internal auth
   // deep link there surfaced 「不允许的协议」 instead of authorizing.
   it('runs the auth deep link in-chat instead of handing it to the OS opener', () => {
-    const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
-    assert.match(main, /不允许的协议/)
+    const openExternalIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'open-external.js'), 'utf8')
+    assert.match(openExternalIpc, /不允许的协议/)
     assert.match(
       workspaceAgent,
       /async function handleFeishuLinkAction[\s\S]{0,400}?const authLink = parseFeishuAuthDeepLink\(url\)/
     )
     assert.match(workspaceAgent, /await runFeishuAuthInChat\(host, authLink\.scopes\)/)
     // The interception must precede every openExternal call in that function.
-    const body = /async function handleFeishuLinkAction[\s\S]*?\n  \}\n/.exec(workspaceAgent)[0]
+    const body = /async function handleFeishuLinkAction[\s\S]*?\r?\n  \}\r?\n/.exec(workspaceAgent)?.[0]
+    assert.ok(body, 'handleFeishuLinkAction body should be locatable')
     assert.ok(
       body.indexOf('parseFeishuAuthDeepLink') < body.indexOf('openExternal'),
       'deep link is consumed before any external open'

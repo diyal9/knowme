@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "id": "office-outline-draft",
+  "kind": "skill",
+  "name": "按提纲成稿",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "writingOutlineDraft",
+          "title": "按提纲成稿",
+          "subtitle": "提纲扩写为完整段落与过渡",
+          "icon": "list",
+          "group": "writing-refine",
+          "modes": ["writing"],
+          "surfaces": ["empty", "quick-menu"],
+          "prompt": "请根据我提供的标题、提纲和要点扩写成完整文稿。",
+          "preflight": {
+            "type": "material",
+            "message": "请把提纲或标题贴进输入框（或 @ 文件），我再扩写成完整文稿。"
+          }
+        }]
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "version": "v2",
+  "changelog": "Adds advisory thresholds for toolSuccessRate, latencyMs, recoveryPassRate, ungroundedClaimRate without changing L0 hard dimensions.",
+  "hardDimensions": ["toolChoice", "factFaithfulness", "refusalWhenUnmet", "contextContinuity"],
+  "advisoryDimensions": ["toolSuccessRate", "latencyMs", "recoveryPassRate", "ungroundedClaimRate"],
+  "thresholds": {
+    "toolChoice": 1.0,
+    "factFaithfulness": 1.0,
+    "refusalWhenUnmet": 1.0,
+    "contextContinuity": 0.9,
+    "toolArgs": 0.8,
+    "taskCompletion": 0.8,
+    "formatUx": 0.7,
+    "toolSuccessRate": 0.9,
+    "latencyMs": 1.0,
+    "recoveryPassRate": 1.0,
+    "ungroundedClaimRate": 1.0
+  },
+  "latencyBudgetMs": 8000
+}

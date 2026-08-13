@@ -35,6 +35,10 @@ describe('workspace agent independent chat', () => {
   it('uses icon-first Agent tabs and icon-only message roles', () => {
     assert.ok(html.includes('说说你想做什么，或问公司约定'), 'friendly composer placeholder')
     assert.ok(html.includes('id="agentSessionTabs"'), 'session tab list')
+    assert.ok(html.includes('class="agent-tab-scroll"'), 'session tab scroll container')
+    assert.match(html, /\.agent-tab-scroll\s*\{[^}]*scrollbar-width:none;/, 'hides visible tab scrollbar')
+    assert.ok(html.includes('.agent-tab-scroll::-webkit-scrollbar { display:none; }'), 'hides webkit tab scrollbar')
+    assert.ok(!html.includes('scrollbar-width:thin;\n}\n.agent-session-tabs'), 'does not keep thin tab scrollbar')
     assert.ok(!html.includes('id="agentNewAgent"'), 'left New Agent button removed')
     assert.ok(!html.includes('id="agentTabPlus"'), 'standalone plus button merged into expert entry')
     assert.match(html, /id="agentExpertBtn"[^>]*>\s*<span class="ico" data-icon="plus"><\/span>\s*<\/button>/, 'expert entry uses plus icon')
@@ -56,11 +60,16 @@ describe('workspace agent independent chat', () => {
     assert.ok(!html.includes('公司智能办公搭档'), 'old company hero removed')
     assert.ok(!html.includes('飞书办公规划'), 'old office planning card removed')
     assert.ok(!html.includes('agent-empty-hints'), 'home empty state omits shortcut hint rows')
-    assert.ok(html.includes('智能办公搭档'), 'office-partner empty hero')
-    assert.match(
+    assert.ok(!html.includes('开始一个新任务'), 'launch state omits the redundant hero heading')
+    assert.ok(html.includes('把你的问题或任务交给 KnowMe'), 'launch-state product guidance')
+    assert.ok(!html.includes('agent-launch-mark'), 'launch title omits the decorative assistant icon')
+    assert.ok(html.includes('data-agent-composer-mount'), 'launch state reserves the real Composer mount')
+    assert.ok(html.includes('开始使用'), 'launch state labels the shortcut section')
+    assert.match(html, /\.agent-launch-intro\s*\{[^}]*align-items:center;[^}]*text-align:center;/, 'launch intro is centered')
+    assert.doesNotMatch(
       html,
-      /\.agent-empty-home \.agent-empty-hero,\s*\.agent-empty-home \.agent-empty-sub \{[^}]*text-align:center/,
-      'home empty-state heading and subtitle are centered'
+      /\.agent-home-composer-mount \.agent-go#agentSend\s*\{/,
+      'launch state reuses the conversation send-button styling'
     )
     assert.match(html, /\.agent-empty-act \{[^}]*text-align:left/, 'action-card copy remains left aligned')
     assert.ok(html.includes('data-auto-send="1"'), 'office cards are auto-send shortcuts')
@@ -79,7 +88,7 @@ describe('workspace agent independent chat', () => {
       agent.indexOf('return `<div class="agent-empty-tips agent-empty-home" aria-label="任务入口">')
     )
     assert.ok(!stewardEmpty.includes('class="agent-empty-tip"'), 'steward omits legacy shortcut hint rows')
-    assert.ok(html.includes('懂你的智能体搭档'), 'brand empty slogan')
+    assert.ok(html.includes('懂你的专家搭档'), 'brand empty slogan')
     assert.ok(agent.includes('feishu.related_chats'), 'related chats shortcut prompts workflow')
     assert.ok(agent.includes('feishu.today_priority'), 'today priority shortcut prompts workflow')
     assert.ok(agent.includes('enrichTodayPriorityShortcutPrompt'), 'today priority prompt enrichment')
@@ -96,7 +105,17 @@ describe('workspace agent independent chat', () => {
     assert.match(
       html,
       /\.agent-bubble\s*\{\s*width:var\(--agent-message-track\);\s*max-width:var\(--agent-message-track\);/,
-      'all Agent bubbles use the same message track'
+      'assistant message shell keeps the shared reading track'
+    )
+    assert.match(
+      html,
+      /\.agent-bubble\.user\s*\{[^}]*width:fit-content;[^}]*max-width:min\(76%, 720px\);[^}]*align-self:flex-end;/,
+      'user messages shrink to content and align right'
+    )
+    assert.match(
+      html,
+      /\.agent-bubble\.assistant\s*\{[^}]*background:transparent;[^}]*border:1px solid transparent;/,
+      'assistant replies use the quiet left reading surface'
     )
     assert.match(
       html,
@@ -108,8 +127,8 @@ describe('workspace agent independent chat', () => {
       /\.agent-quick-menu\s*\{[^}]*width:var\(--agent-message-track\);\s*max-width:var\(--agent-message-track\);/,
       'quick panel uses the same message track'
     )
-    assert.match(html, /\.agent-chat-log\s*\{[^}]*padding:18px 16px 8px;/, 'chat log keeps a compact bottom inset')
-    assert.match(html, /\.agent-col-foot\s*\{[^}]*padding:4px 16px 12px;/, 'footer keeps matching horizontal and compact top inset')
+    assert.match(html, /\.agent-chat-log\s*\{[^}]*padding:20px 16px 10px;/, 'chat log keeps a compact bottom inset')
+    assert.match(html, /\.agent-col-foot\s*\{[^}]*padding:6px 16px 14px;/, 'footer separates the Composer from the final response')
     assert.doesNotMatch(html, /\.agent-col-foot\s*\{[^}]*border-top:/, 'composer footer has no top divider')
     assert.match(html, /\.agent-composer\s*\{[^}]*border:1px solid rgba\(0,0,0,0\.10\)/, 'composer keeps its own border')
     assert.doesNotMatch(
@@ -142,9 +161,43 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('润色去 AI 味'), 'writing mode quick menu exposes humanizer action')
   })
 
+  it('keeps four home recommendations and separates workflow intake', () => {
+    assert.ok(agent.includes('partitionPackHomeCards(cards, 4)'), 'Pack home uses a bounded partition')
+    assert.ok(agent.includes('home.recommendations') && agent.includes('.map(card => renderEmptyActionCard'), 'only recommended cards enter the grid')
+    assert.ok(agent.includes('class="agent-empty-act agent-workflow-entry"'), 'workflow intake has a separate entry')
+    assert.ok(agent.includes('<small>启动工作流</small>'), 'workflow entry communicates its execution level')
+    assert.ok(agent.includes('cards.slice(0, 4).map'), 'generic modes also cap recommendation cards')
+    assert.ok(html.includes('.agent-workflow-entry {'), 'workflow entry has dedicated styling')
+  })
+
+  it('moves one real Composer between launch and conversation states', () => {
+    assert.ok(agent.includes('function dockComposerAfterChat()'), 'conversation dock helper exists')
+    assert.ok(agent.includes('function mountComposerInLaunchState()'), 'launch mount helper exists')
+    assert.ok(agent.includes("chatLog.querySelector('[data-agent-composer-mount]')"), 'launch state finds its Composer mount')
+    assert.ok(agent.includes("chatLog.insertAdjacentElement('afterend', agentFoot)"), 'Composer is rescued before chat HTML replacement')
+    assert.ok(agent.includes("agentCol.classList.add('agent-launch-state')"), 'empty Session exposes launch layout state')
+    assert.ok(agent.includes("agentCol.classList.remove('agent-launch-state')"), 'conversation Session clears launch layout state')
+    assert.match(
+      agent,
+      /agentCol\.classList\.remove\('agent-launch-state'\)[\s\S]{0,300}?resizeAiInput\(\)/,
+      'conversation docking remeasures textarea after leaving the larger launch state'
+    )
+    assert.equal((html.match(/id="agentComposer"/g) || []).length, 1, 'only one Composer exists')
+    assert.equal((html.match(/id="agentInput"/g) || []).length, 1, 'only one Agent textarea exists')
+  })
+
   it('offers explainable continuation without composer work-hint chips', () => {
-    assert.ok(agent.includes('async function resumeSession(sessionId)'), 'resume action is session-scoped')
-    assert.ok(html.includes('依据：已有 Session 摘要'), 'resume suggestion shows its basis')
+    assert.ok(agent.includes('async function resumeSession(sessionId)'), 'workbench/agent resume remains outside the fab')
+    // 通知 FAB：零 resumeSession；只做通知与快捷处理
+    const fabScript = html.match(/\(function initKnowMeFab\(\) \{[\s\S]*?\}\)\(\)/)?.[0] || ''
+    assert.ok(fabScript, 'notification fab bootstrap exists')
+    assert.ok(!/resumeSession|agentSessionList|km-fab-resume|data-fab-resume|继续工作/.test(fabScript), 'fab script has no session-resume capability')
+    assert.ok(!html.includes('id="km-fab-resume"'), 'notification fab does not host session resume card')
+    assert.ok(!html.includes('data-fab-resume'), 'notification fab has no session resume CTA')
+    assert.ok(!html.includes('继续工作'), 'notification fab does not show continue-work copy')
+    assert.ok(html.includes('aria-label="通知"'), 'fab panel is labeled as notifications')
+    assert.ok(html.includes('提醒与快捷入口'), 'fab copy stays notification + quick-action scoped')
+    assert.match(html, /#km-fab-root\s*\{[^}]*right:\s*6px;[^}]*bottom:\s*6px;/, 'fab defaults to a tight bottom-right corner')
     // 产品尚未定清「意图推荐 / 记忆开关」之前，输入框上方不展示记忆勾选条
     assert.ok(!agent.includes('agent-work-hints'), 'composer work-hint bar is parked')
     assert.ok(!agent.includes('本轮带上'), 'per-turn context chips are not shown')
@@ -154,8 +207,6 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('本轮沿用了'), 'assistant bubble can explain applied habits')
     assert.ok(agent.includes('effectivePersonalization?.promptBlock'), 'shortcuts reuse effective personalization')
     assert.ok(html.includes('.agent-personalization'), 'personalization styles are present')
-    assert.ok(html.includes('id="km-fab-resume"'), 'resume suggestion lives in the floating assistant')
-    assert.ok(html.includes('data-fab-resume'), 'floating assistant resume action is session-scoped')
     assert.ok(!agent.includes('renderResumeCard()'), 'empty state does not render a resume card')
   })
 
@@ -165,7 +216,7 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('禁止输出“选一项”列表、按钮选项'), 'empty priority facts forbid suggestion choices')
     assert.ok(agent.includes('function hasEmptyTodayPriorityFacts'), 'empty priority facts have a deterministic UI guard')
     assert.ok(agent.includes('emptyTodayPriorityBody()'), 'empty priority facts use deterministic industry body')
-    assert.ok(agent.includes('const bar = emptyTodayPriority ? null : parsed.bar'), 'empty priority facts hide generated choices')
+    assert.ok(agent.includes('const bar = emptyTodayPriority ? null : (presetBar || parsed.bar)'), 'empty priority facts hide generated choices')
   })
 
   it('shows the quick action as an icon on the left side of the toolbar', () => {
@@ -178,28 +229,29 @@ describe('workspace agent independent chat', () => {
     assert.ok(html.includes('id="agentMorePop"'), 'agent more popover')
   })
 
-  it('shows quick actions as an animated inline panel without covering content', () => {
+  it('shows quick actions as a searchable command panel without covering content', () => {
     assert.ok(html.includes('.agent-quick-menu {'), 'quick actions use a dedicated panel')
-    assert.ok(html.includes('grid-template-columns:170px minmax(240px, 1fr)'), 'quick panel uses two-step columns')
-    assert.ok(html.includes('.agent-quick-col {'), 'quick actions support grouped columns')
-    assert.ok(html.includes('.agent-quick-col-title'), 'quick actions render group titles')
-    assert.ok(html.includes('id="agentQuickCats"'), 'left column uses dynamic category host')
-    assert.ok(html.includes('id="agentQuickItems"'), 'right column uses dynamic item host')
-    assert.ok(html.includes('.agent-quick-menu.quick-focus-cats'), 'focus mode styles category column')
-    assert.ok(html.includes('.agent-quick-menu.quick-focus-items'), 'focus mode styles item column')
+    assert.ok(html.includes('id="agentQuickSearch"'), 'launcher has a dedicated search input')
+    assert.ok(html.includes('placeholder="搜索任务、技能或结果…"'), 'search copy is task-oriented')
+    assert.ok(html.includes('id="agentQuickItems"'), 'launcher has a dynamic result host')
+    assert.ok(html.includes('id="agentQuickEmpty"'), 'launcher has an explicit empty result state')
+    assert.ok(!html.includes('id="agentQuickCats"'), 'launcher no longer exposes category navigation')
+    assert.ok(!html.includes('快捷大类') && !html.includes('快捷子项'), 'internal category copy is removed')
+    assert.ok(html.includes('.agent-command-item {'), 'results use command rows')
     assert.ok(html.includes('max-height:0') && html.includes('.agent-quick-menu.show'), 'panel expands in document flow')
-    assert.ok(html.includes('height:166px') && html.includes('max-height:166px'), 'open panel keeps a fixed height across categories')
-    assert.ok(html.includes('background:var(--bg-card)') && html.includes('box-shadow:0 6px 18px'), 'panel has visual separation')
+    assert.ok(html.includes('max-height:min(420px, 56vh)'), 'open panel stays bounded across result counts')
+    assert.ok(html.includes('background:var(--bg-card)') && html.includes('box-shadow:0 10px 30px'), 'panel has visual separation')
     assert.ok(html.includes('prefers-reduced-motion: reduce'), 'panel respects reduced motion')
     assert.ok(agent.includes('setQuickMenuOpen'), 'trigger synchronizes expanded state')
     assert.ok(agent.includes('const QUICK_MENU_PROFILES = {'), 'quick menu profiles are role-aware')
     assert.ok(agent.includes('renderQuickMenuForAgent(activeAgentId)'), 'quick menu re-renders by active assistant')
+    assert.ok(agent.includes('filterQuickCommands'), 'quick menu filters task records')
     assert.ok(agent.includes('data-steward'), 'quick actions support steward-only workflows')
     assert.ok(agent.includes('function handleQuickMenuKeydown'), 'quick menu has dedicated keyboard handler')
-    assert.ok(agent.includes("quickFocus = 'cats'"), 'quick menu opens with category focus')
-    assert.ok(agent.includes("e.key === 'ArrowLeft'"), 'left arrow moves to category column')
-    assert.ok(agent.includes("e.key === 'ArrowRight'"), 'right arrow moves to item column')
-    assert.ok(agent.includes("if (aiQuickMenu?.classList.contains('show')) setQuickMenuOpen(false)"), 'Ctrl+K toggles the quick panel closed')
+    assert.ok(agent.includes("e.key === 'ArrowDown'"), 'down arrow moves through filtered results')
+    assert.ok(agent.includes("e.key === 'ArrowUp'"), 'up arrow moves through filtered results')
+    assert.ok(agent.includes('requestAnimationFrame(() => quickSearchInput?.focus())'), 'launcher focuses search without changing the draft')
+    assert.ok(agent.includes('quickSearchInput?.addEventListener(\'input\''), 'search updates results immediately')
   })
 
   it('provides a local text-file attachment flow for the composer', () => {
@@ -220,9 +272,27 @@ describe('workspace agent independent chat', () => {
 
   it('keeps the conversation readable as a bounded message stream', () => {
     assert.ok(html.includes('--agent-message-track: min(920px, 100%)'), 'bounded shared message track')
+    assert.ok(html.includes('--agent-reading-track: min(780px, 100%)'), 'ordinary answers use a narrower reading track')
     assert.ok(html.includes('max-width:var(--agent-message-track)'), 'message width inherits shared track')
+    assert.match(
+      html,
+      /\.agent-bubble\.assistant:not\(\.related-chats-result\) > \.agent-response-body,[\s\S]*?width:var\(--agent-reading-track\);/,
+      'ordinary assistant body is constrained without narrowing specialized results'
+    )
+    assert.match(html, /\.agent-md p\s*\{\s*margin:0 0 0\.72em;/, 'paragraphs use a calmer vertical rhythm')
+    assert.match(html, /\.agent-md hr\s*\{[^}]*background:rgba\(61,58,54,\.1\);/, 'markdown dividers stay quiet')
+    assert.match(html, /\.agent-suggest\s*\{[^}]*border-radius:12px;[^}]*background:rgba\(61,58,54,\.025\);/, 'choices form a distinct light action region')
+    assert.match(
+      html,
+      /\.agent-suggest-item \.sug-desc\s*\{[^}]*white-space:normal;[^}]*overflow-wrap:anywhere;/,
+      'long choice descriptions wrap instead of truncating'
+    )
+    assert.match(html, /\.agent-composer\s*\{[^}]*min-height:108px;/, 'conversation Composer starts compact')
+    assert.match(html, /\.agent-input-wrap textarea\s*\{[^}]*min-height:66px;[^}]*max-height:198px;/, 'conversation textarea can still grow')
+    assert.match(html, /\.agent-home-composer-mount \.agent-composer\s*\{[^}]*min-height:148px;/, 'launch Composer keeps its larger task-entry size')
+    assert.match(html, /\.agent-home-composer-mount \.agent-input-wrap textarea\s*\{[^}]*min-height:92px;/, 'launch textarea remains spacious')
     assert.ok(html.includes('box-shadow:0 1px 2px'), 'message surface treatment')
-    assert.ok(html.includes('padding:18px 16px 8px'), 'conversation uses a compact bottom inset')
+    assert.ok(html.includes('padding:20px 16px 10px'), 'conversation uses a compact bottom inset')
   })
 
   it('uses Cursor-style multi session tabs with independent transcripts', () => {
@@ -230,10 +300,12 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('agentSessionNew'), 'creates a new Agent session')
     assert.ok(agent.includes('agentSessionFork'), 'fork continues in new Agent')
     assert.ok(agent.includes('agentSessionCloseTab'), 'closes tab without deleting')
-    assert.ok(agent.includes('sessionId: activeSession?.id'), 'sends session id')
+    assert.ok(agent.includes('sessionId: runSessionId || activeSession?.id'), 'sends session id')
     assert.ok(agent.includes('openSessionIds'), 'tracks open tabs')
     assert.ok(agent.includes('createNewAgent'), 'New Agent action')
     assert.ok(agent.includes('contextmenu'), 'tab right-click menu')
+    assert.ok(agent.includes("addEventListener('wheel'"), 'wheel pans overflowing session tabs')
+    assert.ok(agent.includes('sessionTabScrollEl.scrollLeft'), 'wheel updates tab strip scrollLeft')
     assert.ok(agent.includes('复制对话记录'), 'copy transcript action')
     assert.ok(agent.includes('管理对话'), 'manage conversation action')
     assert.ok(agent.includes('关闭左侧'), 'close-left action')
@@ -247,12 +319,73 @@ describe('workspace agent independent chat', () => {
     assert.ok(!agent.includes('agentNewAgent'), 'left New Agent button unbound')
   })
 
+  it('starts a dedicated expert session with identity and degraded capability guidance', () => {
+    assert.ok(agent.includes('async function startExpertChat(expertIdOrOptions)'), 'public expert start path accepts task context')
+    assert.ok(agent.includes('const created = await createNewAgent({'), 'reuses the durable session creator')
+    assert.ok(agent.includes('knowledgeRefs,') && agent.includes('taskRef: options.taskRef || null'), 'session creator receives scoped task context')
+    assert.ok(agent.includes('activeSession.expertName'), 'expert identity labels the session')
+    assert.ok(agent.includes('function renderExpertEmptyState'), 'expert welcome surface')
+    assert.ok(agent.includes('renderLaunchIntroHtml(expert.name,'), 'expert identity is visible in launch metadata')
+    assert.ok(agent.includes('data-expert-config'), 'limited connector has a configuration action')
+    assert.ok(agent.includes("window.openCapabilityHub('connectors')"), 'configuration action opens connectors')
+    assert.ok(html.includes('.agent-expert-capability.limited'), 'limited dependency state is styled')
+  })
+
+  it('leads the expert welcome surface with the agent identity', () => {
+    assert.ok(agent.includes('function renderExpertIdentityHtml(expert)'), 'identity block exists')
+    assert.ok(agent.includes('${renderExpertIdentityHtml(expert)}'), 'identity renders before the composer')
+    assert.ok(agent.includes('window.AgentIdentity'), 'shares icon semantics with the workbench card')
+    assert.ok(agent.includes('identityAvatarSrc'), 'prefers packaged preset photos when resolvable')
+    assert.ok(agent.includes('function agentAvatarMarkHtml'), 'session tabs and pops share avatar marks')
+    assert.ok(agent.includes('function agentMarkPayload'), 'builtin modes map onto preset keys')
+    
+    assert.ok(agent.includes('agent-expert-identity-photo'), 'identity mark can render an img')
+    assert.ok(agent.includes('agent-expert-identity-badge'), 'source badge tells which shelf the agent came from')
+    assert.ok(agent.includes('告诉「${expert.name}」你的目标…'), 'composer placeholder names the active agent')
+    assert.ok(!agent.includes("avatar || '🧩'"), 'no emoji avatar is rendered')
+    assert.ok(html.includes('.agent-expert-identity-mark'), 'identity block is styled')
+    assert.ok(html.includes('.agent-expert-identity-photo'), 'photo crop styles exist')
+    assert.ok(html.includes('lib/agent-identity.js'), 'identity module is loaded in the workspace')
+  })
+
+  it('lets a degraded expert start talking instead of blocking the entry', () => {
+    // 渲染层缓存加载失败会被静默置空，拿它当准入判据会造成「卡片看得见、点了没反应」
+    assert.ok(!agent.includes("return { ok: false, error: '专家不存在或尚未安装' }"), 'renderer cache no longer vetoes start')
+    assert.ok(agent.includes("catalogExperts.find(item => String(item.id || '') === id) || null"), 'catalog is display-only')
+    assert.ok(agent.includes('surfaceMode = previousSurface'), 'failed start does not leave a half-switched surface')
+    assert.ok(agent.includes('notified: true'), 'failure is reported once')
+    assert.ok(agent.includes('仍可直接对话'), 'degraded dependencies explicitly permit conversation')
+    assert.ok(html.includes('.agent-expert-degraded'), 'degraded note is styled')
+  })
+
   it('keeps Agent and workbench tab collections separate', () => {
     assert.ok(agent.includes('knowme.agent.surfaceUi.v2'), 'persists per-surface tab state')
     assert.ok(agent.includes('openIds: [...new Set(openSessionIds)]'), 'stores each surface open tabs')
     assert.ok(agent.includes('surfaceUi[surfaceMode]'), 'updates only the active surface')
-    assert.ok(agent.includes('openSessionIds = state.openIds.filter'), 'restores only target surface tabs')
+    assert.ok(agent.includes('function paintSurfaceTabs'), 'sync paints target surface tabs')
+    assert.ok(agent.includes('openSessionIds = (state.openIds || []).filter'), 'restores only target surface tabs')
+    assert.ok(agent.includes('if (sessionsLoaded && switched) paintSurfaceTabs(surfaceMode)'), 'paints tabs before async activate')
     assert.ok(agent.includes('updateCurrentSurfaceUi(activeSession.id)'), 'new tabs remain on current surface')
+    assert.ok(agent.includes('function isWorkbenchOwnedSession'), 'classifies workbench-owned sessions')
+    assert.ok(agent.includes('relocateWorkbenchSessionsFromAgentSurface'), 'migrates polluted assistant tabs')
+    assert.ok(agent.includes("options.surface === 'workbench'"), 'expert chat can target workbench surface')
+    assert.ok(agent.includes('if (sessionsLoaded && switched) return activateSurfaceSession(surfaceMode)'), 'both surfaces restore their own tabs')
+    assert.ok(/\/\^工作台\\s\*\[·\\-—–\]/.test(agent), 'recognizes hyphenated workbench title variants')
+    assert.ok(agent.includes("surfaceMode === 'agent') setDaemonProcessFeed(null)"), 'clears daemon process feed when entering assistant')
+    assert.ok(agent.includes("surfaceMode !== 'workbench' || !transcript"), 'never paints process feed off workbench surface')
+    assert.ok(agent.includes("surfaceMode !== 'workbench' || !daemonProcessCache"), 'restore skips process feed off workbench')
+  })
+
+  it('preserves inflight assistant chat across surface switches', () => {
+    assert.ok(agent.includes('inflightChatBySession'), 'tracks inflight chat histories by session')
+    assert.ok(agent.includes('inflightChatBySession.set(runSessionId, chatHistory)'), 'registers history when a run starts')
+    assert.ok(agent.includes('inflightChatBySession.delete(runSessionId)'), 'releases inflight history when the run ends')
+    assert.ok(agent.includes('const inflightHistory = inflightChatBySession.get(sessionId)'), 'activate prefers inflight history')
+    assert.ok(agent.includes('chatHistory = inflightHistory'), 'restores the same array after surface return')
+    assert.ok(agent.includes('for (const hist of inflightChatBySession.values())'), 'stream lookup searches inflight histories')
+    assert.ok(agent.includes('if (chatHistory[messageIdx] !== message) return true'), 'off-screen stream events skip DOM render')
+    assert.ok(agent.includes('const targetSessionId = runSessionId || result.sessionId || activeSession?.id || \'\''), 'completion updates the run session, not the switched activeSession')
+    assert.ok(agent.includes('sessionId: runSessionId || activeSession?.id'), 'aiGenerate keeps the originating session id')
   })
 
   it('shows a thinking indicator before the first stream chunk', () => {
@@ -263,21 +396,21 @@ describe('workspace agent independent chat', () => {
     assert.ok(html.includes('.agent-bubble.thinking'), 'thinking bubble style')
   })
 
-  it('renders json thinking blocks as a dedicated card', () => {
-    assert.ok(agent.includes('function parseThinkingBlocks'), 'parses dedicated thinking blocks')
-    assert.ok(agent.includes('function renderThinkingBlock'), 'renders thinking block component')
-    assert.ok(html.includes('.agent-thinking-json'), 'thinking block styles exist')
-    assert.ok(html.includes('.agent-thinking-badge'), 'thinking card badge style')
+  it('strips thinking protocol from legacy hydration without rendering cards', () => {
+    assert.ok(agent.includes('stripDisplayProtocolText'), 'uses shared strip helper for legacy hydration')
+    assert.ok(!agent.includes('function renderThinkingBlock'), 'thinking json cards removed')
+    assert.ok(!agent.includes('agent-thinking-json'), 'thinking card markup removed')
   })
 
   it('shows run-scoped stages and tool execution timeline', () => {
     assert.ok(agent.includes('onAiStreamEvent'), 'subscribes to structured stream events')
     assert.ok(agent.includes('event.runId !== runId'), 'ignores events from other runs')
+    assert.ok(agent.includes('function applyV2StreamEvent'), 'handles v2 output events via reducer')
     assert.ok(agent.includes('function upsertAssistantTrace'), 'updates stable trace rows')
     assert.ok(agent.includes('function renderExecutionTimeline'), 'renders execution timeline')
-    assert.ok(agent.includes("event.type === 'tool.started'"), 'handles tool start')
-    assert.ok(agent.includes("event.type === 'tool.completed'"), 'handles tool completion')
-    assert.ok(agent.includes("event.type === 'tool.failed'"), 'handles tool failure')
+    assert.ok(agent.includes("type === 'tool.started'"), 'handles tool start via v2 reducer path')
+    assert.ok(agent.includes("type === 'tool.completed'"), 'handles tool completion via v2 reducer path')
+    assert.ok(agent.includes("type === 'tool.failed'"), 'handles tool failure via v2 reducer path')
     assert.ok(html.includes('.agent-execution'), 'execution timeline styles')
     assert.ok(html.includes('.agent-trace-pulse'), 'running step indicator')
     assert.ok(agent.includes('执行进度'), 'uses a stable summary instead of duplicating the active step')
@@ -285,10 +418,18 @@ describe('workspace agent independent chat', () => {
     assert.ok(html.includes('.agent-execution-meta'), 'separates elapsed time from current activity')
     assert.ok(html.includes('.agent-trace-row.pending'), 'visually focuses the active step')
     assert.ok(agent.includes('formatElapsed'), 'shows elapsed thinking time')
-    assert.ok(html.includes('border-left:1px solid #e1ddd7'), 'draws a quiet continuous step rail')
+    assert.ok(html.includes('border-left:1px solid rgba(129,123,115,.22)'), 'draws a quiet continuous step rail')
+    assert.ok(agent.includes('const timelineHtml = renderExecutionTimeline(m)'), 'renders the waiting timeline once')
+    assert.ok(agent.includes('const hasExecution = Boolean(timelineHtml)'), 'uses the actual execution surface as the status source of truth')
+    assert.ok(agent.includes("bubble.querySelector('[data-thinking-status]')?.remove()"), 'removes the standalone waiting status when the first timeline arrives')
+    assert.ok(agent.includes('class="agent-trace-meta"'), 'groups result actions and step timing into one metadata region')
+    assert.ok(html.includes('.agent-trace-meta'), 'aligns secondary step metadata consistently')
+    assert.ok(html.includes('.agent-execution-summary:focus-visible'), 'keeps the execution disclosure keyboard visible')
+    assert.ok(html.includes('.agent-trace-row summary:focus-visible'), 'keeps result disclosures keyboard visible')
+    assert.ok(html.includes('@media (max-width:720px)'), 'stacks step metadata safely on narrow windows')
     assert.ok(!html.includes('max-height:238px'), 'avoids a nested timeline scrollbar')
     assert.ok(agent.includes("sources.length ? `查看 ${sources.length} 条资料` : '查看结果'"), 'labels collapsed tool results')
-    assert.ok(agent.includes('const keepExpanded = pending || m.streaming'), 'collapses the timeline after completion')
+    assert.ok(agent.includes('const keepExpanded = running || pendingReview'), 'collapses completed timelines unless approval is pending')
     assert.ok(!agent.includes("status !== 'error' || sources.length > 0"), 'does not auto-expand raw tool output')
     assert.ok(html.includes('.agent-trace-result-label'), 'styles the on-demand result affordance')
     assert.ok(agent.includes('function renderAssistantEmptyResultFallback'), 'adds fallback copy when result body is empty')
@@ -304,7 +445,9 @@ describe('workspace agent independent chat', () => {
   it('aligns workbench composer styling and task completion copy', () => {
     assert.ok(html.includes('border:1px solid rgba(0,0,0,0.10)'), 'composer has the shared input border baseline')
     assert.ok(html.includes('box-shadow:0 0 0 3px rgba(61,58,54,0.07)'), 'composer has the shared focus baseline')
-    assert.ok(agent.includes("补充任务要求或材料；进度与审批请看右侧流程… @ 选文件"), 'workbench keeps task-specific placeholder')
+    assert.ok(agent.includes('可先问助手要补充什么；准备好答案后点卡片「提交澄清」'), 'unclear clarification routes ask to assistant')
+    assert.ok(agent.includes('shouldAutoSubmitDaemonClarification'), 'clarification auto-submit is gated')
+    assert.ok(agent.includes('data-daemon-hitl-clarify-submit'), 'explicit submit clarification button')
     assert.ok(agent.includes('function workbenchTaskDone()'), 'workbench task completion state is explicit')
     assert.ok(agent.includes('任务已完成 · 可继续补充问题或开始新任务'), 'completed task uses task-specific helper copy')
     assert.ok(!html.includes(':has(#wbRunner:not([hidden])) .agent-col'), 'runner state must not reopen chat on the workbench home')
@@ -330,17 +473,20 @@ describe('workspace agent independent chat', () => {
     assert.ok(html.includes('.feishu-auth-cta'), 'styles the auth button')
   })
 
-  it('coalesces stream paints and holds incomplete tables in plain tail', () => {
+  it('coalesces stream paints and buffers incomplete content outside visible DOM', () => {
     assert.ok(agent.includes('function splitStreamingMarkdown'), 'streaming split helper')
     assert.ok(agent.includes('requestAnimationFrame'), 'raf coalesce')
     assert.ok(agent.includes('scrollChatToBottomIfNeeded'), 'conditional scroll')
-    assert.ok(agent.includes('md-stream-tail'), 'plain stream tail')
+    assert.ok(agent.includes('md-stream-pending'), 'fixed pending state is visible')
+    assert.ok(!agent.includes('md-stream-tail'), 'raw tail is never rendered')
+    assert.ok(!agent.includes('escHtml(tail)'), 'raw model tail does not enter html')
+    assert.ok(html.includes('agent-stream-visibility.js'), 'visibility boundary loads before renderer')
     assert.ok(html.includes('contain:layout style') || html.includes('contain: layout style'), 'streaming contain')
     assert.ok(html.includes('table-layout:fixed') || html.includes('table-layout: fixed'), 'fixed table during stream')
   })
 
   it('builds priorHistory before calling aiGenerate', () => {
-    assert.ok(agent.includes('const priorHistory = chatHistory.slice(0, -2)'), 'defines priorHistory')
+    assert.ok(agent.includes('const priorHistory = ((runSessionId && inflightChatBySession.get(runSessionId)) || chatHistory)'), 'defines priorHistory from inflight or current chat')
     assert.ok(agent.includes('history: priorHistory'), 'passes priorHistory to aiGenerate')
   })
 
@@ -386,7 +532,8 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('promptText = pendingShortcut.prompt'), 'runAI resumes the pending task after material is provided')
     // 空态卡片与快捷菜单统一走 runTaskCard
     assert.ok(agent.includes('runTaskCard(shortcutId'), 'empty-state cards route through runTaskCard')
-    assert.ok(agent.includes('const taskId = PROMPT_TO_TASK.get(prompt)'), 'quick menu reuses the same preflight')
+    assert.ok(agent.includes('PROMPT_TO_TASK.get(prompt)'), 'quick menu reuses prompt->task preflight map')
+    assert.ok(agent.includes('data-task-id'), 'quick menu exposes dynamic task identity')
     // 知识管家 remote-rag 缺主题一句话询问
     assert.ok(agent.includes('请用一句话告诉我要在远程知识库里检索什么主题'), 'remote-rag asks for a query when composer is empty')
     // 回归：卡片确定性发送必须直接走 runAI，避免执行策略里的【…】被 send→fill 改判成"请补充内容后发送"
@@ -416,6 +563,77 @@ describe('workspace agent independent chat', () => {
     assert.ok(agent.includes('dispatchAgentAction'), 'followup routes through dispatcher')
     assert.ok(html.includes('.agent-followups'), 'followup container styles exist')
     assert.ok(html.includes('.agent-followup-btn'), 'followup button styles exist')
+  })
+
+  it('hosts task attention notifications without session resume', () => {
+    const workbench = fs.readFileSync(path.join(__dirname, '..', 'src', 'workbench.js'), 'utf8')
+    assert.ok(html.includes('id="km-fab-notify"'), 'fab hosts attention list')
+    assert.ok(html.includes('knowme-needs-attention'), 'fab listens for attention events')
+    assert.ok(html.includes('needs-attention'), 'fab has attention pulse class hook')
+    assert.ok(html.includes('km-fab-attention-pulse'), 'intermittent bell animation exists')
+    assert.ok(!html.includes('id="km-fab-resume"'), 'session resume card stays removed')
+    assert.ok(workbench.includes('publishTaskAttention'), 'workbench publishes attention events')
+    assert.ok(workbench.includes('attentionNotify'), 'workbench routes background attention to desktop')
+  })
+
+  it('uses an outlined bell for the floating assistant trigger', () => {
+    const fabButton = html.match(/<button[^>]*id="km-fab-btn"[\s\S]*?<\/button>/)?.[0] || ''
+    const panelAvatar = html.match(/<span class="km-fab-avatar"[\s\S]*?<\/span>/)?.[0] || ''
+
+    assert.ok(fabButton, 'floating assistant trigger exists')
+    assert.ok(fabButton.includes('class="km-fab-bell"'), 'trigger uses a dedicated bell glyph')
+    assert.ok(fabButton.includes('viewBox="0 0 24 24"'), 'bell uses the compact 24px viewBox')
+    assert.ok(!fabButton.includes('km-fab-mark-'), 'trigger no longer uses the connected brand mark')
+    assert.ok(panelAvatar.includes('km-fab-mark-line'), 'assistant panel keeps the KnowMe brand mark')
+    assert.ok(!html.includes('km-fab-mark-node-center'), 'legacy center-node mark styles are removed')
+    assert.match(
+      html,
+      /#km-fab-btn \.km-fab-glyph svg\s*\{[^}]*width:\s*19px;[^}]*fill:\s*none;[^}]*stroke:\s*currentColor;[^}]*stroke-width:\s*1\.8;/,
+      'bell stays compact and uses a single theme-aware outline',
+    )
+    assert.equal((html.match(/id="km-fab-badge"/g) || []).length, 1, 'notification badge node is reserved once')
+    assert.match(
+      html,
+      /#km-fab-btn \.km-fab-badge\s*\{[^}]*top:\s*2px;\s*right:\s*2px;\s*left:\s*auto;/,
+      'status indicator hugs the bell upper-right edge',
+    )
+    assert.ok(fabButton.includes('aria-label="通知"'), 'trigger is labeled as notifications')
+    assert.ok(fabButton.includes('aria-haspopup="true"'), 'existing popup interaction contract is preserved')
+    assert.ok(html.includes('RIGHT_MARGIN = 6'), 'drag placement keeps the tight right margin')
+    assert.ok(html.includes("const POS_KEY = 'knowme.fab.pos.v2'"), 'existing drag position storage is preserved')
+  })
+
+  it('draws the assistant panel avatar with the application icon geometry', () => {
+    const master = fs.readFileSync(
+      path.join(__dirname, '..', 'assets', 'brand-src', 'knowme-icon.svg'),
+      'utf8',
+    )
+    const panelAvatar = html.match(/<span class="km-fab-avatar"[\s\S]*?<\/span>/)?.[0] || ''
+
+    const paths = source => (source.match(/\sd="([^"]+)"/g) || [])
+      .map(item => item.replace(/\sd="|"$/g, '').replace(/\s+/g, ' ').trim())
+      .sort()
+    const circles = source => (source.match(/<circle[^>]*>/g) || [])
+      .map(item => ['cx', 'cy', 'r'].map(key => item.match(new RegExp(`${key}="([^"]+)"`))?.[1]).join(','))
+      .sort()
+
+    assert.deepEqual(paths(panelAvatar), paths(master), 'avatar connection path matches the icon master')
+    assert.deepEqual(circles(panelAvatar), circles(master), 'avatar node coordinates match the icon master')
+    assert.equal(
+      (panelAvatar.match(/km-fab-mark-origin/g) || []).length,
+      1,
+      'exactly one node carries the coral memory origin',
+    )
+    assert.ok(
+      panelAvatar.includes('cx="173" cy="190"') && panelAvatar.includes('class="km-fab-mark-origin"'),
+      'the coral origin sits at the path origin rather than the path center',
+    )
+    assert.match(html, /\.km-fab-mark-origin \{ fill: #f05d4e; \}/, 'origin node uses the brand coral')
+    assert.match(
+      html,
+      /#km-fab-panel \.km-fab-avatar \{[^}]*background: #172535;/,
+      'avatar carrier uses the brand navy',
+    )
   })
 
   it('adds low-distraction companion presence states with a local opt-out', () => {

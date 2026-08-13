@@ -1,0 +1,103 @@
+{
+  "at": "2026-08-07T06:50:41.072Z",
+  "change": "unify-knowledge-settings-tabs",
+  "shots": [
+    "knowledge-browse-tabs.png",
+    "knowledge-sources-tab.png",
+    "knowledge-health-tab.png",
+    "settings-shell-tabs.png",
+    "settings-assistant-tab.png",
+    "settings-tabs-minimum.png"
+  ],
+  "checks": [
+    {
+      "id": "knowledge-browse-tabs",
+      "ok": true,
+      "labels": [
+        "浏览",
+        "知识源",
+        "知识体检"
+      ],
+      "active": "browse",
+      "background": "rgba(0, 0, 0, 0)"
+    },
+    {
+      "id": "shot-knowledge-browse-tabs.png",
+      "ok": true
+    },
+    {
+      "id": "knowledge-sources-tab",
+      "ok": true,
+      "active": "sources",
+      "providers": 1
+    },
+    {
+      "id": "shot-knowledge-sources-tab.png",
+      "ok": true
+    },
+    {
+      "id": "knowledge-health-tab",
+      "ok": true,
+      "active": "health",
+      "panelText": "Knowledge checkup发现 608 个需要关注的地方\n    已检查 366 份资料。你可以先查看建议，再决定是否让 AI 协助整理。\n    链接"
+    },
+    {
+      "id": "shot-knowledge-health-tab.png",
+      "ok": true
+    },
+    {
+      "id": "settings-shell-tabs",
+      "ok": true,
+      "labels": [
+        "内容源",
+        "AI 接口",
+        "助手模式",
+        "系统配置",
+        "连接器",
+        "我的记忆",
+        "关于"
+      ],
+      "active": "sources",
+      "innerTitleDisplay": "none"
+    },
+    {
+      "id": "shot-settings-shell-tabs.png",
+      "ok": true
+    },
+    {
+      "id": "settings-tab-sync",
+      "ok": true,
+      "outerActive": "assistant",
+      "innerActive": "assistant",
+      "src": "file:///D:/aispace/sticky-notes/src/settings.html?embedded=1&tab=assistant"
+    },
+    {
+      "id": "shot-settings-assistant-tab.png",
+      "ok": true
+    },
+    {
+      "id": "settings-tabs-minimum-width",
+      "ok": true,
+      "clientWidth": 697,
+      "scrollWidth": 697,
+      "closeRightGap": 18
+    },
+    {
+      "id": "shot-settings-tabs-minimum.png",
+      "ok": true
+    },
+    {
+      "id": "page-errors",
+      "ok": true,
+      "count": 0
+    },
+    {
+      "id": "console-errors",
+      "ok": true,
+      "count": 0
+    }
+  ],
+  "pageErrors": [],
+  "consoleErrors": [],
+  "ok": true
+}

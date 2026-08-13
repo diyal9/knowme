@@ -1,0 +1,29 @@
+{
+  "name": "tool-recovery",
+  "input": { "prompt": "读取飞书文档", "tier": "retrieval" },
+  "forceTools": true,
+  "llmScript": [
+    {
+      "response": {
+        "text": "",
+        "toolCalls": [{ "name": "feishu.doc_read", "arguments": "{\"token\":\"abc\"}" }]
+      }
+    },
+    {
+      "response": {
+        "text": "",
+        "toolCalls": [{ "name": "feishu.doc_read", "arguments": "{\"token\":\"abc-fixed\"}" }]
+      }
+    },
+    { "response": { "text": "已修正参数后读取成功。" } }
+  ],
+  "toolScript": [
+    { "fail": true, "code": "permission", "message": "403 forbidden", "text": "403 未授权 scope 不足" },
+    { "ok": true, "text": "文档内容摘要", "preview": "文档内容摘要" }
+  ],
+  "expect": {
+    "terminal": "DONE",
+    "phases": ["PREPARE", "CONTEXT", "MODEL", "TOOL", "RECOVER", "PERSIST", "DONE"],
+    "toolCalls": 2
+  }
+}

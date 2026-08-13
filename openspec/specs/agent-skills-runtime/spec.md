@@ -122,3 +122,81 @@ Agent Skills Runtime MUST 将已启用的 Cursor 仓库技能与已复制到 cap
 - **THEN** 技能不进入可执行列表
 - **AND** Hub 可显示来源丢失状态
 
+### Requirement: Skill runtime exposes unified declaration metadata
+
+标准、legacy OKF 与 Cursor linked Skill MUST 在运行时映射为统一声明，并在 L0 元数据中提供依赖、权限、输入输出、风险与 provenance；L1–L3 内容和执行边界 MUST 保持不变。
+
+#### Scenario: Linked skill has sidecar metadata
+
+- **WHEN** 已注册 linked Skill 含合法 v2 sidecar
+- **THEN** L0 SHALL 使用 sidecar 治理元数据和 SKILL.md 展示内容
+- **AND** 资源与脚本仍受仓库和技能目录双重约束
+
+#### Scenario: Legacy skill lacks sidecar
+
+- **WHEN** SKILL.md 不含 v2 sidecar
+- **THEN** runtime SHALL 使用 adapter 返回兼容统一声明
+- **AND** 技能仍可按原方式自动匹配和 slash 加载
+
+### Requirement: Skill and workflow declare grounding contract
+
+SKILL.md frontmatter 与 Workflow manifest MUST 支持可选字段：`requiredTools`、`requiredEvidence`、`completionConditions`。Runtime 激活 skill/workflow 时 MUST 写入 ReferenceState.taskFrame 并强制执行。
+
+#### Scenario: Required tool enforced at runtime
+
+- **WHEN** skill 声明 `requiredTools: [feishu.meeting_read]`
+- **AND** 用户完成结构化选择触发读取流程
+- **THEN** runtime MUST 调度该 tool 或 fail-closed
+- **AND** MUST NOT 仅依赖 skill body 中的自然语言说明
+
+#### Scenario: Required evidence blocks completion
+
+- **WHEN** `requiredEvidence` 要求 tool_result minChars 且 forbidTruncated
+- **AND** 工具返回 truncated/empty
+- **THEN** completionConditions MUST NOT 满足
+- **AND** skill 不得标记 workflow 完成
+
+#### Scenario: Missing contract keeps legacy behavior
+
+- **WHEN** skill 未声明 grounding 三元组
+- **THEN** runtime MUST 保持与改造前等价的宽松行为
+- **AND** 不得因缺字段而阻断 unrelated chat
+
+### Requirement: Workflow writes structured refs not NL recovery hints
+
+Skill/Workflow 触发的候选列表（会议、文档、任务等）MUST 通过 ReferenceState pendingSelection 或 refs 写入结构化 payload，MUST NOT 仅依赖助手 Markdown 里的「回复 1/2」文本供下轮 NL 解析。
+
+#### Scenario: Meeting workflow seeds pending selection
+
+- **WHEN** workflow 展示 N 个候选条目
+- **THEN** 系统 MUST 写入 pendingSelection.options 含 id、label、payload
+- **AND** UI 卡片与 ReferenceState MUST 一致
+
+### Requirement: Skill references in Agent Profile snapshots
+
+Agent Profile 和 Workflow Package MUST 保存所启用 Skill 的版本、内容哈希、治理摘要和触发方式；运行时 MUST 根据快照解析 Skill，不得静默使用当前目录中的不同版本。
+
+#### Scenario: Snapshot enabled skills
+
+- **WHEN** 用户保存 Agent Profile 或确认工作流
+- **THEN** 系统保存每个启用 Skill 的版本、哈希和权限摘要
+
+#### Scenario: Skill version drift
+
+- **WHEN** 历史工作流引用的 Skill 当前版本发生变化
+- **THEN** 系统提示版本漂移，并要求用户确认升级或继续使用历史快照
+
+### Requirement: Skill availability in workflow validation
+
+Graph 或 Workflow Package 校验 MUST 检查每个 Skill 的 enabled 状态、依赖、风险和执行权限；不满足条件时 MUST fail closed。
+
+#### Scenario: Disabled skill blocks run
+
+- **WHEN** 工作流引用已禁用 Skill
+- **THEN** 校验失败并指出对应 Agent 和 Skill，且不创建 Run
+
+#### Scenario: Skill risk requires gate
+
+- **WHEN** 工作流启用需要审批的高风险 Skill
+- **THEN** 工作流预览显示审批 Gate，未经确认不得执行副作用操作
+

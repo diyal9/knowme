@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": false,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "maxNodeModuleJsDepth": 0
+  },
+  "files": [
+    "src/lib/workbench-daemon-errors.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-release",
+    "out",
+    "tests"
+  ]
+}

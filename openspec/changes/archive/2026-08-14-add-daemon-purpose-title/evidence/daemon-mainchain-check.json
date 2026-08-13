@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "stopped": false,
+  "endpoint": "http://127.0.0.1:8010",
+  "startedAt": "2026-08-12T16:13:30.157Z",
+  "steps": [
+    {
+      "id": "title-projection",
+      "ok": true
+    },
+    {
+      "id": "overview",
+      "ok": true,
+      "online": true,
+      "workflowCount": 14,
+      "taskCount": 20
+    },
+    {
+      "id": "launchContext",
+      "ok": true,
+      "skipped": true,
+      "workflowId": "demo-experience",
+      "reason": "当前管线服务尚未提供默认上下文接口"
+    },
+    {
+      "id": "task",
+      "ok": true,
+      "slug": "demo-knowme-live-edac2z",
+      "state": "finished",
+      "terminal": true
+    },
+    {
+      "id": "progress",
+      "ok": true,
+      "slug": "demo-knowme-live-edac2z",
+      "chars": 1025
+    },
+    {
+      "id": "run-title-from-task",
+      "ok": true,
+      "runTitle": "Daemon 阶段 · KnowMe daemon live E2E p"
+    }
+  ],
+  "titleProjection": {
+    "purpose": "实现 Proto 变更并同步客户端。",
+    "titled": "Daemon 阶段 · 实现 Proto 变更并同步客户端。",
+    "compact": "实现 Proto 变更并同步客户端。"
+  },
+  "mainChain": {
+    "overview": {
+      "online": true,
+      "health": [
+        "ok",
+        "hostname",
+        "executor_hostname",
+        "executor_seen_at",
+        "web_hostname",
+        "insecure_auth",
+        "auth_enabled",
+        "tenants_enabled",
+        "query_stream_timeout_sec"
+      ]
+    },
+    "launchContext": {
+      "workflowId": "demo-experience",
+      "skipped": true,
+      "code": "unsupported"
+    },
+    "task": {
+      "slug": "demo-knowme-live-edac2z",
+      "state": "finished",
+      "hasStatus": true
+    },
+    "progress": {
+      "slug": "demo-knowme-live-edac2z",
+      "chars": 1025
+    },
+    "runTitle": "Daemon 阶段 · KnowMe daemon live E2E p"
+  },
+  "finishedAt": "2026-08-12T16:13:30.319Z",
+  "summary": "Daemon 主链路（overview → launchContext → task/progress）与目的标题投影可用"
+}

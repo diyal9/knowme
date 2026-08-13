@@ -1,0 +1,41 @@
+{
+  "at": "2026-08-07T10:43:53.420Z",
+  "mode": "live-agent-services",
+  "status": "BLOCKED",
+  "ok": false,
+  "hardGate": false,
+  "hermeticGateRequired": true,
+  "results": [
+    {
+      "backend": "cursor",
+      "status": "BLOCKED",
+      "missing": [
+        "KNOWME_CURSOR_AGENT_URL",
+        "KNOWME_CURSOR_AGENT_TOKEN"
+      ],
+      "reason": "缺少 live Agent Service endpoint/token",
+      "rerun": "node openspec/changes/harden-agent-team-runtime-production-readiness/evidence/agent-service-live-e2e.js"
+    },
+    {
+      "backend": "claude",
+      "status": "BLOCKED",
+      "missing": [
+        "KNOWME_CLAUDE_AGENT_URL",
+        "KNOWME_CLAUDE_AGENT_TOKEN"
+      ],
+      "reason": "缺少 live Agent Service endpoint/token",
+      "rerun": "node openspec/changes/harden-agent-team-runtime-production-readiness/evidence/agent-service-live-e2e.js"
+    },
+    {
+      "backend": "daemon",
+      "status": "BLOCKED",
+      "missing": [
+        "KNOWME_DAEMON_AGENT_URL",
+        "KNOWME_DAEMON_AGENT_TOKEN"
+      ],
+      "reason": "缺少 live Agent Service endpoint/token",
+      "rerun": "node openspec/changes/harden-agent-team-runtime-production-readiness/evidence/agent-service-live-e2e.js"
+    }
+  ],
+  "rerun": "node openspec/changes/harden-agent-team-runtime-production-readiness/evidence/agent-service-live-e2e.js"
+}

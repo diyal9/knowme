@@ -1,0 +1,56 @@
+{
+  "change": "llmwiki-ops-hub",
+  "at": "2026-08-10T08:55:39.846Z",
+  "passed": 5,
+  "total": 5,
+  "ok": true,
+  "checks": [
+    {
+      "id": "llmwiki-three-action-hub",
+      "pass": true,
+      "detail": {
+        "title": "我的知识",
+        "query": true,
+        "ingest": true,
+        "lint": true,
+        "obsidian": true,
+        "graphCanvas": false,
+        "text": "\n        \n          我的知识\n          让资料随时可查，也始终由你管理\n          添加原始资料，检查知识质量；需要答案时，KnowMe 会优先用 qmd 查询你的结构化知识。\n          \n            \n              Query查找知识优先查询你的结构化知识\n            \n            \n              Ingest添加资料保存到可编辑的资料区\n            \n            \n              Lint检查问题发现空文、重复与断链\n            \n          \n        \n        \n          \n            \n              \n                Query\n                查找结构化知识\n                同一个问题，界面与系统 Agent 共用同一套根知识索引。\n              \n              qmd 优先\n            \n            \n              \n              查询\n            \n            \n              \n                你的知识已经可以查询\n                当前可查询 1 个条目。qmd 不可用时会自动使用本地检索。\n              \n            \n          \n          \n            \n              当前 Wiki1\n              1 份资料 · 0 条已整理知识\n              \n                浏览全部资料\n                在 Obsidian 中打开\n              \n              关系图谱交给 Obsidian；KnowMe 专注于添加、检查和检索你的知识。\n            \n            \n              待我确认\n              0\n              当前没有待处理建议。\n              让 KnowMe 整理\n            \n            \n              最近更新1\n              \n                LLM Wikiraw/llmwiki.md\n              \n            \n            \n              \n              资料空间正常\n              文件操作保护已开启\n              查看检查\n            \n          \n        \n      "
+      }
+    },
+    {
+      "id": "obsidian-is-graph-handoff",
+      "pass": true,
+      "detail": {
+        "obsidian": true,
+        "graphCanvas": false
+      }
+    },
+    {
+      "id": "query-shows-actual-engine",
+      "pass": true,
+      "detail": {
+        "engine": "本地检索",
+        "hitCount": 1
+      }
+    },
+    {
+      "id": "narrow-layout-no-horizontal-overflow",
+      "pass": true,
+      "detail": {
+        "viewport": 510,
+        "bodyWidth": 510,
+        "homeWidth": 380,
+        "actionColumns": "380px"
+      }
+    },
+    {
+      "id": "no-new-renderer-errors",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": []
+      }
+    }
+  ]
+}

@@ -23,7 +23,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["开发"],
+      "categories": ["研发"],
       "tags": ["code", "review"],
       "featured": true,
       "bundlePath": "skills/code-review"
@@ -40,6 +40,97 @@
       "tags": ["office", "partner"],
       "featured": true,
       "bundlePath": "experts/office-partner"
+    },
+    {
+      "id": "meeting-scribe",
+      "kind": "expert",
+      "name": "纪要专家",
+      "description": "整理会议资料为决议、争议点与依据。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["办公"],
+      "tags": ["office", "meeting"],
+      "featured": true,
+      "bundlePath": "experts/meeting-scribe"
+    },
+    {
+      "id": "action-owner",
+      "kind": "expert",
+      "name": "待办编排",
+      "description": "从纪要提取负责人、截止日与可追踪待办。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["办公"],
+      "tags": ["office", "actions"],
+      "featured": true,
+      "bundlePath": "experts/action-owner"
+    },
+    {
+      "id": "producer",
+      "kind": "expert",
+      "name": "制作人",
+      "description": "规划目标、验收标准与风险，驱动三角色交付。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["研发"],
+      "tags": ["engineering", "producer"],
+      "featured": true,
+      "bundlePath": "experts/producer"
+    },
+    {
+      "id": "developer",
+      "kind": "expert",
+      "name": "开发",
+      "description": "按验收标准给出实现方案、改动要点与自测清单。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["研发"],
+      "tags": ["engineering", "developer"],
+      "featured": true,
+      "bundlePath": "experts/developer"
+    },
+    {
+      "id": "tester",
+      "kind": "expert",
+      "name": "测试",
+      "description": "按验收标准执行 QA、反模式审查并给出结论。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["研发"],
+      "tags": ["engineering", "tester"],
+      "featured": true,
+      "bundlePath": "experts/tester"
+    },
+    {
+      "id": "copywriter",
+      "kind": "expert",
+      "name": "文案",
+      "description": "把 Brief 整理为受众、卖点与文案方向。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["写作", "视觉"],
+      "tags": ["visual", "copy"],
+      "featured": true,
+      "bundlePath": "experts/copywriter"
+    },
+    {
+      "id": "visual-designer",
+      "kind": "expert",
+      "name": "视觉",
+      "description": "产出可迭代图像提示词与构图约束。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["视觉"],
+      "tags": ["visual", "design"],
+      "featured": true,
+      "bundlePath": "experts/visual-designer"
     },
     {
       "id": "feishu",
@@ -84,7 +175,7 @@
       "id": "game-dev-delivery",
       "kind": "skill",
       "name": "游戏研发交付",
-      "description": "从需求案经 Daemon 工作流完成研发交付与产物审阅。",
+      "description": "从需求案经管线服务工作流完成研发交付与产物审阅。",
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
@@ -131,6 +222,32 @@
       "tags": ["game", "studio"],
       "featured": true,
       "bundlePath": "experts/game-studio-partner"
+    },
+    {
+      "id": "knowledge-steward",
+      "kind": "skill",
+      "name": "项目知识管家",
+      "description": "Wiki/OKF 查询、ingest 与健康检查，服务 game-knowledge 场景。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["知识"],
+      "tags": ["wiki", "okf", "steward"],
+      "featured": false,
+      "bundlePath": "skills/knowledge-steward"
+    },
+    {
+      "id": "visual-brief-prompt",
+      "kind": "skill",
+      "name": "视觉 Brief 出图",
+      "description": "把视觉 Brief 转为文案方向、图像提示词与审阅清单。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["视觉", "写作"],
+      "tags": ["visual", "brief", "prompt"],
+      "featured": true,
+      "bundlePath": "skills/visual-brief-prompt"
     }
   ]
 }

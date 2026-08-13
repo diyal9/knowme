@@ -1,0 +1,26 @@
+{
+  "change": "strengthen-workbench-tool-surface",
+  "updatedAt": "2026-08-06T00:45:00+08:00",
+  "phases": {
+    "P1": {
+      "registryUnitTests": { "required": 15, "actual": 16, "pass": true },
+      "fileDraftTests": { "required": 10, "actual": 13, "pass": true },
+      "closedLoopSubset": { "readPatchDraft": "100%", "pass": true }
+    },
+    "P2": {
+      "fakeFeishuDrafts": { "required": 8, "actual": 8, "pass": true },
+      "runTaskCancelMs": { "requiredMax": 3000, "mockPass": true, "pass": true }
+    },
+    "P3": {
+      "fakeMcpHttp": { "pass": true },
+      "domainBlock": { "pass": true },
+      "browserProjection": { "pass": true }
+    },
+    "P4": {
+      "fullClosedLoopEval": { "passRate": 1.0, "pass": true },
+      "npmTest": { "pass": true },
+      "npmLint": { "pass": true },
+      "harnessGate": { "pass": true }
+    }
+  }
+}

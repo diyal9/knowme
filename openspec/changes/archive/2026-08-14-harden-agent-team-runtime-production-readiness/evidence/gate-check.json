@@ -1,0 +1,39 @@
+{
+  "at": "2026-08-07T10:44:46.000Z",
+  "gate": "Story 完成门禁",
+  "change": "harden-agent-team-runtime-production-readiness",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "1423/1423 passed"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "passed"
+    }
+  ],
+  "soft": [
+    {
+      "id": "qa-plan-smoke-scope",
+      "ok": true,
+      "path": "openspec/changes/harden-agent-team-runtime-production-readiness/qa-plan.md"
+    },
+    {
+      "id": "code-review",
+      "ok": true,
+      "path": "openspec/changes/harden-agent-team-runtime-production-readiness/code-review.md"
+    }
+  ],
+  "repositoryAdvisories": {
+    "present": true,
+    "scope": "other active OpenSpec changes",
+    "blocking": false,
+    "note": "Harness reported missing or empty QA/code-review artifacts in unrelated shared-workspace changes; none apply to this change."
+  }
+}

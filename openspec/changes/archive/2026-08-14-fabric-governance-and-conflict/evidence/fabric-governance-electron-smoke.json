@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "checks": [
+    {
+      "id": "gov-tab",
+      "ok": true
+    },
+    {
+      "id": "gov-checkup",
+      "ok": true
+    },
+    {
+      "id": "gov-ignore-action",
+      "ok": true
+    },
+    {
+      "id": "console-clean",
+      "ok": true,
+      "errors": []
+    }
+  ],
+  "consoleErrorCount": 0,
+  "userDataDir": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\knowme-gov-smoke-I2pW4N",
+  "at": "2026-08-08T15:27:53.789Z"
+}
