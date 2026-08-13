@@ -20,7 +20,7 @@
 - [x] 3.1 填写 `parity-matrix.md` 状态
 - [x] 3.2 `npm test` / `lint` / `typecheck:renderer` — 1882 pass / lint ok / tsc ok
 - [ ] 3.3 制作人 acceptance 对比通过
-- [x] 3.4 开 PR（默认可回滚 legacy）
+- [x] 3.4 分支已推送；PR 链接见 acceptance（本机无 `gh` CLI，需在 GitHub 网页创建）
 
 ## 4. Secondary windows (follow-up)
 
