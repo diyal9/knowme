@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { expertHomeTasks } from '../../../domain/run-projection'
 import {
   previewNeedsToggle,
@@ -9,7 +9,7 @@ import {
 } from '../../../domain/workbench-home'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { TaskComposerModal } from './TaskComposerModal'
 import { TaskManageModal } from './TaskManageModal'
 import { TaskQuickCard } from './TaskQuickCard'
@@ -27,7 +27,6 @@ export function TaskHomeSurface() {
     () => workbenchHomeExperts(hubItems, modes),
     [hubItems, modes],
   )
-  const setHubTab = useAppStore((s) => s.setHubTab)
   const setRoute = useAppStore((s) => s.setRoute)
   const showToast = useAppStore((s) => s.showToast)
   const openExpertRoom = useAppStore((s) => s.openExpertRoom)
@@ -42,20 +41,22 @@ export function TaskHomeSurface() {
   const visibleRecent = previewSlice(expertTasks, recentExpanded, TASK_RECENT_PREVIEW)
   const quickNeedsToggle = previewNeedsToggle(experts.length, TASK_QUICK_PREVIEW)
   const recentNeedsToggle = previewNeedsToggle(expertTasks.length, TASK_RECENT_PREVIEW)
+  const surfaceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    setHubTab('expert')
+    // 直接写 hubTab，避免 setHubTab 再触发一轮 loadHubCapabilities
+    useAppStore.setState({ hubTab: 'expert' })
     void load()
     void loadHub()
     void loadModes()
-  }, [load, loadHub, loadModes, setHubTab])
-  useStickyIcons(`${experts.length}:${expertTasks.length}`)
+  }, [load, loadHub, loadModes])
+  useKnowMeIcons(`${experts.length}:${expertTasks.length}`, surfaceRef)
 
   if (expertRoom) return null
 
   return (
     <>
-      <div className="wb-task-home" data-testid="taskhome-surface">
+      <div ref={surfaceRef} className="wb-task-home" data-testid="taskhome-surface">
         <section
           className={`wb-task-home-panel wb-task-quick${quickExpanded && quickNeedsToggle ? ' expanded' : ''}`}
           aria-labelledby="wbTaskQuickTitle"

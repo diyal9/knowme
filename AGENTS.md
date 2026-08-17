@@ -4,10 +4,9 @@
 
 ## 产品定位
 
-- **是什么**：本地优先的 AI 知识工作台与工作伙伴；主界面是工作台（专家协作、工作流、管线服务），不是桌面便签产品。
+- **是什么**：本地优先的 AI 知识工作台与工作伙伴；主界面是工作台（专家协作、工作流、管线服务）。
 - **内容从哪来**：用户绑定的**本地文件夹**或 **GitLab** 仓库；应用目录只保存会话、设置与索引。
 - **数据目录**：`%APPDATA%\KnowMe\`（不会自动迁移旧版数据）。
-- **历史名**：仓库/Skill 里可能仍出现 `sticky-notes`、`sticky-agent-memory` 等标识，那是技术遗产，**不得**当作产品叙事或 UI 文案。
 
 ## 仓库布局
 
@@ -59,7 +58,7 @@
 
 ### 个人会话记忆（Hook 自动）
 
-Skill：`sticky-agent-memory`（开发侧本地会话记忆，与产品便签无关）— 存储在 `%LOCALAPPDATA%\knowme\memory\`（不入 git）
+Skill：`sticky-agent-memory`（开发侧本地会话记忆，与产品运行时无关）— 存储在 `%LOCALAPPDATA%\knowme\memory\`（不入 git）
 
 | 能力 | 说明 |
 |------|------|
@@ -85,7 +84,7 @@ Story 完成后 SHOULD 写 `brain/memory/working/<change>-retro.md` 并 `/kb-ing
 | `npm run renderer:build` | 仅出包或核对 dist 时编渲染产物 |
 | `npm run kill` | 只清 KnowMe / Electron / :5173 |
 
-仓库若以 junction 打开（`knowme` → `sticky-notes`），启动脚本会 `chdir` 真实路径，避免 Vite 预构建崩溃。关窗口后 `npm start` 以 0 退出。
+启动脚本会 `chdir` 到仓库真实路径（`fs.realpathSync`）。关窗口后 `npm start` 以 0 退出。
 
 ## 工作流
 

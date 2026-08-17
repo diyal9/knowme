@@ -8,7 +8,7 @@ Defines visual and interaction parity of KnowMe React surfaces against git commi
 The product MUST treat commit `f6ad048` (`feature/game-studio-work-partner`) as the sole UI and interaction oracle. Git `main` MUST NOT be used as a workbench baseline.
 
 #### Scenario: Wrong baseline rejected
-- **WHEN** a reviewer compares React UI to git `main` sticky-notes pages
+- **WHEN** a reviewer compares React UI to unrelated legacy note-app pages or an unapproved baseline
 - **THEN** that comparison MUST be discarded in favor of `f6ad048` workspace, settings, memory, log-viewer, and capability-hub
 
 ### Requirement: Chrome, rail, and window chrome match baseline

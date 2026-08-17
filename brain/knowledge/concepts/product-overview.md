@@ -9,14 +9,14 @@ resource: knowme://product
 
 # Scope
 
-C 端桌面便签：多窗口、美观、轻量、无打扰。产品细节见本页；团队协作见 [Evolution Loop](/processes/evolution-loop.md)。
+C 端桌面 AI 知识工作台 / 工作伙伴：本地优先、专家协作、工作流与管线服务。产品细节见本页；团队协作见 [Evolution Loop](/processes/evolution-loop.md)。
 
 # Core behaviors
 
-- Multi-note independent windows
-- Auto-save 500ms debounce
-- Tray + global hotkey `Ctrl+Alt+N`
-- Persist to `%APPDATA%\KnowMe\`
+- 工作台：货架、任务、Run、Studio
+- 办公助理：会话、流式、内容源文件引用
+- 知识网、专家库、设置（模型 / 内容源 / 连接器）
+- Persist to `%APPDATA%\KnowMe\`（会话、设置、索引）；正文在用户绑定的本地文件夹或 GitLab
 
 # Team workflow
 

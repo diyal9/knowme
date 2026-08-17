@@ -33,6 +33,19 @@ function create(ctx) {
       }
       catch { /* ignore */ }
     }
+    // GPU 崩溃：落盘回退并自动重启一次，无需用户配环境变量
+    if (type === 'GPU' && process.platform === 'win32' && !ctx._gpuCrashRelaunching) {
+      try {
+        const { markGpuCrash } = require('../lib/windows-gpu-fallback')
+        markGpuCrash(ctx.app.getPath('userData'), ctx.fs, ctx.path)
+        ctx.logger.system('gpu-policy', 'GPU crashed; relaunching with software path')
+      } catch { /* ignore */ }
+      ctx._gpuCrashRelaunching = true
+      try {
+        ctx.app.relaunch()
+        ctx.app.exit(0)
+      } catch { /* ignore */ }
+    }
   })
 }
 

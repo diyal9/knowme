@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * 能力 Hub 卡片图标：按工作域选代表图标（StickyIcons 名）。
+ * 能力 Hub 卡片图标：按工作域选代表图标（KnowMeIcons 名）。
  * 专家有头像时由渲染层优先显示头像。
  */
 ;(function initCapabilityHubIcons(global) {

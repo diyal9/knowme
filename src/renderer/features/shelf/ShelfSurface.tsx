@@ -13,7 +13,7 @@ import {
 } from '../../../domain/workbench-home'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { ShelfCard } from './ShelfCard'
 import { TaskManageModal } from '../taskhome/TaskManageModal'
 import { TaskRecentCard } from '../taskhome/TaskRecentCard'
@@ -48,6 +48,7 @@ export function ShelfSurface() {
   const [recentExpanded, setRecentExpanded] = useState(false)
   const [rowCapacity, setRowCapacity] = useState(2)
   const gridRef = useRef<HTMLDivElement>(null)
+  const surfaceRef = useRef<HTMLDivElement>(null)
   const visibleCards = previewSlice(cards, gridExpanded, rowCapacity)
   const visibleRecentRuns = previewSlice(recentRuns, recentExpanded, TASK_RECENT_PREVIEW)
   const gridNeedsToggle = previewNeedsToggle(cards.length, rowCapacity)
@@ -57,7 +58,7 @@ export function ShelfSurface() {
   const homeLocked = !(catalogExpanded || recentOpen)
 
   useEffect(() => { void load() }, [load])
-  useStickyIcons(`${cards.length}:${recentRuns.length}:${catalogExpanded}`)
+  useKnowMeIcons(`${cards.length}:${recentRuns.length}:${catalogExpanded}`, surfaceRef)
 
   useEffect(() => {
     const node = gridRef.current
@@ -78,7 +79,7 @@ export function ShelfSurface() {
   }, [homeLocked])
 
   return (
-    <div className="wb-shelf" data-testid="shelf-surface">
+    <div ref={surfaceRef} className="wb-shelf" data-testid="shelf-surface">
       <div className="wb-shelf-filters">
         <div className="wb-domain-switcher" id="wbDomainSwitcher" role="group" aria-label="领域筛选">
           {DOMAINS.map((item) => (

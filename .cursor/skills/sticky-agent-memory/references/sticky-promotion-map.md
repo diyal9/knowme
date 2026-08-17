@@ -28,5 +28,5 @@
 
 ## 示例
 
-- 用户三次确认「便签关闭按钮是删便签不是退出应用」→ `concepts/note-lifecycle.md`
+- 用户三次确认「关闭工作台不恢复已退役笔记窗」→ `concepts/workspace-lifecycle.md`
 - 用户三次跑「story-done 前必须 gate-check」→ `processes/story-done-gate.md`

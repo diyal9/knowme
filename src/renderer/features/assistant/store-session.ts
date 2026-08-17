@@ -90,6 +90,117 @@ let activeStreamAssistantId: string | null = null
 let activeStreamSessionId: string | null = null
 let streamUnsub: (() => void) | null = null
 let streamEventUnsub: (() => void) | null = null
+let streamChunkSet: StoreSet | null = null
+let pendingStreamText: string | null = null
+let streamChunkRafId: number | null = null
+let streamChunkTimer: ReturnType<typeof setTimeout> | null = null
+/** 非文本 stream event 合并队列（与 chunk 同帧 flush） */
+let pendingStreamEvents: Record<string, unknown>[] = []
+let streamEventRafId: number | null = null
+let streamEventTimer: ReturnType<typeof setTimeout> | null = null
+
+const STREAM_CHUNK_FLUSH_MS = 32
+
+function cancelStreamChunkSchedule() {
+  if (streamChunkRafId != null) {
+    cancelAnimationFrame(streamChunkRafId)
+    streamChunkRafId = null
+  }
+  if (streamChunkTimer != null) {
+    clearTimeout(streamChunkTimer)
+    streamChunkTimer = null
+  }
+}
+
+function cancelStreamEventSchedule() {
+  if (streamEventRafId != null) {
+    cancelAnimationFrame(streamEventRafId)
+    streamEventRafId = null
+  }
+  if (streamEventTimer != null) {
+    clearTimeout(streamEventTimer)
+    streamEventTimer = null
+  }
+}
+
+function flushStreamChunkBuffer() {
+  cancelStreamChunkSchedule()
+  const text = pendingStreamText
+  pendingStreamText = null
+  const set = streamChunkSet
+  const assistantId = activeStreamAssistantId
+  const sessionId = activeStreamSessionId
+  if (text == null || !set || !assistantId || !sessionId) return
+  set((state: AppState) => patchLiveAssistantMessage(state, assistantId, (msg) => {
+    if (msg.protocolVersion === 2 || msg.v2AnswerCommitted) return msg
+    return stampStreamTiming({ ...msg, text, thinking: false, streaming: true })
+  }, sessionId))
+}
+
+function scheduleStreamChunkFlush() {
+  if (streamChunkRafId != null || streamChunkTimer != null) return
+  if (typeof requestAnimationFrame === 'function') {
+    streamChunkRafId = requestAnimationFrame(() => {
+      streamChunkRafId = null
+      flushStreamChunkBuffer()
+    })
+    return
+  }
+  streamChunkTimer = setTimeout(() => {
+    streamChunkTimer = null
+    flushStreamChunkBuffer()
+  }, STREAM_CHUNK_FLUSH_MS)
+}
+
+function flushStreamEventBuffer() {
+  cancelStreamEventSchedule()
+  const events = pendingStreamEvents
+  pendingStreamEvents = []
+  const set = streamChunkSet
+  if (!events.length || !set) return
+  set((state: AppState) => {
+    let working: AppState = state
+    const next: Partial<AppState> = {}
+    for (const event of events) {
+      const type = String(event.type || '')
+      const nested = event.payload && typeof event.payload === 'object'
+        ? event.payload as Record<string, unknown>
+        : {}
+      const title = String(nested.title || event.title || '').trim()
+      const contextInfo = parseContextInfo(nested.contextInfo || event.contextInfo)
+      if (contextInfo) next.assistantContextInfo = contextInfo
+      if (title && type !== 'cancelled') next.assistantStatus = title
+      if (type === 'error') next.assistantStatus = title || '生成失败'
+      if (type === 'cancelled') next.assistantStatus = '已停止生成'
+      const assistantId = activeStreamAssistantId
+      const sessionId = activeStreamSessionId
+      if (assistantId && sessionId) {
+        const patched = patchLiveAssistantMessage(working, assistantId, (msg) => {
+          if (event.runId && msg.runId && String(event.runId) !== String(msg.runId)) return msg
+          return applyRuntimeStreamEvent(msg, event)
+        }, sessionId)
+        Object.assign(next, patched)
+        working = { ...working, ...patched }
+      }
+    }
+    return next
+  })
+}
+
+function scheduleStreamEventFlush() {
+  if (streamEventRafId != null || streamEventTimer != null) return
+  if (typeof requestAnimationFrame === 'function') {
+    streamEventRafId = requestAnimationFrame(() => {
+      streamEventRafId = null
+      flushStreamEventBuffer()
+    })
+    return
+  }
+  streamEventTimer = setTimeout(() => {
+    streamEventTimer = null
+    flushStreamEventBuffer()
+  }, STREAM_CHUNK_FLUSH_MS)
+}
 
 function parseContextInfo(raw: unknown): AgentContextInfo | null {
   if (!raw || typeof raw !== 'object') return null
@@ -115,33 +226,19 @@ function parseContextInfo(raw: unknown): AgentContextInfo | null {
   }
 }
 
-function applyStreamEvent(set: StoreSet, event: Record<string, unknown>) {
-  const type = String(event.type || '')
-  const nested = event.payload && typeof event.payload === 'object'
-    ? event.payload as Record<string, unknown>
-    : {}
-  const title = String(nested.title || event.title || '').trim()
-  const contextInfo = parseContextInfo(nested.contextInfo || event.contextInfo)
-
-  set((state: AppState) => {
-    const next: Partial<AppState> = {}
-    if (contextInfo) next.assistantContextInfo = contextInfo
-    if (title && type !== 'cancelled') next.assistantStatus = title
-    if (type === 'error') next.assistantStatus = title || '生成失败'
-    if (type === 'cancelled') next.assistantStatus = '已停止生成'
-    const assistantId = activeStreamAssistantId
-    const sessionId = activeStreamSessionId
-    if (assistantId && sessionId) {
-      Object.assign(next, patchLiveAssistantMessage(state, assistantId, (msg) => {
-        if (event.runId && msg.runId && String(event.runId) !== String(msg.runId)) return msg
-        return applyRuntimeStreamEvent(msg, event)
-      }, sessionId))
-    }
-    return next
-  })
+function enqueueStreamEvent(event: Record<string, unknown>) {
+  pendingStreamEvents.push(event)
+  scheduleStreamEventFlush()
 }
 
 export function detachStreamListener() {
+  if (streamChunkSet && pendingStreamText != null) flushStreamChunkBuffer()
+  if (streamChunkSet && pendingStreamEvents.length) flushStreamEventBuffer()
+  cancelStreamChunkSchedule()
+  cancelStreamEventSchedule()
+  pendingStreamText = null
+  pendingStreamEvents = []
+  streamChunkSet = null
   streamUnsub?.()
   streamUnsub = null
   streamEventUnsub?.()
@@ -158,17 +255,15 @@ export function waitForStreamFlush(): Promise<void> {
 }
 
 export function attachStreamListener(set: StoreSet) {
+  streamChunkSet = set
   if (!streamUnsub && api()?.onAiStreamChunk) {
     streamUnsub = api()!.onAiStreamChunk!((chunk) => {
       const assistantId = activeStreamAssistantId
       const sessionId = activeStreamSessionId
       if (!assistantId || !sessionId) return
       if (chunk.sessionId && chunk.sessionId !== sessionId) return
-      const text = chunk.text ?? ''
-      set((state: AppState) => patchLiveAssistantMessage(state, assistantId, (msg) => {
-        if (msg.protocolVersion === 2 || msg.v2AnswerCommitted) return msg
-        return stampStreamTiming({ ...msg, text, thinking: false, streaming: true })
-      }, sessionId))
+      pendingStreamText = chunk.text ?? ''
+      scheduleStreamChunkFlush()
     })
   }
 
@@ -178,13 +273,15 @@ export function attachStreamListener(set: StoreSet) {
       if (!sessionId) return
       if (event?.sessionId && event.sessionId !== sessionId) return
       if (event && typeof event === 'object') {
-        applyStreamEvent(set, event as Record<string, unknown>)
+        enqueueStreamEvent(event as Record<string, unknown>)
       }
     })
   }
 }
 
 export function beginAssistantStream(assistantId: string, sessionId: string, set: StoreSet) {
+  if (streamChunkSet && pendingStreamText != null) flushStreamChunkBuffer()
+  if (streamChunkSet && pendingStreamEvents.length) flushStreamEventBuffer()
   activeStreamAssistantId = assistantId
   activeStreamSessionId = sessionId
   set({

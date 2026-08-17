@@ -5,6 +5,7 @@ const path = require('path')
 
 /**
  * Path security: lstat (no follow), realpath parent validation, Windows junction negative cases.
+ * 不负责：内容源策略、工具草稿编排。
  */
 
 function isSymlinkOrJunction(absPath) {
@@ -24,10 +25,11 @@ function realpathSafe(absPath) {
   }
 }
 
+/** 比较前把 root 也 realpath，避免 junction/symlink 导致路径误判「穿透」。 */
 function isPathInsideRoot(resolved, rootPath) {
   if (!rootPath || !resolved) return false
-  const root = path.resolve(rootPath)
-  const target = path.resolve(resolved)
+  const root = realpathSafe(rootPath) || path.resolve(rootPath)
+  const target = realpathSafe(resolved) || path.resolve(resolved)
   const rel = path.relative(root, target)
   return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))
 }

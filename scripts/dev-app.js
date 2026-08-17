@@ -3,7 +3,7 @@
 
 /**
  * 日常开发入口：清残留 → Vite HMR → Electron --dev。
- * 不跑 renderer:build。仓库 junction（knowme → sticky-notes）下必须 chdir 真实路径。
+ * 不跑 renderer:build。启动前 chdir 到仓库真实路径（realpath），避免解析偏移。
  */
 const fs = require('fs')
 const http = require('http')

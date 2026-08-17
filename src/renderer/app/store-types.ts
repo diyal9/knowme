@@ -27,6 +27,7 @@ import type { RunArtifact, RunPhase } from '../../domain/run-telemetry'
 import type { RunLane } from '../../domain/workbench-task-room'
 import type { ReviewTabId } from '../../domain/daemon-review-tabs'
 import type { RunGraphNode } from '../../domain/run-projection'
+import type { LinkPreviewState } from '../features/link-preview/store-link-preview'
 
 export interface RunState {
   workflowId: string
@@ -184,6 +185,7 @@ export interface AppState {
   fileTreeTruncated: boolean
   fileTreeLoading: boolean
   fileTreeCollapsed: Record<string, true>
+  assistantApplyTarget: { sourceId: string; path: string } | null
   knowledgePage: KnowledgePage
   knowledgeQuery: string
   knowledgeFilter: KnowledgeKindFilter
@@ -232,6 +234,11 @@ export interface AppState {
   fabricStats: { nodeCount?: number; edgeCount?: number; staleAnchors?: number } | null
   stewardTasks: StewardTaskSummary[]
   knowledgeIoLoading: boolean
+  linkPreview: LinkPreviewState | null
+  linkFullscreen: boolean
+  openLinkPreview: (href: string, title?: string) => boolean
+  closeLinkPreview: () => void
+  setLinkFullscreen: (next: boolean) => void
   setRoute: (route: AppRoute) => void
   openSettingsSurface: (tab?: string) => void
   setWorkbenchSurface: (surface: WorkbenchSurface) => void
@@ -291,6 +298,11 @@ export interface AppState {
   startAssistantMode: (modeId: string) => Promise<void>
   toggleSessionKnowledge: (refId: string) => Promise<void>
   clearSessionKnowledge: () => Promise<void>
+  setAssistantApplyTarget: (target: { sourceId: string; path: string } | null) => void
+  applyAssistantText: (mode: 'insert' | 'append' | 'replace', text: string) => Promise<void>
+  acceptAssistantArtifact: (artifactId: string) => Promise<void>
+  rejectAssistantArtifact: (artifactId: string) => Promise<void>
+  refreshActiveSessionArtifacts: () => Promise<void>
   setImageViewer: (url: string) => void
   loadFileCatalog: () => Promise<void>
   setFileTreeQuery: (q: string) => void

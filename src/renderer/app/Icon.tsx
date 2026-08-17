@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react'
-import { mountStickyIcons, stickyIconSvg } from './sticky-icons'
+import { mountKnowMeIcons, knowMeIconSvg } from './knowme-icons'
 
 export function Icon({ name }: { name: string }) {
   const ref = useRef<HTMLSpanElement>(null)
@@ -7,9 +7,9 @@ export function Icon({ name }: { name: string }) {
   useLayoutEffect(() => {
     const el = ref.current
     if (!el) return
-    const html = stickyIconSvg(name)
+    const html = knowMeIconSvg(name)
     if (html) el.innerHTML = html
-    else mountStickyIcons(el)
+    else mountKnowMeIcons(el)
   }, [name])
 
   return <span ref={ref} className="ico" data-icon={name} />

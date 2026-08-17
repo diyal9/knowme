@@ -33,7 +33,7 @@ npm start
 - **MUST NOT** 为了看 UI 而先 `renderer:build`
 - 改 `src/renderer/**` / CSS：保存后热更新或窗口刷新即可
 - 改主进程 / preload：再跑一次 `npm start`（脚本会先杀旧进程）
-- 仓库可能是 junction（`knowme` → `sticky-notes`）；脚本会 `chdir` 真实路径，否则 Vite 预构建会崩
+- 仓库路径可能经 junction/symlink；脚本会 `chdir` 真实路径，否则 Vite 预构建会崩
 - Git Bash 下 **不要**手搓 `taskkill /F`（`/F` 会被当成路径）。清场用 `npm run kill` 或直接再 `npm start`
 
 ### 2. 重启 / 重启体验

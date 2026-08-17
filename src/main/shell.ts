@@ -1,7 +1,7 @@
 'use strict'
 
 /**
- * 窗口句柄、便签兼容 stub、工作台/设置/记忆/日志窗。
+ * 窗口句柄、notes 数据兼容 stub、工作台/设置/记忆/日志窗。
  * 不负责图标路径（见 icons.ts）或知识检索。
  */
 
@@ -306,6 +306,7 @@ ctx.purgeEmptyClosedNotes = function purgeEmptyClosedNotes() {
 };
 
 ctx.loadAllNotes = () => {
+    // 仅 notesCompat IPC 兼容路径；冷启动 workspace-init 勿调用。
     if (!ctx.fs.existsSync(ctx.DATA_DIR))
         return [];
     return ctx.fs.readdirSync(ctx.DATA_DIR).filter(f => ctx.noteId.isSafeNoteFileName(f)).map(f => {
@@ -393,7 +394,7 @@ ctx.getImportedPromptMeta = function getImportedPromptMeta(file) {
 ctx.importPromptSpace = function importPromptSpace() {
     if (!ctx.PROMPT_SPACE_DIR || !ctx.fs.existsSync(ctx.PROMPT_SPACE_DIR)) {
         return { ok: false, error: ctx.PROMPT_SPACE_DIR ? `目录不存在：${ctx.PROMPT_SPACE_DIR}`
-                : '未配置 STICKY_PROMPT_SPACE_DIR 环境变量' };
+                : '未配置 KNOWME_PROMPT_SPACE_DIR 环境变量' };
     }
     const existing = new Set(ctx.loadAllNotes().map(n => n.sourcePath).filter(Boolean).map(p => ctx.path.normalize(p).toLowerCase()));
     const files = ctx.walkPromptFiles(ctx.PROMPT_SPACE_DIR);
@@ -650,7 +651,7 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
 ctx.bringSettingsToFront = function bringSettingsToFront() {
     if (!ctx.settingsWin || ctx.settingsWin.isDestroyed())
         return;
-    // 便签 / 总览默认 alwaysOnTop，设置窗必须临时抬升才能盖过它们
+    // 工作台等常驻窗可能 alwaysOnTop；设置窗须临时抬升以免被盖住
     ctx.settingsWin.setAlwaysOnTop(true);
     if (ctx.settingsWin.isMinimized())
         ctx.settingsWin.restore();

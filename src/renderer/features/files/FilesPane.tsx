@@ -21,6 +21,7 @@ export function FilesPane() {
   const openSettingsSurface = useAppStore((s) => s.openSettingsSurface)
   const openSourceRoot = useAppStore((s) => s.openSourceRoot)
   const showToast = useAppStore((s) => s.showToast)
+  const setAssistantApplyTarget = useAppStore((s) => s.setAssistantApplyTarget)
   const [fileMenu, setFileMenu] = useState(false)
   const [previewPath, setPreviewPath] = useState<string | null>(null)
   const [previewText, setPreviewText] = useState('')
@@ -47,6 +48,7 @@ export function FilesPane() {
   async function openFilePreview(path: string) {
     if (!activeSourceId) return
     setPreviewPath(path)
+    setAssistantApplyTarget({ sourceId: activeSourceId, path })
     setPreviewLoading(true)
     setPreviewText('')
     try {

@@ -2,7 +2,7 @@
  * 对话气泡：用户/助手均左对齐。
  * 首 Token 只在主进程日志，不进气泡。
  */
-import { useEffect, useState, type ReactNode } from 'react'
+import { memo, useEffect, useState, type ReactNode } from 'react'
 import {
   buildExecutionTimelineView,
   formatElapsed,
@@ -11,19 +11,21 @@ import {
 import { compactUserShortcutBubbleText } from '../../../domain/agent-shortcut-display'
 import { ContentView } from '../content-view/ContentView'
 import { AgentFollowUps, AgentGroundingMeta, AgentStructuredUi } from './AgentMessageExtras'
+import { AgentChatApplyActions } from './AgentChatApplyActions'
 import { AgentExecutionTimeline } from './AgentExecutionTimeline'
 
 function useLiveNow(active: boolean) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     if (!active) return
-    const timer = window.setInterval(() => setNow(Date.now()), 200)
+    const ms = window.knowme?.perf?.liveNowIntervalMs || 500
+    const timer = window.setInterval(() => setNow(Date.now()), ms)
     return () => window.clearInterval(timer)
   }, [active])
   return now
 }
 
-export function AgentMessageBubble({
+function AgentMessageBubbleImpl({
   role,
   text,
   userMsgIdx,
@@ -109,6 +111,7 @@ export function AgentMessageBubble({
               {body ? (
                 <ContentView
                   source={body}
+                  streaming={Boolean(streaming)}
                   caret={streaming ? <span className="stream-cursor" aria-hidden="true">▍</span> : null}
                 />
               ) : null}
@@ -122,8 +125,13 @@ export function AgentMessageBubble({
           {showFollowUps && modeId && onFollowUp && body && !streaming ? (
             <AgentFollowUps modeId={modeId} onPick={onFollowUp} />
           ) : null}
+          {body && !streaming && !thinking && !error ? (
+            <AgentChatApplyActions text={body} />
+          ) : null}
         </>
       ) : null}
     </div>
   )
 }
+
+export const AgentMessageBubble = memo(AgentMessageBubbleImpl)

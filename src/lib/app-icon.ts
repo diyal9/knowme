@@ -1,3 +1,7 @@
+/**
+ * KnowMe 桌面图标：从品牌 PNG/ICO 生成 Windows 窗口与托盘图标。
+ * 不负责渲染层 ui-icons（见 src/ui-icons.js）。
+ */
 const zlib = require('zlib')
 const fs = require('fs')
 const path = require('path')
@@ -94,7 +98,7 @@ function fillRoundRect(buf, size, x1, y1, x2, y2, cr, color) {
 }
 
 /**
- * 便签线稿：透明底 + 单色圆角矩形 + 三条横线（系统托盘专用）。
+ * 托盘线稿：透明底 + 单色圆角矩形 + 三条横线（系统托盘专用）。
  * 托盘区为单色渲染，保留描边造型以便小尺寸清晰。
  */
 function drawNoteGlyph(buf, size, { fg }) {

@@ -1,7 +1,7 @@
 ---
 type: Concept
 title: KnowMe 产品概览
-description: 本地优先的 AI 知识工作台与工作伙伴，主界面是工作台而非便签。
+description: 本地优先的 AI 知识工作台与工作伙伴，主界面是工作台。
 tags: [product, knowme, electron]
 timestamp: 2026-08-14T00:00:00Z
 ---

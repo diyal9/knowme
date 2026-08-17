@@ -74,6 +74,28 @@ function createEvictingMap(opts = {}) {
   return { map, set, get, getFriendly, purge, maxEntries, ttlMs }
 }
 
+/** Map 兼容薄封装：value 为事件数组，供 workbenchAgentRunEvents 等有界存储。 */
+function createEvictingEventMap(opts = {}) {
+  const store = createEvictingMap(opts)
+  return {
+    get(key) {
+      // 走 store.get 以触发 TTL purge；勿直读 map 绕过淘汰。
+      const hit = store.get(String(key))
+      if (!hit || hit.expired) return undefined
+      return hit.events
+    },
+    set(key, events) {
+      const id = String(key)
+      const prev = store.map.get(id)
+      store.set(id, {
+        events: Array.isArray(events) ? events : [],
+        createdAt: prev?.createdAt || Date.now(),
+      })
+    },
+  }
+}
+
 module.exports = {
   createEvictingMap,
+  createEvictingEventMap,
 }

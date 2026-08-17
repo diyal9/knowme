@@ -35,7 +35,7 @@ npm run lint       # lint 无 error（硬门禁）
 手动验证：
 - [ ] 控制台/终端无 uncaught error
 - [ ] 本次 change 的 specs 行为全部满足
-- [ ] 未破坏已有便签功能（回归冒烟）
+- [ ] 未破坏已有工作台核心路径（回归冒烟）
 
 ### 自测证据
 

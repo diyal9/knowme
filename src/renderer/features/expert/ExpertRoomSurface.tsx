@@ -1,6 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useAppStore } from '../../app/store'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { ExpertSideStack } from './ExpertSideStack'
 
 export function ExpertRoomSurface() {
@@ -19,12 +19,13 @@ export function ExpertRoomSurface() {
     }
   }, [hubItems, room])
 
-  useStickyIcons(room?.id)
+  const surfaceRef = useRef<HTMLElement>(null)
+  useKnowMeIcons(room?.id, surfaceRef)
 
   if (!room || !expert) return null
 
   return (
-    <article className="wb-expert-task-room" id="wbExpertTaskRoom" data-testid="expert-room" aria-label="专家任务详情">
+    <article ref={surfaceRef} className="wb-expert-task-room" id="wbExpertTaskRoom" data-testid="expert-room" aria-label="专家任务详情">
       <header className="wb-expert-task-head" hidden>
         <div className="wb-expert-task-head-title">
           <strong id="wbExpertTaskTitle">{room.goal.trim() || room.name}</strong>

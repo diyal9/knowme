@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { extractImageUrls } from '../../../domain/agent-session'
 import { resolveAssistantModeId } from '../../../domain/assistant-modes'
 import {
@@ -9,11 +9,13 @@ import { isAssistantLaunchEmpty } from '../../../domain/agent-session'
 import { INCOMPLETE_ASSISTANT_REPLY } from '../../../domain/agent-v2-runtime'
 import { AgentComposer } from './AgentComposer'
 import { AgentMessageBubble } from './AgentMessageBubble'
+import { AgentArtifactCards } from './AgentArtifactCards'
+import { selectActiveArtifacts } from './store-assistant-apply'
 import { AssistantEmptyHome } from './AssistantEmptyHome'
 import { AssistantSessionTabs } from './AssistantSessionTabs'
 import { AssistantTopicNav } from './AssistantTopicNav'
 
-const MESSAGE_WINDOW = 50
+const MESSAGE_PAGE = 32
 
 function composerWrap(node: ReactNode, empty: boolean) {
   if (!empty) return <div className="agent-col-foot">{node}</div>
@@ -28,7 +30,6 @@ export function AssistantPane() {
   const messages = useAppStore(selectActiveMessages)
   const sessions = useAppStore((s) => s.sessions)
   const activeSessionId = useAppStore((s) => s.activeSessionId)
-  const loadFileCatalog = useAppStore((s) => s.loadFileCatalog)
   const loadAssistantSessions = useAppStore((s) => s.loadAssistantSessions)
   const loadAssistantChrome = useAppStore((s) => s.loadAssistantChrome)
   const isGenerating = useAppStore((s) => s.isGenerating)
@@ -36,21 +37,25 @@ export function AssistantPane() {
   const setImageViewer = useAppStore((s) => s.setImageViewer)
   const setComposer = useAppStore((s) => s.setComposer)
   const sendMessage = useAppStore((s) => s.sendMessage)
-  const [showEarlier, setShowEarlier] = useState(false)
+  const [visibleCount, setVisibleCount] = useState(MESSAGE_PAGE)
   const chatLogRef = useRef<HTMLDivElement>(null)
   const empty = isAssistantLaunchEmpty(messages)
   const activeSession = sessions.find((item) => item.id === activeSessionId)
   const modeId = resolveAssistantModeId(activeSession?.agentId || activeSession?.expertId)
+  const artifacts = selectActiveArtifacts(sessions, activeSessionId)
 
+  // 首屏不扇出 fileCatalog（@ / 文件侧栏再拉）；只拉会话与 chrome
   useEffect(() => {
-    void loadFileCatalog()
     void loadAssistantSessions()
     void loadAssistantChrome()
-  }, [loadFileCatalog, loadAssistantSessions, loadAssistantChrome])
+  }, [loadAssistantSessions, loadAssistantChrome])
 
-  const hiddenCount = messages.length > MESSAGE_WINDOW && !showEarlier
-    ? messages.length - MESSAGE_WINDOW : 0
-  const visibleMessages = hiddenCount > 0 ? messages.slice(-MESSAGE_WINDOW) : messages
+  useEffect(() => {
+    setVisibleCount(MESSAGE_PAGE)
+  }, [activeSessionId])
+
+  const hiddenCount = Math.max(0, messages.length - visibleCount)
+  const visibleMessages = hiddenCount > 0 ? messages.slice(-visibleCount) : messages
   const lastAssistantId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
       if (messages[i].role === 'assistant') return messages[i].id
@@ -58,15 +63,15 @@ export function AssistantPane() {
     return ''
   }, [messages])
 
-  function runFollowUp(prompt: string) {
+  const runFollowUp = useCallback((prompt: string) => {
     setComposer(prompt)
     sendMessage(prompt)
-  }
+  }, [setComposer, sendMessage])
 
-  function runStructuredPick(payload: string, needsInput: boolean) {
+  const runStructuredPick = useCallback((payload: string, needsInput: boolean) => {
     setComposer(payload)
     if (!needsInput) sendMessage(payload)
-  }
+  }, [setComposer, sendMessage])
 
   return (
     <>
@@ -85,8 +90,13 @@ export function AssistantPane() {
         ) : (
           <>
             {hiddenCount > 0 ? (
-              <button type="button" className="msg system" onClick={() => setShowEarlier(true)} data-testid="agent-show-earlier">
-                … 更早 {hiddenCount} 条
+              <button
+                type="button"
+                className="msg system"
+                onClick={() => setVisibleCount((n) => Math.min(messages.length, n + MESSAGE_PAGE))}
+                data-testid="agent-show-earlier"
+              >
+                … 更早 {Math.min(MESSAGE_PAGE, hiddenCount)} / 共隐 {hiddenCount} 条
               </button>
             ) : null}
             {visibleMessages.map((m) => {
@@ -122,6 +132,7 @@ export function AssistantPane() {
                 </AgentMessageBubble>
               )
             })}
+            {!empty ? <AgentArtifactCards artifacts={artifacts} /> : null}
           </>
         )}
       </div>

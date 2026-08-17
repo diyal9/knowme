@@ -72,6 +72,7 @@ export function resetAppStore() {
     fileTreeTruncated: false,
     fileTreeLoading: false,
     fileTreeCollapsed: {},
+    assistantApplyTarget: null,
     knowledgePage: 'status',
     knowledgeQuery: '',
     knowledgeFilter: 'all',
@@ -120,6 +121,8 @@ export function resetAppStore() {
     fabricStats: null,
     stewardTasks: [],
     knowledgeIoLoading: false,
+    linkPreview: null,
+    linkFullscreen: false,
   })
 }
 
@@ -222,8 +225,13 @@ export function mockApi(partial: Partial<KnowMeApi> = {}): KnowMeApi {
     sourcesTree: async () => ({ ok: true, nodes: [] }),
     sourcesTreeChildren: async () => ({ ok: true, nodes: [] }),
     sourcesSetActive: async () => ({ ok: true }),
+    sourcesReadFile: async () => ({ ok: true, content: '' }),
     sourcesWriteFile: async () => ({ ok: true }),
     sourcesOpenRoot: async () => ({ ok: true }),
+    agentArtifactAdd: async () => ({ ok: true }),
+    agentArtifactAccept: async () => ({ ok: true }),
+    agentArtifactReject: async () => ({ ok: true }),
+    agentApplyLog: async () => ({ ok: true }),
     ...partial,
   } as KnowMeApi
   window.api = api

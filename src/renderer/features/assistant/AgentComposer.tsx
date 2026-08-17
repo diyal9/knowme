@@ -42,17 +42,29 @@ export function AgentComposer({
     ? (s) => s.sendWorkbenchMessage
     : (s) => s.sendMessage)
   const fileCatalog = useAppStore((s) => s.fileCatalog)
+  const loadFileCatalog = useAppStore((s) => s.loadFileCatalog)
   const isGenerating = useAppStore((s) => s.isGenerating)
   const stopGenerate = useAppStore((s) => s.stopGenerate)
   const models = useAppStore((s) => s.assistantModels)
   const modelGroups = useAppStore((s) => s.assistantModelGroups)
   const modelId = useAppStore((s) => s.assistantModelId)
   const assistantContextInfo = useAppStore((s) => s.assistantContextInfo)
-  const activeMessages = useAppStore((s) => getSessionSlice(s.sessionStates, s.activeSessionId).messages)
+  // 跳过 streaming 正文：chunk 刷新时返回值不变，Composer 不跟着每字重渲
+  const historyTokens = useAppStore((s) => {
+    const msgs = getSessionSlice(s.sessionStates, s.activeSessionId).messages
+    let len = 0
+    for (const item of msgs) {
+      if (item.streaming || item.thinking) continue
+      len += String(item.text || '').length
+    }
+    return Math.ceil(len / 4)
+  })
   const setAssistantModel = useAppStore((s) => s.setAssistantModel)
   const skills = useAppStore((s) => s.assistantSkills)
   const knowledgeWiki = useAppStore((s) => s.knowledgeWiki)
   const knowledgeOkf = useAppStore((s) => s.knowledgeOkf)
+  const knowledgeProviders = useAppStore((s) => s.knowledgeProviders)
+  const loadKnowledge = useAppStore((s) => s.loadKnowledge)
   const sessions = useAppStore((s) => s.sessions)
   const activeSessionId = useAppStore((s) => s.activeSessionId)
   const toggleSessionKnowledge = useAppStore((s) => s.toggleSessionKnowledge)
@@ -89,9 +101,6 @@ export function AgentComposer({
     if (!slashQuery) return true
     return `${item.name || ''} ${item.id} ${item.description || ''}`.toLowerCase().includes(slashQuery)
   })
-  const historyTokens = Math.ceil(
-    activeMessages.map((item) => item.text || '').join('\n').length / 4,
-  )
   const activeModel = models.find((item) => item.id === modelId)
   const contextUsage = buildContextUsageViewModel(
     assistantContextInfo,
@@ -100,6 +109,12 @@ export function AgentComposer({
   )
 
   useEffect(() => { setAtActive(0) }, [atContext?.query])
+
+  // @ 选文件时再拉目录，避免助理 mount 扫盘
+  useEffect(() => {
+    if (!atContext) return
+    void loadFileCatalog()
+  }, [atContext, loadFileCatalog])
 
   useEffect(() => {
     if (!launchEmpty) return
@@ -283,7 +298,11 @@ export function AgentComposer({
             aria-label="选择本次对话知识库"
             aria-expanded={menu === 'knowledge'}
             aria-controls="agentSessionKnowledgeMenu"
-            onClick={() => setMenu(menu === 'knowledge' ? null : 'knowledge')}
+            onClick={() => {
+              const next = menu === 'knowledge' ? null : 'knowledge'
+              setMenu(next)
+              if (next === 'knowledge') void loadKnowledge()
+            }}
           >
             <Icon name="bookOpen" />
             <span id="agentSessionKnowledgeLabel">{knowledgeLabel}</span>
@@ -332,6 +351,7 @@ export function AgentComposer({
       {showKnowledgeToolbar && menu === 'knowledge' ? (
         <AgentKnowledgeMenu
           knowledge={knowledge}
+          providers={knowledgeProviders}
           refs={refs}
           onToggle={(path) => void toggleSessionKnowledge(path)}
           onClear={() => void clearSessionKnowledge()}

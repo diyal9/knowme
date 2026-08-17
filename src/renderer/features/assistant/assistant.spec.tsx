@@ -391,4 +391,136 @@ describe('assistant chat', () => {
       Boolean(cards && composer && (cards.compareDocumentPosition(composer) & Node.DOCUMENT_POSITION_FOLLOWING)),
     ).toBe(true)
   })
+
+  it('applies assistant text to source file and shows artifact cards', async () => {
+    const writes: Array<{ path?: string; content?: string }> = []
+    mockApi({
+      sourcesReadFile: async () => ({ ok: true, content: 'prev' }),
+      sourcesWriteFile: async (payload) => {
+        writes.push(payload as { path?: string; content?: string })
+        return { ok: true }
+      },
+      agentArtifactAdd: async ({ artifact }) => ({
+        ok: true,
+        session: {
+          id: 's1',
+          title: '新助手',
+          run: {
+            artifacts: [{
+              id: 'art-1',
+              type: 'editor_patch',
+              title: artifact.title,
+              body: artifact.body,
+              status: 'draft',
+              targetPath: 'docs/a.md',
+              meta: { mode: 'replace', sourceId: 'src1', path: 'docs/a.md' },
+            }],
+          },
+        },
+      }),
+    })
+    render(<AppShell />)
+    useAppStore.setState({
+      activeSourceId: 'src1',
+      assistantApplyTarget: { sourceId: 'src1', path: 'docs/a.md' },
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: '写一段' },
+            { id: 'a1', role: 'assistant', text: '新正文内容' },
+          ],
+        },
+      },
+    })
+    await waitFor(() => expect(screen.getByTestId('agent-apply-menu')).toBeInTheDocument())
+    fireEvent.click(screen.getByTestId('agent-apply-menu'))
+    fireEvent.click(screen.getByRole('menuitem', { name: '追加文末' }))
+    await waitFor(() => {
+      expect(writes[0]?.path).toBe('docs/a.md')
+      expect(writes[0]?.content).toContain('prev')
+      expect(writes[0]?.content).toContain('新正文内容')
+    })
+
+    fireEvent.click(screen.getByTestId('agent-apply-menu'))
+    fireEvent.click(screen.getByRole('menuitem', { name: /替换全文/ }))
+    await waitFor(() => expect(screen.getByTestId('agent-artifact-card')).toHaveTextContent('替换当前文件全文'))
+  })
+
+  it('accepts editor_patch artifact and writes target file', async () => {
+    const write = vi.fn(async () => ({ ok: true }))
+    mockApi({
+      agentArtifactAccept: async () => ({
+        ok: true,
+        editorPatch: true,
+        body: '已写入正文',
+        session: {
+          id: 's1',
+          run: {
+            artifacts: [{
+              id: 'art-1',
+              type: 'editor_patch',
+              status: 'accepted',
+              targetPath: 'docs/a.md',
+              meta: { sourceId: 'src1', path: 'docs/a.md' },
+            }],
+          },
+        },
+      }),
+      sourcesWriteFile: write,
+    })
+    render(<AppShell />)
+    useAppStore.setState({
+      assistantApplyTarget: { sourceId: 'src1', path: 'docs/a.md' },
+      sessions: [{
+        id: 's1',
+        title: '新助手',
+        agentId: 'general',
+        run: {
+          artifacts: [{
+            id: 'art-1',
+            type: 'editor_patch',
+            title: '替换当前文件全文（待确认）',
+            body: '已写入正文',
+            status: 'draft',
+            targetPath: 'docs/a.md',
+            meta: { sourceId: 'src1', path: 'docs/a.md' },
+          }],
+        },
+      }],
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: '写' },
+            { id: 'a1', role: 'assistant', text: '正文' },
+          ],
+        },
+      },
+    })
+    await waitFor(() => expect(screen.getByTestId('agent-artifact-card')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: '接受' }))
+    await waitFor(() => expect(write).toHaveBeenCalled())
+    expect(write.mock.calls[0]?.[0]).toMatchObject({ sourceId: 'src1', path: 'docs/a.md', content: '已写入正文' })
+  })
+
+  it('shows history sessions with mode avatar marks', async () => {
+    mockApi({
+      agentSessionList: async () => ({
+        sessions: [
+          { id: 's1', title: '当前', agentId: 'general' },
+          { id: 'h1', title: '历史会话', agentId: 'general' },
+        ],
+        ui: { openSessionIds: ['s1'], activeSessionId: 's1' },
+      }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByRole('tab', { name: '当前' })).toBeInTheDocument())
+    fireEvent.click(screen.getByLabelText('历史'))
+    const pop = await screen.findByTestId('agent-history-pop')
+    expect(within(pop).getByText('历史会话')).toBeInTheDocument()
+    expect(pop.querySelector('.agent-avatar-photo')).toBeTruthy()
+  })
 })

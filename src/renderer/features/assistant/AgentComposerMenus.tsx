@@ -115,15 +115,19 @@ export function AgentModelMenu({
 
 export function AgentKnowledgeMenu({
   knowledge,
+  providers = [],
   refs,
   onToggle,
   onClear,
 }: {
   knowledge: KnowledgeEntry[]
+  /** 知识源 provider（与 wiki/okf 条目并列可选） */
+  providers?: Array<{ id: string; displayName?: string; name?: string; kind?: string }>
   refs: string[]
   onToggle: (path: string) => void
   onClear: () => void
 }) {
+  const empty = providers.length === 0 && knowledge.length === 0
   return (
     <div className="agent-menu agent-knowledge-menu show" data-testid="agent-knowledge-menu" role="menu" aria-label="本次对话知识库">
       <div className="agent-knowledge-menu-head">
@@ -138,9 +142,23 @@ export function AgentKnowledgeMenu({
         >
           跟随默认 · 系统默认
         </button>
-        {knowledge.length === 0 ? (
+        {empty ? (
           <span className="agent-expert-capability limited">暂无知识库条目</span>
-        ) : knowledge.map((item) => (
+        ) : null}
+        {providers.map((item) => (
+          <button
+            key={`provider:${item.id}`}
+            type="button"
+            className={`agent-expert-knowledge${refs.includes(item.id) ? ' selected' : ''}`}
+            aria-pressed={refs.includes(item.id)}
+            data-testid="agent-knowledge-provider"
+            onClick={() => onToggle(item.id)}
+          >
+            {item.displayName || item.name || item.id}
+            {item.kind ? ` · ${item.kind}` : ''}
+          </button>
+        ))}
+        {knowledge.map((item) => (
           <button
             key={item.path}
             type="button"

@@ -67,7 +67,7 @@
     "playwright": "^1.62.1",
     "typescript": "^5.9.2",
     "vite": "^6.3.5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   },
   "dependencies": {
     "dompurify": "^3.4.12",

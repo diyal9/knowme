@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { parseContentBlocks } from './content-blocks'
+import {
+  findStableContentPrefixEnd,
+  parseContentBlocks,
+  parseContentBlocksStreaming,
+} from './content-blocks'
 import { renderKnowledgeMarkdown } from './knowledge-markdown'
 
 describe('content-blocks', () => {
@@ -28,5 +32,21 @@ describe('content-blocks', () => {
     expect(html).toContain('<ol>')
     expect(html).toContain('<strong>Data Server Host</strong>')
     expect(html).not.toContain('**Data')
+  })
+
+  it('finds fence-balanced stable prefix ends', () => {
+    const src = 'hello\n\nworld\n\nmore'
+    expect(findStableContentPrefixEnd(src)).toBe('hello\n\nworld\n\n'.length)
+    const openFence = 'before\n\n```js\ncode\n'
+    expect(findStableContentPrefixEnd(openFence)).toBe('before\n\n'.length)
+  })
+
+  it('reuses streaming prefix cache for growing tails', () => {
+    const prefix = 'para one\n\n'
+    const first = parseContentBlocksStreaming(`${prefix}tail`)
+    expect(first.cache.prefix).toBe(prefix)
+    const second = parseContentBlocksStreaming(`${prefix}tail grows`, first.cache)
+    expect(second.cache.blocks).toBe(first.cache.blocks)
+    expect(second.blocks.length).toBeGreaterThanOrEqual(first.blocks.length)
   })
 })

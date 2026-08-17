@@ -10,11 +10,12 @@ timestamp: 2026-07-01T00:00:00Z
 
 | 文件 | 职责 |
 |------|------|
-| `src/main.js` | 窗口、托盘、热键、持久化 |
+| `src/main.js` | 薄 boot → 主进程 TypeScript 模块 |
 | `src/preload.js` | `contextBridge` 最小 API |
-| `src/note.html` | 便签 UI |
-| `src/list.html` | 便签列表 |
-| `src/settings.html` | 设置 |
+| `src/renderer/` | 工作台 React/TS 渲染层 |
+| `src/shared/api.ts` | IPC DTO 唯一源 |
+
+详见仓库 `docs/architecture.md`。
 
 # 安全原则
 
@@ -24,5 +25,5 @@ timestamp: 2026-07-01T00:00:00Z
 
 # 性能
 
-- 启动速度、多窗口内存占用为 C 端关键指标
-- 自动保存 debounce 500ms，避免频繁 IO
+- 启动速度与内存占用为 C 端关键指标
+- 日常开发用 Vite HMR（`npm start`），不为看 UI 先编 dist

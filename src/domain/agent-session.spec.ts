@@ -25,6 +25,30 @@ describe('agent session helpers', () => {
     expect(parsed.tabs[1].pinned).toBe(true)
   })
 
+  it('parses run.artifacts on session records', () => {
+    const session = parseSessionRecord({
+      id: 's1',
+      title: '对话',
+      run: {
+        goal: '写文件',
+        artifacts: [{
+          id: 'art-1',
+          type: 'editor_patch',
+          title: '替换',
+          body: 'hello',
+          status: 'draft',
+          meta: { sourceId: 'src', path: 'a.md', mode: 'replace' },
+        }],
+      },
+    })
+    expect(session?.run?.artifacts?.[0]).toMatchObject({
+      id: 'art-1',
+      type: 'editor_patch',
+      targetPath: 'a.md',
+      meta: { sourceId: 'src', path: 'a.md', mode: 'replace' },
+    })
+  })
+
   it('dedupes repeated openSessionIds', () => {
     const parsed = parseSessionList({
       sessions: [{ id: 's1', title: '三元礼包' }],

@@ -191,6 +191,8 @@ describe('ipc core modules', () => {
   it('workspace-init IPC lives in src/ipc/workspace-init.js', () => {
     const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'workspace-init.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('workspace-init'"))
+    assert.ok(!mod.includes('loadAllNotes'), 'cold start must not scan notes dir')
+    assert.ok(mod.includes('notes: []'))
   })
 
   it('build-final-prompt IPC lives in src/ipc/build-final-prompt.js', () => {

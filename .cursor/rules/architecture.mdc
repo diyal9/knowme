@@ -1,5 +1,5 @@
 ---
-description: KnowMe 运行时架构硬约束（防上帝文件、双份规则、便签回流）
+description: KnowMe 运行时架构硬约束（防上帝文件、双份规则、产品叙事漂移）
 alwaysApply: true
 ---
 
@@ -16,7 +16,7 @@ alwaysApply: true
 - 单一职责优先于行数；模块化 / 组件化次之。禁止为过行数而切碎。
 - 运行时 `src/**/*.{ts,tsx}`：超过 1200 行告警；超过 2000 行失败。存量过硬顶见 `scripts/architecture-lib-oversize.json`（只许缩小）。
 - 不新增页面级 `src/*.html`（通知窗 `attention-toast.html` 除外）。
-- 不把 KnowMe 写成便签产品；不恢复独立便签窗。
+- 产品叙事保持知识工作台 / 工作伙伴；不恢复独立桌面笔记窗。
 - `src/` 必要注释：文件头、重要导出函数、非自明常量。见 `.cursor/rules/source-comments.mdc`。
 
 ## MUST NOT

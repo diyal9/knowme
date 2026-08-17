@@ -52,16 +52,18 @@
 |----|------|------|------|
 | A-empty | 空态主页 | 快捷开场 | 有（composer 居中、快捷卡文案/图标对齐 f6ad048） |
 | A-tabs | Session 标签 | 新建/切换/关闭/右键（重命名/钉住/分叉） | 有（plus=专家；可见新对话按钮；tab-ctx+更多菜单对齐基线） |
-| A-history | 历史弹出 | 搜索历史会话 | 有（搜索+pop-meta/已打开；无头像 IPC） |
+| A-history | 历史弹出 | 搜索历史会话 | 有（搜索+pop-meta/已打开；**ModeAvatarMark 按 agent/expert**） |
 | A-model | 模型切换 | 菜单、用量 | 有（分组列表+Context Usage；**发送后接 ai-stream-event contextInfo**，非独立 token IPC） |
 | A-expert | 专家弹出 | 选专家 | 薄（顶栏 plus） |
-| A-knowledge | 本会话知识 | 菜单勾选 refs | 有（跟随默认+wiki/okf 多选；**Studio knowledge 节点已接 provider IPC**） |
+| A-knowledge | 本会话知识 | 菜单勾选 refs | 有（跟随默认 + **providers + wiki/okf**；打开菜单时 loadKnowledge） |
 | A-at | @ 文件 | 菜单、键盘、插入引用 | 有（键盘导航+空态） |
 | A-slash | 斜杠技能 | 菜单 | 有（基线 slash-item class） |
 | A-quick | 快捷指令 | 搜索、空态 | 有（agent-quick-menu 密度+Ctrl+K） |
 | A-more | 更多菜单 | 附件、设置项 | 有（复制总结/新对话/在新对话继续/重命名/关闭） |
 | A-attach | 附件 | 文件 input | 有（FileReader + `agent-attachment` chips；发送时附带文本） |
-| A-stream | 流式对话 | chunk、状态条、daemon process feed、返回工作台 | 有（过程摘要+运行日志双区块+紧凑进度卡；**stage 事件经 onAiStreamEvent**；chunk 动画仍简） |
+| A-stream | 流式对话 | chunk、状态条、daemon process feed、返回工作台 | 有（过程摘要+运行日志；**stream-in/chunk 动画**；throttle 时关 blur） |
+| A-apply | 应用到文件 | insert/append/replace | 有（目标=文件中心预览；无便签光标时 insert→append；replace→editor_patch 产物卡） |
+| A-artifacts | 会话产物卡 | 接受/拒绝 | 有（`run.artifacts` + AgentArtifactCards） |
 | A-image | 图片查看器 | 放大关闭 | 有（`agent-image-viewer` 蒙层） |
 | A-topic | 话题导航 | 滚动定位 | 有（`agent-topic-nav`；>2 主题且溢出时显示） |
 

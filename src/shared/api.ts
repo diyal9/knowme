@@ -69,6 +69,24 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   agentSessionContextUpdate?: (sessionId: string, patch: Record<string, unknown>) => Promise<unknown>
   agentSessionTranscript?: (id: string) => Promise<{ items?: unknown[]; text?: string }>
   agentSessionSummary?: (id: string) => Promise<{ ok?: boolean; text?: string; error?: string }>
+  /** 写入提案（如 editor_patch）；返回刷新后的 session */
+  agentArtifactAdd?: (payload: {
+    sessionId?: string
+    artifact?: Partial<AgentRunArtifact>
+  }) => Promise<{ ok?: boolean; error?: string; session?: AgentSession }>
+  agentArtifactAccept?: (payload: {
+    sessionId?: string
+    artifactId?: string
+  }) => Promise<{ ok?: boolean; error?: string; session?: AgentSession; editorPatch?: boolean; body?: string }>
+  agentArtifactReject?: (payload: {
+    sessionId?: string
+    artifactId?: string
+  }) => Promise<{ ok?: boolean; error?: string; session?: AgentSession }>
+  agentApplyLog?: (payload: {
+    sessionId?: string
+    action?: string
+    detail?: string
+  }) => Promise<{ ok?: boolean }>
   copyToClipboard?: (text: string) => void
   aiGenerate: (payload: Record<string, unknown>) => Promise<AiGenerateResult>
   aiCancelRun: (runId: string) => Promise<unknown>
@@ -239,6 +257,16 @@ export interface WorkflowPackageSaveResult {
   error?: string
 }
 
+export interface AgentRunArtifact {
+  id: string
+  type?: string
+  title?: string
+  body?: string
+  status?: string
+  targetPath?: string
+  meta?: { mode?: string; noteId?: string; sourceId?: string; path?: string }
+}
+
 export interface AgentSession {
   id: string
   title?: string
@@ -248,7 +276,10 @@ export interface AgentSession {
   expertId?: string
   knowledgeRefs?: string[]
   taskRef?: { id?: string; kind?: string } | null
-  run?: { goal?: string } | null
+  run?: {
+    goal?: string
+    artifacts?: AgentRunArtifact[]
+  } | null
 }
 
 export interface AgentFileRef {

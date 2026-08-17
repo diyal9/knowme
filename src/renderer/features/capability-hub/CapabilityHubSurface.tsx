@@ -12,7 +12,7 @@ import {
   type HubCapabilityItem,
 } from '../../../domain/capability-hub'
 import { Icon } from '../../app/Icon'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { useAppStore } from '../../app/store'
 import { HubAddDialog } from './HubAddDialog'
 import { HubCapabilityIcon } from './HubCapabilityIcon'
@@ -41,6 +41,7 @@ export function CapabilityHubSurface() {
   const setQuery = useAppStore((s) => s.setHubQuery)
   const loadHub = useAppStore((s) => s.loadHubCapabilities)
   const searchRef = useRef<HTMLInputElement>(null)
+  const surfaceRef = useRef<HTMLDivElement>(null)
   const [category, setCategory] = useState('全部')
   const [installedOnly, setInstalledOnly] = useState(false)
   const [detail, setDetail] = useState<HubCapabilityItem | null>(null)
@@ -58,7 +59,7 @@ export function CapabilityHubSurface() {
   const catalogTitle = hubCatalogTitle(tab, { query, installedOnly, category })
   const copy = HUB_TAB_COPY[tab]
 
-  useStickyIcons(`${tab}:${items.length}:${featured.length}:${category}:${installedOnly}:${loading}`)
+  useKnowMeIcons(`${tab}:${items.length}:${featured.length}:${category}:${installedOnly}:${loading}`, surfaceRef)
 
   useEffect(() => {
     void loadHub()
@@ -87,7 +88,7 @@ export function CapabilityHubSurface() {
   }
 
   return (
-    <div className="hub-app" id="hubApp" data-testid="capability-hub-surface" data-tab={tab === 'expert' ? 'experts' : tab === 'skill' ? 'skills' : 'connectors'}>
+    <div ref={surfaceRef} className="hub-app" id="hubApp" data-testid="capability-hub-surface" data-tab={tab === 'expert' ? 'experts' : tab === 'skill' ? 'skills' : 'connectors'}>
       <div className="hub-nav">
         <div className="hub-nav-title">
           <Icon name="capabilityStack" />

@@ -127,3 +127,48 @@ export function parseContentBlocks(src: string): ContentBlock[] {
   flushList()
   return out
 }
+
+export type StreamingParseCache = {
+  prefix: string
+  blocks: ContentBlock[]
+}
+
+/**
+ * 流式增量：找到「围栏成对」的最后一个段落边界，此前视为稳定前缀。
+ * 未找到则返回 0（整段都当尾部解析）。
+ */
+export function findStableContentPrefixEnd(src: string): number {
+  const text = String(src || '').replace(/\r\n/g, '\n')
+  if (text.length < 2) return 0
+  let searchFrom = text.length
+  while (searchFrom > 0) {
+    const idx = text.lastIndexOf('\n\n', searchFrom - 1)
+    if (idx < 0) return 0
+    const prefix = text.slice(0, idx + 2)
+    const fenceCount = (prefix.match(/^```/gm) || []).length
+    if (fenceCount % 2 === 0) return idx + 2
+    searchFrom = idx
+  }
+  return 0
+}
+
+/** 流式解析：稳定前缀命中缓存时只重解析尾段。 */
+export function parseContentBlocksStreaming(
+  src: string,
+  cache?: StreamingParseCache | null,
+): { blocks: ContentBlock[]; cache: StreamingParseCache } {
+  const text = String(src || '').replace(/\r\n/g, '\n')
+  const end = findStableContentPrefixEnd(text)
+  if (end <= 0) {
+    const blocks = parseContentBlocks(text)
+    return { blocks, cache: { prefix: '', blocks: [] } }
+  }
+  const prefix = text.slice(0, end)
+  const tail = text.slice(end)
+  const prefixBlocks = cache && cache.prefix === prefix
+    ? cache.blocks
+    : parseContentBlocks(prefix)
+  const nextCache: StreamingParseCache = { prefix, blocks: prefixBlocks }
+  if (!tail) return { blocks: prefixBlocks.slice(), cache: nextCache }
+  return { blocks: prefixBlocks.concat(parseContentBlocks(tail)), cache: nextCache }
+}

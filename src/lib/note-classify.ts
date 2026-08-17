@@ -1,5 +1,5 @@
 /**
- * 旧便签分类：启发式从 promptGroup / 路径 / 项目名推断 category 与 okfTags
+ * notes 兼容分类：启发式从 promptGroup / 路径 / 项目名推断 category 与 okfTags
  */
 'use strict';
 

@@ -47,7 +47,10 @@ describe('assistant output style', () => {
     ].join('\n')
     const styleLib = fs.readFileSync(path.join(root, 'src', 'lib', 'assistant-output-style.ts'), 'utf8')
     const sessions = agentSessions
-    const feishu = fs.readFileSync(path.join(root, 'src', 'lib', 'connectors', 'feishu-cli.ts'), 'utf8')
+    const feishu = [
+      fs.readFileSync(path.join(root, 'src', 'lib', 'connectors', 'feishu-cli.ts'), 'utf8'),
+      fs.readFileSync(path.join(root, 'src', 'lib', 'connectors', 'feishu-cli', 'im.ts'), 'utf8'),
+    ].join('\n')
 
     assert.ok(prompt.includes('默认不要在自己生成的标题、列表、状态标签或正文中使用 Emoji'))
     assert.ok(main.includes("require('../lib/assistant-output-style')") || main.includes("require('./lib/assistant-output-style')"))

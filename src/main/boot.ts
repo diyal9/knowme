@@ -25,21 +25,60 @@ try {
         : ctx.path.join(ctx.app.getPath('appData'), 'KnowMe'));
 }
 catch { /* path may already be locked */ }
+/** @type {'' | 'remote' | 'crash' | 'env'} */
+let windowsGpuDisableReason = '';
+/** @type {ReturnType<typeof import('../lib/windows-gpu-policy').resolveWindowsGpuPolicy> | null} */
+let windowsGpuPolicy = null;
 if (process.platform === 'win32') {
     ctx.app.setAppUserModelId('com.aispace.knowme');
-    const isRemoteDesktop = /^RDP-Tcp/i.test(String(process.env.SESSIONNAME || ''));
-    if (isRemoteDesktop) {
-        // RDP + Chromium GPU sandbox is a common source of renderer white screens on Windows.
+    // 自动：远程 / 上次 GPU 崩溃 → 软件路径 + UI 降频；本机健康则开 GPU。
+    const { resolveWindowsGpuPolicy } = require('../lib/windows-gpu-policy');
+    const {
+        readGpuFallback,
+        noteGpuFallbackStable,
+        clearGpuFallback,
+    } = require('../lib/windows-gpu-fallback');
+    const userDataDir = ctx.app.getPath('userData');
+    const crashState = readGpuFallback(userDataDir, ctx.fs, ctx.path);
+    if (crashState.expired) clearGpuFallback(userDataDir, ctx.fs, ctx.path);
+    windowsGpuPolicy = resolveWindowsGpuPolicy({
+        env: process.env,
+        crashFallbackActive: crashState.active,
+    });
+    if (windowsGpuPolicy.useInProcessGpu && !windowsGpuPolicy.disableGpu) {
+        // 远程温和加固：进程内 GPU，仍用硬件加速
         ctx.app.commandLine.appendSwitch('in-process-gpu');
-        ctx.app.commandLine.appendSwitch('use-angle', 'swiftshader');
     }
-    // Some Windows GPUs intermittently fail composition and show a blank white window.
-    // Disable hardware acceleration to keep renderer output stable.
-    ctx.app.commandLine.appendSwitch('disable-gpu');
-    ctx.app.commandLine.appendSwitch('disable-gpu-compositing');
-    ctx.app.disableHardwareAcceleration();
+    if (windowsGpuPolicy.disableGpu) {
+        if (windowsGpuPolicy.applyRdpSwiftShader) {
+            ctx.app.commandLine.appendSwitch('in-process-gpu');
+            ctx.app.commandLine.appendSwitch('use-angle', 'swiftshader');
+        }
+        ctx.app.commandLine.appendSwitch('disable-gpu');
+        ctx.app.commandLine.appendSwitch('disable-gpu-compositing');
+        ctx.app.disableHardwareAcceleration();
+        windowsGpuDisableReason = windowsGpuPolicy.reason;
+        if (crashState.active) {
+            // 软件路径稳定一段时间后自动清除回退，下次再探测硬件加速
+            noteGpuFallbackStable(userDataDir, ctx.fs, ctx.path);
+        }
+    } else if (crashState.active || crashState.expired) {
+        clearGpuFallback(userDataDir, ctx.fs, ctx.path);
+    }
+    if (windowsGpuPolicy.uiThrottle) {
+        process.env.KNOWME_UI_THROTTLE = '1';
+    }
+    // 本机也写入间隔，避免 preload 回退到过密的默认值
+    process.env.KNOWME_UI_LIVE_MS = String(windowsGpuPolicy.liveNowIntervalMs);
+    process.env.KNOWME_UI_TELEMETRY_MS = String(windowsGpuPolicy.runTelemetryIntervalMs);
+    ctx.windowsGpuPolicy = windowsGpuPolicy;
 }
 ctx.logger = require('../lib/logger');
+if (windowsGpuDisableReason) {
+    ctx.logger.system('gpu-policy', `Windows GPU auto-degraded (${windowsGpuDisableReason})`);
+} else if (windowsGpuPolicy && windowsGpuPolicy.uiThrottle) {
+    ctx.logger.system('gpu-policy', `Windows UI throttle (${windowsGpuPolicy.reason || 'on'})`);
+}
 ctx.__bind_materializeWindowsIcon = require('../lib/app-icon'), ctx.materializeWindowsIcon = ctx.__bind_materializeWindowsIcon.materializeWindowsIcon;
 ctx.productKnowledge = require('../lib/product-knowledge');
 ctx.productMemory = require('../lib/product-memory');
@@ -277,7 +316,7 @@ ctx.SETTINGS_FILE = ctx.path.join(ctx.app.getPath('userData'), 'settings.json');
 ctx.KNOWLEDGE_DIR = ctx.path.join(ctx.app.getPath('userData'), 'knowledge');
 ctx.MEMORY_DIR = ctx.path.join(ctx.app.getPath('userData'), 'memory');
 ctx.KNOWLEDGE_SEED = ctx.path.join(__dirname, '..', 'assets', 'knowledge-seed');
-ctx.PROMPT_SPACE_DIR = process.env.STICKY_PROMPT_SPACE_DIR || '';
+ctx.PROMPT_SPACE_DIR = process.env.KNOWME_PROMPT_SPACE_DIR || process.env.STICKY_PROMPT_SPACE_DIR || '';
 ctx.PROMPT_SPACE_IMPORT_FLAG = ctx.path.join(ctx.app.getPath('userData'), 'prompt_space_imported.flag');
 ctx.RECENT_FILE = ctx.path.join(ctx.app.getPath('userData'), 'recent-notes.json');
 ctx.AGENT_SESSIONS_FILE = ctx.path.join(ctx.app.getPath('userData'), 'agent-sessions.json');
@@ -297,7 +336,8 @@ ctx.agentTeamRuntime = null;
 ctx.workbenchAgentTeamRunner = null;
 ctx.workbenchAgentGateWaiters = new Map();
 ctx.workbenchAgentRunControllers = new Map();
-ctx.workbenchAgentRunEvents = new Map();
+ctx.__bind_createEvictingEventMap = require('../lib/runtime-store'), ctx.createEvictingEventMap = ctx.__bind_createEvictingEventMap.createEvictingEventMap;
+ctx.workbenchAgentRunEvents = ctx.createEvictingEventMap({ maxEntries: 64, ttlMs: 24 * 60 * 60 * 1000 });
 }
 
 module.exports = { create }

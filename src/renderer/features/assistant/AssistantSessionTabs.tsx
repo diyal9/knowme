@@ -377,7 +377,7 @@ export function AssistantSessionTabs() {
                 setHistoryOpen(false)
               }}
             >
-              <Icon name="chat" />
+              <ModeAvatarMark modeId={resolveAssistantModeId(item.agentId || item.expertId)} />
               <span>{item.title || item.id}</span>
               <span className="pop-meta">{openIds.has(item.id) ? '已打开' : ''}</span>
             </button>

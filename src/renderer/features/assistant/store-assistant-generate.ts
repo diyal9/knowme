@@ -85,5 +85,6 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
       }
     })
     if (result.resultError && !result.cancelled) get().showToast(result.resultError)
+    void get().refreshActiveSessionArtifacts?.()
   })()
 }

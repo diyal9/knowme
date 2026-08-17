@@ -188,8 +188,10 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
       } catch {
         /* ignore */
       }
-      void get().loadHubCapabilities()
-      void get().loadKnowledge?.()
+      // 首屏不挡：知识列表延后给 Composer；Hub 由能力中心/任务房自己拉
+      window.setTimeout(() => {
+        void get().loadKnowledge?.()
+      }, 0)
     },
 
     renameSession: async (id: string, title: string) => {

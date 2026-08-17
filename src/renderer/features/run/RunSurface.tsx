@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { runNextAction, runProgressLabel, runStatusSummary } from '../../../domain/run-telemetry'
 import { useAppStore, selectProcessView } from '../../app/store'
 import { Icon } from '../../app/Icon'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { DaemonReviewPanel } from './DaemonReviewPanel'
 import { RunAgentsSection, RunGraphSection } from './RunAgentsGraph'
 import { RunInputAgentsPreview } from './RunInputAgentsPreview'
@@ -108,11 +108,13 @@ export function RunSurface({ taskRoom = false }: { taskRoom?: boolean }) {
   const rerun = useAppStore((s) => s.rerun)
   const toggleProcessLog = useAppStore((s) => s.toggleProcessLog)
   const processView = selectProcessView(run)
+  const surfaceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!run || run.phase === 'input' || run.phase === 'done') return
     void refreshRunTelemetry()
-    const timer = window.setInterval(() => { void refreshRunTelemetry() }, 1600)
+    const ms = window.knowme?.perf?.runTelemetryIntervalMs || 1600
+    const timer = window.setInterval(() => { void refreshRunTelemetry() }, ms)
     const unsub = window.api?.onWorkbenchDaemonLogEvent?.(() => { void refreshRunTelemetry() })
     return () => {
       window.clearInterval(timer)
@@ -120,11 +122,11 @@ export function RunSurface({ taskRoom = false }: { taskRoom?: boolean }) {
     }
   }, [run?.slug, run?.phase, refreshRunTelemetry])
 
-  useStickyIcons(run?.phase)
+  useKnowMeIcons(run?.phase, surfaceRef)
 
   if (!run) {
     return (
-      <div className="wb-run-shell" data-testid="run-surface">
+      <div ref={surfaceRef} className="wb-run-shell" data-testid="run-surface">
         <p className="wb-run-empty">从货架选择工作流以进入任务房间。</p>
       </div>
     )
@@ -134,7 +136,7 @@ export function RunSurface({ taskRoom = false }: { taskRoom?: boolean }) {
   const live = run.phase === 'running' || run.phase === 'hitl'
 
   return (
-    <div className="wb-run-shell" id="wbTaskDashboard" data-testid="run-surface">
+    <div ref={surfaceRef} className="wb-run-shell" id="wbTaskDashboard" data-testid="run-surface">
       <header className="wb-run-topbar" hidden={taskRoom}>
         <div className="wb-run-topbar-title">
           <div className="wb-run-topbar-identity">

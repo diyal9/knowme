@@ -24,7 +24,7 @@ function writeChange(name, specId, title) {
   fs.writeFileSync(path.join(root, '.openspec.yaml'), 'schema: spec-driven\ncreated: 2026-08-16\n')
   fs.writeFileSync(path.join(root, 'proposal.md'), `## Why
 
-${title} — 架构扫尾，用现行分层还债，不还原便签窗或 HTML 工作台。
+${title} — 架构扫尾，用现行分层还债，不还原已退役笔记窗或页面级 HTML 工作台。
 
 ## 目标用户
 
@@ -38,7 +38,7 @@ KnowMe 桌面工作台的开发者与制作人（后续迭代速度）。
 
 ## 非目标
 
-便签窗、页面级 HTML 工作台、cron、文件分屏编辑器、飞书 iframe。
+已退役独立笔记窗、页面级 HTML 工作台、cron、文件分屏编辑器、飞书 iframe。
 
 ## What Changes
 
@@ -90,7 +90,7 @@ Renderer → preload window.api → ipc/* → lib。主进程组合根显式 req
   fs.writeFileSync(path.join(root, 'acceptance.md'), `# 制作人验收 — ${name}
 
 - [ ] 相关面可打开且无控制台报错
-- [ ] 未出现便签产品叙事
+- [ ] 产品叙事保持知识工作台 / 工作伙伴
 `)
   fs.writeFileSync(
     path.join(root, 'specs', specId, 'spec.md'),
@@ -98,7 +98,7 @@ Renderer → preload window.api → ipc/* → lib。主进程组合根显式 req
 
 ### Requirement: ${title}
 
-系统 MUST 以新分层完成此项，且 MUST NOT 恢复便签窗或页面级 HTML 工作台。
+系统 MUST 以新分层完成此项，且 MUST NOT 恢复已退役独立笔记窗或页面级 HTML 工作台。
 
 #### Scenario: 结构约束成立
 

@@ -169,7 +169,7 @@ function agentDeps(ctx) {
   }
 }
 
-/** 便签兼容 stub（产品面已退役，IPC 仍读 notes 目录）。 */
+/** notes 数据兼容 stub（产品面已退役，IPC 仍读 notes 目录）。 */
 function notesCompatDeps(ctx) {
   return {
     noteId: ctx.noteId,

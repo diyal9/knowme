@@ -15,7 +15,7 @@ async function main() {
   await page.goto('file:///' + html.replace(/\\/g, '/'), { waitUntil: 'domcontentloaded' })
   await page.addStyleTag({ content: ':root,.app{--titlebar-height:32px !important}' })
   await page.waitForTimeout(400)
-  await page.evaluate(() => window.StickyIcons && window.StickyIcons.mount(document))
+  await page.evaluate(() => window.KnowMeIcons && window.KnowMeIcons.mount(document))
   await page.screenshot({ path: path.join(SHOTS, 'baseline-assistant.png') })
 
   await page.evaluate(() => {

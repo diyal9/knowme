@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DAEMON_MIN_INTENT_CHARS,
   DAEMON_RUN_FILTERS,
@@ -12,7 +12,7 @@ import {
 } from '../../../domain/daemon-compose'
 import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 
 interface PickedMaterial {
   path: string
@@ -34,6 +34,7 @@ export function DaemonComposePanel() {
   const [submitting, setSubmitting] = useState(false)
   const [overviewTasks, setOverviewTasks] = useState<unknown[]>([])
   const [overviewWorkflows, setOverviewWorkflows] = useState<DaemonPathItem[]>([])
+  const surfaceRef = useRef<HTMLDivElement>(null)
 
   const offline = daemonOnline === false
   const paths = useMemo(() => {
@@ -74,7 +75,7 @@ export function DaemonComposePanel() {
     if (!pathId && selected?.id) setPathId(selected.id)
   }, [pathId, selected?.id])
 
-  useStickyIcons(`${offline}:${pathId}:${runFilter}:${records.length}`)
+  useKnowMeIcons(`${offline}:${pathId}:${runFilter}:${records.length}`, surfaceRef)
 
   async function pickMaterials() {
     const result = await window.api?.workbenchPickFiles?.({ title: '选择补充材料' })
@@ -121,7 +122,7 @@ export function DaemonComposePanel() {
   }
 
   return (
-    <div className="wb-manage-body">
+    <div ref={surfaceRef} className="wb-manage-body">
       <section className="wb-manage-panel active" id="wbDaemonPage" data-manage-panel="daemon" aria-label="管线服务" data-testid="manage-surface">
         <div className="wb-daemon-console">
           <div className="wb-daemon-home-shell">

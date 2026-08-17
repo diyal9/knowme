@@ -34,7 +34,7 @@
     gate: { w: 200, h: 96 },
   }
 
-  // Keep in sync with studio palette glyphs (ui-icons / StickyIcons)
+  // Keep in sync with studio palette glyphs (ui-icons / KnowMeIcons)
   const KIND_ICONS = {
     start: 'play',
     end: 'square',

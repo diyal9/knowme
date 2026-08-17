@@ -13,6 +13,12 @@ contextBridge.exposeInMainWorld('api', api)
 const capInvoke = (ch, ...args) => ipcRenderer.invoke(ch, ...args)
 
 contextBridge.exposeInMainWorld('knowme', {
+  /** 主进程根据远程/GPU 降级自动写入；渲染层定时器据此降频。 */
+  perf: {
+    uiThrottle: process.env.KNOWME_UI_THROTTLE === '1',
+    liveNowIntervalMs: Number(process.env.KNOWME_UI_LIVE_MS || 0) || (process.env.KNOWME_UI_THROTTLE === '1' ? 1000 : 500),
+    runTelemetryIntervalMs: Number(process.env.KNOWME_UI_TELEMETRY_MS || 0) || (process.env.KNOWME_UI_THROTTLE === '1' ? 4000 : 1600),
+  },
   capability: {
     list: opts => capInvoke('capability-list', opts),
     favoriteList: () => capInvoke('capability-favorite-list'),

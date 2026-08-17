@@ -25,7 +25,33 @@ function parseRun(raw: unknown): AgentSession['run'] {
   if (!raw || typeof raw !== 'object') return undefined
   const rec = raw as Record<string, unknown>
   const goal = String(rec.goal || '').trim()
-  return goal ? { goal } : undefined
+  const artifacts = Array.isArray(rec.artifacts)
+    ? rec.artifacts.map((item) => {
+      const art = asRecord(item)
+      const id = String(art.id || '').trim()
+      if (!id) return null
+      const meta = asRecord(art.meta)
+      return {
+        id,
+        type: String(art.type || '').trim() || undefined,
+        title: String(art.title || '').trim() || undefined,
+        body: String(art.body || ''),
+        status: String(art.status || 'draft').trim() || 'draft',
+        targetPath: String(art.targetPath || meta.path || '').trim() || undefined,
+        meta: {
+          mode: String(meta.mode || '').trim() || undefined,
+          noteId: String(meta.noteId || '').trim() || undefined,
+          sourceId: String(meta.sourceId || '').trim() || undefined,
+          path: String(meta.path || '').trim() || undefined,
+        },
+      }
+    }).filter(Boolean) as NonNullable<NonNullable<AgentSession['run']>['artifacts']>
+    : []
+  if (!goal && !artifacts.length) return undefined
+  return {
+    ...(goal ? { goal } : {}),
+    ...(artifacts.length ? { artifacts } : {}),
+  }
 }
 
 export function dedupeOpenSessionIds(ids: string[]): string[] {

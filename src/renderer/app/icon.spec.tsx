@@ -1,10 +1,10 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { Icon } from './Icon'
-import './sticky-icons'
+import './knowme-icons'
 
 describe('Icon', () => {
-  it('injects StickyIcons svg for a known glyph', () => {
+  it('injects KnowMeIcons svg for a known glyph', () => {
     const { container } = render(<Icon name="chat" />)
     const ico = container.querySelector('.ico[data-icon="chat"]')
     expect(ico?.querySelector('svg')).toBeTruthy()

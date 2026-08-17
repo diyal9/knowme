@@ -2027,6 +2027,8 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
 .agent-artifact.accepted { opacity:.85; border-color:#b7d4c0; }
 .agent-artifact.rejected { opacity:.7; }
 .agent-bubble {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 120px;
   width:var(--agent-message-track);
   max-width:var(--agent-message-track);
   align-self:flex-start;
@@ -2272,10 +2274,17 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
   font:600 14px/1.2 var(--ui); transform:translateY(1px); animation:agent-blink 0.9s step-end infinite;
 }
 .agent-bubble.streaming { contain:layout style; animation:agent-stream-in .2s ease-out; }
+.agent-bubble.streaming .agent-md > *:last-child {
+  animation: agent-stream-chunk .28s ease-out;
+}
 .agent-bubble.streaming .agent-md table { table-layout:fixed; }
 @keyframes agent-stream-in {
   from { opacity:.55; filter:saturate(.85); }
   to { opacity:1; filter:none; }
+}
+@keyframes agent-stream-chunk {
+  from { opacity:.35; }
+  to { opacity:1; }
 }
 .agent-execution { width:100%; margin:0 0 10px; overflow:hidden; border:1px solid rgba(61,58,54,.09); border-radius:12px; background:rgba(255,255,255,.72); box-shadow:0 1px 2px rgba(38,48,44,.025),inset 0 1px 0 rgba(255,255,255,.72); font-style:normal; }
 .agent-bubble.thinking .agent-execution { margin:0; }
@@ -3343,6 +3352,9 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
   flex-shrink:0; height:40px; display:none; align-items:center; gap:4px;
   padding:0 8px; border-bottom:1px solid #e3e3e0; background:#f8f8f7;
   transition:background-color .18s ease, border-color .18s ease, color .18s ease;
+  -webkit-app-region:no-drag;
+  position:relative;
+  z-index:1;
 }
 .pane-wrap.surface-review .work-surface-bar { display:flex; }
 .pane-wrap.surface-link .work-surface-bar { display:flex; }
@@ -3366,6 +3378,7 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
   background:transparent; color:#5c5c5c; cursor:pointer;
   display:inline-flex; align-items:center; justify-content:center;
   transition:background-color .16s ease, border-color .16s ease, color .16s ease, transform .12s ease;
+  -webkit-app-region:no-drag;
 }
 .work-surface-bar .ws-bar-btn .ico { width:16px; height:16px; }
 .work-surface-bar #btnOpenLinkExternal,
@@ -3478,23 +3491,38 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
 }
 .app.link-preview-fullscreen .side-rail,
 .app.link-preview-fullscreen .sidebar,
-.app.link-preview-fullscreen .agent-col {
+.app.link-preview-fullscreen .agent-col,
+.app.link-preview-fullscreen .agent-topic-nav {
   display:none !important;
 }
 .app.link-preview-fullscreen .main {
   display:block;
 }
+/* 全屏预览必须让出 titleBarOverlay / 拖拽顶栏，否则工具栏按钮点不到、也无法退出。 */
 .app.link-preview-fullscreen #workSurfaceWrap {
   position:fixed;
-  inset:0;
+  top:var(--titlebar-height);
+  left:0;
+  right:0;
+  bottom:0;
   z-index:3000;
   background:var(--bg);
   max-width:none !important;
-  width:100vw;
+  width:auto;
   border:none;
 }
+.app.link-preview-fullscreen #workSurfaceWrap .work-surface-bar {
+  position:relative;
+  z-index:2;
+  -webkit-app-region:no-drag;
+  flex-shrink:0;
+}
+.app.link-preview-fullscreen #workSurfaceWrap .work-surface-bar .ws-bar-btn {
+  -webkit-app-region:no-drag;
+}
 .app.link-preview-fullscreen #workSurfaceWrap .work-review-body {
-  padding:2px;
+  padding:0;
+  min-height:0;
 }
 .app.link-preview-fullscreen #workSurfaceWrap .work-link-shell {
   border-radius:0;

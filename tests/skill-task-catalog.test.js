@@ -118,6 +118,7 @@ describe('skill-task hub + ipc contract', () => {
   const root = path.join(__dirname, '..')
   const preload = readPreload()
   const hubService = fs.readFileSync(path.join(root, 'src', 'lib', 'capability-hub-service.ts'), 'utf8')
+  const hubIpc = fs.readFileSync(path.join(root, 'src', 'lib', 'capability-hub', 'ipc.ts'), 'utf8')
 
   it('preload exposes skillTaskList and knowme.skill.tasks', () => {
     assert.ok(preload.includes("ipcRenderer.invoke('skill-task-list')"), 'window.api.skillTaskList')
@@ -126,7 +127,7 @@ describe('skill-task hub + ipc contract', () => {
   })
 
   it('hub registers skill-task-list IPC channel', () => {
-    assert.ok(hubService.includes("'skill-task-list'"))
+    assert.ok(hubIpc.includes("'skill-task-list'"))
     assert.ok(hubService.includes('listSkillTasks'))
   })
 

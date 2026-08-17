@@ -105,4 +105,27 @@ describe('workspace file tree', () => {
     fireEvent.click(screen.getByText('readme.md'))
     await waitFor(() => expect(screen.getByTestId('files-preview-panel')).toHaveTextContent('Hello KnowMe'))
   })
+
+  it('sets assistant apply target when previewing a file', async () => {
+    mockApi({
+      sourcesList: async () => ({
+        sources: [{ id: 's1', type: 'local', displayName: 'Docs' }],
+        activeSourceId: 's1',
+      }),
+      sourcesTree: async () => ({
+        ok: true,
+        nodes: [{ type: 'file', name: 'notes.md', path: 'notes.md', depth: 0 }],
+      }),
+      sourcesReadFile: async () => ({ ok: true, content: 'body' }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByText('notes.md')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('notes.md'))
+    await waitFor(() => {
+      expect(useAppStore.getState().assistantApplyTarget).toEqual({
+        sourceId: 's1',
+        path: 'notes.md',
+      })
+    })
+  })
 })

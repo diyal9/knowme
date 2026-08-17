@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import '../app/tokens.css'
-import '../app/sticky-icons'
+import '../app/knowme-icons'
 import { SettingsSurface } from '../features/settings/SettingsSurface'
 
 const el = document.getElementById('root')

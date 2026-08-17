@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { filterShelfCards, type ShelfCardModel } from '../../domain/shelf'
 import type { ChatMessage } from '../../shared/api'
 import { createAssistantSlice } from '../features/assistant/store-assistant'
+import { createAssistantApplySlice } from '../features/assistant/store-assistant-apply'
 import { bindAttentionEvents, createAttentionSlice } from './store-attention'
 import { createChromeSlice } from './store-chrome'
 import { createFilesKnowledgeSlice } from './store-files-knowledge'
@@ -10,6 +11,7 @@ import { emptySessionSlice, getSessionSlice } from '../features/assistant/store-
 import { createStudioManageSlice } from '../features/studio/store-studio'
 import type { AppState, ProcessView, RunState } from './store-types'
 import { createWorkbenchSlice } from '../features/workbench/store-workbench'
+import { createLinkPreviewSlice } from '../features/link-preview/store-link-preview'
 
 export type { AppState, ProcessView, RunState } from './store-types'
 
@@ -52,6 +54,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   fileTreeTruncated: false,
   fileTreeLoading: false,
   fileTreeCollapsed: {},
+  assistantApplyTarget: null,
   knowledgePage: 'status',
   knowledgeQuery: '',
   knowledgeFilter: 'all',
@@ -104,11 +107,13 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   ...createWorkbenchSlice(set, get),
   ...createAssistantSlice(set, get),
+  ...createAssistantApplySlice(set, get),
   ...createAttentionSlice(set, get),
   ...createFilesKnowledgeSlice(set, get),
   ...createKnowledgeSlice(set, get),
   ...createStudioManageSlice(set, get),
   ...createChromeSlice(set, get),
+  ...createLinkPreviewSlice(set, get),
 }))
 
 export function selectProcessView(run: RunState | null): ProcessView | null {

@@ -8,7 +8,7 @@ LLM 维护的领域百科。查询时 **先读本 index**，再打开相关页�
 
 ## Concepts
 
-* [KnowMe 产品概览](concepts/knowme-overview.md) - 桌面便签定位与核心功能
+* [KnowMe 产品概览](concepts/knowme-overview.md) - 知识工作台定位与核心功能
 * [Electron 架构](concepts/electron-architecture.md) - 主进程/渲染/IPC 边界
 * [LLM 处理链路与 Cursor 对标](concepts/llm-processing-and-cursor-benchmark.md) - 上下文编排、工具闭环与能力映射
 * [生产级 Agent Team Runtime](concepts/production-agent-team-runtime.md) - 真实子 Run、持久化编排、跨 Builder 治理与恢复

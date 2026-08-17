@@ -32,12 +32,12 @@ describe('shell-rail', () => {
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
   })
 
-  it('opens settings in the main window instead of a secondary window', () => {
+  it('opens settings in the main window instead of a secondary window', async () => {
     const openSettingsWindow = vi.fn()
     mockApi({ openSettingsWindow })
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '设置' }))
-    expect(screen.getByTestId('settings-surface')).toBeInTheDocument()
+    expect(await screen.findByTestId('settings-surface')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '设置' })).toHaveAttribute('aria-pressed', 'true')
     expect(openSettingsWindow).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: '设置' }))

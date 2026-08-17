@@ -31,7 +31,7 @@ resource: sticky-agent-memory:pat_8530a8e8
 - **MUST NOT**：为看 UI 先 `renderer:build`。
 - **MUST NOT**：在 Git Bash 手搓 `taskkill /F`（`/F` 会被当成路径）。清场用 `npm run kill` 或直接再 `npm start`。
 - 启动前用 Node `execFile` 杀 `KnowMe.exe` / `electron.exe` 和占用 **5173** 的进程。
-- 仓库若是 junction（`knowme` → `sticky-notes`），脚本会切到真实路径，避免 Vite 预构建崩溃。
+- 启动脚本会切到仓库真实路径（realpath），避免路径解析偏移导致 Vite 预构建崩溃。
 - 关窗口后 `npm start` 以 **0** 退出；不要把停掉 Vite 的信号当成失败。
 - `renderer:build` 只留给出包或核对 `dist`。
 

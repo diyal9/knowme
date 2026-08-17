@@ -4,7 +4,7 @@
 
 ## 产品
 
-知我是本地优先的 AI 知识工作台 / 工作伙伴。主界面是工作台与助理，**不是便签产品**。独立便签窗、便签总览、便签备份产品面已退役。
+知我是本地优先的 AI 知识工作台 / 工作伙伴。主界面是工作台与助理。已退役的独立笔记窗 / 总览 / 备份产品面不得恢复。
 
 数据：`%APPDATA%\KnowMe\`；正文在用户绑定的本地文件夹或 GitLab。
 
@@ -58,7 +58,7 @@ src/lib                   无 DOM 应用服务（TypeScript；Electron/测试经
 - UMD / `window.Xxx =` 作为模块导出
 - React 使用 `ipcRenderer`
 - 测试 `readFileSync` `tests/fixtures/legacy-pages`
-- 现行文案把 KnowMe 写成便签产品
+- 现行文案偏离知识工作台 / 工作伙伴定位
 - 无 OpenSpec 新增表面
 
 ## IPC

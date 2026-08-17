@@ -11,7 +11,7 @@ description: >-
 
 ## 输入
 
-- 可选：change 名称、用户目标（如「v0.2 增加便签分组」）
+- 可选：change 名称、用户目标（如「工作台增加 Run 分组」）
 - 无 change 时：制作人先 `/opsx:propose`
 
 ## 状态机

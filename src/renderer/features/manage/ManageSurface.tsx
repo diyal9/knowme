@@ -1,12 +1,12 @@
 /**
  * 管理工作流 / 自动化 / 管线面板。编辑带 package id；复制走 fork，不进空白草稿。
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AUTOMATION_LIST_HINT, automationRunCapable } from '../../../domain/studio'
 import { workbenchHomeExperts } from '../../../domain/workbench-home'
 import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
-import { useStickyIcons } from '../../app/useStickyIcons'
+import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { DaemonComposePanel } from './DaemonComposePanel'
 import { ManageAutomationModal } from './ManageAutomationModal'
 import { ManageWorkflowCard } from './ManageWorkflowCard'
@@ -31,6 +31,7 @@ export function ManageSurface() {
   const runAutomationNow = useAppStore((s) => s.runAutomationNow)
   const openDaemonReview = useAppStore((s) => s.openDaemonReview)
   const [editor, setEditor] = useState<WorkbenchAutomationJob | null | undefined>(undefined)
+  const surfaceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (panel === 'workflows' || panel === 'daemon') {
@@ -40,7 +41,7 @@ export function ManageSurface() {
     } else void loadManage()
   }, [loadManage, loadWorkbench, loadHubCapabilities, loadWorkbenchModes, panel])
 
-  useStickyIcons(`${panel}:${automationJobs.length}`)
+  useKnowMeIcons(`${panel}:${automationJobs.length}`, surfaceRef)
 
   const mine = shelfCards.filter((card) => card.provenanceLabel === '我的')
   const expertNames = useMemo(() => {
@@ -55,7 +56,7 @@ export function ManageSurface() {
 
   if (panel === 'workflows') {
     return (
-      <div className="wb-manage-body">
+      <div ref={surfaceRef} className="wb-manage-body">
         <section className="wb-manage-panel active" id="wbWorkflowManagePage" data-manage-panel="workflows" aria-label="工作流管理" data-testid="manage-workflows">
           <div className="wb-dashboard">
             <section className="wb-panel wb-workflow-manage" aria-labelledby="wbWorkflowManageTitle">
@@ -108,7 +109,7 @@ export function ManageSurface() {
 
   if (panel === 'automation') {
     return (
-      <div className="wb-manage-body">
+      <div ref={surfaceRef} className="wb-manage-body">
       <section className="wb-manage-panel active" id="wbAutomationPage" data-manage-panel="automation" aria-label="自动化中心">
         <div className="wb-dashboard" id="wbAutomationDashboard">
           <section className="wb-panel wb-automation-panel" aria-labelledby="wbAutomationTitle">
