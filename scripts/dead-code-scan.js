@@ -2,13 +2,13 @@
 
 /**
  * 扫描（可选删除）单文件里定义后再无调用点的函数。
- * 重构期用来清理僵尸代码：node scripts/dead-code-scan.js src/workbench.js [--fix]
+ * 重构期用来清理僵尸代码：node scripts/dead-code-scan.js tests/fixtures/legacy-pages/workbench.js [--fix]
  */
 
 const fs = require('fs')
 const path = require('path')
 
-const target = process.argv[2] || path.join('src', 'workbench.js')
+const target = process.argv[2] || path.join('tests', 'fixtures', 'legacy-pages', 'workbench.js')
 const fix = process.argv.includes('--fix')
 
 function declarations(source) {

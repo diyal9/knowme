@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 const path = require('path')
 const harness = require('../src/lib/llmwiki-harness')
 

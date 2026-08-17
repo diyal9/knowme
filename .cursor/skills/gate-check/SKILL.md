@@ -18,6 +18,7 @@ description: >-
 ```bash
 npm test
 npm run lint
+npm run test:renderer
 ```
 
 任一项失败 → **BLOCKING**，不得 `/story-done`。

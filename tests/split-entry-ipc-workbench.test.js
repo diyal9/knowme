@@ -1,12 +1,13 @@
 'use strict'
+const { currentPage, readPreload } = require('./helpers/current-src')
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('fs')
 const path = require('path')
-const { shelfProvenanceLabel } = require('../src/workbench/provenance')
-const { runPhaseFromStatus } = require('../src/workbench/run-phase')
-const { escapeHtml } = require('../src/workbench/escape')
+const { shelfProvenanceLabel } = require('../src/domain/workbench-provenance')
+const { runPhaseFromStatus } = require('../src/domain/workbench-run-phase')
+const { escapeHtml } = require('../src/domain/workbench-escape')
 
 describe('workbench provenance', () => {
   it('maps source labels', () => {
@@ -40,7 +41,6 @@ describe('ipc core modules', () => {
     assert.equal(typeof ipc.registerCoreIpc, 'function')
     assert.equal(typeof ipc.registerMemoryIpc, 'function')
     assert.equal(typeof ipc.registerProductKnowledgeIpc, 'function')
-    assert.equal(typeof ipc.registerNotesBackupIpc, 'function')
     assert.equal(typeof ipc.registerKnowledgeOsIpc, 'function')
     assert.equal(typeof ipc.registerKnowledgeStewardIpc, 'function')
     assert.equal(typeof ipc.registerKnowledgeProviderIpc, 'function')
@@ -57,7 +57,6 @@ describe('ipc core modules', () => {
     assert.equal(typeof ipc.registerWorkbenchAgentGraphIpc, 'function')
     assert.equal(typeof ipc.registerAgentRunControlIpc, 'function')
     assert.equal(typeof ipc.registerWorkbenchDispatchIpc, 'function')
-    assert.equal(typeof ipc.registerNotesIpc, 'function')
     assert.equal(typeof ipc.registerGameIpc, 'function')
     assert.equal(typeof ipc.registerCapabilityPackIpc, 'function')
     assert.equal(typeof ipc.registerAgentProfileIpc, 'function')
@@ -70,34 +69,13 @@ describe('ipc core modules', () => {
     assert.equal(typeof ipc.registerWorkspaceStateIpc, 'function')
     assert.equal(typeof ipc.registerWorkspaceInitIpc, 'function')
     assert.equal(typeof ipc.registerBuildFinalPromptIpc, 'function')
-    assert.equal(typeof ipc.registerNoteLayoutIpc, 'function')
-    assert.equal(typeof ipc.registerNoteContextMenuIpc, 'function')
     assert.equal(typeof ipc.registerAiAssistIpc, 'function')
     assert.equal(typeof ipc.registerAgentOutputFixtureIpc, 'function')
     assert.equal(typeof ipc.registerAiGenerateIpc, 'function')
   })
 
-  it('notes CRUD lives in src/ipc/notes.js', () => {
-    const notesIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'notes.js'), 'utf8')
-    for (const ch of [
-      "ipcMain.on('note-update'",
-      "ipcMain.on('note-delete'",
-      "ipcMain.on('new-note'",
-      "ipcMain.handle('get-note'",
-      "ipcMain.handle('workspace-new-note'",
-      "ipcMain.handle('workspace-delete-note'",
-      "ipcMain.handle('workspace-duplicate-note'",
-      "ipcMain.on('note-toggle-favorite'",
-      "ipcMain.on('note-increment-copy'",
-      "ipcMain.handle('notes-batch-classify'",
-      "ipcMain.handle('suggest-classification'",
-    ]) {
-      assert.ok(notesIpc.includes(ch), ch)
-    }
-  })
-
-  it('game IPC lives in src/ipc/game.js', () => {
-    const gameIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'game.js'), 'utf8')
+  it('game IPC lives in src/ipc/game.ts', () => {
+    const gameIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'game.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('game-studio-scenes'",
       "ipcMain.handle('game-requirement-build'",
@@ -110,7 +88,7 @@ describe('ipc core modules', () => {
   })
 
   it('capability-pack IPC lives in src/ipc/capability-pack.js', () => {
-    const packIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'capability-pack.js'), 'utf8')
+    const packIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'capability-pack.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('capability-pack-list'",
       "ipcMain.handle('capability-pack-empty-state'",
@@ -124,7 +102,7 @@ describe('ipc core modules', () => {
   })
 
   it('agent-profile IPC lives in src/ipc/agent-profile.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-profile.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-profile.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('agent-profile-list'",
       "ipcMain.handle('agent-profile-get'",
@@ -136,7 +114,7 @@ describe('ipc core modules', () => {
   })
 
   it('agent-session IPC lives in src/ipc/agent-session.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-session.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-session.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('agent-session-list'",
       "ipcMain.handle('agent-session-get'",
@@ -150,7 +128,7 @@ describe('ipc core modules', () => {
   })
 
   it('agent-session UI IPC lives in src/ipc/agent-session-ui.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-session-ui.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'agent-session-ui.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('agent-session-set-ui'",
       "ipcMain.handle('agent-session-rename'",
@@ -162,7 +140,7 @@ describe('ipc core modules', () => {
   })
 
   it('app-shell IPC lives in src/ipc/app-shell.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'app-shell.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'app-shell.ts'), 'utf8')
     for (const ch of [
       "ipcMain.on('open-settings'",
       "ipcMain.on('copy-to-clipboard'",
@@ -173,7 +151,7 @@ describe('ipc core modules', () => {
   })
 
   it('logs IPC lives in src/ipc/logs.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'logs.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'logs.ts'), 'utf8')
     for (const ch of [
       "ipcMain.on('app-log'",
       "ipcMain.handle('logs-query'",
@@ -185,7 +163,7 @@ describe('ipc core modules', () => {
   })
 
   it('skills IPC lives in src/ipc/skills.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'skills.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'skills.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('list-skills'",
       "ipcMain.handle('create-skill'",
@@ -195,7 +173,7 @@ describe('ipc core modules', () => {
   })
 
   it('app-info IPC lives in src/ipc/app-info.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'app-info.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'app-info.ts'), 'utf8')
     for (const ch of [
       "ipcMain.handle('app-info'",
       "ipcMain.handle('check-for-updates'",
@@ -205,49 +183,62 @@ describe('ipc core modules', () => {
   })
 
   it('workspace-state IPC lives in src/ipc/workspace-state.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'workspace-state.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'workspace-state.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('get-workspace-state'"))
     assert.ok(mod.includes("ipcMain.on('save-workspace-state'"))
   })
 
   it('workspace-init IPC lives in src/ipc/workspace-init.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'workspace-init.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'workspace-init.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('workspace-init'"))
   })
 
   it('build-final-prompt IPC lives in src/ipc/build-final-prompt.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'build-final-prompt.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'build-final-prompt.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('build-final-prompt'"))
   })
 
-  it('note-layout IPC lives in src/ipc/note-layout.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'note-layout.js'), 'utf8')
-    assert.ok(mod.includes("ipcMain.handle('note-set-ai-mode'"))
-  })
-
-  it('note context menu IPC lives in src/ipc/note-context-menu.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'note-context-menu.js'), 'utf8')
-    assert.ok(mod.includes("ipcMain.on('show-context-menu'"))
-    assert.ok(mod.includes("ipcMain.on('show-list-context-menu'"))
-  })
-
   it('ai-assist IPC lives in src/ipc/ai-assist.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'ai-assist.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'ai-assist.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('ai-suggest-title'"))
     assert.ok(mod.includes("ipcMain.handle('ai-cancel-run'"))
     assert.ok(!mod.includes("ipcMain.handle('ai-generate'"), 'ai-generate stays separate')
   })
 
   it('ai-generate IPC lives in src/ipc/ai-generate.js', () => {
-    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'ai-generate.js'), 'utf8')
+    const mod = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'ai-generate.ts'), 'utf8')
     assert.ok(mod.includes("ipcMain.handle('ai-generate'"))
     assert.ok(!mod.includes("ipcMain.handle('ai-cancel-run'"), 'cancel-run stays in ai-assist')
   })
 
+  it('main process uses named modules instead of numbered part slices', () => {
+    const mainDir = path.join(__dirname, '..', 'src', 'main')
+    const numbered = fs.readdirSync(mainDir).filter((f) => /^part-\d+\.ts$/.test(f))
+    assert.deepEqual(numbered, [])
+    assert.equal(fs.existsSync(path.join(mainDir, 'scope.ts')), false)
+    const index = fs.readFileSync(path.join(mainDir, 'index.ts'), 'utf8')
+    assert.ok(index.includes('const ctx = Object.create(null)'))
+    assert.ok(index.includes("require('./boot').create(ctx)"))
+    assert.ok(index.includes("require('./icons').create(ctx)"))
+    assert.ok(index.includes("require('./process-guards').create(ctx)"))
+    assert.ok(index.includes("require('./workbench').create(ctx)"))
+    assert.ok(index.includes("require('./ipc-deps').bindCoreIpc(ctx)"))
+    assert.ok(!index.includes("require('./part-"))
+    assert.ok(!index.includes("require('./scope')"))
+    assert.ok(!index.includes('.attach('))
+    const ipcIndex = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'index.ts'), 'utf8')
+    assert.ok(ipcIndex.includes('function pick(groups'))
+    assert.ok(ipcIndex.includes("pick(groups, 'electron', 'paths', 'shell')"))
+  })
+
   it('main wires registerCoreIpc with no inline ipcMain handlers', () => {
-    const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
-    assert.ok(main.includes("require('./ipc')"))
-    assert.ok(main.includes('registerCoreIpc(ipcMain'))
+    const main = require('./helpers/main-ipc-bundle').readMainEntryBundle()
+    assert.ok(main.includes("require('../ipc')"))
+    assert.ok(
+      main.includes('registerCoreIpc(ipcMain')
+      || main.includes('registerCoreIpc(scope.ipcMain')
+      || main.includes('registerCoreIpc(ctx.ipcMain'),
+    )
     assert.ok(!main.includes("ipcMain.handle('sources-list'"))
     assert.ok(!main.includes("ipcMain.handle('open-external'"))
     assert.ok(!main.includes("ipcMain.handle('memory-status'"))
@@ -314,25 +305,8 @@ describe('ipc core modules', () => {
     assert.ok(main.includes('agentRuntimePortFactories,'), 'ai-generate runtime deps wired')
   })
 
-  it('workspace loads workbench helpers before workbench.js', () => {
-    const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.html'), 'utf8')
-    const order = [
-      'workbench/provenance.js',
-      'workbench/escape.js',
-      'workbench/run-phase.js',
-      'workbench/labels.js',
-      'workbench.js',
-    ]
-    let last = -1
-    for (const name of order) {
-      const idx = html.indexOf(name)
-      assert.ok(idx > last, name)
-      last = idx
-    }
-  })
-
   it('workbench labels map backends and sources', () => {
-    const { consoleSourceLabel, executionBackendLabel, workflowSourceLabel } = require('../src/workbench/labels')
+    const { consoleSourceLabel, executionBackendLabel, workflowSourceLabel } = require('../src/domain/workbench-labels')
     assert.equal(consoleSourceLabel('daemon'), '管线服务')
     assert.equal(executionBackendLabel({ executionSource: 'local-team' }), '本机专家团队')
     assert.equal(workflowSourceLabel('official'), '官方专业管线')

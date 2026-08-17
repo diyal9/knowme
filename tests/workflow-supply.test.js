@@ -88,6 +88,18 @@ describe('workflow supply collection', () => {
     assert.equal(result.stats.byOrigin.official || 0, 0)
   })
 
+  it('does not inject official reference packages unless verticals are supplied', () => {
+    const result = buildWorkflowSupply({
+      repoWorkflows: [],
+      daemon: { online: true, workflows: [] },
+      personal: [],
+      agents: [],
+      repoActive: true,
+      localTeamEnabled: true,
+    })
+    assert.equal(result.packages.find(item => String(item.id || '').startsWith('official-')), undefined)
+  })
+
   it('keeps official reference packages when supplied as verticals', () => {
     const official = require('../src/lib/official-workflows').listOfficialWorkflowPackages()
     const experts = require('../src/lib/official-workflows').requiredExpertIds().map(id => ({ id }))

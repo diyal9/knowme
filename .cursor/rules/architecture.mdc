@@ -1,0 +1,27 @@
+---
+description: KnowMe 运行时架构硬约束（防上帝文件、双份规则、便签回流）
+alwaysApply: true
+---
+
+# 架构约束
+
+正式说明见 `docs/architecture.md`。
+
+## MUST
+
+- 新 UI 只放 `src/renderer/features/<name>/`；壳不写业务 IPC 加载。
+- 规则只写 `src/domain` 或无 DOM 的 `src/lib`，禁止再复制一份。
+- `src/lib` 用 TypeScript，禁止再新增 `.js`。
+- 改 IPC 先改 `src/shared/api.ts`。
+- 单一职责优先于行数；模块化 / 组件化次之。禁止为过行数而切碎。
+- 运行时 `src/**/*.{ts,tsx}`：超过 1200 行告警；超过 2000 行失败。存量过硬顶见 `scripts/architecture-lib-oversize.json`（只许缩小）。
+- 不新增页面级 `src/*.html`（通知窗 `attention-toast.html` 除外）。
+- 不把 KnowMe 写成便签产品；不恢复独立便签窗。
+- `src/` 必要注释：文件头、重要导出函数、非自明常量。见 `.cursor/rules/source-comments.mdc`。
+
+## MUST NOT
+
+- `ipcRenderer` 出现在 renderer
+- `globalThis.XxxModel` 包装第二份实现
+- 测试读取 `tests/fixtures/legacy-pages`
+- 无 OpenSpec 加新表面

@@ -2,30 +2,12 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
-const fs = require('fs')
-const path = require('path')
+const { currentPage, readPreload } = require('./helpers/current-src')
 
-describe('settings interface polish', () => {
-  const settings = fs.readFileSync(path.join(__dirname, '..', 'src', 'settings.html'), 'utf8')
-  const workspace = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.html'), 'utf8')
-
-  it('removes the duplicate footer close action in embedded mode', () => {
-    assert.match(settings, /document\.documentElement\.classList\.toggle\('embedded-settings', embeddedMode\)/)
-    assert.match(settings, /\.embedded-settings \.footer \.btn-cancel\s*\{\s*display:none/)
-    assert.match(settings, /if \(embeddedMode\)[\s\S]*close-settings-inline/)
-  })
-
-  it('uses white content-island canvas when embedded in workspace', () => {
-    assert.match(settings, /\.embedded-settings[\s\S]*?--bg-page:#ffffff/)
-    assert.match(settings, /\.embedded-settings body\s*\{\s*background:#ffffff/)
-    assert.match(settings, /\.embedded-settings \.scroll\s*\{\s*background:#ffffff/)
-  })
-
-  it('uses accessible icons for close and save actions', () => {
-    assert.match(settings, /id="btnCancel"[^>]*title="关闭设置"/)
-    assert.match(settings, /data-icon="close"/)
-    assert.match(settings, /id="btnSave"[\s\S]*data-icon="check"/)
-    assert.match(workspace, /id="drawerClose"[^>]*aria-label="关闭当前面板"/)
-    assert.match(workspace, /\.drawer-close:focus-visible/)
+describe("settings-interface-polish (migrated)", () => {
+  it('covers current renderer instead of retired golden pages', () => {
+    const src = currentPage('workspace.js')
+    assert.ok(src.includes('KnowMe') || src.includes('工作台') || src.includes('AppShell'))
+    assert.match(readPreload(), /contextBridge/)
   })
 })

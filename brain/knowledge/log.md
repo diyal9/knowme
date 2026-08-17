@@ -1,5 +1,16 @@
 # Knowledge Bundle Update Log
 
+## 2026-08-17
+
+* **Promotion**: [Attached Plan Execution](processes/attached-plan-execution.md) — sticky `pat_bceaacf5`（附带 plan 落地）。
+* **Update**: [Dev Collaboration Verbal Cues](processes/dev-collaboration-verbal-cues.md) — 增补「按照建议优化」（`pat_6f6f2eb0`）与附带 plan 交叉引用。
+* **Update**: [MCP UI Deep Verify And Code Explore](processes/mcp-ui-and-code-explore-playbook.md) — 增补 `browser_console_messages` / `browser_resize` / `browser_tabs`（`pat_a3aaf630` `pat_7587b81f` `pat_bd7f07ea`）。
+* **Update**: Skill `team-learned-dev-playwright-ui-verify` — 标准链纳入控制台/视口/多标签。
+
+## 2026-08-16
+
+* **Promotion**: [Electron Dev Restart And HMR](processes/electron-dev-restart.md) — 升格 sticky pattern「重启」（`pat_8530a8e8`）：日常再跑 `npm start` 即重启，不为看 UI 先 `renderer:build`。
+
 ## 2026-08-12
 
 * **Promotion**: [MCP UI Deep Verify And Code Explore](processes/mcp-ui-and-code-explore-playbook.md) — sticky patterns：`browser_run_code_unsafe` / `browser_press_key` / `browser_network_requests` / `list_repos`（`pat_d3afb407` `pat_6b67301f` `pat_4d3fefc0` `pat_e8d31dc4`）。

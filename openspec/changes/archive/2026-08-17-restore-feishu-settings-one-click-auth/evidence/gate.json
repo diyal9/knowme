@@ -1,0 +1,36 @@
+{
+  "gate": "Story 完成门禁",
+  "ok": true,
+  "blocking": false,
+  "hard": [
+    {
+      "id": "npm-test",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    },
+    {
+      "id": "npm-lint",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    },
+    {
+      "id": "test-renderer",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    },
+    {
+      "id": "typecheck-lib",
+      "level": "blocking",
+      "ok": true,
+      "detail": "pass"
+    }
+  ],
+  "soft": [],
+  "evidence": {
+    "test_report": "openspec/changes/<name>/evidence/test-report.md",
+    "screenshots": "openspec/changes/<name>/evidence/screenshots/"
+  }
+}

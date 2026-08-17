@@ -11,6 +11,7 @@ const {
   createRunEmitter,
   mapLegacyEvent,
   mapLegacyType,
+  redactSensitiveFields,
 } = require('../src/lib/agent-output-protocol')
 
 describe('agent-output-protocol', () => {
@@ -106,5 +107,11 @@ describe('agent-output-protocol', () => {
   it('stableHash is deterministic', () => {
     assert.equal(stableHash('hello'), stableHash('hello'))
     assert.notEqual(stableHash('hello'), stableHash('hello!'))
+  })
+
+  it('redactSensitiveFields masks token keys without unbound REDACT_KEY_PATTERN', () => {
+    const out = redactSensitiveFields({ token: 'abc', title: 'ok' })
+    assert.equal(out.token, '[REDACTED]')
+    assert.equal(out.title, 'ok')
   })
 })

@@ -4,8 +4,8 @@
 
 const fs = require('fs')
 
-const js = fs.readFileSync('src/workbench.js', 'utf8')
-const html = fs.readFileSync('src/workspace.html', 'utf8')
+const js = fs.readFileSync('tests/fixtures/legacy-pages/workbench.js', 'utf8')
+const html = fs.readFileSync('tests/fixtures/legacy-pages/workspace.html', 'utf8')
 
 const bindings = [...js.matchAll(/(el[A-Za-z0-9_]+|btn[A-Za-z0-9_]+)\s*=\s*document\.getElementById\('([^']+)'\)/g)]
   .map(match => ({ variable: match[1], id: match[2] }))

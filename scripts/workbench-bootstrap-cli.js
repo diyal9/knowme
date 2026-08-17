@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 /**
  * KnowMe Workbench bootstrap CLI — deploy workflows + optional compat patch.
  * Does NOT commit/push the external workbench repository.

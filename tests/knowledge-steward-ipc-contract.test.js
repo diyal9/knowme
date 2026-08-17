@@ -1,4 +1,5 @@
 'use strict'
+const { readPreload } = require('./helpers/current-src')
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
@@ -6,9 +7,9 @@ const fs = require('fs')
 const path = require('path')
 
 describe('knowledge steward IPC contract', () => {
-  const stewardIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'knowledge-steward.js'), 'utf8')
-  const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
-  const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8')
+  const stewardIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'knowledge-steward.ts'), 'utf8')
+  const main = require('./helpers/main-ipc-bundle').readMainEntryBundle()
+  const preload = readPreload()
 
   it('keeps task lifecycle and proposal review handlers paired', () => {
     const names = [

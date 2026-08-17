@@ -71,11 +71,4 @@ describe('agent grounding user labels', () => {
     assert.ok(!gs.violations[0].userMessage.includes('feishu.meeting_read'))
   })
 
-  it('workspace-agent delegates grounding meta to GroundingUI', () => {
-    const agent = fs.readFileSync(path.join(__dirname, '../src/workspace-agent.js'), 'utf8')
-    assert.ok(agent.includes('GroundingUI'))
-    assert.ok(agent.includes('captureGroundingDetailsOpenState'))
-    assert.ok(agent.includes('restoreGroundingDetailsOpenState'))
-    assert.ok(!agent.match(/renderGroundingStatusMeta[\s\S]*?violations\[0\]\.message/))
-  })
 })

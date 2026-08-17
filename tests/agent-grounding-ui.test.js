@@ -91,9 +91,9 @@ describe('agent grounding ui details state', () => {
   })
 
   it('styles grounding disclosure without browser default markers or bullets', () => {
-    const workspace = fs.readFileSync(path.join(__dirname, '../src/workspace.html'), 'utf8')
-    assert.match(workspace, /\.agent-grounding-sources > summary\s*\{[\s\S]*?list-style:\s*none/)
-    assert.match(workspace, /\.agent-grounding-sources > summary::-webkit-details-marker\s*\{\s*display:\s*none/)
-    assert.match(workspace, /\.agent-grounding-sources ul\s*\{[\s\S]*?list-style:\s*none/)
+    const lib = fs.readFileSync(path.join(__dirname, '../src/lib/agent-grounding-ui.ts'), 'utf8')
+    assert.match(lib, /class="agent-grounding-sources"/)
+    assert.match(lib, /<details class="agent-grounding-sources"><summary>查看来源/)
+    assert.match(lib, /<ul>\$\{sourceItems\}<\/ul>/)
   })
 })

@@ -8,7 +8,7 @@ const path = require('path');
 const os = require('os');
 const Module = require('module');
 
-const MOD_PATH = path.join(__dirname, '..', 'src', 'lib', 'settings-secure.js');
+const MOD_PATH = path.join(__dirname, '..', 'src', 'lib', 'settings-secure.ts');
 const originalLoad = Module._load;
 
 function mockSafeStorage(available) {

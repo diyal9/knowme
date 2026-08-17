@@ -29,6 +29,9 @@ openspec/changes/**/evidence/screenshots/*.jpg
 # Local typecheck / tooling caches
 *.tsbuildinfo
 .jsdoc-cache/
+test-results/
+playwright-report/
+scripts/tmp-shelf-debug*
 
 # KB export artifacts (regenerate via npm run kb:export)
 dist/kb-export/

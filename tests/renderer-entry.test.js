@@ -5,18 +5,16 @@ const assert = require('node:assert/strict')
 const { getRendererMode } = require('../src/lib/renderer-entry')
 
 describe('renderer-entry', () => {
-  it('defaults to legacy', () => {
-    assert.equal(getRendererMode({}), 'legacy')
-    assert.equal(getRendererMode({ KNOWME_RENDERER: '' }), 'legacy')
-    assert.equal(getRendererMode({ KNOWME_RENDERER: 'LEGACY' }), 'legacy')
+  it('defaults to vite', () => {
+    assert.equal(getRendererMode({}), 'vite')
+    assert.equal(getRendererMode({ KNOWME_RENDERER: '' }), 'vite')
   })
 
-  it('accepts vite', () => {
+  it('accepts vite explicitly', () => {
     assert.equal(getRendererMode({ KNOWME_RENDERER: 'vite' }), 'vite')
-    assert.equal(getRendererMode({ KNOWME_RENDERER: 'Vite' }), 'vite')
   })
 
-  it('rejects unknown as legacy', () => {
-    assert.equal(getRendererMode({ KNOWME_RENDERER: 'react' }), 'legacy')
+  it('allows legacy only when set', () => {
+    assert.equal(getRendererMode({ KNOWME_RENDERER: 'legacy' }), 'legacy')
   })
 })

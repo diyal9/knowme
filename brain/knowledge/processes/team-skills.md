@@ -23,11 +23,13 @@ timestamp: 2026-07-01T00:00:00Z
 | Skill | 触发 | 批准日期 |
 |-------|------|----------|
 | `team-learned-dev-electron-runloop` | 打包 / 执行 / 重启 / `npm start` / electron-builder | 2026-07-16 |
-| `team-learned-dev-playwright-ui-verify` | Playwright MCP navigate + screenshot 验 UI | 2026-07-16 |
+| `team-learned-dev-playwright-ui-verify` | Playwright MCP：navigate / resize / tabs / console / screenshot | 2026-07-16（2026-08-17 扩标准链） |
 
 # Promotion
 
 流程见 `team/evolution/skill-promotion.md`，命令 `/evolve`。
 
 相关口头协作口径：[Dev Collaboration Verbal Cues](dev-collaboration-verbal-cues.md)。  
+附带计划落地：[Attached Plan Execution](attached-plan-execution.md)。  
+开发重启口径：[Electron Dev Restart And HMR](electron-dev-restart.md)。  
 MCP 深验 / GitNexus 入口：[MCP UI Deep Verify And Code Explore](mcp-ui-and-code-explore-playbook.md)。

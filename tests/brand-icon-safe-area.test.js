@@ -8,6 +8,7 @@ const ICON_PNG_PATH = path.join(__dirname, '..', 'src', 'assets', 'icon.png')
 const ICON_PATH = path.join(__dirname, '..', 'src', 'assets', 'icon.ico')
 const TRAY_ICON_PATH = path.join(__dirname, '..', 'src', 'assets', 'tray-icon.png')
 const SVG_PATH = path.join(__dirname, '..', 'assets', 'brand-src', 'knowme-icon.svg')
+const { readMainEntryBundle } = require('./helpers/main-ipc-bundle')
 const MAIN_PATH = path.join(__dirname, '..', 'src', 'main.js')
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const BRAND_COLORS = {
@@ -228,8 +229,8 @@ describe('Windows brand icon safe area', () => {
   })
 
   it('loads the 32px tray source as a 2x high-DPI representation', () => {
-    const mainSource = fs.readFileSync(MAIN_PATH, 'utf8')
-    assert.match(mainSource, /nativeImage\.createFromBuffer\(fs\.readFileSync\(TRAY_ICON_PNG\)/)
+    const mainSource = readMainEntryBundle()
+    assert.match(mainSource, /nativeImage\.createFromBuffer\((?:scope\.|ctx\.)?fs\.readFileSync\((?:scope\.|ctx\.)?TRAY_ICON_PNG\)/)
     assert.match(mainSource, /\{\s*scaleFactor:\s*2\s*\}/)
   })
 })

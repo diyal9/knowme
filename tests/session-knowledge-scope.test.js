@@ -111,7 +111,10 @@ describe('session knowledge scope', () => {
   })
 
   it('gates prompt-side local knowledge context with the authoritative Session scope', () => {
-    const aiGenerate = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'ai-generate.js'), 'utf8')
+    const aiGenerate = [
+      fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'agent-generate-prepare.ts'), 'utf8'),
+      fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'agent-generate-libs.ts'), 'utf8'),
+    ].join('\n')
     assert.ok(aiGenerate.includes('resolveSessionRetrievalScope(session)'), 'ai-generate resolves scope from stored Session')
     assert.ok(aiGenerate.includes("['local', 'qmd-local'].includes"), 'local provider kinds are recognized explicitly')
     assert.ok(aiGenerate.includes('heavyCtx && localKnowledgeEnabled'), 'local snippets are excluded from remote-only or degraded scopes')

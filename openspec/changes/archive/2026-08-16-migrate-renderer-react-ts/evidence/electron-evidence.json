@@ -1,0 +1,79 @@
+{
+  "at": "2026-08-14T15:28:30.069Z",
+  "change": "migrate-renderer-react-ts",
+  "shots": [
+    "electron-assistant.png",
+    "electron-workspace.png",
+    "electron-shelf.png",
+    "electron-daemon.png",
+    "electron-studio.png",
+    "electron-settings-sources.png",
+    "electron-settings-ai.png",
+    "electron-settings-assistant.png",
+    "electron-settings-system.png",
+    "electron-settings-connectors.png",
+    "electron-settings-memory.png",
+    "electron-settings-about.png",
+    "electron-memory.png",
+    "electron-log-viewer.png"
+  ],
+  "checks": [
+    {
+      "id": "electron-assistant.png",
+      "ok": true
+    },
+    {
+      "id": "electron-workspace.png",
+      "ok": true
+    },
+    {
+      "id": "electron-shelf.png",
+      "ok": true
+    },
+    {
+      "id": "electron-daemon.png",
+      "ok": true
+    },
+    {
+      "id": "electron-studio.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-sources.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-ai.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-assistant.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-system.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-connectors.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-memory.png",
+      "ok": true
+    },
+    {
+      "id": "electron-settings-about.png",
+      "ok": true
+    },
+    {
+      "id": "electron-memory.png",
+      "ok": true
+    },
+    {
+      "id": "electron-log-viewer.png",
+      "ok": true
+    }
+  ],
+  "ok": true
+}

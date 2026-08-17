@@ -1,3 +1,4 @@
+require('./register-ts')
 #!/usr/bin/env node
 /**
  * release-v0.1.1 Windows 打包冒烟（隔离 user-data-dir，不污染正式数据）

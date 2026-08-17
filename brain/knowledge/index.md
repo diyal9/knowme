@@ -25,6 +25,8 @@ OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 * [Evolution Loop](processes/evolution-loop.md) - 自我进化循环
 * [Team Skills Registry](processes/team-skills.md) - 团队 Skill 登记
 * [Dev Collaboration Verbal Cues](processes/dev-collaboration-verbal-cues.md) - 口头确认与重启/评估优化口径
+* [Attached Plan Execution](processes/attached-plan-execution.md) - 附带 plan 落地：不改 plan、不重建 todo
+* [Electron Dev Restart And HMR](processes/electron-dev-restart.md) - 日常重启即 npm start，不为看 UI 编 dist
 * [MCP UI Deep Verify And Code Explore](processes/mcp-ui-and-code-explore-playbook.md) - Playwright 深验与 GitNexus list_repos
 
 ## References

@@ -2,15 +2,16 @@
 
 ## 使命
 
-打造轻量、有设计感、无打扰的 Windows 桌面便签工具。
+打造本地优先、有设计感、可落地任务的 Windows 桌面 **AI 知识工作台 / 工作伙伴**。内容来自用户绑定的本地文件夹或 GitLab；KnowMe 提供专家协作、工作流与管线服务，而不是桌面便签。
 
 ## 协作原则
 
 1. **测试驱动开发**：制作人先定义可测验收标准，再交给开发
-2. **OpenSpec 优先**：无 proposal/tasks 不开发；spec 与实现冲突先改 artifact
+2. **OpenSpec 优先**：无 proposal/tasks 不开发；spec 与实现冲突先改 artifact；**无 OpenSpec 不得新表面**
 3. **ReACT 自循环**：Reason → Act → Observe → Reflect，Bug 仔细修复后重过门禁
 4. **Script > Prompt**：门禁用 harness 脚本验证，不靠 Agent 自述
 5. **知识复利**：Story 后沉淀 OKF；复发问题升格 Skill（`/evolve`）
+6. **架构预算**：单一职责优先，模块化 / 组件化次之；`src/**/*.{ts,tsx}` 超过 1200 行仅告警，超过 2000 行不得合入。存量过硬顶仅可缩小（见 `docs/architecture.md`）
 
 ## 自我进化
 

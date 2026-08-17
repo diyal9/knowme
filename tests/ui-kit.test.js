@@ -4,7 +4,7 @@ const { describe, it } = require('node:test')
 const assert = require('node:assert')
 
 const { escapeHtml, relativeTime, relativeTimeCompact, formatDateTime, createToast } =
-  require('../src/lib/ui-kit.js')
+  require('../src/lib/ui-kit.ts')
 
 describe('ui-kit escapeHtml', () => {
   it('escapes every character that can break out of markup', () => {

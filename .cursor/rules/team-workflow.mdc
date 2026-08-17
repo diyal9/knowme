@@ -54,6 +54,6 @@ alwaysApply: true
 
 ## 项目上下文
 
-- 产品：Windows 桌面便签（Electron）
-- 技术栈：Electron 31、electron-store、原生 HTML/JS
-- 数据：`%APPDATA%\KnowMe\notes\`
+- 产品：知我 KnowMe — Windows 桌面 AI 知识工作台 / 工作伙伴（Electron），不是便签产品
+- 技术栈：Electron 31、工作台渲染层（含 React/TS 与遗留 HTML/JS）、electron-store
+- 数据：`%APPDATA%\KnowMe\`（会话、设置、索引）；正文在用户绑定的本地文件夹或 GitLab 工作副本

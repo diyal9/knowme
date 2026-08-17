@@ -1,5 +1,6 @@
 'use strict'
 
+require('../scripts/register-ts')
 const fs = require('fs')
 const path = require('path')
 const { AgentRunExecutor } = require('../src/lib/agent-run-executor')

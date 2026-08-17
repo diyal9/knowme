@@ -1,0 +1,127 @@
+/* React 壳与遗留 CSS 之间的显示桥：不重画视觉，只保证 flex / grid 铺满 */
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--app-chrome, #ebeae7) !important;
+  color: var(--text, #1c1917);
+  font-family: var(--ui, 'Segoe UI', system-ui, sans-serif);
+}
+#root { display: block; }
+
+#workbench.workbench {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.app.mode-agent #workbench,
+.app.mode-knowledge #workbench,
+.app.mode-settings #workbench,
+.app.mode-capabilities #workbench {
+  display: none !important;
+}
+.app.mode-settings .settings-embedded {
+  flex: 1;
+  min-width: 0;
+}
+.app.mode-workbench .agent-col { display: none; }
+.app.mode-workbench.workbench-task-active .agent-col { display: flex; }
+
+/* task-room：React 无 #workSurfaceWrap，.workbench 即右栏 */
+.app.mode-workbench.workbench-task-active .main > .workbench,
+.app.mode-workbench[data-workbench-layout="task-room"] .main > .workbench {
+  grid-column: 2;
+  grid-row: 2;
+  flex: unset;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  background: var(--wb-bg);
+}
+.app.mode-workbench.workbench-task-active[data-workbench-task-kind="pipeline-review"] .main > .workbench,
+.app.mode-workbench[data-workbench-layout="task-room"][data-workbench-task-kind="pipeline-review"] .main > .workbench {
+  grid-column: 2;
+}
+.app.mode-workbench.workbench-task-active .main > .agent-col,
+.app.mode-workbench[data-workbench-layout="task-room"] .main > .agent-col {
+  grid-column: 1;
+  grid-row: 2;
+  flex: unset;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  background: var(--wb-bg);
+}
+.app.mode-workbench.workbench-task-active .main > .agent-dialogue-status-bar,
+.app.mode-workbench[data-workbench-layout="task-room"] .main > .agent-dialogue-status-bar {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.wb-surface { display: none; min-height: 0; }
+.wb-surface.active { display: block; }
+#wbStudioSurface.active,
+#wbRunSurface.active,
+#wbManageSurface.active {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.hub-overlay-host {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+.hub-overlay-host .hub-app {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 管理工作流：dashboard 卡片网格与基线一致 */
+#wbManageSurface.wb-manage-workflows.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+#wbManageSurface.wb-manage-workflows .wb-manage-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* Studio：画布点阵与三栏铺满 */
+#wbStudioSurface.active {
+  min-height: 0;
+  flex: 1;
+}
+#wbStudioSurface.active .wb-studio-shell {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+#wbStudioSurface.active .wb-studio-canvas {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+#wbStudioSurface.active .wb-studio-graph.wb-studio-graph--canvas {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+}
+#wbStudioSurface.active .wb-studio-graph--canvas .wb-studio-viewport {
+  position: absolute;
+  inset: 0;
+}
+#wbStudioSurface.active .wb-studio-inspector #wbStudioInspector {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}

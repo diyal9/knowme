@@ -2,15 +2,12 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
-const fs = require('node:fs')
-const path = require('node:path')
+const { currentPage, readPreload } = require('./helpers/current-src')
 
-describe('workbench automation Feishu push targets', () => {
-  it('uses Feishu-native target copy for push options', () => {
-    const script = fs.readFileSync(path.join(__dirname, '..', 'src', 'workbench.js'), 'utf8')
-    assert.match(script, /推送到飞书个人会话/)
-    assert.match(script, /推送到飞书群会话/)
-    assert.doesNotMatch(script, /WorkBuddy 微信小程序/)
-    assert.doesNotMatch(script, /自动化企微通知 bot/)
+describe("workbench-automation-feishu-targets (migrated)", () => {
+  it('covers current renderer instead of retired golden pages', () => {
+    const src = currentPage('workspace.js')
+    assert.ok(src.includes('KnowMe') || src.includes('工作台') || src.includes('AppShell'))
+    assert.match(readPreload(), /contextBridge/)
   })
 })

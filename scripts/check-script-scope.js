@@ -12,7 +12,9 @@
 const fs = require('fs')
 const path = require('path')
 
-const SRC = path.join(__dirname, '..', 'src')
+const ROOT = path.join(__dirname, '..')
+const SRC = path.join(ROOT, 'src')
+
 /**
  * 只看 let / const / class：它们进入全局词法环境，跨脚本重名才会抛错。
  * 顶层 function / var 是 var 作用域（挂全局对象），跨脚本重复声明是合法的，
@@ -37,7 +39,7 @@ function pageScripts(htmlFile) {
     if (/^https?:/.test(rel)) continue
     const file = path.join(path.dirname(htmlFile), rel)
     if (!fs.existsSync(file)) continue
-    out.push({ label: path.relative(SRC, file).replace(/\\/g, '/'), code: fs.readFileSync(file, 'utf8') })
+    out.push({ label: path.relative(ROOT, file).replace(/\\/g, '/'), code: fs.readFileSync(file, 'utf8') })
   }
 
   const inline = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g
@@ -57,15 +59,29 @@ function topLevelNames(code) {
   return names
 }
 
+function collectPageHtmlFiles() {
+  const pages = []
+  if (fs.existsSync(SRC)) {
+    for (const file of fs.readdirSync(SRC)) {
+      if (file.endsWith('.html')) pages.push(path.join(SRC, file))
+    }
+  }
+  return pages.sort()
+}
+
 function run() {
-  const pages = fs.readdirSync(SRC).filter(f => f.endsWith('.html'))
+  const pages = collectPageHtmlFiles()
+  if (!pages.length) {
+    console.log('script-scope ok (no page html to scan)')
+    return
+  }
   const problems = []
-  for (const page of pages) {
+  for (const htmlFile of pages) {
     const owner = new Map()
-    for (const { label, code } of pageScripts(path.join(SRC, page))) {
+    for (const { label, code } of pageScripts(htmlFile)) {
       for (const name of topLevelNames(code)) {
         if (owner.has(name)) {
-          problems.push(`${page}: 顶层重名 '${name}' — ${owner.get(name)} 与 ${label}`)
+          problems.push(`${path.relative(ROOT, htmlFile)}: 顶层重名 '${name}' — ${owner.get(name)} 与 ${label}`)
         } else {
           owner.set(name, label)
         }
@@ -77,7 +93,7 @@ function run() {
     process.exitCode = 1
     return
   }
-  console.log('script-scope ok')
+  console.log(`script-scope ok (${pages.length} pages)`)
 }
 
 run()

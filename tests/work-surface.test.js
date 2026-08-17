@@ -3,7 +3,7 @@
  */
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
-const { createWorkSurface, summarizeArtifact } = require('../src/work-surface')
+const { createWorkSurface, summarizeArtifact } = require('../src/domain/work-surface')
 
 describe('work-surface', () => {
   it('defaults to doc mode', () => {

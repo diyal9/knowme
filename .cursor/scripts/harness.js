@@ -132,6 +132,22 @@ function buildGateReport(changeName) {
     detail: lint.ok ? 'pass' : (lint.stderr || lint.stdout || `exit ${lint.status}`),
   });
 
+  const renderer = npmScript('test:renderer');
+  hard.push({
+    id: 'test-renderer',
+    level: 'blocking',
+    ok: renderer.ok,
+    detail: renderer.ok ? 'pass' : (renderer.stderr || renderer.stdout || `exit ${renderer.status}`),
+  });
+
+  const libTypes = npmScript('typecheck:lib');
+  hard.push({
+    id: 'typecheck-lib',
+    level: 'blocking',
+    ok: libTypes.ok,
+    detail: libTypes.ok ? 'pass' : (libTypes.stderr || libTypes.stdout || `exit ${libTypes.status}`),
+  });
+
   const soft = [];
   const changes = changeName ? [changeName] : listActiveChanges();
   for (const c of changes) {

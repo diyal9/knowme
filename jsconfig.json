@@ -13,7 +13,7 @@
     "maxNodeModuleJsDepth": 0
   },
   "files": [
-    "src/lib/workbench-daemon-errors.js"
+    "src/lib/workbench-daemon-errors.ts"
   ],
   "exclude": [
     "node_modules",

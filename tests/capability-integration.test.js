@@ -1,4 +1,5 @@
 'use strict'
+const { readPreload } = require('./helpers/current-src')
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
@@ -12,7 +13,7 @@ const { createSession, normalizeSession } = require('../src/lib/agent-sessions')
 const { buildSkillTools, SKILL_TOOL_NAMES } = require('../src/lib/agent-skill-tools')
 const { createCapabilityStore } = require('../src/lib/capability-store')
 const { readMainIpcBundle } = require('./helpers/main-ipc-bundle')
-const preload = fs.readFileSync(path.join(__dirname, '../src/preload.js'), 'utf8')
+const preload = readPreload()
 const mainSource = readMainIpcBundle()
 
 function tmpDir() {
@@ -58,7 +59,7 @@ describe('capability integration wiring', () => {
   it('isolates Electron smoke user data behind the explicit test seam', () => {
     assert.match(mainSource, /KNOWME_TEST_SEAM\s*===\s*'1'/)
     assert.match(mainSource, /KNOWME_TEST_USER_DATA_DIR/)
-    assert.match(mainSource, /path\.join\(app\.getPath\('appData'\), 'KnowMe'\)/)
+    assert.match(mainSource, /\.join\((?:scope\.|ctx\.)?app\.getPath\('appData'\),\s*'KnowMe'\)/)
   })
 
   it('wires pack dependency manifests and blocks unavailable required tools in main', () => {

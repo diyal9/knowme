@@ -1,0 +1,51 @@
+/* 全入口共享的设计 token。组件布局禁止写在这里：
+   工作台壳层用 workspace-chrome.css，各面用 features/*/ 与 styles/。
+   曾在此复制 rail / hub / shelf，选择器比面级 CSS 更具体，会把两套皮肤叠在一起。
+
+   Accent 双层语义（有意保留，禁止同屏主 CTA 混用）：
+   - 壳层 / Rail / 设置主操作 → --accent（炭黑）
+   - 工作台 / 货架 / 管线 / Studio / Hub 主 CTA → --wb-accent（墨绿）
+   详见 align-production-ui-visual-parity design.md */
+:root {
+  --app-chrome: #ebeae7;
+  --app-chrome-line: #e2e0dc;
+  --titlebar-height: env(titlebar-area-height, 0px);
+  --bg-app: #f1efec;
+  --bg-side: #f0eeeb;
+  --bg-card: #ffffff;
+  --div: rgba(0, 0, 0, 0.08);
+  --text: #1c1917;
+  --text2: #57534e;
+  --text3: #a8a29e;
+  /* 壳层炭黑：导航选中、设置主按钮、助理 chrome 强调 */
+  --accent: #3d3a36;
+  --accent-bg: rgba(61, 58, 54, 0.08);
+  --accent-b: rgba(61, 58, 54, 0.20);
+  /* 工作台墨绿：主 CTA / 成功态；勿用于设置 primary */
+  --wb-accent: #2f6f5e;
+  --wb-accent-soft: #e8f0ec;
+  --wb-success: #34735e;
+  --wb-border: #e2ded5;
+  --wb-line: #deddd7;
+  --wb-surface: #ffffff;
+  --green: #16a34a;
+  --red: #dc2626;
+  --rail-width: 120px;
+  --ui: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  /* 交互时长：微交互 / 面板开合 */
+  --motion-micro: 160ms;
+  --motion-panel: 280ms;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--app-chrome);
+  color: var(--text);
+  font-family: var(--ui);
+}

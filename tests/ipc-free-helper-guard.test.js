@@ -9,8 +9,9 @@ const assert = require('node:assert')
 const fs = require('fs')
 const path = require('path')
 
+const { readMainEntryBundle } = require('./helpers/main-ipc-bundle')
+
 const ROOT = path.join(__dirname, '..')
-const MAIN = path.join(ROOT, 'src', 'main.js')
 const IPC_DIR = path.join(ROOT, 'src', 'ipc')
 
 const KNOWN_SAFE = new Set([
@@ -28,6 +29,7 @@ function extractMainHelpers(src) {
   const names = new Set()
   for (const m of src.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)) names.add(m[1])
   for (const m of src.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/g)) names.add(m[1])
+  for (const m of src.matchAll(/\b(?:scope|ctx)\.([A-Za-z_$][\w$]*)\s*=/g)) names.add(m[1])
   return names
 }
 
@@ -103,7 +105,7 @@ function findFreeCalls(src, candidates) {
 
 describe('ipc free-main-helper guard', () => {
   it('ai-generate and ai-assist resolve former main-closure helpers', () => {
-    const mainSrc = fs.readFileSync(MAIN, 'utf8')
+    const mainSrc = readMainEntryBundle()
     const mainHelpers = extractMainHelpers(mainSrc)
     // Focused watchlist from the temporal-anchor / IPC strangler class of bugs
     const watch = [
@@ -126,8 +128,14 @@ describe('ipc free-main-helper guard', () => {
       )
     }
 
-    const gen = fs.readFileSync(path.join(IPC_DIR, 'ai-generate.js'), 'utf8')
-    const assist = fs.readFileSync(path.join(IPC_DIR, 'ai-assist.js'), 'utf8')
+    const gen = [
+      fs.readFileSync(path.join(ROOT, 'src', 'ipc', 'ai-generate.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-prepare.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-tool-surface.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-execute.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-child-ports.ts'), 'utf8'),
+    ].join('\n')
+    const assist = fs.readFileSync(path.join(IPC_DIR, 'ai-assist.ts'), 'utf8')
 
     const genBound = new Set([
       ...extractRequireBindings(gen),
@@ -152,12 +160,13 @@ describe('ipc free-main-helper guard', () => {
     assert.deepEqual(assistMissing, [], `ai-assist unbound helpers: ${assistMissing.join(', ')}`)
 
     // Temporal anchor / merge tools must come from lib, not main closure
-    assert.match(gen, /require\('\.\.\/lib\/temporal-anchor'\)/)
-    assert.match(gen, /require\('\.\.\/lib\/merge-extra-tools'\)/)
+    assert.match(gen, /require\('\.\.\/lib\/temporal-anchor'\)|require\('\.\/temporal-anchor'\)/)
+    assert.match(gen, /require\('\.\.\/lib\/merge-extra-tools'\)|require\('\.\/merge-extra-tools'\)/)
     assert.match(gen, /assertRequiredDeps\(/)
     assert.match(gen, /humanizeAgentError\(/)
     assert.ok(genBound.has('buildTemporalAnchorContext'))
     assert.ok(genBound.has('mergeExtraTools'))
+    assert.ok(genBound.has('connectorToolRuntime'))
 
     // Cancel path must wire a real cancelSubRun (not empty noop)
     assert.match(assist, /cancelAllSubRuns\(/)
@@ -165,9 +174,9 @@ describe('ipc free-main-helper guard', () => {
   })
 
   it('scans ipc modules for unbound main-helper identifiers (advisory list)', () => {
-    const mainSrc = fs.readFileSync(MAIN, 'utf8')
+    const mainSrc = readMainEntryBundle()
     const mainHelpers = extractMainHelpers(mainSrc)
-    const files = fs.readdirSync(IPC_DIR).filter(f => f.endsWith('.js') && f !== 'index.js')
+    const files = fs.readdirSync(IPC_DIR).filter(f => f.endsWith('.ts') && f !== 'index.ts')
     const problems = []
     for (const file of files) {
       const src = fs.readFileSync(path.join(IPC_DIR, file), 'utf8')
@@ -197,7 +206,10 @@ describe('ipc free-main-helper guard', () => {
   })
 
   it('ai-generate registers with required-deps assert and outer fail catch', () => {
-    const gen = fs.readFileSync(path.join(IPC_DIR, 'ai-generate.js'), 'utf8')
+    const gen = [
+      fs.readFileSync(path.join(IPC_DIR, 'ai-generate.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-execute.ts'), 'utf8'),
+    ].join('\n')
     assert.match(gen, /AI_GENERATE_REQUIRED_DEPS/)
     assert.match(gen, /catch \(err\) \{\s*[\s\S]*?return fail\(err\)/m)
   })

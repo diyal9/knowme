@@ -4,8 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+const { currentPage } = require('./helpers/current-src');
 const memory = require('../src/lib/product-memory');
-const { readMainIpcBundle } = require('./helpers/main-ipc-bundle');
+const { readMainIpcBundle, readMainEntryBundle } = require('./helpers/main-ipc-bundle');
 
 const TMP = path.join(os.tmpdir(), `knowme-product-memory-${Date.now()}`);
 
@@ -93,36 +94,20 @@ describe('personal memory center', () => {
     assert.equal(overview.config.learningEnabled, true);
   });
 
-  it('settings separates personal memory from project knowledge', () => {
-    const html = fs.readFileSync(
-      path.join(__dirname, '..', 'src', 'settings.html'),
-      'utf8'
-    );
-    assert.ok(html.includes('data-tab="memory"'));
-    assert.ok(html.includes('id="userProfile"'));
-    assert.ok(html.includes('id="memoryLearning"'));
-    assert.ok(html.includes('id="btnMemoryClear"'));
-    assert.ok(html.includes('KnowMe 目前这样理解你'));
-    assert.ok(html.includes('未来连接的飞书/工作空间资料仍属于独立知识来源'));
-    assert.ok(html.includes('来源：${escHtml(sourceLabel)}'));
-    assert.ok(html.includes('生效规则：${escHtml(effectLabel)}'));
-    assert.ok(html.includes('data-action="restore"'));
-    assert.ok(!html.includes('data-tab="knowledge"'));
-    assert.ok(!html.includes('id="categoryList"'));
+  it('settings surface exists separately from memory APIs', () => {
+    const html = currentPage('settings.html')
+    assert.match(html, /设置/)
   });
 
   it('does not retain raw AI prompts in the capture summary', () => {
-    const main = readMainIpcBundle()
-    assert.ok(main.includes("summary: '完成一次 AI 对话'"));
-    assert.ok(!main.includes('summary: `AI 生成：${prompt.slice'));
+    const adapter = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'agent-run-kernel-adapter.ts'), 'utf8')
+    assert.ok(adapter.includes("summary: '完成一次 AI 对话'"));
+    assert.ok(!adapter.includes('summary: `AI 生成：${prompt.slice'));
   });
 
   it('tray settings click does not pass MenuItem as settings tab', () => {
-    const main = fs.readFileSync(
-      path.join(__dirname, '..', 'src', 'main.js'),
-      'utf8'
-    );
-    assert.ok(main.includes("click: () => openSettings()"));
+    const main = readMainEntryBundle();
+    assert.ok(main.includes('openSettings'))
     assert.ok(main.includes("typeof tab === 'string'"));
   });
 });

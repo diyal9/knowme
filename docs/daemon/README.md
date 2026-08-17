@@ -8,7 +8,7 @@
 | 同步副本 | [API.md](./API.md) |
 | 当前同步版本 | `1.0.0`（发布时间 `2026-08-13 00:19:01 +0800`） |
 | 默认基址 | `http://127.0.0.1:8010` |
-| KnowMe 客户端 | `src/lib/workbench-daemon-client.js` · `src/lib/workbench-auth.js` · `src/lib/workbench-daemon-errors.js` |
+| KnowMe 客户端 | `src/lib/workbench-daemon-client.ts` · `src/lib/workbench-auth.ts` · `src/lib/workbench-daemon-errors.ts` |
 
 上游变更后：覆盖复制 `API.md`，更新本表版本号，并核对本 README 的端点清单。
 

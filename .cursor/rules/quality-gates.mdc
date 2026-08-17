@@ -16,7 +16,8 @@ alwaysApply: true
 | 级别 | 检查项 | 命令/路径 |
 |------|--------|-----------|
 | 硬 | 单元/集成测试通过 | `npm test` |
-| 硬 | Lint 无 error | `npm run lint` |
+| 硬 | Lint 无 error（含架构硬顶 2000 行/禁止项；1200 行为告警） | `npm run lint` |
+| 硬 | 渲染层类型检查 | `npm run typecheck:renderer` |
 | 软 | qa-plan 存在且 Smoke Scope 已填 | `openspec/changes/<name>/qa-plan.md` |
 | 软 | code-review 已完成 | `openspec/changes/<name>/code-review.md` |
 

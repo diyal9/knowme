@@ -235,4 +235,25 @@ describe('agent sessions', () => {
     assert.equal(migrated.knowledgeRefs[0].id, 'kp_0')
     assert.equal(migrated.knowledgeRefs[15].id, 'kp_15')
   })
+
+  it('keeps workbench lane sessions out of assistant open tabs', () => {
+    const { ensureSessionInStore } = require('../src/lib/agent-session-ensure')
+    const existing = createSession('writing', 1)
+    existing.id = 's_assistant'
+    const { session, sessions, ui, created } = ensureSessionInStore(
+      [existing],
+      { openSessionIds: ['s_assistant'], activeSessionId: 's_assistant' },
+      'wb-expert-writer',
+      { role: 'writing', expertId: 'writer', surface: 'workbench' },
+    )
+    assert.equal(created, true)
+    assert.equal(session.id, 'wb-expert-writer')
+    assert.equal(session.agentId, 'writing')
+    assert.equal(session.expertId, 'writer')
+    assert.equal(session.ephemeral, true)
+    assert.deepEqual(session.taskRef, { id: 'writer', kind: 'expert-chat' })
+    assert.deepEqual(ui.openSessionIds, ['s_assistant'])
+    assert.equal(ui.activeSessionId, 's_assistant')
+    assert.equal(sessions[0].id, 'wb-expert-writer')
+  })
 })

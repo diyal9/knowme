@@ -1,0 +1,9 @@
+[
+  "boot.ts",
+  "agent-runtime.ts",
+  "icons.ts",
+  "shell.ts",
+  "knowledge.ts",
+  "workbench.ts",
+  "process-guards.ts"
+]

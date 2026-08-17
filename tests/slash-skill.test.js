@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
+const { currentPage } = require('./helpers/current-src');
 const productKnowledge = require('../src/lib/product-knowledge');
 
 const TMP = path.join(os.tmpdir(), `sticky-slash-skill-${Date.now()}`);
@@ -68,12 +69,8 @@ describe('slash-skill-ref', () => {
   });
 
   it('settings keeps skill management out of personal memory', () => {
-    const html = fs.readFileSync(
-      path.join(__dirname, '..', 'src', 'settings.html'),
-      'utf8'
-    );
-    assert.ok(html.includes('data-tab="memory"'), 'personal memory tab present');
-    assert.ok(!html.includes('btnCreateSkill'), 'skill management belongs outside settings');
-    assert.ok(!html.includes('openCreateSkillDrawer'), 'legacy skill drawer removed');
-  });
+    const html = currentPage('settings.html')
+    assert.match(html, /设置/)
+    assert.ok(!html.includes('btnCreateSkill'))
+  })
 });

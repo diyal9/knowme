@@ -1,4 +1,5 @@
 'use strict'
+const { readPreload } = require('./helpers/current-src')
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
@@ -115,8 +116,8 @@ describe('skill-task-catalog merge', () => {
 
 describe('skill-task hub + ipc contract', () => {
   const root = path.join(__dirname, '..')
-  const preload = fs.readFileSync(path.join(root, 'src', 'preload.js'), 'utf8')
-  const hubService = fs.readFileSync(path.join(root, 'src', 'lib', 'capability-hub-service.js'), 'utf8')
+  const preload = readPreload()
+  const hubService = fs.readFileSync(path.join(root, 'src', 'lib', 'capability-hub-service.ts'), 'utf8')
 
   it('preload exposes skillTaskList and knowme.skill.tasks', () => {
     assert.ok(preload.includes("ipcRenderer.invoke('skill-task-list')"), 'window.api.skillTaskList')

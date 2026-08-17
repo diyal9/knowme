@@ -1,3 +1,4 @@
+const { currentPage, readPreload } = require('./helpers/current-src')
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
 const fs = require('node:fs')
@@ -98,12 +99,4 @@ describe('workbench-task-composer-schedule', () => {
     assert.equal(mask.querySelector('#wbTaskComposerScheduleFields').hidden, true)
   })
 
-  it('workbench loads lib and keeps thin wrappers', () => {
-    const workbench = fs.readFileSync(path.join(__dirname, '..', 'src', 'workbench.js'), 'utf8')
-    const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'workspace.html'), 'utf8')
-    assert.ok(html.includes('workbench-task-composer-schedule.js'), 'workspace includes schedule lib')
-    assert.ok(workbench.includes('WorkbenchTaskComposerSchedule'), 'workbench delegates to lib')
-    assert.ok(workbench.includes('function readTaskComposerSchedule'), 'thin wrapper retained for contracts')
-    assert.match(workbench, /不会无人值守代发消息|WorkbenchTaskComposerSchedule\.COPY/)
-  })
 })

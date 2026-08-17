@@ -3,7 +3,7 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
 
-const { render, renderInline } = require('../src/lib/markdown-lite.js')
+const { render, renderInline } = require('../src/lib/markdown-lite.ts')
 
 describe('markdown-lite block rendering', () => {
   it('renders headings, lists, code fences and paragraphs', () => {

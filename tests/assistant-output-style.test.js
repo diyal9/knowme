@@ -38,20 +38,29 @@ describe('assistant output style', () => {
 
   it('wires the same policy into prompt, main, renderer, and workspace shell', () => {
     const root = path.join(__dirname, '..')
-    const prompt = fs.readFileSync(path.join(root, 'src', 'lib', 'ai-assistant-context.js'), 'utf8')
+    const prompt = fs.readFileSync(path.join(root, 'src', 'lib', 'ai-assistant-context.ts'), 'utf8')
     const main = readMainIpcBundle()
-    const renderer = fs.readFileSync(path.join(root, 'src', 'workspace-agent.js'), 'utf8')
-    const shell = fs.readFileSync(path.join(root, 'src', 'workspace.html'), 'utf8')
-    const sessions = fs.readFileSync(path.join(root, 'src', 'lib', 'agent-sessions.js'), 'utf8')
-    const feishu = fs.readFileSync(path.join(root, 'src', 'lib', 'connectors', 'feishu-cli.js'), 'utf8')
+    const agentSessions = fs.readFileSync(path.join(root, 'src', 'lib', 'agent-sessions.ts'), 'utf8')
+    const aiGenerate = [
+      fs.readFileSync(path.join(root, 'src', 'ipc', 'ai-generate.ts'), 'utf8'),
+      fs.readFileSync(path.join(root, 'src', 'lib', 'agent-generate-execute.ts'), 'utf8'),
+    ].join('\n')
+    const styleLib = fs.readFileSync(path.join(root, 'src', 'lib', 'assistant-output-style.ts'), 'utf8')
+    const sessions = agentSessions
+    const feishu = fs.readFileSync(path.join(root, 'src', 'lib', 'connectors', 'feishu-cli.ts'), 'utf8')
 
     assert.ok(prompt.includes('默认不要在自己生成的标题、列表、状态标签或正文中使用 Emoji'))
-    assert.ok(main.includes("require('./lib/assistant-output-style')"))
-    assert.ok(main.includes('normalizeAssistantOutput(snapshot.content)'))
-    assert.ok(main.includes('fullText = normalizeAssistantOutput(fullText)'))
-    assert.ok(renderer.includes('window.AssistantOutputStyle'))
-    assert.ok(renderer.includes('const assistantText = normalizeAssistantOutput(m.text)'))
-    assert.ok(shell.includes('lib/assistant-output-style.js'))
+    assert.ok(main.includes("require('../lib/assistant-output-style')") || main.includes("require('./lib/assistant-output-style')"))
+    const executor = fs.readFileSync(path.join(root, 'src', 'lib', 'agent-run-executor.ts'), 'utf8')
+    assert.ok(
+      main.includes('normalizeAssistantOutput(snapshot.content)')
+      || main.includes('normalizeAssistantOutput: scope.normalizeAssistantOutput')
+      || main.includes('normalizeAssistantOutput: ctx.normalizeAssistantOutput')
+      || executor.includes('fullText = normalizeAssistantOutput(fullText)'),
+    )
+    assert.ok(executor.includes('fullText = normalizeAssistantOutput(fullText)'))
+    assert.ok(aiGenerate.includes('normalizeAssistantOutput'))
+    assert.ok(styleLib.includes('function normalizeAssistantOutput'))
     assert.ok(sessions.includes("require('./assistant-output-style')"))
     assert.ok(sessions.includes('normalizeAssistantOutput(m.text)'))
     assert.ok(feishu.includes('默认不使用 emoji、颜文字或装饰性图标'))

@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 /** @deprecated Use scripts/workbench-bootstrap-cli.js */
 const bootstrap = require('../src/lib/workbench-bootstrap')
 

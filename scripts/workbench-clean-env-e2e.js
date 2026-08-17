@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 /**
  * Clean-environment bootstrap verification — no manual external patch required.
  * Uses temp install dir seeded from upstream anchor commit file contents.

@@ -32,7 +32,7 @@ describe('attention payload', () => {
 
 describe('attention ipc module', () => {
   it('registers attention notify handlers', () => {
-    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'attention-notify.js'), 'utf8')
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'attention-notify.ts'), 'utf8')
     assert.ok(src.includes("ipcMain.handle('attention-notify'"))
     assert.ok(src.includes('showDesktopToast'))
     assert.ok(src.includes('workspaceForeground'))

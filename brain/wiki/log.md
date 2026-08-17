@@ -1,5 +1,15 @@
 # Wiki Update Log
 
+## 2026-08-17
+
+* **Creation**: [附带计划落地](concepts/attached-plan-execution.md) — sticky `pat_bceaacf5`。
+* **Update**: [开发协作口头指令](concepts/dev-collaboration-verbal-cues.md) — 增补「按照建议优化」与附带 plan。
+* **Update**: [MCP 深验与代码探索](concepts/mcp-ui-and-code-explore.md) — 增补 console/resize/tabs。
+
+## 2026-08-16
+
+* **Creation**: [Electron 开发重启与热更](concepts/electron-dev-restart.md) — 升格「重启」口径：`npm start` 即热更重启。
+
 ## 2026-08-12
 
 * **Creation**: [MCP 深验与代码探索](concepts/mcp-ui-and-code-explore.md) — Playwright 深验 + GitNexus list_repos SOP。

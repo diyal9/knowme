@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 /**
  * 飞书会议只读探针：production feishu-cli meeting_candidates + meeting_read（候选 #2）。
  * 仅统计 token 哈希/正文长度，不落盘敏感正文。writeBlocked=true。

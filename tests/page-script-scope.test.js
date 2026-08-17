@@ -6,23 +6,10 @@ const fs = require('fs')
 const path = require('path')
 const vm = require('vm')
 
-/**
- * 用真实的 V8 编译器验证每个页面的脚本能共存。
- *
- * 经典 <script> 的顶层 let/const/class 进入全局词法环境，第二个脚本声明同名标识符时
- * 会在实例化阶段抛 SyntaxError，且该脚本及其后所有脚本都不执行——线上表现是整页白屏
- * 或功能静默失效，控制台只有一行错误。
- *
- * 把一个页面的所有脚本单元按加载顺序拼起来编译，能精确复现这套语义：
- * 两个 `function foo` 合法（var 作用域，挂全局对象），两个 `const foo` 非法。
- * 这比按正则数声明名字准确——正则无法区分这两种情况。
- *
- * 只编译不执行，因此不需要 DOM 环境。
- */
+const ROOT = path.join(__dirname, '..')
+const SRC = path.join(ROOT, 'src')
+const RENDERER = path.join(SRC, 'renderer')
 
-const SRC = path.join(__dirname, '..', 'src')
-
-/** 按加载顺序取出页面的脚本单元：外部文件 + 内联块 */
 function pageScriptUnits(htmlFile) {
   const html = fs.readFileSync(htmlFile, 'utf8')
   const units = []
@@ -31,6 +18,7 @@ function pageScriptUnits(htmlFile) {
 
   while ((m = re.exec(html))) {
     const attrs = m[1]
+    if (/\stype="module"/.test(attrs)) continue
     const srcMatch = attrs.match(/\ssrc="([^"]+)"/)
 
     if (srcMatch) {
@@ -38,10 +26,9 @@ function pageScriptUnits(htmlFile) {
       if (/^https?:/.test(rel)) continue
       const file = path.join(path.dirname(htmlFile), rel)
       if (!fs.existsSync(file)) continue
-      // 第三方打包产物（marked / DOMPurify）不是本仓库维护的代码，跳过
       if (rel.includes('vendor/')) continue
       units.push({ label: rel, code: fs.readFileSync(file, 'utf8') })
-    } else if (m[2].trim() && !/\stype="(?!text\/javascript)/.test(attrs)) {
+    } else if (m[2].trim()) {
       units.push({ label: `${path.basename(htmlFile)} 内联`, code: m[2] })
     }
   }
@@ -49,37 +36,57 @@ function pageScriptUnits(htmlFile) {
   return units
 }
 
-const pages = fs.readdirSync(SRC).filter(f => f.endsWith('.html'))
+function collectClassicHtmlFiles() {
+  const pages = []
+  if (fs.existsSync(SRC)) {
+    for (const file of fs.readdirSync(SRC)) {
+      if (file.endsWith('.html')) pages.push(path.join(SRC, file))
+    }
+  }
+  return pages.sort()
+}
+
+const pages = collectClassicHtmlFiles()
 
 describe('页面脚本顶层作用域', () => {
-  it('每个页面都有脚本被扫描到（防止匹配逻辑失效后静默通过）', () => {
-    const counts = pages.map(p => pageScriptUnits(path.join(SRC, p)).length)
-    assert.ok(pages.length > 0, '应能找到页面')
+  it('经典 html 壳（非 Vite module）可扫描', () => {
+    assert.ok(pages.length > 0, '应能找到 src/*.html')
+    const counts = pages.map(p => pageScriptUnits(p).length)
     assert.ok(counts.every(n => n > 0), `每页至少一个脚本单元，实际 ${JSON.stringify(counts)}`)
   })
 
-  for (const page of pages) {
-    it(`${page}：所有脚本可共存于同一顶层作用域`, () => {
-      const units = pageScriptUnits(path.join(SRC, page))
-      const combined = units.map(u => `// ---- ${u.label} ----\n${u.code}`).join('\n;\n')
+  it('renderer 入口使用 type=module，不再拼进同一经典作用域', () => {
+    const entries = fs.readdirSync(RENDERER)
+      .map((name) => path.join(RENDERER, name, 'index.html'))
+      .filter((html) => fs.existsSync(html))
+    assert.ok(entries.length >= 4, 'workspace/settings/memory/log-viewer')
+    for (const html of entries) {
+      const text = fs.readFileSync(html, 'utf8')
+      assert.match(text, /type="module"/)
+    }
+  })
 
+  for (const htmlFile of pages) {
+    const label = path.relative(ROOT, htmlFile).replace(/\\/g, '/')
+    it(`${label}：所有经典脚本可共存于同一顶层作用域`, () => {
+      const units = pageScriptUnits(htmlFile)
+      const combined = units.map(u => `// ---- ${u.label} ----\n${u.code}`).join('\n;\n')
       try {
-        new vm.Script(combined, { filename: `${page}#combined` })
+        new vm.Script(combined, { filename: `${label}#combined` })
       } catch (err) {
         const hint = /already been declared/.test(err.message)
           ? '\n同页脚本顶层重名会让整页解析失败。把模块包进 IIFE，或改名。'
           : ''
-        assert.fail(`${page} 脚本无法共存：${err.message}${hint}\n加载顺序：${units.map(u => u.label).join(' → ')}`)
+        assert.fail(`${label} 脚本无法共存：${err.message}${hint}\n加载顺序：${units.map(u => u.label).join(' → ')}`)
       }
     })
   }
 })
 
 describe('共享模块不污染页面顶层作用域', () => {
-  for (const mod of ['ui-kit.js', 'markdown-lite.js']) {
+  for (const mod of ['ui-kit.ts', 'markdown-lite.ts']) {
     it(`${mod} 不引入任何顶层标识符`, () => {
       const code = fs.readFileSync(path.join(SRC, 'lib', mod), 'utf8')
-      // 与自身拼接：若有顶层 let/const/class 泄露，重复声明会立刻暴露
       assert.doesNotThrow(
         () => new vm.Script(`${code}\n;\n${code}`, { filename: mod }),
         `${mod} 有顶层声明泄露到共享作用域，应包进 IIFE`,

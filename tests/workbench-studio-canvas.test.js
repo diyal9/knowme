@@ -84,6 +84,7 @@ describe('workbench-studio-canvas', () => {
     assert.ok(end.sections?.some(s => s.title === '输出'))
     assert.ok(llm.sections?.some(s => s.title === 'Prompt'))
     assert.ok(llm.sections?.some(s => s.title === '模型'))
+    assert.equal(agent.agentPackageId, 'pkg-qa')
     assert.ok(agent.sections?.some(s => s.title === '执行专家' && s.rows.some(r => String(r).includes('pkg-qa'))))
     assert.ok(agent.sections?.some(s => s.title === '目标'))
     assert.ok(!agent.sections?.some(s => s.title === '输出'), 'agent canvas drops output; inspector keeps it')
@@ -143,14 +144,6 @@ describe('workbench-studio-canvas', () => {
     assert.ok(!sections.some(s => s.title === '输入'))
   })
 
-  it('workbench canvas nodes use StickyIcons data-icon not unicode glyphs', () => {
-    const script = fs.readFileSync(path.join(__dirname, '../src/workbench.js'), 'utf8')
-    assert.match(script, /function studioKindIcon\(/)
-    assert.match(script, /wb-studio-flow-icon[\s\S]*data-icon=/)
-    assert.doesNotMatch(script, /start:\s*'▶'/)
-    assert.doesNotMatch(script, /gate:\s*'✓'/)
-  })
-
   it('condition cards expose branch section', () => {
     const sections = canvas.sectionsFromNode({
       kind: 'condition',
@@ -190,14 +183,6 @@ describe('workbench-studio-canvas', () => {
 
     const unboundAgent = canvas.sectionsFromNode({ kind: 'agent', name: '专家', intent: 'x' })
     assert.ok(unboundAgent.some(s => s.title === '执行专家' && s.tone === 'warn'))
-  })
-
-  it('canvas css uses type-colored full header chrome', () => {
-    const css = fs.readFileSync(path.join(__dirname, '../src/workbench-console.css'), 'utf8')
-    assert.match(css, /\.wb-studio-flow-node\.kind-tool \.wb-studio-flow-head\s*\{[^}]*background:/s)
-    assert.match(css, /\.wb-studio-flow-node\.kind-knowledge \.wb-studio-flow-head\s*\{[^}]*background:/s)
-    assert.match(css, /\.wb-studio-flow-section\.is-empty/)
-    assert.doesNotMatch(css, /\.wb-studio-flow-node\.kind-tool\s*\{\s*border-top:\s*3px/)
   })
 
   it('sizes summary nodes from compact section floors', () => {

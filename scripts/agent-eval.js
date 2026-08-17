@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 const fs = require('fs')
 const path = require('path')
 const { loadBaseline } = require('../tests/agent-conversation-eval-harness')

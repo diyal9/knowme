@@ -13,9 +13,14 @@ KnowMe 开发会话中，用户常用短指令推进工作：
 - **可以 / 同意** → 批准并执行
 - **继续** → 按计划推进
 - **执行** → 立即落地/跑通（实现、重启、自测）
-- **重启服务** → 重启 Electron（见 runloop Skill）
-- **评估并且优化方案** → 评估后落地优化
+- **重启 / 重启服务** → 再跑 `npm start`（见重启 Playbook / runloop Skill）
+- **评估并且优化方案 / 按照建议优化** → 评估后落地优化
+- **附带 plan 系统提示** → 不改 plan、不重建 todo、做到全部完成（见附带计划 Playbook）
 
 完整 Playbook：[Dev Collaboration Verbal Cues](../../knowledge/processes/dev-collaboration-verbal-cues.md)
+
+附带计划：[附带计划落地](attached-plan-execution.md)
+
+重启细节：[Electron 开发重启与热更](electron-dev-restart.md)
 
 相关深验 SOP：[MCP 深验 UI 与代码探索](mcp-ui-and-code-explore.md)

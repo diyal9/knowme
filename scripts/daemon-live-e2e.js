@@ -1,5 +1,6 @@
 'use strict'
 
+require('./register-ts')
 const fs = require('fs')
 const path = require('path')
 const handoff = require('../src/lib/game-workbench-handoff')

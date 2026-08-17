@@ -2,7 +2,7 @@ schema: spec-driven
 
 context: |
   产品：知我 KnowMe — AI 知识工作台 / 工作伙伴 Agent（Electron）
-  技术栈：Electron 31、原生 HTML/JS
+  技术栈：Electron 31、React/TypeScript 渲染层；主进程本阶段 CJS 组合根
   数据路径：%APPDATA%\KnowMe\（内容源：本地文件夹 + GitLab）
   仓库本地文件夹名可能仍为历史名称（与产品名无关）
 

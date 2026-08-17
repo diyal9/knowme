@@ -1,4 +1,5 @@
 'use strict'
+const { readPreload } = require('./helpers/current-src')
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
@@ -192,9 +193,9 @@ describe('obsidian vault bridge', () => {
   }))
 
   it('exposes fixed IPC APIs and removes the embedded graph bridge', () => {
-    const preload = fs.readFileSync(path.join(__dirname, '..', 'src', 'preload.js'), 'utf8')
-    const main = fs.readFileSync(path.join(__dirname, '..', 'src', 'main.js'), 'utf8')
-    const knowledgeOsIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'knowledge-os.js'), 'utf8')
+    const preload = readPreload()
+    const main = require('./helpers/main-ipc-bundle').readMainEntryBundle()
+    const knowledgeOsIpc = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'knowledge-os.ts'), 'utf8')
     assert.match(preload, /obsidianStatus: \(\) => ipcRenderer\.invoke\('obsidian-status'\)/)
     assert.match(preload, /obsidianInstall: \(\) => ipcRenderer\.invoke\('obsidian-install'\)/)
     assert.match(preload, /obsidianBridgeInstall: \(\) => ipcRenderer\.invoke\('obsidian-bridge-install'\)/)

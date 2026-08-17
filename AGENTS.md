@@ -1,12 +1,20 @@
 # KnowMe — 智能体仓库总纲
 
-会话启动时 **MUST** 读取本文件。本仓库是 **Electron 桌面便签 + 三角色 Agent Team** 的智能体驱动项目。
+会话启动时 **MUST** 读取本文件。本仓库是 **知我 KnowMe（Electron 桌面 AI 知识工作台 / 工作伙伴 Agent）+ 三角色 Agent Team** 的智能体驱动项目。
+
+## 产品定位
+
+- **是什么**：本地优先的 AI 知识工作台与工作伙伴；主界面是工作台（专家协作、工作流、管线服务），不是桌面便签产品。
+- **内容从哪来**：用户绑定的**本地文件夹**或 **GitLab** 仓库；应用目录只保存会话、设置与索引。
+- **数据目录**：`%APPDATA%\KnowMe\`（不会自动迁移旧版数据）。
+- **历史名**：仓库/Skill 里可能仍出现 `sticky-notes`、`sticky-agent-memory` 等标识，那是技术遗产，**不得**当作产品叙事或 UI 文案。
 
 ## 仓库布局
 
 | 路径 | 内容 |
 |------|------|
-| `src/` | Electron 主进程、预加载、便签 UI |
+| `src/` | Electron 主进程、预加载、工作台与渲染层 |
+| `docs/architecture.md` | 运行时分层与文件预算（人读主文档） |
 | `tests/` | 冒烟测试（`npm test`） |
 | `scripts/` | lint 等工具脚本 |
 | `.cursor/` | Rules、Skills、Commands、Hooks、Harness、Agents |
@@ -16,7 +24,7 @@
 
 ## 团队使命
 
-以 **制作人 → 开发 → 测试** 三角色协作，按 OpenSpec + ReACT 持续演进 KnowMe 桌面便签产品。
+以 **制作人 → 开发 → 测试** 三角色协作，按 OpenSpec + ReACT 持续演进 KnowMe 知识工作台与工作伙伴体验。
 
 ## 角色矩阵
 
@@ -31,7 +39,7 @@
 ## 知识库与自我进化
 
 > **边界**：以下为 **智能体仓库开发基建**（`brain/`、Hook、`npm run kb:*`）。  
-> **产品运行时**知识库与记忆在 `%APPDATA%\KnowMe\knowledge\` 与 `memory\`，见 `src/lib/product-*.js`、设置页「知识库与记忆」。
+> **产品运行时**知识库与记忆在 `%APPDATA%\KnowMe\knowledge\` 与 `memory\`，见 `src/lib/product-*.ts`、设置页「知识库与记忆」。
 
 基于 [Karpathy LLM Wiki](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f) + [OKF v0.1](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)：
 
@@ -51,7 +59,7 @@
 
 ### 个人会话记忆（Hook 自动）
 
-Skill：`sticky-agent-memory` — 存储在 `%LOCALAPPDATA%\knowme\memory\`（不入 git）
+Skill：`sticky-agent-memory`（开发侧本地会话记忆，与产品便签无关）— 存储在 `%LOCALAPPDATA%\knowme\memory\`（不入 git）
 
 | 能力 | 说明 |
 |------|------|
@@ -67,6 +75,17 @@ STICKY_MEMORY=0      # 关闭 Hook 记忆
 个人记忆 → 用户确认 → `brain/knowledge/`（OKF）→ `kb:export` 分享
 
 Story 完成后 SHOULD 写 `brain/memory/working/<change>-retro.md` 并 `/kb-ingest` 沉淀。
+
+## 本地运行（基建）
+
+| 命令 | 作用 |
+|------|------|
+| `npm start` | 清残留 → Vite 热更 → Electron `--dev`。再跑一次即重启。改界面保存即更新，**不要**为看 UI 而 `renderer:build` |
+| `npm run start:dist` | 清残留后加载 `dist/renderer`（核对发行包） |
+| `npm run renderer:build` | 仅出包或核对 dist 时编渲染产物 |
+| `npm run kill` | 只清 KnowMe / Electron / :5173 |
+
+仓库若以 junction 打开（`knowme` → `sticky-notes`），启动脚本会 `chdir` 真实路径，避免 Vite 预构建崩溃。关窗口后 `npm start` 以 0 退出。
 
 ## 工作流
 

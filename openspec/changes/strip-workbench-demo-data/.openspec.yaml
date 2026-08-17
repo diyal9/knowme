@@ -1,0 +1,5 @@
+schema: spec-driven
+id: strip-workbench-demo-data
+title: 工作台去掉 Demo/测试数据，改用正式供给
+status: active
+created: 2026-08-16
