@@ -33,7 +33,7 @@
 | 代码 / 模块 / 目录 / IPC | `fabric-*`、`knowledge-*`、`knowledge-os`、channel 名 | ❌ 不改 |
 | 英文 | 对外 Knowledge Web；内部技术 Fabric | — |
 
-**改名边界**：仅改**顶层**（左侧菜单标签、知识中心整体定位语）为「知识网」；**不改**个体库用词、AI 提示词中泛指/个体的"知识库"、专有名词与代码标识。落地见 change `rename-knowledge-menu-to-web`。
+**改名边界**：仅改**顶层**（左侧菜单标签、知识中心整体定位语）为「知识网」；**不改**个体库用词、AI 提示词中泛指/个体的"知识库"、专有名词与代码标识。落地见工作台顶栏「知识网」文案（原 change `rename-knowledge-menu-to-web` 已从 archive 删除）。
 
 ---
 

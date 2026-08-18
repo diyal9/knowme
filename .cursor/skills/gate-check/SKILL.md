@@ -16,12 +16,13 @@ description: >-
 ### 硬项 [BLOCKING]
 
 ```bash
-npm test
-npm run lint
-npm run test:renderer
+npm run check
+# 等价：npm test && npm run lint && npm run test:renderer && npm run typecheck:renderer
 ```
 
 任一项失败 → **BLOCKING**，不得 `/story-done`。
+
+软项只核 **当前 change**（`--change` 或 `OPENSPEC_CHANGE`）。全量缺口用 `npm run openspec:health`。
 
 ### 软项 [ADVISORY]
 
@@ -46,6 +47,8 @@ npm run test:renderer
 |--------|------|------|------|
 | npm test | 硬 | PASS/FAIL | ... |
 | npm run lint | 硬 | PASS/FAIL | ... |
+| npm run test:renderer | 硬 | PASS/FAIL | ... |
+| npm run typecheck:renderer | 硬 | PASS/FAIL | ... |
 | qa-plan + Smoke Scope | 软 | PASS/WARN | path |
 | code-review | 软 | PASS/WARN | path |
 

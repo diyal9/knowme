@@ -20,7 +20,7 @@
 |----|------|------------|------|
 | S-rail | 侧栏 Rail | 文件展开、助理、工作台、专家库、管线、知识网、设置；active / 图标 / 字号 | 有 |
 | S-title | 顶栏品牌 | 拖拽区、BrandMark | 有 |
-| S-files | 文件中心 | 源切换、刷新、树、搜索、新建、折叠、右键、外链、分屏、版本、飞书链接菜单 | 薄（新建/折叠/打开源/读预览已接；分屏/版本 disabled 诚实降级，非基线编辑器） |
+| S-files | 文件中心 | 源切换、刷新、树、搜索、新建、折叠、右键、外链、分屏、版本、飞书链接菜单 | 薄（新建/折叠/打开源/读预览/只读分屏已接；**版本对比 disabled 退役**，非基线双编辑器） |
 | S-drawer | 通用抽屉 | backdrop、标题、surface tabs、关闭 | 有 |
 | S-ctx | 右键菜单 | `#ctxMenu` | 有 |
 | S-toast | 页内 toast | `#toastWrap` | 有 |
@@ -31,14 +31,14 @@
 | ID | 界面 | 交互 / 动作 | 现状 |
 |----|------|-------------|------|
 | WB-tabs | 模式 Tab | 专家协作 / 工作流 / 管线服务 | 有 |
-| WB-search | 顶栏搜索 | 搜工作流 | 有（货架 shelf 面显示；placeholder 对齐；无全站 IPC） |
+| WB-search | 顶栏搜索 | 搜工作流 | 有（货架/管理/TaskHome 客户端过滤；placeholder 对齐 f6ad048） |
 | WB-taskhome | 专家协作 | 快捷网格、最近任务、新建、进入专家任务房 | 薄（`wb-task-quick-*` + `ExpertAvatarMark` + version/badge 已对齐 f6ad048） |
 | WB-expert-room | 专家任务房 | 标题/状态/对话体、返回 | 薄（`wb-expert-task-room` + `wb-side-stack` 侧栏结构已对齐；管理面板交互仍简） |
 | WB-shelf | 工作流货架 | 网格/列表切换、卡片徽章、开始、管理、最近、锁定态、空态 | 薄（React DOM/class 已对齐 f6ad048 `workbench-shelf.css`；图标经 `StickyIcons`；最近运行有预览/更多） |
 | WB-wf-manage | 管理工作流 | 列表、新建、删除确认、返回、进 Studio | 有（删除经 `confirm-modal` 确认后 archive） |
 | WB-manage | 管线服务首页 | 工作模式列表、创建任务文案、任务轨搜索 | 薄（`wb-daemon-compose-*` + linkbar/filters 已对齐 f6ad048；compose 提交/材料 IPC 仍简） |
 | WB-auto-page | 自动化页 | 模板、新建、列表、立即跑 | 薄（独立页已接；模板依赖 IPC 返回） |
-| WB-auto-modal | 自动化编辑弹层 | 保存/取消、飞书目标 | 有（schedule daily/interval/once、connector、permissionMode、管线 select + 飞书推送；无 cron 表达式） |
+| WB-auto-modal | 自动化编辑弹层 | 保存/取消、飞书目标 | 有（schedule daily/interval/once/**cron**、connector、permissionMode、管线 select + 飞书推送） |
 | WB-daemon-review | 管线详情/审核 | 身份、工作流名、Tab、刷新、日志 | 有（Run live/done 内 `wb-daemon-review` 五步 Tab） |
 | WB-studio | Studio | 组件库、画布拖拽平移、四向端口连线、工具条、标题、inspector 表单、保存脏标记、右键、返回来源（货架 vs 管理） | 有（图标工具栏/轻量步骤/专家选择器/滚轮缩放/检查流程；IO 入出参；knowledge provider） |
 | WB-run | 任务房间 | 顶栏返回、目标/状态/进度、图、专家列、产物、过程日志、HITL、再跑、trace | 有（`wbRunAgents`/`wbRunGraph`/daemon-review 分区已接） |

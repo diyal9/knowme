@@ -17,5 +17,12 @@ These are **renderer chrome evidence**, not a substitute for `npm start` Electro
 | `react-settings-*.png` | — |
 | `react-memory.png` | — |
 | `react-log-viewer.png` | — |
+| `electron-workbench-search.png` | Electron 冒烟（Vite dev + `--dev`） |
+| `electron-studio.png` | — |
+| `electron-automation-cron.png` | — |
+| `electron-hub-add.png` | — |
+| `electron-files.png` | — |
 
-复采：`npm run renderer:build && node scripts/capture-restore-ui-parity.js`
+复采（静态 React）：`npm run renderer:build && node scripts/capture-restore-ui-parity.js`
+
+Electron Defer 收口：`node openspec/changes/archive/2026-08-18-restore-game-studio-ui-parity/evidence/defer-closeout-electron-smoke.js`

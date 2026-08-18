@@ -29,12 +29,23 @@ function exists(p) {
   return fs.existsSync(p);
 }
 
+function clip(text, max = 1200) {
+  const s = String(text || '').trim();
+  return s.length > max ? `${s.slice(0, max)}\n…(truncated)` : s;
+}
+
+function resolveGateChange(explicit) {
+  if (explicit) return explicit;
+  const env = String(process.env.OPENSPEC_CHANGE || '').trim();
+  return env || null;
+}
+
 function run(cmd, args, opts = {}) {
   const r = spawnSync(cmd, args, {
     cwd: ROOT,
     encoding: 'utf8',
     shell: process.platform === 'win32',
-    timeout: opts.timeout || 120000,
+    timeout: opts.timeout || 180000,
     env: { ...process.env, FORCE_COLOR: '0' },
   });
   return {
@@ -121,7 +132,7 @@ function buildGateReport(changeName) {
     id: 'npm-test',
     level: 'blocking',
     ok: test.ok,
-    detail: test.ok ? 'pass' : (test.stderr || test.stdout || `exit ${test.status}`),
+    detail: test.ok ? 'pass' : clip(test.stderr || test.stdout || `exit ${test.status}`),
   });
 
   const lint = npmScript('lint');
@@ -129,7 +140,7 @@ function buildGateReport(changeName) {
     id: 'npm-lint',
     level: 'blocking',
     ok: lint.ok,
-    detail: lint.ok ? 'pass' : (lint.stderr || lint.stdout || `exit ${lint.status}`),
+    detail: lint.ok ? 'pass' : clip(lint.stderr || lint.stdout || `exit ${lint.status}`),
   });
 
   const renderer = npmScript('test:renderer');
@@ -137,7 +148,15 @@ function buildGateReport(changeName) {
     id: 'test-renderer',
     level: 'blocking',
     ok: renderer.ok,
-    detail: renderer.ok ? 'pass' : (renderer.stderr || renderer.stdout || `exit ${renderer.status}`),
+    detail: renderer.ok ? 'pass' : clip(renderer.stderr || renderer.stdout || `exit ${renderer.status}`),
+  });
+
+  const rendererTypes = npmScript('typecheck:renderer');
+  hard.push({
+    id: 'typecheck-renderer',
+    level: 'blocking',
+    ok: rendererTypes.ok,
+    detail: rendererTypes.ok ? 'pass' : clip(rendererTypes.stderr || rendererTypes.stdout || `exit ${rendererTypes.status}`),
   });
 
   const libTypes = npmScript('typecheck:lib');
@@ -145,15 +164,26 @@ function buildGateReport(changeName) {
     id: 'typecheck-lib',
     level: 'blocking',
     ok: libTypes.ok,
-    detail: libTypes.ok ? 'pass' : (libTypes.stderr || libTypes.stdout || `exit ${libTypes.status}`),
+    detail: libTypes.ok ? 'pass' : clip(libTypes.stderr || libTypes.stdout || `exit ${libTypes.status}`),
   });
 
   const soft = [];
-  const changes = changeName ? [changeName] : listActiveChanges();
-  for (const c of changes) {
-    for (const issue of checkSoftArtifacts(c)) {
-      soft.push({ ...issue, change: c });
+  const scoped = resolveGateChange(changeName);
+  const allActive = listActiveChanges();
+  if (scoped) {
+    for (const issue of checkSoftArtifacts(scoped)) {
+      soft.push({ ...issue, change: scoped });
     }
+  } else {
+    const missingQa = allActive.filter((c) => checkSoftArtifacts(c).some((i) => i.id === 'QA-PLAN-MISSING' || i.id === 'SMOKE-SCOPE-EMPTY'));
+    const missingCr = allActive.filter((c) => checkSoftArtifacts(c).some((i) => i.id === 'CODE-REVIEW-MISSING'));
+    soft.push({
+      id: 'ACTIVE-CHANGE-SUMMARY',
+      level: 'advisory',
+      change: '*',
+      path: 'openspec/changes',
+      detail: `${allActive.length} active; missing qa-plan/smoke=${missingQa.length}; missing code-review=${missingCr.length}. Pass --change <name> or OPENSPEC_CHANGE.`,
+    });
   }
 
   const blockingFailed = hard.some((h) => !h.ok);
@@ -161,6 +191,7 @@ function buildGateReport(changeName) {
     gate: 'Story 完成门禁',
     ok: !blockingFailed,
     blocking: blockingFailed,
+    change: scoped,
     hard,
     soft,
     evidence: {
@@ -240,9 +271,10 @@ function buildDoctorReport() {
     advisories,
     fixes,
     hints: [
-      'Read AGENTS.md at session start',
+      'Run: npm run check   # test + lint + test:renderer + typecheck:renderer',
       'Run: node .cursor/scripts/harness.js preflight --json',
-      'Before story-done: node .cursor/scripts/harness.js gate --json',
+      'Before story-done: node .cursor/scripts/harness.js gate --json --change <name>',
+      'OpenSpec health: npm run openspec:health',
       'Optional: npm run daemon:docs-check / npm run typecheck (advisory)',
     ],
   };
@@ -259,7 +291,7 @@ function output(data, json) {
         lines.push(`  [${h.level}] ${h.id}: ${h.ok ? 'PASS' : 'FAIL'} — ${h.detail}`);
       }
       for (const s of data.soft || []) {
-        lines.push(`  [${s.level}] ${s.id} (${s.change}): WARN`);
+        lines.push(`  [${s.level}] ${s.id} (${s.change}): ${s.detail || 'WARN'}`);
       }
     } else if (data.check) {
       lines.push(`Doctor: ${data.ok ? 'OK' : 'NEEDS ATTENTION'}`);

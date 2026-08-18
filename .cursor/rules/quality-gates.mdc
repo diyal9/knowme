@@ -17,6 +17,7 @@ alwaysApply: true
 |------|--------|-----------|
 | 硬 | 单元/集成测试通过 | `npm test` |
 | 硬 | Lint 无 error（含架构硬顶 2000 行/禁止项；1200 行为告警） | `npm run lint` |
+| 硬 | 渲染层测试 | `npm run test:renderer` |
 | 硬 | 渲染层类型检查 | `npm run typecheck:renderer` |
 | 软 | qa-plan 存在且 Smoke Scope 已填 | `openspec/changes/<name>/qa-plan.md` |
 | 软 | code-review 已完成 | `openspec/changes/<name>/code-review.md` |
@@ -36,4 +37,4 @@ alwaysApply: true
 | 正式测试 | 测试接入门禁 | 制作人验收通过后 | 测试 |
 | 归档 | Story 完成门禁 | `/story-done` | 全员 |
 
-执行 `/gate-check` 可自动跑硬项并核对软项清单。
+执行 `/gate-check` 或 `npm run check` 可自动跑硬项。软项用 `npm run harness:gate -- --change <name>`。

@@ -97,22 +97,24 @@ OpenSpec 命令：`/opsx:explore` `/opsx:propose` `/opsx:apply` `/opsx:sync` `/o
 ## Harness（环境 + 门禁）
 
 ```bash
-node .cursor/scripts/harness.js preflight --json   # 会话前（<1s）
-node .cursor/scripts/harness.js check --json       # 只读健康检查
-node .cursor/scripts/harness.js gate --json        # Story 完成硬门禁
-node .cursor/scripts/harness.js doctor --json      # 诊断 + 修复建议
+npm run check                                          # 开发自测硬项一键：test + lint + test:renderer + typecheck:renderer
+npm run check:quick                                    # lint + test:renderer
+npm run openspec:health                                # 活跃 change 软项缺口
+node .cursor/scripts/harness.js preflight --json       # 会话前（<1s）
+node .cursor/scripts/harness.js gate --json --change <name>
+# 或 OPENSPEC_CHANGE=<name> npm run harness:gate
 ```
 
-npm 别名：`npm run harness:preflight` / `harness:check` / `harness:gate`
+未指定 `--change` 时，gate 软项只输出活跃 change **汇总**，不刷 40+ 条 WARN。
 
 ## 质量门禁
 
 | 门禁 | 触发 | 硬/软 |
 |------|------|-------|
-| 开发自测 | tasks 完成 | 硬：test + lint |
+| 开发自测 | tasks 完成 | 硬：`npm run check` |
 | 制作人验收 | 自测通过 | acceptance.md |
 | 测试接入 | 验收通过 | test-report.md |
-| Story 完成 | `/story-done` | 硬：test/lint；软：qa-plan、code-review |
+| Story 完成 | `/story-done` | 硬：check；软：qa-plan、code-review（当前 change） |
 
 详见 `.cursor/rules/quality-gates.mdc`
 

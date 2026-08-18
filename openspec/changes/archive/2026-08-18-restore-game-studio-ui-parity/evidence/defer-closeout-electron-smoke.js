@@ -1,20 +1,23 @@
 #!/usr/bin/env node
 /**
  * Defer 收口 Electron smoke：Studio / Hub 添加 / Cron 自动化 / 文件中心 / 工作台搜索。
+ * 走 Vite dev + Electron --dev（dist file:// 在 Playwright 下 React 可能未挂载）。
  * 不打真实 LLM；原生文件对话框不点（会卡住）。
  */
 'use strict'
 
 const fs = require('fs')
+const http = require('http')
 const os = require('os')
 const path = require('path')
-const { execFileSync } = require('child_process')
+const { spawn, execFileSync } = require('child_process')
 const { _electron: electron } = require('playwright')
 
 const ROOT = path.resolve(__dirname, '../../../../..')
 const SHOTS = path.join(__dirname, 'screenshots', 'electron')
 const REACT = path.join(__dirname, 'screenshots', 'react')
 const REPORT = path.join(__dirname, 'defer-closeout-electron-smoke.json')
+const VITE_URL = String(process.env.KNOWME_VITE_URL || 'http://127.0.0.1:5173').replace(/\/$/, '')
 
 function killElectron() {
   if (process.platform !== 'win32') return
@@ -25,17 +28,68 @@ function killElectron() {
   }
 }
 
+function waitForHttp(url, timeoutMs = 45000) {
+  const started = Date.now()
+  return new Promise((resolve, reject) => {
+    const ping = () => {
+      const req = http.get(url, (res) => {
+        res.resume()
+        resolve()
+      })
+      req.on('error', () => {
+        if (Date.now() - started > timeoutMs) reject(new Error(`等待 Vite 超时：${url}`))
+        else setTimeout(ping, 250)
+      })
+    }
+    ping()
+  })
+}
+
+function startViteDev() {
+  if (process.env.KNOWME_SMOKE_SKIP_VITE === '1') return null
+  const child = spawn(process.execPath, [path.join(ROOT, 'node_modules', 'vite', 'bin', 'vite.js')], {
+    cwd: ROOT,
+    stdio: 'ignore',
+    env: process.env,
+  })
+  return child
+}
+
 async function shot(window, name) {
   const file = `${name}.png`
-  await window.screenshot({ path: path.join(SHOTS, file), fullPage: false })
-  fs.copyFileSync(path.join(SHOTS, file), path.join(REACT, `electron-${file}`))
+  const target = path.join(SHOTS, file)
+  try { fs.unlinkSync(target) } catch { /* none */ }
+  await window.screenshot({ path: target, fullPage: false })
+  fs.copyFileSync(target, path.join(REACT, `electron-${file}`))
 }
 
 async function waitPending(window) {
   const pending = window.locator('[data-testid="km-surface-pending"]')
   if (await pending.count()) {
-    await pending.waitFor({ state: 'hidden', timeout: 20000 }).catch(() => null)
+    await pending.waitFor({ state: 'hidden', timeout: 30000 }).catch(() => null)
   }
+}
+
+async function openStudio(window) {
+  await window.locator('[data-wb-mode="workflows"]').click()
+  await window.waitForTimeout(1200)
+  await waitPending(window)
+  const shelfCreate = window.locator('[data-testid="shelf-create-workflow"]')
+  if (await shelfCreate.isVisible().catch(() => false)) {
+    await shelfCreate.click()
+  } else {
+    await window.locator('#wbShelfManage').click()
+    await window.waitForTimeout(1000)
+    await waitPending(window)
+    await window.locator('[data-testid="studio-create-workflow"]').click()
+  }
+  await window.waitForTimeout(1500)
+  await waitPending(window)
+  const studio = window.locator('[data-testid="studio-surface"]')
+  await studio.waitFor({ state: 'visible', timeout: 45000 })
+  const palette = window.locator('[data-testid="studio-palette"]')
+  await palette.waitFor({ state: 'visible', timeout: 15000 })
+  return { studio, palette }
 }
 
 async function main() {
@@ -44,10 +98,17 @@ async function main() {
   killElectron()
   await new Promise((r) => setTimeout(r, 800))
 
+  const vite = startViteDev()
+  if (vite) {
+    process.stdout.write(`[smoke] 等待 Vite ${VITE_URL}/workspace/ …\n`)
+    await waitForHttp(`${VITE_URL}/workspace/`)
+  }
+
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-defer-smoke-'))
   const report = {
     at: new Date().toISOString(),
     ok: false,
+    mode: vite ? 'vite-dev' : 'dist',
     userDataDir,
     consoleErrors: [],
     checks: [],
@@ -56,12 +117,13 @@ async function main() {
   const app = await electron.launch({
     cwd: ROOT,
     executablePath: require('electron'),
-    args: ['.', `--user-data-dir=${userDataDir}`],
+    args: ['.', '--dev', `--user-data-dir=${userDataDir}`],
     env: {
       ...process.env,
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       KNOWME_TEST_SEAM: '1',
       KNOWME_TEST_USER_DATA_DIR: userDataDir,
+      KNOWME_VITE_URL: VITE_URL,
     },
     timeout: 120000,
   })
@@ -76,8 +138,8 @@ async function main() {
       }
     })
     await window.waitForLoadState('domcontentloaded', { timeout: 90000 })
-    await window.locator('#appShell, #btnRailAi').first().waitFor({ state: 'visible', timeout: 45000 })
-    await window.waitForTimeout(1800)
+    await window.locator('#appShell').waitFor({ state: 'visible', timeout: 60000 })
+    await window.waitForTimeout(1500)
 
     await window.locator('#btnRailWorkbench').click()
     await window.waitForTimeout(1600)
@@ -89,29 +151,16 @@ async function main() {
     report.checks.push({ id: 'wb-search-visible-on-taskhome', ok: searchVisible })
     await shot(window, 'workbench-search')
 
-    await window.locator('[data-wb-mode="workflows"]').click()
-    await window.waitForTimeout(1200)
-    await waitPending(window)
-    const manageWf = window.locator('#wbShelfManage')
-    await manageWf.waitFor({ state: 'visible', timeout: 15000 })
-    await manageWf.click()
-    await window.waitForTimeout(1000)
-    await waitPending(window)
-    const createWf = window.locator('[data-testid="studio-create-workflow"]')
-    await createWf.waitFor({ state: 'visible', timeout: 15000 })
-    await createWf.click()
-    await window.waitForTimeout(1500)
-    await waitPending(window)
-    const studio = window.locator('[data-testid="studio-surface"]')
-    await studio.waitFor({ state: 'visible', timeout: 20000 })
-    const palette = window.locator('[data-testid="studio-palette"]')
+    const { studio, palette } = await openStudio(window)
     report.checks.push({
       id: 'studio-surface',
-      ok: await studio.isVisible() && (await palette.count()) > 0,
+      ok: (await studio.isVisible()) && (await palette.count()) > 0,
     })
     await shot(window, 'studio')
     const leave = window.locator('[data-testid="studio-leave"]')
-    if (await leave.isVisible().catch(() => false)) await leave.click()
+    if (await leave.isVisible().catch(() => false)) {
+      await leave.click({ force: true }).catch(() => null)
+    }
     await window.waitForTimeout(600)
     const discard = window.locator('[data-leave-choice="discard"]')
     if (await discard.count()) await discard.click().catch(() => null)
@@ -141,7 +190,11 @@ async function main() {
     await waitPending(window)
     const hub = window.locator('[data-testid="capability-hub-surface"]')
     await hub.waitFor({ state: 'visible', timeout: 20000 })
-    await window.locator('#hubBtnAdd').click()
+    await window.getByRole('tab', { name: '技能' }).click()
+    await window.waitForTimeout(400)
+    const addBtn = window.locator('#hubBtnAdd').or(window.getByRole('button', { name: '添加能力' }))
+    await addBtn.first().waitFor({ state: 'visible', timeout: 15000 })
+    await addBtn.first().click()
     const addDlg = window.locator('[data-testid="hub-add-dialog"]')
     await addDlg.waitFor({ state: 'visible', timeout: 10000 })
     report.checks.push({
@@ -181,6 +234,7 @@ async function main() {
     if (!report.ok) process.exitCode = 1
   } finally {
     await app.close().catch(() => null)
+    if (vite && !vite.killed) vite.kill()
   }
 }
 

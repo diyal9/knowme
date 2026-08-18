@@ -1,0 +1,37 @@
+{
+  "at": "2026-08-18T07:42:40.877Z",
+  "ok": true,
+  "mode": "vite-dev",
+  "userDataDir": "D:\\USERCA~1\\Temp\\knowme-defer-smoke-XjQJPz",
+  "consoleErrors": [],
+  "checks": [
+    {
+      "id": "wb-search-visible-on-taskhome",
+      "ok": true
+    },
+    {
+      "id": "studio-surface",
+      "ok": true
+    },
+    {
+      "id": "automation-cron",
+      "ok": true
+    },
+    {
+      "id": "hub-add-dialog",
+      "ok": true
+    },
+    {
+      "id": "files-pane",
+      "ok": true
+    },
+    {
+      "id": "files-split-or-empty",
+      "ok": true
+    },
+    {
+      "id": "files-version-retired",
+      "ok": true
+    }
+  ]
+}

@@ -60,7 +60,8 @@
 - [x] 8.3 **WB-studio**：节点 `#ctxMenu` 删除；离开 Studio 改 `confirm-modal`（非 `window.confirm`）
 - [x] 8.4 **WB-ws / WB-modals**：`WorkspaceTreeModal`（`wb-ws-mask`）；Daemon review 顶栏「代码工作区」入口
 - [x] 8.5 **H-add / H-expert-dlg**：`hub-dialog-mask` + 五 Tab 添加能力 + 自建专家 foot
-- [ ] 8.6 **仍薄（未在本轮签字 1:1）**：A-tabs 右键、H-picker、Studio palette 密度、WB-search 全量、Electron 真机像素对照
+- [x] 8.6 **Defer 收口**：WB-search 全量、cron、只读分屏、进程动画；Electron 冒烟 PASS（`defer-closeout-electron-smoke.js`）
+- [ ] 8.6 **仍薄 / 未 1:1**：A-tabs 右键、Studio palette 密度；**不宣称** f6ad048 像素对照
 
 ## 9. Wave 9 — FAB attention / 自动化飞书 / 助理核心 / 文件降级 / 知识网 IO（2026-08-15）
 
@@ -70,7 +71,7 @@
 - [x] 9.4 **S-files**：点击文件 `sourcesReadFile` 预览；分屏/版本 **disabled 诚实降级**（架构已退役独立编辑器）
 - [x] 9.5 **K-io**：`loadKnowledgeIo` → `fabricGraph` + `knowledgeStewardTaskList`；知识网侧栏 Fabric 统计 + Steward 任务
 - [x] 9.6 门禁：`typecheck:renderer` / `test:renderer`(89) / `npm test`(1562) / `lint` 全绿；`store-workbench` 拆 helper ≤400 行
-- [ ] 9.7 **仍差（诚实）**：S-files 分屏/版本非基线编辑器；Electron 真机截图未重跑
+- [x] 9.7 **Defer 收口**：只读分屏预览；版本对比仍退役；Electron 冒烟截图 `evidence/screenshots/react/electron-*.png`
 
 ## 10. Wave 10 — 自动化全字段 / H-picker / A-tabs ctx / A-stream feed / Studio 密度（2026-08-15）
 
@@ -80,7 +81,8 @@
 - [x] 10.4 **A-tabs**：`AssistantSessionTabs` 对齐 f6ad048 tab-ctx（管理/复制/Pin/分叉/关闭左中右 + 图标）
 - [x] 10.5 **A-stream**：`AgentDaemonProcessFeed` 多行折叠日志（`agent-daemon-process-*` class）
 - [x] 10.6 门禁：`typecheck:renderer` / `test:renderer`(90) / `npm test`(1562) / `lint` 全绿；顺带统一 `RunState.agents` 类型
-- [ ] 10.7 **仍差（诚实）**：WB-auto 无 cron 表达式；A-stream 无基线 progress 子块/动画；A-tabs 新建仍在「更多」；WB-search 全量；Electron 真机像素未签字
+- [x] 10.7 **Defer 收口**：WB-auto cron；A-stream 过程卡进场动画；Electron 冒烟 PASS
+- [ ] 10.7 **仍差（诚实）**：A-stream 无基线 progress 子块 IPC；A-tabs 新建仍在「更多」；**不宣称**像素 1:1
 
 ## 11. Wave 11 — A-tabs 新建 / 助理菜单密度 / A-stream / WB-search / Studio 工作流（2026-08-15）
 
@@ -90,7 +92,8 @@
 - [x] 11.4 **WB-search**：placeholder/显示时机对齐 f6ad048（仅 shelf surface `hidden`）
 - [x] 11.5 **Studio**：inspector 补工作流 name/goal；llm 模型 select、tool/skill 下拉接 `llmModels`/`capabilityList`
 - [x] 11.6 门禁：`typecheck:renderer` / `test:renderer` / `npm test` / `lint`
-- [ ] 11.7 **仍差（诚实）**：Context Usage 无真实 token IPC；knowledge provider 列表非 Hub provider IPC；Studio 入出参 IO 未还原；Electron 真机像素未签字
+- [x] 11.7 **Defer 收口**：WB-search 全量过滤；Electron 冒烟 PASS
+- [ ] 11.7 **仍差（诚实）**：Context Usage 无真实 token IPC；knowledge provider 列表非 Hub provider IPC；Studio 入出参 IO 未完全还原；**不宣称**像素 1:1
 
 ## 14. Wave 14 — 知识网对齐 f6ad048（2026-08-16）
 
@@ -107,7 +110,7 @@
 - [x] 13.2 **WB-shelf**：去掉列表/网格切换；货架默认只露一行，「更多」展开；首页锁定滚动
 - [x] 13.3 **WB-run-input**：任务房间确认输入对齐基线（本次目标、执行方式、左侧不再重复长提示）
 - [x] 13.4 **WB-daemon**：管线首页改回「交付路径」+ 运行列表，去掉工作模式卡
-- [ ] 13.5 Electron 真机像素对照仍待制作人签字
+- [x] 13.5 Electron 真机冒烟 PASS（见 `evidence/producer-walkthrough.md`）；**非** f6ad048 像素 1:1 签字
 
 ## 12. Wave 12 — Studio IO / knowledge provider / Context Usage / 截图（2026-08-15）
 
@@ -125,12 +128,12 @@
 - [x] 15.3 画布：滚轮缩放、适应、空白平移、连线预览、Delete 删节点/边
 - [x] 15.4 轻量步骤列表；inspector 专家下拉绑定工作台专家
 - [x] 15.4b 无选中节点隐藏属性；专家属性补齐；检查流程 tips + 画布动画；轻量步骤含开始/结束
-- [ ] 15.5 Electron 真机像素对照仍待制作人签字
+- [x] 15.5 Electron 真机冒烟含 Studio 路径 PASS；**非**像素 1:1 签字
 
 ## 16. Wave 16 — 自建专家编辑器对齐重构前（2026-08-16）
 
 - [x] 16.1 还原头像单行横滑、AgenticType 分隔下拉与 ReAct/规划勾选
 - [x] 16.2 Skills/连接器/知识库改回摘要 chips + 二级选择器；空目录引导安装
 - [x] 16.3 必填校验、底栏已选摘要、保存写入 avatar/agentic/soul/sop/description
-- [ ] 16.4 Electron 真机像素对照仍待制作人签字
+- [x] 16.4 Electron 真机冒烟含 Hub 添加弹层 PASS；**非**像素 1:1 签字
 
