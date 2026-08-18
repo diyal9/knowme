@@ -1,0 +1,3 @@
+archived: 2026-08-18
+canonical: openspec/changes/archive/2026-08-18-harden-llm-call-and-prompt-assembly
+note: 实现已合入 v0.4.0 基线；活跃目录为残留 stub，勿再编辑

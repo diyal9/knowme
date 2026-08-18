@@ -33,6 +33,14 @@ test-results/
 playwright-report/
 scripts/tmp-shelf-debug*
 
+# Local lint/test dumps (never commit)
+/lint-output.txt
+/renderer-test-output.txt
+/focused-renderer-test.txt
+/test-output.txt
+/vitest-out.txt
+_inventory-out.json
+
 # KB export artifacts (regenerate via npm run kb:export)
 dist/kb-export/
 
