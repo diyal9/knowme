@@ -52,6 +52,31 @@ describe('release materials', () => {
     assert.ok(!/features\/\*\//.test(css), 'comment must not contain features/*/ which closes the block');
   });
 
+  it('renderer CSS minifies without syntax warnings', async () => {
+    const esbuild = require('esbuild');
+    const root = path.join(__dirname, '..', 'src', 'renderer');
+    const files = [];
+    const walk = (dir) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name.endsWith('.css')) files.push(full);
+      }
+    };
+    walk(root);
+    assert.ok(files.length > 0, 'expected renderer CSS files');
+    for (const file of files) {
+      const css = fs.readFileSync(file, 'utf8');
+      const result = await esbuild.transform(css, { loader: 'css', minify: true, logLevel: 'silent' });
+      const syntax = (result.warnings || []).filter((w) => {
+        const id = String(w.id || '');
+        const text = String(w.text || '');
+        return id === 'css-syntax-error' || text.includes('css-syntax-error') || /Expected identifier|Unexpected "/.test(text);
+      });
+      assert.equal(syntax.length, 0, `${path.relative(root, file)}: ${syntax.map((w) => w.text).join('; ')}`);
+    }
+  });
+
   it('release workflow runs test and lint', () => {
     const wf = fs.readFileSync(
       path.join(__dirname, '..', '.github', 'workflows', 'release.yml'),

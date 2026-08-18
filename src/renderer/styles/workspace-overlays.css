@@ -1,4 +1,4 @@
-/* FAB — 对齐重构前 workspace.html #km-fab-*（compact 日志图标 + 铃铛热区） */
+/* FAB：对齐重构前 workspace.html 的 km-fab compact 日志图标与铃铛热区。 */
 .km-fab-root {
   position: fixed;
   right: 6px;
@@ -296,6 +296,7 @@ html[data-ui-throttle="1"] * {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
+.files-preview-panel {
   margin-top: 10px;
   border: 1px solid var(--div);
   border-radius: 8px;
