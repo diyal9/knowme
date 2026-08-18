@@ -196,7 +196,43 @@ describe('run / pipeline review', () => {
     expect(screen.getByText('对话中')).toBeInTheDocument()
   })
 
-  it('streams workbench task dialogue onto the shared bubble timeline', async () => {
+  it('acks pipeline task-room text onto the shared bubble timeline without aiGenerate', async () => {
+    const generate = vi.fn(async () => ({ text: '任务答复', streamed: true }))
+    mockApi({ aiGenerate: generate })
+    useAppStore.setState({
+      run: pipelineRun({ phase: 'running', log: [], dialogueMessages: [] }),
+      workbenchDialogue: { composer: '你好', attachments: [] },
+    })
+    render(<AppShell />)
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => {
+      const messages = useAppStore.getState().run?.dialogueMessages || []
+      expect(messages.some((m) => m.role === 'user' && m.text === '你好')).toBe(true)
+      expect(messages.some((m) => m.role === 'assistant' && String(m.text).includes('已记下'))).toBe(true)
+    })
+    expect(generate).not.toHaveBeenCalled()
+    expect(useAppStore.getState().isGenerating).toBe(false)
+  })
+
+  it('does not leave pipeline bubbles streaming after an ack', async () => {
+    mockApi({
+      aiGenerate: async () => ({ text: '不应出现', streamed: true }),
+    })
+    useAppStore.setState({
+      run: pipelineRun({ phase: 'running', log: [], dialogueMessages: [] }),
+      workbenchDialogue: { composer: '停一下', attachments: [] },
+    })
+    render(<AppShell />)
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => {
+      const live = useAppStore.getState().run?.dialogueMessages.find((m) => m.role === 'assistant')
+      expect(live?.text).toMatch(/已记下/)
+      expect(live?.streaming).toBeFalsy()
+    })
+    expect(useAppStore.getState().isGenerating).toBe(false)
+  })
+
+  it('streams workflow task dialogue onto the shared bubble timeline', async () => {
     let emit: ((event: Record<string, unknown>) => void) | undefined
     const generate = vi.fn(async (payload: Record<string, unknown>) => {
       expect(String(payload.sessionId)).toMatch(/^wb-run-/)

@@ -19,11 +19,22 @@ describe('agent-context-usage', () => {
     expect(usage.barClass).toBe('')
     expect(usage.rows.some((row) => row.key === 'knowledge')).toBe(true)
     expect(usage.compacted).toBe(true)
+    expect(usage.source).toBe('session')
+    expect(usage.sourceLabel).toBe('会话用量')
+  })
+
+  it('marks estimate when only historyTokens', () => {
+    const usage = buildContextUsageViewModel(null, 32768, 5000)
+    expect(usage.source).toBe('estimate')
+    expect(usage.sourceLabel).toBe('估算')
+    expect(usage.used).toBe(5000)
   })
 
   it('returns empty rows before first turn', () => {
     const usage = buildContextUsageViewModel(null, 32768, 0)
     expect(usage.rows).toEqual([])
     expect(usage.used).toBe(0)
+    expect(usage.source).toBe('none')
+    expect(usage.sourceLabel).toBe('')
   })
 })

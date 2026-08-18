@@ -292,6 +292,9 @@ export interface KnowMeExtendedApi {
   capabilityPickLocalFolder?: () => Promise<{ ok?: boolean; path?: string }>
   capabilityPickZipFile?: () => Promise<{ ok?: boolean; path?: string }>
   capabilityPickCursorRepository?: () => Promise<{ ok?: boolean; path?: string }>
+  capabilityInstallPrecheck?: (payload: Record<string, unknown>) => Promise<unknown>
+  capabilityImportPrecheck?: (payload: Record<string, unknown>) => Promise<unknown>
+  capabilityScanCursorRepository?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityImportCursorRepository?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityEnable?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityDisable?: (payload: Record<string, unknown>) => Promise<unknown>

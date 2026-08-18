@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import '../../styles/capability-hub.css'
 import type { CapabilityKind } from '../../../shared/api'
 import {
   featuredHubItems,

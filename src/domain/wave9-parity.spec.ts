@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildConversationTopics } from './agent-topics'
+import { buildConversationTopics, estimateTopicOffset, layoutTopicRailMarks, resolveActiveTopicIndex } from './agent-topics'
 import { normalizeAttentionItem } from './attention'
 import { resolveTargetId, targetDisplayById } from './automation-push'
 
@@ -21,6 +21,28 @@ describe('agent topics', () => {
       { id: '5', role: 'user', text: '导出会议纪要给团队' },
     ])
     expect(topics.length).toBeGreaterThan(2)
+  })
+
+  it('maps topic offsets onto a fixed rail and resolves the active range', () => {
+    const ys = layoutTopicRailMarks([0, 500, 1000], 1000, 200, 12)
+    expect(ys[0]).toBeLessThan(ys[1]!)
+    expect(ys[1]).toBeLessThan(ys[2]!)
+    expect(ys[2]).toBeLessThanOrEqual(200)
+    const packed = layoutTopicRailMarks([0, 1, 2], 1000, 40, 12)
+    expect(packed[1]! - packed[0]!).toBeGreaterThanOrEqual(12)
+    expect(resolveActiveTopicIndex([0, 400, 800], 420)).toBe(1)
+    expect(estimateTopicOffset(10, 21, 1000)).toBe(500)
+  })
+
+  it('captures assistant preview after each topic user turn', () => {
+    const topics = buildConversationTopics([
+      { id: '1', role: 'user', text: '写一份完整的需求文档' },
+      { id: '2', role: 'assistant', text: '好的，我先梳理范围与里程碑' },
+      { id: '3', role: 'user', text: '补充测试范围与验收标准' },
+      { id: '4', role: 'assistant', text: '收到，我会列出测试矩阵' },
+    ])
+    expect(topics[0]?.preview).toContain('梳理范围')
+    expect(topics[1]?.preview).toContain('测试矩阵')
   })
 })
 

@@ -2,7 +2,10 @@
  * 管理工作流 / 自动化 / 管线面板。编辑带 package id；复制走 fork，不进空白草稿。
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import '../workbench/workbench-layout.css'
+import '../workbench/workbench-daemon.css'
 import { AUTOMATION_LIST_HINT, automationRunCapable } from '../../../domain/studio'
+import { filterByWorkbenchQuery } from '../../../domain/workbench-search'
 import { workbenchHomeExperts } from '../../../domain/workbench-home'
 import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
@@ -21,6 +24,7 @@ export function ManageSurface() {
   const hubItems = useAppStore((s) => s.hubItems)
   const modes = useAppStore((s) => s.modes)
   const automationJobs = useAppStore((s) => s.automationJobs)
+  const shelfQuery = useAppStore((s) => s.shelfQuery)
   const automationTemplates = useAppStore((s) => s.automationTemplates)
   const shelfCards = useAppStore((s) => s.shelfCards)
   const enterStudio = useAppStore((s) => s.enterStudio)
@@ -43,6 +47,15 @@ export function ManageSurface() {
 
   useKnowMeIcons(`${panel}:${automationJobs.length}`, surfaceRef)
 
+  const visibleJobs = useMemo(
+    () => filterByWorkbenchQuery(automationJobs.map((job) => ({
+      ...job,
+      id: job.id,
+      name: job.name,
+      scheduleLabel: job.scheduleLabel,
+    })), shelfQuery),
+    [automationJobs, shelfQuery],
+  )
   const mine = shelfCards.filter((card) => card.provenanceLabel === '我的')
   const expertNames = useMemo(() => {
     const map: Record<string, string> = {}
@@ -124,9 +137,9 @@ export function ManageSurface() {
             </div>
             <div className="wb-automation-hint" data-testid="manage-automation-hint">{AUTOMATION_LIST_HINT}</div>
             <div className="wb-automation-list" id="wbAutomationList" aria-label="自动化任务列表" data-testid="manage-automation-list">
-              {automationJobs.length === 0 ? (
-                <p className="empty" data-testid="manage-automation-empty">还没有自动化任务。</p>
-              ) : automationJobs.map((job) => {
+              {visibleJobs.length === 0 ? (
+                <p className="empty" data-testid="manage-automation-empty">{shelfQuery.trim() ? '没有匹配的自动化任务。' : '还没有自动化任务。'}</p>
+              ) : visibleJobs.map((job) => {
                 const runCapable = automationRunCapable(job)
                 return (
                   <article key={job.id} className="wb-automation-card" data-automation-id={job.id}>

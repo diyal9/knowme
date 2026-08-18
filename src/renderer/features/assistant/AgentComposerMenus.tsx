@@ -1,4 +1,4 @@
-import type { CapabilityItem } from '../../../shared/api'
+import type { AgentContextInfo, CapabilityItem } from '../../../shared/api'
 import { ASSISTANT_QUICK_COMMANDS } from '../../../domain/agent-quick-commands'
 import {
   buildContextUsageViewModel,
@@ -25,14 +25,7 @@ export function AgentModelMenu({
   presets: ModelPreset[]
   modelId: string
   onPick: (id: string) => void
-  contextInfo?: {
-    usedTokens?: number
-    contextWindow?: number
-    omittedTurns?: number
-    omittedMessages?: number
-    sectionUsage?: { key: string; usedTokens?: number }[]
-    sectionOmitted?: string[]
-  } | null
+  contextInfo?: AgentContextInfo | null
   historyTokens?: number
   fallbackLimit?: number
 }) {
@@ -85,11 +78,19 @@ export function AgentModelMenu({
           ))}
         </div>
         <aside className="agent-model-context" aria-label="Context Usage">
-          <div className="ctx2-title">Context Usage</div>
+          <div className="ctx2-title">
+            Context Usage
+            {usage.sourceLabel ? (
+              <span className="ctx2-source" data-testid="ctx-usage-source"> · {usage.sourceLabel}</span>
+            ) : null}
+          </div>
           {hasUsage ? (
             <>
               <div className="ctx2-sub">{Math.round(usage.ratio * 100)}% Full</div>
-              <div className="ctx2-total">{`~${formatTokenCount(usage.used)} / ${formatTokenCount(usage.limit)} Tokens`}</div>
+              <div className="ctx2-total">
+                {usage.source === 'estimate' ? '~' : ''}
+                {`${formatTokenCount(usage.used)} / ${formatTokenCount(usage.limit)} Tokens`}
+              </div>
               <div className={`ctx2-bar ${usage.barClass}`}>
                 <i style={{ width: `${Math.max(usage.ratio * 100, usage.ratio > 0 ? 2 : 0)}%` }} />
               </div>

@@ -89,6 +89,7 @@ describe('agent session helpers', () => {
   it('resolves default general tab label to 通用', () => {
     expect(resolveSessionTabLabel({ id: 's1', title: '新助手', agentId: 'general' })).toBe('通用')
     expect(resolveSessionTabLabel({ id: 's1', title: '新助手', displayTitle: '新助手' })).toBe('通用')
+    expect(resolveSessionTabLabel({ id: 's1', title: 'New Agent', agentId: 'general' })).toBe('通用')
     expect(resolveSessionTabLabel({ id: 's2', title: '项目跟进' })).toBe('项目跟进')
     expect(resolveSessionTabLabel({
       id: 's3',
@@ -102,6 +103,11 @@ describe('agent session helpers', () => {
 
   it('reads nested session payload and messages', () => {
     expect(parseSessionRecord({ ok: true, session: { id: 's1', title: '协作' } })?.title).toBe('协作')
+    expect(parseSessionRecord({
+      id: 's2',
+      title: '协作',
+      updatedAt: '2026-08-18T02:00:00.000Z',
+    })?.updatedAt).toBe('2026-08-18T02:00:00.000Z')
     expect(chatMessagesFromSession({
       session: { messages: [{ id: 'u1', role: 'user', text: 'hi' }] },
     }).map((m) => m.text)).toEqual(['hi'])

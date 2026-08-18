@@ -23,6 +23,7 @@ export function emptyRun(
       ? [`已打开工作流「${card.name}」`, '填写目标后开始运行']
       : [`已打开运行「${card.name}」`],
     gateNode: null,
+    clarifyNode: null,
     gateTitle: null,
     processLogsText: '',
     progressText: '',

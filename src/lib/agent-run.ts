@@ -59,7 +59,7 @@ function formatPlanChecklist(plan) {
     const evidence = item.evidence ? ` — ${item.evidence}` : ''
     return `${index + 1}. ${mark} ${item.title}${evidence}`
   })
-  return `【执行计划】\n${lines.join('\n')}`
+  return `To-dos ${normalized.items.length}\n${lines.join('\n')}`
 }
 
 function countPlanRemaining(plan) {

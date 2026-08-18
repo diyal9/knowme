@@ -1,3 +1,6 @@
+/**
+ * 任务首页新建弹层：选专家、目标、可选日程。不打开任务房对话。
+ */
 import { useEffect, useMemo, useState } from 'react'
 import type { CapabilityItem } from '../../../shared/api'
 import { ExpertAvatarMark } from '../expert/ExpertAvatarMark'

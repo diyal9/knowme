@@ -21,7 +21,8 @@ describe('agent-execution-timeline', () => {
       trace: seedPrepareTrace(),
     })
     expect(view?.rows[0].title).toBe('正在整理相关内容')
-    expect(view?.summaryTitle).toBe('执行进度')
+    expect(view?.summaryTitle).toBe('正在整理相关内容')
+    expect(view?.compact).toBe(true)
   })
 
   it('upserts v2 payload stages onto the assistant message', () => {
@@ -37,13 +38,22 @@ describe('agent-execution-timeline', () => {
     expect(view?.rows[0].hint).toBe('命中 8 条')
   })
 
+  it('copies plan.updated onto the assistant message', () => {
+    const next = applyAssistantStreamEvent(
+      { id: 'a1', role: 'assistant', text: '', streaming: true, thinking: true },
+      { type: 'plan.updated', plan: { items: [{ id: '1', title: '想', status: 'pending' }] } },
+    )
+    expect(next.plan?.items?.[0]?.title).toBe('想')
+    expect(next.thinking).toBe(false)
+  })
+
   it('accepts legacy flat stage events', () => {
     const next = applyAssistantStreamEvent(
       { id: 'a1', role: 'assistant', text: '', streaming: true, trace: [] },
       { type: 'stage', id: 'stage_generate', title: '正在组织回答', status: 'pending' },
     )
     expect(next.trace?.[0].id).toBe('stage_generate')
-    expect(buildExecutionTimelineView({ ...next, streaming: true })?.summaryTitle).toBe('执行进度')
+    expect(buildExecutionTimelineView({ ...next, streaming: true })?.summaryTitle).toBe('正在组织回答')
   })
 
   it('stamps first-token latency once text appears', () => {

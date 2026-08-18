@@ -230,7 +230,7 @@ describe('agent-suggestion', () => {
     const html = currentPage('workspace.html')
     const editorHtml = fs.readFileSync(path.join(__dirname, '..', 'src', 'editor-pane.html'), 'utf8')
     const noteHtml = fs.readFileSync(path.join(__dirname, '..', 'src', 'note.html'), 'utf8')
-    const ctx = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'ai-assistant-context.ts'), 'utf8')
+    const ctx = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'knowme-system-prompt.ts'), 'utf8')
     assert.ok(html.includes('lib/agent-suggestion.js'), 'loads suggestion lib')
     assert.ok(html.includes('lib/structured-choice.js'), 'loads structured choice component')
     assert.ok(html.includes('agent-suggest'), 'suggest styles')

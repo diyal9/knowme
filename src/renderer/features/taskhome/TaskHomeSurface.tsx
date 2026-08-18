@@ -1,4 +1,9 @@
+/**
+ * 工作台「任务」首页：快捷任务、最近任务、新建任务弹层。
+ * 不负责任务房内对话。
+ */
 import { useEffect, useMemo, useState, useRef } from 'react'
+import '../workbench/workbench-layout.css'
 import { expertHomeTasks } from '../../../domain/run-projection'
 import {
   previewNeedsToggle,
@@ -10,8 +15,9 @@ import {
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
 import { useKnowMeIcons } from '../../app/useKnowMeIcons'
-import { TaskComposerModal } from './TaskComposerModal'
+import { filterByWorkbenchQuery } from '../../../domain/workbench-search'
 import { TaskManageModal } from './TaskManageModal'
+import { TaskComposerModal } from './TaskComposerModal'
 import { TaskQuickCard } from './TaskQuickCard'
 import { TaskRecentCard } from './TaskRecentCard'
 import { WorkbenchListToggle } from '../workbench/WorkbenchListToggle'
@@ -27,6 +33,7 @@ export function TaskHomeSurface() {
     () => workbenchHomeExperts(hubItems, modes),
     [hubItems, modes],
   )
+  const shelfQuery = useAppStore((s) => s.shelfQuery)
   const setRoute = useAppStore((s) => s.setRoute)
   const showToast = useAppStore((s) => s.showToast)
   const openExpertRoom = useAppStore((s) => s.openExpertRoom)
@@ -36,10 +43,21 @@ export function TaskHomeSurface() {
   const reopenTaskRun = useAppStore((s) => s.reopenTaskRun)
   const openTaskManage = useAppStore((s) => s.openTaskManage)
   const expertRoom = useAppStore((s) => s.expertRoom)
-  const expertTasks = useMemo(() => expertHomeTasks(tasks), [tasks])
-  const visibleExperts = previewSlice(experts, quickExpanded, TASK_QUICK_PREVIEW)
+  const expertTasks = useMemo(() => {
+    const list = expertHomeTasks(tasks)
+    return filterByWorkbenchQuery(list.map((item) => ({
+      ...item,
+      id: String(item.id || ''),
+      name: String(item.title || ''),
+    })), shelfQuery)
+  }, [tasks, shelfQuery])
+  const filteredExperts = useMemo(
+    () => filterByWorkbenchQuery(experts.map((item) => ({ ...item, id: item.id, name: item.name })), shelfQuery),
+    [experts, shelfQuery],
+  )
+  const visibleExperts = previewSlice(filteredExperts, quickExpanded, TASK_QUICK_PREVIEW)
   const visibleRecent = previewSlice(expertTasks, recentExpanded, TASK_RECENT_PREVIEW)
-  const quickNeedsToggle = previewNeedsToggle(experts.length, TASK_QUICK_PREVIEW)
+  const quickNeedsToggle = previewNeedsToggle(filteredExperts.length, TASK_QUICK_PREVIEW)
   const recentNeedsToggle = previewNeedsToggle(expertTasks.length, TASK_RECENT_PREVIEW)
   const surfaceRef = useRef<HTMLDivElement>(null)
 

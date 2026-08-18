@@ -1,11 +1,31 @@
-import { lazy, Suspense, useEffect, useRef } from 'react'
+/**
+ * Workspace chrome: assistant is eager; other surfaces are lazy in production.
+ * Head chrome CSS is static; feature modules own their surface stylesheets.
+ */
+import { Suspense, useEffect, useRef } from 'react'
 import { studioReturnLabel } from '../../domain/rail'
 import { resolveWorkbenchTaskKind } from '../../domain/workbench-task-room'
 import { bindAttentionEvents } from './store-attention'
 import { BrandMark } from './BrandMark'
-import { ensureSurfaceCss } from './ensureSurfaceCss'
 import { Icon } from './Icon'
+import '../features/workbench/workbench-chrome.css'
+import { SurfacePending } from './lazySurface'
 import { SideRail } from './SideRail'
+import {
+  CapabilityHubSurface,
+  ExpertRoomSurface,
+  FilesPane,
+  KnowledgeSurface,
+  LinkPreviewSurface,
+  ManageSurface,
+  RunSurface,
+  SettingsSurface,
+  ShelfSurface,
+  StudioSurface,
+  TaskHomeSurface,
+  TaskRoomHost,
+  WorkflowRoomSurface,
+} from './surface-registry'
 import { useAppStore } from './store'
 import { useKnowMeIcons } from './useKnowMeIcons'
 import { AssistantPane } from '../features/assistant/AssistantPane'
@@ -13,30 +33,34 @@ import { StudioHeadNav } from '../features/workbench/StudioHeadNav'
 import { resolveWorkbenchTabMode, workbenchHeadTitle } from '../features/workbench/workbench-head'
 import { WorkspaceOverlays } from './WorkspaceOverlays'
 
-/** 默认路由助手保持同步；其余表面按需分包，减冷启动解析量。 */
-const ManageSurface = lazy(() => import('../features/manage/ManageSurface').then((m) => ({ default: m.ManageSurface })))
-const StudioSurface = lazy(() => import('../features/studio/StudioSurface').then((m) => ({ default: m.StudioSurface })))
-const ShelfSurface = lazy(() => import('../features/shelf/ShelfSurface').then((m) => ({ default: m.ShelfSurface })))
-const TaskHomeSurface = lazy(() => import('../features/taskhome/TaskHomeSurface').then((m) => ({ default: m.TaskHomeSurface })))
-const RunSurface = lazy(() => import('../features/run/RunSurface').then((m) => ({ default: m.RunSurface })))
-const FilesPane = lazy(() => import('../features/files/FilesPane').then((m) => ({ default: m.FilesPane })))
-const KnowledgeSurface = lazy(() => import('../features/knowledge/KnowledgeSurface').then((m) => ({ default: m.KnowledgeSurface })))
-const SettingsSurface = lazy(() => import('../features/settings/SettingsSurface').then((m) => ({ default: m.SettingsSurface })))
-const CapabilityHubSurface = lazy(() => import('../features/capability-hub/CapabilityHubSurface').then((m) => ({ default: m.CapabilityHubSurface })))
-const ExpertRoomSurface = lazy(() => import('../features/expert/ExpertRoomSurface').then((m) => ({ default: m.ExpertRoomSurface })))
-const TaskRoomHost = lazy(() => import('../features/task-dialogue/TaskRoomHost').then((m) => ({ default: m.TaskRoomHost })))
-const WorkflowRoomSurface = lazy(() => import('../features/workflow/WorkflowRoomSurface').then((m) => ({ default: m.WorkflowRoomSurface })))
-const LinkPreviewSurface = lazy(() => import('../features/link-preview/LinkPreviewSurface').then((m) => ({ default: m.LinkPreviewSurface })))
+/** Visible chrome copy; escapes keep CJK intact under Windows encoding tools. */
+const T = {
+  collab: '\u4e13\u5bb6\u534f\u4f5c',
+  workflow: '\u5de5\u4f5c\u6d41',
+  daemon: '\u7ba1\u7ebf\u670d\u52a1',
+  files: '\u6587\u4ef6\u4e2d\u5fc3',
+  workbench: '\u5de5\u4f5c\u53f0',
+  wbViews: '\u5de5\u4f5c\u53f0\u89c6\u56fe',
+  searchWf: '\u641c\u7d22\u5de5\u4f5c\u6d41',
+  searchPh: '\u641c\u7d22\u60f3\u8981\u7684\u7ed3\u679c',
+  reload: '\u5237\u65b0',
+  reloadWb: '\u5237\u65b0\u5de5\u4f5c\u53f0',
+  shelf: '\u5de5\u4f5c\u6d41\u8d27\u67b6',
+  automation: '\u81ea\u52a8\u5316\u4e2d\u5fc3',
+  manageWf: '\u7ba1\u7406\u5de5\u4f5c\u6d41',
+  studio: '\u642d\u5efa',
+  run: '\u8fd0\u884c',
+}
 
 const WB_TABS = [
-  { id: 'taskhome', mode: 'tasks', label: '专家协作' },
-  { id: 'shelf', mode: 'workflows', label: '工作流' },
-  { id: 'manage', mode: 'daemon', label: '管线服务' },
+  { id: 'taskhome', mode: 'tasks', label: T.collab },
+  { id: 'shelf', mode: 'workflows', label: T.workflow },
+  { id: 'manage', mode: 'daemon', label: T.daemon },
 ] as const
 
 export function AppShell() {
   const route = useAppStore((s) => s.route)
-  const surface = useAppStore((s) => s.workbenchSurface)
+  const surfaceId = useAppStore((s) => s.workbenchSurface)
   const filesOpen = useAppStore((s) => s.filesOpen)
   const hasExpertRoom = useAppStore((s) => !!s.expertRoom)
   const runLane = useAppStore((s) => s.run?.lane ?? null)
@@ -53,47 +77,30 @@ export function AppShell() {
   const linkPreview = useAppStore((s) => s.linkPreview)
   const linkFullscreen = useAppStore((s) => s.linkFullscreen)
   const shellRef = useRef<HTMLDivElement>(null)
-  useKnowMeIcons(route + surface + String(filesOpen) + String(!!linkPreview) + String(linkFullscreen), shellRef)
+  useKnowMeIcons(route + surfaceId + String(filesOpen) + String(!!linkPreview) + String(linkFullscreen), shellRef)
 
   useEffect(() => bindAttentionEvents(useAppStore.getState), [])
   useEffect(() => window.api?.onWorkspaceOpenSettings?.((tab) => {
     openSettingsSurface(tab)
   }), [openSettingsSurface])
 
-  // 大表 CSS 按面懒加载，避免助理首屏解析 workbench/hub/run 全量样式
-  useEffect(() => {
-    if (route === 'workbench' || route === 'automation') {
-      ensureSurfaceCss('workbench-layout', () => import('../features/workbench/workbench-layout.css'))
-    }
-    if (surface === 'shelf') {
-      ensureSurfaceCss('shelf', () => import('../features/shelf/shelf.css'))
-    }
-    if (surface === 'run') {
-      ensureSurfaceCss('console', () => import('../features/run/console.css'))
-    }
-    if (route === 'capabilities') {
-      ensureSurfaceCss('capability-hub', () => import('../styles/capability-hub.css'))
-    }
-    if (filesOpen || linkPreview) {
-      ensureSurfaceCss('secondary-dialog', () => import('../../secondary-dialog.css'))
-    }
-  }, [route, surface, filesOpen, linkPreview])
-
   useEffect(() => {
     if (!filesOpen) return
     void useAppStore.getState().loadFileCatalog?.()
   }, [filesOpen])
 
-  const isStudio = surface === 'studio'
-  const showModeTabs = route === 'workbench' && ['taskhome', 'shelf', 'manage'].includes(surface)
-  const activeTabMode = resolveWorkbenchTabMode(surface, managePanel)
+  const isStudio = surfaceId === 'studio'
+  const showModeTabs = route === 'workbench'
+    && managePanel !== 'automation'
+    && ['taskhome', 'shelf', 'manage'].includes(surfaceId)
+  const activeTabMode = resolveWorkbenchTabMode(surfaceId, managePanel)
   const backLabel = studioReturnLabel(studioReturnSurface)
-  const headTitle = workbenchHeadTitle(route, surface)
+  const headTitle = workbenchHeadTitle(route, surfaceId)
   const taskKind = resolveWorkbenchTaskKind({ expertRoom: hasExpertRoom, lane: runLane })
 
   const mode = route === 'workbench' ? 'workbench' : route === 'knowledge' ? 'knowledge' : route === 'capabilities' ? 'capabilities' : route === 'automation' ? 'automation' : route === 'settings' ? 'settings' : 'agent'
   const showWorkbench = route === 'workbench' || route === 'automation'
-  const taskRoomActive = route === 'workbench' && (surface === 'run' || hasExpertRoom)
+  const taskRoomActive = route === 'workbench' && (surfaceId === 'run' || hasExpertRoom)
   const appClass = [
     'app',
     `mode-${mode}`,
@@ -116,22 +123,22 @@ export function AppShell() {
         data-workbench-task-kind={taskRoomActive ? taskKind : undefined}
       >
         <SideRail />
-        <aside className="sidebar" id="sidebar" data-ui="obsidian-files" hidden={!filesOpen} aria-label="文件中心">
+        <aside className="sidebar" id="sidebar" data-ui="obsidian-files" hidden={!filesOpen} aria-label={T.files}>
           {filesOpen ? (
-            <Suspense fallback={null}>
+            <Suspense fallback={<SurfacePending />}>
               <FilesPane />
             </Suspense>
           ) : null}
         </aside>
         <main className="main">
           {route === 'assistant' ? <AssistantPane /> : null}
-          {route === 'assistant' ? (
-            <Suspense fallback={null}>
+          {route === 'assistant' && linkPreview ? (
+            <Suspense fallback={<SurfacePending />}>
               <LinkPreviewSurface />
             </Suspense>
           ) : null}
           {taskRoomActive ? (
-            <Suspense fallback={null}>
+            <Suspense fallback={<SurfacePending />}>
               <TaskRoomHost />
             </Suspense>
           ) : null}
@@ -141,10 +148,10 @@ export function AppShell() {
             hidden={!showWorkbench}
             data-surface={taskRoomActive ? 'run' : isStudio ? 'studio' : 'home'}
             data-layout={taskRoomActive ? 'task-room' : 'overview'}
-            aria-label="工作台"
+            aria-label={T.workbench}
           >
-            <header className="wb-head" id="wbHead" hidden={taskRoomActive || surface === 'run'}>
-              {!isStudio ? (
+            <header className="wb-head" id="wbHead" hidden={taskRoomActive || surfaceId === 'run'}>
+              {!isStudio && !showModeTabs ? (
                 <div className="wb-head-title">
                   <Icon name="workbench" />
                   <span id="wbHeadTitle">{headTitle}</span>
@@ -152,7 +159,7 @@ export function AppShell() {
                 </div>
               ) : null}
               {isStudio ? <StudioHeadNav /> : null}
-              <div className="wb-mode-tabs" id="wbModeTabs" role="tablist" aria-label="工作台视图" hidden={!showModeTabs}>
+              <div className="wb-mode-tabs" id="wbModeTabs" role="tablist" aria-label={T.wbViews} hidden={!showModeTabs}>
                 {WB_TABS.map((tab) => {
                   const selected = activeTabMode === tab.mode
                   return (
@@ -177,14 +184,14 @@ export function AppShell() {
                 })}
               </div>
               <div className="wb-head-tools">
-                <label className="wb-sr-only" htmlFor="wbShelfSearch">搜索工作流</label>
+                <label className="wb-sr-only" htmlFor="wbShelfSearch">{T.searchWf}</label>
                 <input
                   type="search"
                   className="wb-shelf-search"
                   id="wbShelfSearch"
-                  placeholder="搜索想要的结果"
+                  placeholder={T.searchPh}
                   autoComplete="off"
-                  hidden={surface !== 'shelf'}
+                  hidden={isStudio}
                   value={shelfQuery}
                   onChange={(e) => setShelfQuery(e.target.value)}
                 />
@@ -193,8 +200,8 @@ export function AppShell() {
                   className="wb-icon-btn"
                   id="wbReload"
                   data-testid="studio-leave"
-                  title={isStudio ? backLabel : '刷新'}
-                  aria-label={isStudio ? backLabel : '刷新工作台'}
+                  title={isStudio ? backLabel : T.reload}
+                  aria-label={isStudio ? backLabel : T.reloadWb}
                   hidden={!isStudio}
                   onClick={() => leaveStudio()}
                 >
@@ -203,25 +210,25 @@ export function AppShell() {
               </div>
             </header>
             <div className="wb-body">
-              <section className={`wb-surface${surface === 'taskhome' ? ' active' : ''}`} id="wbTaskSurface" data-wb-surface="taskhome" aria-label="专家协作">
-                {surface === 'taskhome' ? (
-                  <Suspense fallback={null}><TaskHomeSurface /></Suspense>
+              <section className={`wb-surface${surfaceId === 'taskhome' ? ' active' : ''}`} id="wbTaskSurface" data-wb-surface="taskhome" aria-label={T.collab}>
+                {showWorkbench && surfaceId === 'taskhome' ? (
+                  <Suspense fallback={<SurfacePending />}><TaskHomeSurface /></Suspense>
                 ) : null}
               </section>
-              <section className={`wb-surface${surface === 'shelf' ? ' active' : ''}`} id="wbShelfSurface" data-wb-surface="shelf" aria-label="工作流货架">
-                {surface === 'shelf' ? (
-                  <Suspense fallback={null}><ShelfSurface /></Suspense>
+              <section className={`wb-surface${surfaceId === 'shelf' ? ' active' : ''}`} id="wbShelfSurface" data-wb-surface="shelf" aria-label={T.shelf}>
+                {showWorkbench && surfaceId === 'shelf' ? (
+                  <Suspense fallback={<SurfacePending />}><ShelfSurface /></Suspense>
                 ) : null}
               </section>
-              <section className={`wb-surface wb-manage-surface${managePanel === 'daemon' ? ' wb-manage-daemon' : ''}${managePanel === 'workflows' ? ' wb-manage-workflows' : ''}${surface === 'manage' ? ' active' : ''}`} id="wbManageSurface" data-wb-surface="manage" aria-label={managePanel === 'automation' ? '自动化中心' : managePanel === 'workflows' ? '管理工作流' : '管线服务'}>
-                {surface === 'manage' ? <Suspense fallback={null}><ManageSurface /></Suspense> : null}
+              <section className={`wb-surface wb-manage-surface${managePanel === 'daemon' ? ' wb-manage-daemon' : ''}${managePanel === 'workflows' ? ' wb-manage-workflows' : ''}${surfaceId === 'manage' ? ' active' : ''}`} id="wbManageSurface" data-wb-surface="manage" aria-label={managePanel === 'automation' ? T.automation : managePanel === 'workflows' ? T.manageWf : T.daemon}>
+                {showWorkbench && surfaceId === 'manage' ? <Suspense fallback={<SurfacePending />}><ManageSurface /></Suspense> : null}
               </section>
-              <section className={`wb-surface${surface === 'studio' ? ' active' : ''}`} id="wbStudioSurface" data-wb-surface="studio" aria-label="搭建">
-                {surface === 'studio' ? <Suspense fallback={null}><StudioSurface /></Suspense> : null}
+              <section className={`wb-surface${surfaceId === 'studio' ? ' active' : ''}`} id="wbStudioSurface" data-wb-surface="studio" aria-label={T.studio}>
+                {showWorkbench && surfaceId === 'studio' ? <Suspense fallback={<SurfacePending />}><StudioSurface /></Suspense> : null}
               </section>
-              <section className={`wb-surface${surface === 'run' ? ' active' : ''}`} id="wbRunSurface" data-wb-surface="run" aria-label="运行">
-                {surface === 'run' ? (
-                  <Suspense fallback={null}>
+              <section className={`wb-surface${surfaceId === 'run' ? ' active' : ''}`} id="wbRunSurface" data-wb-surface="run" aria-label={T.run}>
+                {showWorkbench && surfaceId === 'run' ? (
+                  <Suspense fallback={<SurfacePending />}>
                     {hasExpertRoom
                       ? <ExpertRoomSurface />
                       : runLane === 'pipeline'
@@ -234,18 +241,18 @@ export function AppShell() {
           </section>
           {route === 'capabilities' ? (
             <div className="hub-overlay-host">
-              <Suspense fallback={null}>
+              <Suspense fallback={<SurfacePending />}>
                 <CapabilityHubSurface />
               </Suspense>
             </div>
           ) : null}
           {route === 'knowledge' ? (
-            <Suspense fallback={null}>
+            <Suspense fallback={<SurfacePending />}>
               <KnowledgeSurface />
             </Suspense>
           ) : null}
           {route === 'settings' ? (
-            <Suspense fallback={null}>
+            <Suspense fallback={<SurfacePending />}>
               <SettingsSurface
                 embedded
                 initialTab={settingsTab}

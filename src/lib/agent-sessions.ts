@@ -16,6 +16,16 @@ const MAX_MESSAGES = 80
 const MAX_CONTEXT_CHARS = 24000
 const KEEP_MESSAGES_AFTER_COMPACT = 12
 const DEFAULT_TITLE = '新助手'
+/** 空会话占位名；含重构前英文标题，normalize 时收成 DEFAULT_TITLE */
+const PLACEHOLDER_TITLES = new Set([DEFAULT_TITLE, 'New Agent', '新对话', '对话', '当前协作'])
+
+function isPlaceholderTitle(title) {
+  const text = String(title || '').trim()
+  if (!text) return true
+  if (PLACEHOLDER_TITLES.has(text)) return true
+  return /^新对话\s*\d*$/.test(text)
+}
+
 const MAX_OPEN_TABS = 24, MAX_HISTORY = 30, MAX_TRACE_EVENTS = 40, MAX_KNOWLEDGE_REFS = 16
 
 function normalizeKnowledgeRefs(raw, max = MAX_KNOWLEDGE_REFS) {
@@ -163,7 +173,7 @@ function normalizeSession(raw, fallbackIndex = 1) {
       .slice(-MAX_MESSAGES)
     : []
   const rawTitle = String(raw?.title || '').trim()
-  const title = (!rawTitle || /^新对话\s*\d*$/.test(rawTitle)) ? DEFAULT_TITLE : rawTitle
+  const title = isPlaceholderTitle(rawTitle) ? DEFAULT_TITLE : rawTitle
   const run = raw?.run != null ? agentRun.normalizeRun(raw.run) : undefined
   return {
     ...base,
@@ -277,7 +287,7 @@ function contextMessages(session) {
 
 function sessionDisplayTitle(session) {
   const t = String(session?.title || '').trim()
-  if (t && t !== DEFAULT_TITLE && !/^新对话\s*\d*$/.test(t)) return t.slice(0, 40)
+  if (t && !isPlaceholderTitle(t)) return t.slice(0, 40)
   const goal = String(session?.run?.goal || '').trim()
   if (goal) return goal.replace(/\s+/g, ' ').slice(0, 28)
   const firstUser = (session?.messages || []).find(m => m.role === 'user' && String(m.text || '').trim())

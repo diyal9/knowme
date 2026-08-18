@@ -1,6 +1,30 @@
+/**
+ * 助理过程进度。单步一行；多步可展开。外层一张过程卡，内部不再套盒。
+ * 不负责气泡正文。
+ */
 import type { ExecutionTimelineView } from '../../../domain/agent-execution-timeline'
 
+function ExecutionMark({ running }: { running: boolean }) {
+  return running
+    ? <span className="agent-execution-orb" aria-hidden="true" />
+    : <span className="agent-execution-check" aria-hidden="true">✓</span>
+}
+
 export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }) {
+  if (view.compact) {
+    return (
+      <div
+        className={`agent-execution is-compact${view.running ? ' is-running' : ''}`}
+        data-execution-timeline="1"
+        data-testid="agent-execution-timeline"
+      >
+        <ExecutionMark running={view.running} />
+        <span className="agent-execution-title">{view.summaryTitle}</span>
+        {view.summaryMeta ? <span className="agent-execution-meta">{view.summaryMeta}</span> : null}
+      </div>
+    )
+  }
+
   return (
     <details
       className={`agent-execution${view.running ? ' is-running' : ''}`}
@@ -9,9 +33,7 @@ export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }
       open={view.running}
     >
       <summary className="agent-execution-summary">
-        {view.running
-          ? <span className="agent-execution-orb" aria-hidden="true" />
-          : <span className="agent-execution-check" aria-hidden="true">✓</span>}
+        <ExecutionMark running={view.running} />
         <span className="agent-execution-title">{view.summaryTitle}</span>
         {view.summaryMeta ? <span className="agent-execution-meta">{view.summaryMeta}</span> : null}
       </summary>

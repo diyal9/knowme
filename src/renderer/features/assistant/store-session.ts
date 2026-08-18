@@ -167,11 +167,35 @@ function flushStreamEventBuffer() {
         ? event.payload as Record<string, unknown>
         : {}
       const title = String(nested.title || event.title || '').trim()
+      const summary = String(nested.summary || event.summary || '').trim()
       const contextInfo = parseContextInfo(nested.contextInfo || event.contextInfo)
       if (contextInfo) next.assistantContextInfo = contextInfo
-      if (title && type !== 'cancelled') next.assistantStatus = title
-      if (type === 'error') next.assistantStatus = title || '生成失败'
-      if (type === 'cancelled') next.assistantStatus = '已停止生成'
+      // 结束后错误已进气泡；迟到的 stream 事件不得再钉一条状态
+      const generating = Boolean(working.isGenerating)
+      if (generating) {
+        if (title && type !== 'cancelled') next.assistantStatus = title
+        if (type === 'error') next.assistantStatus = title || '生成失败'
+        if (type === 'cancelled') next.assistantStatus = '已停止生成'
+        const recoveryHit = /waiting_|timeout|error|backend\.degraded|cancelled/.test(type)
+          || Boolean(nested.recommendedAction)
+        if (recoveryHit) {
+          next.assistantRecovery = {
+            status: type || String(nested.status || ''),
+            code: String(nested.code || event.code || ''),
+            recommendedAction: String(nested.recommendedAction || ''),
+            estimatedWait: String(nested.estimatedWait || event.estimatedWait || ''),
+          }
+        }
+        if (summary) {
+          const prevLines = (next.assistantProcessLines as string[] | undefined) || working.assistantProcessLines || []
+          next.assistantProcessLines = [...prevLines, summary].slice(-40)
+          next.assistantProcessFeed = summary
+          working = { ...working, assistantProcessLines: next.assistantProcessLines as string[], assistantProcessFeed: summary }
+        } else if (title && type !== 'cancelled' && type !== 'error') {
+          next.assistantProcessFeed = title
+          working = { ...working, assistantProcessFeed: title }
+        }
+      }
       const assistantId = activeStreamAssistantId
       const sessionId = activeStreamSessionId
       if (assistantId && sessionId) {
@@ -227,6 +251,13 @@ function parseContextInfo(raw: unknown): AgentContextInfo | null {
 }
 
 function enqueueStreamEvent(event: Record<string, unknown>) {
+  const type = String(event.type || '')
+  // 终态/落字立即 flush，避免与 stage 合批造成「先过程再整段替换」的闪一下
+  if (type === 'answer.committed' || type === 'error' || type === 'cancelled' || type === 'done') {
+    pendingStreamEvents.push(event)
+    flushStreamEventBuffer()
+    return
+  }
   pendingStreamEvents.push(event)
   scheduleStreamEventFlush()
 }

@@ -38,7 +38,10 @@ describe('assistant output style', () => {
 
   it('wires the same policy into prompt, main, renderer, and workspace shell', () => {
     const root = path.join(__dirname, '..')
-    const prompt = fs.readFileSync(path.join(root, 'src', 'lib', 'ai-assistant-context.ts'), 'utf8')
+    const prompt = [
+      fs.readFileSync(path.join(root, 'src', 'lib', 'ai-assistant-context.ts'), 'utf8'),
+      fs.readFileSync(path.join(root, 'src', 'lib', 'knowme-system-prompt.ts'), 'utf8'),
+    ].join('\n')
     const main = readMainIpcBundle()
     const agentSessions = fs.readFileSync(path.join(root, 'src', 'lib', 'agent-sessions.ts'), 'utf8')
     const aiGenerate = [

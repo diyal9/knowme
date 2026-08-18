@@ -25,6 +25,8 @@ export type ExecutionTimelineRow = {
 
 export type ExecutionTimelineView = {
   running: boolean
+  /** 单步不展开，避免「执行进度」卡再套一层同文案 */
+  compact: boolean
   summaryTitle: string
   summaryMeta: string
   rows: ExecutionTimelineRow[]
@@ -144,6 +146,10 @@ export function applyAssistantStreamEvent(message: ChatMessage, event: Record<st
   const flat = { ...asRecord(event), ...nested }
   const type = String(event.type || flat.type || 'stage')
   if (type === 'content' || type === 'answer.committed' || type === 'choice.ready') return message
+  if (type === 'plan.updated') {
+    const plan = flat.plan && typeof flat.plan === 'object' ? flat.plan as ChatMessage['plan'] : message.plan
+    return plan ? { ...message, plan, thinking: false } : message
+  }
 
   const activity = String(flat.title || flat.summary || message.activity || '').trim()
   const id = String(flat.id || flat.toolCallId || flat.subRunId || '').trim()
@@ -187,13 +193,16 @@ export function buildExecutionTimelineView(
   const toolCount = trace.filter((item) => item.kind === 'tool').length
   const errorCount = trace.filter((item) => item.status === 'error').length
   const rounds = new Set(trace.map((item) => item.round).filter((value) => Number.isFinite(value)))
+  const current = [...trace].reverse().find((item) => item.status === 'pending') || trace[trace.length - 1]
   const summaryMeta = running
     ? formatElapsed(elapsedMs)
     : `${trace.length} 步${rounds.size > 1 ? ` / ${rounds.size} 轮` : ''}${toolCount ? ` / ${toolCount} 项操作` : ''}${errorCount ? ` / ${errorCount} 项未完成` : ''}`
+  const currentTitle = userStatusLabel(current?.title || '正在处理', current?.status)
 
   return {
     running,
-    summaryTitle: running ? '执行进度' : '执行过程',
+    compact: trace.length <= 1,
+    summaryTitle: running || trace.length === 1 ? currentTitle : '执行过程',
     summaryMeta,
     rows: trace.map((item) => {
       const status = item.status

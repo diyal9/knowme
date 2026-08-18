@@ -1,8 +1,8 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../../app/AppShell'
 import { useAppStore } from '../../app/store'
-import { mockApi, resetAppStore } from '../../test/helpers'
+import { mockApi, renderApp, resetAppStore } from '../../test/helpers'
 
 const catalog = {
   ok: true,
@@ -22,7 +22,7 @@ describe('capability hub overlay', () => {
 
   it('lists experts by default with tabs for 专家/技能/MCP', async () => {
     mockApi({ capabilityList: async () => catalog })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => {
       expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument()
@@ -44,7 +44,7 @@ describe('capability hub overlay', () => {
         items: catalog.items.filter((item) => item.kind === opts?.kind),
       }),
     })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
@@ -56,7 +56,7 @@ describe('capability hub overlay', () => {
 
   it('filters hub cards by search query', async () => {
     mockApi({ capabilityList: async () => catalog })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument())
     fireEvent.change(within(hub).getByLabelText('搜索能力'), { target: { value: '飞书' } })
@@ -79,7 +79,7 @@ describe('capability hub overlay', () => {
       capabilityPickLocalFolder: async () => ({ ok: true, path: 'D:/pack' }),
       capabilityImport: imported,
     })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument())
     expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('办公')
@@ -96,7 +96,14 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
     fireEvent.click(within(hub).getByRole('button', { name: '添加能力' }))
     fireEvent.click(screen.getByRole('button', { name: '选择文件夹' }))
-    await waitFor(() => expect(imported).toHaveBeenCalledWith(expect.objectContaining({ source: 'local', path: 'D:/pack' })))
+    await waitFor(() => expect(screen.getByTestId('hub-import-preview')).toBeInTheDocument())
+    expect(imported).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByTestId('hub-import-confirm'))
+    await waitFor(() => expect(imported).toHaveBeenCalledWith(expect.objectContaining({
+      source: 'local',
+      path: 'D:/pack',
+      trustConfirmed: true,
+    })))
   })
 
   it('opens hub picker for skills in expert dialog', async () => {
@@ -104,7 +111,7 @@ describe('capability hub overlay', () => {
       capabilityList: async () => catalog,
       sourcesList: async () => ({ sources: [{ id: 'src1', type: 'local', displayName: '本地资料' }] }),
     })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('button', { name: '我的' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('button', { name: '我的' }))
@@ -122,7 +129,7 @@ describe('capability hub overlay', () => {
         items: catalog.items.filter((item) => item.kind !== 'skill'),
       }),
     })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('button', { name: '我的' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('button', { name: '我的' }))
@@ -134,7 +141,7 @@ describe('capability hub overlay', () => {
   it('blocks save when name is empty and highlights the field', async () => {
     const save = vi.fn(async () => ({ ok: true }))
     mockApi({ capabilityList: async () => catalog, expertSave: save })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('button', { name: '我的' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('button', { name: '我的' }))
@@ -150,7 +157,7 @@ describe('capability hub overlay', () => {
       capabilityList: async () => catalog,
       expertSave: save,
     })
-    render(<AppShell />)
+    await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('button', { name: '我的' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('button', { name: '我的' }))

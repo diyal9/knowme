@@ -140,12 +140,8 @@ function normalizeDateRange(input = {}) {
 }
 
 function normalizeSchedule(input = {}) {
-  const type = ['daily', 'interval', 'once'].includes(input.type) ? input.type : 'daily'
-  const dailyTime = validDailyTime(input.dailyTime) || '09:00'
-  const intervalValue = clampInt(input.intervalValue, 1, 720, 24)
-  const intervalUnit = ['hour', 'day'].includes(input.intervalUnit) ? input.intervalUnit : 'hour'
-  const onceAt = String(input.onceAt || '').trim()
-  return { type, dailyTime, intervalValue, intervalUnit, onceAt }
+  const { normalizeSchedule: normalize } = require('./workbench-task-scheduler')
+  return normalize(input)
 }
 
 function validDailyTime(value) {
@@ -160,39 +156,20 @@ function clampInt(value, min, max, fallback) {
 }
 
 function scheduleToLabel(schedule = {}) {
-  if (schedule.type === 'once') {
-    return schedule.onceAt ? `单次 ${schedule.onceAt}` : '单次（未设置）'
-  }
-  if (schedule.type === 'interval') {
-    const unit = schedule.intervalUnit === 'day' ? '天' : '小时'
-    return `每 ${schedule.intervalValue || 1} ${unit}`
-  }
-  return `每天 ${schedule.dailyTime || '09:00'}`
+  const { scheduleToLabel: label } = require('./workbench-task-scheduler')
+  return label(schedule)
 }
 
 function nextRunAt(schedule = {}, dateRange = {}, enabled = true) {
+  const { computeNextRunAt } = require('./workbench-task-scheduler')
   if (!enabled) return ''
-  const now = new Date()
-  if (schedule.type === 'once') {
-    if (!schedule.onceAt) return ''
-    const t = new Date(schedule.onceAt)
-    return Number.isFinite(t.getTime()) && t.getTime() > now.getTime() ? t.toISOString() : ''
-  }
-  if (schedule.type === 'interval') {
-    const unitMs = schedule.intervalUnit === 'day' ? 24 * 3600 * 1000 : 3600 * 1000
-    const ts = now.getTime() + (Math.max(1, Number(schedule.intervalValue || 1)) * unitMs)
-    return new Date(ts).toISOString()
-  }
-  const [hh, mm] = String(schedule.dailyTime || '09:00').split(':').map(Number)
-  const candidate = new Date(now)
-  candidate.setSeconds(0, 0)
-  candidate.setHours(Number.isFinite(hh) ? hh : 9, Number.isFinite(mm) ? mm : 0, 0, 0)
-  if (candidate.getTime() <= now.getTime()) candidate.setDate(candidate.getDate() + 1)
+  const iso = computeNextRunAt(schedule, true, new Date())
+  if (!iso) return ''
   if (dateRange.end) {
     const end = new Date(`${dateRange.end}T23:59:59`)
-    if (Number.isFinite(end.getTime()) && candidate.getTime() > end.getTime()) return ''
+    if (Number.isFinite(end.getTime()) && Date.parse(iso) > end.getTime()) return ''
   }
-  return candidate.toISOString()
+  return iso
 }
 
 function makeId() {

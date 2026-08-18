@@ -42,6 +42,8 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
     generateRunId: runId,
     assistantStatus: '正在生成…',
     assistantProcessFeed: '',
+    assistantCancelStage: '',
+    assistantRecovery: null,
     sessionStates: patchSession(state.sessionStates, sessionId, {
       composer: '',
       attachments: [],
@@ -71,7 +73,12 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
       return {
         isGenerating: false,
         generateRunId: '',
-        assistantStatus: result.cancelled ? '已停止' : (result.resultError ? '生成失败' : ''),
+        assistantStatus: '',
+        assistantProcessFeed: '',
+        assistantCancelStage: '',
+        assistantRecovery: result.resultError && !result.cancelled
+          ? { status: 'failed', code: 'generate_failed', recommendedAction: 'retry' }
+          : null,
         sessionStates: patchAssistantMessage(state.sessionStates, sessionId, assistantId, (msg) => ({
           ...msg,
           role: final.role,

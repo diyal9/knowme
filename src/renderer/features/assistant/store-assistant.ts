@@ -13,6 +13,7 @@ import {
 import { createAssistantModeActions } from './store-assistant-modes'
 import { startAssistantGenerate } from './store-assistant-generate'
 import { api, type StoreGet, type StoreSet } from '../../app/store-types'
+import type { KnowledgeProviderItem } from '../../../shared/api'
 import {
   detachStreamListener,
   emptySessionSlice,
@@ -65,14 +66,25 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
 
     stopGenerate: () => {
       const runId = get().generateRunId
-      if (runId) void api()?.aiCancelRun?.(runId).catch(() => null)
-      detachStreamListener()
-      set((state) => ({
-        isGenerating: false,
-        generateRunId: '',
-        assistantStatus: '已停止',
-        ...stopLiveStreamingMessages(state),
-      }))
+      set({ assistantCancelStage: 'requesting_cancel', assistantStatus: '正在请求取消…' })
+      const finishCancel = () => {
+        detachStreamListener()
+        set((state) => ({
+          isGenerating: false,
+          generateRunId: '',
+          assistantStatus: '已取消',
+          assistantCancelStage: 'cancelled',
+          assistantProcessFeed: '',
+          assistantRecovery: { status: 'cancelled', recommendedAction: 'retry' },
+          ...stopLiveStreamingMessages(state),
+        }))
+      }
+      if (!runId) {
+        finishCancel()
+        return
+      }
+      set({ assistantCancelStage: 'cancelling_children' })
+      void api()?.aiCancelRun?.(runId).catch(() => null).finally(finishCancel)
     },
 
     newSession: () => {
@@ -173,22 +185,28 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
 
     loadAssistantChrome: async () => {
       try {
-        const [models, profile, skills] = await Promise.all([
+        const [models, profile, skills, providers] = await Promise.all([
           api()?.llmModels?.(),
           api()?.llmProfile?.(),
           api()?.capabilityList?.({ kind: 'skill' }),
+          api()?.knowledgeProviderList?.().catch(() => null),
         ])
         const { groups, presets, defaultModelId } = parseAssistantModelCatalog(models)
+        const providerList = (providers?.providers || []) as KnowledgeProviderItem[]
         set({
           assistantModels: presets,
           assistantModelGroups: groups,
           assistantModelId: parseAssistantProfileModel(profile, defaultModelId),
           assistantSkills: parseAssistantSkills(skills),
+          ...(providerList.length ? {
+            knowledgeProviders: providerList,
+            knowledgeActiveProviderId: providers?.activeProviderId || providerList[0]?.id || get().knowledgeActiveProviderId,
+          } : {}),
         })
       } catch {
         /* ignore */
       }
-      // 首屏不挡：知识列表延后给 Composer；Hub 由能力中心/任务房自己拉
+      // wiki/okf 仍延后；provider 已在上面预载供专家模式知识菜单
       window.setTimeout(() => {
         void get().loadKnowledge?.()
       }, 0)

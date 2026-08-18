@@ -1,10 +1,11 @@
 'use strict'
 
 /**
- * AI assist IPC: title suggestion + run cancellation.
+ * AI assist IPC: title suggestion、连通探测、run 取消。
  */
 const agentProcessTools = require('../lib/agent-process-tools')
 const agentOrchestration = require('../lib/agent-orchestration')
+const { probeLlmConnection } = require('../lib/main-llm-bridge')
 
 function registerAiAssistIpc(ipcMain, deps) {
   const {
@@ -41,6 +42,19 @@ function registerAiAssistIpc(ipcMain, deps) {
       return { title: localTitleFromParagraph(para), local: true, error: result.error }
     }
     return { title: cleanSuggestedTitle(result.text) }
+  })
+
+  ipcMain.handle('llm-probe', async (_e, payload = {}) => {
+    const saved = loadSettings()
+    const overlay = payload && typeof payload === 'object' ? payload : {}
+    const s = {
+      ...saved,
+      apiEndpoint: String(overlay.apiEndpoint || saved.apiEndpoint || '').trim() || saved.apiEndpoint,
+      model: String(overlay.model || saved.model || '').trim() || saved.model,
+      llmProvider: String(overlay.llmProvider || saved.llmProvider || '').trim() || saved.llmProvider,
+    }
+    if (overlay.apiKey) s.apiKey = String(overlay.apiKey)
+    return probeLlmConnection(s)
   })
 
   ipcMain.handle('ai-cancel-run', async (_e, runId = '') => {

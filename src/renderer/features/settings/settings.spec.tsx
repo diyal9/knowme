@@ -36,6 +36,28 @@ describe('settings-surface', () => {
     fireEvent.click(screen.getByRole('button', { name: '保存设置' }))
   })
 
+  it('probes the saved AI endpoint from the settings page', async () => {
+    const probe = vi.fn(async () => ({ ok: true, latencyMs: 42, host: 'dashscope.aliyuncs.com', model: 'qwen-turbo' }))
+    mockApi({
+      getSettings: () => ({
+        model: 'qwen-turbo',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        llmProvider: 'dashscope',
+      }),
+      initSettings: (cb) => cb({
+        model: 'qwen-turbo',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      }),
+      sourcesList: async () => ({ sources: [] }),
+      llmProbe: probe,
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 接口' }))
+    fireEvent.click(screen.getByRole('button', { name: '测试连接' }))
+    await waitFor(() => expect(probe).toHaveBeenCalled())
+    await waitFor(() => expect(screen.getByText(/连通（42ms）/)).toBeInTheDocument())
+  })
+
   it('restores memory tab identity and pattern review', async () => {
     const review = vi.fn(async () => ({ ok: true }))
     mockApi({

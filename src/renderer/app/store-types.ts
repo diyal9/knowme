@@ -5,6 +5,7 @@ import type { KnowledgePage } from '../../domain/knowledge-surface'
 import type { KnowledgeKindFilter } from '../../domain/knowledge-tree'
 import type { KnowledgeReadResult, StewardProposal } from '../../shared/api-extended'
 import type {
+  AgentContextInfo,
   AgentFileRef,
   AgentSession,
   CapabilityItem,
@@ -38,6 +39,7 @@ export interface RunState {
   brief: string
   log: string[]
   gateNode: string | null
+  clarifyNode: string | null
   gateTitle: string | null
   processLogsText: string
   progressText: string
@@ -96,14 +98,8 @@ export interface StudioKnowledgeProvider {
   kind?: string
 }
 
-export interface AgentContextInfo {
-  usedTokens?: number
-  contextWindow?: number
-  omittedTurns?: number
-  omittedMessages?: number
-  sectionUsage?: { key: string; usedTokens?: number }[]
-  sectionOmitted?: string[]
-}
+/** 与 shared/api.AgentContextInfo 同步；流式 stage_prepare 写入 assistantContextInfo */
+export type { AgentContextInfo }
 
 export interface SessionSlice {
   messages: ChatMessage[]
@@ -176,6 +172,14 @@ export interface AppState {
   assistantProcessFeed: string
   assistantContextInfo: AgentContextInfo | null
   assistantProcessLines: string[]
+  /** requesting_cancel → cancelling_children → cancelled；空串表示无取消过程 */
+  assistantCancelStage: '' | 'requesting_cancel' | 'cancelling_children' | 'cancelled' | 'resume_pending'
+  assistantRecovery: {
+    status?: string
+    code?: string
+    recommendedAction?: string
+    estimatedWait?: string
+  } | null
   imageViewerUrl: string
   generateRunId: string
   fileTreeQuery: string
@@ -299,7 +303,6 @@ export interface AppState {
   toggleSessionKnowledge: (refId: string) => Promise<void>
   clearSessionKnowledge: () => Promise<void>
   setAssistantApplyTarget: (target: { sourceId: string; path: string } | null) => void
-  applyAssistantText: (mode: 'insert' | 'append' | 'replace', text: string) => Promise<void>
   acceptAssistantArtifact: (artifactId: string) => Promise<void>
   rejectAssistantArtifact: (artifactId: string) => Promise<void>
   refreshActiveSessionArtifacts: () => Promise<void>

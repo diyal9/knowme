@@ -1,18 +1,21 @@
 /**
- * 对话气泡：用户/助手均左对齐。
- * 首 Token 只在主进程日志，不进气泡。
+ * 对话气泡：用户/助手均左对齐；流式纯文本、结束后再 lazy Markdown，减 chunk 解析开销。
+ * 首 Token 只在主进程日志，不进气泡。不负责分页窗口（见 AssistantPane）。
  */
-import { memo, useEffect, useState, type ReactNode } from 'react'
+import { lazy, memo, Suspense, useEffect, useState, type ReactNode } from 'react'
 import {
   buildExecutionTimelineView,
   formatElapsed,
   userStatusLabel,
 } from '../../../domain/agent-execution-timeline'
 import { compactUserShortcutBubbleText } from '../../../domain/agent-shortcut-display'
-import { ContentView } from '../content-view/ContentView'
 import { AgentFollowUps, AgentGroundingMeta, AgentStructuredUi } from './AgentMessageExtras'
-import { AgentChatApplyActions } from './AgentChatApplyActions'
 import { AgentExecutionTimeline } from './AgentExecutionTimeline'
+import { AgentPlanChecklist } from './AgentPlanChecklist'
+
+const LazyContentView = lazy(() =>
+  import('../content-view/ContentView').then((m) => ({ default: m.ContentView })),
+)
 
 function useLiveNow(active: boolean) {
   const [now, setNow] = useState(() => Date.now())
@@ -23,6 +26,41 @@ function useLiveNow(active: boolean) {
     return () => window.clearInterval(timer)
   }, [active])
   return now
+}
+
+/** lazy 加载前以纯文本占位，避免长对话首屏阻塞 Markdown 解析 */
+function PlainContentFallback({ text, caret }: { text: string; caret?: ReactNode }) {
+  return (
+    <div className="agent-md-fallback" data-testid="content-view-fallback">
+      {text}
+      {caret}
+    </div>
+  )
+}
+
+function AssistantBodyContent({
+  body,
+  streaming,
+  caret,
+}: {
+  body: string
+  streaming: boolean
+  caret?: ReactNode
+}) {
+  // 流式期间预拉 ContentView 包，结束切 Markdown 时少等一轮网络/解析
+  useEffect(() => {
+    if (streaming) void import('../content-view/ContentView')
+  }, [streaming])
+
+  if (streaming) {
+    return <PlainContentFallback text={body} caret={caret} />
+  }
+
+  return (
+    <Suspense fallback={<PlainContentFallback text={body} />}>
+      <LazyContentView source={body} streaming={false} />
+    </Suspense>
+  )
 }
 
 function AgentMessageBubbleImpl({
@@ -90,12 +128,13 @@ function AgentMessageBubbleImpl({
     ? Number(message?.elapsedMs)
     : (live && Number(message?.startedAt) ? now - Number(message?.startedAt) : 0)
   const elapsedLabel = formatElapsed(elapsed)
-  const showThinking = (thinking || (live && !body)) && !timeline
+  // 有时间线时不再叠 thinking 胶囊，避免同一句「正在整理」出现两次
+  const showThinking = Boolean(!timeline && (thinking || (live && !body)))
 
   return (
     <div className={`${cls}${timeline ? ' has-execution' : ''}`} data-testid="msg-assistant">
       {timeline ? <AgentExecutionTimeline view={timeline} /> : null}
-      {showThinking ? (
+      {showThinking && !body ? (
         <div className="thinking-status" data-testid="agent-thinking-status">
           <span className="agent-execution-orb" aria-hidden="true" />
           <span className="thinking-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -104,31 +143,26 @@ function AgentMessageBubbleImpl({
             {elapsedLabel ? ` · ${elapsedLabel}` : ''}
           </span>
         </div>
-      ) : body || children || message ? (
-        <>
-          {body || children ? (
-            <div className="agent-response-body" data-assistant-body="1">
-              {body ? (
-                <ContentView
-                  source={body}
-                  streaming={Boolean(streaming)}
-                  caret={streaming ? <span className="stream-cursor" aria-hidden="true">▍</span> : null}
-                />
-              ) : null}
-              {children}
-            </div>
+      ) : null}
+      {body || children ? (
+        <div className="agent-response-body" data-assistant-body="1">
+          {body ? (
+            <AssistantBodyContent
+              body={body}
+              streaming={Boolean(streaming)}
+              caret={streaming ? <span className="stream-cursor" aria-hidden="true">▍</span> : null}
+            />
           ) : null}
-          {message && onStructuredPick ? (
-            <AgentStructuredUi message={message} onPick={onStructuredPick} />
-          ) : null}
-          {message ? <AgentGroundingMeta message={message} /> : null}
-          {showFollowUps && modeId && onFollowUp && body && !streaming ? (
-            <AgentFollowUps modeId={modeId} onPick={onFollowUp} />
-          ) : null}
-          {body && !streaming && !thinking && !error ? (
-            <AgentChatApplyActions text={body} />
-          ) : null}
-        </>
+          {children}
+        </div>
+      ) : null}
+      {message ? <AgentPlanChecklist message={message} /> : null}
+      {message && onStructuredPick ? (
+        <AgentStructuredUi message={message} onPick={onStructuredPick} />
+      ) : null}
+      {message ? <AgentGroundingMeta message={message} /> : null}
+      {showFollowUps && modeId && onFollowUp && body && !streaming ? (
+        <AgentFollowUps modeId={modeId} onPick={onFollowUp} />
       ) : null}
     </div>
   )

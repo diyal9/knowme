@@ -128,4 +128,29 @@ describe('workspace file tree', () => {
       })
     })
   })
+
+  it('opens a second read-only split preview', async () => {
+    mockApi({
+      sourcesList: async () => ({
+        sources: [{ id: 's1', type: 'local', displayName: 'Docs' }],
+        activeSourceId: 's1',
+      }),
+      sourcesTree: async () => ({
+        ok: true,
+        nodes: [
+          { type: 'file', name: 'a.md', path: 'a.md', depth: 0 },
+          { type: 'file', name: 'b.md', path: 'b.md', depth: 0 },
+        ],
+      }),
+      sourcesReadFile: async ({ path }) => ({ ok: true, content: path === 'b.md' ? 'split-b' : 'main-a' }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByText('a.md')).toBeInTheDocument())
+    fireEvent.click(screen.getByText('a.md'))
+    await waitFor(() => expect(screen.getByTestId('files-preview-panel')).toHaveTextContent('main-a'))
+    fireEvent.click(screen.getByLabelText('文件操作'))
+    fireEvent.click(screen.getByRole('menuitem', { name: '分屏预览' }))
+    fireEvent.click(screen.getByText('b.md'))
+    await waitFor(() => expect(screen.getByTestId('files-preview-split')).toHaveTextContent('split-b'))
+  })
 })

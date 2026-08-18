@@ -44,6 +44,7 @@ class AgentRunScheduler {
     this.now = typeof opts.now === 'function' ? opts.now : () => Date.now()
     this.onLaunch = typeof opts.onLaunch === 'function' ? opts.onLaunch : null
     this.onJoinComplete = typeof opts.onJoinComplete === 'function' ? opts.onJoinComplete : null
+    this.workspaceBudget = opts.workspaceBudget || null
 
     /** @type {Map<string, object>} */
     this.items = new Map()
@@ -80,6 +81,14 @@ class AgentRunScheduler {
   register(item = {}) {
     const runId = String(item.runId || '')
     if (!runId) return { ok: false, code: 'missing_run_id' }
+    if (this.workspaceBudget) {
+      const gate = this.workspaceBudget.check({
+        workspaceId: item.workspaceId || item.meta?.workspaceId,
+        teamId: item.teamId || item.meta?.teamId,
+        priority: item.priority,
+      })
+      if (!gate.ok) return { ok: false, code: gate.code, message: gate.message }
+    }
 
     const record = {
       runId,
@@ -372,6 +381,7 @@ class AgentRunScheduler {
         joinStrategy: v.joinStrategy,
         resolvedCount: v.resolved.size,
       })),
+      slo: this.workspaceBudget?.slo?.() || null,
     }
   }
 }

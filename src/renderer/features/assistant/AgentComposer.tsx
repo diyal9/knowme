@@ -1,3 +1,7 @@
+/**
+ * 助手 composer：输入、附件、模型/知识库/快捷菜单与发送。
+ * 不负责消息列表与流式气泡。
+ */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { selectActiveAttachments, selectActiveComposer, useAppStore } from '../../app/store'
 import { getSessionSlice } from './store-session'
@@ -107,6 +111,15 @@ export function AgentComposer({
     activeModel?.contextWindow || 32768,
     historyTokens,
   )
+  /* 空态/无用量不画环：0.04 下限会在底边漏一截 usage 色 */
+  const showUsageRing = !launchEmpty && contextUsage.ratio > 0.02
+  const usageTone = !showUsageRing
+    ? ''
+    : contextUsage.ratio > 0.85
+      ? ' usage-danger'
+      : contextUsage.ratio > 0.5
+        ? ' usage-warn'
+        : ' usage-safe'
 
   useEffect(() => { setAtActive(0) }, [atContext?.query])
 
@@ -269,14 +282,15 @@ export function AgentComposer({
         <div className="ai-menu-wrap">
         <button
           type="button"
-          className={`agent-model-btn${contextUsage.ratio > 0.5 ? contextUsage.ratio > 0.85 ? ' usage-danger' : ' usage-warn' : contextUsage.ratio > 0 ? ' usage-safe' : ''}`}
+          className={`agent-model-btn${usageTone}${showUsageRing ? ' has-usage' : ''}`}
           data-testid="agent-model-btn"
           title="选择模型"
           aria-label="选择模型"
           aria-expanded={menu === 'model'}
-          style={contextUsage.ratio > 0 ? { ['--model-usage-progress' as string]: String(Math.max(contextUsage.ratio, 0.04)) } : undefined}
+          style={showUsageRing ? { ['--model-usage-progress' as string]: String(contextUsage.ratio) } : undefined}
           onClick={() => setMenu(menu === 'model' ? null : 'model')}
         >
+          {showUsageRing ? <span className="agent-model-usage-ring" aria-hidden="true" /> : null}
           <span id="agentModelLabel">{models.find((item) => item.id === modelId)?.label || modelId || '模型'}</span>
           <span
             className={`agent-model-usage${contextUsage.compacted ? ' compacted' : ''}`}

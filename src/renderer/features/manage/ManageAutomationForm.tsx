@@ -24,11 +24,12 @@ export type AutomationFormState = {
   backend: string
   connectorId: string
   permissionMode: 'default' | 'full'
-  scheduleType: 'daily' | 'interval' | 'once'
+  scheduleType: 'daily' | 'interval' | 'once' | 'cron'
   dailyTime: string
   intervalValue: string
   intervalUnit: 'hour' | 'day'
   onceAt: string
+  cronExpr: string
   dateStart: string
   dateEnd: string
   pushMiniApp: boolean
@@ -61,6 +62,7 @@ function initialForm(job: WorkbenchAutomationJob | null): AutomationFormState {
     intervalValue: String(job?.schedule?.intervalValue || 24),
     intervalUnit: job?.schedule?.intervalUnit || 'hour',
     onceAt: job?.schedule?.onceAt || '',
+    cronExpr: job?.schedule?.cronExpr || '',
     dateStart: job?.dateRange?.start || '',
     dateEnd: job?.dateRange?.end || '',
     pushMiniApp: push.miniApp === true,
@@ -175,6 +177,7 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
       intervalValue: Number(form.intervalValue) || 24,
       intervalUnit: form.intervalUnit,
       onceAt: form.onceAt,
+      cronExpr: form.cronExpr,
     }
     const ok = await onSave({
       name: form.name,
@@ -252,6 +255,7 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
               <option value="daily">周期（每天）</option>
               <option value="interval">按间隔</option>
               <option value="once">单次</option>
+              <option value="cron">Cron 表达式</option>
             </select>
             {form.scheduleType === 'daily' ? (
               <input id="wbAutoDailyTime" className="wb-auto-input" type="time" value={form.dailyTime} onChange={(e) => patchForm({ dailyTime: e.target.value })} aria-label="每天时间" data-auto-schedule="daily" />
@@ -267,6 +271,9 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
             ) : null}
             {form.scheduleType === 'once' ? (
               <input id="wbAutoOnceAt" className="wb-auto-input" type="datetime-local" value={form.onceAt} onChange={(e) => patchForm({ onceAt: e.target.value })} aria-label="单次时间" data-auto-schedule="once" />
+            ) : null}
+            {form.scheduleType === 'cron' ? (
+              <input id="wbAutoCronExpr" className="wb-auto-input" value={form.cronExpr} onChange={(e) => patchForm({ cronExpr: e.target.value })} placeholder="0 9 * * 1-5" aria-label="Cron 表达式" data-auto-schedule="cron" />
             ) : null}
           </div>
         </div>

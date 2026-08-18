@@ -175,7 +175,9 @@ describe('assistant chat', () => {
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByLabelText('任务入口')).toBeInTheDocument())
-    expect(screen.getByText(/把你的问题或任务交给 KnowMe/)).toBeInTheDocument()
+    expect(screen.getByText(/今天想让 KnowMe 做什么/)).toBeInTheDocument()
+    expect(screen.queryByText('开始使用')).not.toBeInTheDocument()
+    expect(screen.getByText(/最近三天会议/)).toBeInTheDocument()
     expect(screen.getByPlaceholderText(/给 KnowMe 发送消息/)).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /^通用/ })).toBeInTheDocument()
     expect(screen.queryByLabelText('选择本次对话知识库')).not.toBeInTheDocument()
@@ -183,6 +185,8 @@ describe('assistant chat', () => {
     expect(screen.getByTestId('agent-quick-btn')).toBeInTheDocument()
     expect(screen.getByTestId('agent-model-btn')).toBeInTheDocument()
     expect(screen.getByTestId('agent-model-btn').querySelector('svg')).toBeNull()
+    expect(screen.getByTestId('agent-model-btn')).not.toHaveClass('has-usage')
+    expect(screen.getByTestId('agent-model-btn').querySelector('.agent-model-usage-ring')).toBeNull()
     expect(screen.getByRole('button', { name: /会议总结/ })).toBeInTheDocument()
     expect(screen.queryByText(/我专注于协助您完成具体工作任务/)).not.toBeInTheDocument()
   })
@@ -309,7 +313,7 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByTestId('agent-attachments')).toHaveTextContent('notes.md'))
   })
 
-  it('shows topic nav when many user turns overflow chat log', async () => {
+  it('shows topic rail as soon as a meaningful user turn exists', async () => {
     render(<AppShell />)
     useAppStore.setState({
       sessionStates: {
@@ -318,20 +322,17 @@ describe('assistant chat', () => {
           attachments: [],
           messages: [
             { id: 'u1', role: 'user', text: '主题一：需求梳理与范围确认' },
-            { id: 'a1', role: 'assistant', text: '好的' },
-            { id: 'u2', role: 'user', text: '主题二：接口设计与联调计划' },
-            { id: 'a2', role: 'assistant', text: '收到' },
-            { id: 'u3', role: 'user', text: '主题三：测试计划与发布窗口' },
+            { id: 'a1', role: 'assistant', text: '好的，先从范围与里程碑开始' },
           ],
         },
       },
     })
-    const log = screen.getByTestId('agent-chat-log')
-    Object.defineProperty(log, 'scrollHeight', { configurable: true, value: 800 })
-    Object.defineProperty(log, 'clientHeight', { configurable: true, value: 200 })
-    fireEvent.scroll(log)
-    window.dispatchEvent(new Event('resize'))
     await waitFor(() => expect(screen.getByTestId('agent-topic-nav')).toBeInTheDocument())
+    expect(screen.getByTestId('agent-topic-nav')).not.toHaveAttribute('hidden')
+    expect(screen.getByLabelText(/主题 1：主题一/)).toBeInTheDocument()
+    expect(screen.getByTestId('msg-user')).toHaveAttribute('data-user-msg-idx', '0')
+    expect(screen.getByTestId('agent-chat-log').contains(screen.getByTestId('agent-topic-nav'))).toBe(false)
+    expect(screen.queryByTestId('agent-topic-viewport')).not.toBeInTheDocument()
   })
 
   it('shows compact shortcut bubble and live execution progress for meeting summary', async () => {
@@ -349,6 +350,8 @@ describe('assistant chat', () => {
     expect(screen.getByTestId('msg-user')).toHaveTextContent('会议总结')
     expect(screen.queryByTestId('msg-user')?.textContent).not.toMatch(/feishu\.meeting_read/)
     expect(screen.getByTestId('agent-execution-timeline')).toHaveTextContent('正在整理相关内容')
+    expect(screen.getByTestId('agent-execution-timeline')).toHaveClass('is-compact')
+    expect(screen.queryByTestId('agent-thinking-status')).not.toBeInTheDocument()
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     await waitFor(() => expect(generate).toHaveBeenCalled())
   })
@@ -392,33 +395,7 @@ describe('assistant chat', () => {
     ).toBe(true)
   })
 
-  it('applies assistant text to source file and shows artifact cards', async () => {
-    const writes: Array<{ path?: string; content?: string }> = []
-    mockApi({
-      sourcesReadFile: async () => ({ ok: true, content: 'prev' }),
-      sourcesWriteFile: async (payload) => {
-        writes.push(payload as { path?: string; content?: string })
-        return { ok: true }
-      },
-      agentArtifactAdd: async ({ artifact }) => ({
-        ok: true,
-        session: {
-          id: 's1',
-          title: '新助手',
-          run: {
-            artifacts: [{
-              id: 'art-1',
-              type: 'editor_patch',
-              title: artifact.title,
-              body: artifact.body,
-              status: 'draft',
-              targetPath: 'docs/a.md',
-              meta: { mode: 'replace', sourceId: 'src1', path: 'docs/a.md' },
-            }],
-          },
-        },
-      }),
-    })
+  it('does not show sticky-notes apply-to-file on assistant replies', async () => {
     render(<AppShell />)
     useAppStore.setState({
       activeSourceId: 'src1',
@@ -434,18 +411,11 @@ describe('assistant chat', () => {
         },
       },
     })
-    await waitFor(() => expect(screen.getByTestId('agent-apply-menu')).toBeInTheDocument())
-    fireEvent.click(screen.getByTestId('agent-apply-menu'))
-    fireEvent.click(screen.getByRole('menuitem', { name: '追加文末' }))
-    await waitFor(() => {
-      expect(writes[0]?.path).toBe('docs/a.md')
-      expect(writes[0]?.content).toContain('prev')
-      expect(writes[0]?.content).toContain('新正文内容')
-    })
-
-    fireEvent.click(screen.getByTestId('agent-apply-menu'))
-    fireEvent.click(screen.getByRole('menuitem', { name: /替换全文/ }))
-    await waitFor(() => expect(screen.getByTestId('agent-artifact-card')).toHaveTextContent('替换当前文件全文'))
+    await waitFor(() => expect(screen.getByText('新正文内容')).toBeInTheDocument())
+    expect(screen.queryByTestId('agent-apply-menu')).not.toBeInTheDocument()
+    expect(screen.queryByText('应用到文件')).not.toBeInTheDocument()
+    expect(screen.queryByText('插入光标')).not.toBeInTheDocument()
+    expect(screen.queryByText('追加文末')).not.toBeInTheDocument()
   })
 
   it('accepts editor_patch artifact and writes target file', async () => {
@@ -503,7 +473,7 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByTestId('agent-artifact-card')).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: '接受' }))
     await waitFor(() => expect(write).toHaveBeenCalled())
-    expect(write.mock.calls[0]?.[0]).toMatchObject({ sourceId: 'src1', path: 'docs/a.md', content: '已写入正文' })
+    expect(write).toHaveBeenCalledWith(expect.objectContaining({ sourceId: 'src1', path: 'docs/a.md', content: '已写入正文' }))
   })
 
   it('shows history sessions with mode avatar marks', async () => {
@@ -511,7 +481,8 @@ describe('assistant chat', () => {
       agentSessionList: async () => ({
         sessions: [
           { id: 's1', title: '当前', agentId: 'general' },
-          { id: 'h1', title: '历史会话', agentId: 'general' },
+          { id: 'h1', title: '历史会话', agentId: 'general', updatedAt: '2026-08-18T02:00:00.000Z' },
+          { id: 'h2', title: 'New Agent', agentId: 'general' },
         ],
         ui: { openSessionIds: ['s1'], activeSessionId: 's1' },
       }),
@@ -520,7 +491,110 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByRole('tab', { name: '当前' })).toBeInTheDocument())
     fireEvent.click(screen.getByLabelText('历史'))
     const pop = await screen.findByTestId('agent-history-pop')
+    expect(within(pop).getByLabelText('搜索历史会话')).toHaveClass('history-pop-query')
     expect(within(pop).getByText('历史会话')).toBeInTheDocument()
+    expect(within(pop).getByText('通用')).toBeInTheDocument()
     expect(pop.querySelector('.agent-avatar-photo')).toBeTruthy()
+  })
+
+  it('keeps tab context menu to session actions only', async () => {
+    render(<AppShell />)
+    const tab = await screen.findByRole('tab')
+    fireEvent.contextMenu(tab)
+    const menu = await screen.findByTestId('agent-tab-ctx')
+    expect(within(menu).getByText('重命名')).toBeInTheDocument()
+    expect(within(menu).getByText('复制对话记录')).toBeInTheDocument()
+    expect(within(menu).getByText('关闭')).toBeInTheDocument()
+    expect(within(menu).queryByText('管理对话')).not.toBeInTheDocument()
+    expect(within(menu).queryByText('Pin')).not.toBeInTheDocument()
+    expect(within(menu).queryByText('分叉')).not.toBeInTheDocument()
+    expect(within(menu).queryByText('关闭左侧')).not.toBeInTheDocument()
+  })
+
+  it('keeps more menu to current-work actions', async () => {
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByLabelText('更多')).toBeInTheDocument())
+    fireEvent.click(screen.getByLabelText('更多'))
+    const pop = await screen.findByTestId('agent-more-pop')
+    expect(within(pop).getByText('新对话')).toBeInTheDocument()
+    expect(within(pop).getByText('在新对话继续')).toBeInTheDocument()
+    expect(within(pop).getByText('复制当前总结')).toBeInTheDocument()
+    expect(within(pop).queryByText('重命名')).not.toBeInTheDocument()
+    expect(within(pop).queryByText('关闭 Tab')).not.toBeInTheDocument()
+    expect(within(pop).queryByText(/动作表现/)).not.toBeInTheDocument()
+    expect(within(pop).queryByText('复制错误信息')).not.toBeInTheDocument()
+  })
+
+  it('renders streaming assistant text as plain fallback without markdown parse', async () => {
+    render(<AppShell />)
+    useAppStore.setState({
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: '你好' },
+            { id: 'a1', role: 'assistant', text: '1. **bold**', streaming: true },
+          ],
+        },
+      },
+      isGenerating: true,
+      assistantStatus: '正在组织回答',
+    })
+    await waitFor(() => {
+      expect(screen.getByTestId('msg-assistant')).toBeInTheDocument()
+      expect(screen.getByTestId('content-view-fallback')).toHaveTextContent('1. **bold**')
+    })
+    expect(screen.queryByTestId('content-view')).not.toBeInTheDocument()
+    const streamStatus = screen.getByTestId('assistant-stream-status')
+    expect(streamStatus).toHaveTextContent('正在组织回答')
+    expect(screen.getByTestId('agent-chat-log').contains(streamStatus)).toBe(true)
+    expect(document.querySelector('.agent-col-foot')?.contains(streamStatus)).toBe(false)
+  })
+
+  it('keeps finished timeout errors in the transcript, not above the composer', async () => {
+    render(<AppShell />)
+    useAppStore.setState({
+      isGenerating: false,
+      assistantStatus: '请求超时（120s），请检查网络或 Endpoint',
+      assistantProcessFeed: '请求超时（120s），请检查网络或 Endpoint',
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: '会议总结' },
+            { id: 'a1', role: 'error', text: '请求超时（120s），请检查网络或 Endpoint' },
+          ],
+        },
+      },
+    })
+    await waitFor(() => expect(screen.getByText('请求超时（120s），请检查网络或 Endpoint')).toBeInTheDocument())
+    expect(screen.queryByTestId('assistant-stream-status')).not.toBeInTheDocument()
+  })
+
+  it('preloads knowledge providers during assistant chrome load', async () => {
+    const providerList = vi.fn(async () => ({
+      ok: true,
+      providers: [{ id: 'p-remote', displayName: '远程知识库', kind: 'remote' }],
+      activeProviderId: 'p-remote',
+    }))
+    mockApi({ knowledgeProviderList: providerList })
+    render(<AppShell />)
+    await waitFor(() => expect(providerList).toHaveBeenCalled())
+    await waitFor(() => {
+      expect(useAppStore.getState().knowledgeProviders.some((p) => p.id === 'p-remote')).toBe(true)
+    })
+  })
+
+  it('shows guided recovery after a failed generate', async () => {
+    mockApi({ aiGenerate: async () => ({ error: '远程超时' }) })
+    render(<AppShell />)
+    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('guided-recovery-panel')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('guided-recovery-panel')).toHaveTextContent('重试')
   })
 })

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--bg-page, #f3f1ec);
+  background: var(--bg-card, #fff);
   color: var(--text, #1c1917);
   font: 13px/1.45 var(--ui, 'Segoe UI', system-ui, sans-serif);
 }

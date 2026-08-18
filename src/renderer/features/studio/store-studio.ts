@@ -202,7 +202,7 @@ export function createStudioManageSlice(set: StoreSet, get: StoreGet) {
             studioReturnManagePanel: null,
             workbenchSurface,
             route: 'workbench',
-            managePanel: workbenchSurface === 'manage' ? 'daemon' : current.managePanel,
+            managePanel: workbenchSurface === 'manage' || current.managePanel === 'automation' ? 'daemon' : current.managePanel,
             expertRoom: workbenchSurface === 'taskhome' ? current.expertRoom : null,
           })
         }
@@ -217,10 +217,10 @@ export function createStudioManageSlice(set: StoreSet, get: StoreGet) {
         return
       }
       set({
-        workbenchSurface,
-        route: 'workbench',
-        managePanel: workbenchSurface === 'manage' ? 'daemon' : current.managePanel,
-        expertRoom: workbenchSurface === 'taskhome' ? current.expertRoom : null,
+            workbenchSurface,
+            route: 'workbench',
+            managePanel: workbenchSurface === 'manage' || current.managePanel === 'automation' ? 'daemon' : current.managePanel,
+            expertRoom: workbenchSurface === 'taskhome' ? current.expertRoom : null,
       })
     },
 

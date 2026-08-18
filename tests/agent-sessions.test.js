@@ -43,6 +43,12 @@ describe('agent sessions', () => {
     assert.equal(sessionDisplayTitle(steward), '检索远程知识库')
   })
 
+  it('treats legacy New Agent title as placeholder', () => {
+    const session = normalizeSession({ id: 's1', agentId: 'general', title: 'New Agent' })
+    assert.equal(session.title, DEFAULT_TITLE)
+    assert.equal(sessionDisplayTitle(session), '通用')
+  })
+
   it('compacts old messages while retaining recent context', () => {
     const session = createSession('general', 1)
     session.summary = ''

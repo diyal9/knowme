@@ -28,6 +28,7 @@ export function automationScheduleLabel(schedule: {
   intervalValue?: number
   intervalUnit?: string
   onceAt?: string
+  cronExpr?: string
 }): string {
   if (schedule.type === 'once') {
     return schedule.onceAt ? `单次 ${schedule.onceAt}` : '单次（未设置）'
@@ -35,6 +36,9 @@ export function automationScheduleLabel(schedule: {
   if (schedule.type === 'interval') {
     const unit = schedule.intervalUnit === 'day' ? '天' : '小时'
     return `每 ${schedule.intervalValue || 1} ${unit}`
+  }
+  if (schedule.type === 'cron') {
+    return schedule.cronExpr ? `cron ${schedule.cronExpr}` : 'cron（未设置）'
   }
   return `每天 ${schedule.dailyTime || '09:00'}`
 }

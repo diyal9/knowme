@@ -19,15 +19,17 @@ const TABS: { id: SettingsTabId; label: string }[] = [
   { id: 'about', label: '关于' },
 ]
 
+export type SettingsSurfaceProps = {
+  embedded?: boolean
+  initialTab?: string
+  onOpenCapabilityHub?: () => void
+}
+
 export function SettingsSurface({
   embedded = false,
   initialTab,
   onOpenCapabilityHub,
-}: {
-  embedded?: boolean
-  initialTab?: string
-  onOpenCapabilityHub?: () => void
-}) {
+}: SettingsSurfaceProps) {
   const {
     tab,
     setTab,

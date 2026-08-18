@@ -80,6 +80,7 @@ export function enrichChatMessage(raw: unknown, fallback: Partial<ChatMessage>):
     protocolVersion: Number(rec.protocolVersion) || fallback.protocolVersion,
     runId: String(rec.runId || fallback.runId || '').trim() || undefined,
     v2AnswerCommitted: rec.v2AnswerCommitted === true || fallback.v2AnswerCommitted,
+    plan: rec.plan && typeof rec.plan === 'object' ? rec.plan as ChatMessage['plan'] : fallback.plan,
   }
 }
 

@@ -1,7 +1,19 @@
 import '@testing-library/jest-dom/vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import { expect } from 'vitest'
+import type { ReactElement } from 'react'
 import type { KnowMeApi } from '../../shared/api'
 import type { RunState } from '../app/store-types'
 import { useAppStore } from '../app/store'
+
+/** 渲染壳并等到懒表面 pending 消失。Vitest 下表面同步解析，通常立即通过。 */
+export async function renderApp(ui: ReactElement) {
+  const view = render(ui)
+  await waitFor(() => {
+    expect(screen.queryByTestId('km-surface-pending')).not.toBeInTheDocument()
+  }, { timeout: 4000 })
+  return view
+}
 
 export function makeRunState(overrides: Partial<RunState> & Pick<RunState, 'phase'>): RunState {
   return {
@@ -12,6 +24,7 @@ export function makeRunState(overrides: Partial<RunState> & Pick<RunState, 'phas
     brief: '',
     log: [],
     gateNode: null,
+    clarifyNode: null,
     gateTitle: null,
     processLogsText: '',
     progressText: '',
@@ -63,6 +76,8 @@ export function resetAppStore() {
     assistantProcessFeed: '',
     assistantContextInfo: null,
     assistantProcessLines: [],
+    assistantCancelStage: '',
+    assistantRecovery: null,
     imageViewerUrl: '',
     generateRunId: '',
     fileTreeQuery: '',
@@ -156,6 +171,7 @@ export function mockApi(partial: Partial<KnowMeApi> = {}): KnowMeApi {
     workbenchDaemonEvents: async () => ({ ok: true, events: [{ id: 'e1', type: 'step', message: 'started' }] }),
     workbenchDaemonChanges: async () => ({ ok: true, files: [{ path: 'out.md', status: 'added' }] }),
     workbenchDaemonGate: async () => ({}),
+    workbenchDaemonClarify: async () => ({ ok: true }),
     workbenchDaemonCancel: async () => ({}),
     workbenchLaunchStart: async () => ({}),
     workbenchPickFiles: async () => ({ ok: true, canceled: true, files: [] }),
@@ -173,6 +189,7 @@ export function mockApi(partial: Partial<KnowMeApi> = {}): KnowMeApi {
     llmProfile: async () => ({}),
     llmModels: async () => ({ presets: [] }),
     llmSetModel: async () => ({ ok: true }),
+    llmProbe: async () => ({ ok: true, latencyMs: 12, host: 'example.com', model: 'qwen-turbo' }),
     agentSessionList: async () => ({ items: [] }),
     agentSessionNew: async () => ({ id: 'n1', title: '新对话' }),
     agentSessionGet: async () => null,
@@ -205,6 +222,17 @@ export function mockApi(partial: Partial<KnowMeApi> = {}): KnowMeApi {
     capabilityPackEmptyState: async () => ({ ok: true, groups: [] }),
     capabilityList: async () => ({ ok: true, items: [] }),
     capabilityImport: async () => ({ ok: true }),
+    capabilityImportPrecheck: async () => ({
+      ok: true,
+      preview: {
+        name: '预检能力',
+        kind: 'skill',
+        risk: { level: 'low', reasons: [] },
+        compatibility: { status: 'compatible' },
+        rollbackHint: '安装后可停用',
+      },
+    }),
+    capabilityScanCursorRepository: async () => ({ ok: true, previewToken: 'tok', name: 'repo' }),
     capabilityPickLocalFolder: async () => ({ ok: true, path: 'D:/cap' }),
     capabilityPickZipFile: async () => ({ ok: true, path: 'D:/cap.zip' }),
     capabilityPickCursorRepository: async () => ({ ok: true, path: 'D:/cursor-repo' }),

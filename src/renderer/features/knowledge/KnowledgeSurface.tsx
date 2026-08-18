@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import '../../styles/knowledge-chrome.css'
 import { useAppStore } from '../../app/store'
 import { KnowledgeEmptyWelcome } from './KnowledgeEmptyWelcome'
 import { KnowledgeHealthPage } from './KnowledgeHealthPage'

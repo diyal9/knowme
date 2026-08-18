@@ -64,31 +64,9 @@
 .wb-shelf-provenance-team { background:#eef4f1; color:#2f7461; }
 .wb-shelf-provenance-mine { background:#f3f0ea; color:#6b5b4b; }
 
-/* ── 头部工作模式 Tab ───────────────────────────────────────── */
-/* 与能力页 / 知识网的顶栏 Tab 同一套：Tab 长在顶栏内，下划线压住顶栏底边 */
-.wb-mode-tabs { height:52px; display:inline-flex; align-items:stretch; gap:12px; flex-shrink:0; }
-.wb-mode-tabs[hidden] { display:none; }
-.wb-head[hidden] { display:none !important; }
-.wb-mode-tab {
-  position:relative; min-height:52px; padding:0 8px; border:0; border-radius:0;
-  background:transparent; color:#77736d; font:600 13px var(--ui);
-  letter-spacing:.1px; cursor:pointer;
-  transition:color var(--motion-micro, 160ms) ease, transform 120ms ease;
-}
-.wb-mode-tab::after {
-  content:""; position:absolute; left:8px; right:8px; bottom:0; height:2px;
-  border-radius:2px 2px 0 0; background:#292724;
-  transform:scaleX(0); transform-origin:center;
-  transition:transform var(--motion-micro, 160ms) ease;
-}
-.wb-mode-tab:hover { color:#292724; }
-.wb-mode-tab.active { color:#1c1917; }
-.wb-mode-tab.active::after { transform:scaleX(1); }
-.wb-mode-tab:active { transform:translateY(1px); }
-.wb-mode-tab:focus-visible { outline:2px solid var(--wb-accent); outline-offset:-4px; }
+/* 顶栏 .wb-head / .wb-mode-tab 见 workbench-chrome.css（AppShell 静态加载）。 */
 
 /* ── 头部工具条 ─────────────────────────────────────────────── */
-.wb-head-tools { display:flex; align-items:center; gap:8px; margin-left:auto; position:relative; }
 .wb-shelf-search {
   width:clamp(180px, 26vw, 300px); min-height:30px; padding:0 11px;
   border:1px solid var(--wb-line); border-radius:8px; background:#fff;

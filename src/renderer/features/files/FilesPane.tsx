@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import '../../../secondary-dialog.css'
 import { fileTreeNodeIcon, filterVisibleNodes, sourceKindLabel } from '../../../domain/file-tree'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
@@ -26,6 +27,10 @@ export function FilesPane() {
   const [previewPath, setPreviewPath] = useState<string | null>(null)
   const [previewText, setPreviewText] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [splitPath, setSplitPath] = useState<string | null>(null)
+  const [splitText, setSplitText] = useState('')
+  const [splitLoading, setSplitLoading] = useState(false)
+  const [pickingSplit, setPickingSplit] = useState(false)
 
   const visibleNodes = useMemo(() => {
     if (!activeSourceId) return []
@@ -45,8 +50,23 @@ export function FilesPane() {
     void loadFileTree()
   }, [loadFileTree])
 
-  async function openFilePreview(path: string) {
+  async function openFilePreview(path: string, target: 'main' | 'split' = 'main') {
     if (!activeSourceId) return
+    if (pickingSplit || target === 'split') {
+      setPickingSplit(false)
+      setSplitPath(path)
+      setSplitLoading(true)
+      setSplitText('')
+      try {
+        const result = await window.api?.sourcesReadFile?.({ sourceId: activeSourceId, path })
+        setSplitText(String(result?.content || '').slice(0, 12000) || (result?.ok === false ? (result.error || '无法读取') : '（空文件）'))
+      } catch {
+        setSplitText('无法读取文件')
+      } finally {
+        setSplitLoading(false)
+      }
+      return
+    }
     setPreviewPath(path)
     setAssistantApplyTarget({ sourceId: activeSourceId, path })
     setPreviewLoading(true)
@@ -151,10 +171,14 @@ export function FilesPane() {
                 <button className="side-menu-item" type="button" role="menuitem" onClick={() => { setFileMenu(false); void openSourceRoot() }}>
                   <Icon name="externalLink" /><span>打开源目录</span>
                 </button>
-                <button className="side-menu-item side-menu-item-disabled" type="button" role="menuitem" disabled title="React 工作台未恢复独立编辑器分屏">
-                  <Icon name="obsidianPanel" /><span>分屏编辑（未接入）</span>
+                <button className="side-menu-item" type="button" role="menuitem" onClick={() => {
+                  setFileMenu(false)
+                  setPickingSplit(true)
+                  showToast('再点一个文件，打开只读分屏预览')
+                }}>
+                  <Icon name="obsidianPanel" /><span>分屏预览</span>
                 </button>
-                <button className="side-menu-item side-menu-item-disabled" type="button" role="menuitem" disabled title="版本对比依赖 Git 编辑器窗，当前仅支持读文件预览">
+                <button className="side-menu-item side-menu-item-disabled" type="button" role="menuitem" disabled title="版本对比依赖已退役的独立编辑器，当前仅支持只读预览">
                   <Icon name="obsidianSort" /><span>版本对比（未接入）</span>
                 </button>
               </div>
@@ -249,14 +273,27 @@ export function FilesPane() {
           </div>
         ) : null}
         {previewPath ? (
-          <div className="files-preview-panel" data-testid="files-preview-panel">
-            <header>
-              <strong>{previewPath}</strong>
-              <button type="button" className="files-preview-close" aria-label="关闭预览" onClick={() => setPreviewPath(null)}>×</button>
-            </header>
-            {previewLoading ? <p className="tree-empty tiny">读取中…</p> : (
-              <pre className="files-preview-body">{previewText || '（空文件）'}</pre>
-            )}
+          <div className={`files-preview-stack${splitPath ? ' is-split' : ''}`}>
+            <div className="files-preview-panel" data-testid="files-preview-panel">
+              <header>
+                <strong>{previewPath}</strong>
+                <button type="button" className="files-preview-close" aria-label="关闭预览" onClick={() => { setPreviewPath(null); setSplitPath(null) }}>×</button>
+              </header>
+              {previewLoading ? <p className="tree-empty tiny">读取中…</p> : (
+                <pre className="files-preview-body">{previewText || '（空文件）'}</pre>
+              )}
+            </div>
+            {splitPath ? (
+              <div className="files-preview-panel" data-testid="files-preview-split">
+                <header>
+                  <strong>{splitPath}</strong>
+                  <button type="button" className="files-preview-close" aria-label="关闭分屏" onClick={() => setSplitPath(null)}>×</button>
+                </header>
+                {splitLoading ? <p className="tree-empty tiny">读取中…</p> : (
+                  <pre className="files-preview-body">{splitText || '（空文件）'}</pre>
+                )}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>

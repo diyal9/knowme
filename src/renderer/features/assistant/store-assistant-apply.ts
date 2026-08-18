@@ -1,6 +1,6 @@
 /**
- * 助理「应用到文件」与会话产物卡：对接内容源读写 + editor_patch 确认。
- * 不负责 Markdown 渲染。
+ * 助理会话产物卡：对接内容源写入与 editor_patch 确认。
+ * 不负责气泡套用菜单（便签编辑器已退役）。
  */
 import type { AgentRunArtifact, AgentSession } from '../../../shared/api'
 import { api, type StoreGet, type StoreSet } from '../../app/store-types'
@@ -22,78 +22,6 @@ export function createAssistantApplySlice(set: StoreSet, get: StoreGet) {
 
     setAssistantApplyTarget: (target: { sourceId: string; path: string } | null) => {
       set({ assistantApplyTarget: target })
-    },
-
-    applyAssistantText: async (mode: 'insert' | 'append' | 'replace', text: string) => {
-      const body = String(text || '').trim()
-      if (!body) {
-        get().showToast('没有可应用的内容')
-        return
-      }
-      const session = activeSession(get)
-      if (!session?.id) {
-        get().showToast('请先打开一个对话 Session')
-        return
-      }
-      const target = get().assistantApplyTarget
-      const sourceId = target?.sourceId || get().activeSourceId
-      if (!sourceId || !target?.path) {
-        get().showToast('请先在文件中心打开一个文件预览')
-        return
-      }
-
-      if (mode === 'replace') {
-        const artifact = {
-          type: 'editor_patch',
-          title: '替换当前文件全文（待确认）',
-          body,
-          status: 'draft',
-          targetPath: target.path,
-          meta: { mode: 'replace', sourceId, path: target.path },
-        }
-        const res = await api()?.agentArtifactAdd?.({ sessionId: session.id, artifact }) as {
-          ok?: boolean
-          error?: string
-          session?: AgentSession
-        } | undefined
-        if (!res?.ok) {
-          get().showToast(res?.error || '无法创建写入提案')
-          return
-        }
-        if (res.session) mergeSession(set, get, res.session)
-        get().showToast('请确认是否允许替换全文')
-        return
-      }
-
-      // 无光标时 insert 与 append 均落到文末（独立笔记编辑器已退役）
-      try {
-        const read = await api()?.sourcesReadFile?.({ sourceId, path: target.path }) as {
-          ok?: boolean
-          content?: string
-          error?: string
-        } | undefined
-        if (read?.ok === false) {
-          get().showToast(read.error || '无法读取文件')
-          return
-        }
-        const prev = String(read?.content || '')
-        const next = prev
-          ? `${prev.replace(/\s+$/, '')}\n\n${body}`
-          : body
-        const written = await api()?.sourcesWriteFile?.({ sourceId, path: target.path, content: next })
-        if (written?.ok === false) {
-          get().showToast(written.error || '写入失败')
-          return
-        }
-        await api()?.agentApplyLog?.({
-          sessionId: session.id,
-          action: mode,
-          detail: mode === 'insert' ? '已写入文件（无光标，按追加处理）' : '已追加到文末',
-        }).catch(() => null)
-        get().showToast(mode === 'insert' ? '已写入文件（无光标，按追加处理）' : '已追加到文末')
-      } catch {
-        get().showToast('写入失败')
-      }
     },
 
     acceptAssistantArtifact: async (artifactId: string) => {

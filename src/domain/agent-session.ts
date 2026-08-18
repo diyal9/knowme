@@ -4,7 +4,8 @@ import { BUILTIN_ASSISTANT_MODES, resolveAssistantModeId } from './assistant-mod
 import { isWorkbenchLaneSessionId } from './dialogue-lanes'
 
 const WORKBENCH_SESSION_GOAL = '当前工作'
-const DEFAULT_TAB_TITLES = new Set(['新助手', '新对话', '对话', '当前协作'])
+/** 占位标题不覆盖模式名；含重构前英文 New Agent */
+const DEFAULT_TAB_TITLES = new Set(['新助手', '新对话', '对话', '当前协作', 'New Agent'])
 
 function asRecord(raw: unknown): Record<string, unknown> {
   return raw && typeof raw === 'object' && !Array.isArray(raw)
@@ -155,6 +156,7 @@ export function parseSessionRecord(raw: unknown): AgentSession | null {
     : []
   const displayTitle = String(nested.displayTitle || '').trim()
   const agentId = String(nested.agentId || '').trim()
+  const updatedAt = String(nested.updatedAt || '').trim()
   return {
     id,
     title: String(displayTitle || nested.title || '对话').trim() || '对话',
@@ -165,6 +167,7 @@ export function parseSessionRecord(raw: unknown): AgentSession | null {
     knowledgeRefs: refs,
     taskRef: parseTaskRef(nested.taskRef),
     run: parseRun(nested.run),
+    ...(updatedAt ? { updatedAt } : {}),
   }
 }
 

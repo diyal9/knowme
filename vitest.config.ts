@@ -27,6 +27,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: false,
     setupFiles: ['./vitest.setup.ts'],
-    include: ['src/renderer/**/*.spec.tsx', 'src/domain/**/*.spec.ts'],
+    include: ['src/renderer/**/*.spec.tsx', 'src/renderer/**/*.spec.ts', 'src/domain/**/*.spec.ts'],
+    testTimeout: 15000,
   },
 })

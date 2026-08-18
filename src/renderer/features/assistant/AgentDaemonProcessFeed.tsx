@@ -27,7 +27,7 @@ export function AgentDaemonProcessFeed({
     const showTip = compact.tip && compact.statusLabel !== '已完成' && compact.statusLabel !== '失败'
     return (
       <div className="agent-daemon-process agent-stream-bar" data-testid="agent-stream-bar">
-        <article className="agent-daemon-progress-card" aria-label={compact.title || '管线进度'}>
+        <article className="agent-daemon-progress-card agent-stream-in" aria-label={compact.title || '管线进度'}>
           <div className="agent-daemon-progress-head">
             <strong>{compact.currentLabel || '管线任务'}</strong>
             <span className="agent-daemon-progress-status">{compact.statusLabel || ''}</span>
@@ -55,7 +55,7 @@ export function AgentDaemonProcessFeed({
         {transcript?.tip || status ? (
           <div className="agent-daemon-process-tip">{transcript?.tip || status}</div>
         ) : null}
-        <section className={`agent-daemon-process-block${progressCollapsed ? ' is-collapsed' : ''}`} data-daemon-process="progress">
+        <section className={`agent-daemon-process-block agent-stream-in${progressCollapsed ? ' is-collapsed' : ''}`} data-daemon-process="progress">
           <header className="agent-daemon-process-head">
             <strong>{transcript?.progress?.title || '过程'}</strong>
             <button

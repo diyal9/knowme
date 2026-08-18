@@ -1,17 +1,17 @@
 'use strict'
 
 /**
- * Workbench one-shot dispatch LLM stream (no session side effects).
+ * Workbench one-shot dispatch LLM stream（无会话副作用）。
+ * HTTP 只走 requestAgentCompletion，不另开 Node HTTPS 套接字。
  */
+const { applyProviderCompat } = require('../lib/main-llm-bridge')
+
 function registerWorkbenchDispatchIpc(ipcMain, deps) {
   const {
-    https,
-    http,
     loadSettings,
     llmModelCatalog,
     normalizeChatEndpoint,
-    parseSseLines,
-    extractChatText,
+    requestAgentCompletion,
   } = deps
 
   ipcMain.handle('workbench-dispatch', async (e, payload = {}) => {
@@ -39,72 +39,30 @@ function registerWorkbenchDispatchIpc(ipcMain, deps) {
       if (!Number.isFinite(n)) return 0.6
       return Math.min(2, Math.max(0, n))
     })()
-    const body = JSON.stringify({
+    const body = applyProviderCompat(url, {
       model: routedModel.model || 'gpt-4o-mini',
       messages,
       max_tokens: 2000,
       temperature: chatTemp,
       stream: true,
-    })
+    }, s)
 
     const pushChunk = (fullText) => {
       if (!webContents.isDestroyed()) webContents.send('workbench-stream-chunk', { dispatchId, text: fullText })
     }
 
-    return new Promise(resolve => {
-      const lib = url.protocol === 'https:' ? https : http
-      const port = url.port || (url.protocol === 'https:' ? 443 : 80)
-      const req = lib.request({
-        hostname: url.hostname, port, method: 'POST',
-        path: url.pathname + url.search,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${s.apiKey}`,
-          'Content-Length': Buffer.byteLength(body),
-        },
-      }, res => {
-        let raw = ''
-        let sseBuf = ''
-        let fullText = ''
-        let streamed = false
-        if (res.statusCode !== 200) {
-          res.on('data', c => { raw += c })
-          res.on('end', () => {
-            try {
-              const j = JSON.parse(raw)
-              resolve({ error: `HTTP ${res.statusCode}: ${j.error?.message || j.message || raw.slice(0, 200)}` })
-            } catch { resolve({ error: `HTTP ${res.statusCode}: ${raw.slice(0, 200)}` }) }
-          })
-          return
-        }
-        res.on('data', chunk => {
-          const piece = chunk.toString()
-          raw += piece
-          try {
-            sseBuf = parseSseLines(sseBuf + piece, delta => { fullText += delta; streamed = true; pushChunk(fullText) })
-          } catch (err) { req.destroy(); resolve({ error: err.message || '流式响应解析失败' }) }
-        })
-        res.on('end', () => {
-          if (sseBuf.trim()) {
-            try { parseSseLines(sseBuf + '\n', delta => { fullText += delta; streamed = true; pushChunk(fullText) }) } catch { /* ignore trailing parse */ }
-          }
-          if (!fullText) {
-            try {
-              const j = JSON.parse(raw)
-              if (j.error) { resolve({ error: j.error.message || '响应异常' }); return }
-              fullText = extractChatText(j)
-              if (fullText && !streamed) pushChunk(fullText)
-            } catch { /* ignore non-json fallback */ }
-          }
-          if (!fullText) { resolve({ error: `响应格式异常 (${res.statusCode})` }); return }
-          resolve({ text: fullText, streamed })
-        })
-      })
-      req.setTimeout(120000, () => { req.destroy(); resolve({ error: '请求超时（120s）' }) })
-      req.on('error', err => resolve({ error: `连接失败: ${err.message}` }))
-      req.write(body)
-      req.end()
+    const result = await requestAgentCompletion({
+      url,
+      settings: s,
+      body,
+      onSnapshot: (snapshot) => {
+        if (snapshot?.content) pushChunk(snapshot.content)
+      },
     })
+    if (result.error) return { error: result.error }
+    const text = result.snapshot?.content || ''
+    if (!text) return { error: `响应格式异常 (${result.status || ''})`.trim() }
+    return { text, streamed: result.streamed }
   })
 }
 

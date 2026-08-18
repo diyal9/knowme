@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import './console.css'
 import { runNextAction, runProgressLabel, runStatusSummary } from '../../../domain/run-telemetry'
 import { useAppStore, selectProcessView } from '../../app/store'
 import { Icon } from '../../app/Icon'

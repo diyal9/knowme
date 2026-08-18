@@ -3,6 +3,7 @@
  * 不负责文档审阅或飞书 CLI 权限草稿。
  */
 import { useEffect, useRef } from 'react'
+import '../../../secondary-dialog.css'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
 

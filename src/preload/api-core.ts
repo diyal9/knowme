@@ -19,6 +19,7 @@ module.exports = {
   llmProfile: () => ipcRenderer.invoke('llm-profile'),
   llmModels: () => ipcRenderer.invoke('llm-models'),
   llmSetModel: p => ipcRenderer.invoke('llm-set-model', p),
+  llmProbe: p => ipcRenderer.invoke('llm-probe', p || {}),
   agentSessionList: () => ipcRenderer.invoke('agent-session-list'),
   agentSessionGet: id => ipcRenderer.invoke('agent-session-get', id),
   agentSessionNew: agentIdOrOpts => ipcRenderer.invoke('agent-session-new', agentIdOrOpts),

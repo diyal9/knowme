@@ -1,5 +1,10 @@
 'use strict'
 
+/**
+ * Agent Run 启动器：注册 backend、探测健康、必要时降级已注册远程。
+ * 未注册 backend 直接失败，不降级本地。
+ */
+
 const crypto = require('crypto')
 const { AgentRunExecutor } = require('./agent-run-executor')
 const { RunPhase } = require('./agent-run-ports')
@@ -18,6 +23,8 @@ const {
   REQUIRED_REMOTE_CAPABILITIES,
 } = require('./agent-run-launcher-shared')
 
+const { createBackendHealthPolicy } = require('./agent-backend-health-policy')
+const { createWorkspaceBudget } = require('./agent-workspace-budget')
 const { mapTerminalToStatus, isTerminalStatus, handoffByteSize, validateHandoffPayload, isFakeSpawnResult, createMessageId, normalizeRemoteError, withRemoteTimeout, LocalExecutorAdapter, RemoteAgentServiceAdapter } = require('./agent-run-launcher-adapters')
 
 class AgentRunLauncher {
@@ -28,6 +35,8 @@ class AgentRunLauncher {
     this.Executor = opts.Executor || AgentRunExecutor
     this.defaultBackend = opts.defaultBackend || BACKEND_LOCAL
     this.metrics = opts.metrics || createAgentRuntimeMetrics()
+    this.healthPolicy = opts.healthPolicy || createBackendHealthPolicy({ localBackend: this.defaultBackend })
+    this.workspaceBudget = opts.workspaceBudget || createWorkspaceBudget(opts.workspaceBudgetOpts)
     this.registerBackend(BACKEND_LOCAL, new LocalExecutorAdapter({
       buildPorts: this.buildPorts,
       Executor: this.Executor,
@@ -75,11 +84,11 @@ class AgentRunLauncher {
   }
 
   async probeHealth(backendId) {
+    const adapter = this.resolveBackend(backendId)
     try {
-      const adapter = this.resolveBackend(backendId)
       return await adapter.probeHealth?.() || { ok: true, status: 'READY' }
     } catch (err) {
-      return { ok: false, code: 'backend_missing', message: String(err?.message || err) }
+      return { ok: false, code: 'probe_failed', message: String(err?.message || err) }
     }
   }
 
@@ -94,7 +103,37 @@ class AgentRunLauncher {
       throw err
     }
 
-    const backendId = runSpec.backend || this.defaultBackend
+    const requestedBackend = runSpec.backend || this.defaultBackend
+    // 未注册的 backend 是配置错误，禁止当成远程不健康而降级本地。
+    if (!this.backends.has(String(requestedBackend))) {
+      throw new Error(`Unknown launcher backend: ${requestedBackend}`)
+    }
+    const budgetCheck = this.workspaceBudget.check({
+      workspaceId: runSpec.workspaceId || runSpec.meta?.workspaceId,
+      teamId: runSpec.teamId,
+      priority: runSpec.priority,
+    })
+    if (!budgetCheck.ok) {
+      const err = new Error(budgetCheck.message || 'workspace budget tripped')
+      err.code = budgetCheck.code
+      throw err
+    }
+    const probe = await this.probeHealth(requestedBackend)
+    const decision = this.healthPolicy.decide(requestedBackend, probe)
+    const backendId = decision.backend || requestedBackend
+    if (decision.degraded) {
+      runSpec = {
+        ...runSpec,
+        backend: backendId,
+        degrade: { from: decision.from, reason: decision.reason, recoveryHint: decision.recoveryHint },
+      }
+      hooks.onEvent?.({
+        type: 'backend.degraded',
+        title: '已降级本地执行',
+        summary: decision.reason,
+        payload: { from: decision.from, reason: decision.reason, recoveryHint: decision.recoveryHint },
+      })
+    }
     const adapter = this.resolveBackend(backendId)
 
     const launchEntry = {
@@ -120,6 +159,15 @@ class AgentRunLauncher {
         entry.endedAt = Date.now()
         entry.terminal = info.terminal
         entry.summary = info.text
+        this.workspaceBudget.record({
+          workspaceId: runSpec.workspaceId || runSpec.meta?.workspaceId,
+          teamId: runSpec.teamId,
+          priority: runSpec.priority,
+        }, {
+          ok: entry.status !== 'error' && entry.status !== 'failed',
+          wallMs: entry.endedAt - (entry.startedAt || entry.endedAt),
+          timeout: info.terminal === 'timeout' || info.code === 'timeout',
+        })
         if (isTerminalStatus(entry.status)) {
           this.activeLaunches.delete(runId)
         }
@@ -244,6 +292,7 @@ class AgentRunLauncher {
         parentRunId: entry.parentRunId,
         status: entry.status,
       })),
+      slo: this.workspaceBudget.slo(),
     }
   }
 }

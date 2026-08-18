@@ -1,8 +1,12 @@
+/**
+ * 助理顶栏：会话 Tab、历史弹出、专家 / 更多菜单。
+ * 不负责对话正文与输入框。
+ */
 import { useEffect, useMemo, useState } from 'react'
 import { hasErrorMessage, lastErrorMessageText } from '../../../domain/agent-message-ui'
-import { readAgentPresenceEnabled, toggleAgentPresenceEnabled } from '../../../domain/agent-presence'
 import { BUILTIN_ASSISTANT_MODES, resolveAssistantModeId } from '../../../domain/assistant-modes'
 import { sortSessionTabs, resolveSessionTabLabel } from '../../../domain/agent-session'
+import { taskRelTime } from '../../../domain/run-projection'
 import { selectActiveMessages, useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
 import { AssistantTabContextMenu, ModeAvatarMark } from './AssistantTabContextMenu'
@@ -26,10 +30,8 @@ export function AssistantSessionTabs() {
   const selectSession = useAppStore((s) => s.selectSession)
   const newSession = useAppStore((s) => s.newSession)
   const renameSession = useAppStore((s) => s.renameSession)
-  const pinSession = useAppStore((s) => s.pinSession)
   const forkSession = useAppStore((s) => s.forkSession)
   const closeSessionTab = useAppStore((s) => s.closeSessionTab)
-  const closeSessionTabs = useAppStore((s) => s.closeSessionTabs)
   const copySessionTranscript = useAppStore((s) => s.copySessionTranscript)
   const startAssistantMode = useAppStore((s) => s.startAssistantMode)
   const showToast = useAppStore((s) => s.showToast)
@@ -39,7 +41,6 @@ export function AssistantSessionTabs() {
   const [moreOpen, setMoreOpen] = useState(false)
   const [historyQuery, setHistoryQuery] = useState('')
   const [renaming, setRenaming] = useState('')
-  const [presenceEnabled, setPresenceEnabled] = useState(() => readAgentPresenceEnabled())
   const activeModeId = resolveAssistantModeId(
     sessions.find((item) => item.id === activeSessionId)?.agentId
       || sessions.find((item) => item.id === activeSessionId)?.expertId,
@@ -60,32 +61,26 @@ export function AssistantSessionTabs() {
     return () => document.removeEventListener('click', onClose)
   }, [])
 
-  const historyItems = [...history]
-    .sort((a, b) => String(b.title || '').localeCompare(String(a.title || '')))
-    .filter((item) => {
-      const q = historyQuery.trim().toLowerCase()
-      if (!q) return true
-      return String(item.title || item.id || '').toLowerCase().includes(q)
-    })
-    .slice(0, 30)
+  const historyItems = useMemo(() => {
+    const q = historyQuery.trim().toLowerCase()
+    return [...history]
+      .sort((a, b) => {
+        const at = Date.parse(String(b.updatedAt || '')) || 0
+        const bt = Date.parse(String(a.updatedAt || '')) || 0
+        if (at !== bt) return at - bt
+        return resolveSessionTabLabel(a).localeCompare(resolveSessionTabLabel(b), 'zh')
+      })
+      .filter((item) => {
+        if (!q) return true
+        const label = resolveSessionTabLabel(item).toLowerCase()
+        const title = String(item.title || item.id || '').toLowerCase()
+        return label.includes(q) || title.includes(q)
+      })
+      .slice(0, 30)
+  }, [history, historyQuery])
 
   async function handleTabCtxAction(action: string, sessionId: string) {
     setMenu(null)
-    const orderedIds = orderedSessions.map((item) => item.id)
-    const currentIndex = orderedIds.indexOf(sessionId)
-    const leftIds = currentIndex > 0 ? orderedIds.slice(0, currentIndex) : []
-    const rightIds = currentIndex >= 0 ? orderedIds.slice(currentIndex + 1) : []
-    const otherIds = orderedIds.filter((id) => id !== sessionId)
-
-    if (action === 'manage') {
-      if (isGenerating && activeSessionId !== sessionId) {
-        showToast('当前助手正在生成，请稍候')
-        return
-      }
-      if (activeSessionId !== sessionId) selectSession(sessionId)
-      setMoreOpen(true)
-      return
-    }
     if (action === 'transcript') {
       await copySessionTranscript(sessionId)
       return
@@ -94,45 +89,12 @@ export function AssistantSessionTabs() {
       setRenaming(sessionId)
       return
     }
-    if (action === 'pin') {
-      const pinned = sessions.find((item) => item.id === sessionId)?.pinned === true
-      await pinSession(sessionId, !pinned)
-      showToast(pinned ? '已取消 Pin' : '已 Pin')
-      return
-    }
-    if (action === 'fork') {
-      await forkSession(sessionId)
-      return
-    }
-    if (action === 'close') {
-      await closeSessionTab(sessionId)
-      return
-    }
-    if (action === 'close-left') {
-      await closeSessionTabs(leftIds)
-      showToast('已关闭左侧会话')
-      return
-    }
-    if (action === 'close-right') {
-      await closeSessionTabs(rightIds)
-      showToast('已关闭右侧会话')
-      return
-    }
-    if (action === 'close-others') {
-      await closeSessionTabs(otherIds)
-      showToast('已关闭其他会话')
-    }
+    if (action === 'close') await closeSessionTab(sessionId)
   }
 
   async function handleMoreAction(action: string) {
     setMoreOpen(false)
     const activeId = activeSessionId
-    if (action === 'toggle-presence') {
-      const enabled = toggleAgentPresenceEnabled()
-      setPresenceEnabled(enabled)
-      showToast(enabled ? '已开启动作表现' : '已关闭动作表现')
-      return
-    }
     if (action === 'copy-error') {
       const text = lastErrorMessageText(messages)
       if (!text) {
@@ -167,21 +129,11 @@ export function AssistantSessionTabs() {
       } catch {
         showToast('复制失败')
       }
-      return
-    }
-    if (action === 'rename') {
-      if (!activeId) return
-      setRenaming(activeId)
-      return
-    }
-    if (action === 'close') {
-      if (!activeId) return
-      await closeSessionTab(activeId)
     }
   }
 
   function openContextMenu(sessionId: string, clientX: number, clientY: number) {
-    const pos = clampMenuPosition(clientX, clientY, 196, 220)
+    const pos = clampMenuPosition(clientX, clientY, 196, 148)
     setMenu({ id: sessionId, x: pos.left, y: pos.top })
   }
 
@@ -274,10 +226,11 @@ export function AssistantSessionTabs() {
         </button>
         <button
           type="button"
-          className="agent-head-tool"
+          className={`agent-head-tool${historyOpen ? ' is-open' : ''}`}
           id="agentHistoryBtn"
-          title="历史 Session"
+          title="历史会话"
           aria-label="历史"
+          aria-expanded={historyOpen}
           onClick={(e) => { e.stopPropagation(); setHistoryOpen((open) => !open); setExpertOpen(false); setMoreOpen(false) }}
         >
           <Icon name="history" />
@@ -312,10 +265,7 @@ export function AssistantSessionTabs() {
         </div>
       ) : null}
       {moreOpen ? (
-        <div className="agent-pop show" id="agentMorePop" data-testid="agent-more-pop" role="menu" aria-label="助手管理" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('copy-summary')}>
-            <Icon name="copy" /><span>复制当前总结</span>
-          </button>
+        <div className="agent-pop show" id="agentMorePop" data-testid="agent-more-pop" role="menu" aria-label="当前对话" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             className="agent-pop-item"
@@ -327,67 +277,69 @@ export function AssistantSessionTabs() {
           <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('fork')}>
             <Icon name="plus" /><span>在新对话继续</span>
           </button>
-          <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('rename')}>
-            <Icon name="edit" /><span>重命名</span>
-          </button>
           <div className="agent-pop-sep" />
-          <button
-            type="button"
-            className="agent-pop-item"
-            aria-pressed={presenceEnabled}
-            onClick={() => void handleMoreAction('toggle-presence')}
-          >
-            <Icon name="optimize" /><span>{`动作表现：${presenceEnabled ? '已开启' : '已关闭'}`}</span>
+          <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('copy-summary')}>
+            <Icon name="copy" /><span>复制当前总结</span>
           </button>
-          <button
-            type="button"
-            className="agent-pop-item"
-            disabled={!canCopyError}
-            onClick={() => void handleMoreAction('copy-error')}
-          >
-            <Icon name="copy" /><span>复制错误信息</span>
-          </button>
-          <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('close')}>
-            <Icon name="close" /><span>关闭 Tab</span>
-          </button>
+          {canCopyError ? (
+            <button
+              type="button"
+              className="agent-pop-item"
+              onClick={() => void handleMoreAction('copy-error')}
+            >
+              <Icon name="copy" /><span>复制错误信息</span>
+            </button>
+          ) : null}
         </div>
       ) : null}
       {historyOpen ? (
-        <div className="agent-pop history-pop show" data-testid="agent-history-pop" role="menu" aria-label="历史 Session" onClick={(e) => e.stopPropagation()}>
-          <input
-            type="search"
-            placeholder="搜索历史会话"
-            aria-label="搜索历史会话"
-            value={historyQuery}
-            onChange={(e) => setHistoryQuery(e.target.value)}
-          />
-          {historyItems.length === 0 ? (
-            <div className="agent-pop-empty">暂无历史 Session</div>
-          ) : historyItems.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`agent-pop-item${item.id === activeSessionId ? ' active' : ''}`}
-              onClick={() => {
-                if (isGenerating && item.id !== activeSessionId) {
-                  showToast('当前助手正在生成，请稍候')
-                  return
-                }
-                selectSession(item.id)
-                setHistoryOpen(false)
-              }}
-            >
-              <ModeAvatarMark modeId={resolveAssistantModeId(item.agentId || item.expertId)} />
-              <span>{item.title || item.id}</span>
-              <span className="pop-meta">{openIds.has(item.id) ? '已打开' : ''}</span>
-            </button>
-          ))}
+        <div className="agent-pop history-pop show" data-testid="agent-history-pop" role="menu" aria-label="历史会话" onClick={(e) => e.stopPropagation()}>
+          <div className="history-pop-search">
+            <input
+              type="search"
+              className="history-pop-query"
+              placeholder="搜索历史会话"
+              aria-label="搜索历史会话"
+              value={historyQuery}
+              onChange={(e) => setHistoryQuery(e.target.value)}
+            />
+          </div>
+          <div className="history-pop-list">
+            {historyItems.length === 0 ? (
+              <div className="agent-pop-empty">暂无历史会话</div>
+            ) : historyItems.map((item) => {
+              const label = resolveSessionTabLabel(item)
+              const when = taskRelTime(item.updatedAt)
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`agent-pop-item${item.id === activeSessionId ? ' active' : ''}`}
+                  title={label}
+                  onClick={() => {
+                    if (isGenerating && item.id !== activeSessionId) {
+                      showToast('当前助手正在生成，请稍候')
+                      return
+                    }
+                    selectSession(item.id)
+                    setHistoryOpen(false)
+                  }}
+                >
+                  <ModeAvatarMark modeId={resolveAssistantModeId(item.agentId || item.expertId)} />
+                  <span className="pop-copy">
+                    <span className="pop-label">{label}</span>
+                    {when ? <span className="pop-when">{when}</span> : null}
+                  </span>
+                  {openIds.has(item.id) ? <span className="pop-meta">已打开</span> : null}
+                </button>
+              )
+            })}
+          </div>
         </div>
       ) : null}
       {menu ? (
         <AssistantTabContextMenu
           sessionId={menu.id}
-          sessions={orderedSessions}
           style={{ left: menu.x, top: menu.y }}
           onAction={(action, sessionId) => void handleTabCtxAction(action, sessionId)}
         />

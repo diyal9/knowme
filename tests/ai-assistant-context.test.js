@@ -4,6 +4,10 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert');
 const {
+  assembleCorePrompt,
+  capPromptText,
+} = require('../src/lib/knowme-system-prompt')
+const {
   ASSISTANT_BASE_PROMPT,
   LEGACY_DEFAULT_SYSTEM_PROMPT,
   isLegacyDefaultSystemPrompt,
@@ -13,6 +17,24 @@ const {
 } = require('../src/lib/ai-assistant-context');
 
 describe('ai-assistant-context', () => {
+  it('keeps chat-tier core shorter than the full KnowMe base prompt', () => {
+    const chat = assembleCorePrompt({ tier: 'chat', toolsEnabled: false })
+    const full = assembleCorePrompt({ tier: 'assist', toolsEnabled: true })
+    assert.ok(chat.includes('你是 KnowMe（知我）Agent'))
+    assert.ok(chat.includes('禁止幻觉'))
+    assert.ok(!chat.includes('feishu.search_docs'))
+    assert.ok(!chat.includes('```suggestion'))
+    assert.ok(full.includes('feishu.search_docs'))
+    assert.ok(chat.length < full.length)
+  })
+
+  it('caps oversized user preferences', () => {
+    const long = '偏好'.repeat(300)
+    const capped = capPromptText(long, 400)
+    assert.ok(capped.length < long.length)
+    assert.ok(capped.includes('用户偏好已按预算截断'))
+  })
+
   it('positions the assistant as a work partner instead of a prompt tool', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('你是 KnowMe（知我）Agent'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('不得自称“WorkBuddy”'));

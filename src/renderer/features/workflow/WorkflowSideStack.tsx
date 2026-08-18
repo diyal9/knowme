@@ -48,6 +48,7 @@ export function WorkflowSideStack({
         ) : (
           <p className="wb-side-workflow-steps">打开对话后，步骤会随协作更新。</p>
         )}
+        <p className="wb-side-hint">进度见对话 To-dos，右侧步骤只是工作流说明。</p>
       </section>
       <p className="wb-side-hint">现在可以在左侧对话推进。</p>
     </div>

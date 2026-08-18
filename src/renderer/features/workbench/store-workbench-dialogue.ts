@@ -1,3 +1,6 @@
+/**
+ * 工作台对话发送：专家房走 LLM；管线任务房走 Daemon clarify/gate，禁止 aiGenerate。
+ */
 import { api, type StoreGet, type StoreSet } from '../../app/store-types'
 import { createAgentRunId } from '../../../domain/agent-v2-runtime'
 import { finalizeGenerateReply, historyTurns, seedStreamingAssistant } from '../../../domain/agent-generate-contract'
@@ -7,8 +10,26 @@ import {
   workbenchRunSessionId,
   workbenchTaskRefForSessionId,
 } from '../../../domain/dialogue-lanes'
+import {
+  pipelineComposerReceipt,
+  planPipelineComposerSend,
+} from '../../../domain/pipeline-composer-send'
 import { invokeStreamingGenerate } from '../assistant/store-generate-invoke'
 import { beginAssistantStream, patchLiveAssistantMessage } from '../assistant/store-session'
+
+function daemonResultOk(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object') return false
+  const rec = raw as { ok?: boolean; error?: string }
+  if (rec.ok === false) return false
+  if (rec.error) return false
+  return rec.ok === true || rec.ok == null
+}
+
+function daemonErrorText(raw: unknown, fallback: string): string {
+  if (!raw || typeof raw !== 'object') return fallback
+  const rec = raw as { error?: string; message?: string }
+  return String(rec.error || rec.message || fallback)
+}
 
 export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
   return {
@@ -38,23 +59,77 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
       const attachment = slice.attachments[0]
       if ((!text && !attachment) || get().isGenerating) return
 
-      const bridge = api()
-      if (!bridge?.aiGenerate) {
-        get().showToast('助手 API 未就绪，请重启应用')
-        return
-      }
-
       const displayText = text || (attachment ? `（附件：${attachment.name}）` : '')
+      const expertRoom = get().expertRoom
+      const run = get().run
+      const plan = planPipelineComposerSend({
+        expertRoom: Boolean(expertRoom),
+        run: run && !expertRoom
+          ? {
+              lane: run.lane,
+              clarifyNode: run.clarifyNode,
+              gateNode: run.gateNode,
+              phase: run.phase,
+            }
+          : null,
+        text: displayText,
+      })
+      if (plan.kind === 'empty') return
+
       const user = {
         id: `wu-${Date.now()}`,
         role: 'user' as const,
         text: displayText,
         attachmentName: attachment?.name,
       }
+
+      if (plan.kind !== 'llm') {
+        if (!run) return
+        const assistant = {
+          id: `wa-${Date.now()}`,
+          role: 'assistant' as const,
+          text: pipelineComposerReceipt(plan),
+        }
+        set({
+          workbenchDialogue: { composer: '', attachments: [] },
+          run: {
+            ...run,
+            dialogueMessages: [...run.dialogueMessages, user, assistant],
+          },
+        })
+        void (async () => {
+          const bridge = api()
+          if (plan.kind === 'clarify') {
+            const result = await bridge?.workbenchDaemonClarify?.(run.slug, {
+              node: plan.node,
+              answer: plan.answer,
+            }).catch((err: unknown) => ({ ok: false, error: String(err) }))
+            if (!daemonResultOk(result)) {
+              get().showToast(daemonErrorText(result, '澄清提交失败'))
+            }
+          } else if (plan.kind === 'gate-revise') {
+            const result = await bridge?.workbenchDaemonGate?.(run.slug, {
+              node: plan.node,
+              decision: 'revise',
+              comment: plan.comment,
+            }).catch((err: unknown) => ({ ok: false, error: String(err) }))
+            if (!daemonResultOk(result)) {
+              get().showToast(daemonErrorText(result, '修改意见提交失败'))
+            }
+          }
+          await get().refreshRunTelemetry()
+        })()
+        return
+      }
+
+      const bridge = api()
+      if (!bridge?.aiGenerate) {
+        get().showToast('助手 API 未就绪，请重启应用')
+        return
+      }
+
       const assistantId = `wa-${Date.now()}`
       const runId = createAgentRunId()
-      const expertRoom = get().expertRoom
-      const run = get().run
       const expert = expertRoom
         ? get().hubItems.find((item) => item.id === expertRoom.id)
         : null

@@ -45,6 +45,7 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   workbenchDaemonWorkspaceTree?: (slug: string, relPath?: string) => Promise<unknown>
   workbenchDaemonWorkspaceBlob?: (slug: string, relPath?: string) => Promise<unknown>
   workbenchDaemonGate: (slug: string, payload: Record<string, unknown>) => Promise<unknown>
+  workbenchDaemonClarify?: (slug: string, payload: Record<string, unknown>) => Promise<unknown>
   workbenchDaemonCancel: (slug: string, payload?: Record<string, unknown>) => Promise<unknown>
   workbenchLaunchStart: (payload: Record<string, unknown>) => Promise<unknown>
   workbenchPickFiles: (payload?: Record<string, unknown>) => Promise<{ ok?: boolean; canceled?: boolean; files?: { path: string; name: string }[]; error?: string }>
@@ -54,6 +55,12 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   llmProfile: () => Promise<{ model?: string; provider?: string } | unknown>
   llmModels?: () => Promise<{ presets?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean }[]; groups?: { id: string; label?: string; models?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean }[] }[] }>
   llmSetModel?: (payload: { model?: string; provider?: string }) => Promise<{ ok?: boolean; error?: string }>
+  llmProbe?: (payload?: {
+    apiEndpoint?: string
+    apiKey?: string
+    model?: string
+    llmProvider?: string
+  }) => Promise<{ ok?: boolean; error?: string; latencyMs?: number; host?: string; model?: string }>
   agentSessionList: () => Promise<{ items?: AgentSession[]; sessions?: AgentSession[]; ui?: { openSessionIds?: string[]; activeSessionId?: string } }>
   agentSessionNew: (opts?: unknown) => Promise<AgentSession | { ok?: boolean; session?: AgentSession; ui?: unknown }>
   agentSessionGet: (id: string) => Promise<AgentSession | { ok?: boolean; session?: AgentSession } | null>
@@ -189,11 +196,12 @@ export interface WorkbenchAutomationJob {
   connectorId?: string
   permissionMode?: string
   schedule?: {
-    type?: 'daily' | 'interval' | 'once'
+    type?: 'daily' | 'interval' | 'once' | 'cron'
     dailyTime?: string
     intervalValue?: number
     intervalUnit?: 'hour' | 'day'
     onceAt?: string
+    cronExpr?: string
   }
   dateRange?: { start?: string; end?: string }
   pushTargets?: AutomationPushTargets
@@ -280,6 +288,8 @@ export interface AgentSession {
     goal?: string
     artifacts?: AgentRunArtifact[]
   } | null
+  /** 最近更新；历史列表按此排序，缺省时不展示相对时间 */
+  updatedAt?: string
 }
 
 export interface AgentFileRef {
@@ -310,6 +320,12 @@ export interface ChatMessage {
   runId?: string
   v2AnswerCommitted?: boolean
   messageState?: unknown
+  plan?: {
+    version?: number
+    updatedAt?: string
+    remaining?: number
+    items?: { id?: string; title?: string; status?: string; evidence?: string }[]
+  }
 }
 
 export interface AiStreamChunk {
@@ -375,6 +391,30 @@ export interface KnowledgeProviderListResult {
   activeProviderId?: string | null
 }
 
+/** 上下文分区 token 占用（stage_prepare / 流式 contextInfo.sectionUsage） */
+export interface AgentContextSectionUsage {
+  /** 分区键：conversation / knowledge / tools / grounding 等 */
+  key: string
+  /** 该分区估算或实测 token 数 */
+  usedTokens?: number
+}
+
+/** 单次 run 的上下文窗口占用快照（IPC / 流式 stage_prepare 下发） */
+export interface AgentContextInfo {
+  /** 主进程聚合已用 token；有值时 UI 标「会话用量」 */
+  usedTokens?: number
+  /** 当前模型上下文窗口上限 */
+  contextWindow?: number
+  /** 按轮压缩时已省略的对话轮数 */
+  omittedTurns?: number
+  /** 按轮压缩时已省略的消息条数 */
+  omittedMessages?: number
+  /** 各分区 token 占用明细 */
+  sectionUsage?: AgentContextSectionUsage[]
+  /** 因预算未纳入的分区键列表 */
+  sectionOmitted?: string[]
+}
+
 export interface AiStreamEvent {
   runId?: string
   sessionId?: string
@@ -384,7 +424,7 @@ export interface AiStreamEvent {
   status?: string
   id?: string
   payload?: Record<string, unknown>
-  contextInfo?: Record<string, unknown>
+  contextInfo?: AgentContextInfo
 }
 
 export interface KnowledgeHit {

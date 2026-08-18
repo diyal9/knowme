@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import '../run/console.css'
+import '../workbench/workbench-daemon.css'
 import {
   DAEMON_MIN_INTENT_CHARS,
   DAEMON_RUN_FILTERS,

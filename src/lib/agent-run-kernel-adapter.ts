@@ -116,7 +116,10 @@ function buildProductionRunPorts(state) {
             cancelSubRun: orchestration.cancelSubRun,
           })
           cancelledCount = Array.isArray(result?.cancelled) ? result.cancelled.length : 0
-        } else if (typeof orchestration.cancelSubRun === 'function') {
+        } else if (typeof orchestration.cancelAllChildren === 'function' && runId) {
+          await orchestration.cancelAllChildren(runId, reason)
+          cancelledCount = 1
+        } else if (process.env.KNOWME_ALLOW_ACTIVE_SUBRUNS === '1' && typeof orchestration.cancelSubRun === 'function') {
           for (const sub of orchestration.activeSubRuns || []) {
             orchestration.cancelSubRun(sub?.id || sub)
             cancelledCount += 1

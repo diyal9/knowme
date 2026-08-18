@@ -32,6 +32,17 @@ describe('shell-rail', () => {
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
   })
 
+  it('returns to 专家协作 after visiting automation via 助理', async () => {
+    render(<AppShell />)
+    fireEvent.click(screen.getByRole('button', { name: '自动化' }))
+    expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '办公助理' }))
+    fireEvent.click(screen.getByRole('button', { name: '工作台' }))
+    expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'true')
+    expect(await screen.findByRole('heading', { name: '安排专家协作' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '按你的节奏自动推进工作' })).not.toBeInTheDocument()
+  })
+
   it('opens settings in the main window instead of a secondary window', async () => {
     const openSettingsWindow = vi.fn()
     mockApi({ openSettingsWindow })

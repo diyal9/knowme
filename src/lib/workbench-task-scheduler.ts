@@ -5,6 +5,8 @@
  * 仅本机 App 在线时由主进程 tick 调用；不承诺关机后台。
  */
 
+const { parseCronExpr, nextCronRunAt } = require('./cron-next-run')
+
 function validDailyTime(value) {
   const text = String(value || '').trim()
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(text) ? text : ''
@@ -18,12 +20,13 @@ function clampInt(value, min, max, fallback) {
 
 function normalizeSchedule(input = {}) {
   const source = input && typeof input === 'object' ? input : {}
-  const type = ['daily', 'interval', 'once'].includes(source.type) ? source.type : 'daily'
+  const type = ['daily', 'interval', 'once', 'cron'].includes(source.type) ? source.type : 'daily'
   const dailyTime = validDailyTime(source.dailyTime) || '09:00'
   const intervalValue = clampInt(source.intervalValue, 1, 720, 24)
   const intervalUnit = ['hour', 'day'].includes(source.intervalUnit) ? source.intervalUnit : 'hour'
   const onceAt = String(source.onceAt || '').trim()
-  return { type, dailyTime, intervalValue, intervalUnit, onceAt }
+  const cronExpr = parseCronExpr(source.cronExpr) ? String(source.cronExpr).trim() : ''
+  return { type, dailyTime, intervalValue, intervalUnit, onceAt, cronExpr }
 }
 
 function scheduleToLabel(schedule = {}) {
@@ -38,6 +41,7 @@ function scheduleToLabel(schedule = {}) {
     const unit = s.intervalUnit === 'day' ? '天' : '小时'
     return `每 ${s.intervalValue || 1} ${unit}`
   }
+  if (s.type === 'cron') return s.cronExpr ? `cron ${s.cronExpr}` : 'cron（未设置）'
   return `每天 ${s.dailyTime || '09:00'}`
 }
 
@@ -58,6 +62,8 @@ function computeNextRunAt(schedule = {}, enabled = true, fromDate = new Date()) 
     const ts = now.getTime() + (Math.max(1, Number(s.intervalValue || 1)) * unitMs)
     return new Date(ts).toISOString()
   }
+
+  if (s.type === 'cron') return nextCronRunAt(s.cronExpr, now)
 
   const [hh, mm] = String(s.dailyTime || '09:00').split(':').map(Number)
   const candidate = new Date(now)

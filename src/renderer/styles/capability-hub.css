@@ -19,7 +19,7 @@
   --hub-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-html, body { height: 100%; overflow: hidden; background: var(--hub-bg); color: var(--hub-text); font: 13px var(--hub-ui); }
+html, body { height: 100%; overflow: hidden; color: var(--hub-text); font: 13px var(--hub-ui); }
 
 .hub-app {
   height: 100%; display: flex; flex-direction: column; min-height: 0;
@@ -237,12 +237,12 @@ html, body { height: 100%; overflow: hidden; background: var(--hub-bg); color: v
 
 .hub-loading .hub-grid { opacity: 0.45; pointer-events: none; }
 
-/* Capability Hub v2 — KnowMe warm editorial system */
+/* 嵌入主壳：岛色跟工作台 / 助理共用 --bg-card，禁止再铺独立米色底 */
 :root {
-  --hub-bg: #f3f1ed;
-  --hub-card: #fffefa;
-  --hub-surface: #f8f7f4;
-  --hub-surface-strong: #ebe8e2;
+  --hub-bg: var(--bg-card, #ffffff);
+  --hub-card: var(--bg-card, #ffffff);
+  --hub-surface: var(--bg-card, #ffffff);
+  --hub-surface-strong: var(--app-chrome-line, #e2e0dc);
   --hub-div: rgba(45, 41, 37, 0.1);
   --hub-div-strong: rgba(45, 41, 37, 0.18);
   --hub-text: #24211e;
@@ -262,7 +262,6 @@ html, body { height: 100%; overflow: hidden; background: var(--hub-bg); color: v
 }
 
 html, body {
-  background: var(--hub-bg);
   color: var(--hub-text);
   font: 13px/1.5 var(--hub-ui);
   -webkit-font-smoothing: antialiased;
@@ -289,7 +288,7 @@ button, input, select, textarea { font-family: inherit; }
   align-items: center;
   gap: 14px;
   border-bottom: 1px solid var(--hub-div);
-  background: #fbfaf7;
+  background: var(--bg-card, #fff);
 }
 body.hub-embedded .hub-nav { display: none; }
 /* 工作台详情叠层：只露二级弹窗，目录壳层隐藏 */
@@ -1316,6 +1315,22 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-import-precheck-list.safe {
   color: #2d6c5a;
 }
+.hub-import-preview {
+  padding: 8px 4px 4px;
+}
+.hub-import-preview h3 { margin: 0 0 4px; font: 650 16px/1.3 var(--hub-ui); }
+.hub-import-meta { margin: 0 0 12px; color: var(--hub-text3); font: 12px/1.4 var(--hub-ui); }
+.hub-import-preview dl {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 6px 12px;
+  margin: 0 0 14px;
+  font: 12.5px/1.45 var(--hub-ui);
+}
+.hub-import-preview dt { color: var(--hub-text3); font-weight: 600; }
+.hub-import-preview dd { margin: 0; }
+.hub-import-fail { color: #9a4a3a; font: 12.5px/1.45 var(--hub-ui); }
+.hub-import-actions { display: flex; justify-content: flex-end; gap: 8px; }
 
 .hub-toast {
   bottom: 20px;

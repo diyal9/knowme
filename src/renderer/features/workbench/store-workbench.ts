@@ -11,6 +11,7 @@ import {
 import {
   parseRunProjection,
   parseTaskListResponse,
+  parsePendingClarifyNode,
   runPhaseFromTaskStatus,
 } from '../../../domain/run-projection'
 import { workbenchRunReturnSurface } from '../../../domain/workbench-task-room'
@@ -207,6 +208,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
             processLogsText: logs.lines.join('\n') || latest.processLogsText,
             progressText,
             gateNode: logs.gate?.node || latest.gateNode,
+            clarifyNode: parsePendingClarifyNode(taskRaw),
             gateTitle: logs.gate?.title || latest.gateTitle,
             artifacts: artifacts.length ? artifacts : latest.artifacts,
             agents: projection?.agents?.length
@@ -313,10 +315,13 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
     },
 
     openWorkbenchRail: () => {
-      if (get().route === 'automation') {
+      const { route, managePanel } = get()
+      /* 自动化复用 manage 面；从助理回来时不得把自动化页当成专家协作 */
+      if (route === 'automation' || managePanel === 'automation') {
         set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
         return
       }
+      if (route === 'workbench') return
       set({ route: 'workbench' })
     },
 

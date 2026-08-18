@@ -1,0 +1,233 @@
+/* 管线/Run 对话与 Daemon 嵌入样式；run/manage 时懒加载。 */
+/* ── 代码工作区：二级弹窗（对齐 Daemon WebUI） ───────────────── */
+.wb-ws-mask {
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  padding: 28px;
+  background: rgba(28, 25, 23, .36);
+}
+.wb-ws-modal {
+  width: min(88vw, 1440px);
+  height: min(88vh, 980px);
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #e3e3e0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 22px 60px rgba(15, 14, 12, .28);
+}
+.wb-ws-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  flex-shrink: 0;
+  padding: 8px 12px 8px 14px;
+  border-bottom: 1px solid #e3e3e0;
+  background: #fff;
+}
+.wb-ws-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.wb-ws-meta .ico { width: 16px; height: 16px; flex-shrink: 0; color: #6d6860; }
+.wb-ws-meta select {
+  font: 600 12px/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding: 3px 8px;
+  border: 1px solid #deded9;
+  border-radius: 6px;
+  background: #fff;
+  color: #2a2926;
+  max-width: 180px;
+}
+.wb-ws-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 550 12px/1.35 var(--ui);
+  color: #8a857c;
+}
+.wb-ws-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wb-ws-head-actions .wb-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.wb-ws-head-actions .wb-run-btn .ico { width: 14px; height: 14px; }
+.wb-ws-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  background: #fff;
+  overflow: hidden;
+}
+.wb-ws-tree {
+  flex: 0 0 300px;
+  min-width: 220px;
+  max-width: 44%;
+  overflow: auto;
+  border-right: 1px solid #e3e3e0;
+  padding: 8px 4px 8px 8px;
+  font: 12.5px/1.35 var(--ui);
+  background: #fafaf8;
+}
+.wb-ws-tree.busy { cursor: progress; }
+.wb-ws-tree.busy .wb-ws-node { pointer-events: none; }
+.wb-ws-tree.busy .wb-ws-node.loading { opacity: 1; }
+.wb-ws-tree.busy .wb-ws-node:not(.loading) { opacity: .55; }
+.wb-ws-blob {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+  background: #f6f5f1;
+}
+.wb-ws-empty {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  padding: 16px;
+  color: #9a958e;
+  font: 550 13px/1.45 var(--ui);
+  text-align: center;
+}
+.wb-ws-node {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  color: #2a2926;
+}
+.wb-ws-node.added { color: #2f6f5e; }
+.wb-ws-node.modified { color: #8a6a2f; }
+.wb-ws-node.deleted { color: #9a4a3a; text-decoration: line-through; }
+.wb-ws-node.renamed { color: #3d5a8a; }
+.wb-ws-blob pre, .wb-ws-blob code { font: 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-word; }
+.wb-ws-blob .kw { color: #2f5c4e; font-weight: 650; }
+.wb-ws-node.active { background: #efece5; font-weight: 650; }
+.wb-ws-node.loading { cursor: progress; }
+.wb-ws-node .ico {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #8a857c;
+}
+.wb-ws-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.wb-ws-size {
+  margin-left: auto;
+  font-size: 11px;
+  color: #9a958e;
+  padding-left: 8px;
+  flex-shrink: 0;
+}
+.wb-ws-children { padding-left: 14px; }
+.wb-ws-code {
+  margin: 0;
+  padding: 14px 16px;
+  font: 12.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #2a2926;
+  white-space: pre;
+  tab-size: 4;
+}
+
+/* ── 左栏：过程对话卡片（Daemon process → chat feed） ───────── */
+.agent-daemon-process {
+  flex-shrink: 0;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 0 2px;
+}
+.agent-daemon-process[hidden] { display: none !important; }
+.agent-daemon-process-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e5e1d8;
+  border-radius: 14px;
+  background: #fbfaf7;
+  box-shadow: 0 1px 0 rgba(40, 44, 38, .03);
+}
+.agent-daemon-process-tip {
+  font: 12.5px/1.5 var(--ui, system-ui);
+  color: #6d6860;
+}
+.agent-daemon-process-block {
+  border: 1px solid #e8e4db;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.agent-daemon-process-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0ece4;
+  background: #faf8f4;
+}
+.agent-daemon-process-head strong {
+  font: 600 12px/1.3 var(--ui, system-ui);
+  letter-spacing: .04em;
+  color: #3d3a35;
+  text-transform: uppercase;
+}
+.agent-daemon-process-toggle {
+  border: 0;
+  background: transparent;
+  padding: 2px 6px;
+  font: 600 12px var(--ui, system-ui);
+  color: #6d6860;
+  cursor: pointer;
+}
+.agent-daemon-process-toggle:hover { color: #1f1e1b; }
+.agent-daemon-process-body { padding: 10px 12px; max-height: 220px; overflow: auto; }
+.agent-daemon-process-block.is-collapsed .agent-daemon-process-body { display: none; }
+.agent-daemon-process-block.is-collapsed .agent-daemon-process-head { border-bottom: 0; }
+.agent-daemon-process-empty {
+  font: 12.5px/1.45 var(--ui, system-ui);
+  color: #8a857c;
+}
+.agent-daemon-process-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: 12.5px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #2a2926;
+}
+.agent-daemon-process-log-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #3d3a35;
+}
+.agent-daemon-process-log-line {
+  padding: 2px 0;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+.agent-col.has-daemon-process .agent-empty-home {
+  margin-top: 4px;
+}

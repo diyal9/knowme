@@ -113,6 +113,26 @@ export function rosterLabelsFromPackage(raw: unknown): string[] {
   return labels.slice(0, 8)
 }
 
+function firstClarifyNode(list: unknown): string | null {
+  if (!Array.isArray(list) || !list.length) return null
+  const rec = list[0] && typeof list[0] === 'object' && !Array.isArray(list[0])
+    ? list[0] as Record<string, unknown>
+    : {}
+  const id = text(rec.node || rec.node_id || rec.nodeId || rec.id)
+  return id || null
+}
+
+/** Daemon task 投影里的待澄清节点；没有 pending 时返回 null。 */
+export function parsePendingClarifyNode(raw: unknown): string | null {
+  const source = asRecord(raw)
+  const nested = [source, asRecord(source.task), asRecord(source.status), asRecord(source.data)]
+  for (const obj of nested) {
+    const node = firstClarifyNode(obj.pending_clarifications) || firstClarifyNode(obj.pendingClarifications)
+    if (node) return node
+  }
+  return null
+}
+
 export function parseTaskListResponse(raw: unknown): WorkbenchTask[] {
   const result = asRecord(raw)
   if (Array.isArray(result.items)) return result.items as WorkbenchTask[]

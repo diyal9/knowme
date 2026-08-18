@@ -2,6 +2,8 @@
  * 工作流货架：卡片打开对话；空态可新建编排。
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
+import './shelf.css'
+import '../workbench/workbench-layout.css'
 import { filterShelfCards, shelfLockHint, shelfSupplyHint, type ShelfDomain } from '../../../domain/shelf'
 import { workflowShelfTasks } from '../../../domain/run-projection'
 import {

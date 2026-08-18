@@ -1,3 +1,7 @@
+/**
+ * 助理空态首页：问候标题 + 快捷卡 + 底部 composer。
+ * 不负责会话气泡与发送（见 AssistantPane / AgentComposer）。
+ */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { PackEmptyGroup } from '../../../shared/api'
 import { ASSISTANT_QUICK_COMMANDS } from '../../../domain/agent-quick-commands'
@@ -17,6 +21,18 @@ const QUICK_ICONS: Record<string, string> = {
   todayPriority: 'automation',
   docKbSuggest: 'bookOpen',
   relatedChats: 'chat',
+}
+
+/** 空态副标题比 Ctrl+K 更短，语义不变 */
+const LAUNCH_SUBTITLES: Record<string, string> = {
+  meetingSummary: '最近三天会议',
+  todayPriority: '日程/待办 Top3',
+  docKbSuggest: '文件夹 · 记忆 · 最近',
+  relatedChats: '今日私聊/群聊 · @我',
+}
+
+function launchCardSubtitle(item: { id: string; subtitle: string }): string {
+  return LAUNCH_SUBTITLES[item.id] || item.subtitle
 }
 
 function resolveModeCards(mode: AssistantModeId): EmptyShortcutCard[] {
@@ -82,15 +98,11 @@ export function AssistantEmptyHome({
   const sectionMeta = packGroup?.kicker || packGroup?.hero || modeSectionMeta(modeId)
   const ariaLabel = packGroup ? `${sectionMeta}任务入口` : '任务入口'
 
-  /* 基线 f6ad048：问候 → 快捷卡网格 → composer 锚在空态底部（非卡上居中悬浮） */
+  /* 短问句；四卡恢复改前面板（标题+副标题）；composer 粉圈不加重 CTA */
   return (
     <div className={`agent-empty-tips agent-empty-home${packGroup ? ' agent-empty-pack' : ''}`} aria-label={ariaLabel} data-testid="assistant-empty-home" data-pack-id={packGroup?.packId || undefined}>
       <div className="agent-launch-intro">
-        <div className="agent-empty-sub">把你的问题或任务交给 KnowMe，它来帮你完成。</div>
-      </div>
-      <div className="agent-launch-section">
-        <span>开始使用</span>
-        <small>{sectionMeta}</small>
+        <p className="agent-empty-sub">今天想让 KnowMe 做什么？</p>
       </div>
       <div className="agent-empty-actions">
         {cards.map((item) => (
@@ -105,7 +117,7 @@ export function AssistantEmptyHome({
             </span>
             <span className="agent-empty-act-copy">
               <strong>{item.title}</strong>
-              <span>{item.subtitle}</span>
+              <span>{launchCardSubtitle(item)}</span>
             </span>
           </button>
         ))}

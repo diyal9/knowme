@@ -291,7 +291,11 @@ html[data-ui-throttle="1"] * {
   outline-offset: 2px;
   border-radius: 4px;
 }
-.files-preview-panel {
+.files-preview-stack.is-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
   margin-top: 10px;
   border: 1px solid var(--div);
   border-radius: 8px;

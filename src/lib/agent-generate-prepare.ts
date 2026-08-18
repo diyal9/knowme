@@ -11,6 +11,7 @@ const L = require('./agent-generate-libs')
 async function prepareAgentGenerate(env) {
   const { app, path, promptRouter, buildSystemContent, buildChatMessages, productKnowledge, productMemory, conversationGrounding, agentSessions, agentRun, groundingRuntime, feishuGroundingAdapter, llmRuntime, llmModelCatalog, llmUsage, knowledgeOs, fabricRetrieval, chatIntent, contextCache, contextOrchestrator, contextPacketLib, writingWorkflow, buildTemporalAnchorContext, logger, resolveGroundingRuntimeMode } = L
   const { loadSettings, ensureAgentSession, saveAgentSessions, buildFabricCtx, ensureFabricSeeded, ensureCapabilityHub, readNote, buildEmbedFn, normalizeChatEndpoint, resolveActiveProvider, KNOWLEDGE_DIR, MEMORY_DIR, loadSourcesStore, activeAgentRuns } = env.deps
+  const workflowReact = require('./workflow-react-prompt')
   const { payload, runId, stage, emit, metrics, signal } = env
   const fail = (error) => ({ early: env.fail(error) })
   const cancelled = () => fail('请求已取消')
@@ -58,6 +59,9 @@ async function prepareAgentGenerate(env) {
     ephemeral: surface === 'workbench',
   })
   let session = ensured.session
+  if (workflowReact.shouldForceWorkflowReact(session)) {
+    session = workflowReact.ensureWorkflowPlanSeed(session, agentRun)
+  }
   const prepared = agentSessions.compactSession(session)
   session = prepared.session
   if (prepared.compacted) {
@@ -317,6 +321,7 @@ async function prepareAgentGenerate(env) {
     industry: s.industry,
     prompt,
   })
+  const toolsEnabled = tier !== 'chat' && modelProfile.supportsTools !== false
   const systemContent = buildSystemContent({
     scenePrompt: promptRouter.buildScenePrompt({ scene: sceneId, mode: ctxRole }),
     userPrompt: promptRouter.buildUserPrompt(s, ctxRole, {
@@ -324,6 +329,8 @@ async function prepareAgentGenerate(env) {
     }),
     skillPrompt: promptRouter.buildSkillPrompt(slashRefs),
     dynamicContext: '',
+    tier,
+    toolsEnabled,
   })
   const rawMessages = buildChatMessages({
     systemContent,
@@ -334,6 +341,12 @@ async function prepareAgentGenerate(env) {
   })
   const fittedConversation = llmRuntime.fitConversation(rawMessages, policy.inputBudget)
   let apiMessages = fittedConversation.messages
+  if (workflowReact.shouldForceWorkflowReact(session)) {
+    const sys = apiMessages[0]
+    apiMessages = sys
+      ? [sys, { role: 'system', content: workflowReact.REACT_INSTRUCTIONS }, ...apiMessages.slice(1)]
+      : [{ role: 'system', content: workflowReact.REACT_INSTRUCTIONS }, ...apiMessages]
+  }
   try {
     logger.systemPrompt('llm-system-prompt', '构建系统提示词', {
       model: modelProfile.model,

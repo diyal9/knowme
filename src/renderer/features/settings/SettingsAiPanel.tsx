@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { SettingsForm } from '../../../shared/api-extended'
 
+/**
+ * 设置页 AI 接口：Endpoint / Key / 模型，以及 8 秒连通探测。
+ */
+
 type Props = {
   form: SettingsForm
   onPatch: (next: Partial<SettingsForm>) => void
@@ -9,6 +13,8 @@ type Props = {
 export function SettingsAiPanel({ form, onPatch }: Props) {
   const [modelHint, setModelHint] = useState('加载中…')
   const [presets, setPresets] = useState<{ id: string; label?: string }[]>([])
+  const [probeBusy, setProbeBusy] = useState(false)
+  const [probeHint, setProbeHint] = useState('')
 
   useEffect(() => {
     void (async () => {
@@ -30,6 +36,33 @@ export function SettingsAiPanel({ form, onPatch }: Props) {
       }
     })()
   }, [form.model, form.llmProvider])
+
+  async function runProbe() {
+    setProbeBusy(true)
+    setProbeHint('正在探测…')
+    try {
+      const result = await window.api?.llmProbe?.({
+        apiEndpoint: form.apiEndpoint,
+        model: form.model,
+        llmProvider: form.llmProvider,
+        apiKey: form.apiKey || undefined,
+      })
+      if (!result) {
+        setProbeHint('探测接口未就绪，请重启应用')
+        return
+      }
+      if (result.ok) {
+        const ms = Number(result.latencyMs) || 0
+        setProbeHint(`连通（${ms}ms）· ${result.host || 'host'} · ${result.model || form.model || ''}`)
+        return
+      }
+      setProbeHint(result.error || '不通')
+    } catch (err) {
+      setProbeHint(err instanceof Error ? err.message : '探测失败')
+    } finally {
+      setProbeBusy(false)
+    }
+  }
 
   return (
     <div className="settings-section">
@@ -99,6 +132,20 @@ export function SettingsAiPanel({ form, onPatch }: Props) {
           placeholder="qwen-plus 或 gpt-4o-mini"
         />
         <div className="settings-hint">{modelHint}</div>
+      </div>
+      <div className="settings-field">
+        <label>连通探测</label>
+        <div className="settings-actions" style={{ padding: 0 }}>
+          <button
+            type="button"
+            className="settings-btn"
+            disabled={probeBusy}
+            onClick={() => void runProbe()}
+          >
+            {probeBusy ? '探测中…' : '测试连接'}
+          </button>
+        </div>
+        <div className="settings-hint">{probeHint || '8 秒内确认 Endpoint / Key 是否可达，不写请求正文。'}</div>
       </div>
       <div className="settings-field">
         <label htmlFor="temperature">
