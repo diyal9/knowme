@@ -41,8 +41,8 @@ Run MUST 支持 `artifacts` 列表；知识类与需人审的产物 MUST 以**�
 
 #### Scenario: Bubble actions remain secondary
 
-- **WHEN** 助手文本气泡展示且存在活动编辑器
-- **THEN** 用户仍可通过次要动作将内容应用到文件（替换须授权）；审阅类主路径仍在右栏
+- **WHEN** 助手文本气泡展示
+- **THEN** 气泡仅提供「复制」等轻量动作；文件写入须通过产物卡（`editor_patch`）人审；审阅类主路径仍在右栏
 
 ### Requirement: Draft opens review surface
 
@@ -53,14 +53,14 @@ Run MUST 支持 `artifacts` 列表；知识类与需人审的产物 MUST 以**�
 - **WHEN** 本轮首次产生待审 draft Artifact
 - **THEN** 右栏进入 `review` 并展示该产物
 
-### Requirement: Retain file apply actions
+### Requirement: File write via artifact only
 
-对普通文本助手回复，系统 SHOULD 仍提供写入当前编辑器的能力（若有活动编辑器）；高风险「替换全文」MUST 经确认或 `editor_patch` 授权，不得静默一键覆盖。
+对普通文本助手回复，系统 MUST NOT 在气泡内提供「应用到文件」入口。写入当前编辑器的能力 MUST 通过 `editor_patch` 产物卡人审；高风险「替换全文」MUST 经确认或 `editor_patch` 授权，不得静默一键覆盖。
 
-#### Scenario: Replace still works
+#### Scenario: Write via artifact card
 
-- **WHEN** 助手文本气泡展示且存在活动编辑器
-- **THEN** 用户仍可通过「应用到文件」将内容写入当前文件（替换须先授权）
+- **WHEN** 助手文本回复需写入活动文件
+- **THEN** 用户通过产物卡接受 `editor_patch` draft 后写入；气泡内无「应用到文件」菜单
 
 ### Requirement: Tools used recorded
 

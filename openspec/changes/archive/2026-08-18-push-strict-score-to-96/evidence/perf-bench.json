@@ -1,0 +1,12 @@
+{
+  "ok": true,
+  "baseline": "f6ad048",
+  "before_bytes": 611936,
+  "after_first_paint_css_bytes": 146154,
+  "ratio": 0.2388,
+  "before": {
+    "src/workspace.html": 15729,
+    "src/workspace-agent.js": 596207
+  },
+  "note": "after = assistant-route static CSS only; JS is code-split. before = HTML god-file + page. Re-run: node scripts/strict-perf-bench.js --json"
+}

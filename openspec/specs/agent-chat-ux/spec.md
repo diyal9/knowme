@@ -170,27 +170,28 @@ Composer 快捷菜单（Ctrl+K）MUST 以协作动作为主（总结、改写、
 
 ### Requirement: Bubble actions for partner workflow
 
-助手气泡动作 MUST 提供「复制」；对需人审的 Artifact，MUST 提供进入右栏审阅的入口（或依赖同轮摘要卡），MUST NOT 将接受/拒绝作为气泡内唯一完整审阅 UI。「应用到文件」等编辑动作仅在存在活动编辑器时作为可选次要动作。
+助手气泡动作 MUST 提供「复制」；对需人审的 Artifact，MUST 提供进入右栏审阅的入口（或依赖同轮摘要卡），MUST NOT 将接受/拒绝作为气泡内唯一完整审阅 UI。独立笔记编辑器已退役；气泡 MUST NOT 提供「应用到文件」或插入光标 / 追加文末 / 替换全文；对文件的写入 MUST 走产物卡（`editor_patch`）人审。
 
 #### Scenario: Copy always
 
 - **WHEN** 助手回复完成且非空
 - **THEN** 可见「复制」动作，点击后内容进入剪贴板
 
-#### Scenario: Edit actions gated
+#### Scenario: No apply-to-file on completed reply
 
-- **WHEN** 无活动可写编辑器
-- **THEN** 不展示「替换正文」或将其禁用，避免无效操作
+- **WHEN** 助手回复完成且非空
+- **THEN** 气泡内不展示「应用到文件」
+- **AND** 不展示插入光标、追加文末、替换全文
 
 #### Scenario: Review entry for artifacts
 
 - **WHEN** 本轮关联 draft Artifact
 - **THEN** 用户可从气泡区或摘要卡进入右栏审阅，无需在窄气泡内读完全文才能接受
 
-#### Scenario: Apply remains optional
+#### Scenario: File write stays on artifact card
 
-- **WHEN** 存在活动编辑器且回复为普通文本（非强制 Artifact）
-- **THEN** 可显示应用到文件类次要动作
+- **WHEN** 本轮存在 `editor_patch` draft 产物
+- **THEN** 用户仍可通过产物卡接受后写入目标文件
 
 ### Requirement: Suggestion / action bar in chat
 
@@ -236,27 +237,13 @@ Composer 快捷菜单（Ctrl+K）MUST 以协作动作为主（总结、改写、
 - **WHEN** 流式过程中 `suggestion` 围栏未闭合
 - **THEN** 不以半截 JSON 渲染可点条；闭合或流式结束后再渲染
 
-### Requirement: Apply-to-file menu
-
-有活动编辑器时，助手气泡 MUST 提供「应用到文件」入口；其下 MUST 含插入光标、追加文末、替换全文；MUST NOT 将三项平铺为与「复制」同级的默认主按钮。
-
-#### Scenario: Menu gated
-
-- **WHEN** 无活动可写编辑器
-- **THEN** 不展示「应用到文件」
-
-#### Scenario: Copy remains primary
-
-- **WHEN** 助手回复完成
-- **THEN** 「复制」仍为可见主动作
-
 ### Requirement: Replace requires authorization
 
-「替换全文」MUST NOT 立即改写编辑器；MUST 先产生待审阅提案（`editor_patch` draft），用户接受后才应用。
+通过产物卡发起的「替换全文」MUST NOT 立即改写编辑器；MUST 先产生待审阅提案（`editor_patch` draft），用户接受后才应用。气泡内 MUST NOT 提供直接替换入口。
 
-#### Scenario: Propose replace
+#### Scenario: Propose replace via artifact
 
-- **WHEN** 用户选择替换全文且存在活动文件
+- **WHEN** 用户从产物卡发起替换全文且存在活动文件
 - **THEN** 出现 draft 产物卡（或等价确认 UI），编辑器内容尚未被替换
 
 #### Scenario: Accept replace
