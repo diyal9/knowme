@@ -6,7 +6,7 @@
 |------|------|------|
 | 主规格 SSOT | PASS | agent-chat-ux / agent-run 与 simplify-assistant-reply-chrome 一致 |
 | ContentView | PASS | `bound` 守卫防 source 切换闪旧 blocks |
-| LLM bridge | PASS | `createIpv4FirstLookup` 替代 `family:4`；workbench-dispatch 仍走同一客户端 |
+| LLM bridge | PASS | `createIpv4FirstLookup` 按 `options.all` 返回数组或标量；`http.request` 集成测试覆盖 |
 | 范围 | PASS | 无 v0.5.0 功能扩散 |
 | 薄表面 | ADVISORY | 诚实记录于 BACKLOG / handoff，未伪造 1:1 |
 

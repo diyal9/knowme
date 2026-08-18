@@ -7,8 +7,8 @@
 
 | 层 | 结果 | 证据 |
 |----|------|------|
-| Renderer 单测 | 265 passed（含 ContentView 长文首屏不 `parseContentBlocks`） | `npm run test:renderer` |
-| Electron 真机 | 12 条种子长对话可出 `content-view` + 表格或飞书卡；无业务 console error | `core-path-electron-smoke.json` `ok: true`（2026-08-18T05:19:52Z） |
+| Renderer 单测 | 268 passed / 52 files（含 ContentView 长文首屏不 `parseContentBlocks`） | `npm run test:renderer` |
+| Electron 真机 | 12 条种子长对话可出 `content-view` + 表格或飞书卡；无业务 console error；连续两轮可重复 | `core-path-electron-smoke.json` `ok: true`（2026-08-18T09:38:43Z，第二轮） |
 | 未做 | 主线程卡顿毫秒 / profiler | 不把 Worker 架构当成性能完成；记 BACKLOG |
 
 结论：长回复**能打开、能出 Markdown 卡片**；首屏不解析仅单测签字。检查点不要求 profiler。

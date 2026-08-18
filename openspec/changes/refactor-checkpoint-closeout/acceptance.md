@@ -4,7 +4,9 @@
 - [x] 本树定位为 **v0.4.0 React+TS 工程基线**，非整包产品 1:1 完成
 - [x] 主规格与实现一致（气泡无「应用到文件」；写入走产物卡）
 - [x] ContentView source 切换不闪旧内容（vitest 覆盖）
-- [x] LLM Endpoint IPv4 优先且允许纯 IPv6 自定义 Endpoint（单测覆盖）
+- [x] LLM Endpoint IPv4 优先且允许纯 IPv6 自定义 Endpoint（`options.all` 契约 + `http.request` 集成测试）
+- [x] 生产构建零 CSS 语法警告；GPU fallback 期间加载拒绝不换错误页
+- [x] 默认 Electron smoke 连续两轮 11/11；版本 0.4.0
 - [x] 薄表面走查有结论（能开 / 仍薄；见 `evidence/producer-walkthrough.md`）
 - [x] 未完成 epic / restore 缺口已转入 `openspec/changes/BACKLOG.md`
 
