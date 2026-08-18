@@ -603,8 +603,33 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
         }
     });
     ctx.workspaceWin.webContents.on('did-fail-load', (_event, code, desc, url, isMainFrame) => {
-        if (!isMainFrame)
+        const { shouldIgnoreRendererLoadFail, shouldRetryRendererLoadFail } = require('../lib/renderer-load-fail');
+        if (shouldIgnoreRendererLoadFail({ code, isMainFrame }))
             return;
+        const gpuFallbackActive = Boolean(ctx.windowsGpuPolicy && ctx.windowsGpuPolicy.disableGpu);
+        ctx._workspaceLoadFailRetries = Number(ctx._workspaceLoadFailRetries || 0);
+        if (shouldRetryRendererLoadFail({
+            code,
+            gpuFallbackActive,
+            retryCount: ctx._workspaceLoadFailRetries,
+        })) {
+            ctx._workspaceLoadFailRetries += 1;
+            setTimeout(() => {
+                try {
+                    if (!ctx.workspaceWin || ctx.workspaceWin.isDestroyed())
+                        return;
+                    void ctx.loadRendererEntry(ctx.workspaceWin, {
+                        legacyFile: 'workspace.html',
+                        viteEntry: 'workspace',
+                        viteDevPath: '/workspace/',
+                    });
+                }
+                catch (err) {
+                    console.error('[workspace-load-retry-fail]', err && err.message || err);
+                }
+            }, 280);
+            return;
+        }
         const target = String(url || 'workspace.html');
         console.error('[workspace-load-fail]', { code, desc, url: target });
         const html = [
@@ -748,6 +773,9 @@ ctx.openLogViewer = function openLogViewer() {
         webPreferences: { preload: ctx.path.join(__dirname, '..', 'preload.js'), contextIsolation: true, sandbox: false },
     });
     ctx.logViewerWin.webContents.on('did-fail-load', (_event, code, desc, url, isMainFrame) => {
+        const { shouldIgnoreRendererLoadFail } = require('../lib/renderer-load-fail');
+        if (shouldIgnoreRendererLoadFail({ code, isMainFrame }))
+            return;
         if (!isMainFrame)
             return;
         const message = `日志页面加载失败\ncode: ${String(code)}\ndesc: ${String(desc || 'unknown')}\nurl: ${String(url || 'log-viewer.html')}`;

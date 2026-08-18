@@ -1,6 +1,6 @@
 {
   "name": "knowme",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "知我 KnowMe — AI 知识工作台 / 工作伙伴 Agent",
   "license": "MIT",
   "author": "aispace",
@@ -34,6 +34,10 @@
     "renderer:dev": "vite",
     "renderer:build": "vite build",
     "test:renderer": "vitest run --config vitest.config.ts",
+    "check": "npm test && npm run lint && npm run test:renderer && npm run typecheck:renderer",
+    "check:quick": "npm run lint && npm run test:renderer",
+    "perf:strict-bench": "node scripts/strict-perf-bench.js --json",
+    "openspec:health": "node scripts/openspec-health.js --json",
     "test:e2e": "playwright test",
     "daemon:docs-check": "node scripts/check-daemon-docs-sync.js",
     "harness:check": "node .cursor/scripts/harness.js check",
@@ -76,6 +80,7 @@
     "marked": "^18.0.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-virtuoso": "^4.12.5",
     "zustand": "^5.0.6"
   }
 }

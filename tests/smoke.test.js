@@ -44,7 +44,12 @@ describe('release materials', () => {
 
   it('package version matches release target', () => {
     const pkg = require('../package.json');
-    assert.equal(pkg.version, '0.3.0');
+    assert.equal(pkg.version, '0.4.0');
+  });
+
+  it('tokens.css comments do not close early', () => {
+    const css = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'app', 'tokens.css'), 'utf8');
+    assert.ok(!/features\/\*\//.test(css), 'comment must not contain features/*/ which closes the block');
   });
 
   it('release workflow runs test and lint', () => {

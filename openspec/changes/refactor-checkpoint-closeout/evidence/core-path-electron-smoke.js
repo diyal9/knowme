@@ -15,14 +15,12 @@ const ROOT = path.resolve(__dirname, '../../../..')
 const SHOTS = path.join(__dirname, 'screenshots')
 const REPORT = path.join(__dirname, 'core-path-electron-smoke.json')
 
-function killElectron() {
+function killLeftoverKnowMe() {
   if (process.platform !== 'win32') return
-  for (const image of ['KnowMe.exe', 'electron.exe']) {
-    try {
-      execFileSync('cmd.exe', ['/c', 'taskkill', '/F', '/IM', image, '/T'], { stdio: 'ignore' })
-    } catch {
-      /* none */
-    }
+  try {
+    execFileSync('cmd.exe', ['/c', 'taskkill', '/F', '/IM', 'KnowMe.exe', '/T'], { stdio: 'ignore' })
+  } catch {
+    /* none */
   }
 }
 
@@ -69,7 +67,7 @@ function seedSessions() {
 
 async function main() {
   fs.mkdirSync(SHOTS, { recursive: true })
-  killElectron()
+  killLeftoverKnowMe()
   await new Promise((r) => setTimeout(r, 800))
 
   const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-core-smoke-'))
@@ -92,6 +90,7 @@ async function main() {
       ELECTRON_DISABLE_SECURITY_WARNINGS: 'true',
       KNOWME_TEST_SEAM: '1',
       KNOWME_TEST_USER_DATA_DIR: userDataDir,
+      KNOWME_DISABLE_GPU: '1',
     },
     timeout: 120000,
   })

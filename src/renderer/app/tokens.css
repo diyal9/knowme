@@ -1,5 +1,5 @@
 /* 全入口共享的设计 token。组件布局禁止写在这里：
-   工作台壳层用 workspace-chrome.css，各面用 features/*/ 与 styles/。
+   工作台壳层用 workspace-chrome.css，各面用 features 子目录与 styles。
    曾在此复制 rail / hub / shelf，选择器比面级 CSS 更具体，会把两套皮肤叠在一起。
 
    Accent 双层语义（有意保留，禁止同屏主 CTA 混用）：

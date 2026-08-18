@@ -20,37 +20,45 @@ try {
 /** IPv4 优先但不禁止纯 IPv6 Endpoint；供 requestAgentCompletion 与单测复用。 */
 function createIpv4FirstLookup() {
   return (hostname, options, callback) => {
-    dns.lookup(hostname, { all: true, verbatim: true, ...options }, (err, addresses) => {
+    if (typeof options === 'function') {
+      callback = options
+      options = {}
+    }
+    const opts = options && typeof options === 'object' ? options : {}
+    const wantAll = Boolean(opts.all)
+    dns.lookup(hostname, { ...opts, all: true, verbatim: true }, (err, addresses) => {
       if (err) return callback(err)
-      const list = Array.isArray(addresses) ? addresses : [addresses]
-      if (!list.length) return callback(new Error(`No address found for ${hostname}`))
+      const list = Array.isArray(addresses)
+        ? addresses.filter((row) => row && row.address)
+        : addresses
+          ? [{ address: addresses, family: 4 }]
+          : []
+      if (!list.length) return callback(new Error('No address found for ' + hostname))
       const sorted = [...list].sort((a, b) => {
-        const af = Number(a?.family)
-        const bf = Number(b?.family)
+        const af = Number(a && a.family)
+        const bf = Number(b && b.family)
         if (af === 4 && bf === 6) return -1
         if (af === 6 && bf === 4) return 1
         return 0
       })
+      if (wantAll) return callback(null, sorted)
       const pick = sorted[0]
       callback(null, pick.address, pick.family)
     })
   }
 }
 
-/** 连接已发出但迟迟无 HTTP 头：DNS 死 IP、防火墙拦 POST、网关排队 */
+/** Qwen3 兼容模式默认开思考，可能长时间不吐首包；未显式打开时关掉。 */
 const FIRST_BYTE_TIMEOUT_MS = 15000
-/** 已开始收流后的空闲超时（思考/长输出中途停顿） */
 const STREAM_IDLE_TIMEOUT_MS = 120000
-/** 设置页连通探测：首包与空闲都卡在 8s，避免再空等 120s */
 const PROBE_TIMEOUT_MS = 8000
 
-/** 请求级脱敏 meta：禁止 Key / Authorization / body。 */
 function llmCallMeta(url, body, extra = {}) {
   return {
-    host: url?.hostname || '',
-    path: url?.pathname || '',
-    model: String(body?.model || ''),
-    stream: body?.stream !== false,
+    host: url && url.hostname || '',
+    path: url && url.pathname || '',
+    model: String(body && body.model || ''),
+    stream: body && body.stream !== false,
     ...extra,
   }
 }
@@ -59,12 +67,11 @@ function formatLlmTimeoutError({ host, phase, firstByteMs = FIRST_BYTE_TIMEOUT_M
   if (phase === 'first-byte') {
     const sec = Math.round(Number(firstByteMs) / 1000) || 15
     const where = host ? String(host) : 'Endpoint'
-    return `连接超时（${sec}s）：${where} 未返回数据（API 已配置，请检查网络或稍后重试）`
+    return `\u8fde\u63a5\u8d85\u65f6\uff08${sec}s\uff09\uff1a${where} \u672a\u8fd4\u56de\u6570\u636e\uff08API \u5df2\u914d\u7f6e\uff0c\u8bf7\u68c0\u67e5\u7f51\u7edc\u6216\u7a0d\u540e\u91cd\u8bd5\uff09`
   }
-  return '请求超时（120s），请检查网络或 Endpoint'
+  return '\u8bf7\u6c42\u8d85\u65f6\uff08120s\uff09\uff0c\u8bf7\u68c0\u67e5\u7f51\u7edc\u6216 Endpoint'
 }
 
-/** Qwen3 兼容模式默认开思考，可能长时间不吐首包；未显式打开时关掉。 */
 function applyProviderCompat(url, body, settings) {
   if (!body || typeof body !== 'object') return body
   const host = String(url?.hostname || '')

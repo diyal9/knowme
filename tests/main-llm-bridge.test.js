@@ -88,7 +88,42 @@ describe('main-llm-bridge', () => {
     assert.ok(!dispatch.includes('lib.request('))
     assert.ok(!dispatch.includes('https.request'))
     assert.ok(bridge.includes('lookup: createIpv4FirstLookup()'))
-    assert.ok(!bridge.includes('family: 4'))
+    assert.ok(!/lib\.request\(\{[\s\S]*?family:\s*4/.test(bridge))
+  })
+
+  it('returns an address array when options.all is true and a scalar otherwise', async () => {
+    const dns = require('dns')
+    const { createIpv4FirstLookup } = require('../src/lib/main-llm-bridge')
+    const lookup = createIpv4FirstLookup()
+    const orig = dns.lookup
+    try {
+      dns.lookup = (_hostname, options, cb) => {
+        assert.equal(options.all, true)
+        cb(null, [
+          { address: '2001:db8::1', family: 6 },
+          { address: '93.184.216.34', family: 4 },
+        ])
+      }
+      const all = await new Promise((resolve, reject) => {
+        lookup('dual.example', { all: true }, (err, addresses) => {
+          if (err) reject(err)
+          else resolve(addresses)
+        })
+      })
+      assert.ok(Array.isArray(all))
+      assert.equal(all[0].address, '93.184.216.34')
+      assert.equal(all[0].family, 4)
+      const scalar = await new Promise((resolve, reject) => {
+        lookup('dual.example', { all: false }, (err, address, family) => {
+          if (err) reject(err)
+          else resolve({ address, family })
+        })
+      })
+      assert.equal(scalar.address, '93.184.216.34')
+      assert.equal(scalar.family, 4)
+    } finally {
+      dns.lookup = orig
+    }
   })
 
   it('prefers IPv4 but allows IPv6-only endpoints via custom lookup', async () => {
@@ -127,6 +162,55 @@ describe('main-llm-bridge', () => {
       assert.equal(v6.family, 6)
     } finally {
       dns.lookup = orig
+    }
+  })
+
+  it('drives a real http.request and honors the lookup all contract', async () => {
+    const http = require('http')
+    const { createIpv4FirstLookup } = require('../src/lib/main-llm-bridge')
+    const server = http.createServer((_req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('ok')
+    })
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const { port } = server.address()
+    const lookup = createIpv4FirstLookup()
+    try {
+      const seen = []
+      const wrapped = (hostname, options, cb) => {
+        seen.push({ hostname, all: Boolean(options && options.all) })
+        lookup(hostname, options, (...args) => {
+          if (options && options.all) {
+            assert.equal(Array.isArray(args[1]), true)
+          } else if (!args[0]) {
+            assert.equal(typeof args[1], 'string')
+          }
+          cb(...args)
+        })
+      }
+      const body = await new Promise((resolve, reject) => {
+        const req = http.request({
+          hostname: 'localhost',
+          port,
+          path: '/',
+          method: 'GET',
+          lookup: wrapped,
+        }, (res) => {
+          let raw = ''
+          res.setEncoding('utf8')
+          res.on('data', (c) => { raw += c })
+          res.on('end', () => resolve({ status: res.statusCode, raw }))
+        })
+        req.on('error', reject)
+        req.end()
+      })
+      assert.equal(body.status, 200)
+      assert.equal(body.raw, 'ok')
+      assert.ok(seen.length >= 1)
+    } finally {
+      await new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()))
+      })
     }
   })
 })
