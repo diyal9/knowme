@@ -40,8 +40,6 @@ function create(ctx) {
         markGpuCrash(ctx.app.getPath('userData'), ctx.fs, ctx.path)
         ctx.logger.system('gpu-policy', 'GPU crashed; relaunching with software path')
       } catch { /* ignore */ }
-      // 测试缝不重启，避免 Playwright 丢窗、smoke 不可复跑
-      if (process.env.KNOWME_TEST_SEAM === '1') return
       ctx._gpuCrashRelaunching = true
       try {
         ctx.app.relaunch()

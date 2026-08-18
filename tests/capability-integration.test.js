@@ -62,6 +62,12 @@ describe('capability integration wiring', () => {
     assert.match(mainSource, /\.join\((?:scope\.|ctx\.)?app\.getPath\('appData'\),\s*'KnowMe'\)/)
   })
 
+  it('keeps GPU crash recovery active under the Electron test seam', () => {
+    const guards = fs.readFileSync(path.join(__dirname, '..', 'src', 'main', 'process-guards.ts'), 'utf8')
+    assert.match(guards, /ctx\.app\.relaunch\(\)/)
+    assert.doesNotMatch(guards, /KNOWME_TEST_SEAM.*return/)
+  })
+
   it('wires pack dependency manifests and blocks unavailable required tools in main', () => {
     assert.match(mainSource, /getAvailableCapabilityManifests:/)
     assert.match(mainSource, /capability-catalog'\)\.listCatalog/)

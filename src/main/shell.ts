@@ -584,6 +584,8 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
         legacyFile: 'workspace.html',
         viteEntry: 'workspace',
         viteDevPath: '/workspace/',
+    }).catch((err) => {
+        console.error('[workspace-load-reject]', err && err.message || err);
     });
     ctx.workspaceWin.webContents.on('will-attach-webview', (event, webPreferences, params) => {
         delete webPreferences.preload;
@@ -622,6 +624,8 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
                         legacyFile: 'workspace.html',
                         viteEntry: 'workspace',
                         viteDevPath: '/workspace/',
+                    }).catch((err) => {
+                        console.error('[workspace-load-retry-reject]', err && err.message || err);
                     });
                 }
                 catch (err) {
