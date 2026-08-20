@@ -110,6 +110,20 @@ CREATE TABLE IF NOT EXISTS models (
   enabled INTEGER NOT NULL DEFAULT 1,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS usage_events (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  activation_id INTEGER NOT NULL,
+  request_id TEXT NOT NULL,
+  model TEXT NOT NULL,
+  business_type TEXT NOT NULL DEFAULT 'chat',
+  prompt_tokens INTEGER NOT NULL DEFAULT 0,
+  completion_tokens INTEGER NOT NULL DEFAULT 0,
+  total_tokens INTEGER NOT NULL DEFAULT 0,
+  cost REAL NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'success',
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(activation_id) REFERENCES product_activations(id)
+);
 INSERT OR IGNORE INTO plans (id, name, trial_days, daily_token_limit, monthly_token_limit, max_devices, features_json)
   VALUES ('trial', '体验版', 7, 100000, 1000000, 1, '{"cloudModel":true,"workbench":true}');
 INSERT OR IGNORE INTO models (id, label, provider, context_window, max_output, supports_tools, updated_at)

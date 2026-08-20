@@ -217,6 +217,38 @@ func TestProductActivationAndMe(t *testing.T) {
 	if meRes.StatusCode != http.StatusOK {
 		t.Fatalf("me status=%d", meRes.StatusCode)
 	}
+	usageReq, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/usage/events", bytes.NewBufferString(`{"request_id":"req-1","model":"gpt-4o-mini","business_type":"code","prompt_tokens":12,"completion_tokens":8}`))
+	usageReq.Header.Set("Content-Type", "application/json")
+	usageReq.Header.Set("Authorization", "Bearer "+activation.Token)
+	usageRes, err := http.DefaultClient.Do(usageReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer usageRes.Body.Close()
+	if usageRes.StatusCode != http.StatusAccepted {
+		t.Fatalf("usage status=%d", usageRes.StatusCode)
+	}
+	quotaReq, _ := http.NewRequest(http.MethodGet, srv.URL+"/v1/quota", nil)
+	quotaReq.Header.Set("Authorization", "Bearer "+activation.Token)
+	quotaRes, err := http.DefaultClient.Do(quotaReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer quotaRes.Body.Close()
+	if quotaRes.StatusCode != http.StatusOK {
+		t.Fatalf("quota status=%d", quotaRes.StatusCode)
+	}
+	var quota struct {
+		Data struct {
+			DailyUsed int64 `json:"DailyUsed"`
+		} `json:"quota"`
+	}
+	if err := json.NewDecoder(quotaRes.Body).Decode(&quota); err != nil {
+		t.Fatal(err)
+	}
+	if quota.Data.DailyUsed != 20 {
+		t.Fatalf("unexpected quota: %#v", quota)
+	}
 
 	modelsRes, err := http.Get(srv.URL + "/v1/models")
 	if err != nil {

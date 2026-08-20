@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"knowme/server/internal/store"
 )
 
@@ -60,6 +61,54 @@ func (s *Server) productMe(c *gin.Context) {
 	a, _ := c.Get("productActivation")
 	activation, _ := a.(store.ProductActivation)
 	c.JSON(http.StatusOK, gin.H{"ok": true, "activation": productActivationDTO(activation)})
+}
+
+func (s *Server) productQuota(c *gin.Context) {
+	a, _ := c.Get("productActivation")
+	activation := a.(store.ProductActivation)
+	quota, err := s.store.GetQuota(c.Request.Context(), activation.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": "failed to load quota"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true, "quota": quota})
+}
+
+func (s *Server) recordProductUsage(c *gin.Context) {
+	a, _ := c.Get("productActivation")
+	activation := a.(store.ProductActivation)
+	var body struct {
+		RequestID        string  `json:"request_id"`
+		Model            string  `json:"model"`
+		BusinessType     string  `json:"business_type"`
+		PromptTokens     int64   `json:"prompt_tokens"`
+		CompletionTokens int64   `json:"completion_tokens"`
+		TotalTokens      int64   `json:"total_tokens"`
+		Cost             float64 `json:"cost"`
+		Status           string  `json:"status"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "code": "invalid_json", "error": "请求格式无效"})
+		return
+	}
+	if body.RequestID == "" {
+		body.RequestID = uuid.NewString()
+	}
+	if body.BusinessType == "" {
+		body.BusinessType = "chat"
+	}
+	if body.Status == "" {
+		body.Status = "success"
+	}
+	if body.TotalTokens == 0 {
+		body.TotalTokens = body.PromptTokens + body.CompletionTokens
+	}
+	err := s.store.RecordUsage(c.Request.Context(), store.UsageEvent{ActivationID: activation.ID, RequestID: body.RequestID, Model: body.Model, BusinessType: body.BusinessType, PromptTokens: body.PromptTokens, CompletionTokens: body.CompletionTokens, TotalTokens: body.TotalTokens, Cost: body.Cost, Status: body.Status})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusAccepted, gin.H{"ok": true, "request_id": body.RequestID})
 }
 
 func (s *Server) publicModels(c *gin.Context) {

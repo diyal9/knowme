@@ -27,6 +27,8 @@ func (s *Server) Register(r *gin.Engine) {
 	r.GET("/v1/models", s.publicModels)
 	product := r.Group("/v1", s.requireProductAuth())
 	product.GET("/me", s.productMe)
+	product.GET("/quota", s.productQuota)
+	product.POST("/usage/events", s.recordProductUsage)
 	s.registerWeb(r)
 	admin := r.Group("/v1/admin")
 	admin.Use(s.adminWriteAuth())

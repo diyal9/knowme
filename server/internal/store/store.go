@@ -64,6 +64,29 @@ type Model struct {
 	UpdatedAt     time.Time
 }
 
+type UsageEvent struct {
+	ActivationID     int64
+	Model            string
+	BusinessType     string
+	PromptTokens     int64
+	CompletionTokens int64
+	TotalTokens      int64
+	Cost             float64
+	Status           string
+	RequestID        string
+	CreatedAt        time.Time
+}
+
+type Quota struct {
+	PlanID           string
+	DailyLimit       int64
+	MonthlyLimit     int64
+	DailyUsed        int64
+	MonthlyUsed      int64
+	DailyRemaining   int64
+	MonthlyRemaining int64
+}
+
 type Store interface {
 	GetPublicConfig(ctx context.Context) (PublicConfig, error)
 	SetPublicConfig(ctx context.Context, config map[string]any) (PublicConfig, error)
@@ -83,6 +106,8 @@ type Store interface {
 	ListModels(ctx context.Context, includeDisabled bool) ([]Model, error)
 	UpsertModel(ctx context.Context, model Model) error
 	SetModelEnabled(ctx context.Context, id string, enabled bool) error
+	RecordUsage(ctx context.Context, event UsageEvent) error
+	GetQuota(ctx context.Context, activationID int64) (Quota, error)
 	Close() error
 }
 
