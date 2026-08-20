@@ -12,6 +12,23 @@ function safeJsonParse(text = '') {
 }
 
 function extractMeetingCandidatesFromToolText(text = '') {
+  if (text && typeof text === 'object') {
+    const meta = text.meta && typeof text.meta === 'object' ? text.meta : text
+    const lists = [meta.candidates, meta.items, meta.data?.candidates, meta.data?.items]
+    for (const list of lists) {
+      if (Array.isArray(list) && list.length) {
+        return list.map((c, idx) => ({
+          id: c.id || `candidate-${idx + 1}`,
+          title: c.title || c.name || c.label || `候选 ${idx + 1}`,
+          minute_token: c.minute_token || c.minuteToken || '',
+          url: c.url || c.open_url || '',
+          startTime: c.start_time || c.startTime || c.time || '',
+          organizer: c.organizer || c.owner_name || '',
+        })).filter(item => item.minute_token || item.url)
+      }
+    }
+    return []
+  }
   const json = safeJsonParse(text)
   if (json && Array.isArray(json.candidates)) {
     return json.candidates.map((c, idx) => ({
@@ -58,10 +75,22 @@ function buildLegacyPostProcessHint(prompt, toolMessages, fullText, context = {}
   return feishuGrounding.buildFeishuGroundingHint(prompt, toolMessages, fullText, context)
 }
 
-function resolveUserPromptWithReferenceState(referenceState, userInput, { bindRefId } = {}) {
+function resolveUserPromptWithReferenceState(referenceState, userInput, { bindRefId, allowMeetingRecovery = false } = {}) {
   const binding = groundingRuntime.bindNumericSelection(referenceState, userInput, { bindRefId })
   if (!binding.bound) {
     if (binding.ambiguous && groundingRuntime.parseNumericSelection(userInput)) {
+      const requiredTools = referenceState?.taskFrame?.requiredTools || []
+      const canRecoverMeetings = allowMeetingRecovery || requiredTools.includes('feishu.meeting_candidates')
+      if (canRecoverMeetings) {
+        const index = groundingRuntime.parseNumericSelection(userInput)
+        return {
+          referenceState: binding.state,
+          prompt: `我选择第${index}条会议。候选状态缺失，请先重新调用 \`feishu.meeting_candidates\`（优先 days=3；必要时扩展到 days=7），再按序号读取第${index}条。不要编造候选或会议正文。`,
+          binding,
+          needsClarification: false,
+          selfHealing: true,
+        }
+      }
       return {
         referenceState: binding.state,
         prompt: userInput,

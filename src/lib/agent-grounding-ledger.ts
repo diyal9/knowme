@@ -198,6 +198,16 @@ function extractClaims(text = '') {
   return claims
 }
 
+const EXECUTION_TOOL_FAMILIES = [
+  { claim: /(已(?:经)?导入|imported)/i, tool: /(import|ingest)/i, label: '导入' },
+  { claim: /(已(?:经)?安装|installed)/i, tool: /(install|import)/i, label: '安装' },
+  { claim: /(已(?:经)?发送)/i, tool: /(send|message|mail)/i, label: '发送' },
+  { claim: /(已(?:经)?发布|published)/i, tool: /(publish|release|deploy)/i, label: '发布' },
+  { claim: /(已(?:经)?删除|deleted)/i, tool: /(delete|remove)/i, label: '删除' },
+  { claim: /(已(?:经)?修改(?:文件|代码)|已(?:经)?写入|已(?:经)?保存)/i, tool: /(write|update|patch|edit|save)/i, label: '写入' },
+  { claim: /(已(?:经)?运行(?:测试|脚本|命令)|tests? passed)/i, tool: /(test|run|shell|python|process|command)/i, label: '运行' },
+]
+
 function verifyClaims({
   text = '',
   evidenceLedger,
@@ -244,6 +254,16 @@ function verifyClaims({
     const hasRead = readTools.some(name => hasOkToolCall(tl, name))
     if (!execOk || (/(已读取|读取完成|读取成功)/i.test(text) && !hasRead)) {
       violations.push({ code: 'false_execution_claim', message: '执行态声明无 ToolLedger 支撑' })
+    }
+    for (const family of EXECUTION_TOOL_FAMILIES) {
+      if (!family.claim.test(text)) continue
+      const supported = tl.calls.some(call => call.status === 'ok' && family.tool.test(String(call.name || '')))
+      if (!supported) {
+        violations.push({
+          code: 'unsupported_execution_claim',
+          message: `${family.label}声明没有对应的成功工具证据`,
+        })
+      }
     }
   }
 

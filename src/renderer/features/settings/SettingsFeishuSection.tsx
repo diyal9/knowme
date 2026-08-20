@@ -30,6 +30,7 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
   const [authOpen, setAuthOpen] = useState(false)
   const [authUrl, setAuthUrl] = useState('')
   const [qrDataUrl, setQrDataUrl] = useState('')
+  const [actionBusy, setActionBusy] = useState(false)
   const [allowlist, setAllowlist] = useState((feishu?.allowlist || []).join(', '))
 
   useEffect(() => {
@@ -37,31 +38,37 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
   }, [feishu])
 
   const startAuth = async (force = true) => {
-    const enabled = await window.api?.connectorsUpsert?.({
-      id: 'feishu',
-      type: 'feishu',
-      enabled: true,
-      allowlist: [...new Set([...parseAllowlist(allowlist), ...DEFAULT_FEISHU_ALLOWLIST])],
-    })
-    if (enabled && enabled.ok === false) {
-      flash(enabled.error || '启用飞书连接器失败', 'err')
-      return
-    }
-    const result = await window.api?.connectorsFeishuAuthStart?.({ force })
-    if (result?.verificationUrl) {
-      setAuthUrl(result.verificationUrl)
-      setQrDataUrl(String(result.qrDataUrl || ''))
-      setAuthOpen(true)
-      setConfirmOpen(false)
-      onPolling(true)
-      const opened = await window.api?.openExternal?.(result.verificationUrl)
-      if (!opened?.ok) flash(opened?.message || '无法打开授权链接', 'err')
-    } else if (result?.ok && feishuUserReady(result)) {
-      flash('飞书已连接')
-      setAuthOpen(false)
-      void onRefresh()
-    } else {
-      flash(result?.message || '授权启动失败', 'err')
+    if (actionBusy) return
+    setActionBusy(true)
+    try {
+      const enabled = await window.api?.connectorsUpsert?.({
+        id: 'feishu',
+        type: 'feishu',
+        enabled: true,
+        allowlist: [...new Set([...parseAllowlist(allowlist), ...DEFAULT_FEISHU_ALLOWLIST])],
+      })
+      if (enabled && enabled.ok === false) {
+        flash(enabled.error || '启用飞书连接器失败', 'err')
+        return
+      }
+      const result = await window.api?.connectorsFeishuAuthStart?.({ force })
+      if (result?.verificationUrl) {
+        setAuthUrl(result.verificationUrl)
+        setQrDataUrl(String(result.qrDataUrl || ''))
+        setAuthOpen(true)
+        setConfirmOpen(false)
+        onPolling(true)
+        const opened = await window.api?.openExternal?.(result.verificationUrl)
+        if (!opened?.ok) flash(opened?.message || '无法打开授权链接', 'err')
+      } else if (result?.ok && feishuUserReady(result)) {
+        flash('飞书已连接')
+        setAuthOpen(false)
+        void onRefresh()
+      } else {
+        flash(result?.message || '授权启动失败', 'err')
+      }
+    } finally {
+      setActionBusy(false)
     }
   }
 
@@ -89,12 +96,12 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
           <button
             type="button"
             className={`settings-btn${card.primaryDisabled ? '' : ' primary'}`}
-            disabled={card.primaryDisabled}
+            disabled={card.primaryDisabled || actionBusy}
             data-testid="feishu-primary-action"
             data-mode={card.primaryMode}
             onClick={onPrimaryClick}
           >
-            {card.primaryLabel}
+            {actionBusy ? '连接中…' : card.primaryLabel}
           </button>
           <button type="button" className="settings-btn" onClick={() => void onRefresh()}>
             刷新状态
@@ -127,8 +134,8 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
             </p>
           )}
           <div className="settings-actions" style={{ padding: '8px 0 0' }}>
-            <button type="button" className="settings-btn primary" onClick={() => void startAuth(true)}>
-              确认并授权
+            <button type="button" className="settings-btn primary" disabled={actionBusy} onClick={() => void startAuth(true)}>
+              {actionBusy ? '连接中…' : '确认并授权'}
             </button>
             <button type="button" className="settings-btn" onClick={() => setConfirmOpen(false)}>
               取消

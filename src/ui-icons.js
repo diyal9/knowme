@@ -13,8 +13,8 @@
   const lucideSet = new Set([
     'obsidianNewNote', 'obsidianFolderPlus', 'obsidianSort', 'obsidianPanel', 'obsidianCollapse', 'sidePanel',
     'folder', 'file', 'chevronTree', 'searchLine', 'starLine', 'listLine', 'settingsLine', 'chevronLeftLine', 'plusLine', 'collapseAll',
-    'history', 'eye', 'note', 'code', 'image', 'star', 'chat', 'copy', 'send', 'chevronLeft', 'chevronRight', 'list', 'optimize', 'expandText', 'simplify', 'en', 'bold', 'italic', 'strikethrough', 'link', 'close', 'maximize', 'externalLink', 'circleX', 'classify', 'trash', 'settings', 'plus', 'columns', 'newVersion', 'edit',
-    'bookOpen', 'pencilLine', 'moreVertical', 'moreHorizontal', 'paperclip',
+    'history', 'eye', 'note', 'code', 'image', 'star', 'chat', 'copy', 'thumbsUp', 'thumbsDown', 'gitFork', 'send', 'chevronLeft', 'chevronRight', 'list', 'optimize', 'expandText', 'simplify', 'en', 'bold', 'italic', 'strikethrough', 'link', 'close', 'maximize', 'externalLink', 'circleX', 'classify', 'trash', 'settings', 'plus', 'columns', 'newVersion', 'edit',
+    'bookOpen', 'pencilLine', 'moreVertical', 'moreHorizontal', 'paperclip', 'commentThread', 'chatHistory', 'robot',
     'coffee', 'mail', 'wechat',
     // 工作台：必须用 24 viewBox，否则 path 被 16 裁切显得「残缺」
     'workbench', 'workflow', 'users', 'play', 'step', 'refresh', 'automation', 'clock',
@@ -75,6 +75,7 @@
     searchLine: `<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>`,
     listLine: `<path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>`,
     settingsLine: `<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>`,
+    properties: `<path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/>`,
     starLine: `<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`,
     collapseAll: `<path d="m7 20 5-5 5 5"/><path d="m7 4 5 5 5-5"/>`,
     chevronLeftLine: `<path d="m15 18-6-6 6-6"/>`,
@@ -172,9 +173,15 @@
     history: `<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>`,
     eye: `<path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/>`,
     note: `<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>`,
+    // 多层对话线程：用于历史会话入口，表达“多条对话记录”而非时间回退
+    commentThread: `<path d="M5 2.5h14A1.5 1.5 0 0 1 20.5 4v5A1.5 1.5 0 0 1 19 10.5h-3v3l-3-3H5A1.5 1.5 0 0 1 3.5 9V4A1.5 1.5 0 0 1 5 2.5Z"/><circle cx="9" cy="6.5" r=".8" fill="currentColor" stroke="none"/><circle cx="12" cy="6.5" r=".8" fill="currentColor" stroke="none"/><circle cx="15" cy="6.5" r=".8" fill="currentColor" stroke="none"/><path d="M4 10.5h12A1.5 1.5 0 0 1 17.5 12v4A1.5 1.5 0 0 1 16 17.5h-3v3l-3-3H4A1.5 1.5 0 0 1 2.5 16v-4A1.5 1.5 0 0 1 4 10.5Z"/><circle cx="7" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="10" cy="14" r=".8" fill="currentColor" stroke="none"/><circle cx="13" cy="14" r=".8" fill="currentColor" stroke="none"/><path d="M5 16.5h14A1.5 1.5 0 0 1 20.5 18v3A1.5 1.5 0 0 1 19 22.5H5A1.5 1.5 0 0 1 3.5 21v-3A1.5 1.5 0 0 1 5 16.5Z"/><circle cx="9" cy="19.5" r=".8" fill="currentColor" stroke="none"/><circle cx="12" cy="19.5" r=".8" fill="currentColor" stroke="none"/><circle cx="15" cy="19.5" r=".8" fill="currentColor" stroke="none"/>`,
+    // 对话历史：气泡叠加时钟，表达“历史对话”而非单纯的时间回退
+    chatHistory: `<path d="M3.5 3h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4.5 3.5V13h-1a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><circle cx="17" cy="17" r="4.5"/><path d="M17 14.8v2.4l1.6.9"/>`,
     code: `<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>`,
     star: `<path class="s-o" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/><path class="s-f" fill="currentColor" stroke="none" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>`,
     chat: `<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>`,
+    // 机器人头像：用于智能伙伴主导航入口
+    robot: `<path d="M12 4v4M9 4h6"/><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M4 11H2v6h2M20 11h2v6h-2"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/><path d="M9 17h6"/>`,
     // Lucide layout-grid：完整 2×2 宫格，作工作台入口（替代易被裁切的不对称 dashboard）
     workbench: `<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>`,
     workflow: `<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>`,
@@ -211,6 +218,10 @@
     layoutTidy: `<rect width="18" height="7" x="3" y="3" rx="1"/><rect width="9" height="7" x="3" y="14" rx="1"/><rect width="5" height="7" x="16" y="14" rx="1"/>`,
     step: `<path d="M6 4h2v16H6z"/><path d="m10 4 10 8-10 8z"/>`,
     copy: `<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>`,
+    thumbsUp: `<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a3.13 3.13 0 0 1 3 3.88Z"/>`,
+    thumbsDown: `<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22h0a3.13 3.13 0 0 1-3-3.88Z"/>`,
+    // 分支到新聊天：使用真正的三节点分叉图形，避免与“展开/外部打开”图标混淆。
+    gitFork: `<circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9a9 9 0 0 1-6 3 9 9 0 0 1-6-3"/><path d="M12 12v3"/>`,
     send: `<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>`,
     chevronLeft: `<path d="m15 18-6-6 6-6"/>`,
     chevronRight: `<path d="m9 18 6-6-6-6"/>`,

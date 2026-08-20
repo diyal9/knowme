@@ -173,6 +173,9 @@ async function executeAgentGenerate(env) {
         metrics: kernelResult.metrics, protocolVersion: kernelResult.protocolVersion || null,
         answerHash: kernelResult.answerHash || null, terminal: kernelResult.terminal || null,
         text: String(kernelResult.text || ''),
+        executionEvidence: kernelResult.executionEvidence || {
+          gateStatus: 'not_required', verificationPassed: true, toolCalls: [], evidence: [], violations: [],
+        },
         personalization: {
           applied: effectivePersonalization.applied.map(item => ({
             id: item.id, kind: item.kind, text: item.text,

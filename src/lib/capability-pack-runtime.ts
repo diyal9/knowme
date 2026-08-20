@@ -864,7 +864,7 @@ function createCapabilityPackRuntime(options = {}) {
   }
 
   function ensureDefaultPacks() {
-    const defaultPackIds = ['game-studio', 'office-partner']
+    const defaultPackIds = ['office-partner']
     const results = []
     for (const packId of defaultPackIds) {
       if (isPackEnabled(packId)) {

@@ -38,6 +38,17 @@ describe('agent-execution-timeline', () => {
     expect(view?.rows[0].hint).toBe('命中 8 条')
   })
 
+  it('uses the user-facing title for a completed multi-step trace', () => {
+    const view = buildExecutionTimelineView({
+      streaming: false,
+      trace: [
+        { id: 'a', kind: 'stage', title: '准备内容', status: 'done', round: 1 },
+        { id: 'b', kind: 'tool', title: '读取资料', status: 'done', round: 1 },
+      ],
+    })
+    expect(view?.summaryTitle).toBe('思考执行过程')
+  })
+
   it('copies plan.updated onto the assistant message', () => {
     const next = applyAssistantStreamEvent(
       { id: 'a1', role: 'assistant', text: '', streaming: true, thinking: true },

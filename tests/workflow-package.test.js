@@ -48,6 +48,41 @@ describe('workflow-package', () => {
     assert.deepEqual(result.issues.map(item => item.code), ['dangling_edge', 'unsupported_backend'])
   })
 
+  it('allows a composed workflow with one expert at the product boundary', () => {
+    const result = workflow.validateWorkflowPackage(sample({
+      executionBackends: ['local-team'],
+    }), { enforceProductBoundary: true })
+    assert.equal(result.ok, true)
+  })
+
+  it('allows an executable composed workflow without an expert node', () => {
+    const result = workflow.validateWorkflowPackage(sample({
+      executionBackends: ['local-team'],
+      agentRefs: [],
+      graph: {
+        nodes: [
+          { id: 'draft', type: 'llm', config: { modelName: 'local-model', prompt: '整理输入' } },
+          { id: 'terminal', type: 'terminal' },
+        ],
+        edges: [{ from: 'draft', to: 'terminal' }],
+      },
+    }), { enforceProductBoundary: true })
+    assert.equal(result.ok, true)
+  })
+
+  it('rejects a composed graph that has no executable node', () => {
+    const result = workflow.validateWorkflowPackage(sample({
+      executionBackends: ['local-team'],
+      agentRefs: [],
+      graph: {
+        nodes: [{ id: 'terminal', type: 'terminal' }],
+        edges: [],
+      },
+    }), { enforceProductBoundary: true })
+    assert.equal(result.ok, false)
+    assert.equal(result.issues.some(item => item.code === 'executable_node_required'), true)
+  })
+
   it('forks official workflows without mutating the source', () => {
     const result = workflow.forkWorkflowPackage(sample(), { id: 'my-engineering', name: '我的研发流程' })
     assert.equal(result.ok, true)

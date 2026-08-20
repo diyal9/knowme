@@ -17,9 +17,9 @@ const PACKAGE_ID_RE = /^[a-z][a-z0-9-]{0,62}$/
 const SEMVER_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/
 const VALID_NODE_TYPES = new Set([
   'agent', 'gate', 'join', 'human', 'terminal', 'condition',
-  'llm', 'tool', 'knowledge',
+  'llm', 'tool', 'knowledge', 'mcp', 'request',
 ])
-const SPECIALTY_NODE_TYPES = new Set(['llm', 'tool', 'knowledge'])
+const SPECIALTY_NODE_TYPES = new Set(['llm', 'tool', 'knowledge', 'mcp', 'request'])
 const VALID_JOIN_STRATEGIES = new Set(['allSucceeded', 'all', 'any', 'anySucceeded'])
 const VALID_BACKENDS = new Set(['local-executor', 'cursor-package', 'claude-package', 'daemon-agent'])
 const BUILDER_BACKEND_MAP = Object.freeze({

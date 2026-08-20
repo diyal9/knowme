@@ -19,7 +19,7 @@ export function workbenchTaskModeLabel(kind: WorkbenchTaskKind): string {
 export function workbenchTaskBackLabel(kind: WorkbenchTaskKind): string {
   if (kind === 'expert-chat') return '返回专家协作'
   if (kind === 'pipeline-review') return '返回管线服务'
-  return '返回'
+  return '返回工作流'
 }
 
 export function joinTaskTitle(primary?: string | null, secondary?: string | null): string {
@@ -42,7 +42,12 @@ export function workbenchTaskStateLabel(
   phase?: 'input' | 'running' | 'hitl' | 'done' | null,
 ): string {
   if (kind === 'expert-chat') return '协作中'
-  if (kind === 'workflow-chat') return '对话中'
+  if (kind === 'workflow-chat') {
+    if (phase === 'done') return '已完成'
+    if (phase === 'hitl') return '等待确认'
+    if (phase === 'input') return '待启动'
+    return '执行中'
+  }
   if (phase === 'done') return '已完成'
   if (phase === 'hitl') return '等待确认'
   if (phase === 'input') return '确认输入'

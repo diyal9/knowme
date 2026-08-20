@@ -89,6 +89,7 @@ class RemoteAgentServiceAdapter {
         inputPayload: {
           prompt: runSpec.prompt,
           handoff: runSpec.handoff,
+          executionContract: runSpec.executionContract,
         },
         hooks: {
           onProgress: (msg) => hooks.emit?.(msg, { runId, backend: this.id }),
@@ -121,6 +122,9 @@ class RemoteAgentServiceAdapter {
         terminal: task.terminal,
         text: task.summary || task.text,
         ok: task.terminal !== 'failed' && task.terminal !== 'cancelled',
+        artifactRefs: task.artifactRefs || task.artifacts || [],
+        evidenceRefs: task.evidenceRefs || [],
+        executionEvidence: task.executionEvidence,
       })
     }
 

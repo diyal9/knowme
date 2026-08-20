@@ -116,9 +116,6 @@ function classifyPreferenceEvent(event) {
   if (kind === 'correction') {
     return { field: 'openProblem', text: summary, confidence: 'derived' };
   }
-  if (kind === 'workflow_choice') {
-    return { field: 'decision', text: summary, confidence: 'derived' };
-  }
   if (kind === 'preference' || kind === 'product') {
     if (GOAL_KEYWORDS.test(summary)) {
       return { field: 'goal', text: summary, confidence: 'derived' };
@@ -144,6 +141,19 @@ function buildDraftItems(memoryDir) {
     const signal = resolveEventSignal(event);
     if (signal === 'telemetry') {
       if (isUselessTelemetry(event.summary)) continue;
+      if (event.kind === 'workflow_choice') {
+        pushDraft({
+          field: 'decision',
+          text: String(event.summary || '').trim(),
+          confidence: 'activity',
+          source: {
+            type: 'event',
+            ids: [event.id].filter(Boolean),
+            summary: event.summary,
+          },
+        });
+        continue;
+      }
       const project = extractProjectFromEvent(event);
       if (project) {
         pushDraft({

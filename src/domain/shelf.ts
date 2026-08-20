@@ -36,13 +36,20 @@ export function isDemoShelfEntry(id: string): boolean {
 
 export type ShelfDomain = 'all' | 'office' | 'engineering' | 'visual'
 
-export function workflowDomain(item: { goalTypes?: string[]; provenance?: { domain?: string } }): Exclude<ShelfDomain, 'all'> | 'other' {
+export function workflowDomain(item: {
+  name?: string
+  description?: string
+  goalTypes?: string[]
+  provenance?: { domain?: string }
+}): Exclude<ShelfDomain, 'all'> | 'other' {
   const fromProv = String(item.provenance?.domain || '').toLowerCase()
   if (fromProv === 'office' || fromProv === 'engineering' || fromProv === 'visual') return fromProv
-  const types = (item.goalTypes || []).map((t) => String(t).toLowerCase())
-  if (types.some((t) => t.includes('office') || t.includes('meeting'))) return 'office'
-  if (types.some((t) => t.includes('eng') || t.includes('dev') || t.includes('code'))) return 'engineering'
-  if (types.some((t) => t.includes('visual') || t.includes('design'))) return 'visual'
+  const text = [item.name, item.description, ...(item.goalTypes || [])]
+    .map((value) => String(value || '').toLowerCase())
+    .join(' ')
+  if (/(visual|design|image|\bui\b|\bux\b|\bart\b|graphic|psd|photoshop|sprite|artbundle|视觉|美术|设计|图像|生图|切图)/i.test(text)) return 'visual'
+  if (/(office|meeting|minutes|calendar|mail|document|spreadsheet|办公|会议|纪要|日程|邮件|文档|表格)/i.test(text)) return 'office'
+  if (/(engineering|\beng\b|\bdev\b|code|coding|test|release|deploy|研发|开发|代码|测试|发布|部署)/i.test(text)) return 'engineering'
   return 'other'
 }
 
@@ -143,14 +150,15 @@ export function toShelfCard(item: {
 }
 
 export function shelfLockHint(daemonOnline: boolean | null | undefined): string | null {
-  if (daemonOnline === false) return '管线服务离线，工作流暂不可启动。'
+  // 普通工作流由本地 Agent Team Runtime 执行，不依赖管线服务在线状态。
+  void daemonOnline
   return null
 }
 
 /** 货架空态副文案，对齐 f6ad048 `shelfSupplyHint`。 */
 export function shelfSupplyHint(daemonOnline: boolean | null | undefined): string {
-  if (daemonOnline === false) return '连接管线服务，或点击「新建工作流」编排自己的流程。'
-  return '在专家库安装专家后，可编排工作流或直接使用共享流程。'
+  void daemonOnline
+  return '添加需要的节点并连接执行关系，完成后即可运行；也可以直接使用团队提供的流程。'
 }
 
 export function filterShelfCards(

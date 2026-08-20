@@ -11,7 +11,7 @@ const html = currentPage('capability-hub.html')
 
 describe('capability hub renderer contract', () => {
   it('experts library surface has search and type tabs', () => {
-    assert.match(html, /专家库/)
+assert.match(html, /能力中心/)
     assert.match(html, /搜索能力/)
     assert.match(html, /id: 'expert'/)
     assert.match(html, /id: 'skill'/)

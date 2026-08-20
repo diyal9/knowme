@@ -115,6 +115,20 @@ describe('web-fetch assertSafeUrl', () => {
   });
 });
 
+describe('web-fetch source URL normalization', () => {
+  it('uses the raw GitHub endpoint for blob pages', () => {
+    assert.equal(
+      webFetch.preferredFetchUrl('https://github.com/infiniflow/ragflow/blob/v0.27.0/README_zh.md'),
+      'https://raw.githubusercontent.com/infiniflow/ragflow/v0.27.0/README_zh.md',
+    );
+  });
+
+  it('leaves ordinary pages unchanged', () => {
+    const url = 'https://example.com/docs/article';
+    assert.equal(webFetch.preferredFetchUrl(url), url);
+  });
+});
+
 describe('web-fetch extractReadableText', () => {
   it('drops chrome elements and keeps article body', () => {
     const html = `<html><head><title>T</title><style>.a{color:red}</style></head>

@@ -112,11 +112,25 @@ systemPrompt: |
       connectors: ['feishu'],
       systemPrompt: 'Persona v1',
     })
+    fs.writeFileSync(path.join(capabilitiesRoot, 'experts', 'coach', 'capability.manifest.json'), JSON.stringify({
+      schemaVersion: 3,
+      id: 'coach',
+      kind: 'expert',
+      name: 'Coach',
+      description: 'Coach expert',
+      version: '1.0.0',
+      dependencies: [],
+      permissions: { tools: ['write_report'] },
+      inputs: [], outputs: [],
+      risk: { level: 'low', reasons: [] },
+      provenance: { source: 'test', trust: 'bundled' },
+    }))
 
     const snap = runtime.createSessionSnapshot('session-1', 'coach')
     assert.equal(snap.ok, true)
     assert.equal(snap.snapshot.persona.systemPrompt, 'Persona v1')
     assert.equal(snap.snapshot.hashes.skills.writing, 'hash-writing')
+    assert.deepEqual(snap.snapshot.capabilityManifest.permissions.tools, ['write_report'])
 
     runtime.saveExpert('coach', {
       name: 'Coach',
@@ -129,6 +143,7 @@ systemPrompt: |
     const persona = runtime.getSessionPersona('session-1')
     assert.equal(persona.source, 'snapshot')
     assert.equal(persona.persona.systemPrompt, 'Persona v1')
+    assert.deepEqual(persona.capabilityManifest.permissions.tools, ['write_report'])
   })
 
   it('saves and freezes Soul SOP agenticType without hub drift', () => {

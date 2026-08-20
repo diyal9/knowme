@@ -202,7 +202,7 @@ export function buildExecutionTimelineView(
   return {
     running,
     compact: trace.length <= 1,
-    summaryTitle: running || trace.length === 1 ? currentTitle : '执行过程',
+    summaryTitle: running || trace.length === 1 ? currentTitle : '思考执行过程',
     summaryMeta,
     rows: trace.map((item) => {
       const status = item.status

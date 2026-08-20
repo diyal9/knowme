@@ -7,6 +7,7 @@
 
 const { AgentRunExecutor } = require('./agent-run-executor')
 const { RunPhase } = require('./agent-run-ports')
+const { enforceExecutionTerminal } = require('./agent-execution-contract')
 const {
   CANCEL_BUDGET_MS,
   HANDOFF_MAX_BYTES,
@@ -77,6 +78,7 @@ class LocalExecutorAdapter {
       session: runSpec.session,
       evidence: runSpec.evidence,
       parentState: runSpec.parentState,
+      executionContract: runSpec.executionContract,
     })
 
     const input = {
@@ -86,6 +88,7 @@ class LocalExecutorAdapter {
       handoff: runSpec.handoff,
       tier: runSpec.tier || 'agent',
       parentRunId: runSpec.parentRunId,
+      executionContract: runSpec.executionContract,
     }
 
     const emit = (event) => {
@@ -94,7 +97,7 @@ class LocalExecutorAdapter {
 
     const runPromise = this.Executor.run(input, ports, emit)
       .then((result) => {
-        hooks.onTerminal?.({
+        const enforced = enforceExecutionTerminal(runSpec.executionContract, {
           runId,
           backend: this.id,
           terminal: result.report?.terminal || result.terminal || RunPhase.DONE,
@@ -103,10 +106,21 @@ class LocalExecutorAdapter {
           metrics: result.metrics || result.report?.metrics || {},
           artifactRefs: Array.isArray(result.artifactRefs) ? result.artifactRefs : [],
           evidenceRefs: Array.isArray(result.evidenceRefs) ? result.evidenceRefs : [],
+          executionEvidence: result.executionEvidence,
+          artifacts: Array.isArray(result.artifacts) ? result.artifacts : [],
           cancelled: result.cancelled === true,
           ok: result.report?.terminal !== RunPhase.ERROR && result.ok !== false,
         })
-        return result
+        hooks.onTerminal?.(enforced)
+        if (enforced.executionContractVerified !== false) return result
+        return {
+          ...result,
+          ok: false,
+          terminal: RunPhase.ERROR,
+          error: enforced.error,
+          executionEvidence: enforced.executionEvidence,
+          report: { ...(result.report || {}), terminal: RunPhase.ERROR, error: { message: enforced.error } },
+        }
       })
       .catch((err) => {
         hooks.onTerminal?.({

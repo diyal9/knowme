@@ -28,15 +28,18 @@ import type { RunArtifact, RunPhase } from '../../domain/run-telemetry'
 import type { RunLane } from '../../domain/workbench-task-room'
 import type { ReviewTabId } from '../../domain/daemon-review-tabs'
 import type { RunGraphNode } from '../../domain/run-projection'
-import type { LinkPreviewState } from '../features/link-preview/store-link-preview'
+import type { DaemonPathItem } from '../../domain/daemon-compose'
+import type { LinkPreviewOpenOptions, LinkPreviewState } from '../features/link-preview/store-link-preview'
 
 export interface RunState {
+  taskId: string
   workflowId: string
   workflowName: string
   slug: string
   lane: RunLane
   phase: RunPhase
   brief: string
+  launchInputs: Record<string, string>
   log: string[]
   gateNode: string | null
   clarifyNode: string | null
@@ -56,6 +59,9 @@ export interface RunState {
   reviewChanges: { summary: string; files: { id: string; path: string; status: string }[]; empty: boolean }
   daemonStatus: string
   dialogueMessages: ChatMessage[]
+  workflowRunId: string
+  workflowPackage: Record<string, unknown> | null
+  selectedNodeId: string | null
 }
 
 export interface ExpertRoomState {
@@ -72,6 +78,12 @@ export interface ExpertRoomState {
 export interface WorkbenchDialogueSlice {
   composer: string
   attachments: { name: string; text?: string }[]
+}
+
+export interface DaemonOverviewCache {
+  workflows: DaemonPathItem[]
+  tasks: unknown[]
+  loadedAt: number
 }
 
 export interface ProcessView {
@@ -153,6 +165,7 @@ export interface AppState {
   shelfCards: ShelfCardModel[]
   shelfLoading: boolean
   shelfDaemonOnline: boolean | null
+  daemonOverviewCache: DaemonOverviewCache | null
   tasks: WorkbenchTask[]
   run: RunState | null
   expertRoom: ExpertRoomState | null
@@ -240,7 +253,11 @@ export interface AppState {
   knowledgeIoLoading: boolean
   linkPreview: LinkPreviewState | null
   linkFullscreen: boolean
-  openLinkPreview: (href: string, title?: string) => boolean
+  linkTitleCache: Record<string, string>
+  cacheLinkTitle: (href: string, title: string) => void
+  openLinkPreview: (href: string, title?: string, options?: LinkPreviewOpenOptions) => boolean
+  updateLinkPreviewTitle: (title: string) => void
+  openMarkdownPreview: (href: string, title?: string) => Promise<boolean>
   closeLinkPreview: () => void
   setLinkFullscreen: (next: boolean) => void
   setRoute: (route: AppRoute) => void
@@ -250,9 +267,10 @@ export interface AppState {
   setShelfQuery: (q: string) => void
   setShelfDomain: (d: ShelfDomain) => void
   setShelfLayout: (layout: ShelfLayout) => void
+  setDaemonOverviewCache: (cache: DaemonOverviewCache | null) => void
   loadWorkbench: () => Promise<void>
   loadTasks: () => Promise<void>
-  startRun: (card: ShelfCardModel) => void
+  launchWorkflow: (card: ShelfCardModel, payload: { goal: string; inputs: Record<string, string> }) => Promise<boolean>
   reopenTaskRun: (task: WorkbenchTask, opts?: { lane?: RunLane }) => Promise<void>
   setRunBrief: (brief: string) => void
   confirmLaunch: () => Promise<void>
@@ -347,6 +365,14 @@ export interface AppState {
   loadWorkbenchModes: () => Promise<void>
   initStudio: () => void
   enterStudio: (from?: WorkbenchSurface, workflowId?: string) => void
+  enterStudioFromExpertTask: (payload: {
+    mode: 'reuse' | 'overflow'
+    taskId: string
+    expertName: string
+    goal: string
+    resultLabel?: string
+    resultSummary?: string
+  }) => void
   forkWorkflow: (workflowId: string) => Promise<void>
   leaveStudio: () => boolean
   addStudioNode: () => void

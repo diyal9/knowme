@@ -11,7 +11,7 @@ const L = require('./agent-generate-libs')
 async function buildRunToolSurface(env, prepared) {
   const {
     app, path, agentTools, agentSandbox, agentPlanTools, agentWebTools, agentProcessTools,
-    agentArtifactTools, agentOrchestration, knowledgeStewardTools, isToolSurfaceV1,
+    agentArtifactTools, agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, isToolSurfaceV1,
     resolveToolSurfaceForRun, getSessionCapabilityBindings, mergeExtraTools, researchRouting,
     llmRuntime, groundingRuntime, feishuGrounding, resolveGroundingRuntimeMode, connectorToolRuntime,
   } = L
@@ -122,6 +122,9 @@ async function buildRunToolSurface(env, prepared) {
       sources: kosSourcesCtx().sources || [],
     })
     : null
+  const capabilityImportTools = session?.expertId === agentCapabilityImportTools.IMPORT_EXPERT_ID
+    ? agentCapabilityImportTools.buildCapabilityImportTools({ hub: ensureCapabilityHub() })
+    : null
   const extraTools = mergeExtraTools(
     fileTools,
     processTools,
@@ -132,6 +135,7 @@ async function buildRunToolSurface(env, prepared) {
     webTools,
     skillTools,
     stewardTools,
+    capabilityImportTools,
   )
   const sessionConnectorBindings = getSessionCapabilityBindings(session, ensureCapabilityHub().expertRuntime())
   const sessionExpertSnapshot = session?.expertId
@@ -239,6 +243,7 @@ async function buildRunToolSurface(env, prepared) {
     webTools,
     skillTools,
     stewardTools,
+    capabilityImportTools,
     extraTools,
     userDataPath,
     resolvedSurface,

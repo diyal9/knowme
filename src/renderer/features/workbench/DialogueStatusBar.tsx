@@ -1,4 +1,4 @@
-import { Icon } from '../../app/Icon'
+import { BackButton } from '../../app/BackButton'
 
 export function DialogueStatusBar({
   mode,
@@ -37,10 +37,7 @@ export function DialogueStatusBar({
       ) : (
         <span className="agent-dialogue-status-state" id="agentDialogueStatusState" hidden />
       )}
-      <button type="button" className="wb-task-back" onClick={onBack} aria-label={backLabel}>
-        <Icon name="chevronLeft" />
-        <span>{backLabel}</span>
-      </button>
+      <BackButton label={backLabel} compact onClick={onBack} />
     </header>
   )
 }

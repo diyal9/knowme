@@ -2,9 +2,10 @@
 
 const crypto = require('crypto')
 
-const PROFILE_VERSION = 2
+const PROFILE_VERSION = 3
 const ID_RE = /^[a-z0-9][a-z0-9._-]{0,63}$/i
 const MAX_LIST = 32
+const MAX_CONTEXTS = 24
 
 function nowIso() {
   return new Date().toISOString()
@@ -48,6 +49,50 @@ function clone(value) {
   return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, clone(nested)]))
 }
 
+function normalizeIdentity(raw, fallbackName = '') {
+  const source = raw && typeof raw === 'object' ? raw : {}
+  return {
+    displayName: text(source.displayName || source.name || fallbackName, 80),
+    avatar: text(source.avatar || source.avatarKey || 'other/partner', 240),
+  }
+}
+
+function normalizeContexts(raw) {
+  const out = []
+  const seen = new Set()
+  for (const value of Array.isArray(raw) ? raw : []) {
+    const source = value && typeof value === 'object' ? value : {}
+    const parsed = id(source.id || source.contextId, '情境标识')
+    if (!parsed.ok || seen.has(parsed.id)) continue
+    seen.add(parsed.id)
+    out.push({
+      id: parsed.id,
+      name: text(source.name || source.label || parsed.id, 80),
+      workspaceRef: text(source.workspaceRef || source.workspaceId, 160),
+      role: text(source.role || source.jobRole, 240),
+      skillRefs: unique(source.skillRefs || source.skills),
+      knowledgeRefs: unique(source.knowledgeRefs || source.knowledgeSources),
+      connectorRefs: unique(source.connectorRefs || source.connectors),
+      permissions: clone(source.permissions || {}),
+    })
+    if (out.length >= MAX_CONTEXTS) break
+  }
+  return out
+}
+
+function normalizeTaskPreferences(raw) {
+  const source = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
+  const out = {}
+  for (const [key, value] of Object.entries(source).slice(0, MAX_LIST)) {
+    const safeKey = text(key, 80)
+    if (!safeKey) continue
+    if (typeof value === 'string') out[safeKey] = text(value, 1000)
+    else if (typeof value === 'boolean' || typeof value === 'number') out[safeKey] = value
+    else if (Array.isArray(value)) out[safeKey] = value.slice(0, MAX_LIST).map(item => text(item, 240)).filter(Boolean)
+  }
+  return out
+}
+
 function stablePayload(value) {
   if (Array.isArray(value)) return value.map(stablePayload)
   if (!value || typeof value !== 'object') return value
@@ -69,11 +114,20 @@ function normalizeAgentProfile(raw = {}) {
   if (!parsed.ok) return parsed
   const agentId = id(source.agentId || source.expertId, 'Agent 标识')
   if (!agentId.ok) return agentId
+  const profileKind = source.profileKind === 'personal' || agentId.id === 'personal'
+    ? 'personal'
+    : 'overlay'
+  const name = text(source.name || source.role || source.identity?.displayName || agentId.id)
+
   const profile = {
     profileVersion: PROFILE_VERSION,
     id: parsed.id,
     agentId: agentId.id,
-    name: text(source.name || source.role || agentId.id),
+    profileKind,
+    identity: normalizeIdentity(source.identity, name),
+    contexts: normalizeContexts(source.contexts),
+    taskPreferences: normalizeTaskPreferences(source.taskPreferences || source.modePreferences),
+    name,
     description: text(source.description),
     version: text(source.version || '1.0.0', 40) || '1.0.0',
     roleOverlay: text(source.roleOverlay || source.systemPromptOverlay, 1200),
@@ -146,9 +200,13 @@ function createProfileSnapshot(profile) {
     ok: true,
     snapshot: {
       profileId: value.id,
+      profileKind: value.profileKind,
       profileVersion: value.version,
       profileHash: value.profileHash,
       agentId: value.agentId,
+      identity: clone(value.identity),
+      contexts: clone(value.contexts),
+      taskPreferences: clone(value.taskPreferences),
       roleOverlay: value.roleOverlay,
       promptOverlay: value.promptOverlay,
       skillRefs: clone(value.skillRefs),

@@ -24,12 +24,12 @@ describe('workbench production-console anti-patterns', () => {
     assert.ok(!projection.domains.some(item => item.id === 'daemon'))
   })
 
-  it('does not inject demo vertical seeds or bundled official packages onto the workflow shelf', () => {
+  it('injects only production official packages and still rejects demo vertical seeds', () => {
     assert.doesNotMatch(main, /verticals:\s*workbenchConsoleModel\.resolveVerticalPipelines/)
-    assert.doesNotMatch(main, /verticals:\s*officialWorkflows\.listOfficialWorkflowPackages/)
+    assert.match(main, /officialWorkflows\.listOfficialWorkflowPackages\(\)/)
     assert.doesNotMatch(main, /status: 'unavailable'[\s\S]*office-meeting-to-actions/)
     assert.doesNotMatch(main, /id: 'office-meeting-to-actions'[\s\S]{0,200}status: 'unavailable'/)
-    assert.match(main, /const verticals = Array\.isArray\(input\.verticals\)/)
+    assert.match(main, /\.\.\.\(Array\.isArray\(input\.verticals\) \? input\.verticals : \[\]\)/)
     assert.match(shelfDomain, /DEMO_VERTICAL_SEED_IDS/)
     assert.match(shelfDomain, /isDemoShelfEntry/)
     assert.match(shelfDomain, /if \(isDemoShelfEntry\(item\.id\)\) return false/)

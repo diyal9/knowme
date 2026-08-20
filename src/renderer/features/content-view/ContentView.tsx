@@ -125,12 +125,13 @@ export function ContentView({
   if (pending) {
     return (
       <div
-        className={`km-content agent-md agent-md-fallback ${className}`.trim()}
+        className={`km-content agent-md agent-md-fallback agent-md-loading ${className}`.trim()}
         data-testid="content-view"
         data-content-pending="1"
+        aria-busy="true"
+        aria-label="正在整理内容"
       >
-        {text}
-        {caret}
+        正在整理内容…
       </div>
     )
   }

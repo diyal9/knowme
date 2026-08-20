@@ -34,6 +34,10 @@ describe('workbench-studio-surface', () => {
     expect(screen.getByTestId('studio-toggle-mode')).toBeInTheDocument()
     expect(screen.getByTestId('studio-inspect')).toBeInTheDocument()
     expect(screen.getByTestId('studio-auto-layout')).toBeInTheDocument()
+    expect(screen.getByTestId('studio-palette-tool')).toHaveTextContent('工具')
+    expect(screen.getByTestId('studio-palette-gate')).toHaveTextContent('人工确认')
+    expect(screen.queryByTestId('studio-palette-human')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('studio-palette-action')).not.toBeInTheDocument()
   })
 
   it('adds a node and marks draft dirty', async () => {
@@ -41,6 +45,42 @@ describe('workbench-studio-surface', () => {
     await addUnboundAgent()
     await waitFor(() => expect(screen.getByTestId('studio-dirty')).toBeInTheDocument())
     expect(screen.getByTestId('studio-node-list')).toHaveTextContent('专家节点')
+    expect(screen.getByLabelText('专家节点').querySelector('.wb-studio-flow-type')).toBeNull()
+  })
+
+  it('creates a workflow draft with accepted expert result as its input', () => {
+    useAppStore.setState({
+      route: 'workbench',
+      workbenchSurface: 'taskhome',
+      expertRoom: {
+        id: 'expert-task-7',
+        name: '研究专家',
+        goal: '形成发布方案',
+        log: [],
+        messages: [],
+        skills: [],
+        connectors: [],
+        knowledgeRefs: [],
+      },
+    })
+    useAppStore.getState().enterStudioFromExpertTask({
+      mode: 'reuse',
+      taskId: 'expert-task-7',
+      expertName: '研究专家',
+      goal: '形成发布方案',
+      resultLabel: '竞品分析报告',
+      resultSummary: '已验收的关键结论',
+    })
+
+    const state = useAppStore.getState()
+    expect(state.workbenchSurface).toBe('studio')
+    expect(state.expertRoom).toBeNull()
+    expect(state.studioDraft?.name).toBe('研究专家成果后续工作流')
+    expect(state.studioDraft?.goal).toContain('竞品分析报告')
+    expect(state.studioDraft?.inputs).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'expert-result', label: '竞品分析报告', example: '已验收的关键结论' }),
+    ]))
+    expect(state.studioDraft?.dirty).toBe(true)
   })
 
   it('opens expert picker from palette', async () => {
@@ -136,16 +176,19 @@ describe('workbench-studio-surface', () => {
     fireEvent.click(node)
     await waitFor(() => expect(screen.getByTestId('studio-inspector-form')).toBeInTheDocument())
     expect(screen.getByTestId('studio-inspector')).toBeInTheDocument()
-    expect(screen.getByText('节点名称')).toBeInTheDocument()
     expect(screen.getAllByText('执行专家').length).toBeGreaterThan(0)
-    expect(screen.getByText('本节点目标')).toBeInTheDocument()
-    expect(screen.getByText('节点角色')).toBeInTheDocument()
-    expect(screen.getByText('本节点输入')).toBeInTheDocument()
-    expect(screen.getByText('本节点输出')).toBeInTheDocument()
-    expect(screen.getByText('与下一节点关系')).toBeInTheDocument()
+    expect(screen.getByText('本步骤目标')).toBeInTheDocument()
+    expect(screen.getByText('更多设置')).toBeInTheDocument()
+    expect(screen.getByText('步骤角色')).not.toBeVisible()
+    expect(screen.getByText('本步骤技能')).not.toBeVisible()
+    fireEvent.click(screen.getByText('更多设置'))
+    expect(screen.getByText('步骤角色')).toBeVisible()
+    expect(screen.getByText('本步骤输入')).toBeVisible()
+    expect(screen.getByText('本步骤输出')).toBeVisible()
+    expect(screen.queryByText('进入下一步前')).not.toBeInTheDocument()
     expect(screen.getByText('本步骤技能')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '去专家库调优' })).toBeInTheDocument()
-    const nameInput = screen.getByLabelText('节点名称')
+    const nameInput = screen.getByLabelText('步骤名称')
     fireEvent.change(nameInput, { target: { value: '需求专家' } })
     expect(useAppStore.getState().studioDraft?.nodes.some((n) => n.name === '需求专家')).toBe(true)
     expect(screen.getByTestId('studio-canvas')).toHaveAttribute('data-pan-x', '0')
@@ -162,6 +205,7 @@ describe('workbench-studio-surface', () => {
     await addUnboundAgent()
     const node = await screen.findByLabelText('专家节点')
     fireEvent.click(node)
+    fireEvent.click(await screen.findByText('更多设置'))
     await waitFor(() => expect(screen.getByText('代码审查')).toBeInTheDocument())
     const option = screen.getByText('代码审查').closest('label')
     expect(option).toBeTruthy()

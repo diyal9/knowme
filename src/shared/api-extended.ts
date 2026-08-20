@@ -16,9 +16,16 @@ export interface MemoryRecord {
 
 export interface MemoryPattern {
   id: string
+  kind?: string
+  signal?: 'preference' | 'telemetry' | string
+  eligibility?: 'eligible' | 'ineligible' | string
   summary?: string
   prompt_state?: string
   count?: number
+  review_ready?: boolean
+  first_seen?: string
+  last_seen?: string
+  meta?: Record<string, unknown>
 }
 
 export interface MemoryConsolidatedPreview {
@@ -28,11 +35,26 @@ export interface MemoryConsolidatedPreview {
   text?: string
 }
 
+export interface GlobalMemoryItem {
+  id: string
+  type: 'fact' | 'preference' | 'goal' | 'relationship' | 'decision'
+  text: string
+  scope?: 'global' | 'project'
+  project?: string
+  source?: { type?: string; label?: string }
+  confidence?: string
+  sensitivity?: 'local' | 'sensitive'
+  createdAt?: string
+  updatedAt?: string
+  lastVerifiedAt?: string
+}
+
 export interface MemoryOverview {
   ok?: boolean
   config?: { learningEnabled?: boolean }
   recent?: MemoryRecord[]
   patterns?: MemoryPattern[]
+  globalMemories?: GlobalMemoryItem[]
   consolidated?: {
     updatedAt?: string | null
     total?: number
@@ -42,7 +64,8 @@ export interface MemoryOverview {
     recentCount?: number
     pendingCount?: number
     acceptedCount?: number
-    consolidatedCount?: number
+      consolidatedCount?: number
+      globalCount?: number
   }
 }
 
@@ -56,6 +79,11 @@ export interface SettingsForm {
   userProfile?: string
   userPrompt?: string
   industry?: string
+  occupationId?: string
+  userProfileConfigId?: string
+  userProfileConfigVersion?: string
+  userProfileConfigSource?: string
+  userProfileConfigMode?: 'default' | 'custom'
   assistantModeConfig?: Record<string, string>
   gitlabHost?: string
   gitlabToken?: string
@@ -254,6 +282,8 @@ export interface KnowMeExtendedApi {
   knowledgeImport?: () => Promise<{ ok?: boolean; error?: string; canceled?: boolean }>
   memoryStatus?: () => Promise<{ ok?: boolean; learning?: boolean; eventCount?: number; recentCount?: number }>
   memoryOverview?: () => Promise<MemoryOverview>
+  memoryGlobalUpsert?: (payload: Partial<GlobalMemoryItem> & { text: string }) => Promise<{ ok?: boolean; error?: string; item?: GlobalMemoryItem }>
+  memoryGlobalRemove?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   memorySetLearning?: (enabled: boolean) => Promise<unknown>
   memoryConsolidate?: () => Promise<unknown>
   memoryReviewPattern?: (payload: { id: string; action: 'accepted' | 'dismissed' | 'pending'; summary?: string }) => Promise<{ ok?: boolean; error?: string }>
@@ -262,6 +292,7 @@ export interface KnowMeExtendedApi {
   openMemoryDir?: () => void
   openDataDir?: () => void
   openExternal?: (url: string) => Promise<{ ok?: boolean; message?: string }>
+  resolveLinkTitle?: (url: string) => Promise<{ ok?: boolean; title?: string; finalUrl?: string; message?: string }>
   getAutostart?: () => boolean
   setAutostart?: (v: boolean) => void
   pullRemoteConfig?: () => Promise<{ ok?: boolean; error?: string; settings?: SettingsForm }>
@@ -299,9 +330,10 @@ export interface KnowMeExtendedApi {
   capabilityEnable?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityDisable?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityUninstall?: (payload: Record<string, unknown>) => Promise<unknown>
+  capabilityUpdate?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityFavoriteToggle?: (payload: { id: string; kind?: string }) => Promise<{ ok?: boolean; favorite?: boolean; error?: string }>
   workbenchModeBindExpert?: (payload: { expertId: string; modeId?: string }) => Promise<{ ok?: boolean; alreadyBound?: boolean; modeName?: string; error?: string }>
-  workbenchModeUnbindExpert?: (payload: { expertId: string; modeId?: string }) => Promise<{ ok?: boolean; modeName?: string; error?: string }>
+  workbenchModeUnbindExpert?: (payload: { expertId: string; modeId?: string; everywhere?: boolean }) => Promise<{ ok?: boolean; modeName?: string; error?: string }>
   workbenchAutomationCreate?: (payload: Record<string, unknown>) => Promise<unknown>
   workbenchAutomationUpdate?: (id: string, patch: Record<string, unknown>) => Promise<unknown>
   workbenchAutomationDelete?: (id: string) => Promise<unknown>

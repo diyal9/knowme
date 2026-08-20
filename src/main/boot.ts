@@ -251,6 +251,7 @@ ctx.ensureCapabilityHub = function ensureCapabilityHub() {
             getUserData: () => ctx.app.getPath('userData'),
             getKnowledgeDir: () => ctx.KNOWLEDGE_DIR,
             getConnectorsApi: ctx.getConnectorsApi,
+            getWorkflowStore: () => ctx.getWorkbenchWorkflowPackageStore(),
             loadAgentStore: ctx.loadAgentStore,
             bundledRoot: ctx.CATALOG_ROOT,
             getPackSkillSources: () => ctx.ensureCapabilityPackRuntime().listSkillSources(),
@@ -289,6 +290,8 @@ ctx.sourcesLib = require('../lib/sources');
 ctx.__bind_registerCoreIpc = require('../ipc'), ctx.registerCoreIpc = ctx.__bind_registerCoreIpc.registerCoreIpc;
 ctx.workbenchRepo = require('../lib/workbench-repo');
 ctx.workflowSupply = require('../lib/workflow-supply');
+ctx.officialWorkflows = require('../lib/official-workflows');
+ctx.productionCatalogMigration = require('../lib/production-catalog-migration');
 ctx.workbenchDaemon = require('../lib/workbench-daemon-client');
 ctx.workbenchAuth = require('../lib/workbench-auth');
 ctx.workbenchBootstrap = require('../lib/workbench-bootstrap');

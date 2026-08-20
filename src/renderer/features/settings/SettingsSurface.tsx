@@ -1,34 +1,51 @@
 import { useState } from 'react'
 import { SettingsAboutPanel } from './SettingsAboutPanel'
 import { SettingsAiPanel } from './SettingsAiPanel'
-import { SettingsAssistantPanel } from './SettingsAssistantPanel'
 import { SettingsConnectorsPanel } from './SettingsConnectorsPanel'
 import { SettingsMemoryPanel } from './SettingsMemoryPanel'
 import { SettingsSourcesPanel } from './SettingsSourcesPanel'
 import { SettingsSystemPanel } from './SettingsSystemPanel'
+import { SettingsUserProfilePanel } from './SettingsUserProfilePanel'
 import './settings.css'
 import { type SettingsTabId, useSettingsForm } from './useSettingsForm'
 
-const TABS: { id: SettingsTabId; label: string }[] = [
-  { id: 'sources', label: '内容源' },
-  { id: 'ai', label: 'AI 接口' },
-  { id: 'assistant', label: '助手模式' },
-  { id: 'system', label: '系统配置' },
-  { id: 'connectors', label: '连接器' },
-  { id: 'memory', label: '我的记忆' },
-  { id: 'about', label: '关于' },
+const TAB_GROUPS: { label: string; tabs: { id: SettingsTabId; label: string; description: string }[] }[] = [
+  {
+    label: '个人',
+    tabs: [
+      { id: 'profile', label: '个人档案', description: '身份、领域与协作偏好' },
+      { id: 'memory', label: '我的记忆', description: '查看和管理长期记忆' },
+    ],
+  },
+  {
+    label: '工作内容',
+    tabs: [{ id: 'sources', label: '内容源', description: '本地文件夹、仓库与网页资料' }],
+  },
+  {
+    label: '能力',
+    tabs: [
+      { id: 'ai', label: 'AI 接口', description: '模型、接口与连接测试' },
+      { id: 'connectors', label: '服务授权', description: '飞书、MCP 与 Agent 服务' },
+    ],
+  },
+  {
+    label: '应用',
+    tabs: [{ id: 'system', label: '系统配置', description: '启动、数据与应用行为' }],
+  },
+  {
+    label: '其他',
+    tabs: [{ id: 'about', label: '关于', description: '版本、更新与联系信息' }],
+  },
 ]
 
 export type SettingsSurfaceProps = {
   embedded?: boolean
   initialTab?: string
-  onOpenCapabilityHub?: () => void
 }
 
 export function SettingsSurface({
   embedded = false,
   initialTab,
-  onOpenCapabilityHub,
 }: SettingsSurfaceProps) {
   const {
     tab,
@@ -51,6 +68,18 @@ export function SettingsSurface({
   const [githubRepoUrl, setGithubRepoUrl] = useState('')
   const [githubBranch, setGithubBranch] = useState('main')
   const [webPageUrl, setWebPageUrl] = useState('')
+  const [sourceBusy, setSourceBusy] = useState<string | null>(null)
+  const showSaveFooter = ['profile', 'ai', 'system', 'connectors'].includes(tab)
+
+  const runSourceAction = async (key: string, action: () => Promise<void>) => {
+    if (sourceBusy) return
+    setSourceBusy(key)
+    try {
+      await action()
+    } finally {
+      setSourceBusy(null)
+    }
+  }
 
   const addGitlab = async () => {
     const result = await window.api?.sourcesAddGitlab?.({
@@ -84,26 +113,39 @@ export function SettingsSurface({
   return (
     <div className={`settings-root${embedded ? ' settings-embedded' : ''}`} data-testid="settings-surface">
       <header className="settings-titlebar">
-        <div className="settings-titlebar-brand">KnowMe / Preferences</div>
+        <div className="settings-titlebar-brand">KNOWME</div>
         <h1>设置</h1>
-        <p>管理内容源、AI 能力与个人工作偏好</p>
-        <div className="settings-tabs" role="tablist">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              role="tab"
-              className={`settings-tab${tab === t.id ? ' active' : ''}`}
-              aria-selected={tab === t.id}
-              onClick={() => setTab(t.id)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <p>管理个人信息、内容来源与系统能力</p>
       </header>
 
-      <div className="settings-scroll" role="tabpanel">
+      <div className="settings-layout">
+        <nav className="settings-nav" aria-label="设置分类">
+          {TAB_GROUPS.map((group) => (
+            <div className="settings-nav-group" key={group.label}>
+              <div className="settings-nav-label">{group.label}</div>
+              <div className="settings-tabs" role="tablist" aria-label={group.label}>
+                {group.tabs.map((t) => (
+                  <button
+                    key={t.id}
+                    id={`settings-tab-${t.id}`}
+                    type="button"
+                    role="tab"
+                    className={`settings-tab${tab === t.id ? ' active' : ''}`}
+                    aria-selected={tab === t.id}
+                    aria-controls="settings-tabpanel"
+                    onClick={() => setTab(t.id)}
+                  >
+                    <span className="settings-tab-label">{t.label}</span>
+                    <span className="settings-tab-description" aria-hidden="true">{t.description}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+
+        <main className="settings-scroll" id="settings-tabpanel" role="tabpanel" aria-labelledby={`settings-tab-${tab}`}>
+        {tab === 'profile' ? <SettingsUserProfilePanel form={form} onPatch={patch} /> : null}
         {tab === 'sources' ? (
           <SettingsSourcesPanel
             sources={sources}
@@ -123,55 +165,48 @@ export function SettingsSurface({
             onGithubToken={(v) => patch({ githubToken: v })}
             onGithubBranch={setGithubBranch}
             onWebPageUrl={setWebPageUrl}
-            onRefresh={() => void refreshSources()}
-            onAddLocal={async () => {
+            onRefresh={() => runSourceAction('refresh', async () => { await refreshSources(); flash('来源列表已刷新') })}
+            onAddLocal={() => runSourceAction('local', async () => {
               const result = await window.api?.sourcesAddLocal?.()
-              if (result?.ok) {
-                flash('本地文件夹已添加')
-                void refreshSources()
-              } else {
-                flash(result?.error || '添加失败', 'err')
-              }
-            }}
-            onAddGitlab={() => void addGitlab()}
-            onAddGithub={() => void addGithub()}
-            onAddWeb={async () => {
+              if (result?.ok) { flash('本地文件夹已添加'); await refreshSources() }
+              else flash(result?.error || '添加失败', 'err')
+            })}
+            onAddGitlab={() => runSourceAction('gitlab', addGitlab)}
+            onAddGithub={() => runSourceAction('github', addGithub)}
+            onAddWeb={() => runSourceAction('web', async () => {
               const result = await window.api?.sourcesAddWeb?.({ url: webPageUrl })
-              if (result?.ok) {
-                flash('网页资料已添加')
-                void refreshSources()
-              } else {
-                flash(result?.error || '添加失败', 'err')
-              }
-            }}
-            onRemove={async (id) => {
+              if (result?.ok) { flash('网页资料已添加'); await refreshSources() }
+              else flash(result?.error || '添加失败', 'err')
+            })}
+            onRemove={(id) => runSourceAction(`remove:${id}`, async () => {
               await window.api?.sourcesRemove?.(id)
-              void refreshSources()
-            }}
-            onSync={async (id) => {
+              await refreshSources()
+              flash('内容源已移除')
+            })}
+            onSync={(id) => runSourceAction(`sync:${id}`, async () => {
               const result = await window.api?.sourcesSync?.(id)
               if (result?.ok) flash('同步完成')
               else flash(result?.error || '同步失败', 'err')
-            }}
+              await refreshSources()
+            })}
             gitAvailable={gitAvailable}
+            busyAction={sourceBusy}
           />
         ) : null}
         {tab === 'ai' ? <SettingsAiPanel form={form} onPatch={patch} /> : null}
-        {tab === 'assistant' ? (
-          <SettingsAssistantPanel form={form} onPatch={patch} onOpenCapabilityHub={onOpenCapabilityHub} />
-        ) : null}
         {tab === 'system' ? <SettingsSystemPanel form={form} onPatch={patch} flash={flash} /> : null}
         {tab === 'connectors' ? <SettingsConnectorsPanel form={form} onPatch={patch} flash={flash} /> : null}
-        {tab === 'memory' ? <SettingsMemoryPanel form={form} onPatch={patch} flash={flash} dirty={dirty} /> : null}
+        {tab === 'memory' ? <SettingsMemoryPanel flash={flash} /> : null}
         {tab === 'about' ? <SettingsAboutPanel flash={flash} /> : null}
+        </main>
       </div>
 
-      <footer className="settings-footer">
+      {showSaveFooter ? <footer className="settings-footer">
         <span className={`settings-toast${toastKind ? ` ${toastKind}` : ''}`}>{toast || (dirty ? '有未保存的修改' : '')}</span>
         <button type="button" className="settings-btn primary" disabled={saving || !dirty} onClick={() => void save()}>
           {saving ? '保存中…' : '保存设置'}
         </button>
-      </footer>
+      </footer> : null}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import type { ContentBlock } from '../../../domain/content-blocks'
 import type { InlineNode } from '../../../domain/content-inlines'
+import { ContentResourceLink } from './ContentResourceLink'
 import { FeishuResourceCard } from './FeishuResourceCard'
 
 export function ContentInlines({ nodes }: { nodes: InlineNode[] }) {
@@ -12,9 +13,7 @@ export function ContentInlines({ nodes }: { nodes: InlineNode[] }) {
         if (node.kind === 'code') return <code key={index}>{node.text}</code>
         if (node.kind === 'feishu') return <FeishuResourceCard key={index} card={node.card} />
         if (node.kind === 'link') {
-          return (
-            <a key={index} href={node.href} target="_blank" rel="noreferrer noopener">{node.label}</a>
-          )
+          return <ContentResourceLink key={index} href={node.href} label={node.label} />
         }
         return null
       })}

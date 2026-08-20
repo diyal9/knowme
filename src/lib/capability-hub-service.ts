@@ -33,6 +33,9 @@ function createCapabilityHubService(deps = {}) {
   const getConnectorsApi = typeof deps.getConnectorsApi === 'function'
     ? deps.getConnectorsApi
     : () => null
+  const getWorkflowStore = typeof deps.getWorkflowStore === 'function'
+    ? deps.getWorkflowStore
+    : () => null
   const bundledRoot = deps.bundledRoot || path.join(__dirname, '..', 'catalog')
   const getPackSkillSources = typeof deps.getPackSkillSources === 'function'
     ? deps.getPackSkillSources
@@ -78,6 +81,7 @@ function createCapabilityHubService(deps = {}) {
   const lifecycle = createCapabilityLifecycle({
     getUserData,
     getConnectorsApi,
+    getWorkflowStore,
     bundledRoot,
     getPackSkillSources,
     store,
@@ -153,7 +157,9 @@ function createCapabilityHubService(deps = {}) {
     importCapability: lifecycle.importCapability,
     precheckImportCapability: lifecycle.precheckImportCapability,
     scanCursorRepositoryForHub: lifecycle.scanCursorRepositoryForHub,
+    planCursorRepositoryForHub: lifecycle.planCursorRepositoryForHub,
     importCursorRepository: lifecycle.importCursorRepository,
+    verifyImportedWorkflow: lifecycle.verifyImportedWorkflow,
     skillRuntime: runtime.skillRuntime,
     listSkillTasks: runtime.listSkillTasks,
     expertRuntime: runtime.expertRuntime,

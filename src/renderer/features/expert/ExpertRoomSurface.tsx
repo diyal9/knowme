@@ -1,44 +1,65 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useState } from 'react'
+import type { WorkbenchTask } from '../../../shared/api'
 import { useAppStore } from '../../app/store'
-import { useKnowMeIcons } from '../../app/useKnowMeIcons'
-import { ExpertSideStack } from './ExpertSideStack'
+import { expertDeliverableTitle, expertDisplayName, expertTaskEventLabel } from '../../../domain/expert-present'
 
 export function ExpertRoomSurface() {
   const room = useAppStore((s) => s.expertRoom)
-  const hubItems = useAppStore((s) => s.hubItems)
-  const setExpertRoomGoal = useAppStore((s) => s.setExpertRoomGoal)
-  const expert = useMemo(() => {
-    if (!room) return null
-    return hubItems.find((item) => item.id === room.id) || {
-      id: room.id,
-      kind: 'expert' as const,
-      name: room.name,
-      description: '安排这位专家协作',
-      category: '专家',
-      installed: true,
+  const [task, setTask] = useState<WorkbenchTask | null>(null)
+  useEffect(() => {
+    if (!room?.id) return
+    const onTaskUpdated = (event: Event) => {
+      const next = (event as CustomEvent<WorkbenchTask>).detail
+      if (next?.id === room.id) setTask(next)
     }
-  }, [hubItems, room])
-
-  const surfaceRef = useRef<HTMLElement>(null)
-  useKnowMeIcons(room?.id, surfaceRef)
-
-  if (!room || !expert) return null
-
+    window.addEventListener('knowme:expert-task-updated', onTaskUpdated)
+    void window.api?.expertTaskGet?.(room.id).then((result) => setTask(result?.task || null)).catch(() => setTask(null))
+    return () => window.removeEventListener('knowme:expert-task-updated', onTaskUpdated)
+  }, [room?.id])
+  if (!room) return null
+  const materials = task?.brief?.materials || []
+  const requested = task?.brief?.deliverables || []
+  const status = String(task?.status || 'starting')
+  const nextStep = status === 'needs_input'
+    ? '补充专家需要的信息'
+    : status === 'review'
+      ? '验收或退回交付物'
+      : ['starting', 'running', 'revising'].includes(status)
+        ? '等待专家提交新成果'
+        : status === 'completed'
+          ? '任务已完成，无待办'
+          : '查看任务记录'
   return (
-    <article ref={surfaceRef} className="wb-expert-task-room" id="wbExpertTaskRoom" data-testid="expert-room" aria-label="专家任务详情">
-      <header className="wb-expert-task-head" hidden>
-        <div className="wb-expert-task-head-title">
-          <strong id="wbExpertTaskTitle">{room.goal.trim() || room.name}</strong>
-          <span className="wb-expert-task-status" id="wbExpertTaskStatus">协作中</span>
-        </div>
-      </header>
-      <div className="wb-expert-task-body" id="wbExpertTaskBody">
-        <ExpertSideStack
-          expert={expert}
-          goal={room.goal}
-          onGoalChange={setExpertRoomGoal}
-        />
-      </div>
-    </article>
+    <aside className="wb-expert-context" data-testid="expert-room" aria-label="专家任务上下文">
+      <section className="wb-expert-next-step">
+        <span className="wb-detail-eyebrow">下一步</span>
+        <strong>{nextStep}</strong>
+        <p>{status === 'review' || status === 'needs_input' ? '处理后任务会自动继续。' : '状态变化会同步更新到这里。'}</p>
+      </section>
+      <section>
+        <span className="wb-detail-eyebrow">当前任务</span>
+        <strong className="wb-expert-context-name">{expertDisplayName(task?.expertName || room.name)}</strong>
+        <h3>{task?.brief?.goal || task?.goal || room.goal}</h3>
+        <dl>
+          <div><dt>材料</dt><dd>{materials.length ? materials.map((item) => item.title).join('、') : '无额外材料'}</dd></div>
+          <div><dt>预期交付</dt><dd>{requested.length ? requested.map((item) => expertDeliverableTitle(item.title)).join('、') : '任务交付物'}</dd></div>
+        </dl>
+      </section>
+      <section className="is-grow wb-expert-audit">
+        <details>
+          <summary>协作记录 <span>{task?.events?.length || 0}</span></summary>
+          <ol className="wb-expert-event-list">
+            {(task?.events || []).slice(-8).reverse().map((event) => (
+              <li key={event.id}>
+                <strong>{expertTaskEventLabel(event.type, event.summary)}</strong>
+                {event.type === 'changes_requested' && event.summary ? <p>{event.summary}</p> : null}
+                <span>{event.createdAt ? new Date(event.createdAt).toLocaleString() : ''}</span>
+              </li>
+            ))}
+          </ol>
+          {!task?.events?.length ? <p>任务记录将在预检后出现。</p> : null}
+        </details>
+      </section>
+    </aside>
   )
 }

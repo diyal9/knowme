@@ -18,7 +18,21 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
   const laneId = String(sessionId || '').trim()
   const found = laneId ? list.find((item) => item.id === laneId) : null
   const nextUi = ui && typeof ui === 'object' ? { ...ui } : {}
-  if (found) return { session: found, sessions: list, ui: nextUi, created: false }
+  if (found) {
+    const workbench = isWorkbenchLaneId(laneId) || opts.ephemeral === true || opts.surface === 'workbench'
+    if (!workbench && !found.profileId) {
+      const upgraded = {
+        ...found,
+        sessionKind: 'personal-topic',
+        profileId: 'my-knowme',
+        contextId: String(opts.contextId || found.contextId || '').trim(),
+      }
+      const index = list.findIndex(item => item.id === found.id)
+      list[index] = upgraded
+      return { session: upgraded, sessions: list, ui: nextUi, created: true, upgraded: true }
+    }
+    return { session: found, sessions: list, ui: nextUi, created: false }
+  }
 
   const workbench = isWorkbenchLaneId(laneId) || opts.ephemeral === true || opts.surface === 'workbench'
   const role = String(opts.role || opts.agentId || 'general')
@@ -28,6 +42,11 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
     role,
     taskRef: opts.taskRef || (workbench ? taskRefForLane(laneId, role) : undefined),
     goal: workbench ? '当前工作' : opts.goal,
+    sessionKind: workbench
+      ? (String(opts.taskRef?.kind || '').includes('workflow') ? 'workflow-run' : 'expert-task')
+      : 'personal-topic',
+    profileId: workbench ? String(opts.profileId || '') : 'my-knowme',
+    contextId: opts.contextId,
   })
   if (laneId) session.id = laneId
   list.unshift(session)

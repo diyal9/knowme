@@ -21,12 +21,23 @@ describe('shelf domain', () => {
 
   it('marks locked cards and daemon-offline hint', () => {
     expect(toShelfCard({ id: 'a', name: 'a', locked: true }).blocked).toBe(true)
-    expect(shelfLockHint(false)).toMatch(/离线/)
+    expect(shelfLockHint(false)).toBeNull()
     expect(shelfLockHint(true)).toBeNull()
   })
 
+  it('classifies imported art workflow tags as visual without explicit provenance', () => {
+    const card = toShelfCard({
+      id: 'th-art-psd-to-artbundle',
+      name: '固定 PSD → 标准 ArtBundle',
+      source: 'team',
+      goalTypes: ['ui', 'psd', 'artbundle', 'factory', 'creator'],
+    })
+    expect(card.domain).toBe('visual')
+    expect(filterShelfCards([card], '', 'visual')).toEqual([card])
+  })
+
   it('explains empty shelf supply by daemon status', () => {
-    expect(shelfSupplyHint(false)).toMatch(/连接管线服务/)
-    expect(shelfSupplyHint(true)).toMatch(/专家库/)
+    expect(shelfSupplyHint(false)).toMatch(/完成后即可运行/)
+    expect(shelfSupplyHint(true)).toMatch(/团队提供/)
   })
 })

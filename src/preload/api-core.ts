@@ -169,6 +169,13 @@ module.exports = {
   workbenchTaskCreate: input => ipcRenderer.invoke('workbench-task-create', input || {}),
   workbenchTaskUpdate: (id, patch) => ipcRenderer.invoke('workbench-task-update', { id, patch: patch || {} }),
   workbenchTaskArchive: id => ipcRenderer.invoke('workbench-task-archive', id),
+  expertTaskCreateStart: payload => ipcRenderer.invoke('expert-task-create-start', payload || {}),
+  expertTaskProvideInput: payload => ipcRenderer.invoke('expert-task-provide-input', payload || {}),
+  expertTaskReviewDeliverable: payload => ipcRenderer.invoke('expert-task-review-deliverable', payload || {}),
+  expertTaskCancel: id => ipcRenderer.invoke('expert-task-cancel', id),
+  expertTaskRetry: id => ipcRenderer.invoke('expert-task-retry', id),
+  expertTaskGet: id => ipcRenderer.invoke('expert-task-get', id),
+  expertTaskList: () => ipcRenderer.invoke('expert-task-list'),
   onWorkbenchTaskScheduleDue: cb => {
     const fn = (_e, data) => cb(data)
     ipcRenderer.on('workbench-task-schedule-due', fn)
@@ -179,5 +186,18 @@ module.exports = {
   workbenchWorkflowPackageSave: payload => ipcRenderer.invoke('workbench-workflow-package-save', payload || {}),
   workbenchWorkflowPackageFork: (id, options) => ipcRenderer.invoke('workbench-workflow-package-fork', id, options || {}),
   workbenchWorkflowPackageArchive: id => ipcRenderer.invoke('workbench-workflow-package-archive', id),
+  workflowActionCatalog: () => ipcRenderer.invoke('workflow-action-catalog'),
+  workflowValidate: payload => ipcRenderer.invoke('workflow-validate', payload || {}),
+  workflowPublish: payload => ipcRenderer.invoke('workflow-publish', payload || {}),
+  workflowRunStart: payload => ipcRenderer.invoke('workflow-run-start', payload || {}),
+  workflowRunGet: id => ipcRenderer.invoke('workflow-run-get', id),
+  workflowRunPause: payload => ipcRenderer.invoke('workflow-run-pause', payload || {}),
+  workflowRunResume: payload => ipcRenderer.invoke('workflow-run-resume', payload || {}),
+  workflowRunSubmitHuman: payload => ipcRenderer.invoke('workflow-run-submit-human', payload || {}),
+  workflowRunSubmitGate: payload => ipcRenderer.invoke('workflow-run-submit-gate', payload || {}),
+  workflowRunIntervene: payload => ipcRenderer.invoke('workflow-run-intervene', payload || {}),
+  workflowRunRerun: payload => ipcRenderer.invoke('workflow-run-rerun', payload || {}),
+  workflowRunSubstitute: payload => ipcRenderer.invoke('workflow-run-substitute', payload || {}),
+  workflowRunComment: payload => ipcRenderer.invoke('workflow-run-comment', payload || {}),
   agentProfileList: agentId => ipcRenderer.invoke('agent-profile-list', agentId || ''),
 }

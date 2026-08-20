@@ -42,7 +42,7 @@ export function planPipelineComposerSend(input: {
 }
 
 export function pipelineComposerReceipt(plan: PipelineComposerPlan): string {
-  if (plan.kind === 'clarify') return '已提交澄清答复。'
+  if (plan.kind === 'clarify') return '已提交补充信息，正在重新检查任务状态。'
   if (plan.kind === 'gate-revise') return '已把修改意见提交给当前确认节点。'
   if (plan.kind === 'ack') return plan.text
   return ''

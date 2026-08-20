@@ -21,6 +21,10 @@ const LEVEL_RANK = { debug: 10, info: 20, warn: 30, error: 40 }
 
 const FILE_PREFIX = 'knowme-'
 const FILE_EXT = '.jsonl'
+const DEFAULT_MAX_BYTES = 10 * 1024 * 1024
+const DEFAULT_RETENTION_DAYS = 7
+const DEFAULT_MAX_FILES = 10
+const DEFAULT_MAX_TOTAL_BYTES = 150 * 1024 * 1024
 
 const SENSITIVE_KEY_RE = /^(api[_-]?key|authorization|access[_-]?token|refresh[_-]?token|token|secret|password|cookie|bearer|client[_-]?secret|app[_-]?secret)$/i
 const SENSITIVE_VALUE_RE = /(sk-[A-Za-z0-9]{6,})|(Bearer\s+[A-Za-z0-9._-]{6,})|([A-Za-z0-9._-]{24,})/g
@@ -29,9 +33,13 @@ let state = {
   dir: '',
   ready: false,
   minLevel: 'info',
-  maxBytes: 8 * 1024 * 1024,
-  retentionDays: 14,
+  maxBytes: DEFAULT_MAX_BYTES,
+  retentionDays: DEFAULT_RETENTION_DAYS,
+  maxFiles: DEFAULT_MAX_FILES,
+  maxTotalBytes: DEFAULT_MAX_TOTAL_BYTES,
+  totalBytes: 0,
   mirrorConsole: true,
+  brokenPipes: { stdout: false, stderr: false },
 }
 const pending = []
 const MAX_PENDING = 500
@@ -101,33 +109,91 @@ function ensureDir() {
   }
 }
 
-function rotateIfNeeded(file) {
-  try {
-    const stat = fs.statSync(file)
-    if (stat.size < state.maxBytes) return
-    const rolled = path.join(state.dir, `${FILE_PREFIX}${dateStamp()}-${timeStamp()}${FILE_EXT}`)
-    fs.renameSync(file, rolled)
-  } catch { /* file may not exist yet */ }
+function nextRolledFile() {
+  const base = `${FILE_PREFIX}${dateStamp()}-${timeStamp()}-${String(Date.now() % 1000).padStart(3, '0')}`
+  let candidate = path.join(state.dir, `${base}${FILE_EXT}`)
+  let suffix = 1
+  while (fs.existsSync(candidate)) candidate = path.join(state.dir, `${base}-${suffix++}${FILE_EXT}`)
+  return candidate
 }
 
-function pruneOldFiles() {
+function rotateIfNeeded(file, incomingBytes = 0) {
+  try {
+    const stat = fs.statSync(file)
+    if (stat.size + incomingBytes <= state.maxBytes) return false
+    fs.renameSync(file, nextRolledFile())
+    return true
+  } catch { return false /* file may not exist yet */ }
+}
+
+function listLogFiles() {
   if (!state.dir) return
-  let files
-  try { files = fs.readdirSync(state.dir) } catch { return }
-  const cutoff = Date.now() - state.retentionDays * 86400 * 1000
-  for (const name of files) {
+  let names
+  try { names = fs.readdirSync(state.dir) } catch { return [] }
+  const files = []
+  for (const name of names) {
     if (!name.startsWith(FILE_PREFIX) || !name.endsWith(FILE_EXT)) continue
     const full = path.join(state.dir, name)
     try {
-      if (fs.statSync(full).mtimeMs < cutoff) fs.unlinkSync(full)
+      const stat = fs.statSync(full)
+      if (stat.isFile()) files.push({ full, name, mtimeMs: stat.mtimeMs, size: stat.size })
+    } catch { /* file disappeared while scanning */ }
+  }
+  return files
+}
+
+/** 启动时执行：按天数、文件数、总字节数三重约束清理，均保留最新文件。 */
+function pruneOldFiles() {
+  let files = listLogFiles()
+  if (!files) return
+  const cutoff = Date.now() - state.retentionDays * 86400 * 1000
+  for (const file of files) {
+    if (file.mtimeMs >= cutoff) continue
+    try {
+      fs.unlinkSync(file.full)
     } catch { /* ignore */ }
   }
+  files = (listLogFiles() || []).sort((a, b) => b.mtimeMs - a.mtimeMs || b.name.localeCompare(a.name))
+  let total = files.reduce((sum, file) => sum + file.size, 0)
+  for (let i = files.length - 1; i >= 0; i -= 1) {
+    const file = files[i]
+    if (i < state.maxFiles && total <= state.maxTotalBytes) continue
+    try {
+      fs.unlinkSync(file.full)
+      total -= file.size
+    } catch { /* ignore */ }
+  }
+  state.totalBytes = total
 }
 
 function writeEntry(entry) {
   const file = currentFile()
-  rotateIfNeeded(file)
-  fs.appendFileSync(file, JSON.stringify(entry) + '\n', 'utf8')
+  const line = JSON.stringify(entry) + '\n'
+  const lineBytes = Buffer.byteLength(line, 'utf8')
+  const rotated = rotateIfNeeded(file, lineBytes)
+  fs.appendFileSync(file, line, 'utf8')
+  state.totalBytes += lineBytes
+  // 文件数只会在轮转时增长；总量则每次写入都必须执行硬限制。
+  if (rotated || state.totalBytes > state.maxTotalBytes) pruneOldFiles()
+}
+
+function isBrokenPipe(error) {
+  return error?.code === 'EPIPE' || /broken pipe/i.test(String(error?.message || error || ''))
+}
+
+function disableBrokenPipe(streamName) {
+  if (streamName === 'stdout' || streamName === 'stderr') state.brokenPipes[streamName] = true
+}
+
+let pipeGuardsInstalled = false
+function installPipeGuards() {
+  if (pipeGuardsInstalled) return
+  pipeGuardsInstalled = true
+  for (const [name, stream] of [['stdout', process.stdout], ['stderr', process.stderr]]) {
+    stream?.on?.('error', error => {
+      if (isBrokenPipe(error)) disableBrokenPipe(name)
+    })
+  }
 }
 
 function mirror(entry) {
@@ -135,9 +201,15 @@ function mirror(entry) {
   const line = `${entry.ts} ${entry.level.toUpperCase()} ${entry.category}/${entry.event}` +
     (entry.runId ? ` [${entry.runId}]` : '') +
     (entry.msg ? ` ${entry.msg}` : '')
-  if (entry.level === 'error') console.error(line)
-  else if (entry.level === 'warn') console.warn(line)
-  else console.log(line)
+  const streamName = entry.level === 'error' || entry.level === 'warn' ? 'stderr' : 'stdout'
+  if (state.brokenPipes[streamName]) return
+  try {
+    if (entry.level === 'error') console.error(line)
+    else if (entry.level === 'warn') console.warn(line)
+    else console.log(line)
+  } catch (error) {
+    if (isBrokenPipe(error)) disableBrokenPipe(streamName)
+  }
 }
 
 /** 构造一条日志记录（已脱敏）。 */
@@ -175,7 +247,10 @@ function init(opts = {}) {
   if (opts.level) state.minLevel = normalizeLevel(opts.level)
   if (Number.isFinite(opts.maxBytes)) state.maxBytes = opts.maxBytes
   if (Number.isFinite(opts.retentionDays)) state.retentionDays = opts.retentionDays
+  if (Number.isFinite(opts.maxFiles)) state.maxFiles = Math.max(1, opts.maxFiles)
+  if (Number.isFinite(opts.maxTotalBytes)) state.maxTotalBytes = Math.max(state.maxBytes, opts.maxTotalBytes)
   if (opts.mirrorConsole != null) state.mirrorConsole = !!opts.mirrorConsole
+  installPipeGuards()
   if (!ensureDir()) return false
   state.ready = true
   pruneOldFiles()
@@ -312,9 +387,13 @@ function _reset() {
     dir: '',
     ready: false,
     minLevel: 'info',
-    maxBytes: 8 * 1024 * 1024,
-    retentionDays: 14,
+    maxBytes: DEFAULT_MAX_BYTES,
+    retentionDays: DEFAULT_RETENTION_DAYS,
+    maxFiles: DEFAULT_MAX_FILES,
+    maxTotalBytes: DEFAULT_MAX_TOTAL_BYTES,
+    totalBytes: 0,
     mirrorConsole: true,
+    brokenPipes: { stdout: false, stderr: false },
   }
   pending.length = 0
 }
@@ -340,5 +419,7 @@ module.exports = {
   counts,
   clear,
   redact,
+  isBrokenPipe,
+  disableBrokenPipe,
   _reset,
 }

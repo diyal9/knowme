@@ -16,6 +16,14 @@
 }
 .wb-head[hidden] { display: none !important; }
 
+.workbench > .wb-body {
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  scrollbar-gutter:stable;
+}
+
 .wb-head-title {
   display: flex;
   align-items: center;
@@ -31,7 +39,7 @@
 .wb-head-title .ico {
   width: 16px;
   height: 16px;
-  color: #2f6f5e;
+  color: #27786a;
   flex-shrink: 0;
 }
 .wb-head-sub {
@@ -60,7 +68,7 @@
   background: transparent;
   color: #77736d;
   font: 600 13px var(--ui);
-  letter-spacing: 0.1px;
+  letter-spacing: 0;
   cursor: pointer;
   transition: color var(--motion-micro, 160ms) ease, transform 120ms ease;
 }
@@ -94,3 +102,68 @@
   position: relative;
   flex-shrink: 0;
 }
+.wb-head-detail-actions { display:flex; align-items:center; }
+.wb-head-detail-actions:empty { display:none; }
+.wb-detail-header-back { margin:0; }
+.workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-shelf-search { display:none; }
+
+/* 搜索框属于 AppShell 常驻顶栏，必须随 chrome 静态加载。 */
+.wb-shelf-search {
+  width: clamp(180px, 26vw, 300px);
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--wb-line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--wb-text);
+  font: 400 13px var(--ui);
+}
+.wb-shelf-search::placeholder { color: var(--wb-text-faint); }
+.wb-shelf-search:focus {
+  outline: none;
+  border-color: var(--wb-accent);
+  box-shadow: 0 0 0 3px var(--wb-accent-soft);
+}
+
+@media (max-width: 900px) {
+  .wb-shelf-search { width: 100%; order: -1; }
+  .wb-head-tools { flex-wrap: wrap; }
+  .wb-mode-tabs { order: 1; width: 100%; height: 44px; }
+  .wb-mode-tab { min-height: 44px; }
+}
+
+/* 全应用详情页 / 任务间共用的返回控件。放在静态 chrome，避免懒加载面退回浏览器默认样式。 */
+.app-back-button,
+.wb-task-back {
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  flex-shrink:0;
+  min-height:32px;
+  padding:0 11px 0 7px;
+  border:1px solid var(--wb-line, #e2e6e9);
+  border-radius:8px;
+  background:#fff;
+  color:var(--wb-text-muted, #5f656b);
+  box-shadow:0 1px 2px rgba(24,42,38,.03);
+  font:600 12px var(--ui);
+  cursor:pointer;
+  transition:color .16s ease, background .16s ease, border-color .16s ease, transform .12s ease, box-shadow .16s ease;
+}
+.app-back-button:hover,
+.wb-task-back:hover {
+  border-color:#cdd8d5;
+  color:var(--wb-text, #202326);
+  background:#f8fbfa;
+  box-shadow:0 4px 12px -9px rgba(28,62,56,.5);
+}
+.app-back-button:active,
+.wb-task-back:active { transform:translateY(1px); box-shadow:none; }
+.app-back-button:focus-visible,
+.wb-task-back:focus-visible { outline:2px solid var(--focus-ring, rgba(39,120,106,.3)); outline-offset:2px; }
+.app-back-button .ico,
+.wb-task-back .ico { width:15px; height:15px; }
+.app-back-button .ico { transition:transform .16s ease; }
+.app-back-button:hover .ico { transform:translateX(-2px); }
+.app-back-button.is-compact { min-height:30px; padding-right:10px; font-size:12px; }
+.app-back-button.is-icon-only { width:32px; min-width:32px; padding:0; justify-content:center; }

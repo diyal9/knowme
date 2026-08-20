@@ -8,8 +8,9 @@ export type InlineNode =
   | { kind: 'link'; href: string; label: string }
   | { kind: 'feishu'; card: FeishuCardModel }
 
-const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g
+const MD_LINK_RE = /\[([^\]]+)\]\(([^)\s]+)\)/g
 const BARE_URL_RE = /(^|[\s>])((?:https?:\/\/|www\.)[^\s<)]+)/g
+const URL_ONLY_RE = /^(?:https?:\/\/|www\.)[^\s<)]+$/i
 
 function pushText(out: InlineNode[], text: string) {
   if (text) out.push({ kind: 'text', text })
@@ -22,7 +23,9 @@ function parseEmphasis(src: string): InlineNode[] {
     if (src[i] === '`') {
       const end = src.indexOf('`', i + 1)
       if (end > i) {
-        out.push({ kind: 'code', text: src.slice(i + 1, end) })
+        const codeText = src.slice(i + 1, end)
+        // 模型常把 URL 包在反引号中；链接仍应可点击，普通代码继续保持代码样式。
+        out.push(URL_ONLY_RE.test(codeText) ? linkNode(codeText, codeText) : { kind: 'code', text: codeText })
         i = end + 1
         continue
       }

@@ -17,6 +17,7 @@ export async function renderApp(ui: ReactElement) {
 
 export function makeRunState(overrides: Partial<RunState> & Pick<RunState, 'phase'>): RunState {
   return {
+    taskId: overrides.taskId ?? '',
     workflowId: 'wf-1',
     workflowName: '会议闭环',
     slug: 'wf-1',
@@ -42,6 +43,10 @@ export function makeRunState(overrides: Partial<RunState> & Pick<RunState, 'phas
     daemonStatus: '',
     dialogueMessages: [],
     ...overrides,
+    launchInputs: overrides.launchInputs ?? {},
+    workflowRunId: overrides.workflowRunId ?? '',
+    workflowPackage: overrides.workflowPackage ?? null,
+    selectedNodeId: overrides.selectedNodeId ?? null,
   }
 }
 
@@ -57,6 +62,7 @@ export function resetAppStore() {
     shelfCards: [],
     shelfLoading: false,
     shelfDaemonOnline: null,
+    daemonOverviewCache: null,
     tasks: [],
     run: null,
     expertRoom: null,
@@ -138,6 +144,7 @@ export function resetAppStore() {
     knowledgeIoLoading: false,
     linkPreview: null,
     linkFullscreen: false,
+    linkTitleCache: {},
   })
 }
 
@@ -152,6 +159,7 @@ export function mockApi(partial: Partial<KnowMeApi> = {}): KnowMeApi {
     workbenchWorkflowPackageSave: async () => ({ ok: true, package: { id: 'my-test', graph: {} } }),
     workbenchTaskList: async () => ({ items: [] }),
     workbenchTaskCreate: async () => ({}),
+    workbenchTaskUpdate: async () => ({}),
     workbenchTaskGet: async () => null,
     workbenchTaskArchive: async () => ({ ok: true }),
     workbenchWorkflowPackageList: async () => ({ items: [] }),

@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import type { AgentContextInfo, CapabilityItem } from '../../../shared/api'
-import { ASSISTANT_QUICK_COMMANDS } from '../../../domain/agent-quick-commands'
+import { ASSISTANT_QUICK_COMMANDS, parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
+import { buildIntelligentRecommendations, type IntelligentRecommendation } from '../../../domain/assistant-recommendations'
 import {
   buildContextUsageViewModel,
   contextUsageSectionLabel,
@@ -176,19 +178,72 @@ export function AgentKnowledgeMenu({
 }
 
 export function AgentQuickMenu({
-  query,
-  onQueryChange,
+  context,
   onPick,
 }: {
-  query: string
-  onQueryChange: (value: string) => void
+  context: string
   onPick: (prompt: string) => void
 }) {
-  const items = ASSISTANT_QUICK_COMMANDS.filter((item) => {
-    const q = query.trim().toLowerCase()
-    if (!q) return true
-    return `${item.title} ${item.prompt}`.toLowerCase().includes(q)
-  })
+  const [memoryHints, setMemoryHints] = useState<string[]>([])
+  const [commonActions, setCommonActions] = useState<IntelligentRecommendation[]>(() => ASSISTANT_QUICK_COMMANDS.map((item) => ({
+    label: item.title,
+    description: item.subtitle,
+    prompt: item.prompt,
+  })))
+  useEffect(() => {
+    let active = true
+    void window.api?.personalAgentGet?.().then((result) => {
+      if (!active) return
+      const profile = result?.profile
+      setMemoryHints([
+        String(profile?.promptOverlay || '').trim(),
+        String(profile?.taskPreferences?.domainCapabilities || '').trim(),
+      ].filter(Boolean).map((item) => item.slice(0, 120)))
+      const configured = parseConfiguredQuickActions(profile?.taskPreferences?.quickActions)
+      if (configured.length) {
+        setCommonActions(configured.map((item) => ({
+          label: item.title,
+          description: item.subtitle,
+          prompt: item.prompt || `请使用 Skill「${item.skillRef}」执行这项操作。`,
+        })))
+      }
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [])
+  const recommendations = buildIntelligentRecommendations(context || '当前工作', 'general', { memoryHints })
+  const items = recommendations
+  const commonItems = commonActions
+  const allItems = [...items, ...commonItems]
+  const [activeIndex, setActiveIndex] = useState(0)
+  const menuRef = useRef<HTMLDivElement>(null)
+  useEffect(() => { menuRef.current?.focus() }, [])
+  useEffect(() => { setActiveIndex(0) }, [context])
+  function choose(index: number) {
+    const item = allItems[index]
+    if (item) onPick(item.prompt)
+  }
+  function moveSelection(key: string) {
+    const leftCount = items.length
+    const rightCount = commonItems.length
+    if (!leftCount && !rightCount) return
+    const onLeft = activeIndex < leftCount
+    const row = onLeft ? activeIndex : activeIndex - leftCount
+    if (key === 'ArrowLeft' && !onLeft && leftCount) {
+      setActiveIndex(Math.min(row, leftCount - 1)); return
+    }
+    if (key === 'ArrowRight' && onLeft && rightCount) {
+      setActiveIndex(leftCount + Math.min(row, rightCount - 1)); return
+    }
+    if (key === 'ArrowDown') {
+      const count = onLeft ? leftCount : rightCount
+      const next = Math.min(row + 1, count - 1)
+      setActiveIndex(onLeft ? next : leftCount + next)
+    }
+    if (key === 'ArrowUp') {
+      const next = Math.max(row - 1, 0)
+      setActiveIndex(onLeft ? next : leftCount + next)
+    }
+  }
 
   return (
     <div
@@ -196,46 +251,42 @@ export function AgentQuickMenu({
       id="agentQuickMenu"
       data-testid="agent-quick-menu"
       role="menu"
-      aria-label="快捷操作"
+      aria-label="智能推荐"
+      tabIndex={-1}
+      ref={menuRef}
+      onKeyDown={(e) => {
+        if (!allItems.length) return
+        if (['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(e.key)) { e.preventDefault(); moveSelection(e.key) }
+        if (e.key === 'Enter') { e.preventDefault(); choose(activeIndex) }
+      }}
       onClick={(e) => e.stopPropagation()}
     >
-      <label className="agent-command-search" htmlFor="agentQuickSearch">
-        <Icon name="optimize" />
-        <input
-          id="agentQuickSearch"
-          type="search"
-          autoComplete="off"
-          spellCheck={false}
-          placeholder="搜索任务、技能或结果…"
-          aria-label="搜索快捷任务"
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-        />
-      </label>
-      <div className="agent-command-summary" id="agentQuickSummary">
-        {query.trim() ? `${items.length} 项匹配` : `${items.length} 项可用任务`}
+      <div className="agent-quick-columns">
+        <section className="agent-quick-section" aria-labelledby="agentQuickRecommendedTitle">
+          <h3 id="agentQuickRecommendedTitle">智能推荐</h3>
+          <div className="agent-command-results" id="agentQuickItems" role="listbox" aria-label="智能推荐结果">
+            {items.map((item, index) => (
+              <button key={`${item.label}-${item.prompt}`} type="button" className={`agent-command-item${activeIndex === index ? ' active' : ''}`} role="menuitem" aria-current={activeIndex === index ? 'true' : undefined} data-quick-command="1" onMouseEnter={() => setActiveIndex(index)} onClick={() => onPick(item.prompt)}>
+                <Icon name="optimize" />
+                <span className="agent-command-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="agent-quick-section" aria-labelledby="agentQuickCommonTitle">
+          <h3 id="agentQuickCommonTitle">我的常用</h3>
+          <div className="agent-command-results" role="listbox" aria-label="我的常用操作">
+            {commonItems.map((item, index) => (
+              <button key={`${item.label}-${item.prompt}`} type="button" className={`agent-command-item${activeIndex === items.length + index ? ' active' : ''}`} role="menuitem" aria-current={activeIndex === items.length + index ? 'true' : undefined} data-quick-command="1" onMouseEnter={() => setActiveIndex(items.length + index)} onClick={() => onPick(item.prompt)}>
+                <Icon name="history" />
+                <span className="agent-command-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
+              </button>
+            ))}
+          </div>
+        </section>
       </div>
-      <div className="agent-command-results" id="agentQuickItems" role="listbox" aria-label="快捷任务结果">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className="agent-command-item"
-            role="option"
-            data-quick-command="1"
-            onClick={() => onPick(item.prompt)}
-          >
-            <Icon name="note" />
-            <span className="agent-command-copy">
-              <strong>{item.title}</strong>
-              <small>{item.subtitle}</small>
-            </span>
-            <span className="agent-command-group">推荐操作</span>
-          </button>
-        ))}
-      </div>
-      <div className={`agent-command-empty${items.length ? '' : ' show'}`} id="agentQuickEmpty" role="status">
-        没有匹配的任务，换个关键词试试。
+      <div className={`agent-command-empty${items.length || commonItems.length ? '' : ' show'}`} id="agentQuickEmpty" role="status">
+        暂无可推荐操作
       </div>
     </div>
   )
@@ -244,23 +295,45 @@ export function AgentQuickMenu({
 export function AgentSlashMenu({
   items,
   onPick,
+  query = '',
+  onQueryChange,
+  activeIndex = 0,
+  onActiveChange,
 }: {
   items: CapabilityItem[]
   onPick: (item: CapabilityItem) => void
+  query?: string
+  onQueryChange?: (query: string) => void
+  activeIndex?: number
+  onActiveChange?: (index: number) => void
 }) {
   return (
-    <div className="agent-slash-menu show" data-testid="agent-slash-menu" role="listbox" aria-label="技能快捷引用">
+    <div className="agent-slash-menu show" data-testid="agent-slash-menu" role="listbox" aria-label="已安装技能">
+      <label className="agent-skill-search">
+        <Icon name="search" />
+        <input
+          value={query}
+          placeholder="搜索已安装技能…"
+          aria-label="搜索已安装技能"
+          onChange={(e) => onQueryChange?.(e.target.value)}
+          onKeyDown={(e) => {
+            if (!items.length) return
+            if (e.key === 'ArrowDown') { e.preventDefault(); onActiveChange?.((activeIndex + 1) % items.length) }
+            if (e.key === 'ArrowUp') { e.preventDefault(); onActiveChange?.((activeIndex - 1 + items.length) % items.length) }
+            if (e.key === 'Enter') { e.preventDefault(); onPick(items[activeIndex]) }
+          }}
+        />
+      </label>
       {items.length === 0 ? (
-        <div className="agent-pop-empty">没有匹配的技能</div>
-      ) : items.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          className="agent-slash-item"
-          onMouseDown={(e) => { e.preventDefault(); onPick(item) }}
-        >
-          <span className="slash-cmd">/{item.name || item.id}</span>
-          <span className="slash-title">{item.description || '技能'}</span>
+        <div className="agent-pop-empty">没有匹配的已安装技能</div>
+      ) : items.map((item, index) => (
+        <button key={item.id} type="button" className={`agent-slash-item${index === activeIndex ? ' active' : ''}`} aria-selected={index === activeIndex} onMouseEnter={() => onActiveChange?.(index)} onMouseDown={(e) => { e.preventDefault(); onPick(item) }}>
+          <Icon name="bookOpen" />
+          <span className="slash-copy">
+            <strong>{item.name || item.id}</strong>
+            <small>{item.description || '已安装技能'}</small>
+          </span>
+          <span className="slash-origin">{item.category || '个人'}</span>
         </button>
       ))}
     </div>

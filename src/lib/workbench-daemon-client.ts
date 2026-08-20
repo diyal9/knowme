@@ -297,13 +297,20 @@ function buildSubmitContext(raw) {
 }
 
 function normalizeTask(item) {
+  const raw = item && typeof item === 'object' ? item : {}
+  const source = raw.source && typeof raw.source === 'object' ? raw.source : null
+  const metadata = raw.metadata && typeof raw.metadata === 'object' ? raw.metadata : null
   return {
-    slug: String(item && item.slug || ''),
-    workflow: String(item && item.workflow || ''),
-    intent: String(item && item.intent || ''),
-    state: taskState(item),
-    updatedAt: String(item && (item.updated_at || item.updatedAt || item.created_at) || ''),
-    raw: item || {},
+    slug: String(raw.slug || ''),
+    workflow: String(raw.workflow || ''),
+    intent: String(raw.intent || ''),
+    state: taskState(raw),
+    updatedAt: String(raw.updated_at || raw.updatedAt || raw.created_at || ''),
+    sourceTitle: String(raw.source_title || raw.sourceTitle || source?.title || ''),
+    documentTitle: String(raw.document_title || raw.documentTitle || metadata?.document_title || metadata?.documentTitle || ''),
+    source,
+    metadata,
+    raw,
   }
 }
 

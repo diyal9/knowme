@@ -45,7 +45,7 @@ export function HubPickerDialog({ spec, onClose, onApply }: Props) {
       <div className="hub-dialog hub-picker-dialog">
         <div className="hub-dialog-head">
           <div>
-            <span className="hub-section-kicker">Catalog</span>
+          <span className="hub-section-kicker">能力目录</span>
             <h2 id="hubPickerTitle">{spec.dialogTitle}</h2>
             <p id="hubPickerDesc">{spec.hint}</p>
           </div>

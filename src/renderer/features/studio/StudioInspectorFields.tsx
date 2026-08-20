@@ -17,6 +17,12 @@ export function StudioInspectorFields({ node, simpleMode, hasNextStep, onPatch }
   const models = useAppStore((s) => s.assistantModels)
   const skills = useAppStore((s) => s.assistantSkills)
   const knowledgeProviders = useAppStore((s) => s.studioKnowledgeProviders)
+  const knowledgeOptions = [
+    { id: 'local-default', name: '本地知识库', kind: 'local' },
+    { id: 'feishu-default', name: '飞书知识库', kind: 'feishu' },
+    { id: 'rag-default', name: 'RAG 知识库', kind: 'rag' },
+    ...knowledgeProviders.filter((item) => !['local-default', 'feishu-default', 'rag-default'].includes(item.id)),
+  ]
 
   if (node.kind === 'start' || node.kind === 'end') {
     return (
@@ -124,18 +130,19 @@ export function StudioInspectorFields({ node, simpleMode, hasNextStep, onPatch }
           <select
             value={currentKnowledge}
             onChange={(e) => {
-              const provider = knowledgeProviders.find((item) => item.id === e.target.value)
+              const provider = knowledgeOptions.find((item) => item.id === e.target.value)
               onPatch({
                 config: {
                   ...(node.config || {}),
                   knowledgeId: e.target.value,
                   ...(provider?.name ? { knowledgeName: provider.name } : {}),
+                  ...(provider?.kind ? { knowledgeKind: provider.kind } : {}),
                 },
               })
             }}
           >
             <option value="">选择知识库…</option>
-            {knowledgeProviders.map((item) => (
+            {knowledgeOptions.map((item) => (
               <option key={item.id} value={item.id}>{item.name || item.id}</option>
             ))}
           </select>
@@ -145,6 +152,60 @@ export function StudioInspectorFields({ node, simpleMode, hasNextStep, onPatch }
           <textarea rows={3} value={String(node.intent || '')} placeholder="检索目标说明" onChange={(e) => onPatch({ intent: e.target.value })} />
         </label>
         <p className="wb-studio-guide">知识库节点直接检索，无需绑定专家。</p>
+      </>
+    )
+  }
+
+  if (node.kind === 'mcp') {
+    return (
+      <>
+        <label className="wb-studio-field">
+          <span>节点名称</span>
+          <input value={node.name || ''} onChange={(e) => onPatch({ name: e.target.value })} />
+        </label>
+        <label className="wb-studio-field">
+          <span>MCP 服务</span>
+          <input value={String(node.config?.connectorName || node.config?.connectorId || '')} placeholder="服务标识或连接器名称" onChange={(e) => onPatch({ config: { ...(node.config || {}), connectorName: e.target.value, connectorId: e.target.value } })} />
+        </label>
+        <label className="wb-studio-field">
+          <span>工具名称</span>
+          <input value={String(node.config?.toolName || '')} placeholder="例如：search" onChange={(e) => patchConfig(node, 'toolName', e.target.value, onPatch)} />
+        </label>
+        <label className="wb-studio-field">
+          <span>参数 JSON</span>
+          <textarea rows={5} value={String(node.config?.arguments || '{}')} placeholder='{"query":"{{input}}"}' onChange={(e) => patchConfig(node, 'arguments', e.target.value, onPatch)} />
+        </label>
+        <p className="wb-studio-guide">通过 MCP 服务调用工具，结果会传给下游节点。</p>
+      </>
+    )
+  }
+
+  if (node.kind === 'request') {
+    return (
+      <>
+        <label className="wb-studio-field">
+          <span>节点名称</span>
+          <input value={node.name || ''} onChange={(e) => onPatch({ name: e.target.value })} />
+        </label>
+        <label className="wb-studio-field">
+          <span>请求方法</span>
+          <select value={String(node.config?.method || 'GET')} onChange={(e) => patchConfig(node, 'method', e.target.value, onPatch)}>
+            {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map((method) => <option key={method} value={method}>{method}</option>)}
+          </select>
+        </label>
+        <label className="wb-studio-field">
+          <span>URL</span>
+          <input value={String(node.config?.url || '')} placeholder="https://api.example.com" onChange={(e) => patchConfig(node, 'url', e.target.value, onPatch)} />
+        </label>
+        <label className="wb-studio-field">
+          <span>请求头 JSON</span>
+          <textarea rows={4} value={String(node.config?.headers || '{}')} placeholder='{"Content-Type":"application/json"}' onChange={(e) => patchConfig(node, 'headers', e.target.value, onPatch)} />
+        </label>
+        <label className="wb-studio-field">
+          <span>请求体</span>
+          <textarea rows={5} value={String(node.config?.body || '')} placeholder="可选，支持 {{input}}" onChange={(e) => patchConfig(node, 'body', e.target.value, onPatch)} />
+        </label>
+        <p className="wb-studio-guide">发起 HTTP 请求；请确认 URL 和敏感信息符合当前环境的安全策略。</p>
       </>
     )
   }

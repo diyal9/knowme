@@ -33,8 +33,10 @@ export default defineConfig({
     },
     rollupOptions: {
       treeshake: {
-        // ui-icons.js registers window.KnowMeIcons via IIFE side effect only.
-        moduleSideEffects: (id) => /ui-icons\.js/.test(id),
+        // These modules exist for runtime side effects. In particular, the
+        // workbench style registry must survive production tree-shaking so its
+        // complete, deterministic cascade is present before lazy routes load.
+        moduleSideEffects: (id) => /(?:ui-icons\.js|workbench-styles\.ts|\.css(?:$|\?))/.test(id),
       },
       input: {
         workspace: path.join(rendererRoot, 'workspace', 'index.html'),

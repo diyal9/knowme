@@ -112,7 +112,7 @@ describe('capability manifest v2', () => {
     assert.equal(aggregateRisk([low, high]).level, 'high')
     const serialized = serializeSidecar(high)
     assert.equal(serialized.ok, true)
-    assert.match(serialized.content, /"schemaVersion": 2/)
+    assert.match(serialized.content, /"schemaVersion": 3/)
   })
 
   it('preserves validated knowme experience and drops invalid tasks', () => {

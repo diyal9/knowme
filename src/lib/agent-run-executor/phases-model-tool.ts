@@ -501,7 +501,7 @@ async function runModelToolLoop(deps) {
         }
       }
       if (groundingMode === 'runtime' && toolName === 'feishu.meeting_candidates' && result.ok !== false) {
-        referenceState = feishuAdapter.applyMeetingCandidatesToReferenceState(referenceState, result.text)
+        referenceState = feishuAdapter.applyMeetingCandidatesToReferenceState(referenceState, result)
         ports.grounding?.setReferenceState?.(referenceState)
       }
       roundToolMessages.push({
@@ -512,7 +512,12 @@ async function runModelToolLoop(deps) {
       })
 
       const modelToolText = llmRuntime.fitText(result.text || '', 6000, '\n…（工具结果已压缩）…\n')
-      apiMessages.push({ role: 'tool', tool_call_id: callId, content: modelToolText })
+      const modelToolContext = [
+        '【工具原始结果｜仅供内部依据】',
+        modelToolText,
+        '【输出要求】请将结果整理成面向用户的自然语言；除非用户明确要求，否则禁止原样输出 JSON、转义字符串、分页 token 或内部字段。',
+      ].join('\n')
+      apiMessages.push({ role: 'tool', tool_call_id: callId, content: modelToolContext })
       session = agentRun.upsertStep(session, resultEvent)
       if (result.ok !== false) session = agentRun.recordTool(session, toolName)
       ports.session.set?.(session)

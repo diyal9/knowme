@@ -8,6 +8,7 @@ const path = require('path')
 const os = require('os')
 
 const industry = require('../src/lib/industry-profile')
+const roleCatalog = require('../src/shared/personal-role-catalog')
 const productMemory = require('../src/lib/product-memory')
 const promptRouter = require('../src/lib/assistant-prompt-router')
 const settingsSecure = require('../src/lib/settings-secure')
@@ -38,6 +39,27 @@ describe('industry-profile', () => {
     assert.match(generalBody, /仅作通用办公场景占位/)
     assert.doesNotMatch(generalBody, /合同签署/)
   })
+
+  it('provides linked base occupations and versioned defaults for every industry', () => {
+    assert.deepEqual(
+      roleCatalog.INDUSTRY_ROLE_CATALOG.map(item => item.id),
+      industry.INDUSTRIES.map(item => item.id)
+    )
+    for (const item of roleCatalog.INDUSTRY_ROLE_CATALOG) {
+      assert.ok(item.occupations.length >= 5, `${item.id} should have base occupations`)
+      assert.ok(item.occupations.some(role => role.id === item.defaultOccupationId))
+    }
+    const softwareRoles = roleCatalog.getOccupations('software').map(item => item.id)
+    for (const id of ['client-engineer', 'server-engineer', 'qa-engineer', 'product-manager', 'visual-designer', 'product-operations']) {
+      assert.ok(softwareRoles.includes(id), `missing software occupation: ${id}`)
+    }
+    const defaults = roleCatalog.getOccupationDefaults('software', 'server-engineer')
+    assert.equal(defaults.source, 'builtin')
+    assert.match(defaults.version, /^builtin-/)
+    assert.match(defaults.aboutMe, /服务端开发/)
+    assert.match(defaults.collaborationPreference, /接口方案/)
+    assert.equal(roleCatalog.normalizeOccupation('game', 'server-engineer'), 'game-designer')
+  })
 })
 
 describe('industry settings + context injection', () => {
@@ -51,11 +73,18 @@ describe('industry settings + context injection', () => {
         model: 'gpt-4o-mini',
         userPrompt: '',
         industry: 'game',
+        occupationId: 'game-client',
+        userProfile: '我负责客户端研发',
+        userProfileConfigMode: 'custom',
       })
-      assert.equal(settingsSecure.load(file).industry, 'game')
+      const saved = settingsSecure.load(file)
+      assert.equal(saved.industry, 'game')
+      assert.equal(saved.occupationId, 'game-client')
+      assert.equal(saved.userProfileConfigMode, 'custom')
+      assert.match(saved.userProfileConfigVersion, /^builtin-/)
 
-      fs.writeFileSync(file, JSON.stringify({ industry: 'invalid-vertical' }), 'utf8')
-      assert.equal(settingsSecure.load(file).industry, 'general')
+      fs.writeFileSync(file, JSON.stringify({ industry: 'game', occupationId: 'server-engineer' }), 'utf8')
+      assert.equal(settingsSecure.load(file).occupationId, 'game-designer')
     } finally {
       fs.rmSync(dir, { recursive: true, force: true })
     }

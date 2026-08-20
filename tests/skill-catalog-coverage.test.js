@@ -31,7 +31,7 @@ describe('skill catalog coverage', () => {
     }
   })
 
-  it('enabled packs load writing-polish, code-review, knowledge-steward', () => {
+  it('the production default pack loads its writing and visual skills', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-skill-load-'))
     const packRt = createCapabilityPackRuntime({ userData: tmpDir })
     packRt.ensureDefaultPacks()
@@ -43,14 +43,14 @@ describe('skill catalog coverage', () => {
       getPackSkillSources: () => packRt.listSkillSources(),
     })
 
-    for (const skillId of ['writing-polish', 'code-review', 'knowledge-steward']) {
+    for (const skillId of ['writing-polish', 'visual-brief-prompt']) {
       const loaded = runtime.loadSkillL1(skillId)
       assert.equal(loaded.ok, true, `${skillId}: ${loaded.message || loaded.code}`)
     }
   })
 
   it('official visual workflow references bundled visual-brief-prompt', () => {
-    const visual = listOfficialWorkflowPackages().find(p => p.id === 'official-visual-brief-review')
+    const visual = listOfficialWorkflowPackages().find(p => p.id === 'official-art-image-production')
     assert.ok(visual)
     const refs = visual.skillRefs.map(r => r.id)
     assert.ok(refs.includes('writing-polish'))
@@ -58,9 +58,9 @@ describe('skill catalog coverage', () => {
     assert.ok(!refs.some(id => id.includes('th-art')))
   })
 
-  it('official engineering workflow references code-review', () => {
-    const eng = listOfficialWorkflowPackages().find(p => p.id === 'official-engineering-team-delivery')
-    assert.ok(eng)
-    assert.ok(eng.skillRefs.some(r => r.id === 'code-review'))
+  it('official requirement workflow references writing-polish', () => {
+    const requirement = listOfficialWorkflowPackages().find(p => p.id === 'official-product-requirement')
+    assert.ok(requirement)
+    assert.ok(requirement.skillRefs.some(r => r.id === 'writing-polish'))
   })
 })

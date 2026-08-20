@@ -51,6 +51,19 @@ describe('agent-grounding-runtime', () => {
     assert.match(gate.text, /尚未|不能|需要先|证据不足|没有成功/)
   })
 
+  it('does not let an unrelated successful tool support an import claim', () => {
+    const toolLedger = grounding.recordToolCall(grounding.createToolLedger(), {
+      name: 'read_file', status: 'ok',
+    })
+    const verification = grounding.verifyClaims({
+      text: '项目已经导入完成。',
+      evidenceLedger: grounding.createEvidenceLedger(),
+      toolLedger,
+    })
+    assert.equal(verification.passed, false)
+    assert.ok(verification.violations.some(item => item.code === 'unsupported_execution_claim'))
+  })
+
   it('allows plain chat without grounding violations', () => {
     const verification = grounding.verifyClaims({
       text: '你好，有什么可以帮你？',

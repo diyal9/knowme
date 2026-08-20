@@ -11,6 +11,8 @@ resource: knowme://product
 
 C 端桌面 AI 知识工作台 / 工作伙伴：本地优先、专家协作、工作流与管线服务。产品细节见本页；团队协作见 [Evolution Loop](/processes/evolution-loop.md)。
 
+对话回复的阅读宽度、字号和间距遵循 [Conversation Reading Layout](conversation-reading-layout.md)。
+
 # Core behaviors
 
 - 工作台：货架、任务、Run、Studio

@@ -133,6 +133,7 @@ describe('ipc free-main-helper guard', () => {
       fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-prepare.ts'), 'utf8'),
       fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-tool-surface.ts'), 'utf8'),
       fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-execute.ts'), 'utf8'),
+      fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-runner.ts'), 'utf8'),
       fs.readFileSync(path.join(ROOT, 'src', 'lib', 'agent-generate-child-ports.ts'), 'utf8'),
     ].join('\n')
     const assist = fs.readFileSync(path.join(IPC_DIR, 'ai-assist.ts'), 'utf8')

@@ -17,6 +17,7 @@ const LIMITS = Object.freeze({
   skills: 200,
   agents: 100,
   connectors: 64,
+  workflows: 64,
   fileBytes: 2 * 1024 * 1024,
 })
 
@@ -111,12 +112,19 @@ function parseAgentMarkdown(content) {
   return { frontmatter, body: match[2].trim() }
 }
 
-function normalizeDeclaredSkills(manifest) {
+function normalizeSkillGroups(manifest) {
   const raw = manifest?.skills
-  if (Array.isArray(raw)) return raw.map(String)
-  if (!raw || typeof raw !== 'object') return []
-  return [...(Array.isArray(raw.required) ? raw.required : []), ...(Array.isArray(raw.optional) ? raw.optional : [])]
-    .map(String)
+  if (Array.isArray(raw)) return { required: raw.map(String), optional: [] }
+  if (!raw || typeof raw !== 'object') return { required: [], optional: [] }
+  return {
+    required: (Array.isArray(raw.required) ? raw.required : []).map(String),
+    optional: (Array.isArray(raw.optional) ? raw.optional : []).map(String),
+  }
+}
+
+function normalizeDeclaredSkills(manifest) {
+  const groups = normalizeSkillGroups(manifest)
+  return [...new Set([...groups.required, ...groups.optional])]
 }
 
 function repositoryIdentity(root) {
@@ -169,6 +177,7 @@ function scanAgents(root, skills, warnings) {
     const manifest = safeReadJson(path.join(dir, 'agent.manifest.json')) || {}
     if (!markdown && !Object.keys(manifest).length) continue
     const parsed = parseAgentMarkdown(markdown)
+    const skillGroups = normalizeSkillGroups(manifest)
     const declared = normalizeDeclaredSkills(manifest)
     const missingSkills = declared.filter((id) => !skillIds.has(id))
     if (missingSkills.length) {
@@ -203,6 +212,8 @@ function scanAgents(root, skills, warnings) {
       originPath: path.relative(root, dir).replace(/\\/g, '/'),
       systemPrompt,
       declaredSkills: declared.filter((id) => skillIds.has(id)),
+      requiredSkills: skillGroups.required.filter((id) => skillIds.has(id)),
+      optionalSkills: skillGroups.optional.filter((id) => skillIds.has(id)),
       missingSkills,
       contentHash: hashText(`${markdown}\n${JSON.stringify(manifest)}`),
     })
@@ -267,6 +278,75 @@ function scanConnectors(root, warnings) {
   return connectors
 }
 
+function scanWorkflows(root, warnings) {
+  const workflowsDir = path.join(root, '.cursor', 'workflows')
+  if (!fs.existsSync(workflowsDir)) return []
+  const index = safeReadJson(path.join(workflowsDir, 'index.json'))
+  const indexed = Array.isArray(index?.workflows) ? index.workflows : []
+  const candidates = indexed.length
+    ? indexed.slice(0, LIMITS.workflows).map((item) => ({
+        file: String(item?.path || '').trim(),
+        catalog: item?.catalog && typeof item.catalog === 'object' ? item.catalog : {},
+        indexed: item,
+      }))
+    : fs.readdirSync(workflowsDir, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name !== 'index.json' && entry.name.endsWith('.json'))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .slice(0, LIMITS.workflows)
+      .map((entry) => ({ file: entry.name, catalog: {}, indexed: {} }))
+
+  const workflows = []
+  for (const candidate of candidates) {
+    const relativeFile = candidate.file.replace(/\\/g, '/')
+    if (!relativeFile || path.isAbsolute(relativeFile) || relativeFile.split('/').includes('..')) {
+      warnings.push({ code: 'invalid_workflow_path', path: relativeFile, message: '工作流路径必须位于 .cursor/workflows 内' })
+      continue
+    }
+    const file = path.resolve(workflowsDir, relativeFile)
+    if (!pathInside(workflowsDir, file)) {
+      warnings.push({ code: 'workflow_path_escape', path: relativeFile, message: '工作流路径越界，已跳过' })
+      continue
+    }
+    try {
+      const stat = fs.lstatSync(file)
+      if (!stat.isFile() || stat.isSymbolicLink()) {
+        warnings.push({ code: 'unsafe_workflow_file', path: `.cursor/workflows/${relativeFile}`, message: '工作流必须是普通文件，已跳过' })
+        continue
+      }
+    } catch {
+      warnings.push({ code: 'missing_workflow_file', path: `.cursor/workflows/${relativeFile}`, message: '工作流文件不存在或不可读' })
+      continue
+    }
+    const definition = safeReadJson(file)
+    if (!definition || !Array.isArray(definition.nodes)) {
+      warnings.push({ code: 'invalid_workflow', path: `.cursor/workflows/${relativeFile}`, message: '工作流缺少合法 nodes 数组' })
+      continue
+    }
+    const sourceId = String(definition.id || candidate.indexed?.id || path.basename(relativeFile, '.json')).trim()
+    if (!sourceId) continue
+    const visibility = String(candidate.catalog?.visibility || 'primary').trim().toLowerCase()
+    workflows.push({
+      kind: 'workflow',
+      sourceId,
+      id: slug(sourceId, 'workflow'),
+      name: String(definition.name || candidate.indexed?.name || sourceId).trim(),
+      description: String(definition.description || candidate.indexed?.description || '').trim(),
+      version: String(definition.version || definition.schema_version || '1.0.0'),
+      originPath: `.cursor/workflows/${relativeFile}`,
+      tags: Array.isArray(definition.tags) ? definition.tags.map(String) : [],
+      visibility,
+      blocked: visibility === 'deprecated' || visibility === 'hidden',
+      blockReason: visibility === 'deprecated' ? '工作流已标记 deprecated' : (visibility === 'hidden' ? '工作流已隐藏' : ''),
+      definition,
+      contentHash: hashText(JSON.stringify(definition)),
+    })
+  }
+  if (indexed.length > LIMITS.workflows) {
+    warnings.push({ code: 'workflow_limit', message: `工作流扫描最多 ${LIMITS.workflows} 个条目` })
+  }
+  return workflows
+}
+
 function selectPrimarySkill(skills, repoName) {
   const repoSlug = slug(repoName)
   const ranked = [...skills].sort((a, b) => {
@@ -302,7 +382,8 @@ function scanCursorRepository(folderPath) {
   const skills = scanSkills(root, warnings)
   const experts = scanAgents(root, skills, warnings)
   const connectors = scanConnectors(root, warnings)
-  if (!skills.length && !experts.length && !connectors.length) {
+  const workflows = scanWorkflows(root, warnings)
+  if (!skills.length && !experts.length && !connectors.length && !workflows.length) {
     return fail('no_capabilities', '仓库中未发现可导入的 Cursor 能力')
   }
 
@@ -322,6 +403,8 @@ function scanCursorRepository(folderPath) {
       originPath: primary?.originPath || '.cursor/skills',
       systemPrompt: primary?.body || primary?.description || `你是 ${path.basename(root)} 仓库专家。`,
       declaredSkills: skills.map((item) => item.sourceId),
+      requiredSkills: skills.map((item) => item.sourceId),
+      optionalSkills: [],
       missingSkills: [],
       generated: true,
       contentHash: hashText(`${primary?.contentHash || ''}:${skills.map((item) => item.contentHash).join(':')}`),
@@ -336,17 +419,26 @@ function scanCursorRepository(folderPath) {
     skills,
     experts,
     connectors,
+    workflows,
     warnings,
     contentHash: hashText([
       ...skills.map((item) => item.contentHash),
       ...experts.map((item) => item.contentHash),
       ...connectors.map((item) => item.contentHash),
+      ...workflows.map((item) => item.contentHash),
     ].join(':')),
   }
 }
 
 function publicPreview(preview, token = '') {
   if (!preview?.ok) return preview
+  const counts = {
+    experts: preview.experts.length,
+    skills: preview.skills.length,
+    connectors: preview.connectors.length,
+    workflows: preview.workflows.length,
+    blocked: [...preview.connectors, ...preview.workflows].filter((item) => item.blocked).length,
+  }
   const project = (item) => ({
     kind: item.kind,
     sourceId: item.sourceId,
@@ -360,6 +452,8 @@ function publicPreview(preview, token = '') {
     blockReason: item.blockReason || '',
     generated: item.generated === true,
     missingSkills: item.missingSkills || [],
+    requiredSkills: item.requiredSkills || [],
+    optionalSkills: item.optionalSkills || [],
   })
   return {
     ok: true,
@@ -367,16 +461,287 @@ function publicPreview(preview, token = '') {
     repositoryId: preview.repositoryId,
     root: preview.root,
     name: preview.name,
-    counts: {
-      experts: preview.experts.length,
-      skills: preview.skills.length,
-      connectors: preview.connectors.length,
-      blocked: preview.connectors.filter((item) => item.blocked).length,
+    preview: {
+      name: preview.name,
+      kind: 'cursor-repository',
+      risk: {
+        level: 'medium',
+        reasons: [`专家 ${counts.experts} · 技能 ${counts.skills} · 连接器 ${counts.connectors} · 工作流 ${counts.workflows}`],
+      },
+      compatibility: { status: 'compatible' },
+      estimatedCost: { level: 'medium', estimate: `将注册 ${counts.experts + counts.skills + counts.connectors + counts.workflows - counts.blocked} 项` },
+      rollbackHint: '能力可逐项卸载；导入工作流可在工作流管理中归档。',
+      counts,
     },
+    counts,
     experts: preview.experts.map(project),
     skills: preview.skills.map(project),
     connectors: preview.connectors.map(project),
+    workflows: preview.workflows.map(project),
     warnings: preview.warnings,
+  }
+}
+
+function uniqueStrings(values) {
+  return [...new Set((Array.isArray(values) ? values : [])
+    .map(value => String(value || '').trim())
+    .filter(Boolean))]
+}
+
+function planCursorRepositoryImport(preview, options = {}) {
+  if (!preview?.ok) return fail('invalid_preview', 'Cursor 仓库预览无效')
+  const requestedIds = uniqueStrings(options.workflowIds)
+  if (!requestedIds.length) {
+    return fail('missing_workflow_selection', '请至少选择一个要导入的工作流')
+  }
+  const workflowsById = new Map()
+  for (const item of preview.workflows || []) {
+    workflowsById.set(item.sourceId, item)
+    workflowsById.set(item.id, item)
+  }
+  const skillsById = new Map()
+  for (const item of preview.skills || []) {
+    skillsById.set(item.sourceId, item)
+    skillsById.set(item.id, item)
+  }
+  // Natural-language requests often list a target workflow followed by entry
+  // Skills. Treat known Skill ids as explicit dependencies instead of failing
+  // the entire plan because the model placed them in workflow_ids.
+  const retypedSkillIds = requestedIds.filter(id => !workflowsById.has(id) && skillsById.has(id))
+  const requestedWorkflowIds = requestedIds.filter(id => workflowsById.has(id))
+  const workflows = requestedWorkflowIds.map(id => workflowsById.get(id)).filter(Boolean)
+  const missingWorkflows = requestedIds.filter(id => !workflowsById.has(id) && !skillsById.has(id))
+  if (missingWorkflows.length) {
+    return fail('workflow_not_found', `未发现工作流：${missingWorkflows.join(', ')}`)
+  }
+  if (!workflows.length) return fail('missing_workflow_selection', '请求中没有可导入的工作流')
+  const blockedWorkflows = workflows.filter(item => item.blocked)
+  if (blockedWorkflows.length) {
+    return fail('workflow_blocked', `工作流不可导入：${blockedWorkflows.map(item => item.sourceId).join(', ')}`)
+  }
+
+  const agentSourceIds = new Set()
+  const workflowSkillIds = new Set()
+  for (const workflow of workflows) {
+    for (const node of workflow.definition?.nodes || []) {
+      if (String(node?.type || 'agent') === 'agent') {
+        const id = String(node.agent || node.agentPackageId || '').trim()
+        if (id) agentSourceIds.add(id)
+      }
+      for (const value of [node?.skill, node?.skillId, node?.skill_ref, node?.skillRef]) {
+        const id = String(value || '').trim()
+        if (id) workflowSkillIds.add(id)
+      }
+    }
+    const declaredWorkflowSkills = Array.isArray(workflow.definition?.skills)
+      ? workflow.definition.skills
+      : (Array.isArray(workflow.definition?.skill_refs) ? workflow.definition.skill_refs : [])
+    for (const value of declaredWorkflowSkills) {
+      const id = String(value?.id || value || '').trim()
+      if (id) workflowSkillIds.add(id)
+    }
+  }
+
+  const expertsById = new Map()
+  for (const item of preview.experts || []) {
+    expertsById.set(item.sourceId, item)
+    expertsById.set(item.id, item)
+  }
+  const missingExperts = [...agentSourceIds].filter(id => !expertsById.has(id))
+  if (missingExperts.length) {
+    return fail('workflow_expert_missing', `工作流引用了未发现专家：${missingExperts.join(', ')}`)
+  }
+  const experts = [...new Set([...agentSourceIds].map(id => expertsById.get(id)))]
+
+  const selectedSkillIds = new Set(uniqueStrings([...(options.additionalSkillIds || []), ...retypedSkillIds]))
+  for (const id of workflowSkillIds) selectedSkillIds.add(id)
+  for (const expert of experts) {
+    for (const id of expert.requiredSkills || expert.declaredSkills || []) selectedSkillIds.add(id)
+    if (options.includeOptionalSkills === true) {
+      for (const id of expert.optionalSkills || []) selectedSkillIds.add(id)
+    }
+  }
+  const missingSkills = [...selectedSkillIds].filter(id => !skillsById.has(id))
+  if (missingSkills.length) {
+    return fail('workflow_skill_missing', `规划引用了未发现技能：${missingSkills.join(', ')}`)
+  }
+  const skills = [...new Set([...selectedSkillIds].map(id => skillsById.get(id)))]
+  const selectedSkillSourceIds = new Set(skills.map(item => item.sourceId))
+  const scopedExperts = experts.map(item => ({
+    ...item,
+    declaredSkills: (item.declaredSkills || []).filter(id => selectedSkillSourceIds.has(id)),
+    requiredSkills: (item.requiredSkills || []).filter(id => selectedSkillSourceIds.has(id)),
+    optionalSkills: (item.optionalSkills || []).filter(id => selectedSkillSourceIds.has(id)),
+    missingSkills: [],
+  }))
+  const connectors = options.includeConnectors === false ? [] : (preview.connectors || [])
+  const scopedPreview = {
+    ...preview,
+    skills,
+    experts: scopedExperts,
+    connectors,
+    workflows,
+    selection: {
+      workflowIds: workflows.map(item => item.sourceId),
+      additionalSkillIds: uniqueStrings([...(options.additionalSkillIds || []), ...retypedSkillIds]),
+      includeOptionalSkills: options.includeOptionalSkills === true,
+      includeConnectors: options.includeConnectors !== false,
+    },
+  }
+  return {
+    ok: true,
+    preview: scopedPreview,
+    plan: {
+      repositoryId: preview.repositoryId,
+      root: preview.root,
+      workflows: workflows.map(item => ({ id: item.sourceId, name: item.name, nodes: item.definition?.nodes?.length || 0 })),
+      experts: scopedExperts.map(item => ({ id: item.sourceId, name: item.name, requiredSkills: item.requiredSkills, optionalSkills: item.optionalSkills })),
+      skills: skills.map(item => ({ id: item.sourceId, name: item.name })),
+      connectors: connectors.map(item => ({ id: item.sourceId, name: item.name, blocked: item.blocked === true, blockReason: item.blockReason || '' })),
+      counts: { workflows: workflows.length, experts: scopedExperts.length, skills: skills.length, connectors: connectors.length },
+      selection: scopedPreview.selection,
+      warnings: preview.warnings || [],
+    },
+  }
+}
+
+function chooseWorkflowId(item, repositoryId, workflowStore) {
+  const base = slug(item.id || item.sourceId, 'workflow')
+  const packages = workflowStore?.list?.().packages || []
+  const existing = packages.find((pkg) => pkg.id === base)
+  if (!existing || existing.provenance?.repositoryId === repositoryId) return base
+  const byId = new Map(packages.map(pkg => [pkg.id, pkg]))
+  let candidate = `${repositoryId}--${base}`.slice(0, 64)
+  let suffix = 2
+  while (byId.has(candidate) && byId.get(candidate)?.provenance?.repositoryId !== repositoryId) {
+    const tail = `-${suffix}`
+    candidate = `${repositoryId}--${base}`.slice(0, 64 - tail.length) + tail
+    suffix += 1
+  }
+  return candidate
+}
+
+function inferWorkflowDomain(item = {}) {
+  const explicit = String(item.domain || '').trim().toLowerCase()
+  if (['office', 'engineering', 'visual'].includes(explicit)) return explicit
+  const text = [item.name, item.description, ...(Array.isArray(item.tags) ? item.tags : [])]
+    .map(value => String(value || '').toLowerCase())
+    .join(' ')
+  if (/(visual|design|image|\bui\b|\bux\b|\bart\b|graphic|psd|photoshop|sprite|artbundle|视觉|美术|设计|图像|生图|切图)/i.test(text)) return 'visual'
+  if (/(office|meeting|minutes|calendar|mail|document|spreadsheet|办公|会议|纪要|日程|邮件|文档|表格)/i.test(text)) return 'office'
+  if (/(engineering|\beng\b|\bdev\b|code|coding|test|release|deploy|研发|开发|代码|测试|发布|部署)/i.test(text)) return 'engineering'
+  return ''
+}
+
+function mapWorkflowPackage(item, preview, idMaps) {
+  const definition = item.definition || {}
+  const nodes = []
+  const edges = []
+  const gates = []
+  const edgeKeys = new Set()
+  const expertIds = new Set()
+
+  function addEdge(from, to, label) {
+    const source = String(from || '').trim()
+    const target = String(to || '').trim()
+    if (!source || !target) return
+    const key = `${source}->${target}:${label || ''}`
+    if (edgeKeys.has(key)) return
+    edgeKeys.add(key)
+    edges.push({ from: source, to: target, label: String(label || '').trim() })
+  }
+
+  for (const raw of definition.nodes || []) {
+    const id = String(raw?.id || '').trim()
+    if (!id) continue
+    const type = String(raw.type || 'agent').trim()
+    if (type === 'agent') {
+      const sourceAgent = String(raw.agent || raw.agentPackageId || '').trim()
+      const agentPackageId = idMaps.experts[sourceAgent] || ''
+      if (agentPackageId) expertIds.add(agentPackageId)
+      nodes.push({
+        id,
+        type: 'agent',
+        agentPackageId,
+        agentOrigin: 'local',
+        role: String(raw.role || raw.node_key || sourceAgent || id),
+        intent: String(raw.intent || ''),
+        name: String(raw.name || raw.node_key || sourceAgent || id),
+        inputs: raw.input || {},
+        outputs: raw.output || {},
+      })
+    } else if (type === 'gate') {
+      const gateRef = String(raw.gate_id || raw.gateRef || id).trim()
+      nodes.push({ id, type: 'gate', gateRef, intent: String(raw.intent || ''), name: String(raw.name || raw.intent || gateRef) })
+      gates.push({
+        id: gateRef,
+        title: String(raw.name || raw.intent || gateRef),
+        type: 'approval',
+        description: String(raw.intent || ''),
+        params: { requiresUserApproval: true },
+      })
+    } else {
+      nodes.push({
+        id,
+        type: type === 'terminal' ? 'terminal' : type,
+        status: String(raw.status || ''),
+        actionRef: String(raw.action_ref || raw.actionRef || ''),
+        humanRole: String(raw.human_role || raw.humanRole || ''),
+        intent: String(raw.intent || ''),
+        name: String(raw.name || raw.intent || id),
+        inputs: raw.input || {},
+        outputs: raw.output || {},
+      })
+    }
+    addEdge(id, raw.next, '')
+    addEdge(id, raw.on_approve, '通过')
+    addEdge(id, raw.on_reject, '驳回')
+    addEdge(id, raw.on_revise, '返工')
+    addEdge(id, raw.on_fail_goto, '失败')
+  }
+
+  const skillIds = Object.values(idMaps.skills)
+  const domain = inferWorkflowDomain(item)
+  return {
+    id: chooseWorkflowId(item, preview.repositoryId, preview.workflowStore),
+    name: item.name,
+    description: item.description,
+    source: 'team',
+    status: 'draft',
+    version: item.version,
+    goalTypes: uniqueStrings([...(item.tags || []), domain]),
+    inputs: [{ id: 'request', label: '任务目标与源文件路径', required: true }],
+    outputs: [{ id: 'delivery', label: '工作流交付物与验收证据' }],
+    agentRefs: [...expertIds].map(id => ({ id })),
+    skillRefs: skillIds.map(id => ({ id })),
+    executionBackends: ['local-team'],
+    qualityGates: gates.map(gate => ({ id: gate.id, label: gate.title })),
+    provenance: {
+      kind: 'cursor-repository',
+      repositoryId: preview.repositoryId,
+      root: preview.root,
+      ref: item.originPath,
+      sourceId: item.sourceId,
+      contentHash: item.contentHash,
+      ...(domain ? { domain } : {}),
+    },
+    graph: {
+      template: 'external-import',
+      goal: item.description || item.name,
+      members: nodes.filter(node => node.type === 'agent').map(node => ({
+        id: node.id,
+        agentPackageId: node.agentPackageId,
+        expertId: node.agentPackageId,
+        agentOrigin: 'local',
+        role: node.role,
+        intent: node.intent,
+      })),
+      nodes,
+      edges,
+      gates,
+      parallelism: 1,
+      joinStrategy: 'allSucceeded',
+    },
   }
 }
 
@@ -449,13 +814,14 @@ function registerCursorRepository(preview, deps = {}) {
   const catalog = deps.catalog
   const expertRuntime = deps.expertRuntime
   const connectorsApi = deps.connectorsApi
+  const workflowStore = deps.workflowStore
   const userData = String(deps.userData || '')
   if (!store || !catalog || !expertRuntime) return fail('invalid_deps', '仓库注册服务未配置')
 
   const current = store.loadInstallStore()
   const entries = current.entries || {}
   const claimed = new Set()
-  const idMaps = { skills: {}, experts: {}, connectors: {} }
+  const idMaps = { skills: {}, experts: {}, connectors: {}, workflows: {} }
   const result = { installed: [], skipped: [], failed: [], idMaps }
 
   for (const item of preview.skills) {
@@ -661,6 +1027,36 @@ function registerCursorRepository(preview, deps = {}) {
     result.installed.push({ id, kind: 'expert', name: item.name })
   }
 
+  for (const item of preview.workflows || []) {
+    if (item.blocked) {
+      result.skipped.push({ kind: 'workflow', sourceId: item.sourceId, error: item.blockReason || '工作流已阻止' })
+      continue
+    }
+    if (!workflowStore || typeof workflowStore.save !== 'function') {
+      result.failed.push({ kind: 'workflow', sourceId: item.sourceId, error: '工作流存储服务未配置' })
+      continue
+    }
+    const packageInput = mapWorkflowPackage(item, { ...preview, workflowStore }, idMaps)
+    const unresolved = packageInput.graph.nodes
+      .filter(node => node.type === 'agent' && !node.agentPackageId)
+      .map(node => node.id)
+    if (unresolved.length) {
+      result.failed.push({
+        kind: 'workflow',
+        sourceId: item.sourceId,
+        error: `工作流引用了未导入专家节点：${unresolved.join(', ')}`,
+      })
+      continue
+    }
+    const saved = workflowStore.save(packageInput)
+    if (!saved?.ok) {
+      result.failed.push({ kind: 'workflow', sourceId: item.sourceId, error: saved?.error || saved?.issues?.[0]?.message || '工作流注册失败' })
+      continue
+    }
+    idMaps.workflows[item.sourceId] = saved.package.id
+    result.installed.push({ id: saved.package.id, kind: 'workflow', name: saved.package.name })
+  }
+
   return {
     ok: result.installed.length > 0,
     repositoryId: preview.repositoryId,
@@ -682,4 +1078,8 @@ module.exports = {
   registerCursorRepository,
   selectPrimarySkill,
   pathInside,
+  scanWorkflows,
+  planCursorRepositoryImport,
+  mapWorkflowPackage,
+  inferWorkflowDomain,
 }

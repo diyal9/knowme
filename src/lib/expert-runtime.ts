@@ -100,7 +100,7 @@ function parseExpertFrontmatter(content) {
     if (idx < 0) continue
     const key = trimmed.slice(0, idx).trim()
     const val = trimmed.slice(idx + 1).trim()
-    if (key === 'skills' || key === 'connectors') {
+    if (['skills', 'connectors', 'useCases', 'boundaries', 'inputContract', 'outputContract'].includes(key)) {
       frontmatter[key] = parseInlineList(val)
       if (!val) listKey = key
     } else if (key === 'orchestrationEnabled') {
@@ -138,6 +138,10 @@ function parseExpertFrontmatter(content) {
     avatar: String(frontmatter.avatar || '').trim(),
     skills: Array.isArray(frontmatter.skills) ? frontmatter.skills.map(String) : [],
     connectors: Array.isArray(frontmatter.connectors) ? frontmatter.connectors.map(String) : [],
+    useCases: Array.isArray(frontmatter.useCases) ? frontmatter.useCases.map(String) : [],
+    boundaries: Array.isArray(frontmatter.boundaries) ? frontmatter.boundaries.map(String) : [],
+    inputContract: Array.isArray(frontmatter.inputContract) ? frontmatter.inputContract.map(String) : [],
+    outputContract: Array.isArray(frontmatter.outputContract) ? frontmatter.outputContract.map(String) : [],
     soul: resolved.soul,
     sop: resolved.sop,
     agenticType: resolved.agenticType,
@@ -525,6 +529,9 @@ function createExpertRuntime(deps = {}) {
         skills: expert.skills,
         connectors: expert.connectors,
       },
+      capabilityManifest: expert.capabilityManifest && typeof expert.capabilityManifest === 'object'
+        ? expert.capabilityManifest
+        : null,
       hashes: {
         expert: expert.manifest.contentHash,
         skills: skillHashes,
@@ -565,6 +572,7 @@ function createExpertRuntime(deps = {}) {
         skills: expert.skills,
         connectors: expert.connectors,
         manifest: expert.manifest,
+        capabilityManifest: expert.capabilityManifest,
       },
       skillHashes,
       connectorHashes,
@@ -614,6 +622,7 @@ function createExpertRuntime(deps = {}) {
         },
         bindings: snapshot.bindings,
         hashes: snapshot.hashes,
+        capabilityManifest: snapshot.capabilityManifest || null,
         readiness: snapshot.readiness || { state: 'ready', items: [], issues: [] },
       }
     }
@@ -641,6 +650,7 @@ function createExpertRuntime(deps = {}) {
         skills: expert.skills,
         connectors: expert.connectors,
       },
+      capabilityManifest: expert.capabilityManifest || null,
       readiness: buildBindingReadiness(expert, {
         availableSkills: getAvailableSkillIds ? getAvailableSkillIds() : null,
         availableConnectors: getAvailableConnectorIds ? getAvailableConnectorIds() : null,

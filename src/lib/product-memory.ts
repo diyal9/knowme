@@ -7,17 +7,21 @@ const crypto = require('crypto');
 const MAX_WORKING = 500;
 const PROMPT_THRESHOLD = 3;
 const DEFAULT_CONFIG = Object.freeze({ learningEnabled: true });
+const GLOBAL_MEMORY_FILE = 'global/registry.json';
+const GLOBAL_MEMORY_TYPES = new Set(['fact', 'preference', 'goal', 'relationship', 'decision']);
 
 /** Kinds that may become pattern candidates (preference signal). */
 const PREFERENCE_KINDS = new Set([
   'correction',
   'preference',
-  'workflow_choice',
   'product',
 ]);
 
 /** Kinds that are usage telemetry only. */
 const TELEMETRY_KINDS = new Set(['telemetry', 'usage']);
+
+/** Work-history events that must stay activity memory, including legacy records. */
+const ACTIVITY_ONLY_KINDS = new Set(['workflow_choice']);
 
 /** Summaries that must never become habits or stable context. */
 const GARBAGE_SUMMARY_RES = [
@@ -36,6 +40,7 @@ function ensureMemory(memoryDir) {
     'episodes',
     'working',
     'patterns',
+    'global',
     'summaries/daily',
     'summaries/weekly',
     'summaries/monthly',
@@ -56,7 +61,72 @@ function ensureMemory(memoryDir) {
     fs.writeFileSync(patterns, '{"patterns":[]}\n', 'utf8');
   }
   migratePatterns(memoryDir);
+  const globalRegistry = path.join(memoryDir, GLOBAL_MEMORY_FILE);
+  if (!fs.existsSync(globalRegistry)) {
+    fs.writeFileSync(globalRegistry, '{"items":[]}\n', 'utf8');
+  }
   return memoryDir;
+}
+
+function loadGlobalMemories(memoryDir) {
+  ensureMemory(memoryDir);
+  try {
+    const data = JSON.parse(fs.readFileSync(path.join(memoryDir, GLOBAL_MEMORY_FILE), 'utf8'));
+    return Array.isArray(data.items) ? data.items : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveGlobalMemories(memoryDir, items) {
+  ensureMemory(memoryDir);
+  fs.writeFileSync(
+    path.join(memoryDir, GLOBAL_MEMORY_FILE),
+    JSON.stringify({ version: 1, items }, null, 2) + '\n',
+    'utf8'
+  );
+}
+
+function upsertGlobalMemory(memoryDir, payload = {}) {
+  const text = String(payload.text || '').trim().slice(0, 500);
+  const type = GLOBAL_MEMORY_TYPES.has(payload.type) ? payload.type : 'fact';
+  if (!text) return { ok: false, error: '记忆内容不能为空' };
+  const items = loadGlobalMemories(memoryDir);
+  const now = new Date().toISOString();
+  const id = String(payload.id || '').trim() || `mem_${crypto.randomUUID()}`;
+  const previous = items.find((item) => item.id === id);
+  const next = {
+    id,
+    type,
+    text,
+    scope: payload.scope === 'project' ? 'project' : 'global',
+    project: payload.scope === 'project' ? String(payload.project || '').trim().slice(0, 160) : '',
+    source: previous?.source || (
+      payload.source && typeof payload.source === 'object'
+        ? { type: String(payload.source.type || 'user'), label: String(payload.source.label || '由你添加') }
+        : { type: 'user', label: '由你添加' }
+    ),
+    confidence: 'confirmed',
+    sensitivity: payload.sensitivity === 'sensitive' ? 'sensitive' : 'local',
+    createdAt: previous?.createdAt || now,
+    updatedAt: now,
+    lastVerifiedAt: now,
+  };
+  const index = items.findIndex((item) => item.id === id);
+  if (index >= 0) items[index] = next;
+  else items.unshift(next);
+  saveGlobalMemories(memoryDir, items.slice(0, 500));
+  return { ok: true, item: next };
+}
+
+function removeGlobalMemory(memoryDir, id) {
+  const target = String(id || '').trim();
+  if (!target) return { ok: false, error: '缺少记忆引用' };
+  const items = loadGlobalMemories(memoryDir);
+  const next = items.filter((item) => item.id !== target);
+  if (next.length === items.length) return { ok: false, error: '记忆不存在' };
+  saveGlobalMemories(memoryDir, next);
+  return { ok: true };
 }
 
 function today() {
@@ -111,6 +181,7 @@ function isGarbageSummary(summary) {
 }
 
 function resolveEventSignal(event = {}) {
+  if (ACTIVITY_ONLY_KINDS.has(event.kind)) return 'telemetry';
   if (event.signal === 'telemetry' || event.signal === 'preference') {
     return event.signal;
   }
@@ -136,8 +207,16 @@ function isPatternEntryEligible(entry = {}) {
   if (PREFERENCE_KINDS.has(entry.kind)) return true;
   // Legacy entries without signal: only keep if not garbage and kind hints preference.
   if (entry.kind === 'correction' || entry.kind === 'product') return true;
-  if (entry.kind === 'preference' || entry.kind === 'workflow_choice') return true;
+  if (entry.kind === 'preference') return true;
   return false;
+}
+
+/**
+ * Inferred preferences need repeated evidence before a person can confirm them.
+ * Explicit teaching uses a separate, direct acceptance path.
+ */
+function isPatternReviewReady(entry = {}) {
+  return isPatternEntryEligible(entry) && Number(entry.count || 0) >= PROMPT_THRESHOLD;
 }
 
 function loadPatterns(memoryDir) {
@@ -210,7 +289,7 @@ function bumpPattern(memoryDir, event) {
   }
   savePatterns(memoryDir, patterns);
   if (
-    entry.count >= PROMPT_THRESHOLD &&
+    isPatternReviewReady(entry) &&
     entry.prompt_state === 'pending' &&
     isPatternEntryEligible(entry)
   ) {
@@ -293,6 +372,7 @@ function getContextForAI(memoryDir, knowledgeSnippet = '', options = {}) {
   const includeRecent = options.includeRecent === true;
   const workContext = String(options.workContext || '').trim();
   const accepted = getAcceptedPatterns(memoryDir).slice(0, 8);
+  const globalMemories = loadGlobalMemories(memoryDir).slice(0, 12);
   const parts = [];
   parts.push(
     '## 用户知识库摘要\n' +
@@ -304,6 +384,12 @@ function getContextForAI(memoryDir, knowledgeSnippet = '', options = {}) {
     parts.push(
       '## 用户已确认的使用偏好（长期记忆，可据此调整协作方式）\n' +
         accepted.map((p) => `- ${p.summary}`).join('\n')
+    );
+  }
+  if (globalMemories.length) {
+    parts.push(
+      '## 用户已确认的全局记忆（关于用户的事实、目标、关系与决策）\n' +
+        globalMemories.map((item) => `- [${item.type}] ${item.text}`).join('\n')
     );
   }
   if (includeRecent && workContext) {
@@ -443,6 +529,23 @@ function buildContextItems(memoryDir, {
   const consolidation = lazyConsolidation()
   const consolidated = consolidation.loadConsolidated(memoryDir)
   const items = []
+
+  for (const memory of loadGlobalMemories(memoryDir).slice(0, 20)) {
+    if (memory.scope === 'project' && memory.project) {
+      const activeProject = String(workContext.project || '').trim().toLowerCase()
+      if (!activeProject || activeProject !== String(memory.project).trim().toLowerCase()) continue
+    }
+    items.push({
+      id: `global_memory:${memory.id}`,
+      type: memory.type === 'preference' ? 'preference' : 'memory',
+      text: memory.text,
+      scope: memory.scope || 'global',
+      confidence: 'confirmed',
+      source: { type: 'global_memory', id: memory.id, label: memory.source?.label || '我的记忆' },
+      reason: 'confirmed_global_memory',
+      sensitivity: memory.sensitivity || 'local',
+    })
+  }
 
   const profile = String(
     userProfile.userProfile || userProfile.about || ''
@@ -654,7 +757,7 @@ function buildWorkHints(memoryDir, workContext = {}) {
   };
 }
 
-function reviewPattern(memoryDir, patternId, action, summary = '') {
+function reviewPattern(memoryDir, patternId, action, summary = '', options = {}) {
   ensureMemory(memoryDir);
   if (!['pending', 'accepted', 'dismissed'].includes(action)) {
     return { ok: false, error: '无效操作' };
@@ -664,6 +767,16 @@ function reviewPattern(memoryDir, patternId, action, summary = '') {
   if (!entry) return { ok: false, error: '模式不存在' };
   if (action === 'accepted' && !isPatternEntryEligible(entry)) {
     return { ok: false, error: '该推测不符合习惯候选条件，无法接受' };
+  }
+  if (
+    (action === 'accepted' || action === 'pending') &&
+    options.explicit !== true &&
+    !isPatternReviewReady(entry)
+  ) {
+    return {
+      ok: false,
+      error: `同一协作偏好至少出现 ${PROMPT_THRESHOLD} 次后才能确认`,
+    };
   }
   const nextSummary = String(summary || '').trim().slice(0, 300);
   if (nextSummary) {
@@ -690,9 +803,15 @@ function overview(memoryDir, options = {}) {
         (stateOrder[a.prompt_state] ?? 3) - (stateOrder[b.prompt_state] ?? 3);
       return stateDiff || (b.count || 0) - (a.count || 0);
     })
-    .slice(0, 50);
+    .slice(0, 50)
+    .map((pattern) => ({
+      ...pattern,
+      review_ready: isPatternReviewReady(pattern),
+    }));
   const recent = getRecent(memoryDir, recentLimit);
-  const pendingEligible = patterns.filter((p) => p.prompt_state === 'pending');
+  const pendingEligible = patterns.filter(
+    (p) => p.prompt_state === 'pending' && p.review_ready === true
+  );
   const consolidation = lazyConsolidation();
   if (options.consolidate !== false) {
     consolidation.consolidateIfStale(memoryDir);
@@ -704,12 +823,14 @@ function overview(memoryDir, options = {}) {
     config: loadConfig(memoryDir),
     recent,
     patterns,
+    globalMemories: loadGlobalMemories(memoryDir),
     consolidated,
     stats: {
       recentCount: status(memoryDir).recentCount,
       patternsCount: patterns.length,
       pendingCount: pendingEligible.length,
       acceptedCount: patterns.filter((p) => p.prompt_state === 'accepted').length,
+      globalCount: loadGlobalMemories(memoryDir).length,
       consolidatedCount: consolidated.total || 0,
       ineligibleHidden: loadPatterns(memoryDir).filter(
         (p) => p.prompt_state === 'ineligible' || !isPatternEntryEligible(p)
@@ -764,10 +885,49 @@ function getWorkMemorySummary(memoryDir, options = {}) {
   return consolidation.summaryForOverview(consolidation.loadConsolidated(memoryDir));
 }
 
+/** Explicit user teaching is accepted immediately; inferred patterns still use review. */
+function rememberExplicitPreference(memoryDir, summary, meta = {}) {
+  const text = String(summary || '').trim().slice(0, 300);
+  if (!text || isGarbageSummary(text)) {
+    return { ok: false, error: '记忆内容为空或不适合作为长期偏好' };
+  }
+  const record = capture(memoryDir, { kind: 'preference', summary: text, meta });
+  if (record?.skipped) return { ok: false, code: record.reason, error: '记忆学习当前已关闭' };
+  const fp = fingerprint('preference', text, meta);
+  const pattern = loadPatterns(memoryDir).find((entry) => entry.fingerprint === fp);
+  if (!pattern) return { ok: false, error: '偏好写入失败' };
+  const reviewed = reviewPattern(
+    memoryDir,
+    pattern.id,
+    'accepted',
+    text,
+    { explicit: true }
+  );
+  return reviewed.ok ? { ok: true, record, pattern: reviewed.pattern } : reviewed;
+}
+
+function retractExplicitPreference(memoryDir, patternId) {
+  const id = String(patternId || '').trim();
+  if (!id) return { ok: false, error: '缺少记忆引用' };
+  const reviewed = reviewPattern(memoryDir, id, 'dismissed');
+  if (!reviewed.ok) return reviewed;
+  capture(memoryDir, {
+    kind: 'telemetry',
+    summary: `撤销明确偏好：${String(reviewed.pattern.summary || '').slice(0, 200)}`,
+    meta: { source: 'personal-agent-undo', patternId: id },
+  });
+  return { ok: true, pattern: reviewed.pattern };
+}
+
 module.exports = {
   ensureMemory,
   capture,
   getRecent,
+  loadGlobalMemories,
+  upsertGlobalMemory,
+  removeGlobalMemory,
+  rememberExplicitPreference,
+  retractExplicitPreference,
   getContextForAI,
   getAcceptedPatterns,
   getVisiblePatterns,
@@ -781,6 +941,7 @@ module.exports = {
   resolveEventSignal,
   isPatternEligible,
   isPatternEntryEligible,
+  isPatternReviewReady,
   isGarbageSummary,
   status,
   overview,
@@ -791,4 +952,5 @@ module.exports = {
   PROMPT_THRESHOLD,
   PREFERENCE_KINDS,
   TELEMETRY_KINDS,
+  ACTIVITY_ONLY_KINDS,
 };

@@ -26,6 +26,7 @@ type Props = {
   onRemove: (id: string) => void
   onSync: (id: string) => void
   gitAvailable?: boolean
+  busyAction?: string | null
 }
 
 export function SettingsSourcesPanel(props: Props) {
@@ -55,6 +56,7 @@ export function SettingsSourcesPanel(props: Props) {
     onRemove,
     onSync,
     gitAvailable,
+    busyAction,
   } = props
 
   return (
@@ -68,14 +70,14 @@ export function SettingsSourcesPanel(props: Props) {
           知我的知识来自你绑定的本地文件夹、GitLab/GitHub 仓库或网页资料。应用数据目录只保存会话与设置，不再把正文锁在便签 JSON 里。
         </p>
         <div className="settings-actions">
-          <button type="button" className="settings-btn primary" onClick={onAddLocal}>
-            添加本地文件夹
+          <button type="button" className="settings-btn primary" disabled={Boolean(busyAction)} onClick={onAddLocal}>
+            {busyAction === 'local' ? '选择中…' : '添加本地文件夹'}
           </button>
-          <button type="button" className="settings-btn" onClick={onRefresh}>
-            刷新列表
+          <button type="button" className="settings-btn" disabled={Boolean(busyAction)} onClick={onRefresh}>
+            {busyAction === 'refresh' ? '刷新中…' : '刷新列表'}
           </button>
         </div>
-        <div style={{ padding: '0 16px 12px' }} data-testid="settings-sources-list">
+        <div className="settings-sources-list" data-testid="settings-sources-list">
           {sources.length === 0 ? (
           <p className="settings-hint">尚未添加内容源。可添加本地文件夹、GitLab/GitHub 仓库或网页资料。</p>
           ) : (
@@ -85,12 +87,12 @@ export function SettingsSourcesPanel(props: Props) {
                   <strong>{s.displayName || s.id}</strong>
                   <small>{s.type}{s.rootPath ? ` · ${s.rootPath}` : ''}</small>
                 </div>
-                <div className="settings-actions" style={{ padding: 0 }}>
-                  <button type="button" className="settings-btn" onClick={() => onSync(s.id)}>
-                    同步
+                <div className="settings-actions settings-actions-inline">
+                  <button type="button" className="settings-btn" disabled={Boolean(busyAction)} onClick={() => onSync(s.id)}>
+                    {busyAction === `sync:${s.id}` ? '同步中…' : '同步'}
                   </button>
-                  <button type="button" className="settings-btn" onClick={() => onRemove(s.id)}>
-                    移除
+                  <button type="button" className="settings-btn" disabled={Boolean(busyAction)} onClick={() => onRemove(s.id)}>
+                    {busyAction === `remove:${s.id}` ? '移除中…' : '移除'}
                   </button>
                 </div>
               </div>
@@ -104,6 +106,8 @@ export function SettingsSourcesPanel(props: Props) {
           <div className="settings-section-title">GitLab</div>
           <span className="settings-badge">远程仓库</span>
         </div>
+        <details className="settings-source-details">
+          <summary>配置 GitLab 仓库</summary>
         <div className="settings-grid">
           <div className="settings-field">
             <label htmlFor="gitlabHost">实例地址</label>
@@ -124,13 +128,14 @@ export function SettingsSourcesPanel(props: Props) {
           </div>
         </div>
         <div className="settings-actions">
-          <button type="button" className="settings-btn primary" onClick={onAddGitlab}>
-            克隆并添加
+          <button type="button" className="settings-btn primary" disabled={Boolean(busyAction)} onClick={onAddGitlab}>
+            {busyAction === 'gitlab' ? '克隆中…' : '克隆并添加'}
           </button>
           <span className="settings-hint" data-testid="git-avail-hint">
             {gitAvailable === true ? '已检测到本机 git' : gitAvailable === false ? '未检测到 git（GitLab / GitHub 克隆需要）' : ''}
           </span>
         </div>
+        </details>
       </div>
 
       <div className="settings-section">
@@ -138,6 +143,8 @@ export function SettingsSourcesPanel(props: Props) {
           <div className="settings-section-title">GitHub</div>
           <span className="settings-badge">远程仓库</span>
         </div>
+        <details className="settings-source-details">
+          <summary>配置 GitHub 仓库</summary>
         <div className="settings-grid">
           <div className="settings-field full">
             <label htmlFor="githubRepoUrl">仓库地址</label>
@@ -154,10 +161,11 @@ export function SettingsSourcesPanel(props: Props) {
           </div>
         </div>
         <div className="settings-actions">
-          <button type="button" className="settings-btn primary" onClick={onAddGithub}>
-            克隆并添加
+          <button type="button" className="settings-btn primary" disabled={Boolean(busyAction)} onClick={onAddGithub}>
+            {busyAction === 'github' ? '克隆中…' : '克隆并添加'}
           </button>
         </div>
+        </details>
       </div>
 
       <div className="settings-section">
@@ -166,15 +174,18 @@ export function SettingsSourcesPanel(props: Props) {
           <span className="settings-badge">公开网页</span>
         </div>
         <p className="settings-intro">抓取公开网页正文并缓存为只读资料，供工作台浏览与写作助手引用。不支持需要登录的页面。</p>
+        <details className="settings-source-details">
+          <summary>配置网页资料</summary>
         <div className="settings-field">
           <label htmlFor="webPageUrl">网页 URL</label>
           <input id="webPageUrl" value={webPageUrl} onChange={(e) => onWebPageUrl(e.target.value)} placeholder="https://example.com/article" />
         </div>
         <div className="settings-actions">
-          <button type="button" className="settings-btn primary" onClick={onAddWeb}>
-            抓取并添加
+          <button type="button" className="settings-btn primary" disabled={Boolean(busyAction)} onClick={onAddWeb}>
+            {busyAction === 'web' ? '抓取中…' : '抓取并添加'}
           </button>
         </div>
+        </details>
       </div>
     </>
   )

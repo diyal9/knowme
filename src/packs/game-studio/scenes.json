@@ -76,12 +76,12 @@
     }
   ],
   "scenePrompts": {
-    "workflow-intake": "你是 KnowMe，工作流 intake / ingest 协作伙伴。\n优先基于飞书文档、会议与聊天事实整理结构化 intake。",
-    "game-design": "你是 KnowMe，手机游戏工作室的策划协作伙伴。\n优先输出结构化游戏需求案。",
-    "game-dev": "你是 KnowMe，手机游戏研发协作伙伴。\n从已批准的需求案出发，明确开发任务与验收清单。",
-    "game-qa": "你是 KnowMe，手机游戏 QA 协作伙伴。\n对照需求验收标准列出测试矩阵与反模式。",
-    "game-production": "你是 KnowMe，手机游戏制作/项目推进伙伴。\n围绕版本目标整理里程碑、依赖与风险。",
-    "game-knowledge": "你是 KnowMe，项目知识管家。\n优先基于已有 Wiki/OKF 证据回答；可建议 kb-ingest / kb-lint 路径。"
+    "workflow-intake": "你是用户配置的智能伙伴，负责工作流 intake / ingest 协作。\n优先基于飞书文档、会议与聊天事实整理结构化 intake。",
+    "game-design": "你是用户配置的智能伙伴，负责手机游戏工作室策划协作。\n优先输出结构化游戏需求案。",
+    "game-dev": "你是用户配置的智能伙伴，负责手机游戏研发协作。\n从已批准的需求案出发，明确开发任务与验收清单。",
+    "game-qa": "你是用户配置的智能伙伴，负责手机游戏 QA 协作。\n对照需求验收标准列出测试矩阵与反模式。",
+    "game-production": "你是用户配置的智能伙伴，负责手机游戏制作与项目推进。\n围绕版本目标整理里程碑、依赖与风险。",
+    "game-knowledge": "你是用户配置的智能伙伴，负责项目知识管理。\n优先基于已有 Wiki/OKF 证据回答；可建议 kb-ingest / kb-lint 路径。"
   },
   "legacyModeMap": {
     "general": "game-production",

@@ -28,7 +28,7 @@ export function KnowledgeOrganizePage() {
       <main className="knowledge-page-main">
         <div className="knowledge-reader-inner knowledge-organizer">
           <section className="knowledge-organizer-hero">
-            <div className="knowledge-panel-kicker">AI knowledge steward</div>
+        <div className="knowledge-panel-kicker">智能知识管家</div>
             <h1>{nextTitle}</h1>
             <p>KnowMe 会读取资料并生成带来源的整理提案。原始资料不会被覆盖，只有你确认后才会写入正式知识。</p>
             <div className="knowledge-organizer-actions">
@@ -50,7 +50,7 @@ export function KnowledgeOrganizePage() {
           </section>
           <section className="knowledge-organizer-task">
             <div className="knowledge-organizer-section-head">
-              <div><div className="knowledge-panel-kicker">Start a task</div><h2>选择整理范围</h2></div>
+        <div><div className="knowledge-panel-kicker">开始整理</div><h2>选择整理范围</h2></div>
             </div>
             <div className="knowledge-scope-options" role="radiogroup" aria-label="整理范围">
               {([
@@ -75,7 +75,7 @@ export function KnowledgeOrganizePage() {
           </section>
           <section className="knowledge-organizer-task-state">
             <div className="knowledge-organizer-section-head">
-              <div><div className="knowledge-panel-kicker">Latest task</div><h2>最近一次整理</h2></div>
+        <div><div className="knowledge-panel-kicker">最近任务</div><h2>最近一次整理</h2></div>
               {latest ? <span className={`knowledge-task-status ${latest.status || ''}`}>{knowledgeTaskStatusLabel(latest.status)}</span> : <span>尚未开始</span>}
             </div>
             {latest ? (

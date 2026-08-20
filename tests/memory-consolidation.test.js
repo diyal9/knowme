@@ -136,6 +136,8 @@ describe('memory consolidation and work hints', () => {
     });
     assert.ok(ctx.includes('工作记忆整合'));
     assert.ok(ctx.includes('决策'));
+    assert.ok(ctx.includes('活动信号'));
+    assert.ok(!memory.overview(TMP, { consolidate: false }).patterns.length);
   });
 
   it('overview includes consolidated summary', () => {

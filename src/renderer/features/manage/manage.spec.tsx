@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AUTOMATION_LIST_HINT } from '../../../domain/studio'
 import { AppShell } from '../../app/AppShell'
@@ -85,12 +85,128 @@ describe('workbench-manage-surface', () => {
     useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage' })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('交付路径')).toBeInTheDocument())
+    const healthy = screen.getByText('运行正常').closest('[role="status"]')
+    expect(healthy).toBeInTheDocument()
+    expect(healthy).toHaveClass('is-live')
+    expect(healthy?.querySelectorAll('.wb-daemon-health-signal i')).toHaveLength(4)
+    expect(screen.queryByText('服务可用')).not.toBeInTheDocument()
     expect(screen.getAllByText('办公交付').length).toBeGreaterThan(0)
     expect(screen.queryByText('工作模式')).not.toBeInTheDocument()
     expect(screen.queryByText('每日简报')).not.toBeInTheDocument()
     useAppStore.setState({ route: 'automation', workbenchSurface: 'manage', managePanel: 'automation' })
     await waitFor(() => expect(screen.getByText('每日简报')).toBeInTheDocument())
     expect(screen.getByText('会议跟进')).toBeInTheDocument()
+  })
+
+  it('does not leak workflow shelf data into delivery paths while pipeline data loads', async () => {
+    let resolveOverview!: (value: unknown) => void
+    const overview = new Promise((resolve) => { resolveOverview = resolve })
+    mockApi({
+      workbenchLoad: async () => ({
+        workflowPackages: [{ id: 'feishu-daily', name: '飞书日常总结' }],
+        daemon: { online: true },
+      }),
+      workbenchDaemonOverview: async () => overview,
+    })
+    resetAppStore()
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', shelfDaemonOnline: true })
+    render(<AppShell />)
+
+    await waitFor(() => expect(screen.getByRole('heading', { name: '创建开发任务' })).toBeInTheDocument())
+    expect(screen.getByText('正在读取交付路径…')).toBeInTheDocument()
+    expect(screen.getByTestId('daemon-overview-loading')).toBeInTheDocument()
+    expect(screen.queryByText('飞书日常总结')).not.toBeInTheDocument()
+    expect(screen.queryByText('新运行')).not.toBeInTheDocument()
+    expect(screen.queryByText('运行记录')).not.toBeInTheDocument()
+
+    await act(async () => {
+      resolveOverview({
+        ok: true,
+        daemon: { online: true, workflows: [{ id: 'daemon-stage-impl', name: '文档到实施计划' }], tasks: [] },
+      })
+      await overview
+    })
+    await waitFor(() => expect(screen.getAllByText('文档到实施计划').length).toBeGreaterThan(0))
+    expect(screen.queryByTestId('daemon-overview-loading')).not.toBeInTheDocument()
+    expect(screen.queryByText('飞书日常总结')).not.toBeInTheDocument()
+  })
+
+  it('reuses a fresh daemon snapshot when switching away and back', async () => {
+    const overview = vi.fn(async () => ({
+      ok: true,
+      daemon: {
+        online: true,
+        workflows: [{ id: 'daemon-stage-impl', name: '文档到实施计划' }],
+        tasks: [{
+          slug: 'cached-run',
+          intent: '缓存任务',
+          status: 'running',
+          workflow: 'daemon-stage-impl',
+        }],
+      },
+    }))
+    mockApi({
+      workbenchLoad: async () => ({ daemon: { online: true } }),
+      workbenchDaemonOverview: overview,
+    })
+    resetAppStore()
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', managePanel: 'daemon' })
+    render(<AppShell />)
+
+    await waitFor(() => expect(screen.getByTestId('daemon-run-cached-run')).toBeInTheDocument())
+    expect(overview).toHaveBeenCalledTimes(1)
+
+    act(() => useAppStore.setState({ managePanel: 'automation' }))
+    await waitFor(() => expect(screen.getByTestId('manage-automation-list')).toBeInTheDocument())
+    act(() => useAppStore.setState({ managePanel: 'daemon' }))
+
+    expect(await screen.findByTestId('daemon-run-cached-run')).toBeInTheDocument()
+    expect(screen.queryByTestId('daemon-overview-loading')).not.toBeInTheDocument()
+    await waitFor(() => expect(overview).toHaveBeenCalledTimes(1))
+  })
+
+  it('presents delivery paths as a grouped picker with up to three tags per option', async () => {
+    mockApi({
+      workbenchLoad: async () => ({ daemon: { online: true } }),
+      workbenchDaemonOverview: async () => ({
+        ok: true,
+        daemon: {
+          online: true,
+          workflows: [
+            { id: 'backend', name: '后端编码', tags: ['后端', '本地部署', '修复循环', '额外标签'], catalog: { category: 'development', order: 30 } },
+            { id: 'plan', name: '文档到实施计划', tags: ['需求'], catalog: { category: 'planning', order: 10 } },
+            { id: 'qa', name: '测试修复循环', tags: ['测试'], catalog: { category: 'testing', order: 20 } },
+          ],
+          tasks: [],
+        },
+      }),
+    })
+    resetAppStore()
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', shelfDaemonOnline: true })
+    render(<AppShell />)
+
+    const hint = await screen.findByText('点击切换交付路径')
+    const trigger = hint.closest('button')
+    expect(trigger).not.toBeNull()
+    expect(within(trigger as HTMLButtonElement).getByText('选择')).toBeInTheDocument()
+    fireEvent.click(trigger as HTMLButtonElement)
+
+    expect(screen.getByText('规划与方案')).toBeInTheDocument()
+    expect(screen.getByText('测试与质量')).toBeInTheDocument()
+    expect(screen.getByText('功能开发')).toBeInTheDocument()
+    expect(screen.getAllByRole('option').map((option) => option.getAttribute('data-testid'))).toEqual([
+      'daemon-path-plan',
+      'daemon-path-qa',
+      'daemon-path-backend',
+    ])
+    const backend = screen.getByTestId('daemon-path-backend')
+    expect(within(backend).getByText('后端')).toBeInTheDocument()
+    expect(within(backend).getByText('本地部署')).toBeInTheDocument()
+    expect(within(backend).getByText('修复循环')).toBeInTheDocument()
+    expect(within(backend).queryByText('额外标签')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByTestId('daemon-path-qa'))
+    expect(within(trigger as HTMLButtonElement).getByText('测试修复循环')).toBeInTheDocument()
   })
 
   it('shows honest copy when automation is unbound', async () => {
@@ -155,6 +271,16 @@ describe('workbench-manage-surface', () => {
     useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', shelfDaemonOnline: true })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByTestId('daemon-run-rdpi-run-1')).toBeInTheDocument())
+
+    const allRunsTab = screen.getByRole('tab', { name: '全部' })
+    expect(within(allRunsTab).getByText('（1）')).toBeInTheDocument()
+    expect(screen.queryByText('共 1 条任务')).not.toBeInTheDocument()
+    expect(document.querySelector('.wb-daemon-rail-head')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('tab', { name: '进行中' }))
+    expect(within(screen.getByRole('tab', { name: '进行中' })).getByText('（1）')).toBeInTheDocument()
+    expect(within(allRunsTab).queryByText('（1）')).not.toBeInTheDocument()
+
     fireEvent.click(screen.getByTestId('daemon-run-rdpi-run-1'))
     await waitFor(() => expect(screen.getByTestId('daemon-review')).toBeInTheDocument())
     expect(within(screen.getByLabelText('任务对话状态')).getByText('管线服务')).toBeInTheDocument()
@@ -163,6 +289,56 @@ describe('workbench-manage-surface', () => {
     await waitFor(() => expect(screen.getByText('交付路径')).toBeInTheDocument())
     expect(useAppStore.getState().workbenchSurface).toBe('manage')
     expect(useAppStore.getState().managePanel).toBe('daemon')
+  })
+
+  it('renders task topic, time and a Feishu document action instead of a raw URL', async () => {
+    const sourceUrl = 'https://forever9.feishu.cn/wiki/DB8YwCuKtiRUkhkL6lyc'
+    mockApi({
+      workbenchLoad: async () => ({ daemon: { online: true } }),
+      workbenchDaemonOverview: async () => ({
+        ok: true,
+        daemon: {
+          online: true,
+          workflows: [{ id: 'daemon-stage-impl', name: '文档到实施计划' }],
+          tasks: [{
+            slug: 'linked-run',
+            intent: `需求文档：${sourceUrl}`,
+            status: 'finished',
+            workflow: 'daemon-stage-impl',
+            documentTitle: '飞书云文档',
+            updatedAt: new Date(Date.now() - 90 * 60 * 1000).toISOString(),
+          }],
+        },
+      }),
+    })
+    resetAppStore()
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', shelfDaemonOnline: true })
+    render(<AppShell />)
+
+    const openTask = await screen.findByTestId('daemon-run-linked-run')
+    const card = openTask.closest('article')
+    expect(card).not.toBeNull()
+    expect(within(card as HTMLElement).getByText('需求文档任务')).toBeInTheDocument()
+    expect(within(card as HTMLElement).getByText('文档到实施计划')).toBeInTheDocument()
+    expect(within(card as HTMLElement).getByText('已完成')).toBeInTheDocument()
+    expect(within(card as HTMLElement).getByText('1 小时前')).toBeInTheDocument()
+    expect(within(card as HTMLElement).getByText('飞书文档')).toBeInTheDocument()
+    expect(within(card as HTMLElement).getByText('点击查看文档')).toBeInTheDocument()
+    expect(within(card as HTMLElement).queryByText(sourceUrl)).not.toBeInTheDocument()
+
+    const resolver = screen.getByTestId('link-title-resolver').querySelector('webview')
+    const titleEvent = new Event('page-title-updated') as Event & { title: string }
+    titleEvent.title = '【FF项目】0元礼包 - 飞书云文档'
+    act(() => resolver?.dispatchEvent(titleEvent))
+    await waitFor(() => expect(within(card as HTMLElement).getByText('【FF项目】0元礼包')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByTestId('daemon-run-source-linked-run'))
+    expect(useAppStore.getState().linkPreview?.href).toBe(sourceUrl)
+    expect(useAppStore.getState().linkPreview?.title).toBe('【FF项目】0元礼包')
+    expect(useAppStore.getState().linkPreview?.presentation).toBe('overlay')
+    expect(useAppStore.getState().route).toBe('workbench')
+    expect(useAppStore.getState().linkFullscreen).toBe(true)
+    expect(await screen.findByTestId('link-preview-surface')).toBeInTheDocument()
   })
 
   it('opens automation editor and saves via IPC', async () => {
@@ -226,6 +402,13 @@ describe('workbench-manage-surface', () => {
     useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', managePanel: 'workflows' })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByTestId('workflow-delete-my-fork')).toBeInTheDocument())
+    const workflowCard = screen.getByTestId('workflow-card-my-fork')
+    expect(workflowCard).toHaveClass('wb-shelf-card')
+    expect(within(workflowCard).getByText('交付')).toBeInTheDocument()
+    expect(within(workflowCard).getByText('协作路径')).toBeInTheDocument()
+    expect(within(workflowCard).getByRole('button', { name: '复制' })).toBeInTheDocument()
+    expect(within(workflowCard).getByRole('button', { name: '编辑' })).toBeInTheDocument()
+    expect(within(workflowCard).getByRole('button', { name: '删除' })).toBeInTheDocument()
     fireEvent.click(screen.getByTestId('workflow-delete-my-fork'))
     const modal = screen.getByTestId('confirm-modal')
     expect(modal).toBeInTheDocument()
@@ -297,6 +480,13 @@ describe('workbench-manage-surface', () => {
     useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', managePanel: 'workflows' })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByTestId('workflow-edit-my-fork')).toBeInTheDocument())
+    await waitFor(() => {
+      const headerActions = document.getElementById('wbHeadDetailActions')
+      expect(headerActions).toBeTruthy()
+      expect(within(headerActions as HTMLElement).getByRole('button', { name: '返回工作流' })).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+    })
+    expect(screen.getAllByRole('button', { name: '返回工作流' })).toHaveLength(1)
     fireEvent.click(screen.getByTestId('workflow-edit-my-fork'))
     await waitFor(() => expect(getPkg).toHaveBeenCalledWith('my-fork'))
     await waitFor(() => expect(screen.getByTestId('studio-surface')).toBeInTheDocument())

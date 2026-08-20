@@ -13,7 +13,7 @@ describe('planPipelineComposerSend', () => {
       text: '补充材料已放仓库',
     })
     expect(plan).toEqual({ kind: 'clarify', node: 'n-q1', answer: '补充材料已放仓库' })
-    expect(pipelineComposerReceipt(plan)).toBe('已提交澄清答复。')
+    expect(pipelineComposerReceipt(plan)).toBe('已提交补充信息，正在重新检查任务状态。')
   })
 
   it('sends HITL free text as gate revise', () => {

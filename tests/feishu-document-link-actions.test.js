@@ -50,6 +50,34 @@ describe('feishu document link actions', () => {
     assert.ok(openExternalIpc.includes('viaClient: true'), 'reports the client path')
   })
 
+  it('resolves a wiki document title through the read-only lark-cli connector', async () => {
+    const { resolveFeishuCliTitle } = require('../src/ipc/open-external')
+    const calls = []
+    const result = await resolveFeishuCliTitle('https://forever9.feishu.cn/wiki/wikcn123', {
+      executeRead: async (toolName, args) => {
+        calls.push({ toolName, args })
+        return { ok: true, text: JSON.stringify({ ok: true, data: { title: '项目需求说明' } }) }
+      },
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.title, '项目需求说明')
+    assert.equal(result.via, 'lark-cli')
+    assert.equal(calls[0].toolName, 'feishu.get_wiki_node')
+    assert.equal(calls[0].args.url, 'https://forever9.feishu.cn/wiki/wikcn123')
+  })
+
+  it('extracts a doc title from lark-cli XML and rejects generic product titles', async () => {
+    const { resolveFeishuCliTitle, titleFromCliResult } = require('../src/ipc/open-external')
+    const result = await resolveFeishuCliTitle('https://forever9.feishu.cn/docx/docx123', {
+      executeRead: async () => ({
+        ok: true,
+        text: JSON.stringify({ data: { document: { content: '<title>【FF项目】0元礼包 &amp; 活动说明</title><p>正文</p>' } } }),
+      }),
+    })
+    assert.equal(result.title, '【FF项目】0元礼包 & 活动说明')
+    assert.equal(titleFromCliResult(JSON.stringify({ data: { title: '飞书知识库' } }), 'wiki'), '')
+  })
+
   it('classifies common Feishu resources without network metadata', () => {
     assert.deepEqual(classifyFeishuResource('/docx/abc'), { type: 'doc', label: '飞书文档', glyph: '文' })
     assert.equal(classifyFeishuResource('/sheets/abc').type, 'sheet')

@@ -8,6 +8,32 @@ const fs = require('fs')
 const path = require('path')
 const Module = require('module')
 
+/**
+ * 测试进程统一兜底临时目录：所有 mkdtemp 结果在 after 中清理。
+ * 各测试仍可提前 rm；force:true 使两者安全共存，失败测试也不会泄漏目录。
+ */
+if (process.argv.some(arg => /\.test\.[cm]?js$/i.test(arg)) && !global.__KNOWME_TEST_TMP_TRACKER) {
+  global.__KNOWME_TEST_TMP_TRACKER = true
+  const trackedTempDirs = new Set()
+  const track = dir => { if (dir) trackedTempDirs.add(path.resolve(String(dir))); return dir }
+  const originalMkdtempSync = fs.mkdtempSync.bind(fs)
+  const originalMkdtemp = fs.mkdtemp.bind(fs)
+  const originalPromiseMkdtemp = fs.promises.mkdtemp.bind(fs.promises)
+  fs.mkdtempSync = (...args) => track(originalMkdtempSync(...args))
+  fs.mkdtemp = (prefix, options, callback) => {
+    const cb = typeof options === 'function' ? options : callback
+    const opts = typeof options === 'function' ? undefined : options
+    return originalMkdtemp(prefix, opts, (error, dir) => cb(error, error ? dir : track(dir)))
+  }
+  fs.promises.mkdtemp = async (...args) => track(await originalPromiseMkdtemp(...args))
+  require('node:test').after(() => {
+    for (const dir of trackedTempDirs) {
+      try { fs.rmSync(dir, { recursive: true, force: true }) } catch { /* best-effort cleanup */ }
+    }
+    trackedTempDirs.clear()
+  })
+}
+
 if (global.__KNOWME_TS_REGISTERED) {
   module.exports = {}
 } else {

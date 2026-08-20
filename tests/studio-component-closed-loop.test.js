@@ -22,11 +22,9 @@ function emptyFreeDraft(goal = '闭环验收') {
 describe('studio component closed-loop acceptance', () => {
   it('covers every palette kind in fields / palette', () => {
     const kinds = canvas.paletteTypes().map(item => item.kind)
-    for (const kind of ['start', 'end', 'agent', 'llm', 'tool', 'knowledge', 'condition', 'join', 'gate']) {
+    for (const kind of ['start', 'end', 'agent', 'condition', 'join', 'gate', 'knowledge', 'mcp', 'request']) {
       assert.ok(kinds.includes(kind), `missing palette ${kind}`)
     }
-    const llmHint = canvas.paletteTypes().find(item => item.kind === 'llm')?.hint || ''
-    assert.equal(/必须|绑定专家/.test(llmHint), false)
     const llmFields = canvas.fieldsFromNode({
       kind: 'llm',
       name: '大模型',

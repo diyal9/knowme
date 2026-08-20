@@ -16,6 +16,7 @@ LLM 维护的领域百科。查询时 **先读本 index**，再打开相关页�
 * [附带计划落地](concepts/attached-plan-execution.md) - 不改 plan、不重建 todo、做到全部完成
 * [Electron 开发重启与热更](concepts/electron-dev-restart.md) - 日常重启即 npm start，不为看 UI 编 dist
 * [MCP 深验与代码探索](concepts/mcp-ui-and-code-explore.md) - Playwright 深验工具与 GitNexus list_repos
+* [通用对话排版系统](concepts/conversation-layout-system.md) - 智能伙伴、专家、工作流与管线共享的消息、正文和输入规范
 
 ## 导航
 

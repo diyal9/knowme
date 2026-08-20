@@ -12,6 +12,7 @@ export function TaskDialogueShell({
   testId,
   logTestId,
   composerExtraClass,
+  composerPlaceholder,
   children,
 }: {
   variant: 'expert' | 'workflow' | 'pipeline'
@@ -20,6 +21,7 @@ export function TaskDialogueShell({
   testId?: string
   logTestId: string
   composerExtraClass?: string
+  composerPlaceholder?: string
   children: ReactNode
 }) {
   const logRef = useRef<HTMLDivElement>(null)
@@ -38,7 +40,7 @@ export function TaskDialogueShell({
 
   return (
     <aside
-      className={`agent-col ${variantClass}${launch ? ' agent-launch-state' : ''}`}
+      className={`agent-col conversation-surface ${variantClass}${launch ? ' agent-launch-state' : ''}`}
       id="agentCol"
       data-testid={testId}
       aria-label={label}
@@ -48,7 +50,11 @@ export function TaskDialogueShell({
       </div>
       {launch ? null : (
         <div className="agent-col-foot">
-          <AgentComposer extraClass={composerExtraClass} surface="workbench" />
+          <AgentComposer
+            extraClass={composerExtraClass}
+            surface="workbench"
+            placeholder={composerPlaceholder}
+          />
         </div>
       )}
     </aside>

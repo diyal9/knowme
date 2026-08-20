@@ -1,0 +1,31 @@
+{
+  "at": "2026-08-18T15:41:42.874Z",
+  "ok": true,
+  "checks": [
+    {
+      "id": "personal-agent-rail",
+      "ok": true
+    },
+    {
+      "id": "agent-center",
+      "ok": true
+    },
+    {
+      "id": "agent-skill-mcp-tabs",
+      "ok": true
+    },
+    {
+      "id": "expert-task-home",
+      "ok": true
+    },
+    {
+      "id": "growth-entry",
+      "ok": true
+    },
+    {
+      "id": "no-console-errors",
+      "ok": true
+    }
+  ],
+  "consoleErrors": []
+}

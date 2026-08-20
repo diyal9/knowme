@@ -1,7 +1,5 @@
 import type { ChatMessage } from '../../../shared/api'
 import { buildGroundingMetaView, formatGroundingSourceLine } from '../../../domain/agent-grounding-meta'
-import type { AssistantModeId, FollowUpPreset } from '../../../domain/assistant-modes'
-import { MODE_FOLLOWUP_PRESETS } from '../../../domain/assistant-modes'
 
 export function AgentGroundingMeta({ message }: { message: ChatMessage }) {
   const view = buildGroundingMetaView(message.groundingStatus)
@@ -82,26 +80,17 @@ export function AgentStructuredUi({
 }
 
 export function AgentFollowUps({
-  modeId,
+  body,
+  userInput,
   onPick,
 }: {
-  modeId: AssistantModeId
+  body: string
+  userInput?: string
   onPick: (prompt: string) => void
 }) {
-  const presets: FollowUpPreset[] = MODE_FOLLOWUP_PRESETS[modeId] || MODE_FOLLOWUP_PRESETS.general
-  return (
-    <div className="agent-followups" aria-label="建议下一步">
-      {presets.slice(0, 3).map((item) => (
-        <button
-          key={item.label}
-          type="button"
-          className="agent-followup-btn"
-          title={item.prompt}
-          onClick={() => onPick(item.prompt)}
-        >
-          {item.label}
-        </button>
-      ))}
-    </div>
-  )
+  // 底部建议必须来自模型明确声明的 structuredUi；不再根据正文关键词推测操作。
+  void body
+  void userInput
+  void onPick
+  return null
 }

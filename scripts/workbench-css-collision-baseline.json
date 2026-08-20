@@ -1,0 +1,454 @@
+{
+  "version": 1,
+  "duplicates": [
+    {
+      "selector": ".app.mode-workbench.workbench-task-active[data-workbench-task-kind=\"expert-chat\"] .main",
+      "owners": [
+        "features/expert/expert-workbench.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "5333bdfc23c68e74"
+    },
+    {
+      "selector": ".wb-agent-avatar",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "d09999cc1d0e8b12"
+    },
+    {
+      "selector": ".wb-agent-avatar .ico",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "7f00da6929ae6cd2"
+    },
+    {
+      "selector": ".wb-agent-card",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "e5ce8b0d40ef2a8d"
+    },
+    {
+      "selector": ".wb-agent-card:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "32f309df5981dd69"
+    },
+    {
+      "selector": ".wb-agent-card:hover",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "53648078d9219f4d"
+    },
+    {
+      "selector": ".wb-automation-template:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "0b65da65814ef696"
+    },
+    {
+      "selector": ".wb-daemon-status:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "d6ec48f1b96b7b1d"
+    },
+    {
+      "selector": ".wb-dag-summary.is-loading",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "b88280045e37b518"
+    },
+    {
+      "selector": ".wb-dag-toggle:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "9d3a84fdd1fc7d36"
+    },
+    {
+      "selector": ".wb-empty-action:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "84976bdde9237dd9"
+    },
+    {
+      "selector": ".wb-flow-library-action",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "2fe3955b90a5166f"
+    },
+    {
+      "selector": ".wb-flow-library-groups",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "461fb1408887845a"
+    },
+    {
+      "selector": ".wb-flow-library-panel",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "ec650e88521fdf23"
+    },
+    {
+      "selector": ".wb-goal-submit:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "84976bdde9237dd9"
+    },
+    {
+      "selector": ".wb-goal-template:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "84976bdde9237dd9"
+    },
+    {
+      "selector": ".wb-head",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "2e5703c33fdfbb9d"
+    },
+    {
+      "selector": ".wb-head-sub",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "829812c11aaa10ea"
+    },
+    {
+      "selector": ".wb-head-title",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "16bd1b4e6f39ba94"
+    },
+    {
+      "selector": ".wb-head-title .ico",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "062f8d3f9cc2843a"
+    },
+    {
+      "selector": ".wb-head-tools",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "4d89dfddf52adbd7"
+    },
+    {
+      "selector": ".wb-help-trigger:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "9d3a84fdd1fc7d36"
+    },
+    {
+      "selector": ".wb-home-status",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "c49d3e64201c7506"
+    },
+    {
+      "selector": ".wb-icon-btn",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "439a67d0e73f0dda"
+    },
+    {
+      "selector": ".wb-intent-toggle:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "677fd85dc1dc1be5"
+    },
+    {
+      "selector": ".wb-manage-head",
+      "owners": [
+        "features/shelf/shelf.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "d4838b44f13e84e1"
+    },
+    {
+      "selector": ".wb-mode-tab",
+      "owners": [
+        "features/workbench/workbench-chrome.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "0556f52e0565089f"
+    },
+    {
+      "selector": ".wb-mode-tab::after",
+      "owners": [
+        "features/workbench/workbench-chrome.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "e46dd8e55d2bab7f"
+    },
+    {
+      "selector": ".wb-run-artifact",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "c285b7a12c3478b6"
+    },
+    {
+      "selector": ".wb-run-artifact:hover",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "c725afe8d844d166"
+    },
+    {
+      "selector": ".wb-run-artifacts",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "2d6ff1a8782cd499"
+    },
+    {
+      "selector": ".wb-run-section",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "bf4935909babfc1f"
+    },
+    {
+      "selector": ".wb-run-status.tone-error",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "1b6fa0d944c9ed05"
+    },
+    {
+      "selector": ".wb-run-status.tone-waiting",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "6d711fc78f01b5e1"
+    },
+    {
+      "selector": ".wb-runner",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "fa2fd043e1520b98"
+    },
+    {
+      "selector": ".wb-runner-log",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "4e2942521cd09f82"
+    },
+    {
+      "selector": ".wb-section-label",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "baf9d6dadaf0ab3d"
+    },
+    {
+      "selector": ".wb-task-back",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "58bf6513a15307b7"
+    },
+    {
+      "selector": ".wb-task-back .ico",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "2e61b84f08d35f85"
+    },
+    {
+      "selector": ".wb-task-back:active",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "1e67a5af8a56134a"
+    },
+    {
+      "selector": ".wb-task-back:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "dd86b36c93836e8a"
+    },
+    {
+      "selector": ".wb-task-back:hover",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-chrome.css"
+      ],
+      "fingerprint": "e23068afd86de4e3"
+    },
+    {
+      "selector": ".wb-task-expert-trigger.is-locked",
+      "owners": [
+        "features/expert/expert-workbench.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "0b2d18b84fdf1b03"
+    },
+    {
+      "selector": ".wb-team-assets-grid",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "ce71b1a8c57146c6"
+    },
+    {
+      "selector": ".wb-team-assets-panel",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "a8ee2c976b87e782"
+    },
+    {
+      "selector": ".wb-team-dashboard",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "52ebf4323f38e5ac"
+    },
+    {
+      "selector": ".wb-team-empty",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "c05957eb95e687c9"
+    },
+    {
+      "selector": ".wb-team-empty-action:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "84976bdde9237dd9"
+    },
+    {
+      "selector": ".wb-team-intro",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "a080bd74cce6986a"
+    },
+    {
+      "selector": ".wb-team-intro-copy h1",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "f536115f3094528a"
+    },
+    {
+      "selector": ".wb-team-roster",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "55828762ccd8c96a"
+    },
+    {
+      "selector": ".wb-template-empty",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "2973cb37a9a21953"
+    },
+    {
+      "selector": ".wb-template-empty strong",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "c3c9e68cdb0e29c5"
+    },
+    {
+      "selector": ".wb-workflow-card:focus-visible",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "32f309df5981dd69"
+    },
+    {
+      "selector": ".wb-workflow-empty",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "5654336d4053a5c2"
+    },
+    {
+      "selector": ".workbench",
+      "owners": [
+        "features/run/console.css",
+        "features/workbench/workbench-layout.css"
+      ],
+      "fingerprint": "83000f87dfb418e5"
+    }
+  ]
+}

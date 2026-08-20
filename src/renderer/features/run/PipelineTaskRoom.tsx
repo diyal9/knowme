@@ -1,9 +1,6 @@
 import {
-  joinTaskTitle,
   workbenchTaskBackLabel,
   workbenchTaskModeLabel,
-  workbenchTaskStateLabel,
-  workbenchTaskStateTone,
 } from '../../../domain/workbench-task-room'
 import { useAppStore } from '../../app/store'
 import { DialogueStatusBar } from '../workbench/DialogueStatusBar'
@@ -18,9 +15,7 @@ export function PipelineTaskRoom() {
     <>
       <DialogueStatusBar
         mode={workbenchTaskModeLabel('pipeline-review')}
-        title={joinTaskTitle('Daemon 阶段', run.brief || run.workflowName)}
-        state={workbenchTaskStateLabel('pipeline-review', run.phase)}
-        stateTone={workbenchTaskStateTone(run.phase)}
+        title={run.workflowName || run.brief || '管线任务'}
         onBack={returnToShelf}
         backLabel={workbenchTaskBackLabel('pipeline-review')}
       />

@@ -58,6 +58,42 @@ describe('personal memory center', () => {
     assert.ok(memory.getContextForAI(TMP).includes('偏好简洁列表'));
   });
 
+  it('keeps one-off work records as memory instead of reviewable preferences', () => {
+    memory.capture(TMP, {
+      kind: 'workflow_choice',
+      signal: 'preference',
+      summary: '选择工作入口：整理今天的会议纪要并生成待办',
+      meta: { source: 'agent-session-new' },
+    });
+
+    const overview = memory.overview(TMP);
+    assert.equal(overview.stats.recentCount, 1);
+    assert.equal(memory.getRecent(TMP, 1)[0].signal, 'telemetry');
+    assert.equal(overview.stats.pendingCount, 0);
+    assert.equal(overview.patterns.length, 0);
+  });
+
+  it('requires three matching observations before an inferred preference can be reviewed', () => {
+    const event = {
+      kind: 'preference',
+      summary: '偏好先给结论再补依据',
+      meta: { action: 'response-order' },
+    };
+    memory.capture(TMP, event);
+    memory.capture(TMP, event);
+
+    const overview = memory.overview(TMP);
+    const pattern = overview.patterns[0];
+    assert.equal(pattern.review_ready, false);
+    assert.equal(overview.stats.pendingCount, 0);
+    assert.equal(memory.reviewPattern(TMP, pattern.id, 'accepted').ok, false);
+
+    memory.capture(TMP, event);
+    const ready = memory.overview(TMP).patterns[0];
+    assert.equal(ready.review_ready, true);
+    assert.equal(memory.overview(TMP).stats.pendingCount, 1);
+  });
+
   it('allows editing and restoring an inferred pattern', () => {
     const event = {
       kind: 'preference',
@@ -92,6 +128,25 @@ describe('personal memory center', () => {
     assert.equal(overview.stats.recentCount, 0);
     assert.equal(overview.stats.patternsCount, 0);
     assert.equal(overview.config.learningEnabled, true);
+  });
+
+  it('stores confirmed global memories separately from automatic activity', () => {
+    const saved = memory.upsertGlobalMemory(TMP, {
+      type: 'fact',
+      text: '我是游戏服务端开发者',
+      scope: 'global',
+    });
+    assert.equal(saved.ok, true);
+    assert.equal(memory.overview(TMP).globalMemories.length, 1);
+    assert.ok(memory.getContextForAI(TMP).includes('我是游戏服务端开发者'));
+
+    memory.capture(TMP, { kind: 'telemetry', summary: '选择工作入口：工作台' });
+    memory.clear(TMP);
+    assert.equal(memory.overview(TMP).stats.recentCount, 0);
+    assert.equal(memory.overview(TMP).globalMemories.length, 1);
+
+    assert.equal(memory.removeGlobalMemory(TMP, saved.item.id).ok, true);
+    assert.equal(memory.overview(TMP).globalMemories.length, 0);
   });
 
   it('settings surface exists separately from memory APIs', () => {

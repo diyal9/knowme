@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import '../app/tokens.css'
+import '../app/ui-system.css'
 import '../app/knowme-icons'
 import { SettingsSurface } from '../features/settings/SettingsSurface'
 

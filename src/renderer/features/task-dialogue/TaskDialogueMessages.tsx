@@ -30,26 +30,27 @@ export function TaskDialogueMessages({
   return (
     <>
       {messages.map((message) => (
-        <AgentMessageBubble
-          key={message.id}
-          role={message.role === 'user' ? 'user' : 'assistant'}
-          text={message.thinking && !message.text ? undefined : message.text}
-          streaming={message.streaming}
-          thinking={Boolean(message.thinking && !message.text)}
-          error={message.role === 'error'}
-          message={message.role === 'assistant' ? message : undefined}
-          modeId={modeId}
-          showFollowUps={
-            followUps
-            && message.role === 'assistant'
-            && message.id === lastAssistantId
-            && !generating
-            && Boolean(message.text)
-            && message.text !== INCOMPLETE_ASSISTANT_REPLY
-            && !message.streaming
-          }
-          onFollowUp={onPrompt}
-        />
+        <div className="agent-virtuoso-row" data-message-id={message.id} key={message.id}>
+          <AgentMessageBubble
+            role={message.role === 'user' ? 'user' : 'assistant'}
+            text={message.thinking && !message.text ? undefined : message.text}
+            streaming={message.streaming}
+            thinking={Boolean(message.thinking && !message.text)}
+            error={message.role === 'error'}
+            message={message.role === 'assistant' ? message : undefined}
+            modeId={modeId}
+            showFollowUps={
+              followUps
+              && message.role === 'assistant'
+              && message.id === lastAssistantId
+              && !generating
+              && Boolean(message.text)
+              && message.text !== INCOMPLETE_ASSISTANT_REPLY
+              && !message.streaming
+            }
+            onFollowUp={onPrompt}
+          />
+        </div>
       ))}
     </>
   )

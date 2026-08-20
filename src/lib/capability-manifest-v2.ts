@@ -2,7 +2,8 @@
 
 const { validateExperienceExtension } = require('./skill-experience')
 
-const SCHEMA_VERSION = 2
+const SCHEMA_VERSION = 3
+const READABLE_SCHEMA_VERSIONS = new Set([2, 3])
 const SIDECAR_FILE = 'capability.manifest.json'
 const VALID_KINDS = new Set(['skill', 'expert', 'connector', 'pack'])
 const VALID_RISK_LEVELS = new Set(['low', 'medium', 'high', 'critical'])
@@ -94,6 +95,39 @@ function normalizeIo(values) {
   }).filter(item => item?.name)
 }
 
+function normalizeActions(values, manifestId, issues) {
+  const seen = new Set()
+  return (Array.isArray(values) ? values : []).slice(0, 64).map((raw, index) => {
+    const value = raw && typeof raw === 'object' ? raw : {}
+    const id = String(value.id || value.name || '').trim()
+    if (!ID_RE.test(id) || seen.has(id)) {
+      issues.push(issue('invalid_action', `Action id 无效或重复: ${id || '(empty)'}`, `actions[${index}].id`))
+      return null
+    }
+    seen.add(id)
+    const sideEffect = String(value.sideEffect || value.side_effect || 'none').trim()
+    if (!['none', 'read', 'reversible_write', 'irreversible_write'].includes(sideEffect)) {
+      issues.push(issue('invalid_action_side_effect', `Action 副作用等级无效: ${sideEffect}`, `actions[${index}].sideEffect`))
+    }
+    const risk = deriveRisk(value, 'action')
+    return {
+      id,
+      name: String(value.name || id).trim(),
+      description: String(value.description || '').trim(),
+      inputSchema: clonePlain(value.inputSchema || value.inputs, {}),
+      outputSchema: clonePlain(value.outputSchema || value.outputs, {}),
+      executor: clonePlain(value.executor || value.executorRef, {}),
+      permissions: clonePlain(value.permissions, {}),
+      risk,
+      sideEffect,
+      timeoutMs: Math.max(1000, Math.min(3600000, Number(value.timeoutMs) || 60000)),
+      retry: clonePlain(value.retry, { maxAttempts: sideEffect === 'none' || sideEffect === 'read' ? 2 : 1 }),
+      idempotency: clonePlain(value.idempotency, { supported: sideEffect !== 'irreversible_write' }),
+      ref: `${manifestId}#${id}`,
+    }
+  }).filter(Boolean)
+}
+
 function deriveRisk(raw = {}, kind = '') {
   const explicit = typeof raw.risk === 'string' ? { level: raw.risk } : raw.risk
   let level = String(explicit?.level || '').trim().toLowerCase()
@@ -141,7 +175,7 @@ function validateAndNormalizeManifest(raw = {}, options = {}) {
   const description = String(raw.description || options.description || '').trim()
   const version = String(raw.version || options.version || '1.0.0').trim()
 
-  if (schemaVersion !== SCHEMA_VERSION) issues.push(issue('unsupported_schema', `不支持的 schemaVersion: ${schemaVersion}`, 'schemaVersion'))
+  if (!READABLE_SCHEMA_VERSIONS.has(schemaVersion)) issues.push(issue('unsupported_schema', `不支持的 schemaVersion: ${schemaVersion}`, 'schemaVersion'))
   if (!ID_RE.test(id)) issues.push(issue('invalid_id', '能力 id 无效', 'id'))
   if (!VALID_KINDS.has(kind)) issues.push(issue('invalid_kind', `能力 kind 无效: ${kind}`, 'kind'))
   if (!name) issues.push(issue('missing_name', '缺少 name', 'name'))
@@ -156,6 +190,7 @@ function validateAndNormalizeManifest(raw = {}, options = {}) {
   const risk = deriveRisk(raw, kind)
   if (!VALID_RISK_LEVELS.has(risk.level)) issues.push(issue('invalid_risk', `风险等级无效: ${risk.level}`, 'risk.level'))
   const provenance = normalizeProvenance(raw.provenance, options.provenance)
+  const actions = normalizeActions(raw.actions, id, issues)
 
   const manifest = {
     schemaVersion: SCHEMA_VERSION,
@@ -168,6 +203,7 @@ function validateAndNormalizeManifest(raw = {}, options = {}) {
     permissions: clonePlain(raw.permissions, {}),
     inputs: normalizeIo(raw.inputs),
     outputs: normalizeIo(raw.outputs),
+    actions,
     risk,
     provenance,
   }
@@ -338,6 +374,7 @@ module.exports = {
   VALID_KINDS,
   VALID_RISK_LEVELS,
   RISK_ORDER,
+  READABLE_SCHEMA_VERSIONS,
   normalizeDependency,
   normalizeDependencies,
   normalizeProvenance,

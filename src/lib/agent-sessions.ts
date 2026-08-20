@@ -6,6 +6,7 @@ const agentRun = require('./agent-run')
 const { normalizeAssistantOutput } = require('./assistant-output-style')
 
 const AGENTS = [
+{ id: 'personal', name: '智能伙伴', icon: 'chat', description: '持续积累、按情境协作的个人工作代理' },
   { id: 'general', name: '通用', icon: 'chat', description: '处理日常问题与笔记整理' },
   { id: 'steward', name: '知识管家', icon: 'book', description: '整理 Wiki、健康检查与升格 OKF' },
   { id: 'writing', name: '写作', icon: 'edit', description: '润色、改写与内容结构化' },
@@ -56,12 +57,15 @@ function newId(prefix = 's') {
   return `${prefix}_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`
 }
 
-function createSession(agentId = 'general', index = 1, runOpts = {}) {
+function createSession(agentId = 'personal', index = 1, runOpts = {}) {
   const agent = AGENTS.find(a => a.id === agentId) || AGENTS[0]
   const role = runOpts.role || (agentRun.RUN_ROLES.includes(agent.id) ? agent.id : 'general')
   return {
     id: newId('session'),
     agentId: agent.id,
+    sessionKind: String(runOpts.sessionKind || (runOpts.taskRef ? 'legacy' : 'personal-topic')).trim(),
+    profileId: String(runOpts.profileId || (!runOpts.taskRef ? 'my-knowme' : '')).trim(),
+    contextId: String(runOpts.contextId || '').trim(),
     expertId: String(runOpts.expertId || '').trim(),
     capabilitySnapshotId: String(runOpts.capabilitySnapshotId || '').trim(),
     snapshotPath: String(runOpts.snapshotPath || '').trim(),
@@ -165,7 +169,7 @@ function normalizeMessage(raw) {
 }
 
 function normalizeSession(raw, fallbackIndex = 1) {
-  const base = createSession(raw?.agentId || 'general', fallbackIndex)
+  const base = createSession(raw?.agentId || 'general', fallbackIndex, { taskRef: raw?.taskRef })
   const messages = Array.isArray(raw?.messages)
     ? raw.messages
       .map(normalizeMessage)
@@ -180,6 +184,9 @@ function normalizeSession(raw, fallbackIndex = 1) {
     ...raw,
     id: String(raw?.id || base.id),
     agentId: AGENTS.some(a => a.id === raw?.agentId) ? raw.agentId : 'general',
+    sessionKind: String(raw?.sessionKind || (raw?.taskRef ? 'legacy' : 'legacy')).trim().slice(0, 40),
+    profileId: String(raw?.profileId || '').trim().slice(0, 80),
+    contextId: String(raw?.contextId || '').trim().slice(0, 80),
     expertId: String(raw?.expertId || '').trim(),
     capabilitySnapshotId: String(raw?.capabilitySnapshotId || raw?.snapshotId || '').trim(),
     snapshotPath: String(raw?.snapshotPath || '').trim(),

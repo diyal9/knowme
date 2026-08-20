@@ -45,13 +45,15 @@ function registerWorkbenchModeIpc(ipcMain, deps) {
 
   ipcMain.handle('workbench-mode-unbind-expert', async (_e, payload = {}) => {
     await refreshWorkbenchModeProjections()
-    const result = getWorkbenchModeStore().unbindExpert(String(payload.expertId || ''), {
-      modeId: String(payload.modeId || '').trim() || undefined,
-    })
+    const result = payload.everywhere === true
+      ? getWorkbenchModeStore().unbindExpertEverywhere(String(payload.expertId || ''))
+      : getWorkbenchModeStore().unbindExpert(String(payload.expertId || ''), {
+          modeId: String(payload.modeId || '').trim() || undefined,
+        })
     if (!result.ok) return result
     return {
       ...result,
-      modeName: modeNameFromDto(result, result.modeId),
+      modeName: payload.everywhere === true ? '工作台常用专家' : modeNameFromDto(result, result.modeId),
     }
   })
 }

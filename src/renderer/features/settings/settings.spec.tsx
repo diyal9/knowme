@@ -58,8 +58,7 @@ describe('settings-surface', () => {
     await waitFor(() => expect(screen.getByText(/连通（42ms）/)).toBeInTheDocument())
   })
 
-  it('restores memory tab identity and pattern review', async () => {
-    const review = vi.fn(async () => ({ ok: true }))
+  it('keeps memory data controls separate from personal-agent attributes', async () => {
     mockApi({
       getSettings: () => ({ userProfile: '独立开发者', userPrompt: '先给结论', industry: 'software' }),
       initSettings: (cb) => cb({ userProfile: '独立开发者', userPrompt: '先给结论', industry: 'software' }),
@@ -70,17 +69,54 @@ describe('settings-surface', () => {
         recent: [{ kind: 'copy', summary: '复制了一段提示词', ts: new Date().toISOString() }],
         stats: { recentCount: 1, pendingCount: 1, acceptedCount: 0 },
       }),
-      memoryReviewPattern: review,
     })
     render(<SettingsSurface />)
     fireEvent.click(screen.getByRole('tab', { name: '我的记忆' }))
-    expect(screen.getByLabelText('关于我')).toHaveValue('独立开发者')
-    expect(screen.getByLabelText('协作偏好')).toHaveValue('先给结论')
-    await waitFor(() => expect(screen.getByTestId('memory-pattern')).toHaveTextContent('喜欢列表回答'))
-    fireEvent.click(screen.getByRole('button', { name: '接受' }))
-    await waitFor(() => expect(review).toHaveBeenCalledWith({ id: 'p1', action: 'accepted' }))
-    fireEvent.click(screen.getByRole('tab', { name: '助手模式' }))
     expect(screen.queryByLabelText('关于我')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('协作偏好')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '我的记忆' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('等待你确认')).toBeInTheDocument())
+    expect(screen.getByText('喜欢列表回答')).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: '智能伙伴' })).not.toBeInTheDocument()
+  })
+
+  it('owns user identity and linked industry occupation in personal profile settings', async () => {
+    const saveSettings = vi.fn(async () => ({ ok: true }))
+    mockApi({
+      getSettings: () => ({
+        industry: 'software',
+        occupationId: 'client-engineer',
+        userProfile: '我负责客户端研发',
+        userProfileConfigMode: 'custom',
+      }),
+      initSettings: (cb) => cb({
+        industry: 'software',
+        occupationId: 'client-engineer',
+        userProfile: '我负责客户端研发',
+        userProfileConfigMode: 'custom',
+      }),
+      sourcesList: async () => ({ sources: [] }),
+      saveSettings,
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: '个人档案' }))
+    expect(screen.queryByLabelText('用户称呼')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('工作领域')).toHaveValue('software')
+    expect(screen.getByLabelText('岗位')).toHaveValue('client-engineer')
+    expect(screen.getByLabelText('关于我')).toHaveValue('我负责客户端研发')
+    expect(screen.getByText('已补充实际情况')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('工作领域'), { target: { value: 'game' } })
+    expect(screen.getByLabelText('岗位')).toHaveValue('game-designer')
+    expect((screen.getByLabelText('关于我') as HTMLTextAreaElement).value).toContain('游戏')
+    expect(screen.getByText('岗位默认内容')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '保存设置' }))
+    await waitFor(() => expect(saveSettings).toHaveBeenCalledWith(expect.objectContaining({
+      industry: 'game',
+      occupationId: 'game-designer',
+      userProfileConfigMode: 'default',
+      userProfileConfigSource: 'builtin',
+    })))
   })
 
   it('polls Feishu authorization and shows missing scopes', async () => {
@@ -119,7 +155,7 @@ describe('settings-surface', () => {
       openExternal: async () => ({ ok: true }),
     })
     render(<SettingsSurface />)
-    fireEvent.click(screen.getByRole('tab', { name: '连接器' }))
+    fireEvent.click(screen.getByRole('tab', { name: '服务授权' }))
     await waitFor(() => expect(screen.getByTestId('feishu-primary-action')).toHaveTextContent('一键授权'))
     fireEvent.click(screen.getByTestId('feishu-primary-action'))
     await waitFor(() => expect(screen.getByTestId('feishu-scopes')).toHaveTextContent('日程'))
@@ -128,7 +164,7 @@ describe('settings-surface', () => {
     expect(screen.getByTestId('feishu-primary-action')).toBeDisabled()
   })
 
-  it('restores assistant, system, mcp and about controls', async () => {
+  it('restores system, mcp and about controls', async () => {
     mockApi({
       getSettings: () => ({ model: 'gpt-4o-mini' }),
       initSettings: (cb) => cb({ model: 'gpt-4o-mini' }),
@@ -141,13 +177,11 @@ describe('settings-surface', () => {
     })
     render(<SettingsSurface />)
     await waitFor(() => expect(screen.getByTestId('git-avail-hint')).toHaveTextContent('已检测到本机 git'))
-    fireEvent.click(screen.getByRole('tab', { name: '助手模式' }))
-    expect(screen.getByRole('button', { name: '打开专家库' })).toBeInTheDocument()
-    expect(screen.getByText('4 Modes')).toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: '智能伙伴' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('tab', { name: '系统配置' }))
     expect(screen.getByText('开机自动启动')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '导出' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('tab', { name: '连接器' }))
+    fireEvent.click(screen.getByRole('tab', { name: '服务授权' }))
     expect(screen.getByLabelText('启动命令')).toBeInTheDocument()
     expect(screen.getByLabelText('服务地址')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('tab', { name: '关于' }))

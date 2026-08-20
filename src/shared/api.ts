@@ -21,15 +21,30 @@ export type {
  * Renderer MUST call only these methods — never ipcRenderer.
  */
 export interface KnowMeApi extends KnowMeExtendedApi {
+  personalAgentGet?: () => Promise<PersonalAgentResult>
+  personalAgentSave?: (payload: Record<string, unknown>) => Promise<PersonalAgentResult>
+  personalAgentTeach?: (payload: Record<string, unknown>) => Promise<PersonalAgentTeachResult>
+  personalAgentApplyProposal?: (payload: Record<string, unknown>) => Promise<PersonalAgentResult>
+  personalAgentGrowthList?: (payload?: { limit?: number }) => Promise<PersonalAgentGrowthResult>
+  personalAgentRouteWork?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  personalAgentResultActions?: () => Promise<{ ok?: boolean; actions?: Array<{ id: string; label: string; confirmation: boolean }> }>
   workbenchLoad: () => Promise<WorkbenchLoadResult>
   workbenchModeList: () => Promise<WorkbenchModeListResult>
   workbenchModeSelect: (modeId: string) => Promise<WorkbenchModeListResult>
   workbenchAutomationList: () => Promise<WorkbenchAutomationListResult>
   workbenchWorkflowPackageSave: (payload: { package: Record<string, unknown> }) => Promise<WorkflowPackageSaveResult>
   workbenchTaskList: () => Promise<{ items?: WorkbenchTask[] }>
-  workbenchTaskCreate: (input: Record<string, unknown>) => Promise<unknown>
+  workbenchTaskCreate: (input: Record<string, unknown>) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
+  workbenchTaskUpdate: (id: string, patch: Record<string, unknown>) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
   workbenchTaskGet: (id: string) => Promise<WorkbenchTask | null>
   workbenchTaskArchive: (id: string) => Promise<{ ok?: boolean; error?: string }>
+  expertTaskCreateStart?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; task?: WorkbenchTask; started?: boolean; error?: string }>
+  expertTaskProvideInput?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
+  expertTaskReviewDeliverable?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
+  expertTaskCancel?: (id: string) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
+  expertTaskRetry?: (id: string) => Promise<{ ok?: boolean; task?: WorkbenchTask; started?: boolean; error?: string }>
+  expertTaskGet?: (id: string) => Promise<{ ok?: boolean; task?: WorkbenchTask; error?: string }>
+  expertTaskList?: () => Promise<{ ok?: boolean; tasks?: WorkbenchTask[]; error?: string }>
   workbenchWorkflowPackageList: (filter?: Record<string, unknown>) => Promise<{
     items?: WorkflowItem[]
     packages?: Record<string, unknown>[]
@@ -37,6 +52,22 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   workbenchWorkflowPackageGet: (id: string) => Promise<{ ok?: boolean; package?: Record<string, unknown>; error?: string }>
   workbenchWorkflowPackageFork: (id: string, options?: Record<string, unknown>) => Promise<{ ok?: boolean; package?: Record<string, unknown>; error?: string }>
   workbenchWorkflowPackageArchive: (id: string) => Promise<{ ok?: boolean; error?: string }>
+  workflowActionCatalog?: () => Promise<{ ok?: boolean; actions?: Record<string, unknown>[]; error?: string }>
+  workflowValidate?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowPublish?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunStart?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunGet?: (id: string) => Promise<Record<string, unknown>>
+  workflowRunPause?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunResume?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunSubmitHuman?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunSubmitGate?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunIntervene?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunRerun?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunSubstitute?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workflowRunComment?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workbenchAgentGraphStart?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workbenchAgentRunTree?: (rootRunId: string) => Promise<Record<string, unknown>>
+  workbenchAgentRunDecision?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
   workbenchDaemonTask: (slug: string) => Promise<unknown>
   workbenchDaemonOverview: () => Promise<unknown>
   workbenchDaemonProgress: (slug: string) => Promise<unknown>
@@ -120,6 +151,10 @@ export interface WorkflowItem {
   inputs?: { label?: string }[]
   outputs?: { label?: string }[]
   provenance?: { domain?: string; kind?: string }
+  graph?: Record<string, unknown>
+  status?: string
+  locked?: boolean
+  executionBackends?: string[]
 }
 
 export interface WorkbenchLoadResult {
@@ -136,7 +171,9 @@ export interface WorkbenchExecRef {
 }
 
 export interface WorkbenchTask {
+  taskVersion?: number
   id: string
+  kind?: 'expert' | 'workflow' | 'legacy' | string
   title?: string
   status?: string
   schedule?: unknown
@@ -149,6 +186,50 @@ export interface WorkbenchTask {
   execRef?: WorkbenchExecRef
   updatedAt?: string
   pinned?: boolean
+  visibility?: 'private' | 'organization'
+  brief?: {
+    goal?: string
+    requiresMaterials?: boolean
+    materials?: { id?: string; type?: string; title?: string; ref?: string; content?: string }[]
+    deliverables?: {
+      id?: string
+      title?: string
+      type?: string
+      required?: boolean
+      acceptanceCriteria?: string[]
+      requiredTools?: string[]
+      requiredEvidence?: Record<string, unknown>[]
+      completionConditions?: Record<string, unknown>[]
+    }[]
+    constraints?: string[]
+    dueAt?: string
+  }
+  assignmentSnapshot?: Record<string, unknown>
+  participants?: { id?: string; role?: string; name?: string }[]
+  events?: { id?: string; type?: string; summary?: string; createdAt?: string }[]
+  deliverables?: {
+    deliverableId?: string
+    title?: string
+    type?: string
+    version?: number
+    required?: boolean
+    previousVersionId?: string
+    artifactRef?: string
+    executionRef?: string
+    evidenceStatus?: 'verified' | 'blocked' | 'not_required' | string
+    acceptanceStatus?: string
+    comments?: { id?: string; body?: string; authorId?: string; createdAt?: string }[]
+  }[]
+  executionEvidence?: {
+    runId?: string
+    deliverableId?: string
+    gateStatus?: 'verified' | 'blocked' | 'not_required' | string
+    verificationPassed?: boolean
+    toolCalls?: { id?: string; name?: string; status?: string; resultRef?: string; error?: string; durationMs?: number | null }[]
+    evidence?: { id?: string; status?: string; digest?: string; provenance?: Record<string, unknown> }[]
+    violations?: { code?: string; message?: string; missingTools?: string[] }[]
+    createdAt?: string
+  }[]
 }
 
 export interface WorkbenchModeBinding {
@@ -281,6 +362,9 @@ export interface AgentSession {
   displayTitle?: string
   pinned?: boolean
   agentId?: string
+  sessionKind?: 'personal-topic' | 'expert-task' | 'workflow-run' | 'legacy' | string
+  profileId?: string
+  contextId?: string
   expertId?: string
   knowledgeRefs?: string[]
   taskRef?: { id?: string; kind?: string } | null
@@ -290,6 +374,92 @@ export interface AgentSession {
   } | null
   /** 最近更新；历史列表按此排序，缺省时不展示相对时间 */
   updatedAt?: string
+  /** 主进程列表投影中的消息数，用于隐藏未交互的空白会话 */
+  messageCount?: number
+  /** 历史列表中的一行会话摘要 */
+  summary?: string
+}
+
+export interface PersonalAgentContext {
+  id: string
+  name?: string
+  workspaceRef?: string
+  role?: string
+  skillRefs?: { id: string; version?: string; contentHash?: string }[]
+  knowledgeRefs?: { id: string; version?: string; contentHash?: string }[]
+  connectorRefs?: { id: string; version?: string; contentHash?: string }[]
+  permissions?: Record<string, unknown>
+}
+
+export interface PersonalAgentProfile {
+  profileVersion: number
+  id: string
+  agentId: string
+  profileKind: 'personal' | 'overlay'
+  name?: string
+  identity: { displayName?: string; avatar?: string }
+    contexts: PersonalAgentContext[]
+    taskPreferences: Record<string, unknown>
+    roleOverlay?: string
+    promptOverlay?: string
+  skillRefs?: { id: string; version?: string; contentHash?: string }[]
+  knowledgeRefs?: { id: string; version?: string; contentHash?: string }[]
+  connectorRefs?: { id: string; version?: string; contentHash?: string }[]
+  permissions?: Record<string, unknown>
+  memoryPolicy?: Record<string, unknown>
+  knowledgePolicy?: Record<string, unknown>
+}
+
+export interface PersonalAgentGrowthEvent {
+  id: string
+  type: string
+  status?: string
+  summary?: string
+  proposalId?: string
+  memoryRef?: string
+  reversible?: boolean
+  createdAt?: string
+}
+
+export interface PersonalAgentProposal {
+  id: string
+  kind: string
+  summary?: string
+  status?: string
+  patch?: Record<string, unknown>
+  createdAt?: string
+}
+
+export interface PersonalAgentResult {
+  ok?: boolean
+  error?: string
+  code?: string
+  profile?: PersonalAgentProfile
+  proposal?: PersonalAgentProposal
+  recentGrowth?: PersonalAgentGrowthEvent[]
+  pendingProposalCount?: number
+  commonExperts?: Array<{
+    id: string
+    name: string
+    description?: string
+    category?: string
+    status?: string
+  }>
+}
+
+export interface PersonalAgentTeachResult extends PersonalAgentResult {
+  applied?: boolean
+  requiresConfirmation?: boolean
+  undoEventId?: string
+  memoryRef?: string
+  event?: PersonalAgentGrowthEvent
+}
+
+export interface PersonalAgentGrowthResult {
+  ok?: boolean
+  error?: string
+  events?: PersonalAgentGrowthEvent[]
+  proposals?: PersonalAgentProposal[]
 }
 
 export interface AgentFileRef {

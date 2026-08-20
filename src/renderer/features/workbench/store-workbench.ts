@@ -12,6 +12,7 @@ import {
   parseRunProjection,
   parseTaskListResponse,
   parsePendingClarifyNode,
+  rosterLabelsFromPackage,
   runPhaseFromTaskStatus,
 } from '../../../domain/run-projection'
 import { workbenchRunReturnSurface } from '../../../domain/workbench-task-room'
@@ -22,6 +23,8 @@ import {
   loadInputAgents,
   parseReviewChangesFromRaw,
   parseReviewEventsFromRaw,
+  workflowGraphPayload,
+  workflowRunProjection,
 } from './store-workbench-helpers'
 
 export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
@@ -72,25 +75,89 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       }
     },
 
-    startRun: (card: ShelfCardModel) => {
+    launchWorkflow: async (
+      card: ShelfCardModel,
+      payload: { goal: string; inputs: Record<string, string> },
+    ) => {
       const lock = shelfLockHint(get().shelfDaemonOnline)
       if (lock || card.blocked) {
         get().showToast(lock || '该工作流已锁定，暂不可启动')
-        return
+        return false
       }
-      set({
-        route: 'workbench',
-        workbenchSurface: 'run',
-        run: {
-          ...emptyRun(card),
-          lane: 'workflow',
-        },
-      })
-      void loadInputAgents(card.id).then((inputAgents) => {
-        const run = get().run
-        if (!run || run.workflowId !== card.id || run.phase !== 'input') return
-        set({ run: { ...run, inputAgents } })
-      })
+      const brief = payload.goal.trim()
+      const inputs = Object.fromEntries(
+        Object.entries(payload.inputs || {})
+          .map(([key, value]) => [String(key).trim(), String(value || '').trim()] as const)
+          .filter(([key, value]) => key && value),
+      )
+      if (!brief) {
+        get().showToast('请填写本次运行目标')
+        return false
+      }
+      inputs.goal = brief
+
+      try {
+        const packageResult = await api()?.workbenchWorkflowPackageGet?.(card.id)
+        const pkg = packageResult?.package
+        if (!pkg) throw new Error(packageResult?.error || '工作流配置不存在')
+        const persisted = await api()?.workflowRunStart?.({
+          workflowId: card.id,
+          input: inputs,
+          enforceProductBoundary: true,
+        })
+        if (persisted?.ok === false) {
+          const issues = Array.isArray(persisted.issues)
+            ? persisted.issues.map((item) => String((item as Record<string, unknown>)?.message || '')).filter(Boolean)
+            : []
+          throw new Error(issues[0] || String(persisted.error || '工作流校验失败'))
+        }
+        const persistedRun = persisted?.run && typeof persisted.run === 'object'
+          ? persisted.run as Record<string, unknown>
+          : {}
+        const started = await api()?.workbenchAgentGraphStart?.({
+          ...workflowGraphPayload(pkg, brief || card.name),
+          inputs,
+        })
+        if (!started || started.ok === false) throw new Error(String(started?.error || '工作流启动失败'))
+
+        const rootRunId = String(started.rootRunId || '')
+        if (!rootRunId) throw new Error('工作流启动后未返回运行标识')
+        const inputAgents = rosterLabelsFromPackage(pkg)
+        set({
+          route: 'workbench',
+          workbenchSurface: 'run',
+          run: {
+            ...emptyRun(card, brief, rootRunId, 'running'),
+            lane: 'workflow',
+            launchInputs: inputs,
+            inputAgents,
+            workflowRunId: String(persistedRun.runId || ''),
+            workflowPackage: pkg,
+            dialogueMessages: [{ id: `wu-brief-${Date.now()}`, role: 'user', text: brief }],
+            log: ['正在启动工作流…', '工作流已按编排开始执行'],
+          },
+        })
+        const createdTaskResult = await api()?.workbenchTaskCreate?.({
+          kind: 'workflow',
+          title: brief || card.name,
+          goal: brief,
+          status: 'running',
+          workflowId: card.id,
+          workflowName: card.name,
+          execRef: { kind: 'run', id: rootRunId },
+        }).catch(() => null)
+        const createdTaskId = String(createdTaskResult?.task?.id || '')
+        const launchedRun = get().run
+        if (launchedRun && launchedRun.lane === 'workflow' && launchedRun.slug === rootRunId) {
+          set({ run: { ...launchedRun, taskId: createdTaskId } })
+        }
+        await get().refreshRunTelemetry()
+        await get().loadTasks()
+        return true
+      } catch (error) {
+        get().showToast(error instanceof Error ? error.message : '工作流启动失败')
+        return false
+      }
     },
 
     reopenTaskRun: async (task: WorkbenchTask, opts?: { lane?: 'workflow' | 'pipeline' }) => {
@@ -112,6 +179,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
             slug,
             phase,
           ),
+          taskId: task.id,
           lane,
           brief: task.goal || '',
         },
@@ -143,13 +211,68 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
         run: {
           ...run,
           phase: 'running',
-          log: [...run.log, '正在启动管线…'],
+          log: [...run.log, run.lane === 'workflow' ? '正在启动工作流…' : '正在启动管线…'],
           dialogueMessages: brief && !alreadySeeded
             ? [...run.dialogueMessages, { id: `wu-brief-${Date.now()}`, role: 'user', text: brief }]
             : run.dialogueMessages,
         },
       })
       try {
+        if (run.lane === 'workflow') {
+          const packageResult = await api()?.workbenchWorkflowPackageGet?.(run.workflowId)
+          const pkg = packageResult?.package
+          if (!pkg) throw new Error(packageResult?.error || '工作流配置不存在')
+          const persisted = await api()?.workflowRunStart?.({
+            workflowId: run.workflowId,
+            input: { ...run.launchInputs, goal: brief },
+            enforceProductBoundary: true,
+          })
+          if (persisted?.ok === false) {
+            const issues = Array.isArray(persisted.issues)
+              ? persisted.issues.map((item) => String((item as Record<string, unknown>)?.message || '')).filter(Boolean)
+              : []
+            throw new Error(issues[0] || String(persisted.error || '工作流校验失败'))
+          }
+          const persistedRun = persisted?.run && typeof persisted.run === 'object'
+            ? persisted.run as Record<string, unknown>
+            : {}
+          const started = await api()?.workbenchAgentGraphStart?.({
+            ...workflowGraphPayload(pkg, brief || run.workflowName),
+            inputs: { ...run.launchInputs, goal: brief },
+          })
+          if (!started || started.ok === false) {
+            throw new Error(String(started?.error || '工作流启动失败'))
+          }
+          const rootRunId = String(started.rootRunId || '')
+          const current = get().run
+          if (!current) return
+          set({
+            run: {
+              ...current,
+              slug: rootRunId,
+              workflowRunId: String(persistedRun.runId || ''),
+              workflowPackage: pkg,
+              log: [...current.log, '工作流已按编排开始执行'],
+            },
+          })
+          const createdTaskResult = await api()?.workbenchTaskCreate?.({
+            kind: 'workflow',
+            title: brief || run.workflowName,
+            goal: brief,
+            status: 'running',
+            workflowId: run.workflowId,
+            workflowName: run.workflowName,
+            execRef: { kind: 'run', id: rootRunId },
+          }).catch(() => null)
+          const createdTaskId = String(createdTaskResult?.task?.id || '')
+          const launchedRun = get().run
+          if (launchedRun && launchedRun.lane === 'workflow' && launchedRun.slug === rootRunId) {
+            set({ run: { ...launchedRun, taskId: createdTaskId } })
+          }
+          await get().refreshRunTelemetry()
+          await get().loadTasks()
+          return
+        }
         const result = await api()?.workbenchLaunchStart?.({
           intent: { resourceType: 'pipeline', resourceId: run.workflowId, brief: run.brief },
           allowRelaunch: false,
@@ -169,8 +292,8 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
           },
         })
         await get().refreshRunTelemetry()
-      } catch {
-        get().showToast('启动失败')
+      } catch (error) {
+        get().showToast(error instanceof Error ? error.message : '启动失败')
         const current = get().run
         if (current) set({ run: { ...current, phase: 'input' } })
       }
@@ -180,6 +303,77 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       const run = get().run
       if (!run || run.phase === 'input') return
       try {
+        if (run.lane === 'workflow') {
+          if (!run.slug) return
+          const [tree, persisted, packageResult] = await Promise.all([
+            api()?.workbenchAgentRunTree?.(run.slug),
+            run.workflowRunId ? api()?.workflowRunGet?.(run.workflowRunId) : Promise.resolve(null),
+            run.workflowPackage ? Promise.resolve(null) : api()?.workbenchWorkflowPackageGet?.(run.workflowId),
+          ])
+          const latest = get().run
+          if (!latest || latest.lane !== 'workflow') return
+          if (!tree || typeof tree !== 'object' || (tree as Record<string, unknown>).ok === false) return
+          const packageRecord = packageResult && typeof packageResult === 'object'
+            ? packageResult as Record<string, unknown>
+            : {}
+          const recoveredPackage = latest.workflowPackage
+            || (packageRecord.package && typeof packageRecord.package === 'object'
+              ? packageRecord.package as Record<string, unknown>
+              : null)
+          const projection = workflowRunProjection(recoveredPackage, tree)
+          const workflowRecord = persisted && typeof persisted === 'object'
+            ? persisted as Record<string, unknown>
+            : {}
+          const persistedRun = workflowRecord.run && typeof workflowRecord.run === 'object'
+            ? workflowRecord.run as Record<string, unknown>
+            : {}
+          const normalizedStatus = String(projection.status || '').toLowerCase()
+          const taskStatus = projection.phase === 'hitl'
+            ? 'review'
+            : projection.phase === 'done'
+              ? (['failed', 'error'].includes(normalizedStatus)
+                  ? 'failed'
+                  : ['cancelled', 'canceled'].includes(normalizedStatus) ? 'cancelled' : 'completed')
+              : 'running'
+          const resultSummary = projection.artifacts
+            .map((item) => item && typeof item === 'object' ? item as Record<string, unknown> : {})
+            .map((item) => String(item.title || item.name || item.path || '').trim())
+            .find(Boolean)
+            || [...projection.graphNodes].reverse().map((node) => node.outputLabel.trim()).find(Boolean)
+            || (projection.phase === 'done' ? '工作流已完成' : '')
+          set({
+            run: {
+              ...latest,
+              phase: projection.phase,
+              graphNodes: projection.graphNodes,
+              currentOwner: projection.currentOwner,
+              gateNode: projection.pendingGate,
+              gateTitle: projection.pendingGate ? '节点产出需要你确认' : null,
+              log: projection.log.length ? projection.log : latest.log,
+              processLogsText: projection.log.join('\n') || latest.processLogsText,
+              progressText: projection.phase === 'hitl'
+                ? '等待我处理'
+                : projection.phase === 'done' ? '运行结束' : '工作流执行中',
+              daemonStatus: String(persistedRun.status || projection.status || ''),
+              workflowPackage: recoveredPackage,
+              artifacts: projection.artifacts.map((item, index) => {
+                const artifact = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+                return {
+                  id: String(artifact.id || index),
+                  name: String(artifact.title || artifact.name || artifact.path || `产物 ${index + 1}`),
+                }
+              }),
+            },
+          })
+          if (latest.taskId && projection.phase !== latest.phase) {
+            await api()?.workbenchTaskUpdate?.(latest.taskId, {
+              status: taskStatus,
+              resultSummary,
+            }).catch(() => null)
+            await get().loadTasks()
+          }
+          return
+        }
         const [logsRaw, artsRaw, taskRaw, progressRaw, eventsRaw, changesRaw] = await Promise.all([
           api()?.workbenchDaemonLogs?.(run.slug),
           api()?.workbenchDaemonArtifacts?.(run.slug),
@@ -231,6 +425,23 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
     hitlDecide: (accept: boolean) => {
       const run = get().run
       if (!run) return
+      if (run.lane === 'workflow') {
+        if (!run.gateNode) return
+        set({ run: { ...run, phase: 'running', log: [...run.log, accept ? '已批准节点交付，继续执行' : '已退回节点交付'] } })
+        void api()?.workbenchAgentRunDecision?.({
+          rootRunId: run.slug,
+          nodeId: run.gateNode,
+          decision: accept ? 'approve' : 'reject',
+        }).then(() => get().refreshRunTelemetry()).catch(() => get().showToast('提交处理决定失败'))
+        if (run.workflowRunId) {
+          void api()?.workflowRunSubmitGate?.({
+            runId: run.workflowRunId,
+            nodeId: run.gateNode,
+            approved: accept,
+          }).catch(() => null)
+        }
+        return
+      }
       set({
         run: {
           ...run,
@@ -259,6 +470,15 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
     rerun: () => {
       const run = get().run
       if (!run) return
+      if (run.lane === 'workflow') {
+        const card = get().shelfCards.find((item) => item.id === run.workflowId)
+        if (!card) {
+          get().showToast('未找到原工作流，请返回工作流列表后重试')
+          return
+        }
+        void get().launchWorkflow(card, { goal: run.brief, inputs: run.launchInputs })
+        return
+      }
       set({
         run: {
           ...emptyRun({ id: run.workflowId, name: run.workflowName }, run.brief),
@@ -306,7 +526,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       }
       set({ taskManageOpen: false })
       await get().loadTasks()
-      get().showToast('已删除所选协作')
+      get().showToast('已从任务列表清理，相关文件未删除')
     },
 
     openAutomationCenter: () => {
@@ -315,14 +535,8 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
     },
 
     openWorkbenchRail: () => {
-      const { route, managePanel } = get()
-      /* 自动化复用 manage 面；从助理回来时不得把自动化页当成专家协作 */
-      if (route === 'automation' || managePanel === 'automation') {
-        set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
-        return
-      }
-      if (route === 'workbench') return
-      set({ route: 'workbench' })
+      /* 自动化复用 manage 面；进入工作台必须清掉旧面板状态，回到专家协作首页。 */
+      set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
     },
 
     openExpertRoom: (room: { id: string; name: string; goal?: string }) => {

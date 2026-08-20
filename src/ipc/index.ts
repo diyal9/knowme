@@ -29,6 +29,9 @@ const { registerWorkbenchDispatchIpc } = require('./workbench-dispatch')
 const { registerGameIpc } = require('./game')
 const { registerCapabilityPackIpc } = require('./capability-pack')
 const { registerAgentProfileIpc } = require('./agent-profile')
+const { registerPersonalAgentIpc } = require('./personal-agent')
+const { registerExpertTaskIpc } = require('./expert-task')
+const { registerWorkflowV2Ipc } = require('./workflow-v2')
 const { registerAgentSessionIpc } = require('./agent-session')
 const { registerAgentSessionUiIpc } = require('./agent-session-ui')
 const { registerAppShellIpc } = require('./app-shell')
@@ -79,6 +82,9 @@ function registerCoreIpc(ipcMain, groups) {
   registerGameIpc(ipcMain, pick(groups, 'knowledge', 'workbench', 'agent'))
   registerCapabilityPackIpc(ipcMain, pick(groups, 'agent'))
   registerAgentProfileIpc(ipcMain, pick(groups, 'knowledge', 'agent'))
+  registerPersonalAgentIpc(ipcMain, pick(groups, 'paths', 'knowledge', 'workbench', 'agent'))
+  registerExpertTaskIpc(ipcMain, pick(groups, 'paths', 'knowledge', 'workbench', 'agent'))
+  registerWorkflowV2Ipc(ipcMain, pick(groups, 'paths', 'workbench', 'agent'))
   registerAgentSessionIpc(ipcMain, pick(groups, ...ALL_DOMAINS))
   registerAgentSessionUiIpc(ipcMain, pick(groups, 'agent'))
   registerAppShellIpc(ipcMain, pick(groups, 'electron', 'paths', 'shell'))
@@ -121,6 +127,9 @@ module.exports = {
   registerGameIpc,
   registerCapabilityPackIpc,
   registerAgentProfileIpc,
+  registerPersonalAgentIpc,
+  registerExpertTaskIpc,
+  registerWorkflowV2Ipc,
   registerAgentSessionIpc,
   registerAgentSessionUiIpc,
   registerAppShellIpc,

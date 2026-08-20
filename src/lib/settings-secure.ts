@@ -6,6 +6,7 @@ const { resolveUserPrompt } = require('./ai-assistant-context');
 const { normalizeRemoteConfig } = require('./remote-config-merge');
 const { normalizeWorkbenchAuth, DEFAULT_WORKBENCH_AUTH } = require('./workbench-auth');
 const { normalizeIndustry, DEFAULT_INDUSTRY } = require('./industry-profile');
+const roleCatalog = require('../shared/personal-role-catalog');
 
 const DEFAULT_SETTINGS = {
   apiEndpoint: 'https://api.openai.com/v1/chat/completions',
@@ -167,6 +168,13 @@ function load(file) {
     workbenchToken,
     userPrompt,
     industry: normalizeIndustry(raw.industry != null ? raw.industry : DEFAULT_SETTINGS.industry),
+    occupationId: raw.occupationId != null
+      ? roleCatalog.normalizeOccupation(
+        normalizeIndustry(raw.industry != null ? raw.industry : DEFAULT_SETTINGS.industry),
+        raw.occupationId
+      )
+      : '',
+    userProfileConfigMode: raw.userProfileConfigMode === 'custom' ? 'custom' : 'default',
     assistantModeConfig: normalizeAssistantModeConfig(raw.assistantModeConfig),
     llmProvider: String(raw.llmProvider || DEFAULT_SETTINGS.llmProvider),
     llmProfile: raw.llmProfile && typeof raw.llmProfile === 'object' ? raw.llmProfile : null,
@@ -185,6 +193,7 @@ function load(file) {
   delete merged.gitlabTokenEnc;
   delete merged.workbenchTokenEnc;
   delete merged.systemPrompt;
+  delete merged.userDisplayName;
   return merged;
 }
 
@@ -236,6 +245,19 @@ function save(file, settings) {
     out.industry = normalizeIndustry(
       settings.industry != null ? settings.industry : out.industry
     );
+  }
+  if (settings.occupationId != null || out.occupationId != null) {
+    const industry = normalizeIndustry(settings.industry != null ? settings.industry : out.industry);
+    const occupationId = roleCatalog.normalizeOccupation(
+      industry,
+      settings.occupationId != null ? settings.occupationId : out.occupationId
+    );
+    const defaults = roleCatalog.getOccupationDefaults(industry, occupationId);
+    out.occupationId = occupationId;
+    out.userProfileConfigId = defaults.id;
+    out.userProfileConfigVersion = defaults.version;
+    out.userProfileConfigSource = defaults.source;
+    out.userProfileConfigMode = settings.userProfileConfigMode === 'custom' ? 'custom' : 'default';
   }
   out.assistantModeConfig = normalizeAssistantModeConfig(settings.assistantModeConfig);
   if (settings.temperature != null) out.temperature = clampTemperature(settings.temperature);
@@ -297,6 +319,7 @@ function save(file, settings) {
   }
   delete out.workbenchToken;
   delete out.systemPrompt;
+  delete out.userDisplayName;
 
   fs.writeFileSync(file, JSON.stringify(out, null, 2), 'utf8');
   return { ok: !warning, warning };

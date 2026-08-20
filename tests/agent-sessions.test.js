@@ -29,7 +29,7 @@ describe('agent sessions', () => {
 
   it('exposes short agent labels without redundant Agent suffix', () => {
     const { AGENTS } = require('../src/lib/agent-sessions')
-    assert.deepEqual(AGENTS.map(a => a.name), ['通用', '知识管家', '写作', '编程'])
+assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管家', '写作', '编程'])
   })
 
   it('uses mode name as empty session tab label', () => {

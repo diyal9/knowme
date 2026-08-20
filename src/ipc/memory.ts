@@ -15,6 +15,8 @@ function registerMemoryIpc(ipcMain, deps) {
   ipcMain.handle('memory-status', () => productMemory.status(MEMORY_DIR))
   ipcMain.handle('memory-overview', () => productMemory.overview(MEMORY_DIR))
   ipcMain.handle('memory-consolidate', () => productMemory.consolidateWorkMemory(MEMORY_DIR))
+  ipcMain.handle('memory-global-upsert', (_e, payload = {}) => productMemory.upsertGlobalMemory(MEMORY_DIR, payload))
+  ipcMain.handle('memory-global-remove', (_e, id) => productMemory.removeGlobalMemory(MEMORY_DIR, id))
   ipcMain.handle('memory-insights', (_e, payload = {}) => {
     const s = loadSettings()
     const userProfile = {
@@ -57,8 +59,8 @@ function registerMemoryIpc(ipcMain, deps) {
       productMemory.isPatternEligible({ kind: 'preference', summary })
     ) {
       productMemory.capture(MEMORY_DIR, {
-        kind: 'preference',
-        summary: summary.slice(0, 300),
+        kind: 'telemetry',
+        summary: `确认长期协作记忆：${summary.slice(0, 260)}`,
         meta: { source: 'memory-review', patternId: String(payload.id || '') },
       })
     }

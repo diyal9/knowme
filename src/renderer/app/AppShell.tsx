@@ -1,19 +1,21 @@
 /**
  * Workspace chrome: assistant is eager; other surfaces are lazy in production.
- * Head chrome CSS is static; feature modules own their surface stylesheets.
+ * Workbench CSS is registered statically in a deterministic cascade before
+ * any lazy workbench surface is rendered.
  */
 import { Suspense, useEffect, useRef } from 'react'
 import { studioReturnLabel } from '../../domain/rail'
 import { resolveWorkbenchTaskKind } from '../../domain/workbench-task-room'
 import { bindAttentionEvents } from './store-attention'
 import { BrandMark } from './BrandMark'
+import { BackButton } from './BackButton'
 import { Icon } from './Icon'
+import '../features/workbench/workbench-styles'
 import '../features/workbench/workbench-chrome.css'
 import { SurfacePending } from './lazySurface'
 import { SideRail } from './SideRail'
 import {
   CapabilityHubSurface,
-  ExpertRoomSurface,
   FilesPane,
   KnowledgeSurface,
   LinkPreviewSurface,
@@ -71,8 +73,6 @@ export function AppShell() {
   const managePanel = useAppStore((s) => s.managePanel)
   const settingsTab = useAppStore((s) => s.settingsTab)
   const openSettingsSurface = useAppStore((s) => s.openSettingsSurface)
-  const setRoute = useAppStore((s) => s.setRoute)
-  const setHubTab = useAppStore((s) => s.setHubTab)
   const leaveStudio = useAppStore((s) => s.leaveStudio)
   const linkPreview = useAppStore((s) => s.linkPreview)
   const linkFullscreen = useAppStore((s) => s.linkFullscreen)
@@ -90,6 +90,7 @@ export function AppShell() {
   }, [filesOpen])
 
   const isStudio = surfaceId === 'studio'
+  const workflowManageActive = surfaceId === 'manage' && managePanel === 'workflows'
   const showModeTabs = route === 'workbench'
     && managePanel !== 'automation'
     && ['taskhome', 'shelf', 'manage'].includes(surfaceId)
@@ -132,7 +133,7 @@ export function AppShell() {
         </aside>
         <main className="main">
           {route === 'assistant' ? <AssistantPane /> : null}
-          {route === 'assistant' && linkPreview ? (
+          {linkPreview && (route === 'assistant' || linkPreview.presentation === 'overlay') ? (
             <Suspense fallback={<SurfacePending />}>
               <LinkPreviewSurface />
             </Suspense>
@@ -153,7 +154,7 @@ export function AppShell() {
             <header className="wb-head" id="wbHead" hidden={taskRoomActive || surfaceId === 'run'}>
               {!isStudio && !showModeTabs ? (
                 <div className="wb-head-title">
-                  <Icon name="workbench" />
+                  <Icon name={route === 'automation' ? 'automation' : 'workbench'} />
                   <span id="wbHeadTitle">{headTitle}</span>
                   <span className="wb-head-sub" id="wbHeadSub" />
                 </div>
@@ -191,22 +192,20 @@ export function AppShell() {
                   id="wbShelfSearch"
                   placeholder={T.searchPh}
                   autoComplete="off"
-                  hidden={isStudio}
+                  hidden={isStudio || workflowManageActive}
                   value={shelfQuery}
                   onChange={(e) => setShelfQuery(e.target.value)}
                 />
-                <button
-                  type="button"
+                <div className="wb-head-detail-actions" id="wbHeadDetailActions" />
+                <BackButton
+                  label={backLabel}
+                  iconOnly
                   className="wb-icon-btn"
                   id="wbReload"
                   data-testid="studio-leave"
-                  title={isStudio ? backLabel : T.reload}
-                  aria-label={isStudio ? backLabel : T.reloadWb}
                   hidden={!isStudio}
                   onClick={() => leaveStudio()}
-                >
-                  <Icon name="chevronLeft" />
-                </button>
+                />
               </div>
             </header>
             <div className="wb-body">
@@ -230,7 +229,7 @@ export function AppShell() {
                 {showWorkbench && surfaceId === 'run' ? (
                   <Suspense fallback={<SurfacePending />}>
                     {hasExpertRoom
-                      ? <ExpertRoomSurface />
+                      ? null
                       : runLane === 'pipeline'
                         ? <RunSurface taskRoom />
                         : <WorkflowRoomSurface />}
@@ -256,10 +255,6 @@ export function AppShell() {
               <SettingsSurface
                 embedded
                 initialTab={settingsTab}
-                onOpenCapabilityHub={() => {
-                  setHubTab('skill')
-                  setRoute('capabilities')
-                }}
               />
             </Suspense>
           ) : null}

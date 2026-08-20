@@ -99,4 +99,58 @@ describe('workbench task store', () => {
     })
     assert.equal(child.task.scheduleParentId, created.task.id)
   })
+
+  it('records revision feedback and moves a reviewed deliverable back to expert work', () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-task-review-')), 'tasks.json')
+    const store = createStore(file)
+    const created = store.create({
+      goal: '整理飞书消息',
+      expertId: 'office-partner',
+      status: 'review',
+      deliverables: [{
+        deliverableId: 'primary',
+        title: '可直接审阅的同步稿',
+        type: 'document',
+        version: 1,
+        required: true,
+        artifactRef: 'session-1#artifact-v1',
+        acceptanceStatus: 'pending',
+      }],
+    })
+
+    const reviewed = store.reviewDeliverable(created.task.id, 'primary', {
+      action: 'changes_requested',
+      actorId: 'user',
+      comment: '请补充每条消息的负责人和截止时间。',
+    })
+
+    assert.equal(reviewed.ok, true)
+    assert.equal(reviewed.task.status, 'revising')
+    assert.equal(reviewed.task.deliverables[0].acceptanceStatus, 'changes_requested')
+    assert.equal(reviewed.task.deliverables[0].comments.at(-1).authorId, 'user')
+    assert.equal(reviewed.task.deliverables[0].comments.at(-1).body, '请补充每条消息的负责人和截止时间。')
+    assert.equal(reviewed.task.events.at(-1).type, 'changes_requested')
+  })
+
+  it('reopens legacy completed tasks when required deliverables are missing', () => {
+    const task = normalizeTask({
+      goal: '先预览再执行导入',
+      expertId: 'external-capability-importer',
+      status: 'completed',
+      brief: {
+        goal: '先预览再执行导入',
+        deliverables: [
+          { id: 'preview', title: '导入预览', required: true },
+          { id: 'result', title: '导入与验证结果', required: true },
+        ],
+      },
+      deliverables: [{
+        deliverableId: 'preview',
+        title: '导入预览',
+        acceptanceStatus: 'accepted',
+      }],
+    })
+
+    assert.equal(task.status, 'needs_input')
+  })
 })

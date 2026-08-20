@@ -51,6 +51,8 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
   const [connectors, setConnectors] = useState<string[]>(() => catalogRefIds(item?.connectors))
   const [knowledgeRefs, setKnowledgeRefs] = useState<string[]>([])
   const [knowledgeItems, setKnowledgeItems] = useState<Array<{ id: string; name?: string }>>([])
+  const [skillItems, setSkillItems] = useState<CapabilityItem[]>(() => hubItems.filter((entry) => entry.kind === 'skill'))
+  const [connectorItems, setConnectorItems] = useState<CapabilityItem[]>(() => hubItems.filter((entry) => entry.kind === 'connector'))
   const [picker, setPicker] = useState<HubCatalogFieldSpec | null>(null)
   const [error, setError] = useState('')
   const [invalid, setInvalid] = useState<'name' | 'id' | ''>('')
@@ -70,6 +72,26 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
         setKnowledgeItems([])
       }
     })()
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      const [skillsResult, connectorsResult] = await Promise.allSettled([
+        window.api?.capabilityList?.({ kind: 'skill' }),
+        window.api?.capabilityList?.({ kind: 'connector' }),
+      ])
+      if (cancelled) return
+      if (skillsResult.status === 'fulfilled') {
+        const next = (skillsResult.value?.items || []).filter((entry) => entry.kind === 'skill')
+        if (next.length) setSkillItems(next)
+      }
+      if (connectorsResult.status === 'fulfilled') {
+        const next = (connectorsResult.value?.items || []).filter((entry) => entry.kind === 'connector')
+        if (next.length) setConnectorItems(next)
+      }
+    })()
+    return () => { cancelled = true }
   }, [])
 
   useEffect(() => {
@@ -118,13 +140,13 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
   }, [onClose, picker])
 
   const catalogFields = useMemo(() => buildExpertCatalogFields({
-    skills: hubItems.filter((entry) => entry.kind === 'skill') as CapabilityItem[],
-    connectors: hubItems.filter((entry) => entry.kind === 'connector') as CapabilityItem[],
+    skills: skillItems,
+    connectors: connectorItems,
     knowledgeRefs: knowledgeItems,
     selectedSkills: skills,
     selectedConnectors: connectors,
     selectedKnowledge: knowledgeRefs,
-  }), [connectors, hubItems, knowledgeItems, knowledgeRefs, skills])
+  }), [connectorItems, connectors, knowledgeItems, knowledgeRefs, skillItems, skills])
 
   const canDelete = mode === 'tune' && !!item && isUserCreatedExpert(item)
   const title = mode === 'tune' ? '调优专家' : mode === 'copy' ? '复制为自建专家' : '添加自己的专家'
@@ -201,9 +223,9 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
         <div className="hub-dialog hub-expert-dialog">
           <div className="hub-dialog-head">
             <div>
-              <span className="hub-section-kicker">Expert</span>
+            <span className="hub-section-kicker">专家</span>
               <h2 id="hubExpertDialogTitle">{title}</h2>
-              <p id="hubExpertDialogDesc">配置 persona、Skill、知识库范围与 Tool，保存后可在工作台编排中使用。</p>
+        <p id="hubExpertDialogDesc">配置人格、技能、知识库范围与工具，保存后可在工作台编排中使用。</p>
             </div>
             <button type="button" className="hub-icon-btn" aria-label="关闭" onClick={onClose}>
               <Icon name="close" />
@@ -246,16 +268,16 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
                 </div>
               </div>
               <div className="hub-field">
-                <label htmlFor="hubExpertPersona">Persona</label>
+              <label htmlFor="hubExpertPersona">角色设定</label>
                 <textarea id="hubExpertPersona" aria-label="专家 persona" value={persona} onChange={(e) => setPersona(e.target.value)} placeholder="描述专家的语气、边界与擅长领域" />
               </div>
               <div className="hub-form-grid">
                 <div className="hub-field">
-                  <label htmlFor="hubExpertSoul">Soul</label>
+              <label htmlFor="hubExpertSoul">内在准则</label>
                   <textarea id="hubExpertSoul" value={soul} onChange={(e) => setSoul(e.target.value)} placeholder="专家的立场与气质" />
                 </div>
                 <div className="hub-field">
-                  <label htmlFor="hubExpertSop">SOP</label>
+              <label htmlFor="hubExpertSop">工作流程</label>
                   <textarea id="hubExpertSop" value={sop} onChange={(e) => setSop(e.target.value)} placeholder="默认工作步骤" />
                 </div>
               </div>

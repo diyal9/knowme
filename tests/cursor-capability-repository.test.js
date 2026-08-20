@@ -11,6 +11,7 @@ const catalogLib = require('../src/lib/capability-catalog')
 const { createExpertRuntime } = require('../src/lib/expert-runtime')
 const { createSkillRuntime } = require('../src/lib/skill-runtime')
 const { createConnectorsApi } = require('../src/lib/connectors')
+const { createStore: createWorkflowStore } = require('../src/lib/workflow-package-store')
 
 function write(file, content) {
   fs.mkdirSync(path.dirname(file), { recursive: true })
@@ -58,6 +59,29 @@ Work carefully.
       },
     },
   }, null, 2))
+  if (options.workflow === true) {
+    write(path.join(root, '.cursor', 'workflows', 'index.json'), JSON.stringify({
+      version: '1.0',
+      workflows: [
+        { id: 'artist-delivery', name: 'Artist delivery', path: 'artist-delivery.json', catalog: { visibility: 'primary' } },
+        { id: 'old-flow', name: 'Old flow', path: 'old-flow.json', catalog: { visibility: 'deprecated' } },
+      ],
+    }, null, 2))
+    const workflow = {
+      schema_version: '1.0',
+      id: 'artist-delivery',
+      name: 'Artist delivery',
+      description: 'Create, approve, and deliver art.',
+      tags: ['art', 'delivery'],
+      nodes: [
+        { id: 'create', type: 'agent', agent: 'artist', intent: 'Create art', next: 'approve' },
+        { id: 'approve', type: 'gate', gate_id: 'art-approve', intent: 'Approve art', on_approve: 'done', on_reject: 'create' },
+        { id: 'done', type: 'terminal', status: 'completed' },
+      ],
+    }
+    write(path.join(root, '.cursor', 'workflows', 'artist-delivery.json'), JSON.stringify(workflow, null, 2))
+    write(path.join(root, '.cursor', 'workflows', 'old-flow.json'), JSON.stringify({ ...workflow, id: 'old-flow', name: 'Old flow' }, null, 2))
+  }
 }
 
 describe('cursor capability repository', () => {
@@ -84,7 +108,8 @@ describe('cursor capability repository', () => {
       capabilitiesRoot: storeLib.resolvePaths(userData).root,
     })
     const connectorsApi = createConnectorsApi({ getUserData: () => userData })
-    return { userData, store, catalog, expertRuntime, connectorsApi }
+    const workflowStore = createWorkflowStore({ userData })
+    return { userData, store, catalog, expertRuntime, connectorsApi, workflowStore }
   }
 
   it('scans skills, agents and blocks plaintext MCP secrets without exposing values', () => {
@@ -113,6 +138,85 @@ describe('cursor capability repository', () => {
     assert.deepEqual(scanned.experts[0].declaredSkills, ['alpha'])
   })
 
+  it('imports Cursor workflows, maps expert ids, and skips deprecated definitions', () => {
+    createRepo(root, { workflow: true })
+    const scanned = repository.scanCursorRepository(root)
+    assert.equal(scanned.ok, true)
+    assert.equal(scanned.workflows.length, 2)
+    assert.equal(scanned.workflows.find(item => item.sourceId === 'old-flow').blocked, true)
+    assert.equal(repository.publicPreview(scanned, 'token').counts.workflows, 2)
+
+    const services = deps()
+    const result = repository.registerCursorRepository(scanned, services)
+    assert.equal(result.ok, true)
+    assert.equal(result.idMaps.workflows['artist-delivery'], 'artist-delivery')
+    assert.ok(result.skipped.some(item => item.kind === 'workflow' && item.sourceId === 'old-flow'))
+
+    const saved = services.workflowStore.get('artist-delivery')
+    assert.equal(saved.ok, true)
+    assert.equal(saved.package.source, 'team')
+    assert.equal(saved.package.status, 'draft')
+    assert.equal(saved.package.provenance.domain, 'visual')
+    assert.ok(saved.package.goalTypes.includes('visual'))
+    assert.deepEqual(saved.package.agentRefs.map(ref => ref.id), [result.idMaps.experts.artist])
+    assert.equal(saved.package.graph.nodes.find(node => node.id === 'create').agentPackageId, result.idMaps.experts.artist)
+    assert.equal(saved.package.graph.gates[0].id, 'art-approve')
+  })
+
+  it('designs a precise workflow package with transitive Agent and Skill dependencies', () => {
+    createRepo(root, { workflow: true })
+    write(path.join(root, '.cursor', 'skills', 'entry', 'SKILL.md'), `---
+name: entry
+description: Workflow entry
+---
+# Entry
+`)
+    write(path.join(root, '.cursor', 'skills', 'optional', 'SKILL.md'), `---
+name: optional
+description: Optional helper
+---
+# Optional
+`)
+    write(path.join(root, '.cursor', 'agents', 'artist', 'agent.manifest.json'), JSON.stringify({
+      id: 'artist',
+      version: '1.0.0',
+      title: 'Artist',
+      skills: { required: ['alpha'], optional: ['optional'] },
+    }, null, 2))
+
+    const scanned = repository.scanCursorRepository(root)
+    const planned = repository.planCursorRepositoryImport(scanned, {
+      workflowIds: ['artist-delivery'],
+      additionalSkillIds: ['entry'],
+      includeOptionalSkills: false,
+      includeConnectors: false,
+    })
+    assert.equal(planned.ok, true)
+    assert.deepEqual(planned.plan.workflows.map(item => item.id), ['artist-delivery'])
+    assert.deepEqual(planned.plan.experts.map(item => item.id), ['artist'])
+    assert.deepEqual(planned.plan.skills.map(item => item.id).sort(), ['alpha', 'entry'])
+    assert.equal(planned.preview.workflows.length, 1)
+    assert.equal(planned.preview.experts.length, 1)
+    assert.equal(planned.preview.connectors.length, 0)
+
+    const tolerantPlan = repository.planCursorRepositoryImport(scanned, {
+      workflowIds: ['artist-delivery', 'entry'],
+      includeOptionalSkills: false,
+      includeConnectors: false,
+    })
+    assert.equal(tolerantPlan.ok, true)
+    assert.deepEqual(tolerantPlan.plan.workflows.map(item => item.id), ['artist-delivery'])
+    assert.ok(tolerantPlan.plan.skills.some(item => item.id === 'entry'))
+    assert.deepEqual(tolerantPlan.plan.selection.additionalSkillIds, ['entry'])
+
+    const services = deps()
+    const installed = repository.registerCursorRepository(planned.preview, services)
+    assert.equal(installed.counts.installed, 4)
+    assert.deepEqual(Object.keys(installed.idMaps.workflows), ['artist-delivery'])
+    assert.deepEqual(Object.keys(installed.idMaps.experts), ['artist'])
+    assert.deepEqual(Object.keys(installed.idMaps.skills).sort(), ['alpha', 'entry'])
+  })
+
   it('registers idempotently and exposes linked skills through runtime and catalog', () => {
     createRepo(root)
     const scanned = repository.scanCursorRepository(root)
@@ -127,7 +231,7 @@ describe('cursor capability repository', () => {
     const skillId = first.idMaps.skills.alpha
     assert.equal(installed.entries[skillId].linked, true)
     assert.equal(installed.entries[skillId].originRoot, fs.realpathSync(root))
-    assert.equal(installed.entries[skillId].manifest.schemaVersion, 2)
+    assert.equal(installed.entries[skillId].manifest.schemaVersion, 3)
     assert.equal(installed.entries[skillId].manifest.provenance.source, 'local-repo')
     const expertId = first.idMaps.experts.artist
     assert.ok(installed.entries[expertId].manifest.dependencies.some(dep => dep.id === skillId && dep.kind === 'skill'))

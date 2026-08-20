@@ -24,6 +24,7 @@ type Preview = {
   rollbackHint?: string
   permissions?: Record<string, unknown>
   trust?: { status?: string; message?: string }
+  counts?: { experts?: number; skills?: number; connectors?: number; workflows?: number; blocked?: number }
 }
 
 type PendingImport = {
@@ -35,7 +36,7 @@ type PendingImport = {
 
 const TABS: { id: SourceKind; label: string; hint: string }[] = [
   { id: 'local', label: '本地文件夹', hint: 'SKILL / EXPERT / MCP' },
-  { id: 'cursor', label: 'Cursor 仓库', hint: '扫描完整能力目录' },
+  { id: 'cursor', label: 'Cursor 仓库', hint: '技能 / 专家 / MCP / 工作流' },
   { id: 'zip', label: 'ZIP 能力包', hint: '校验后安全导入' },
   { id: 'https', label: 'HTTPS 地址', hint: '仅可信远程来源' },
   { id: 'custom', label: '自定义创建', hint: '从最小模板开始' },
@@ -196,7 +197,7 @@ export function HubAddDialog({ onClose, onImported }: Props) {
       <div className="hub-dialog">
         <div className="hub-dialog-head">
           <div>
-            <span className="hub-section-kicker">Add capability</span>
+              <span className="hub-section-kicker">添加能力</span>
             <h2 id="hubAddTitle">添加能力</h2>
             <p>从可信来源导入，或创建一项属于你的能力。</p>
           </div>
@@ -242,7 +243,7 @@ export function HubAddDialog({ onClose, onImported }: Props) {
                   <div className="hub-add-panel active">
                     <div className="hub-source-mark"><Icon name="workbench" /></div>
                     <h3>注册 Cursor 智能体仓库</h3>
-                    <p className="hub-hint">KnowMe 将扫描专家、技能与安全的 MCP 配置，确认前不会写入或执行脚本。</p>
+                    <p className="hub-hint">KnowMe 将扫描专家、技能、安全的 MCP 配置与工作流，确认前不会写入或执行脚本。</p>
                     <button type="button" className="hub-btn primary" disabled={busy} onClick={() => void pickAndPrecheck('cursor')}>选择 Cursor 仓库</button>
                   </div>
                 ) : null}

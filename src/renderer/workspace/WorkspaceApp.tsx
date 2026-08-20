@@ -3,6 +3,7 @@ import { AppShell } from '../app/AppShell'
 import '../app/knowme-icons'
 import '../app/tokens.css' // 仅 :root token；壳层样式在下，勿再往 tokens 写组件布局
 import '../styles/workspace-chrome.css' // 壳：rail / side / main
+import '../app/ui-system.css'
 import '../styles/agent-chrome.css' // 默认助理路由：对话列样式
 import '../styles/workspace-overlays.css'
 import '../app/legacy-bridge.css'

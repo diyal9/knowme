@@ -3,18 +3,18 @@ import type { ContentSourceRef } from '../../../shared/api'
 import type { SettingsForm } from '../../../shared/api-extended'
 
 export type SettingsTabId =
+  | 'profile'
   | 'sources'
   | 'ai'
-  | 'assistant'
   | 'system'
   | 'connectors'
   | 'memory'
   | 'about'
 
 const TAB_IDS: SettingsTabId[] = [
+  'profile',
   'sources',
   'ai',
-  'assistant',
   'system',
   'connectors',
   'memory',

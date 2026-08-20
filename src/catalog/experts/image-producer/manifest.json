@@ -1,0 +1,7 @@
+{
+  "id": "image-producer",
+  "kind": "expert",
+  "version": "2.0.0",
+  "skills": ["visual-brief-prompt"],
+  "connectors": []
+}

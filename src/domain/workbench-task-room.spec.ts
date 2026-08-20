@@ -33,8 +33,11 @@ describe('workbench-task-room', () => {
     expect(workbenchTaskModeLabel(kind)).toBe('工作流')
     expect(workbenchTaskShowsDialogue(kind)).toBe(true)
     expect(workbenchRunReturnSurface('workflow')).toBe('shelf')
-    expect(workbenchTaskStateLabel(kind, 'input')).toBe('对话中')
-    expect(workbenchTaskStateLabel(kind, 'running')).toBe('对话中')
+    expect(workbenchTaskBackLabel(kind)).toBe('返回工作流')
+    expect(workbenchTaskStateLabel(kind, 'input')).toBe('待启动')
+    expect(workbenchTaskStateLabel(kind, 'running')).toBe('执行中')
+    expect(workbenchTaskStateLabel(kind, 'hitl')).toBe('等待确认')
+    expect(workbenchTaskStateLabel(kind, 'done')).toBe('已完成')
     expect(workbenchTaskStateTone('running')).toBe('running')
   })
 

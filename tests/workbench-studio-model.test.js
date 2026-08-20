@@ -5,6 +5,20 @@ const assert = require('node:assert/strict')
 const studio = require('../src/lib/workbench-studio-model')
 
 describe('workbench-studio-model', () => {
+  it('migrates duplicate or unsupported legacy palette nodes', () => {
+    const draft = studio.createDraft({
+      graphMode: 'free',
+      nodes: [
+        { id: 'legacy-human', kind: 'human', name: '人工步骤' },
+        { id: 'legacy-action', kind: 'action', name: '旧动作' },
+      ],
+      edges: [],
+    })
+
+    assert.equal(draft.nodes.find(node => node.id === 'legacy-human').kind, 'gate')
+    assert.equal(draft.nodes.find(node => node.id === 'legacy-action').kind, 'tool')
+  })
+
   it('adds, reorders and removes Agent steps without losing node profiles', () => {
     let draft = studio.createDraft({ name: '我的流程', goal: '完成交付' })
     draft = studio.addAgent(draft, { id: 'producer', name: '制作人' })

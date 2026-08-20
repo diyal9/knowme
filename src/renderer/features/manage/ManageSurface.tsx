@@ -2,14 +2,14 @@
  * 管理工作流 / 自动化 / 管线面板。编辑带 package id；复制走 fork，不进空白草稿。
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
-import '../workbench/workbench-layout.css'
-import '../workbench/workbench-daemon.css'
 import { AUTOMATION_LIST_HINT, automationRunCapable } from '../../../domain/studio'
+import { daemonOverviewCacheIsFresh } from '../../../domain/daemon-overview-cache'
 import { filterByWorkbenchQuery } from '../../../domain/workbench-search'
 import { workbenchHomeExperts } from '../../../domain/workbench-home'
 import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
 import { useKnowMeIcons } from '../../app/useKnowMeIcons'
+import { WorkbenchDetailHeaderAction } from '../workbench/WorkbenchDetailHeaderAction'
 import { DaemonComposePanel } from './DaemonComposePanel'
 import { ManageAutomationModal } from './ManageAutomationModal'
 import { ManageWorkflowCard } from './ManageWorkflowCard'
@@ -27,6 +27,7 @@ export function ManageSurface() {
   const shelfQuery = useAppStore((s) => s.shelfQuery)
   const automationTemplates = useAppStore((s) => s.automationTemplates)
   const shelfCards = useAppStore((s) => s.shelfCards)
+  const daemonOverviewCache = useAppStore((s) => s.daemonOverviewCache)
   const enterStudio = useAppStore((s) => s.enterStudio)
   const forkWorkflow = useAppStore((s) => s.forkWorkflow)
   const setWorkbenchSurface = useAppStore((s) => s.setWorkbenchSurface)
@@ -38,12 +39,14 @@ export function ManageSurface() {
   const surfaceRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (panel === 'workflows' || panel === 'daemon') {
+    if (panel === 'workflows') {
       void loadWorkbench()
       void loadHubCapabilities()
       void loadWorkbenchModes()
+    } else if (panel === 'daemon') {
+      if (!daemonOverviewCacheIsFresh(daemonOverviewCache)) void loadWorkbench()
     } else void loadManage()
-  }, [loadManage, loadWorkbench, loadHubCapabilities, loadWorkbenchModes, panel])
+  }, [daemonOverviewCache, loadManage, loadWorkbench, loadHubCapabilities, loadWorkbenchModes, panel])
 
   useKnowMeIcons(`${panel}:${automationJobs.length}`, surfaceRef)
 
@@ -70,15 +73,12 @@ export function ManageSurface() {
   if (panel === 'workflows') {
     return (
       <div ref={surfaceRef} className="wb-manage-body">
+        <WorkbenchDetailHeaderAction label="返回工作流" onBack={() => setWorkbenchSurface('shelf')} />
         <section className="wb-manage-panel active" id="wbWorkflowManagePage" data-manage-panel="workflows" aria-label="工作流管理" data-testid="manage-workflows">
           <div className="wb-dashboard">
             <section className="wb-panel wb-workflow-manage" aria-labelledby="wbWorkflowManageTitle">
               <div className="wb-panel-head">
                 <div className="wb-workflow-manage-title">
-                  <button type="button" className="wb-task-back" onClick={() => setWorkbenchSurface('shelf')} aria-label="返回工作流">
-                    <Icon name="chevronLeft" />
-                    <span>返回</span>
-                  </button>
                   <div>
                     <div className="wb-section-label">我的工作流</div>
                     <h2 className="wb-panel-title" id="wbWorkflowManageTitle">维护你自己的流程</h2>

@@ -22,7 +22,10 @@ function registerAgentSessionIpc(ipcMain, deps) {
     let { sessions, ui } = loadAgentStore()
     sessions = sessions.filter(s => s.ephemeral !== true)
     if (!sessions.length) {
-      const session = agentSessions.createSession('general', 1)
+      const session = agentSessions.createSession('personal', 1, {
+        sessionKind: 'personal-topic',
+        profileId: 'my-knowme',
+      })
       sessions = [session]
       ui = { openSessionIds: [session.id], activeSessionId: session.id }
       saveAgentStore(sessions, ui)
@@ -56,12 +59,12 @@ function registerAgentSessionIpc(ipcMain, deps) {
       : { ok: false, error: 'Session 不存在' }
   })
 
-  ipcMain.handle('agent-session-new', (_e, agentIdOrOpts = 'general') => {
+  ipcMain.handle('agent-session-new', (_e, agentIdOrOpts = 'personal') => {
     const { sessions, ui } = loadAgentStore()
     const opts = typeof agentIdOrOpts === 'object' && agentIdOrOpts
       ? agentIdOrOpts
       : { agentId: agentIdOrOpts }
-    const agentId = opts.agentId || 'general'
+    const agentId = opts.agentId || 'personal'
     const expertId = String(opts.expertId || '').trim()
     const session = agentSessions.createSession(agentId, sessions.length + 1, {
       goal: opts.goal || '',
@@ -70,6 +73,9 @@ function registerAgentSessionIpc(ipcMain, deps) {
       ephemeral: opts.ephemeral === true,
       taskRef: opts.taskRef,
       knowledgeRefs: opts.knowledgeRefs,
+      sessionKind: opts.sessionKind || (expertId ? 'expert-task' : 'personal-topic'),
+      profileId: opts.profileId || (expertId ? '' : 'my-knowme'),
+      contextId: opts.contextId,
     })
     if (expertId) {
       const hub = ensureCapabilityHub()

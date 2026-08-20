@@ -8,8 +8,10 @@
 /** 挂载工作台投影与 whenReady；进程守卫在其后单独 create。 */
 function create(ctx) {
 ctx.buildWorkflowShelf = function buildWorkflowShelf(input = {}) {
-    // 货架只汇集个人编排、仓库投影与管线目录；内置官方参考包不再默认注入。
-    const verticals = Array.isArray(input.verticals) ? input.verticals : [];
+    const verticals = [
+        ...ctx.officialWorkflows.listOfficialWorkflowPackages(),
+        ...(Array.isArray(input.verticals) ? input.verticals : []),
+    ];
     return ctx.workflowSupply.buildWorkflowSupply({
         repoWorkflows: input.workflows || [],
         daemon: input.daemon || {},
@@ -354,7 +356,7 @@ if (ctx.gotSingleInstanceLock) {
             ctx.restoreAppWindows();
     });
     ctx.app.on('activate', () => ctx.restoreAppWindows());
-    ctx.app.whenReady().then(() => {
+    ctx.app.whenReady().then(async () => {
         ctx.app.setName(ctx.APP_DISPLAY_NAME);
         if (process.platform !== 'darwin')
             ctx.Menu.setApplicationMenu(null);
@@ -365,6 +367,11 @@ if (ctx.gotSingleInstanceLock) {
         try {
             const hub = ctx.ensureCapabilityHub();
             hub.migrateConnectorsIfNeeded();
+            await ctx.productionCatalogMigration.migrateProductionCatalog({
+                userData: ctx.app.getPath('userData'),
+                hub,
+                workflowStore: ctx.getWorkbenchWorkflowPackageStore(),
+            });
             hub.backfillExpertDisplayNames();
             hub.registerIpcHandlers({ showOpenDialog: ctx.showOpenDialogFor });
             ctx.ensureCapabilityPackRuntime();

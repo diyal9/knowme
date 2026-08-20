@@ -64,8 +64,34 @@ function normalizeAssistantOutput(text) {
   return output.join('\n')
 }
 
+/** 最终展示前的轻量门禁：拦截明显的工具协议泄漏，不参与模型生成。 */
+function enforceAssistantOutputGate(text, options = {}) {
+  const source = String(text ?? '').trim()
+  if (!source || options.allowRawJson === true) return { text, blocked: false }
+  if (!(source.startsWith('{') && source.endsWith('}'))) return { text, blocked: false }
+  let parsed
+  try { parsed = JSON.parse(source) } catch { return { text, blocked: false } }
+  const hasToolEnvelope = parsed && typeof parsed === 'object' && (
+    Object.prototype.hasOwnProperty.call(parsed, 'ok')
+    || Object.prototype.hasOwnProperty.call(parsed, 'identity')
+    || Object.prototype.hasOwnProperty.call(parsed, 'page_token')
+    || (parsed.data && typeof parsed.data === 'object' && (
+      Object.prototype.hasOwnProperty.call(parsed.data, 'results')
+      || Object.prototype.hasOwnProperty.call(parsed.data, 'page_token')
+      || Object.prototype.hasOwnProperty.call(parsed.data, 'shown_records_cacheKey')
+    ))
+  )
+  if (!hasToolEnvelope) return { text, blocked: false }
+  const results = Array.isArray(parsed?.data?.results) ? parsed.data.results : []
+  return {
+    text: results.length ? `已获取到 ${results.length} 条结果，正在整理可读信息。` : '已获取到结构化结果，但当前未生成可读摘要。',
+    blocked: true,
+  }
+}
+
 return {
   normalizeAssistantOutput,
   normalizeGeneratedLine,
+  enforceAssistantOutputGate,
 }
 })

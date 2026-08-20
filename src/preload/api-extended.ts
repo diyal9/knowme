@@ -1,6 +1,13 @@
 const { ipcRenderer } = require("electron")
 
 module.exports = {
+  personalAgentGet: () => ipcRenderer.invoke('personal-agent-get'),
+  personalAgentSave: payload => ipcRenderer.invoke('personal-agent-save', payload || {}),
+  personalAgentTeach: payload => ipcRenderer.invoke('personal-agent-teach', payload || {}),
+  personalAgentApplyProposal: payload => ipcRenderer.invoke('personal-agent-apply-proposal', payload || {}),
+  personalAgentGrowthList: payload => ipcRenderer.invoke('personal-agent-growth-list', payload || {}),
+  personalAgentRouteWork: payload => ipcRenderer.invoke('personal-agent-route-work', payload || {}),
+  personalAgentResultActions: () => ipcRenderer.invoke('personal-agent-result-actions'),
   agentProfileGet: id => ipcRenderer.invoke('agent-profile-get', id),
   agentProfileSave: payload => ipcRenderer.invoke('agent-profile-save', payload || {}),
   agentProfileRemove: id => ipcRenderer.invoke('agent-profile-remove', id),
@@ -60,6 +67,7 @@ module.exports = {
   appInfo: () => ipcRenderer.invoke('app-info'),
   checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
   openExternal: url => ipcRenderer.invoke('open-external', url),
+  resolveLinkTitle: url => ipcRenderer.invoke('resolve-link-title', url),
 
   // 产品知识库 OKF + Memory（用户数据目录）
   knowledgeStatus: () => ipcRenderer.invoke('knowledge-status'),
@@ -68,6 +76,8 @@ module.exports = {
   openKnowledgeDir: () => ipcRenderer.send('open-knowledge-dir'),
   memoryStatus: () => ipcRenderer.invoke('memory-status'),
   memoryOverview: () => ipcRenderer.invoke('memory-overview'),
+  memoryGlobalUpsert: payload => ipcRenderer.invoke('memory-global-upsert', payload || {}),
+  memoryGlobalRemove: id => ipcRenderer.invoke('memory-global-remove', id),
   memoryConsolidate: () => ipcRenderer.invoke('memory-consolidate'),
   memoryInsights: payload => ipcRenderer.invoke('memory-insights', payload || {}),
   memorySetLearning: enabled => ipcRenderer.invoke('memory-set-learning', enabled === true),

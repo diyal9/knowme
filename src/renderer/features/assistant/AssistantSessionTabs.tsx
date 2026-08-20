@@ -2,9 +2,9 @@
  * 助理顶栏：会话 Tab、历史弹出、专家 / 更多菜单。
  * 不负责对话正文与输入框。
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { hasErrorMessage, lastErrorMessageText } from '../../../domain/agent-message-ui'
-import { BUILTIN_ASSISTANT_MODES, resolveAssistantModeId } from '../../../domain/assistant-modes'
+import { resolveAssistantModeId } from '../../../domain/assistant-modes'
 import { sortSessionTabs, resolveSessionTabLabel } from '../../../domain/agent-session'
 import { taskRelTime } from '../../../domain/run-projection'
 import { selectActiveMessages, useAppStore } from '../../app/store'
@@ -12,6 +12,32 @@ import { Icon } from '../../app/Icon'
 import { AssistantTabContextMenu, ModeAvatarMark } from './AssistantTabContextMenu'
 
 type MenuState = { id: string; x: number; y: number }
+
+function SessionTabLabel({ text }: { text: string }) {
+  const wrapRef = useRef<HTMLSpanElement>(null)
+  const [overflowDistance, setOverflowDistance] = useState(0)
+
+  useEffect(() => {
+    const node = wrapRef.current
+    if (!node) return undefined
+    const measure = () => setOverflowDistance(Math.max(0, node.scrollWidth - node.clientWidth))
+    measure()
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+    observer?.observe(node)
+    return () => observer?.disconnect()
+  }, [text])
+
+  return (
+    <span className={`tab-label${overflowDistance > 0 ? ' is-overflowing' : ''}`} ref={wrapRef}>
+      <span
+        className="tab-label-text"
+        style={overflowDistance > 0 ? { '--tab-label-shift': `${overflowDistance}px` } as CSSProperties : undefined}
+      >
+        {text}
+      </span>
+    </span>
+  )
+}
 
 function clampMenuPosition(x: number, y: number, width: number, height: number) {
   const pad = 8
@@ -21,10 +47,11 @@ function clampMenuPosition(x: number, y: number, width: number, height: number) 
   }
 }
 
-export function AssistantSessionTabs() {
+export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => void }) {
   const sessions = useAppStore((s) => s.sessions)
   const history = useAppStore((s) => s.sessionHistory)
   const activeSessionId = useAppStore((s) => s.activeSessionId)
+  const sessionStates = useAppStore((s) => s.sessionStates)
   const messages = useAppStore(selectActiveMessages)
   const isGenerating = useAppStore((s) => s.isGenerating)
   const selectSession = useAppStore((s) => s.selectSession)
@@ -33,19 +60,13 @@ export function AssistantSessionTabs() {
   const forkSession = useAppStore((s) => s.forkSession)
   const closeSessionTab = useAppStore((s) => s.closeSessionTab)
   const copySessionTranscript = useAppStore((s) => s.copySessionTranscript)
-  const startAssistantMode = useAppStore((s) => s.startAssistantMode)
   const showToast = useAppStore((s) => s.showToast)
   const [menu, setMenu] = useState<MenuState | null>(null)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [expertOpen, setExpertOpen] = useState(false)
   const [moreOpen, setMoreOpen] = useState(false)
   const [historyQuery, setHistoryQuery] = useState('')
+  const [historyLimit, setHistoryLimit] = useState(10)
   const [renaming, setRenaming] = useState('')
-  const activeModeId = resolveAssistantModeId(
-    sessions.find((item) => item.id === activeSessionId)?.agentId
-      || sessions.find((item) => item.id === activeSessionId)?.expertId,
-  )
-
   const orderedSessions = useMemo(() => sortSessionTabs(sessions), [sessions])
   const openIds = useMemo(() => new Set(sessions.map((item) => item.id)), [sessions])
   const canCopyError = hasErrorMessage(messages)
@@ -54,12 +75,15 @@ export function AssistantSessionTabs() {
     function onClose() {
       setMenu(null)
       setHistoryOpen(false)
-      setExpertOpen(false)
       setMoreOpen(false)
     }
     document.addEventListener('click', onClose)
     return () => document.removeEventListener('click', onClose)
   }, [])
+
+  useEffect(() => {
+    setHistoryLimit(10)
+  }, [historyQuery])
 
   const historyItems = useMemo(() => {
     const q = historyQuery.trim().toLowerCase()
@@ -76,7 +100,17 @@ export function AssistantSessionTabs() {
         const title = String(item.title || item.id || '').toLowerCase()
         return label.includes(q) || title.includes(q)
       })
-      .slice(0, 30)
+      .slice(0, historyLimit)
+  }, [history, historyQuery, historyLimit])
+
+  const matchingHistoryCount = useMemo(() => {
+    const q = historyQuery.trim().toLowerCase()
+    return history.filter((item) => {
+      if (!q) return true
+      const label = resolveSessionTabLabel(item).toLowerCase()
+      const title = String(item.title || item.id || '').toLowerCase()
+      return label.includes(q) || title.includes(q)
+    }).length
   }, [history, historyQuery])
 
   async function handleTabCtxAction(action: string, sessionId: string) {
@@ -95,6 +129,10 @@ export function AssistantSessionTabs() {
   async function handleMoreAction(action: string) {
     setMoreOpen(false)
     const activeId = activeSessionId
+    if (action === 'properties') {
+      onOpenGrowth?.()
+      return
+    }
     if (action === 'copy-error') {
       const text = lastErrorMessageText(messages)
       if (!text) {
@@ -143,7 +181,6 @@ export function AssistantSessionTabs() {
       return
     }
     newSession()
-    setExpertOpen(false)
     setHistoryOpen(false)
     setMoreOpen(false)
   }
@@ -151,7 +188,7 @@ export function AssistantSessionTabs() {
   return (
     <>
       <div className="agent-tab-scroll">
-        <div className="agent-session-tabs" role="tablist" aria-label="助手会话">
+<div className="agent-session-tabs" role="tablist" aria-label="智能伙伴主题">
           {orderedSessions.map((s) => (
             renaming === s.id ? (
               <input
@@ -189,13 +226,13 @@ export function AssistantSessionTabs() {
                 {s.pinned ? (
                   <span className="tab-pin" aria-hidden="true">📌</span>
                 ) : (
-                  <ModeAvatarMark
-                    modeId={resolveAssistantModeId(s.agentId || s.expertId)}
-                    size={16}
-                    className="tab-agent-avatar"
-                  />
+                  <span className="tab-state-icon" aria-hidden="true">
+                    <Icon name={s.id === activeSessionId && isGenerating ? 'play' : sessionStates[s.id]?.messages.some((item) => item.role === 'assistant' && item.text.trim()) ? 'check' : 'chat'} />
+                  </span>
                 )}
-                <span className="tab-label">{resolveSessionTabLabel(s)}</span>
+                <SessionTabLabel text={resolveSessionTabLabel(s, {
+                  firstUserText: sessionStates[s.id]?.messages.find((item) => item.role === 'user')?.text,
+                })} />
                 <button
                   type="button"
                   className="tab-close"
@@ -218,9 +255,9 @@ export function AssistantSessionTabs() {
           type="button"
           className="agent-head-tool agent-expert-tool"
           id="agentExpertBtn"
-          aria-label="我的专家"
-          title="我的专家"
-          onClick={(e) => { e.stopPropagation(); setExpertOpen((open) => !open); setHistoryOpen(false); setMoreOpen(false) }}
+          aria-label="新主题"
+          title="新主题"
+          onClick={(e) => { e.stopPropagation(); openNewSession() }}
         >
           <Icon name="plus" />
         </button>
@@ -231,9 +268,9 @@ export function AssistantSessionTabs() {
           title="历史会话"
           aria-label="历史"
           aria-expanded={historyOpen}
-          onClick={(e) => { e.stopPropagation(); setHistoryOpen((open) => !open); setExpertOpen(false); setMoreOpen(false) }}
+          onClick={(e) => { e.stopPropagation(); setHistoryOpen((open) => !open); setMoreOpen(false) }}
         >
-          <Icon name="history" />
+          <Icon name="chatHistory" />
         </button>
         <button
           type="button"
@@ -241,39 +278,17 @@ export function AssistantSessionTabs() {
           id="agentMoreBtn"
           title="更多"
           aria-label="更多"
-          onClick={(e) => { e.stopPropagation(); setMoreOpen((open) => !open); setHistoryOpen(false); setExpertOpen(false) }}
+          onClick={(e) => { e.stopPropagation(); setMoreOpen((open) => !open); setHistoryOpen(false) }}
         >
           <Icon name="moreHorizontal" />
         </button>
       </div>
-      {expertOpen ? (
-        <div className="agent-pop expert-pop show" id="agentExpertPop" data-testid="agent-expert-menu" role="menu" aria-label="选择助手模式" onClick={(e) => e.stopPropagation()}>
-          {BUILTIN_ASSISTANT_MODES.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`agent-pop-item agent-expert-item${item.id === activeModeId ? ' active' : ''}`}
-              onClick={() => { void startAssistantMode(item.id); setExpertOpen(false) }}
-            >
-              <ModeAvatarMark modeId={item.id} />
-              <span className="expert-copy">
-                <span className="expert-name">{item.name}</span>
-                <span className="expert-desc">{item.description}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      ) : null}
       {moreOpen ? (
         <div className="agent-pop show" id="agentMorePop" data-testid="agent-more-pop" role="menu" aria-label="当前对话" onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            className="agent-pop-item"
-            data-testid="agent-new-chat-btn"
-            onClick={() => { setMoreOpen(false); openNewSession() }}
-          >
-            <Icon name="chat" /><span>新对话</span>
+          <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('properties')}>
+            <Icon name="properties" /><span>智能伙伴属性</span>
           </button>
+          <div className="agent-pop-sep" />
           <button type="button" className="agent-pop-item" onClick={() => void handleMoreAction('fork')}>
             <Icon name="plus" /><span>在新对话继续</span>
           </button>
@@ -307,7 +322,7 @@ export function AssistantSessionTabs() {
           <div className="history-pop-list">
             {historyItems.length === 0 ? (
               <div className="agent-pop-empty">暂无历史会话</div>
-            ) : historyItems.map((item) => {
+              ) : historyItems.map((item) => {
               const label = resolveSessionTabLabel(item)
               const when = taskRelTime(item.updatedAt)
               return (
@@ -328,13 +343,19 @@ export function AssistantSessionTabs() {
                   <ModeAvatarMark modeId={resolveAssistantModeId(item.agentId || item.expertId)} />
                   <span className="pop-copy">
                     <span className="pop-label">{label}</span>
+                    {item.summary ? <span className="pop-summary">{item.summary}</span> : null}
                     {when ? <span className="pop-when">{when}</span> : null}
                   </span>
                   {openIds.has(item.id) ? <span className="pop-meta">已打开</span> : null}
                 </button>
               )
-            })}
+              })}
           </div>
+          {historyItems.length < matchingHistoryCount ? (
+            <button type="button" className="agent-pop-item history-pop-more" onClick={() => setHistoryLimit((limit) => limit + 10)}>
+              <span>展开显示</span><span className="pop-meta">还有 {matchingHistoryCount - historyItems.length} 条</span>
+            </button>
+          ) : null}
         </div>
       ) : null}
       {menu ? (

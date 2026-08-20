@@ -88,7 +88,22 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
     },
 
     newSession: () => {
-      const local = { id: `s-${Date.now()}`, title: '新对话' }
+      const activeId = get().activeSessionId
+      const active = get().sessions.find((item) => item.id === activeId)
+      const activeSlice = getSessionSlice(get().sessionStates, activeId)
+      const isBlankActive = active
+        && ['新主题', '新助手', '新对话', '对话', '当前协作', 'New Agent'].includes(String(active.title || '').trim())
+        && !activeSlice.messages.length
+        && !activeSlice.composer.trim()
+        && !activeSlice.attachments.length
+      if (isBlankActive) return
+      const local = {
+        id: `s-${Date.now()}`,
+        title: '新主题',
+        agentId: 'personal',
+        sessionKind: 'personal-topic',
+        profileId: 'my-knowme',
+      }
       set((state) => {
         const tabs = dedupeSessionsById([...state.sessions, local])
         return {
@@ -99,7 +114,11 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
       })
       void (async () => {
         try {
-          const created = await api()?.agentSessionNew?.({ agentId: 'general' })
+          const created = await api()?.agentSessionNew?.({
+            agentId: 'personal',
+            sessionKind: 'personal-topic',
+            profileId: 'my-knowme',
+          })
           const session = parseSessionRecord(created)
           if (!session) return
           set((state) => {

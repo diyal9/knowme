@@ -20,6 +20,8 @@ const NODE_TITLES: Record<string, string> = {
   llm: '大模型节点',
   tool: '工具节点',
   knowledge: '知识库节点',
+  mcp: 'MCP 节点',
+  request: 'HTTP 请求节点',
   condition: '条件判断',
 }
 

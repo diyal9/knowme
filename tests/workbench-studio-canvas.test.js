@@ -46,12 +46,18 @@ describe('workbench-studio-canvas', () => {
     assert.ok(board.edges.length >= 4)
   })
 
-  it('exposes palette types aligned with agentUniverse-inspired roles', () => {
+  it('exposes only distinct, executable palette types', () => {
     const types = canvas.paletteTypes()
     assert.ok(types.some(t => t.kind === 'start'))
+    assert.ok(types.some(t => t.kind === 'end'))
     assert.ok(types.some(t => t.kind === 'agent'))
-    assert.ok(types.some(t => t.kind === 'llm'))
+    assert.ok(types.some(t => t.kind === 'tool'))
+    assert.ok(types.some(t => t.kind === 'condition'))
+    assert.ok(types.some(t => t.kind === 'join'))
     assert.ok(types.some(t => t.kind === 'gate'))
+    assert.ok(!types.some(t => t.kind === 'human'))
+    assert.ok(!types.some(t => t.kind === 'action'))
+    assert.equal(types.find(t => t.kind === 'gate')?.title, '人工确认')
   })
 
   it('projects agentUniverse-style sectioned summaries on nodes', () => {

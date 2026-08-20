@@ -25,8 +25,12 @@ export type HubCapabilityItem = CapabilityItem & {
   connectors?: Array<string | { id?: string; name?: string }>
 }
 
+export type HubSourceFilter = '全部来源' | '官方' | '组织' | '我的'
+
+export const HUB_EXPERT_SOURCE_FILTERS: HubSourceFilter[] = ['全部来源', '官方', '组织', '我的']
+
 export const HUB_TAB_CATEGORIES: Record<CapabilityKind, string[]> = {
-  expert: ['全部', '收藏', '办公', '写作', '研发', '知识', '我的'],
+  expert: ['全部', '收藏', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究'],
   skill: ['全部', '收藏', '写作', '游戏', '研发', '办公'],
   connector: ['全部', '收藏', '飞书', 'MCP', '知识库', '自定义'],
 }
@@ -45,14 +49,21 @@ export const HUB_TAB_COPY: Record<CapabilityKind, { catalog: string; empty: stri
     unit: '项技能',
   },
   connector: {
-    catalog: '全部连接器',
-    empty: '还没有符合条件的连接器。你可以调整筛选，或添加 MCP 配置。',
-    featured: '连接你信任的服务，在明确授权范围内补齐工作上下文。',
-    unit: '个连接器',
+      catalog: '全部连接器',
+      empty: '还没有符合条件的连接器。你可以调整筛选，或从公司配置中心导入能力包。',
+      featured: '这里提供包装好的 MCP、固定 HTTP 调用包、公司 CLI，以及本机或远程 npx MCP 能力，可安装后装配给专家。',
+      unit: '个连接器',
   },
 }
 
 const DOMAIN_ICONS: Record<string, string> = {
+  产品与研究: 'clipboardCheck',
+  内容写作: 'pencilLine',
+  视觉创意: 'image',
+  日常办公: 'clipboardCheck',
+  数据分析: 'optimize',
+  软件研发: 'code',
+  知识研究: 'bookOpen',
   写作: 'pencilLine',
   游戏: 'gamepad',
   研发: 'code',
@@ -72,9 +83,11 @@ const KIND_FALLBACK: Record<CapabilityKind, string> = {
 }
 
 const SOURCE_LABELS: Record<string, string> = {
-  curated: '精选',
-  local: '本地',
-  'local-repo': 'Cursor 仓库',
+  curated: '官方',
+  official: '官方',
+  pack: '官方',
+  local: '我的',
+  'local-repo': '组织',
   zip: 'ZIP',
   https: '远程',
   custom: '自定义',
@@ -121,19 +134,43 @@ export function isUserCreatedExpert(item: HubCapabilityItem): boolean {
   return true
 }
 
+/** 私人专家由“从目录添加”和“自己创建”两条路径产生。 */
+export function isMyExpert(item: HubCapabilityItem): boolean {
+  return item.kind === 'expert' && (isCapabilityInstalled(item) || isUserCreatedExpert(item))
+}
+
+/** 私人自建 Agent 不回流到所有用户可见的专家目录。 */
+export function isExpertCatalogEntry(item: HubCapabilityItem): boolean {
+  return item.kind === 'expert' && !isUserCreatedExpert(item)
+}
+
+export function myExpertOriginLabel(item: HubCapabilityItem): string {
+  return isUserCreatedExpert(item) ? '我创建的' : '从专家库添加'
+}
+
 export function matchesHubCategory(item: HubCapabilityItem, category: string): boolean {
   if (!category || category === '全部') return true
   if (category === '收藏') return !!item.favorite
-  if (category === '我的') return isUserCreatedExpert(item)
   if (item.category === category) return true
   return (item.categories || []).some((cat) => String(cat) === category)
 }
 
+export function matchesHubSource(item: HubCapabilityItem, sourceFilter: HubSourceFilter | string = '全部来源'): boolean {
+  if (!sourceFilter || sourceFilter === '全部来源') return true
+  const source = String(item.source || 'local')
+  if (sourceFilter === '官方') return ['curated', 'official', 'pack'].includes(source)
+  if (sourceFilter === '组织') return source === 'local-repo' || Boolean(String(item.repositoryId || '').trim())
+  if (sourceFilter === '我的') return isMyExpert(item)
+  return true
+}
+
 export function hubCatalogTitle(
   kind: CapabilityKind,
-  opts: { query?: string; installedOnly?: boolean; category?: string },
+  opts: { query?: string; installedOnly?: boolean; category?: string; sourceFilter?: string },
 ): string {
-  if (kind === 'expert' && opts.category === '我的') return '我创建的专家'
+  if (kind === 'expert' && opts.sourceFilter === '我的') return '我的专家'
+  if (kind === 'expert' && opts.sourceFilter === '组织') return '组织专家'
+  if (kind === 'expert' && opts.sourceFilter === '官方') return '官方专家'
   if (opts.query || opts.installedOnly || (opts.category && opts.category !== '全部')) return '筛选结果'
   return HUB_TAB_COPY[kind].catalog
 }
@@ -169,8 +206,11 @@ export function hubOriginLabel(item: HubCapabilityItem): string {
 
 export function hubItemBadges(item: HubCapabilityItem, offline = false): { label: string; className: string }[] {
   const badges: { label: string; className: string }[] = []
+  if (item.kind === 'expert' && isCuratedExpert(item)) badges.push({ label: '认证', className: 'official verified' })
   if (item.legacy) badges.push({ label: 'Legacy', className: 'legacy' })
-  if (['installed', 'enabled', 'disabled'].includes(String(item.status || '')) || isCapabilityInstalled(item)) {
+  if (item.kind === 'expert' && isMyExpert(item)) {
+    badges.push({ label: '已添加', className: 'installed' })
+  } else if (['installed', 'enabled', 'disabled'].includes(String(item.status || '')) || isCapabilityInstalled(item)) {
     badges.push({ label: '已安装', className: 'installed' })
   }
   if (offline) badges.push({ label: '预览', className: 'offline' })
@@ -193,6 +233,7 @@ export function filterHubItems(
     kind: CapabilityKind
     query?: string
     category?: string
+    sourceFilter?: HubSourceFilter | string
     installedOnly?: boolean
   },
 ): CapabilityItem[] {
@@ -205,6 +246,7 @@ export function filterHubItems(
       return false
     }
     if (!matchesHubCategory(hubItem, category)) return false
+    if (opts.kind === 'expert' && !matchesHubSource(hubItem, opts.sourceFilter)) return false
     if (!q) return true
     const hay = [item.name, hubItem.originName, item.id, item.description, item.category, ...(hubItem.tags || [])]
       .filter(Boolean)

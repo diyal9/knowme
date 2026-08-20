@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import '../workbench/workbench-studio.css'
 import { STUDIO_END_ID, STUDIO_START_ID, studioBusinessNodes, studioEdges } from '../../../domain/studio'
 import { useAppStore } from '../../app/store'
 import { StudioCanvasBoard } from './StudioCanvasBoard'

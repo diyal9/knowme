@@ -53,7 +53,7 @@ export function HubAgenticFields({ agenticType, agenticConfig, onTypeChange, onC
     <section className="hub-expert-section">
       <header className="hub-expert-section-head">
         <div>
-          <h3>AgenticType</h3>
+      <h3>智能体类型</h3>
           <p>决定专家如何思考、用工具和推进任务。</p>
         </div>
       </header>

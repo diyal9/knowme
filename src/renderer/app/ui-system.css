@@ -1,0 +1,96 @@
+/* KnowMe UI foundation. Existing product selectors are bridged here while
+   surfaces migrate toward shared primitives. Keep specificity intentionally low. */
+
+:where(button, input, select, textarea) { font-family:var(--ui); letter-spacing:0; }
+:where(button, [role='button']) { -webkit-tap-highlight-color:transparent; }
+:where(button, input, select, textarea, [tabindex]):focus-visible {
+  outline:2px solid var(--focus-ring);
+  outline-offset:2px;
+}
+:where(button:disabled, input:disabled, select:disabled, textarea:disabled) {
+  cursor:not-allowed;
+  opacity:.48;
+}
+
+:where(.ui-button,.settings-btn,.hub-btn,.wb-run-btn,.wb-empty-action,.personal-growth-card button) {
+  min-height:var(--control-md);
+  padding:0 12px;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-md);
+  background:var(--surface-panel);
+  color:var(--text-primary);
+  font:var(--weight-medium) var(--font-sm)/1 var(--ui);
+  letter-spacing:0;
+  cursor:pointer;
+  transition:background-color var(--motion-micro) ease,border-color var(--motion-micro) ease,color var(--motion-micro) ease,box-shadow var(--motion-micro) ease;
+}
+:where(.ui-button,.settings-btn,.hub-btn,.wb-run-btn,.wb-empty-action,.personal-growth-card button):hover:not(:disabled) {
+  border-color:var(--border-strong);
+  background:var(--surface-hover);
+}
+:where(.ui-button.primary,.settings-btn.primary,.hub-btn.primary,.wb-run-btn.primary,.wb-empty-action.primary,.personal-primary) {
+  border-color:var(--action-primary) !important;
+  background:var(--action-primary) !important;
+  color:#fff !important;
+}
+:where(.ui-button.primary,.settings-btn.primary,.hub-btn.primary,.wb-run-btn.primary,.wb-empty-action.primary,.personal-primary):hover:not(:disabled) {
+  border-color:var(--action-primary-hover) !important;
+  background:var(--action-primary-hover) !important;
+}
+:where(.ui-icon-button,.hub-icon-btn,.wb-icon-btn,.agent-head-tool) {
+  width:var(--control-sm);
+  height:var(--control-sm);
+  padding:0;
+  border:0;
+  border-radius:var(--radius-sm);
+  background:transparent;
+  color:var(--text-secondary);
+  display:inline-grid;
+  place-items:center;
+  cursor:pointer;
+}
+:where(.ui-icon-button,.hub-icon-btn,.wb-icon-btn,.agent-head-tool):hover:not(:disabled) { background:var(--surface-hover); color:var(--text-primary); }
+
+:where(.ui-input,.settings-field input,.settings-field textarea,.settings-field select,.hub-field input,.hub-field textarea,.hub-field select,.memory-compose-row input,.memory-compose-row select) {
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-md);
+  background:var(--surface-panel);
+  color:var(--text-primary);
+  font:var(--weight-regular) var(--font-md)/var(--line-normal) var(--ui);
+  box-shadow:none;
+}
+:where(.ui-input,.settings-field input,.settings-field textarea,.settings-field select,.hub-field input,.hub-field textarea,.hub-field select,.memory-compose-row input,.memory-compose-row select):hover:not(:disabled) { border-color:var(--border-strong); }
+:where(.ui-input,.settings-field input,.settings-field textarea,.settings-field select,.hub-field input,.hub-field textarea,.hub-field select,.memory-compose-row input,.memory-compose-row select):focus { border-color:var(--action-primary); box-shadow:0 0 0 3px var(--focus-ring); outline:0; }
+
+:where(.ui-card,.memory-item,.hub-card,.wb-task-card,.wb-task-quick-card) {
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-lg);
+  background:var(--surface-panel);
+  box-shadow:none;
+}
+:where(.ui-card[role='button'],.memory-item[role='button'],.hub-card,.wb-task-card,.wb-task-quick-card):hover {
+  border-color:var(--border-strong);
+  box-shadow:0 5px 16px rgba(24,31,36,.045);
+}
+
+:where(.ui-badge,.settings-badge,.hub-badge) {
+  display:inline-flex;
+  align-items:center;
+  min-height:20px;
+  padding:0 7px;
+  border-radius:999px;
+  background:var(--surface-subtle);
+  color:var(--text-secondary);
+  font:var(--weight-medium) var(--font-xs)/1 var(--ui);
+}
+
+.ui-page { width:100%; max-width:var(--page-max); margin:0 auto; padding:var(--page-gutter); }
+.ui-page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:24px; }
+.ui-page-header h1 { margin:0; color:var(--text-primary); font:var(--type-page); letter-spacing:0; }
+.ui-page-header p { max-width:64ch; margin:6px 0 0; color:var(--text-secondary); font:var(--type-support); }
+.ui-section-header h2 { margin:0; color:var(--text-primary); font:var(--type-section); letter-spacing:0; }
+.ui-section-header p { margin:5px 0 0; color:var(--text-muted); font:var(--type-support); }
+.ui-empty { min-height:112px; display:grid; place-content:center; justify-items:center; gap:5px; color:var(--text-muted); text-align:center; }
+.ui-empty strong { color:var(--text-secondary); font:var(--weight-semibold) var(--font-sm)/var(--line-normal) var(--ui); }
+
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; } }

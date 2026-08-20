@@ -14,6 +14,7 @@ const connectorCaps = require('../connector-capabilities')
 const {
   scanCursorRepository,
   publicPreview,
+  planCursorRepositoryImport,
   registerCursorRepository,
 } = require('../cursor-capability-repository')
 const {
@@ -32,6 +33,7 @@ function createCapabilityLifecycle(deps) {
   const {
     getUserData,
     getConnectorsApi,
+    getWorkflowStore,
     bundledRoot,
     getPackSkillSources,
     store,
@@ -45,6 +47,7 @@ function createCapabilityLifecycle(deps) {
   } = deps
 
   const repositoryPreviews = new Map()
+  const repositoryImportPlans = new Map()
 
   function rememberRepositoryPreview(preview) {
     const token = crypto.randomBytes(16).toString('hex')
@@ -54,6 +57,21 @@ function createCapabilityLifecycle(deps) {
       repositoryPreviews.delete(oldest)
     }
     return token
+  }
+
+  function rememberRepositoryImportPlan(previewToken, planned) {
+    const planToken = crypto.randomBytes(16).toString('hex')
+    repositoryImportPlans.set(planToken, {
+      previewToken,
+      selection: planned.preview.selection,
+      plan: planned.plan,
+      createdAt: Date.now(),
+    })
+    while (repositoryImportPlans.size > 8) {
+      const oldest = repositoryImportPlans.keys().next().value
+      repositoryImportPlans.delete(oldest)
+    }
+    return planToken
   }
 
   function migrateConnectorsIfNeeded() {
@@ -309,8 +327,66 @@ function createCapabilityLifecycle(deps) {
     return publicPreview(preview, previewToken)
   }
 
-  async function importCursorRepository(payload = {}) {
+  async function planCursorRepositoryForHub(payload = {}) {
     const previewToken = String(payload.previewToken || '').trim()
+    const cached = repositoryPreviews.get(previewToken)
+    if (!cached || Date.now() - cached.createdAt > 10 * 60 * 1000) {
+      repositoryPreviews.delete(previewToken)
+      return fail('preview_expired', '仓库预览已过期，请重新扫描')
+    }
+    const planned = planCursorRepositoryImport(cached.preview, {
+      workflowIds: payload.workflowIds,
+      additionalSkillIds: payload.additionalSkillIds,
+      includeOptionalSkills: payload.includeOptionalSkills === true,
+      includeConnectors: payload.includeConnectors !== false,
+    })
+    if (!planned.ok) return planned
+    const planToken = rememberRepositoryImportPlan(previewToken, planned)
+    return { ok: true, planToken, plan: planned.plan }
+  }
+
+  function verifyImportedWorkflow(payload = {}) {
+    const workflowId = String(payload.workflowId || '').trim()
+    if (!workflowId) return fail('invalid_args', '缺少 workflowId')
+    const workflowStore = getWorkflowStore()
+    const loaded = workflowStore?.get?.(workflowId)
+    if (!loaded?.ok) return fail('workflow_not_found', `未找到已导入工作流：${workflowId}`)
+    const issues = []
+    const experts = []
+    for (const ref of loaded.package.agentRefs || []) {
+      const id = String(ref?.id || '').trim()
+      const expert = expertRuntime().loadExpert(id)
+      experts.push({ id, ok: expert?.ok === true, name: expert?.name || id })
+      if (!expert?.ok) issues.push({ code: 'missing_expert', id, message: `工作流专家不可用：${id}` })
+    }
+    const entries = store.loadInstallStore().entries || {}
+    const skills = (loaded.package.skillRefs || []).map(ref => {
+      const id = String(ref?.id || '').trim()
+      const ok = entries[id]?.kind === 'skill' && entries[id]?.enabled !== false
+      if (!ok) issues.push({ code: 'missing_skill', id, message: `工作流技能不可用：${id}` })
+      return { id, ok }
+    })
+    return {
+      ok: issues.length === 0,
+      workflow: {
+        id: loaded.package.id,
+        name: loaded.package.name,
+        source: loaded.package.source,
+        status: loaded.package.status,
+        nodes: loaded.package.graph?.nodes?.length || 0,
+        gates: loaded.package.graph?.gates?.length || 0,
+      },
+      experts,
+      skills,
+      issues,
+    }
+  }
+
+  async function importCursorRepository(payload = {}) {
+    const planToken = String(payload.planToken || '').trim()
+    const cachedPlan = planToken ? repositoryImportPlans.get(planToken) : null
+    if (planToken && !cachedPlan) return fail('plan_expired', '导入规划不存在或已过期，请重新生成')
+    const previewToken = String(cachedPlan?.previewToken || payload.previewToken || '').trim()
     const cached = repositoryPreviews.get(previewToken)
     if (!cached || Date.now() - cached.createdAt > 10 * 60 * 1000) {
       repositoryPreviews.delete(previewToken)
@@ -337,14 +413,38 @@ function createCapabilityLifecycle(deps) {
         preview: publicPreview(refreshed, nextToken),
       }
     }
-    const result = registerCursorRepository(refreshed, {
+    let importPreview = refreshed
+    if (cachedPlan) {
+      if (Date.now() - cachedPlan.createdAt > 10 * 60 * 1000) {
+        repositoryImportPlans.delete(planToken)
+        return fail('plan_expired', '导入规划已过期，请重新生成')
+      }
+      const replanned = planCursorRepositoryImport(refreshed, {
+        workflowIds: cachedPlan.selection.workflowIds,
+        additionalSkillIds: cachedPlan.selection.additionalSkillIds,
+        includeOptionalSkills: cachedPlan.selection.includeOptionalSkills,
+        includeConnectors: cachedPlan.selection.includeConnectors,
+      })
+      if (!replanned.ok) return replanned
+      importPreview = replanned.preview
+    }
+    const result = registerCursorRepository(importPreview, {
       userData: getUserData(),
       store,
       catalog: catalogApi,
       expertRuntime: expertRuntime(),
       connectorsApi: getConnectorsApi(),
+      workflowStore: getWorkflowStore(),
     })
+    const workflowVerification = Object.values(result.idMaps?.workflows || {})
+      .map(workflowId => verifyImportedWorkflow({ workflowId }))
+    result.verification = {
+      ok: workflowVerification.every(item => item.ok),
+      workflows: workflowVerification,
+    }
+    result.complete = result.failed.length === 0 && result.verification.ok
     repositoryPreviews.delete(previewToken)
+    if (planToken) repositoryImportPlans.delete(planToken)
     return result
   }
 
@@ -566,7 +666,9 @@ function createCapabilityLifecycle(deps) {
     toggleCapabilityFavorite,
     publishImportedEntry,
     scanCursorRepositoryForHub,
+    planCursorRepositoryForHub,
     importCursorRepository,
+    verifyImportedWorkflow,
     installCapability,
     precheckInstallCapability,
     uninstallCapability,

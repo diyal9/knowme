@@ -27,6 +27,17 @@ describe('content-blocks', () => {
     expect(card.card.title).toBe('纪要')
   })
 
+  it('parses relative markdown documents into link nodes', () => {
+    const blocks = parseContentBlocks('见 [技术架构](tech/ActivityScheduler.md)')
+    const para = blocks[0]
+    if (para.type !== 'paragraph') throw new Error('expected paragraph')
+    expect(para.inlines).toContainEqual({
+      kind: 'link',
+      href: 'tech/ActivityScheduler.md',
+      label: '技术架构',
+    })
+  })
+
   it('serializes lists without raw asterisks', () => {
     const html = renderKnowledgeMarkdown('1. **Data Server Host**\n2. **Hit**')
     expect(html).toContain('<ol>')

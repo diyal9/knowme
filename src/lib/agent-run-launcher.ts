@@ -9,6 +9,10 @@ const crypto = require('crypto')
 const { AgentRunExecutor } = require('./agent-run-executor')
 const { RunPhase } = require('./agent-run-ports')
 const { createAgentRuntimeMetrics } = require('./agent-runtime-metrics')
+const {
+  mergeExecutionContracts,
+  enforceExecutionTerminal,
+} = require('./agent-execution-contract')
 
 const {
   CANCEL_BUDGET_MS,
@@ -103,6 +107,14 @@ class AgentRunLauncher {
       throw err
     }
 
+    runSpec = {
+      ...runSpec,
+      executionContract: mergeExecutionContracts([
+        runSpec.executionContract,
+        runSpec.outputContract,
+        runSpec.profileSnapshot?.outputContract,
+      ]),
+    }
     const requestedBackend = runSpec.backend || this.defaultBackend
     // 未注册的 backend 是配置错误，禁止当成远程不健康而降级本地。
     if (!this.backends.has(String(requestedBackend))) {
@@ -154,11 +166,13 @@ class AgentRunLauncher {
           this.metrics.increment('duplicate_terminal_callback_total', 1, { backend: backendId })
           return
         }
+        const enforced = enforceExecutionTerminal(runSpec.executionContract, info)
         entry.terminalDelivered = true
-        entry.status = mapTerminalToStatus(info.terminal)
+        entry.status = mapTerminalToStatus(enforced.terminal)
         entry.endedAt = Date.now()
-        entry.terminal = info.terminal
-        entry.summary = info.text
+        entry.terminal = enforced.terminal
+        entry.summary = enforced.text
+        entry.stopReason = enforced.stopReason || enforced.error || null
         this.workspaceBudget.record({
           workspaceId: runSpec.workspaceId || runSpec.meta?.workspaceId,
           teamId: runSpec.teamId,
@@ -166,12 +180,12 @@ class AgentRunLauncher {
         }, {
           ok: entry.status !== 'error' && entry.status !== 'failed',
           wallMs: entry.endedAt - (entry.startedAt || entry.endedAt),
-          timeout: info.terminal === 'timeout' || info.code === 'timeout',
+          timeout: enforced.terminal === 'timeout' || enforced.code === 'timeout',
         })
         if (isTerminalStatus(entry.status)) {
           this.activeLaunches.delete(runId)
         }
-        hooks.onTerminal?.(info)
+        hooks.onTerminal?.(enforced)
       },
     }
 
@@ -194,9 +208,14 @@ class AgentRunLauncher {
       handle.runPromise.catch(() => {}).finally(() => {
         const entry = this.activeLaunches.get(runId)
         if (entry && entry.status === 'running') {
-          entry.status = 'completed'
-          entry.endedAt = Date.now()
-          this.activeLaunches.delete(runId)
+          wrappedHooks.onTerminal({
+            runId,
+            terminal: RunPhase.ERROR,
+            ok: false,
+            code: 'terminal_callback_missing',
+            error: 'Agent 执行结束但没有返回可验证终态',
+            text: 'Agent 执行结束但没有返回可验证终态',
+          })
         }
       })
     }

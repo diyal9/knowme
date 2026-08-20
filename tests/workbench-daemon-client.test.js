@@ -61,7 +61,15 @@ describe('workbench daemon API client', () => {
         return jsonResponse({ workflows: [{ id: 'daily-brief', name: '每日简报' }] })
       }
       if (url.endsWith('/api/tasks')) {
-        return jsonResponse({ tasks: [{ slug: 'daily-brief-1', workflow: 'daily-brief', job: { state: 'running' } }] })
+        return jsonResponse({
+          tasks: [{
+            slug: 'daily-brief-1',
+            workflow: 'daily-brief',
+            document_title: '项目需求说明',
+            source: { title: '需求文档' },
+            job: { state: 'running' },
+          }],
+        })
       }
       return jsonResponse({ detail: 'not found' }, 404)
     }
@@ -70,6 +78,8 @@ describe('workbench daemon API client', () => {
     assert.equal(result.online, true)
     assert.equal(result.workflows[0].source, 'daemon')
     assert.equal(result.tasks[0].state, 'running')
+    assert.equal(result.tasks[0].documentTitle, '项目需求说明')
+    assert.equal(result.tasks[0].sourceTitle, '需求文档')
   })
 
   it('normalizes and sorts safe daemon Agent experts', async () => {

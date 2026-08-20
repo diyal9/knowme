@@ -141,7 +141,7 @@ export function parseTaskListResponse(raw: unknown): WorkbenchTask[] {
 }
 
 export function taskHasWorkflowId(task: WorkbenchTask): boolean {
-  return Boolean(text(task.workflowId))
+  return text(task.kind).toLowerCase() === 'workflow' || Boolean(text(task.workflowId))
 }
 
 export function workflowShelfTasks(tasks: WorkbenchTask[]): WorkbenchTask[] {
@@ -154,10 +154,17 @@ export function expertHomeTasks(tasks: WorkbenchTask[]): WorkbenchTask[] {
 
 const TASK_STATUS_META: Record<string, { label: string; dot: string }> = {
   draft: { label: '草稿', dot: 'draft' },
+  starting: { label: '正在开工', dot: 'running' },
+  needs_input: { label: '等待我处理', dot: 'running' },
   running: { label: '进行中', dot: 'running' },
   review: { label: '待确认', dot: 'running' },
+  revising: { label: '修改中', dot: 'running' },
+  completed: { label: '已完成', dot: 'done' },
   done: { label: '已完成', dot: 'done' },
   failed: { label: '失败', dot: 'failed' },
+  error: { label: '异常', dot: 'failed' },
+  timeout: { label: '已超时', dot: 'failed' },
+  blocked: { label: '已阻塞', dot: 'failed' },
   cancelled: { label: '已取消', dot: 'cancelled' },
 }
 
@@ -197,7 +204,8 @@ export function taskRelTime(iso?: string): string {
 export function runPhaseFromTaskStatus(status: string | undefined): 'running' | 'hitl' | 'done' | 'input' {
   const value = String(status || '').toLowerCase()
   if (value === 'review') return 'hitl'
-  if (['done', 'failed', 'cancelled'].includes(value)) return 'done'
-  if (value === 'running') return 'running'
+  if (['done', 'completed', 'failed', 'cancelled'].includes(value)) return 'done'
+  if (['starting', 'running', 'revising'].includes(value)) return 'running'
+  if (value === 'needs_input') return 'input'
   return 'done'
 }

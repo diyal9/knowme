@@ -551,7 +551,7 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
     const d = ctx.screen.getPrimaryDisplay();
     const { width: ww, height: wh } = d.workArea;
     // 窗口壳色与工作台左侧 rail 对齐（L 形 chrome：顶栏 + 侧栏同色）
-    const WORKSPACE_CHROME_BG = '#ebeae7';
+    const WORKSPACE_CHROME_BG = '#f1f2f3';
     const workspaceOpts = {
         width: Math.min(1280, ww - 80), height: Math.min(820, wh - 60),
         minWidth: 900, minHeight: 560, center: true,

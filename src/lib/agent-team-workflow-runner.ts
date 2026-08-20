@@ -6,6 +6,7 @@ const {
   mapToBackend,
 } = require('./agent-package-runtime')
 const { validateHandoffPayload } = require('./agent-run-launcher')
+const { mergeExecutionContracts } = require('./agent-execution-contract')
 
 const NODE_PENDING = 'pending'
 const NODE_RUNNING = 'running'
@@ -57,6 +58,12 @@ class AgentTeamWorkflowRunner {
     this.specialtyHandlers = opts.specialtyHandlers && typeof opts.specialtyHandlers === 'object'
       ? opts.specialtyHandlers
       : {}
+    this.resolveAction = typeof opts.resolveAction === 'function' ? opts.resolveAction : () => null
+    this.executeAction = typeof opts.executeAction === 'function' ? opts.executeAction : null
+    this.requestHumanInput = typeof opts.requestHumanInput === 'function'
+      ? opts.requestHumanInput
+      : async () => ({ ok: false, code: 'human_input_required', message: '等待人工处理' })
+    this.saveCheckpoint = typeof opts.saveCheckpoint === 'function' ? opts.saveCheckpoint : () => {}
   }
 
   _resolvePackage(packageId, profileId = '') {
@@ -172,6 +179,19 @@ class AgentTeamWorkflowRunner {
     const backend = backendHealth?.ok === false && manifest.compatibility?.fallbackLocal === true
       ? 'local-executor'
       : requestedBackend
+    const hasDeclaredNodeOutput = node.outputs && typeof node.outputs === 'object'
+      && Object.keys(node.outputs).length > 0
+    const executionContract = mergeExecutionContracts([
+      manifest.executionContract,
+      profile?.outputContract,
+      node.executionContract,
+      hasDeclaredNodeOutput ? {
+        requiredTools: ['create_artifact'],
+        requiredEvidence: [{ kind: 'tool_result', tool: 'create_artifact', forbidTruncated: true }],
+        completionConditions: [{ type: 'artifact_present' }],
+        minArtifacts: 1,
+      } : null,
+    ])
 
     const created = this.runManager.createChildRun(rootRunId, {
       expertId: manifest.packageId,
@@ -205,6 +225,7 @@ class AgentTeamWorkflowRunner {
         outputContract: profile.outputContract,
         budget: profile.budget,
       } : null,
+      executionContract,
       idempotencyKey: `${rootRunId}:${node.id}:${runAttempt}`,
       meta: {
         workflowNodeId: node.id,
@@ -337,6 +358,53 @@ class AgentTeamWorkflowRunner {
       this.emit({ type: 'team.node.failed', rootRunId, ...result })
       return result
     }
+  }
+
+  async _runActionNode({ rootRunId, node, incoming, nodeResults, input, grants = [] }) {
+    const contract = this.resolveAction(node.actionRef)
+    if (!contract || contract.ok === false) return { ok: false, code: 'action_unresolved', nodeId: node.id, status: NODE_FAILED, message: `Action Contract 不存在: ${node.actionRef}` }
+    if (!this.executeAction) return { ok: false, code: 'action_executor_missing', nodeId: node.id, status: NODE_FAILED, message: '未配置 Action 执行器' }
+    const action = contract.action || contract
+    const risk = String(action.risk?.level || 'low')
+    const sideEffect = String(action.sideEffect || 'none')
+    const grantSet = new Set((Array.isArray(grants) ? grants : []).map(item => typeof item === 'string' ? item : item?.actionRef))
+    if (sideEffect === 'reversible_write' && !grantSet.has(node.actionRef)) {
+      return { ok: false, code: 'action_authorization_required', nodeId: node.id, status: NODE_BLOCKED, message: `动作需要启动授权: ${node.actionRef}` }
+    }
+    if (risk === 'high' || risk === 'critical' || sideEffect === 'irreversible_write') {
+      const decision = await this.requestGateDecision({ rootRunId, node, action, reason: 'high_risk_action' })
+      if (decision?.approved !== true) return { ok: false, code: 'gate_rejected', nodeId: node.id, status: NODE_FAILED, stopReason: decision?.reason || 'action_rejected' }
+    }
+    const handoff = this._collectHandoff(node.id, incoming, nodeResults, input)
+    if (!handoff.ok) return handoff
+    this.emit({ type: 'team.action.started', rootRunId, nodeId: node.id, actionRef: node.actionRef })
+    try {
+      const raw = await this.executeAction({ contract: action, node, input: handoff.handoff, rootRunId, idempotencyKey: `${rootRunId}:${node.id}` })
+      const ok = raw?.ok !== false
+      const result = {
+        ok, code: ok ? null : (raw?.code || 'action_failed'), nodeId: node.id,
+        status: ok ? NODE_COMPLETED : NODE_FAILED,
+        summary: boundedSummary(raw?.summary || raw?.output || (ok ? 'action completed' : 'action failed')),
+        artifactRefs: uniqueRefs([raw?.artifactRefs || []]), evidenceRefs: uniqueRefs([raw?.evidenceRefs || []]),
+        output: raw?.output, sideEffectCommitted: ok && sideEffect !== 'none' && sideEffect !== 'read',
+      }
+      if (ok) this.saveCheckpoint({ rootRunId, nodeId: node.id, result, createdAt: new Date().toISOString() })
+      this.emit({ type: ok ? 'team.action.completed' : 'team.action.failed', rootRunId, ...result })
+      return result
+    } catch (error) {
+      return { ok: false, code: 'action_failed', nodeId: node.id, status: NODE_FAILED, message: error?.message || String(error), summary: boundedSummary(error?.message) }
+    }
+  }
+
+  async _runHumanNode({ rootRunId, node, incoming, nodeResults, input }) {
+    const handoff = this._collectHandoff(node.id, incoming, nodeResults, input)
+    if (!handoff.ok) return handoff
+    this.emit({ type: 'team.human.waiting', rootRunId, nodeId: node.id, humanRole: node.humanRole || node.role })
+    const response = await this.requestHumanInput({ rootRunId, node, handoff: handoff.handoff })
+    const ok = response?.ok !== false && response?.submitted !== false
+    const result = { ok, code: ok ? null : (response?.code || 'human_input_required'), nodeId: node.id, status: ok ? NODE_COMPLETED : NODE_BLOCKED, summary: boundedSummary(response?.summary || response?.text || (ok ? 'human input submitted' : 'waiting for human')), artifactRefs: uniqueRefs([response?.artifactRefs || []]), evidenceRefs: uniqueRefs([response?.evidenceRefs || []]), output: response?.output }
+    if (ok) this.saveCheckpoint({ rootRunId, nodeId: node.id, result, createdAt: new Date().toISOString() })
+    return result
   }
 
   async _runGateNode({ rootRunId, node, team, gateAttempts }) {
@@ -490,7 +558,7 @@ class AgentTeamWorkflowRunner {
       }
 
       const specialtyBatch = ready
-        .filter(node => node.type === 'llm' || node.type === 'tool' || node.type === 'knowledge')
+        .filter(node => node.type === 'llm' || node.type === 'tool' || node.type === 'knowledge' || node.type === 'mcp' || node.type === 'request')
         .slice(0, parallelism)
       if (specialtyBatch.length) {
         for (const node of specialtyBatch) nodeStates.set(node.id, NODE_RUNNING)
@@ -510,6 +578,18 @@ class AgentTeamWorkflowRunner {
             failed = result
             break
           }
+        }
+        continue
+      }
+
+      const actionBatch = ready.filter(node => node.type === 'action').slice(0, parallelism)
+      if (actionBatch.length) {
+        for (const node of actionBatch) nodeStates.set(node.id, NODE_RUNNING)
+        const results = await Promise.all(actionBatch.map(node => this._runActionNode({ rootRunId, node, incoming, nodeResults, input, grants: opts.grants || [] })))
+        for (let index = 0; index < actionBatch.length; index += 1) {
+          const result = results[index]; const node = actionBatch[index]
+          nodeResults.set(node.id, result); nodeStates.set(node.id, result.ok ? NODE_COMPLETED : result.status)
+          if (!result.ok) { failed = result; break }
         }
         continue
       }
@@ -536,12 +616,20 @@ class AgentTeamWorkflowRunner {
         continue
       }
 
-      if (node.type === 'join' || node.type === 'terminal') {
+      if (node.type === 'human') {
+        nodeStates.set(node.id, NODE_RUNNING)
+        const result = await this._runHumanNode({ rootRunId, node, incoming, nodeResults, input })
+        nodeResults.set(node.id, result); nodeStates.set(node.id, result.ok ? NODE_COMPLETED : result.status)
+        if (!result.ok) failed = result
+        continue
+      }
+
+      if (node.type === 'join' || node.type === 'terminal' || node.type === 'start' || node.type === 'end' || node.type === 'parallel') {
         const result = {
           ok: true,
           nodeId: node.id,
           status: NODE_COMPLETED,
-          summary: node.type === 'join' ? `join ${node.joinStrategy || workflow.joinStrategy}` : 'workflow completed',
+          summary: node.type === 'join' ? `join ${node.joinStrategy || workflow.joinStrategy}` : (node.type === 'start' || node.type === 'parallel' ? `${node.type} ready` : 'workflow completed'),
           artifactRefs: uniqueRefs((incoming.get(node.id) || []).map(id => nodeResults.get(id)?.artifactRefs || [])),
           evidenceRefs: uniqueRefs((incoming.get(node.id) || []).map(id => nodeResults.get(id)?.evidenceRefs || [])),
         }

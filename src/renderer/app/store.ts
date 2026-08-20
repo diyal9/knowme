@@ -26,6 +26,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   shelfCards: [],
   shelfLoading: false,
   shelfDaemonOnline: null,
+  daemonOverviewCache: null,
   tasks: [],
   run: null,
   expertRoom: null,
@@ -105,6 +106,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleFiles: () => set({ filesOpen: !get().filesOpen }),
   setShelfQuery: (shelfQuery) => set({ shelfQuery }),
   setShelfDomain: (shelfDomain) => set({ shelfDomain }),
+  setDaemonOverviewCache: (daemonOverviewCache) => set({ daemonOverviewCache }),
 
   ...createWorkbenchSlice(set, get),
   ...createAssistantSlice(set, get),

@@ -689,11 +689,15 @@ describe('agent-run-manager', () => {
     const child = manager.createChildRun('run_parent', {
       runId: 'run_child',
       agentPackageId: 'demo-agent',
+      executionContract: { requiredTools: ['create_artifact'] },
       autoLaunch: false,
     })
     assert.equal(child.ok, true)
     assert.equal(child.run.parentRunId, 'run_parent')
     assert.equal(child.run.depth, 1)
+    assert.deepEqual(manager.launchSpecs.get('run_child').executionContract, {
+      requiredTools: ['create_artifact'],
+    })
 
     const parentRun = manager.runs.get('run_parent')
     assert.ok(parentRun.childRunIds.includes('run_child'))

@@ -7,11 +7,11 @@
 })(typeof window !== 'undefined' ? window : globalThis, function createWorkbenchStudioModel() {
   const RELATIONS = new Set(['serial', 'parallel', 'approval'])
   const NODE_KINDS = new Set([
-    'start', 'end', 'agent', 'llm', 'tool', 'knowledge', 'condition', 'join', 'gate',
+    'start', 'end', 'agent', 'llm', 'tool', 'knowledge', 'mcp', 'request', 'condition', 'join', 'gate',
   ])
   const EXEC_AGENT = new Set(['agent'])
-  const EXEC_SPECIALTY = new Set(['llm', 'tool', 'knowledge'])
-  const EXEC_CAPABILITY = new Set(['agent', 'llm', 'tool', 'knowledge'])
+  const EXEC_SPECIALTY = new Set(['llm', 'tool', 'knowledge', 'mcp', 'request'])
+  const EXEC_CAPABILITY = new Set(['agent', 'llm', 'tool', 'knowledge', 'mcp', 'request'])
   /** @deprecated use EXEC_AGENT — specialty no longer compiles as agent */
   const COMPILE_AS_AGENT = EXEC_AGENT
   const MAX_NODES = 24
@@ -38,6 +38,8 @@
     const value = text(raw?.kind || raw?.type || raw?.nodeType || 'agent', 24).toLowerCase()
     if (value === 'ifelse' || value === 'if') return 'condition'
     if (value === 'terminal') return 'end'
+    // 旧版组件库曾暴露未打通的 Action；统一迁移为当前可执行的工具节点。
+    if (value === 'action') return 'tool'
     if (value === 'human' || value === 'approval') return 'gate'
     return NODE_KINDS.has(value) ? value : 'agent'
   }
@@ -87,6 +89,8 @@
       llm: '大模型节点',
       tool: '工具节点',
       knowledge: '知识库节点',
+      mcp: 'MCP 节点',
+      request: 'HTTP 请求节点',
       condition: '条件判断',
       join: '汇合',
       gate: '人工确认',
@@ -112,7 +116,25 @@
       return {
         knowledgeId: text(source.knowledgeId || source.kbId || source.id || '', 80),
         knowledgeName: text(source.knowledgeName || '', 120),
+        knowledgeKind: text(source.knowledgeKind || source.kind || '', 24),
         mode: text(source.mode || 'selected', 24) || 'selected',
+      }
+    }
+    if (kind === 'mcp') {
+      return {
+        connectorId: text(source.connectorId || source.serverId || '', 120),
+        connectorName: text(source.connectorName || source.serverName || '', 160),
+        toolName: text(source.toolName || source.tool || '', 160),
+        arguments: text(source.arguments || source.args || '{}', 4000),
+      }
+    }
+    if (kind === 'request') {
+      const method = text(source.method || 'GET', 12).toUpperCase()
+      return {
+        method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(method) ? method : 'GET',
+        url: text(source.url || source.endpoint || '', 1200),
+        headers: text(source.headers || '{}', 4000),
+        body: text(source.body || '', 8000),
       }
     }
     if (kind === 'condition') {
@@ -258,7 +280,7 @@
       item,
     ]))
     const graphNodes = Array.isArray(graph.nodes) ? graph.nodes : []
-    const capabilityTypes = new Set(['agent', 'llm', 'tool', 'knowledge'])
+    const capabilityTypes = new Set(['agent', 'llm', 'tool', 'knowledge', 'mcp', 'request'])
     const agentNodes = graphNodes.filter(item =>
       capabilityTypes.has(text(item.type, 24)) || item?.agentPackageId || EXEC_SPECIALTY.has(text(item.studioKind, 24)))
     const hasExplicitEdges = Array.isArray(graph.edges) && graph.edges.length
@@ -275,7 +297,7 @@
       const type = text(item.type, 24)
       if (type === 'terminal') return
       const member = members.get(text(item.id, 80)) || {}
-      if (type === 'llm' || type === 'tool' || type === 'knowledge') {
+      if (type === 'llm' || type === 'tool' || type === 'knowledge' || type === 'mcp' || type === 'request') {
         freeNodes.push(normalizeNode({
           ...item,
           kind: type,
@@ -288,7 +310,11 @@
               }
               : type === 'tool'
                 ? { skillId: item.skillId || '', skillName: item.skillName || '' }
-                : { knowledgeId: item.knowledgeId || '', knowledgeName: item.knowledgeName || '', mode: 'selected' }
+                : type === 'knowledge'
+                  ? { knowledgeId: item.knowledgeId || '', knowledgeName: item.knowledgeName || '', mode: 'selected' }
+                  : type === 'mcp'
+                    ? { connectorId: item.connectorId || item.serverId || '', connectorName: item.connectorName || item.serverName || '', toolName: item.toolName || '', arguments: item.arguments || '{}' }
+                    : { method: item.method || 'GET', url: item.url || '', headers: item.headers || '{}', body: item.body || '' }
           ),
           x: item.x ?? graph.layout?.nodes?.[item.id]?.x,
           y: item.y ?? graph.layout?.nodes?.[item.id]?.y,
@@ -441,6 +467,20 @@
           code: 'missing_knowledge',
           nodeId: node.id,
           message: `知识库节点「${node.name || node.id}」需要选择知识库`,
+        })
+      }
+      if (node.kind === 'mcp' && (!text(node.config?.connectorId || node.config?.connectorName, 120) || !text(node.config?.toolName, 120))) {
+        issues.push({
+          code: 'missing_mcp_tool',
+          nodeId: node.id,
+          message: `MCP 节点「${node.name || node.id}」需要填写服务和工具`,
+        })
+      }
+      if (node.kind === 'request' && !text(node.config?.url, 1200)) {
+        issues.push({
+          code: 'missing_request_url',
+          nodeId: node.id,
+          message: `HTTP 请求节点「${node.name || node.id}」需要填写 URL`,
         })
       }
     })

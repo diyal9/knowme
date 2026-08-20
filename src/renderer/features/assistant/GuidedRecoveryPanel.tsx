@@ -13,6 +13,15 @@ export function GuidedRecoveryPanel() {
   if (!status && !cancelStage && !recovery) return null
   if (isGenerating && !recovery && !cancelStage) return null
 
+  const cancelled = cancelStage === 'cancelled' || recovery?.status === 'cancelled' || status === '已取消'
+  if (cancelled) {
+    return (
+      <aside className="agent-guided-recovery is-cancelled" data-testid="guided-recovery-panel" aria-live="polite">
+        <strong>已取消</strong>
+      </aside>
+    )
+  }
+
   const view = buildRecoveryView({
     status: cancelStage || recovery?.status || status,
     code: recovery?.code,
@@ -24,11 +33,9 @@ export function GuidedRecoveryPanel() {
     ? '正在请求取消…'
     : cancelStage === 'cancelling_children'
       ? '正在取消子任务…'
-      : cancelStage === 'cancelled'
-        ? '已取消'
-        : cancelStage === 'resume_pending'
-          ? '正在恢复…'
-          : ''
+      : cancelStage === 'resume_pending'
+        ? '正在恢复…'
+        : ''
 
   return (
     <aside className="agent-guided-recovery" data-testid="guided-recovery-panel" aria-live="polite">

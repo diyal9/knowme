@@ -228,7 +228,7 @@ function createMockRunPorts(fixture, signal) {
           meta: script.meta || {},
         }
         if (name === 'feishu.meeting_candidates') {
-          referenceState = feishuAdapter.applyMeetingCandidatesToReferenceState(referenceState, result.text)
+          referenceState = feishuAdapter.applyMeetingCandidatesToReferenceState(referenceState, result)
           sessionState.session.referenceState = groundingRuntime.serializeReferenceState(referenceState)
         }
         if (name === 'feishu.meeting_read') {

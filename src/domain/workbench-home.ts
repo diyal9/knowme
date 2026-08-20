@@ -28,7 +28,7 @@ export function shelfRowCapacity(width: number): number {
 
 export function shelfSummaryText(total: number, runnable: number): string {
   if (total <= 0) return ''
-  return `${total} 个工作流 · ${runnable} 个现在可以运行`
+  return `${runnable} 个可运行`
 }
 
 /** Test/QA fixtures that must not appear as workbench home experts. */

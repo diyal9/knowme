@@ -1,6 +1,15 @@
 /* Studio 画板样式；surface=studio 时懒加载。 */
 /* ── 管线任务：右栏审阅制品 ───────────────────────────────────── */
 .wb-runner.is-daemon-review {
+  --wb-surface:var(--surface-panel);
+  --wb-surface-subtle:var(--surface-subtle);
+  --wb-border:var(--border-default);
+  --wb-line-strong:var(--border-strong);
+  --wb-text:var(--text-primary);
+  --wb-text-muted:var(--text-secondary);
+  --wb-text-faint:var(--text-muted);
+  --wb-accent:var(--action-primary);
+  --wb-accent-soft:var(--action-primary-soft);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -9,7 +18,7 @@
   overflow: hidden;
   border: 0;
   border-radius: 0;
-  background: var(--wb-surface, #fff);
+  background: var(--surface-panel);
   box-shadow: none;
 }
 .wb-runner.is-daemon-review .wb-runner-head {
@@ -47,41 +56,64 @@
   flex-direction: column;
   min-height: 0;
   flex: 1;
-  padding: 10px 14px 0;
-  background: var(--wb-surface, #fff);
+  padding: 22px 26px 0;
+  background: var(--surface-panel);
 }
 .wb-daemon-review[hidden] { display: none !important; }
 .wb-daemon-review-identity {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 16px;
   min-width: 0;
-  margin: 0 0 10px;
-  padding: 8px 10px;
-  border: 1px solid var(--wb-border, #e2ded5);
-  border-radius: 10px;
-  background: var(--wb-surface-subtle, #f6f5f1);
+  margin: 0;
+  padding: 0 0 17px;
+  border: 0;
+  border-bottom: 1px solid var(--border-default);
+  border-radius: 0;
+  background: transparent;
 }
 .wb-daemon-review-identity[hidden] { display: none !important; }
-.wb-daemon-review-identity-label {
-  flex-shrink: 0;
-  font: 550 11px/1.3 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
-  letter-spacing: 0.02em;
+.wb-daemon-review-identity-copy {
+  display: grid;
+  min-width: 0;
 }
 .wb-daemon-review-identity strong {
   min-width: 0;
-  font: 650 13px/1.35 var(--ui);
+  font: var(--type-section);
   color: var(--wb-text, #2c302d);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
+.wb-daemon-review-state {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font: 600 12px/1.35 var(--ui);
+  white-space: nowrap;
+}
+.wb-daemon-review-state::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.wb-daemon-review-state.tone-running { color:var(--action-primary); }
+.wb-daemon-review-state.tone-waiting { color:var(--wb-warning, #8a641f); }
+.wb-daemon-review-state.tone-done { color:var(--wb-success); }
+.wb-daemon-review-state.tone-muted { color:var(--text-muted); }
 .wb-daemon-review-progress {
   display: grid;
   gap: 8px;
-  margin: 0 0 12px;
+  margin: 0 0 18px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -91,18 +123,18 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 10px;
-  font: 550 11px/1.35 var(--ui);
+  font: 500 12px/1.35 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-progress-head strong {
-  font: 650 12px/1.3 var(--ui);
+  font: 600 12px/1.3 var(--ui);
   color: var(--wb-text, #2c302d);
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
 .wb-daemon-review-progress-bar {
   height: 4px;
   border-radius: 999px;
-  background: #efece5;
+  background: var(--surface-selected);
   overflow: hidden;
 }
 .wb-daemon-review-progress-bar > span {
@@ -112,33 +144,34 @@
   background: var(--wb-warning, #8a641f);
   transition: width .2s ease;
 }
-.wb-daemon-review-progress-bar.is-done > span { background: var(--wb-success, #34735e); }
+.wb-daemon-review-progress-bar.is-done > span { background: var(--wb-success, #2d7a63); }
 .wb-daemon-review-progress-bar.is-error > span { background: var(--wb-danger, #a94f45); }
 .wb-daemon-review-tabs {
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid var(--wb-border, #e2ded5);
-  margin-bottom: 10px;
+  gap: 2px;
+  border-bottom: 1px solid var(--border-default);
+  margin: 0;
   overflow-x: auto;
 }
 .wb-daemon-review-tab {
   position: relative;
   border: 0;
   background: transparent;
-  padding: 8px 14px 9px;
-  font: 650 11.5px/1.2 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  min-height:32px;
+  padding: 7px 10px 8px;
+  font: 600 12px/1.2 var(--ui);
+  color: var(--text-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
   flex: 0 0 auto;
 }
-.wb-daemon-review-tab:hover { color: #3d3a35; }
+.wb-daemon-review-tab:hover { color:var(--text-primary); background:var(--surface-hover); }
 .wb-daemon-review-tab.is-active,
 .wb-daemon-review-tab[aria-selected="true"] {
-  color: #1f1e1b;
-  border-bottom-color: #1f1e1b;
+  color:var(--action-primary);
+  border-bottom-color:var(--action-primary);
 }
 .wb-daemon-review-refresh {
   margin-left: auto;
@@ -155,9 +188,11 @@
   cursor: pointer;
 }
 .wb-daemon-review-refresh:hover {
-  color: #1f1e1b;
-  background: rgba(31, 30, 27, .05);
+  color:var(--text-primary);
+  background:var(--surface-hover);
 }
+.wb-daemon-review-tab:focus-visible,
+.wb-daemon-review-refresh:focus-visible { outline:2px solid var(--focus-ring); outline-offset:1px; }
 .wb-daemon-review-refresh[hidden] {
   display: none !important;
 }
@@ -173,7 +208,7 @@
   background: var(--wb-surface, #fff);
   border-radius: 8px;
   padding: 5px 10px;
-  font: 650 11.5px var(--ui);
+  font: 600 12px var(--ui);
   color: var(--wb-text, #2c302d);
   cursor: pointer;
 }
@@ -186,13 +221,13 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding-bottom: 8px;
+  padding: 16px 0 28px;
 }
 .wb-daemon-review-section-title {
   margin: 0 0 8px;
-  font: 650 11.5px/1.3 var(--ui);
+  font: 600 12px/1.3 var(--ui);
   color: var(--wb-text, #2c302d);
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
 .wb-daemon-review-tip {
   margin: 0 0 10px;
@@ -200,7 +235,7 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  font: 550 11px/1.4 var(--ui);
+  font: 500 12px/1.4 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-empty {
@@ -208,7 +243,7 @@
   place-items: center;
   min-height: 140px;
   color: var(--wb-text-faint, #9a958e);
-  font: 550 12px/1.45 var(--ui);
+  font: 500 12px/1.45 var(--ui);
 }
 .wb-daemon-review-empty p { margin: 0; }
 .wb-daemon-review-empty.is-artifacts {
@@ -217,9 +252,9 @@
   padding: 24px 16px 28px;
   text-align: center;
   justify-items: center;
-  border: 1px dashed #e4e0d7;
+  border: 1px dashed #e1e5e8;
   border-radius: 10px;
-  background: linear-gradient(180deg, #faf9f6 0%, #fff 72%);
+  background: linear-gradient(180deg, #f7f8f9 0%, #fff 72%);
 }
 .wb-daemon-review-empty.is-artifacts .wb-daemon-review-empty-icon {
   display: inline-flex;
@@ -236,13 +271,13 @@
   display: block;
 }
 .wb-daemon-review-empty.is-artifacts strong {
-  font: 650 13px/1.35 var(--ui);
+  font: 600 13px/1.35 var(--ui);
   color: var(--wb-text, #2c302d);
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
 .wb-daemon-review-empty.is-artifacts p {
   max-width: 280px;
-  font: 550 11.5px/1.5 var(--ui);
+  font: 500 12px/1.5 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-empty.is-artifacts .wb-run-btn {
@@ -264,7 +299,7 @@
 }
 .wb-daemon-review-artifacts-head .wb-daemon-review-section-title {
   margin: 0;
-  font: 650 13px/1.3 var(--ui);
+  font: 600 13px/1.3 var(--ui);
 }
 .wb-daemon-review-artifacts-head .wb-daemon-review-tip { margin: 0; }
 .wb-daemon-review-callout {
@@ -272,13 +307,13 @@
   padding: 10px 0 2px;
   border: 0;
   background: transparent;
-  font: 550 12px/1.5 var(--ui);
+  font: 500 12px/1.5 var(--ui);
   color: var(--wb-text-muted, #6d6860);
 }
 .wb-daemon-review-callout strong {
   display: block;
   margin-bottom: 4px;
-  font: 650 12.5px/1.35 var(--ui);
+  font: 600 13px/1.35 var(--ui);
   color: var(--wb-text, #2c302d);
 }
 .wb-daemon-review-steps {
@@ -286,7 +321,7 @@
   flex-direction: column;
   gap: 0;
   margin: 0;
-  padding: 0 0 0 2px;
+  padding: 2px 0 0 2px;
   list-style: none;
 }
 .wb-daemon-review-steps.is-zigzag {
@@ -296,9 +331,10 @@
 .wb-daemon-review-step {
   position: relative;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: flex-start;
-  padding: 0 0 14px 0;
+  min-height: 62px;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -324,7 +360,7 @@
   position: absolute;
   left: 5px;
   top: 14px;
-  bottom: 0;
+  bottom: -1px;
   width: 1.5px;
   background: #e8e4dc;
 }
@@ -341,7 +377,7 @@
   z-index: 1;
   width: 12px;
   height: 12px;
-  margin-top: 3px;
+  margin-top: 7px;
   border-radius: 50%;
   background: #fff;
   border: 2px solid #c9c2b4;
@@ -357,8 +393,8 @@
 .wb-daemon-review-step.status-done .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-completed .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-success .wb-daemon-review-step-mark {
-  border-color: var(--wb-success, #34735e);
-  background: var(--wb-success, #34735e);
+  border-color: var(--wb-success, #2d7a63);
+  background: var(--wb-success, #2d7a63);
 }
 .wb-daemon-review-step.status-active .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-running .wb-daemon-review-step-mark,
@@ -479,19 +515,21 @@
   gap: 0;
   min-width: 0;
   max-width: 100%;
-  width: max-content;
+  width:auto;
+  flex:1;
   margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: 1px solid #e6e1d7;
-  border-radius: 8px;
-  background: #fff;
+  padding: 0 0 14px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: 0;
+  background: transparent;
   box-shadow: none;
   text-align: left;
-  cursor: pointer;
+  cursor: default;
   color: inherit;
   font: inherit;
-  transition: border-color .12s ease;
+  transition: border-color .12s ease, color .12s ease;
 }
 .wb-daemon-review-steps.is-zigzag .wb-daemon-review-step-card {
   width: auto;
@@ -503,9 +541,9 @@
   align-items: flex-start;
   gap: 0;
   min-width: 0;
-  padding: 6px 10px 5px;
-  border-bottom: 1px solid rgba(20, 28, 40, .06);
-  background: #eef2f6;
+  padding: 3px 0 4px;
+  border: 0;
+  background: transparent;
 }
 .wb-daemon-review-step-body {
   display: flex;
@@ -513,42 +551,35 @@
   align-items: flex-start;
   gap: 2px;
   min-width: 0;
-  padding: 5px 10px 6px;
-  background: #fff;
+  padding: 0;
+  background: transparent;
 }
-.wb-daemon-review-step-card:hover,
-.wb-daemon-review-step-card:focus-visible {
-  border-color: #d2cbbd;
-  outline: none;
-}
-.wb-daemon-review-step-card:hover .wb-daemon-review-step-head,
-.wb-daemon-review-step-card:focus-visible .wb-daemon-review-step-head {
-  background: #e8edf3;
-}
+.wb-daemon-review-step-card:hover { border-color:var(--border-strong); }
+.wb-daemon-review-step-card:hover .wb-daemon-review-step-head { background:transparent; }
 .wb-daemon-review-step.is-current .wb-daemon-review-step-card,
 .wb-daemon-review-step.status-active .wb-daemon-review-step-card {
-  border-color: rgba(194, 122, 26, .42);
-  background: #fff;
+  border-color:color-mix(in srgb, var(--wb-warning, #8a641f) 38%, var(--border-default));
+  background:transparent;
 }
 .wb-daemon-review-step.is-current .wb-daemon-review-step-head,
 .wb-daemon-review-step.status-active .wb-daemon-review-step-head {
-  background: #fff4e4;
-  border-bottom-color: rgba(194, 122, 26, .22);
+  background:transparent;
+  border-bottom-color: transparent;
 }
 .wb-daemon-review-step.status-error .wb-daemon-review-step-card {
-  border-color: rgba(180, 35, 24, .35);
-  background: #fff;
+  border-color:color-mix(in srgb, var(--wb-danger, #a94f45) 34%, var(--border-default));
+  background:transparent;
 }
 .wb-daemon-review-step.status-error .wb-daemon-review-step-head {
-  background: #fdeceb;
-  border-bottom-color: rgba(180, 35, 24, .18);
+  background:transparent;
+  border-bottom-color: transparent;
 }
 .wb-daemon-review-step-card strong {
   display: block;
   max-width: 100%;
-  font: 650 12.5px/1.35 var(--ui);
+  font: 600 13px/1.35 var(--ui);
   color: var(--wb-text, #2c302d);
-  letter-spacing: -.01em;
+  letter-spacing: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -558,7 +589,7 @@
 .wb-daemon-review-step-en,
 .wb-daemon-review-step-output {
   display: block;
-  font: 550 11px/1.35 var(--ui);
+  font: 500 12px/1.35 var(--ui);
   color: var(--wb-text-faint, #9a958e);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -566,7 +597,7 @@
   max-width: 100%;
 }
 .wb-daemon-review-step-en {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   letter-spacing: 0;
 }
 .wb-daemon-review-step-output {
@@ -595,8 +626,8 @@
   margin-top: 4px;
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-done {
-  border-color: var(--wb-success, #34735e);
-  background: var(--wb-success, #34735e);
+  border-color: var(--wb-success, #2d7a63);
+  background: var(--wb-success, #2d7a63);
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-active,
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-running,
@@ -632,14 +663,14 @@
 }
 .wb-daemon-review-step-detail-head strong {
   display: block;
-  font: 650 14px/1.35 var(--ui);
+  font: 600 14px/1.35 var(--ui);
   color: var(--wb-text, #2c302d);
-  letter-spacing: -.01em;
+  letter-spacing: 0;
 }
 .wb-daemon-review-step-detail-head small {
   display: block;
   margin-top: 2px;
-  font: 550 11.5px/1.35 var(--ui);
+  font: 500 12px/1.35 var(--ui);
   color: var(--wb-text-muted, #6d6860);
 }
 .wb-daemon-review-step-detail-dl {
@@ -660,12 +691,12 @@
 }
 .wb-daemon-review-step-detail-dl dt {
   margin: 0;
-  font: 550 11.5px/1.4 var(--ui);
+  font: 500 12px/1.4 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-step-detail-dl dd {
   margin: 0;
-  font: 550 12px/1.45 var(--ui);
+  font: 500 12px/1.45 var(--ui);
   color: var(--wb-text, #2c302d);
   word-break: break-word;
 }
@@ -675,6 +706,19 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+.wb-daemon-review-changes > p {
+  margin:0 0 10px;
+  color:var(--text-secondary);
+  font:var(--type-support);
+}
+.wb-daemon-review-changes > ul {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  margin:0;
+  padding:0;
+  list-style:none;
 }
 .wb-daemon-review-changes-head {
   display: flex;
@@ -691,7 +735,7 @@
   gap: 8px;
   padding: 9px 0;
   border: 0;
-  border-bottom: 1px solid #f0ece4;
+  border-bottom:1px solid var(--border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -713,19 +757,19 @@
 }
 .wb-daemon-review-artifact.is-webui:hover {
   border-color: #cfc9bd;
-  background: #fbfaf8;
+  background: #f7f8f9;
 }
 .wb-daemon-review-artifact.is-webui .wb-daemon-review-artifact-icon {
   margin-top: 2px;
-  color: var(--wb-accent, #2f6f5e);
+  color: var(--wb-accent, #27786a);
 }
 .wb-daemon-review-artifact-preview {
   flex-shrink: 0;
   border: 0;
   background: transparent;
   padding: 0;
-  font: 600 12.5px/1.3 var(--ui);
-  color: var(--wb-accent, #2f6f5e);
+  font: 600 13px/1.3 var(--ui);
+  color: var(--wb-accent, #27786a);
   cursor: pointer;
 }
 .wb-daemon-review-artifact-preview:hover { text-decoration: underline; }
@@ -739,12 +783,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 12.5px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 13px/1.35 var(--mono);
   color: #2a2926;
 }
 .wb-daemon-review-artifact-size {
   flex-shrink: 0;
-  font: 550 11.5px/1.3 var(--ui);
+  font: 500 12px/1.3 var(--ui);
   color: var(--wb-text-faint, #9a958e);
   min-width: 3.5em;
   text-align: right;
@@ -754,7 +798,7 @@
   background: var(--wb-surface-subtle, #f6f5f1);
 }
 .wb-daemon-review-artifact.is-webui:hover {
-  background: #fbfaf8;
+  background: #f7f8f9;
 }
 .wb-daemon-review-artifact:last-child,
 .wb-daemon-review-change:last-child { border-bottom: 0; }
@@ -786,15 +830,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font: 12.5px/1.35 var(--ui);
+  font: 13px/1.35 var(--ui);
   color: #2a2926;
 }
 .wb-daemon-review-artifact-name {
-  font: 600 12.5px/1.35 var(--ui);
-  letter-spacing: -.01em;
+  font: 600 13px/1.35 var(--ui);
+  letter-spacing: 0;
 }
 .wb-daemon-review-artifact-meta {
-  font: 550 10.5px/1.3 var(--ui);
+  font: 500 12px/1.3 var(--ui);
   color: var(--wb-text-faint, #9a958e);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -808,15 +852,23 @@
 }
 .wb-daemon-review-change-status {
   flex-shrink: 0;
-  font: 600 10.5px/1.2 var(--ui);
-  color: #6d6860;
-  text-transform: uppercase;
-  letter-spacing: .02em;
+  font: 600 12px/1.2 var(--ui);
+  min-width:58px;
+  padding:3px 6px;
+  border-radius:var(--radius-sm);
+  background:var(--surface-subtle);
+  color:var(--text-secondary);
+  text-align:center;
+  text-transform:none;
+  letter-spacing: 0;
 }
+.wb-daemon-review-change-status.is-added { background:var(--action-primary-soft); color:var(--wb-success); }
+.wb-daemon-review-change-status.is-deleted { background:var(--wb-danger-soft, #f8ece9); color:var(--wb-danger, #a94f45); }
+.wb-daemon-review-change-status.is-modified { background:var(--wb-warning-soft, #f6f0df); color:var(--wb-warning, #8a641f); }
 .wb-daemon-review-event {
   padding: 10px 0;
   border: 0;
-  border-bottom: 1px solid #f0ece4;
+  border-bottom:1px solid var(--border-subtle);
   border-radius: 0;
   background: transparent;
 }
@@ -827,15 +879,15 @@
   gap: 10px;
   margin-bottom: 4px;
   font: 12px/1.35 var(--ui);
-  color: #8a857c;
+  color:var(--text-muted);
 }
 .wb-daemon-review-event-head strong {
-  color: #3d3a35;
+  color:var(--text-primary);
   font-weight: 600;
 }
 .wb-daemon-review-event-body {
-  font: 12.5px/1.45 var(--ui);
-  color: #2a2926;
+  font: 13px/1.45 var(--ui);
+  color:var(--text-secondary);
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -855,18 +907,18 @@
 .wb-daemon-review-logs-tip {
   margin: 0;
   flex: 0 0 auto;
-  font: 550 12px/1.45 var(--ui);
+  font: 500 12px/1.45 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-logs-block {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  border: 1px solid var(--wb-border, #e7e2d8);
-  border-radius: 10px;
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-lg);
   overflow: hidden;
   background: #fff;
-  box-shadow: 0 1px 0 rgba(28, 25, 23, 0.02);
+  box-shadow:none;
 }
 /* 展开区占满剩余高度；收起条贴顶（过程）/贴底（运行日志） */
 .wb-daemon-review-logs-block[data-logs-block="progress"]:not(.is-collapsed),
@@ -892,8 +944,8 @@
   flex: 0 0 auto;
   padding: 0 8px 0 4px;
   min-height: 36px;
-  border-bottom: 1px solid #f0ece4;
-  background: linear-gradient(180deg, #fbfaf7 0%, #f7f5f1 100%);
+  border-bottom:1px solid var(--border-subtle);
+  background:var(--surface-subtle);
 }
 .wb-daemon-review-logs-toggle {
   display: inline-flex;
@@ -926,8 +978,8 @@
 .wb-daemon-review-logs-head strong {
   flex: 1 1 auto;
   min-width: 0;
-  font: 650 12px/1.2 var(--ui);
-  color: #1f1e1b;
+  font: 600 12px/1.2 var(--ui);
+  color:var(--text-primary);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -948,21 +1000,21 @@
   background: #fff;
 }
 .wb-daemon-review-logs-body[data-logs-pane="progress"] {
-  background: #fcfbf9;
+  background: #ffffff;
 }
 .wb-daemon-review-logs-body[data-logs-pane="lines"] {
-  background: #faf9f7;
+  background:var(--surface-subtle);
 }
 .wb-daemon-review-logs-empty {
-  font: 12.5px/1.45 var(--ui);
+  font: 13px/1.45 var(--ui);
   color: var(--wb-text-faint, #9a958e);
 }
 .wb-daemon-review-logs-pre {
   margin: 0;
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 12px/1.5 var(--mono);
   white-space: pre-wrap;
   word-break: break-word;
-  color: #2a2926;
+  color:var(--text-primary);
 }
 .wb-daemon-progress-md {
   color: #2f2c28;
@@ -978,7 +1030,7 @@
   color: #1c1a17;
   line-height: 1.3;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 .wb-daemon-progress-md h1:first-child,
 .wb-daemon-progress-md h2:first-child,
@@ -988,7 +1040,7 @@
 }
 .wb-daemon-progress-md h1 { font-size: 17px; }
 .wb-daemon-progress-md h2 { font-size: 15px; }
-.wb-daemon-progress-md h3 { font-size: 13.5px; }
+.wb-daemon-progress-md h3 { font-size: 14px; }
 .wb-daemon-progress-md p {
   margin: 0.45em 0;
 }
@@ -1004,7 +1056,7 @@
   padding: 1px 5px;
   border-radius: 4px;
   background: rgba(28, 25, 23, 0.06);
-  font: 11.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 12px/1.45 var(--mono);
 }
 .wb-daemon-progress-md pre {
   overflow: auto;
@@ -1012,7 +1064,7 @@
   padding: 10px 12px;
   border: 1px solid #ece7df;
   border-radius: 8px;
-  background: #f4f1ec;
+  background: #f3f4f5;
 }
 .wb-daemon-progress-md pre code {
   padding: 0;
@@ -1049,8 +1101,8 @@
   top: 0;
   background: #f7f3ed;
   color: #4a463f;
-  font-weight: 650;
-  letter-spacing: 0.01em;
+  font-weight: 600;
+  letter-spacing: 0;
   border-bottom-color: #e4ddd2;
 }
 .wb-daemon-progress-md .md-table tbody tr:last-child td {
@@ -1079,12 +1131,12 @@
   border: 0;
   border-radius: 0;
   background: transparent;
-  font: 12.5px/1.5 var(--ui);
+  font: 13px/1.5 var(--ui);
   color: #2f2c28;
 }
 .wb-daemon-progress-md ul > li > strong:first-child {
   color: #6a655c;
-  font-weight: 650;
+  font-weight: 600;
   font-size: 12px;
   flex: 0 0 auto;
 }
@@ -1127,7 +1179,7 @@
   min-height: 0;
   overflow: auto;
   padding: 12px 16px 16px;
-  background: #fcfbf9;
+  background: #ffffff;
 }
 .wb-daemon-progress-preview-modal-body .wb-daemon-progress-md {
   max-width: none;
@@ -1150,7 +1202,7 @@
   gap: 3px;
 }
 .wb-daemon-review-log-line {
-  font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 12px/1.5 var(--mono);
   color: #3a3732;
   white-space: pre-wrap;
   word-break: break-word;
@@ -1164,4 +1216,3 @@
   font-size: 12px;
   border-radius: 7px;
 }
-

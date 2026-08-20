@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 3,
+  "id": "external-capability-importer",
+  "kind": "expert",
+  "name": "智能体运维专员",
+  "description": "审计外部项目并将其中的技能、专家、连接器和工作流适配为 KnowMe 可运行资产。",
+  "version": "1.2.0",
+  "dependencies": [],
+  "permissions": { "tools": ["preview_external_project", "design_external_workflow_import", "import_external_project", "verify_imported_workflow"] },
+  "inputs": [{ "name": "projectPath", "type": "path", "required": true }],
+  "outputs": [
+    { "name": "importReport", "type": "object" },
+    { "name": "workflowIds", "type": "array" }
+  ],
+  "risk": { "level": "medium", "reasons": ["用户确认后安装能力并写入个人工作流存储"] },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "experts/external-capability-importer" },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "deliverables": {
+          "item-1": {
+            "requiredTools": ["preview_external_project", "design_external_workflow_import"],
+            "requiredEvidence": [
+              { "kind": "tool_result", "tool": "preview_external_project", "forbidTruncated": true },
+              { "kind": "tool_result", "tool": "design_external_workflow_import", "forbidTruncated": true }
+            ]
+          },
+          "item-2": {
+            "requiredTools": ["import_external_project", "verify_imported_workflow"],
+            "requiredEvidence": [
+              { "kind": "tool_result", "tool": "import_external_project", "forbidTruncated": true },
+              { "kind": "tool_result", "tool": "verify_imported_workflow", "forbidTruncated": true }
+            ]
+          }
+        }
+      },
+      "experience": {
+        "tasks": [{
+          "id": "importArtBundleWorkflow",
+          "title": "导入 PSD → ArtBundle 产线",
+          "subtitle": "扫描 th-art，规划依赖闭包，确认后精确导入并验证",
+          "icon": "folder",
+          "group": "engineering",
+          "modes": ["coding"],
+          "surfaces": ["workflow"],
+          "prompt": "扫描 D:\\aiworkspace\\th-art，只规划并导入 th-art-psd-to-artbundle。附加 th-art-artbundle-workflow 和 th-art-creator-debug，先展示规划，等我确认后导入并验证。"
+        }]
+      }
+    }
+  }
+}

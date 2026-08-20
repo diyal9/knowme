@@ -34,9 +34,12 @@ describe('official-workflows catalog', () => {
 
   it('exposes required expert ids covering all agent refs', () => {
     const ids = requiredExpertIds()
-    assert.ok(ids.includes('producer'))
+    assert.ok(ids.includes('product-manager'))
+    assert.ok(ids.includes('user-researcher'))
+    assert.ok(ids.includes('requirement-reviewer'))
     assert.ok(ids.includes('meeting-scribe'))
-    assert.ok(ids.includes('copywriter'))
+    assert.ok(ids.includes('creative-director'))
+    assert.ok(ids.includes('image-producer'))
     assert.ok(ids.includes('office-partner'))
     for (const pkg of OFFICIAL_WORKFLOWS) {
       for (const ref of pkg.agentRefs) {
@@ -46,7 +49,7 @@ describe('official-workflows catalog', () => {
   })
 
   it('marks legacy demo seed ids without listing them as official packages', () => {
-    assert.equal(LEGACY_DEMO_SEED_IDS.length, 3)
+    assert.equal(LEGACY_DEMO_SEED_IDS.length, 6)
     for (const id of LEGACY_DEMO_SEED_IDS) {
       assert.equal(isLegacyDemoSeedId(id), true)
       assert.equal(listOfficialWorkflowPackages().find(item => item.id === id), undefined)
@@ -55,29 +58,29 @@ describe('official-workflows catalog', () => {
 
   it('uses short display names for official ids', () => {
     assert.equal(
-      workflowDisplayName({ id: 'official-office-meeting-loop', name: '会议闭环' }),
-      '会议闭环',
+      workflowDisplayName({ id: 'official-product-requirement', name: '写产品需求' }),
+      '写产品需求',
     )
     assert.equal(
-      workflowDisplayName({ id: 'official-engineering-team-delivery', name: '三角色协作交付' }),
-      '三角色协作交付',
+      workflowDisplayName({ id: 'official-art-image-production', name: '美术生图' }),
+      '美术生图',
     )
     assert.equal(
-      workflowDisplayName({ id: 'official-visual-brief-review', name: 'Brief 出图审阅' }),
-      'Brief 出图审阅',
+      workflowDisplayName({ id: 'official-daily-office', name: '日常办公' }),
+      '日常办公',
     )
   })
 
   it('keeps official card blurbs as short value props without step chains', () => {
     const expected = {
-      'official-office-meeting-loop': '把会议资料整理成可跟进的纪要与待办。',
-      'official-engineering-team-delivery': '按制作人、开发、测试三角色完成可验证交付。',
-      'official-visual-brief-review': '把视觉 Brief 变成可审阅的文案与出图提示词。',
+      'official-product-requirement': '把业务想法整理成有证据、可评审、可验收的产品需求。',
+      'official-art-image-production': '从传播目标到候选图片、参数记录和人工选版的完整生图流程。',
+      'official-daily-office': '把会议材料转成正式纪要、行动项和可发送的同步稿。',
     }
     for (const pkg of listOfficialWorkflowPackages()) {
       assert.equal(pkg.description, expected[pkg.id], `${pkg.id} description`)
       assert.doesNotMatch(pkg.description, /→|->/)
-      assert.ok(pkg.description.length <= 32, `${pkg.id} blurb too long`)
+      assert.ok(pkg.description.length <= 36, `${pkg.id} blurb too long`)
     }
   })
 

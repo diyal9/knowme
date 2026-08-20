@@ -2,9 +2,7 @@ import type { CSSProperties } from 'react'
 import type { CapabilityItem } from '../../../shared/api'
 import {
   expertCardTitle,
-  expertQuickBadge,
   expertQuickSub,
-  expertQuickVersion,
 } from '../../../domain/expert-present'
 import { ExpertAvatarMark } from '../expert/ExpertAvatarMark'
 
@@ -12,25 +10,21 @@ export function TaskQuickCard({
   item,
   index,
   selected,
+  onStart,
+  onDetail,
   onOpen,
 }: {
   item: CapabilityItem
   index: number
   selected?: boolean
-  onOpen: () => void
+  onStart?: () => void
+  onDetail?: () => void
+  onOpen?: () => void
 }) {
   const title = expertCardTitle(item)
-  const badge = expertQuickBadge(item)
   const desc = item.description || '安排这位专家协作'
-
-  return (
-    <button
-      type="button"
-      className={`wb-task-quick-card wb-studio-expert-pick-card${selected ? ' is-selected' : ''}`}
-      style={{ '--index': index } as CSSProperties}
-      aria-label={`查看专家 ${title}`}
-      onClick={onOpen}
-    >
+  const body = (
+    <>
       <div className="wb-task-quick-head">
         <ExpertAvatarMark agent={item} className="wb-task-quick-icon" size={38} />
         <div className="wb-task-quick-meta">
@@ -39,12 +33,43 @@ export function TaskQuickCard({
         </div>
       </div>
       <p className="wb-task-quick-desc">{desc}</p>
+    </>
+  )
+
+  if (onOpen) {
+    return (
+      <button type="button" className={`wb-task-quick-card wb-studio-expert-pick-card${selected ? ' is-selected' : ''}`} style={{ '--index': index } as CSSProperties} aria-label={`查看专家 ${title}`} onClick={onOpen}>
+        {body}
+        <div className="wb-task-quick-foot"><span className="wb-task-quick-badge installed">选择专家</span><span className="wb-task-quick-version">单专家任务</span></div>
+      </button>
+    )
+  }
+
+  return (
+    <article
+      className={`wb-task-quick-card wb-studio-expert-pick-card${selected ? ' is-selected' : ''}`}
+      style={{ '--index': index } as CSSProperties}
+      role="button"
+      tabIndex={0}
+      aria-label={`查看专家 ${title}`}
+      onClick={() => onDetail?.()}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget || !['Enter', ' '].includes(event.key)) return
+        event.preventDefault()
+        onDetail?.()
+      }}
+    >
+      {body}
       <div className="wb-task-quick-foot">
-        <div className="wb-task-quick-badges">
-          <span className={`wb-task-quick-badge${badge.installed ? ' installed' : ''}`}>{badge.text}</span>
-        </div>
-        <span className="wb-task-quick-version">v{expertQuickVersion(item)}</span>
+        <button
+          type="button"
+          className="wb-task-quick-start"
+          aria-label={`向${title}发起快捷任务`}
+          onClick={(event) => { event.stopPropagation(); onStart?.() }}
+        >
+          快捷任务
+        </button>
       </div>
-    </button>
+    </article>
   )
 }

@@ -32,6 +32,27 @@ const {
 } = require('./web-fetch-ssrf');
 const { extractReadableText, extractTitle } = require('./web-fetch-html');
 
+/** GitHub 的 blob 页面依赖前端渲染，抓取 HTML 只能得到登录提示和导航壳。
+ * 对仓库中的文本/Markdown 文件优先切到 raw 地址，拿到真实文件正文。 */
+function preferredFetchUrl(rawUrl) {
+  const input = String(rawUrl || '').trim();
+  try {
+    const url = new URL(input);
+    if (url.hostname.toLowerCase() !== 'github.com') return input;
+    const parts = url.pathname.split('/').filter(Boolean);
+    const blobIndex = parts.indexOf('blob');
+    if (parts.length < 5 || blobIndex !== 2) return input;
+    const owner = parts[0];
+    const repo = parts[1];
+    const ref = parts[blobIndex + 1];
+    const filePath = parts.slice(blobIndex + 2).join('/');
+    if (!owner || !repo || !ref || !filePath) return input;
+    return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${filePath}`;
+  } catch {
+    return input;
+  }
+}
+
 /* ------------------------------------------------------------------ 抓取 */
 
 function combineSignals(signals) {
@@ -110,7 +131,7 @@ async function fetchReadablePage(rawUrl, options = {}) {
   const doFetch = typeof options.fetchImpl === 'function' ? options.fetchImpl : fetch;
   const deadline = Date.now() + timeoutMs;
 
-  let target = String(rawUrl || '').trim();
+  let target = preferredFetchUrl(rawUrl);
   for (let hop = 0; hop <= maxRedirects; hop += 1) {
     const safe = await assertSafeUrl(target, { lookup: options.lookup });
     if (!safe.ok) return safe;
@@ -195,6 +216,7 @@ module.exports = {
   isBlockedAddress,
   parseIPv6,
   assertSafeUrl,
+  preferredFetchUrl,
   extractReadableText,
   extractTitle,
   fetchReadablePage,

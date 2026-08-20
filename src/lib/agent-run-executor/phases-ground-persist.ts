@@ -1,11 +1,15 @@
 'use strict'
 
 const agentRun = require('../agent-run')
-const { normalizeAssistantOutput } = require('../assistant-output-style')
+const { normalizeAssistantOutput, enforceAssistantOutputGate } = require('../assistant-output-style')
 const { resolveGroundingRuntimeMode } = require('../agent-run-ports')
 const groundingRuntime = require('../agent-grounding-runtime')
 const { EventType } = require('../agent-output-protocol')
 const { mergeArtifactRefs } = require('./hints')
+const {
+  mergeExecutionContracts,
+  validateExecutionCompletion,
+} = require('../agent-execution-contract')
 
 /**
  * GROUND + VERIFY_CLAIMS + PERSIST + DONE：依据核对、规范化输出与会话持久化。
@@ -50,6 +54,8 @@ async function runGroundAndPersist(deps) {
   let referenceState = initialReferenceState
   let evidenceLedger = initialEvidenceLedger
   let toolLedger = initialToolLedger
+  let verification = null
+  let outputGateStatus = 'not_required'
   const groundingMode = resolveGroundingRuntimeMode()
 
   if (ports.hooks?.postProcess) {
@@ -72,17 +78,44 @@ async function runGroundAndPersist(deps) {
 
     enterPhase(RunPhase.VERIFY_CLAIMS)
     stage('stage_verify_claims', '正在验证输出依据…', 'pending', { runPhase: RunPhase.VERIFY_CLAIMS })
-    const taskFrame = referenceState.taskFrame || ctxBundle.taskFrame || null
-    if (taskFrame?.requiredTools?.length) {
+    const taskFrame = mergeExecutionContracts([
+      referenceState.taskFrame,
+      ctxBundle.taskFrame,
+      input.executionContract,
+    ])
+    if (taskFrame?.requiredTools?.length || taskFrame?.requiredEvidence?.length || taskFrame?.completionConditions?.length) {
       referenceState = groundingRuntime.setTaskFrame(referenceState, taskFrame)
     }
-    let verification = groundingRuntime.verifyClaims({
+    verification = groundingRuntime.verifyClaims({
       text: fullText,
       evidenceLedger,
       toolLedger,
       referenceState,
       taskFrame,
     })
+    const contractAssessment = validateExecutionCompletion(taskFrame, {
+      executionEvidence: {
+        toolCalls: (toolLedger?.calls || []).map(item => ({ name: item.name, status: item.status })),
+        evidence: evidenceLedger?.entries || [],
+      },
+      artifactRefs: mergeArtifactRefs(
+        Array.isArray(session?.run?.artifacts)
+          ? session.run.artifacts.map(artifact => ({
+              id: artifact.id,
+              kind: artifact.type || artifact.kind || 'artifact',
+              type: artifact.type || artifact.kind || 'artifact',
+            }))
+          : [],
+        artifactRefs,
+      ),
+    })
+    if (!contractAssessment.ok) {
+      verification = {
+        ...verification,
+        passed: false,
+        violations: [...(verification?.violations || []), ...contractAssessment.violations],
+      }
+    }
     let gate = groundingRuntime.applyOutputGate({ text: fullText, verification, taskFrame, regenUsed: false })
     if (!gate.allowed && gate.regenSuggested && loopState.finalizationUsed !== true) {
       const regen = await finalizeResponse('grounding')
@@ -97,6 +130,7 @@ async function runGroundAndPersist(deps) {
       gate = groundingRuntime.applyOutputGate({ text: fullText, verification, taskFrame, regenUsed: true })
     }
     if (!gate.allowed) fullText = gate.refusal || gate.text
+    outputGateStatus = gate.allowed ? 'verified' : 'blocked'
     const groundingStatus = groundingRuntime.buildGroundingStatus(verification, { evidenceLedger, toolLedger })
     emitV2({ type: 'grounding-status', ...groundingStatus, runPhase: RunPhase.VERIFY_CLAIMS })
     stage('stage_verify_claims', gate.blocked ? '输出已阻断未验证声明' : '输出验证通过', gate.blocked ? 'error' : 'done', {
@@ -105,7 +139,10 @@ async function runGroundAndPersist(deps) {
     })
   }
 
-  fullText = normalizeAssistantOutput(fullText)
+  const outputGate = enforceAssistantOutputGate(fullText, {
+    allowRawJson: /原始\s*json|json\s*原文|原始数据/i.test(String(input.prompt || '')),
+  })
+  fullText = normalizeAssistantOutput(outputGate.text)
 
   const committed = commitCanonicalAnswer(fullText)
   fullText = committed.text
@@ -186,6 +223,29 @@ async function runGroundAndPersist(deps) {
     protocolVersion: OUTPUT_PROTOCOL_VERSION,
     ui: committed.ui,
     artifactRefs: persistedArtifactRefs,
+    executionEvidence: {
+      gateStatus: outputGateStatus,
+      verificationPassed: verification ? verification.passed === true : true,
+      violations: (verification?.violations || []).slice(0, 16).map(item => ({
+        code: String(item.code || ''),
+        message: String(item.message || '').slice(0, 500),
+        missingTools: Array.isArray(item.missingTools) ? item.missingTools.slice(0, 32).map(String) : [],
+      })),
+      toolCalls: (toolLedger?.calls || []).slice(-64).map(item => ({
+        id: String(item.id || ''),
+        name: String(item.name || ''),
+        status: item.status === 'ok' ? 'ok' : 'fail',
+        resultRef: item.resultRef || null,
+        error: item.error || null,
+        durationMs: item.durationMs || null,
+      })),
+      evidence: (evidenceLedger?.entries || []).slice(-64).map(item => ({
+        id: String(item.id || ''),
+        status: String(item.status || ''),
+        digest: String(item.digest || '').slice(0, 500),
+        provenance: item.provenance && typeof item.provenance === 'object' ? item.provenance : {},
+      })),
+    },
   })
 }
 

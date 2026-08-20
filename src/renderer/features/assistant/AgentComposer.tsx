@@ -2,7 +2,7 @@
  * 助手 composer：输入、附件、模型/知识库/快捷菜单与发送。
  * 不负责消息列表与流式气泡。
  */
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { selectActiveAttachments, selectActiveComposer, useAppStore } from '../../app/store'
 import { getSessionSlice } from './store-session'
 import { buildContextUsageViewModel } from '../../../domain/agent-context-usage'
@@ -20,12 +20,15 @@ export function AgentComposer({
   extraClass = '',
   surface = 'assistant',
   launchEmpty = false,
+  placeholder: placeholderOverride,
 }: {
   extraClass?: string
   /** 助理主列 vs 工作台 task-room 对话；后者不挂载 Ctrl+K 快捷任务 */
   surface?: 'assistant' | 'workbench'
   /** 助手空态首屏 composer：对齐 f6ad048 launch-state 工具条与 placeholder */
   launchEmpty?: boolean
+  /** 任务房可按当前运行态提供行动提示；助手页面不传此项，行为保持不变。 */
+  placeholder?: string
 }) {
   const composer = useAppStore(surface === 'workbench'
     ? (s) => s.workbenchDialogue.composer
@@ -76,16 +79,17 @@ export function AgentComposer({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [atActive, setAtActive] = useState(0)
+  const [slashActive, setSlashActive] = useState(0)
+  const [slashDismissedValue, setSlashDismissedValue] = useState<string | null>(null)
   const [menu, setMenu] = useState<'model' | 'knowledge' | 'quick' | null>(null)
-  const [quickQuery, setQuickQuery] = useState('')
   const allowQuickMenu = surface === 'assistant'
   const active = sessions.find((item) => item.id === activeSessionId)
   const showKnowledgeToolbar = Boolean(active?.expertId)
-  const placeholder = surface === 'workbench'
+  const placeholder = placeholderOverride || (surface === 'workbench'
     ? '补充任务要求或材料… @ 选文件'
     : launchEmpty
       ? '给 KnowMe 发送消息…'
-      : '说说你想做什么，或问公司约定… @ 选文件'
+      : '说说你想做什么，或问公司约定… @ 选文件')
 
   const knowledge = [...knowledgeWiki, ...knowledgeOkf]
   const refs = active?.knowledgeRefs || []
@@ -99,9 +103,9 @@ export function AgentComposer({
     if (!atContext) return []
     return recentFileSuggestions(fileCatalog, atContext.query)
   }, [atContext, fileCatalog])
-  const slashOpen = composer.trimStart().startsWith('/')
+  const slashOpen = composer.trimStart().startsWith('/') && composer !== slashDismissedValue
   const slashQuery = slashOpen ? composer.trimStart().slice(1).toLowerCase() : ''
-  const slashItems = skills.filter((item) => {
+  const slashItems = skills.filter((item) => item.installed !== false && item.enabled !== false).filter((item) => {
     if (!slashQuery) return true
     return `${item.name || ''} ${item.id} ${item.description || ''}`.toLowerCase().includes(slashQuery)
   })
@@ -122,6 +126,18 @@ export function AgentComposer({
         : ' usage-safe'
 
   useEffect(() => { setAtActive(0) }, [atContext?.query])
+  useEffect(() => { setSlashActive(0) }, [slashQuery])
+  useEffect(() => {
+    // `/技能` 是输入驱动的弹窗；一旦出现，关闭智能推荐/模型/知识库菜单，保持单弹窗。
+    if (slashOpen && menu) setMenu(null)
+  }, [slashOpen, menu])
+
+  useLayoutEffect(() => {
+    const node = textareaRef.current
+    if (!node) return
+    node.style.height = 'auto'
+    node.style.height = `${Math.max(48, Math.min(node.scrollHeight, 180))}px`
+  }, [composer])
 
   // @ 选文件时再拉目录，避免助理 mount 扫盘
   useEffect(() => {
@@ -173,12 +189,16 @@ export function AgentComposer({
     setMenu(null)
   }
 
+  function sendAndRefocus() {
+    sendMessage()
+    requestAnimationFrame(() => textareaRef.current?.focus())
+  }
+
   return (
     <>
-    {allowQuickMenu && menu === 'quick' ? (
+    {allowQuickMenu && menu === 'quick' && !slashOpen ? (
       <AgentQuickMenu
-        query={quickQuery}
-        onQueryChange={setQuickQuery}
+        context={composer}
         onPick={(prompt) => {
           setComposer(prompt)
           setMenu(null)
@@ -187,10 +207,10 @@ export function AgentComposer({
       />
     ) : null}
     <form
-      className={`agent-composer${extraClass ? ` ${extraClass}` : ''}`}
+      className={`agent-composer conversation-composer${extraClass ? ` ${extraClass}` : ''}`}
       id="agentComposer"
       onClick={(e) => e.stopPropagation()}
-      onSubmit={(e) => { e.preventDefault(); if (isGenerating) stopGenerate(); else sendMessage() }}
+      onSubmit={(e) => { e.preventDefault(); if (isGenerating) stopGenerate(); else sendAndRefocus() }}
     >
       <div className="agent-input-wrap">
         {atContext ? (
@@ -214,7 +234,16 @@ export function AgentComposer({
           </div>
         ) : null}
         {slashOpen ? (
-          <AgentSlashMenu items={slashItems} onPick={insertSkill} />
+          <AgentSlashMenu
+            items={slashItems}
+            query={slashQuery}
+            activeIndex={slashActive}
+            onActiveChange={setSlashActive}
+            onQueryChange={(value) => {
+              setComposer(`/${value}`)
+            }}
+            onPick={insertSkill}
+          />
         ) : null}
         <textarea
           ref={textareaRef}
@@ -223,7 +252,10 @@ export function AgentComposer({
           placeholder={placeholder}
           spellCheck={false}
           value={composer}
-          onChange={(e) => setComposer(e.target.value)}
+          onChange={(e) => {
+            setSlashDismissedValue(null)
+            setComposer(e.target.value)
+          }}
           onKeyDown={(e) => {
             if (atContext && atSuggestions.length > 0) {
               if (e.key === 'ArrowDown') { e.preventDefault(); setAtActive((i) => (i + 1) % atSuggestions.length); return }
@@ -235,7 +267,17 @@ export function AgentComposer({
                 return
               }
             }
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() }
+            if (e.key === 'Escape' && slashOpen) {
+              e.preventDefault()
+              setSlashDismissedValue(composer)
+              return
+            }
+            if (slashOpen && slashItems.length > 0) {
+              if (e.key === 'ArrowDown') { e.preventDefault(); setSlashActive((i) => (i + 1) % slashItems.length); return }
+              if (e.key === 'ArrowUp') { e.preventDefault(); setSlashActive((i) => (i - 1 + slashItems.length) % slashItems.length); return }
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); insertSkill(slashItems[slashActive]); return }
+            }
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAndRefocus() }
           }}
         />
       </div>
@@ -273,7 +315,10 @@ export function AgentComposer({
               aria-label="快捷操作"
               aria-expanded={menu === 'quick'}
               aria-controls="agentQuickMenu"
-              onClick={() => setMenu(menu === 'quick' ? null : 'quick')}
+              onClick={() => {
+                if (slashOpen) setComposer('')
+                setMenu(menu === 'quick' ? null : 'quick')
+              }}
             >
               <Icon name="optimize" />
             </button>
@@ -335,7 +380,7 @@ export function AgentComposer({
         </button>
         <button
           type="submit"
-          className={`agent-go${isGenerating ? ' is-running' : ''}`}
+          className={`agent-go agent-send${isGenerating ? ' is-running' : ''}${composer.trim() || attachments.length ? ' is-ready' : ''}`}
           aria-label={isGenerating ? '停止生成' : '发送'}
         >
           <Icon name={isGenerating ? 'stop' : 'send'} />

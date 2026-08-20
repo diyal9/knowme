@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import '../../../secondary-dialog.css'
 import {
   hubOriginLabel,
   hubSourceLabel,
@@ -15,9 +16,12 @@ import { HubStatusBadges } from './HubStatusBadges'
 
 type Props = {
   item: HubCapabilityItem
+  isMine?: boolean
   onClose: () => void
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
   onEditExpert: (item: HubCapabilityItem, mode: 'tune' | 'copy') => void
+  onOpenWorkbench: (item: HubCapabilityItem) => void
+  onManageSkill: (item: HubCapabilityItem) => void
 }
 
 function hubVersion(item: HubCapabilityItem): string {
@@ -36,13 +40,11 @@ function listValues(values: unknown[]): string[] {
   }).filter(Boolean)
 }
 
-export function HubDetailDrawer({ item, onClose, onChanged, onEditExpert }: Props) {
+export function HubDetailDrawer({ item, isMine = false, onClose, onChanged, onEditExpert, onOpenWorkbench, onManageSkill }: Props) {
   const showToast = useAppStore((s) => s.showToast)
   const modes = useAppStore((s) => s.modes)
-  const activeModeId = useAppStore((s) => s.activeModeId)
   const installed = isCapabilityInstalled(item) || ['installed', 'enabled', 'disabled'].includes(String(item.status || ''))
-  const active = modes.find((mode) => mode.id === activeModeId) || modes[0]
-  const bound = (active?.bindings || []).some((bind) => bind.expertId === item.id)
+  const bound = modes.some((mode) => (mode.bindings || []).some((bind) => bind.expertId === item.id))
   const [busy, setBusy] = useState('')
 
   useEffect(() => {
@@ -56,21 +58,42 @@ export function HubDetailDrawer({ item, onClose, onChanged, onEditExpert }: Prop
   async function run(act: string) {
     setBusy(act)
     try {
-      if (act === 'install') await window.api?.capabilityInstall?.({ id: item.id, kind: item.kind })
-      if (act === 'uninstall') await window.api?.capabilityUninstall?.({ id: item.id })
-      if (act === 'enable') await window.api?.capabilityEnable?.({ id: item.id })
-      if (act === 'disable') await window.api?.capabilityDisable?.({ id: item.id })
+      let result: { ok?: boolean; error?: string } | undefined
+      if (act === 'install') result = await window.api?.capabilityInstall?.({ id: item.id, kind: item.kind }) as typeof result
+      if (act === 'uninstall') result = await window.api?.capabilityUninstall?.({ id: item.id }) as typeof result
+      if (act === 'enable') result = await window.api?.capabilityEnable?.({ id: item.id }) as typeof result
+      if (act === 'disable') result = await window.api?.capabilityDisable?.({ id: item.id }) as typeof result
+      if (act === 'update') result = await window.api?.capabilityUpdate?.({ id: item.id }) as typeof result
+      if (act === 'addMyExpert') {
+        result = await window.api?.capabilityInstall?.({ id: item.id, kind: 'expert' }) as typeof result
+        if (!result) throw new Error('专家安装接口不可用')
+        if (result.ok === false) throw new Error(result.error || '添加专家失败')
+        const binding = await window.api?.workbenchModeBindExpert?.({ expertId: item.id })
+        if (binding?.ok === false) throw new Error(binding.error || '专家已添加，但设为常用失败')
+        showToast(`已召唤“${item.name || item.id}”，并打开工作台专家协作`)
+      }
+      if (['install', 'uninstall', 'enable', 'disable', 'update'].includes(act) && !result) {
+        throw new Error('能力操作接口不可用')
+      }
+      if (result?.ok === false) throw new Error(result.error || '操作失败')
       if (act === 'addExpert') {
-        const result = await window.api?.workbenchModeBindExpert?.({ expertId: item.id }) as { ok?: boolean; alreadyBound?: boolean; modeName?: string; error?: string } | undefined
-        if (result?.ok === false) throw new Error(result.error || '添加失败')
-        showToast(result?.alreadyBound ? `“${item.name}”已在工作台` : `已将“${item.name}”添加到${result?.modeName || '当前工作台'}`)
+        const binding = await window.api?.workbenchModeBindExpert?.({ expertId: item.id }) as { ok?: boolean; alreadyBound?: boolean; modeName?: string; error?: string } | undefined
+        if (binding?.ok === false) throw new Error(binding.error || '添加失败')
+        showToast(binding?.alreadyBound ? `“${item.name}”已在工作台` : `已将“${item.name}”添加到${binding?.modeName || '当前工作台'}`)
       }
       if (act === 'removeExpert') {
-        const result = await window.api?.workbenchModeUnbindExpert?.({ expertId: item.id }) as { ok?: boolean; modeName?: string; error?: string } | undefined
-        if (result?.ok === false) throw new Error(result.error || '撤回失败')
-        showToast(`已从${result?.modeName || '当前工作台'}撤回“${item.name}”`)
+        const binding = await window.api?.workbenchModeUnbindExpert?.({ expertId: item.id, everywhere: true }) as { ok?: boolean; modeName?: string; error?: string } | undefined
+        if (binding?.ok === false) throw new Error(binding.error || '撤回失败')
+        showToast(`已从${binding?.modeName || '当前工作台'}撤回“${item.name}”`)
       }
-      onChanged()
+      if (act === 'install') showToast(`已安装“${item.name || item.id}”`)
+      if (act === 'uninstall') showToast(`已卸载“${item.name || item.id}”`)
+      if (act === 'enable') showToast(`已启用“${item.name || item.id}”`)
+      if (act === 'disable') showToast(`已停用“${item.name || item.id}”`)
+      if (act === 'update') showToast(`已更新“${item.name || item.id}”，新会话将使用最新版本`)
+      await onChanged()
+      if (act === 'uninstall') onClose()
+      if (act === 'addMyExpert') onOpenWorkbench({ ...item, installed: true, enabled: true, status: 'enabled' })
     } catch (error) {
       showToast(error instanceof Error ? error.message : '操作失败')
     } finally {
@@ -134,6 +157,12 @@ export function HubDetailDrawer({ item, onClose, onChanged, onEditExpert }: Prop
               <p>{listValues(item.connectors || []).join('、') || '未装配连接器，它不会访问外部系统。'}</p>
             </section>
           ) : null}
+          {item.kind === 'skill' ? (
+            <section className="hub-drawer-section hub-skill-usage-note">
+              <h3>技能如何使用</h3>
+              <p>技能不会作为独立伙伴出现在工作台。安装后，可以装备给智能伙伴或“我的专家”。</p>
+            </section>
+          ) : null}
           <section className="hub-drawer-section">
             <h3>依赖</h3>
             {deps.length ? <ul>{deps.map((dep) => <li key={dep}>{dep}</li>)}</ul> : <p>未声明</p>}
@@ -157,7 +186,7 @@ export function HubDetailDrawer({ item, onClose, onChanged, onEditExpert }: Prop
               <dt>来源证据</dt><dd>{item.provenance?.ref || item.provenance?.source || hubSourceLabel(item.source)}</dd>
             </dl>
           </section>
-          {installed ? (
+          {installed && (isMine || item.kind !== 'expert') ? (
             <section className="hub-drawer-section">
               <div className="hub-toggle-row">
                 <label htmlFor="hubEnableToggle">在新会话中使用</label>
@@ -178,18 +207,35 @@ export function HubDetailDrawer({ item, onClose, onChanged, onEditExpert }: Prop
         <div className="hub-drawer-foot secondary-dialog__foot" id="hubDrawerActions">
           {item.kind === 'expert' ? (
             <>
-              {bound ? (
+              {!installed ? (
+                <button type="button" className="hub-btn primary" disabled={!!busy} onClick={() => void run('addMyExpert')}>
+                  {busy === 'addMyExpert' ? '正在召唤…' : '召唤专家'}
+                </button>
+              ) : isMine ? <button type="button" className="hub-btn primary" onClick={() => onOpenWorkbench(item)}>打开我的专家</button>
+                : <button type="button" className="hub-btn" disabled>已召唤</button>}
+              {isMine && installed && bound ? (
                 <button type="button" className="hub-btn" disabled={!!busy} onClick={() => void run('removeExpert')}>
-                  {busy === 'removeExpert' ? '正在撤回…' : '工作台撤回'}
+                  {busy === 'removeExpert' ? '正在撤回…' : '从工作台撤回'}
                 </button>
-              ) : (
-                <button type="button" className="hub-btn primary" disabled={!!busy} onClick={() => void run('addExpert')}>
-                  {busy === 'addExpert' ? '正在添加…' : '添加到工作台'}
+              ) : isMine && installed ? (
+                <button type="button" className="hub-btn" disabled={!!busy} onClick={() => void run('addExpert')}>
+                  {busy === 'addExpert' ? '正在添加…' : '设为常用专家'}
                 </button>
-              )}
-              {curated ? <button type="button" className="hub-btn" onClick={() => onEditExpert(item, 'copy')}>复制为自建</button> : null}
-              {canEdit && !curated ? <button type="button" className="hub-btn" onClick={() => onEditExpert(item, 'tune')}>编辑</button> : null}
+              ) : null}
+              {isMine && canEdit && !curated ? <button type="button" className="hub-btn" onClick={() => onEditExpert(item, 'tune')}>编辑</button> : null}
+              {installed && curated ? (
+                <button type="button" className="hub-btn" disabled={!!busy} onClick={() => void run('update')}>
+                  {busy === 'update' ? '正在更新…' : '更新专家'}
+                </button>
+              ) : null}
+              {installed && curated ? (
+                <button type="button" className="hub-btn danger" disabled={!!busy} onClick={() => void run('uninstall')}>
+                  {busy === 'uninstall' ? '正在卸载…' : '卸载专家'}
+                </button>
+              ) : null}
             </>
+          ) : installed && item.kind === 'skill' ? (
+            <button type="button" className="hub-btn primary" onClick={() => onManageSkill(item)}>管理技能装备</button>
           ) : installed ? (
             <button type="button" className="hub-btn" onClick={() => void run('uninstall')}>卸载</button>
           ) : (

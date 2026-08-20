@@ -1,7 +1,0 @@
-{
-  "version": "1.0.0",
-  "contentHash": "",
-  "name": "game-studio-partner",
-  "skills": ["game-requirement-doc", "game-dev-delivery", "game-qa-acceptance", "game-production"],
-  "connectors": ["feishu"]
-}

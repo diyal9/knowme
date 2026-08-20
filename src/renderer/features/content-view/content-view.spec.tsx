@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import * as ContentBlocks from '../../../domain/content-blocks'
 import { CONTENT_BLOCKS_WORKER_THRESHOLD } from '../../../domain/content-blocks-async'
-import { resetAppStore, useAppStore } from '../../test/helpers'
+import { mockApi, resetAppStore, useAppStore } from '../../test/helpers'
 import { ContentView } from './ContentView'
 
 vi.mock('../../../domain/content-blocks', async (importOriginal) => {
@@ -20,19 +20,78 @@ describe('ContentView', () => {
     vi.mocked(ContentBlocks.parseContentBlocks).mockClear()
   })
 
-  it('renders feishu doc links as a shared card', () => {
+  it('renders feishu documents as branded inline links', () => {
     render(<ContentView source={'见 [纪要](https://sample.feishu.cn/docx/abc123)'} />)
-    const card = screen.getByTestId('feishu-resource-card')
-    expect(card).toHaveTextContent('飞书文档')
-    expect(card).toHaveTextContent('纪要')
-    expect(card).toHaveAttribute('href', 'https://sample.feishu.cn/docx/abc123')
+    const link = screen.getByTestId('feishu-doc-link')
+    expect(link).toHaveTextContent('纪要')
+    expect(link).toHaveAttribute('data-resource-type', 'doc')
+    expect(link).toHaveAttribute('href', 'https://sample.feishu.cn/docx/abc123')
+    expect(screen.queryByTestId('feishu-resource-card')).toBeNull()
   })
 
-  it('opens feishu cards in the right link preview instead of a blank window', () => {
+  it('turns URLs wrapped in inline code into clickable links', () => {
+    render(<ContentView source={'查看 `https://forever9.feishu.cn/docx/abc123` 和 `https://example.com/a`'} />)
+    expect(screen.getAllByTestId('feishu-doc-link')).toHaveLength(1)
+    expect(screen.getByTestId('content-resource-link')).toHaveAttribute('href', 'https://example.com/a')
+  })
+
+  it('opens feishu document links in the browser', () => {
+    const openExternal = vi.fn(async () => ({ ok: true }))
+    mockApi({ openExternal })
     render(<ContentView source={'见 [纪要](https://sample.feishu.cn/docx/abc123)'} />)
-    fireEvent.click(screen.getByTestId('feishu-resource-card'))
-    expect(useAppStore.getState().linkPreview?.href).toBe('https://sample.feishu.cn/docx/abc123')
-    expect(useAppStore.getState().linkPreview?.title).toBe('纪要')
+    fireEvent.click(screen.getByTestId('feishu-doc-link'))
+    expect(openExternal).toHaveBeenCalledWith('https://sample.feishu.cn/docx/abc123')
+  })
+
+  it('renders feishu meetings as information cards', () => {
+    render(<ContentView source={'[1. 对九九AI规划｜2026-08-17 16:00｜组织者：Viola-晏希](https://sample.feishu.cn/minutes/meeting123)'} />)
+    const card = screen.getByTestId('feishu-resource-card')
+    expect(card).toHaveClass('feishu-meeting-card')
+    expect(card).toHaveTextContent('飞书妙记 · 第1场')
+    expect(card).toHaveTextContent('对九九AI规划')
+    expect(card).toHaveTextContent('2026-08-17 16:00 ｜ 组织者：Viola-晏希')
+    expect(screen.queryByTestId('feishu-doc-link')).toBeNull()
+  })
+
+  it('opens ordinary web links in the right preview and exposes shared context actions', () => {
+    mockApi()
+    render(<ContentView source={'查看 [项目主页](https://example.com/project)'} />)
+    const link = screen.getByTestId('content-resource-link')
+    expect(link).toHaveAttribute('data-resource-kind', 'web')
+    fireEvent.click(link)
+    expect(useAppStore.getState().linkPreview?.href).toBe('https://example.com/project')
+    fireEvent.contextMenu(link, { clientX: 24, clientY: 36 })
+    expect(useAppStore.getState().overlayContextMenu?.items.map((item) => item.label)).toEqual([
+      '在外部浏览器打开',
+      '复制链接',
+    ])
+  })
+
+  it('reads local markdown links from the active source for the right document preview', async () => {
+    const read = vi.fn(async () => ({ ok: true, content: '# 技术架构\n\n正文内容' }))
+    mockApi({ sourcesReadFile: read })
+    useAppStore.setState({
+      sources: [{ id: 'source-1', type: 'local', rootPath: 'D:/knowledge' }],
+      activeSourceId: 'source-1',
+    })
+    render(<ContentView source={'查看 [ActivityScheduler 技术架构](tech/ActivityScheduler.md)'} />)
+    const link = screen.getByTestId('content-resource-link')
+    expect(link).toHaveAttribute('data-resource-kind', 'markdown')
+    fireEvent.click(link)
+    await waitFor(() => {
+      expect(useAppStore.getState().linkPreview?.loading).toBe(false)
+    })
+    expect(read).toHaveBeenCalledWith({ sourceId: 'source-1', path: 'tech/ActivityScheduler.md' })
+    expect(useAppStore.getState().linkPreview).toMatchObject({
+      kind: 'markdown',
+      path: 'tech/ActivityScheduler.md',
+      content: '# 技术架构\n\n正文内容',
+    })
+    fireEvent.contextMenu(link)
+    expect(useAppStore.getState().overlayContextMenu?.items.map((item) => item.label)).toEqual([
+      '在系统中打开',
+      '复制链接',
+    ])
   })
 
   it('renders GFM tables', () => {
@@ -61,6 +120,8 @@ describe('ContentView', () => {
     const view = screen.getByTestId('content-view')
     expect(view).toHaveAttribute('data-content-pending', '1')
     expect(view.querySelector('h1')).toBeNull()
+    expect(view).toHaveTextContent('正在整理内容…')
+    expect(view).not.toHaveTextContent('paragraph line.')
     expect(ContentBlocks.parseContentBlocks).not.toHaveBeenCalled()
     await waitFor(() => {
       expect(screen.getByTestId('content-view').querySelector('h1')).toHaveTextContent('Title')

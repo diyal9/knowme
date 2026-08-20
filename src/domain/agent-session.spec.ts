@@ -86,15 +86,19 @@ describe('agent session helpers', () => {
     ])).toBe(false)
   })
 
-  it('resolves default general tab label to 通用', () => {
-    expect(resolveSessionTabLabel({ id: 's1', title: '新助手', agentId: 'general' })).toBe('通用')
-    expect(resolveSessionTabLabel({ id: 's1', title: '新助手', displayTitle: '新助手' })).toBe('通用')
-    expect(resolveSessionTabLabel({ id: 's1', title: 'New Agent', agentId: 'general' })).toBe('通用')
+  it('resolves default personal tab label to 新主题', () => {
+    expect(resolveSessionTabLabel({ id: 's1', title: '新助手', agentId: 'general' })).toBe('新主题')
+    expect(resolveSessionTabLabel({ id: 's1', title: '新助手', displayTitle: '新助手' })).toBe('新主题')
+    expect(resolveSessionTabLabel({ id: 's1', title: 'New Agent', agentId: 'general' })).toBe('新主题')
     expect(resolveSessionTabLabel({ id: 's2', title: '项目跟进' })).toBe('项目跟进')
     expect(resolveSessionTabLabel({
       id: 's3',
       title: '请为我做会议总结：总结最近三天与我相关的会议。',
     })).toBe('会议总结')
+    expect(resolveSessionTabLabel({ id: 's4', title: '新主题', sessionKind: 'personal-topic' }, {
+      firstUserText: '请整理本周项目风险并生成同步稿',
+    })).toBe('请整理本周项目风险并生成同步稿')
+    expect(resolveSessionTabLabel({ id: 's5', title: '新主题' }, { firstUserText: '你好' })).toBe('新主题')
   })
 
   it('dedupes open session ids in order', () => {
@@ -111,6 +115,18 @@ describe('agent session helpers', () => {
     expect(chatMessagesFromSession({
       session: { messages: [{ id: 'u1', role: 'user', text: 'hi' }] },
     }).map((m) => m.text)).toEqual(['hi'])
+  })
+
+  it('does not replay persisted tool payloads as assistant messages', () => {
+    expect(chatMessagesFromSession({
+      session: {
+        messages: [
+          { id: 'u1', role: 'user', text: '读取网页' },
+          { id: 't1', role: 'tool', toolName: 'fetch_web_page', text: '{"ok":true,"data":{}}' },
+          { id: 'a1', role: 'assistant', text: '已整理网页内容。' },
+        ],
+      },
+    }).map((m) => m.text)).toEqual(['读取网页', '已整理网页内容。'])
   })
 
   it('extracts markdown and bare image urls', () => {

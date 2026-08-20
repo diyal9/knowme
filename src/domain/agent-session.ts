@@ -6,6 +6,7 @@ import { isWorkbenchLaneSessionId } from './dialogue-lanes'
 const WORKBENCH_SESSION_GOAL = '当前工作'
 /** 占位标题不覆盖模式名；含重构前英文 New Agent */
 const DEFAULT_TAB_TITLES = new Set(['新助手', '新对话', '对话', '当前协作', 'New Agent'])
+const EMPTY_SESSION_TITLES = new Set([...DEFAULT_TAB_TITLES, '新主题'])
 
 function asRecord(raw: unknown): Record<string, unknown> {
   return raw && typeof raw === 'object' && !Array.isArray(raw)
@@ -101,7 +102,7 @@ export function isAssistantLaunchEmpty(messages: ChatMessage[]): boolean {
 function isDefaultTabTitle(title: string): boolean {
   const text = String(title || '').trim()
   if (!text) return true
-  if (DEFAULT_TAB_TITLES.has(text)) return true
+  if (EMPTY_SESSION_TITLES.has(text)) return true
   return /^新对话\s*\d*$/.test(text)
 }
 
@@ -112,18 +113,27 @@ function compactSessionTabLabel(raw: string): string {
   if (/(今日优先级|today_priority)/i.test(text)) return '今日优先级'
   if (/(查文档\/知识库|doc_kb_suggest)/i.test(text)) return '查文档/知识库'
   if (/(相关的聊天|related_chats|@我)/i.test(text)) return '分析相关聊天'
-  return text.length > 40 ? `${text.slice(0, 36)}…` : text
+  return text.length > 32 ? `${text.slice(0, 28)}…` : text
 }
 
 /** 对齐 f6ad048 tabTitle：空会话 general 显示「通用」，默认标题不覆盖 mode 名 */
-export function resolveSessionTabLabel(session: AgentSession | null | undefined): string {
-  if (!session) return '通用'
+export function resolveSessionTabLabel(
+  session: AgentSession | null | undefined,
+  options: { firstUserText?: string } = {},
+): string {
+  if (!session) return '新主题'
   const display = String(session.displayTitle || '').trim()
   const title = String(session.title || '').trim()
   const raw = [display, title].find((item) => item && !isDefaultTabTitle(item)) || ''
   if (raw) return compactSessionTabLabel(raw) || raw
+  const firstFact = String(options.firstUserText || '').replace(/\s+/g, ' ').trim()
+  // 问候语不具备主题事实，保留「新主题」避免 tab 与消息正文重复。
+  if (firstFact && firstFact.length > 4 && !/^(你好|您好|嗨|hello|hi|在吗)[！!。.?？…\s]*$/i.test(firstFact)) {
+    return compactSessionTabLabel(firstFact) || firstFact
+  }
   const modeId = resolveAssistantModeId(session.agentId || session.expertId)
-  if (modeId === 'general') return '通用'
+  if (session.sessionKind === 'personal-topic' || session.profileId === 'my-knowme') return '新主题'
+  if (modeId === 'general') return '新主题'
   const mode = BUILTIN_ASSISTANT_MODES.find((item) => item.id === modeId)
   return mode?.name || '通用'
 }
@@ -156,19 +166,37 @@ export function parseSessionRecord(raw: unknown): AgentSession | null {
     : []
   const displayTitle = String(nested.displayTitle || '').trim()
   const agentId = String(nested.agentId || '').trim()
+  const sessionKind = String(nested.sessionKind || '').trim()
+  const profileId = String(nested.profileId || '').trim()
+  const contextId = String(nested.contextId || '').trim()
   const updatedAt = String(nested.updatedAt || '').trim()
+  const resume = asRecord(nested.resume)
+  const summary = String(nested.summary || resume.summary || '').trim().slice(0, 180)
   return {
     id,
     title: String(displayTitle || nested.title || '对话').trim() || '对话',
     displayTitle: displayTitle || undefined,
     pinned: nested.pinned === true,
     agentId: agentId || undefined,
+    sessionKind: sessionKind || (profileId === 'my-knowme' ? 'personal-topic' : 'legacy'),
+    profileId: profileId || undefined,
+    contextId: contextId || undefined,
     expertId: String(nested.expertId || '').trim() || undefined,
     knowledgeRefs: refs,
     taskRef: parseTaskRef(nested.taskRef),
     run: parseRun(nested.run),
     ...(updatedAt ? { updatedAt } : {}),
+    ...(Number.isFinite(Number(nested.messageCount)) ? { messageCount: Number(nested.messageCount) } : {}),
+    ...(summary ? { summary } : {}),
   }
+}
+
+function isUnstartedSession(session: AgentSession): boolean {
+  return session.messageCount === 0
+    && EMPTY_SESSION_TITLES.has(String(session.title || '').trim())
+    && !session.pinned
+    && !session.run?.goal
+    && !session.run?.artifacts?.length
 }
 
 export function parseSessionList(raw: unknown): {
@@ -182,18 +210,23 @@ export function parseSessionList(raw: unknown): {
     : Array.isArray(result.items)
       ? result.items
       : []
-  const history = dedupeSessionsById(
+  const allSessions = dedupeSessionsById(
     list.map(parseSessionRecord).filter((item): item is AgentSession => Boolean(item)),
   )
-  const byId = new Map(history.map((item) => [item.id, item]))
   const ui = asRecord(result.ui)
   const openIds = dedupeOpenSessionIds(
     Array.isArray(ui.openSessionIds) ? ui.openSessionIds.map(String) : [],
   )
-  const tabsRaw = openIds.length
+  const byId = new Map(allSessions.map((item) => [item.id, item]))
+  const opened = openIds.length
     ? openIds.map((id) => byId.get(id)).filter((item): item is AgentSession => Boolean(item))
-    : history
+    : allSessions
+  const activeIdHint = String(ui.activeSessionId || '')
+  const emptyTabKept = opened.find((item) => item.id === activeIdHint && isUnstartedSession(item))
+    || opened.find((item) => isUnstartedSession(item))
+  const tabsRaw = opened.filter((item) => !isUnstartedSession(item) || item.id === emptyTabKept?.id)
   const tabs = filterAgentSurfaceSessions(tabsRaw)
+  const history = allSessions.filter((item) => !isUnstartedSession(item))
   let activeId = String(ui.activeSessionId || tabs[0]?.id || history[0]?.id || '')
   if (activeId && !tabs.some((item) => item.id === activeId)) {
     activeId = tabs[0]?.id || ''
@@ -212,7 +245,7 @@ export function chatMessagesFromSession(raw: unknown): ChatMessage[] {
   const result = asRecord(raw)
   const session = result.session && typeof result.session === 'object' ? asRecord(result.session) : result
   const list = Array.isArray(session.messages) ? session.messages : []
-  return list.map((item, index) => {
+  return list.filter((item) => asRecord(item).role !== 'tool').map((item, index) => {
     const rec = asRecord(item)
     return enrichChatMessage(rec, { id: `m-${index}`, role: 'assistant', text: '' })
   }).filter((item) => item.text || item.role === 'error')

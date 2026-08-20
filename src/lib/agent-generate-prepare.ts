@@ -6,11 +6,13 @@
  */
 
 const L = require('./agent-generate-libs')
+const { resolvePersonalAgentSettings } = require('./personal-agent-runtime-profile')
+const { commonExpertIds, projectCommonExperts, buildCommonExpertContext } = require('./personal-expert-roster')
 
 /** 成功返回 prepared；失败返回 `{ early }`（已走 env.fail）。 */
 async function prepareAgentGenerate(env) {
   const { app, path, promptRouter, buildSystemContent, buildChatMessages, productKnowledge, productMemory, conversationGrounding, agentSessions, agentRun, groundingRuntime, feishuGroundingAdapter, llmRuntime, llmModelCatalog, llmUsage, knowledgeOs, fabricRetrieval, chatIntent, contextCache, contextOrchestrator, contextPacketLib, writingWorkflow, buildTemporalAnchorContext, logger, resolveGroundingRuntimeMode } = L
-  const { loadSettings, ensureAgentSession, saveAgentSessions, buildFabricCtx, ensureFabricSeeded, ensureCapabilityHub, readNote, buildEmbedFn, normalizeChatEndpoint, resolveActiveProvider, KNOWLEDGE_DIR, MEMORY_DIR, loadSourcesStore, activeAgentRuns } = env.deps
+  const { loadSettings, ensureAgentSession, saveAgentSessions, buildFabricCtx, ensureFabricSeeded, ensureCapabilityHub, getAgentProfileStore, getWorkbenchModeStore, readNote, buildEmbedFn, normalizeChatEndpoint, resolveActiveProvider, KNOWLEDGE_DIR, MEMORY_DIR, loadSourcesStore, activeAgentRuns } = env.deps
   const workflowReact = require('./workflow-react-prompt')
   const { payload, runId, stage, emit, metrics, signal } = env
   const fail = (error) => ({ early: env.fail(error) })
@@ -59,6 +61,7 @@ async function prepareAgentGenerate(env) {
     ephemeral: surface === 'workbench',
   })
   let session = ensured.session
+  const personalizationSettings = resolvePersonalAgentSettings(s, session, getAgentProfileStore)
   if (workflowReact.shouldForceWorkflowReact(session)) {
     session = workflowReact.ensureWorkflowPlanSeed(session, agentRun)
   }
@@ -78,7 +81,11 @@ async function prepareAgentGenerate(env) {
     ? writingWorkflow.classifyWritingTask(prompt, displayPrompt, grounding)
     : null
   const forceFullCtx = process.env.KNOWME_CTX_FULL === '1' || s.chatContextTier === 'full'
-  const tier = (forceFullCtx || (ctxRole === 'writing' && !!writingTask)) ? 'retrieval' : chatIntent.classifyIntent({
+  const declaredToolExecution = Array.isArray(payload.executionContract?.requiredTools)
+    && payload.executionContract.requiredTools.length > 0
+  const tier = declaredToolExecution
+    ? 'assist'
+    : (forceFullCtx || (ctxRole === 'writing' && !!writingTask)) ? 'retrieval' : chatIntent.classifyIntent({
     prompt,
     hasNoteContext: !!String(context || '').trim(),
     slashRefs,
@@ -158,9 +165,10 @@ async function prepareAgentGenerate(env) {
   const sessionHistory = agentSessions.contextMessages(session)
   const sessionSummary = session.summary ? `## 当前 Session 历史摘要\n${session.summary}` : ''
   const userProfile = {
-    userProfile: s.userProfile,
-    userPrompt: s.userPrompt,
-    industry: s.industry,
+    userProfile: personalizationSettings.userProfile,
+    userPrompt: personalizationSettings.userPrompt,
+    industry: personalizationSettings.industry,
+    occupationId: personalizationSettings.occupationId,
   }
   const workContext = {
     topic: [
@@ -276,7 +284,13 @@ async function prepareAgentGenerate(env) {
     skillCtx,
     { taskId: requestedTaskId },
   )
-  const capAssemblyGrounding = capAssembly?.groundingContract || null
+  const declaredExecutionContract = payload.executionContract && typeof payload.executionContract === 'object'
+    ? groundingRuntime.mergeGroundingContracts([payload.executionContract])
+    : null
+  const capAssemblyGrounding = groundingRuntime.mergeGroundingContracts([
+    capAssembly?.groundingContract,
+    declaredExecutionContract,
+  ].filter(Boolean))
   let effectivePrompt = String(prompt || '')
   let groundingTaskFrame = null
   if (resolveGroundingRuntimeMode() === 'runtime') {
@@ -287,6 +301,7 @@ async function prepareAgentGenerate(env) {
     }
     const resolved = feishuGroundingAdapter.resolveUserPromptWithReferenceState(refState, effectivePrompt, {
       bindRefId: payload.bindRef,
+      allowMeetingRecovery: session.run?.toolsUsed?.includes('feishu.meeting_candidates') === true,
     })
     refState = resolved.referenceState
     session.referenceState = groundingRuntime.serializeReferenceState(refState)
@@ -308,23 +323,36 @@ async function prepareAgentGenerate(env) {
     if (resolved.prompt) effectivePrompt = resolved.prompt
     groundingTaskFrame = refState.taskFrame || groundingTaskFrame
   }
+  let commonExpertContext = ''
+  const personalSession = session?.agentId === 'personal' || session?.sessionKind === 'personal-topic'
+  if (personalSession && typeof getWorkbenchModeStore === 'function') {
+    try {
+      const modeState = getWorkbenchModeStore().load()
+      const ids = commonExpertIds(modeState)
+      if (ids.length) {
+        const catalog = await ensureCapabilityHub().listCapabilities({ kind: 'expert' })
+        commonExpertContext = buildCommonExpertContext(projectCommonExperts(modeState, catalog?.items || []))
+      }
+    } catch { /* roster is optional context; never block conversation */ }
+  }
   const dynamicContext = [
     dynamicContextPack.dynamicContext,
     writingPromptContext,
     capAssembly.dynamicCapabilityContext,
+    commonExpertContext,
   ].filter(Boolean).join('\n\n')
   const sceneId = promptRouter.resolveScene({
     mode: ctxRole,
     tier,
     role: ctxRole,
     hasNoteContext: !!String(context || '').trim(),
-    industry: s.industry,
+    industry: personalizationSettings.industry,
     prompt,
   })
   const toolsEnabled = tier !== 'chat' && modelProfile.supportsTools !== false
   const systemContent = buildSystemContent({
     scenePrompt: promptRouter.buildScenePrompt({ scene: sceneId, mode: ctxRole }),
-    userPrompt: promptRouter.buildUserPrompt(s, ctxRole, {
+    userPrompt: promptRouter.buildUserPrompt(personalizationSettings, ctxRole, {
       includeUserPrompt: memoryToggles?.collaborationPrefs !== false,
     }),
     skillPrompt: promptRouter.buildSkillPrompt(slashRefs),

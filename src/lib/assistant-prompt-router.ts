@@ -153,6 +153,7 @@ function buildUserPrompt(settings = {}, mode = 'general', options = {}) {
     : {}
   const customModePrompt = String(config[modeId] || '').trim() || String(config.general || '').trim()
   let industryBlock = ''
+  let occupationBlock = ''
   try {
     const industryProfile = require('./industry-profile')
     if (settings.industry) {
@@ -161,13 +162,49 @@ function buildUserPrompt(settings = {}, mode = 'general', options = {}) {
   } catch {
     industryBlock = ''
   }
+  try {
+    const roleCatalog = require('../shared/personal-role-catalog')
+    if (settings.industry && settings.occupationId) {
+      const role = roleCatalog.getOccupation(settings.industry, settings.occupationId)
+      const industry = roleCatalog.getRoleIndustry(settings.industry)
+      occupationBlock = `【用户岗位】\n${industry.label} · ${role.label}`
+    }
+  } catch {
+    occupationBlock = ''
+  }
+  const userProfile = settings.userProfile ? String(settings.userProfile).trim() : ''
+  const selfDriveLabels = {
+    guided: '依指令：只完成明确交代的步骤，不自行扩展任务范围。',
+    balanced: '协作推进：主动补全计划、提示遗漏，在关键决定前等待用户确认。',
+    proactive: '主动负责：在既定授权边界内持续推进，遇到阻塞或风险再请求用户介入。',
+  }
+  const selfDriveLevel = String(settings.agentSelfDriveLevel || 'balanced').trim()
+  const selfDrivePolicy = selfDriveLabels[selfDriveLevel] || selfDriveLabels.balanced
   const parts = [
-    settings.userProfile
-      ? `【关于用户】\n${String(settings.userProfile).trim()}`
+    userProfile
+      ? `【关于用户】\n${userProfile}`
       : '',
     industryBlock,
+    occupationBlock,
+    `【事实边界】
+高风险事实（作者、权限、金额、日期、数量、外部状态、执行结果）必须有本轮证据；缺少证据时说明未知。普通问答可回答但标注不确定性；分析和建议要与事实分开。`,
+    settings.agentDisplayName
+      ? `【智能伙伴称呼｜最高优先级】\n${String(settings.agentDisplayName).trim()}。对话中必须使用这个昵称自称；禁止自称“KnowMe”“知我”或其他产品名。`
+      : '',
+    settings.agentSoul
+      ? `【智能伙伴 Soul】\n${String(settings.agentSoul).trim()}`
+      : '',
+    settings.agentDomainCapabilities
+      ? `【智能伙伴领域能力】\n${String(settings.agentDomainCapabilities).trim()}`
+      : '',
+    settings.agentCollaboration
+      ? `【智能伙伴协作偏好】\n${String(settings.agentCollaboration).trim()}`
+      : '',
+    settings.agentSoul || settings.agentSelfDriveRules
+      ? `【智能伙伴自我驱动】\n${selfDrivePolicy}${settings.agentSelfDriveRules ? `\n${String(settings.agentSelfDriveRules).trim()}` : ''}`
+      : '',
     includeUserPrompt && settings.userPrompt
-      ? `【协作偏好】\n${String(settings.userPrompt).trim()}`
+      ? `【用户历史协作偏好】\n${String(settings.userPrompt).trim()}`
       : '',
     config.soul
       ? `【用户追加风格】\n${String(config.soul).trim()}`

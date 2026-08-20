@@ -2,7 +2,7 @@
  * 助手对话列：Virtuoso 虚拟列表 + 左侧主题目录跳转。
  * 不负责 Markdown 解析（见 AgentMessageBubble / ContentView）。
  */
-import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { resolveAssistantModeId } from '../../../domain/assistant-modes'
 import {
@@ -19,6 +19,7 @@ import { AssistantSessionTabs } from './AssistantSessionTabs'
 import { AssistantStreamStatus } from './AssistantStreamStatus'
 import { GuidedRecoveryPanel } from './GuidedRecoveryPanel'
 import { AssistantTopicNav } from './AssistantTopicNav'
+import { PersonalAgentGrowthPanel } from './PersonalAgentGrowthPanel'
 
 /** 停止滚动后多久藏起右侧细滚动条 */
 const SCROLLBAR_HIDE_MS = 700
@@ -46,6 +47,7 @@ export function AssistantPane() {
   const sendMessage = useAppStore((s) => s.sendMessage)
   const chatLogRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
+  const [growthOpen, setGrowthOpen] = useState(false)
   const empty = isAssistantLaunchEmpty(messages)
   const activeSession = sessions.find((item) => item.id === activeSessionId)
   const modeId = resolveAssistantModeId(activeSession?.agentId || activeSession?.expertId)
@@ -55,6 +57,12 @@ export function AssistantPane() {
     void loadAssistantSessions()
     void loadAssistantChrome()
   }, [loadAssistantSessions, loadAssistantChrome])
+
+  useEffect(() => {
+    const openGrowth = () => setGrowthOpen(true)
+    window.addEventListener('knowme:open-personal-growth', openGrowth)
+    return () => window.removeEventListener('knowme:open-personal-growth', openGrowth)
+  }, [])
 
   useEffect(() => {
     const log = chatLogRef.current
@@ -79,6 +87,26 @@ export function AssistantPane() {
     }
     return ''
   }, [messages])
+
+  const lastMessageTextLength = messages.length
+    ? String(messages[messages.length - 1]?.text || '').length
+    : 0
+
+  useEffect(() => {
+    if (empty || !messages.length) return
+    const frame = requestAnimationFrame(() => {
+      if (messages.length > ASSISTANT_VIRTUOSO_THRESHOLD) {
+        virtuosoRef.current?.scrollToIndex({ index: messages.length - 1, align: 'end', behavior: 'smooth' })
+        return
+      }
+      const log = chatLogRef.current
+      if (log) {
+        if (typeof log.scrollTo === 'function') log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' })
+        else log.scrollTop = log.scrollHeight
+      }
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [activeSessionId, empty, isGenerating, lastMessageTextLength, messages.length])
 
   const runFollowUp = useCallback((prompt: string) => {
     setComposer(prompt)
@@ -110,18 +138,21 @@ export function AssistantPane() {
 
   return (
     <>
-      <aside className={`agent-col${empty ? ' agent-launch-state' : ''}`} id="agentCol" aria-label="助手对话">
+      <aside className={`agent-col conversation-surface${empty ? ' agent-launch-state' : ''}`} id="agentCol" aria-label="助手对话">
       <div className="agent-col-head">
-        <AssistantSessionTabs />
+        <AssistantSessionTabs onOpenGrowth={() => setGrowthOpen(true)} />
       </div>
-      {empty ? null : (
+      {growthOpen ? (
+        <PersonalAgentGrowthPanel onClose={() => setGrowthOpen(false)} />
+      ) : null}
+      {!growthOpen && !empty ? (
         <AssistantTopicNav
           messages={messages}
           chatLogRef={chatLogRef}
           requestScrollToUserMsg={scrollToUserMessage}
         />
-      )}
-      <div className="agent-chat-body">
+      ) : null}
+      {!growthOpen ? <div className="agent-chat-body">
         <div className="agent-chat-log" id="agentChatLog" data-testid="agent-chat-log" ref={chatLogRef}>
         {empty ? (
           <AssistantEmptyHome
@@ -150,8 +181,8 @@ export function AssistantPane() {
           />
         )}
         </div>
-      </div>
-      {empty ? null : composerWrap(<AgentComposer />, false)}
+      </div> : null}
+      {growthOpen || empty ? null : composerWrap(<AgentComposer />, false)}
       {imageViewerUrl ? (
         <div className="agent-image-viewer show" data-testid="agent-image-viewer" onClick={() => setImageViewer('')}>
           <button type="button" className="agent-image-viewer-close" aria-label="关闭图片" onClick={() => setImageViewer('')}>×</button>

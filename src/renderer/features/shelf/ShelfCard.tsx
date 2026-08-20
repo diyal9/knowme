@@ -2,31 +2,18 @@ import type { ShelfCardModel } from '../../../domain/shelf'
 import { Icon } from '../../app/Icon'
 
 function ShelfBriefFlow({ labels }: { labels: string[] }) {
-  if (!labels.length) {
-    return (
-      <span className="wb-workflow-manage-flow-step" title="按系统默认顺序调度">
-        按系统默认顺序调度
-      </span>
-    )
-  }
+  const path = labels.length ? labels.join(' → ') : '按系统默认顺序调度'
   return (
-    <>
-      {labels.map((label, index) => (
-        <span key={`${label}-${index}`}>
-          {index ? <span className="wb-workflow-manage-flow-sep" aria-hidden="true">→</span> : null}
-          <span className="wb-workflow-manage-flow-step" title={label}>{label}</span>
-        </span>
-      ))}
-    </>
+    <span className="wb-shelf-brief-flow-text" title={path}>{path}</span>
   )
 }
 
 export function ShelfCard({
   card,
-  onStart,
+  onOpen,
 }: {
   card: ShelfCardModel
-  onStart: () => void
+  onOpen: () => void
 }) {
   return (
     <article
@@ -35,9 +22,9 @@ export function ShelfCard({
       tabIndex={0}
       data-flow-id={card.id}
       data-domain={card.domain}
-      aria-label={`打开工作流对话：${card.name}`}
-      onClick={onStart}
-      onKeyDown={(e) => { if (e.key === 'Enter') onStart() }}
+      aria-label={`查看工作流：${card.name}`}
+      onClick={onOpen}
+      onKeyDown={(e) => { if (e.key === 'Enter') onOpen() }}
     >
       <div className="wb-shelf-card-top">
         <span className="wb-shelf-mark" aria-hidden="true">
@@ -51,38 +38,31 @@ export function ShelfCard({
             </span>
           </div>
           <p className="wb-shelf-outcome">{card.description}</p>
-          <ul className="wb-shelf-chips" aria-label="工作流摘要">
-            <li className="wb-shelf-chip" title={card.inputLabel}>
-              <span className="wb-shelf-chip-k">输入</span>
-              <span className="wb-shelf-chip-v">{card.inputLabel}</span>
-            </li>
-            <li className="wb-shelf-chip" title={card.outcomeLabel}>
-              <span className="wb-shelf-chip-k">产出</span>
-              <span className="wb-shelf-chip-v">{card.outcomeLabel}</span>
-            </li>
-          </ul>
+          <div className="wb-shelf-delivery" title={card.outcomeLabel}>
+            <span><Icon name="clipboardCheck" /> 交付</span>
+            <strong>{card.outcomeLabel}</strong>
+          </div>
         </div>
       </div>
       <div className="wb-shelf-card-bottom">
         <div className="wb-shelf-brief">
-          <div className="wb-shelf-brief-label">简要流程</div>
+          <div className="wb-shelf-brief-label">
+            <span>协作路径</span>
+            <span>{card.stepCount} 个节点</span>
+          </div>
           <div className="wb-shelf-brief-flow" aria-label="简要流程">
             <ShelfBriefFlow labels={card.stepLabels} />
           </div>
         </div>
         <footer>
-          <div className="wb-shelf-meta">
-            <span className="wb-shelf-steps">{card.stepCount} 步</span>
-          </div>
           <div className="wb-shelf-actions">
             <button
               type="button"
-              className="wb-shelf-icon-btn is-primary"
-              title="开始运行"
-              aria-label="开始运行"
-              onClick={(e) => { e.stopPropagation(); onStart() }}
+              className="wb-shelf-open"
+              onClick={(e) => { e.stopPropagation(); onOpen() }}
             >
-              <Icon name="play" />
+              <span>查看工作流</span>
+              <Icon name="chevronRight" />
             </button>
           </div>
         </footer>

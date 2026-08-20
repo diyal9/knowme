@@ -1,7 +1,20 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-04T00:00:00.000Z",
+  "updatedAt": "2026-08-19T00:00:00.000Z",
   "entries": [
+    {
+      "id": "external-capability-importer",
+      "kind": "expert",
+      "name": "智能体运维专员",
+      "description": "审计外部项目并将技能、专家、连接器和工作流适配为 KnowMe 可运行资产。",
+      "version": "1.1.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["软件研发"],
+      "tags": ["import", "migration", "workflow", "agent"],
+      "featured": true,
+      "bundlePath": "experts/external-capability-importer"
+    },
     {
       "id": "writing-polish",
       "kind": "skill",
@@ -31,12 +44,12 @@
     {
       "id": "office-partner",
       "kind": "expert",
-      "name": "办公伙伴",
-      "description": "面向日常办公场景的多能力专家，绑定写作润色与飞书连接器。",
-      "version": "1.0.0",
+      "name": "办公协作专家",
+      "description": "将纪要、行动项和背景材料整理为可直接发送的办公交付物。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["办公"],
+      "categories": ["日常办公"],
       "tags": ["office", "partner"],
       "featured": true,
       "bundlePath": "experts/office-partner"
@@ -44,12 +57,12 @@
     {
       "id": "meeting-scribe",
       "kind": "expert",
-      "name": "纪要专家",
-      "description": "整理会议资料为决议、争议点与依据。",
-      "version": "1.0.0",
+      "name": "会议纪要专家",
+      "description": "将会议记录整理为可追溯的结论、决议、分歧和待确认项。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["办公"],
+      "categories": ["日常办公"],
       "tags": ["office", "meeting"],
       "featured": true,
       "bundlePath": "experts/meeting-scribe"
@@ -57,80 +70,165 @@
     {
       "id": "action-owner",
       "kind": "expert",
-      "name": "待办编排",
-      "description": "从纪要提取负责人、截止日与可追踪待办。",
-      "version": "1.0.0",
+      "name": "行动项管理员",
+      "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["办公"],
+      "categories": ["日常办公"],
       "tags": ["office", "actions"],
       "featured": true,
       "bundlePath": "experts/action-owner"
     },
     {
-      "id": "producer",
+      "id": "product-manager",
       "kind": "expert",
-      "name": "制作人",
-      "description": "规划目标、验收标准与风险，驱动三角色交付。",
-      "version": "1.0.0",
+      "name": "产品经理",
+      "description": "将业务目标和用户问题整理为边界清晰、可评审的产品需求。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["研发"],
-      "tags": ["engineering", "producer"],
+      "categories": ["产品与研究"],
+      "tags": ["product", "requirement"],
       "featured": true,
-      "bundlePath": "experts/producer"
+      "bundlePath": "experts/product-manager"
     },
     {
-      "id": "developer",
+      "id": "user-researcher",
       "kind": "expert",
-      "name": "开发",
-      "description": "按验收标准给出实现方案、改动要点与自测清单。",
-      "version": "1.0.0",
+      "name": "用户研究员",
+      "description": "从访谈、反馈和业务材料中提炼用户问题、证据与机会点。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["研发"],
-      "tags": ["engineering", "developer"],
+      "categories": ["产品与研究"],
+      "tags": ["research", "insight"],
       "featured": true,
-      "bundlePath": "experts/developer"
+      "bundlePath": "experts/user-researcher"
     },
     {
-      "id": "tester",
+      "id": "requirement-reviewer",
       "kind": "expert",
-      "name": "测试",
-      "description": "按验收标准执行 QA、反模式审查并给出结论。",
-      "version": "1.0.0",
+      "name": "需求评审专家",
+      "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["研发"],
-      "tags": ["engineering", "tester"],
+      "categories": ["产品与研究"],
+      "tags": ["product", "review"],
       "featured": true,
-      "bundlePath": "experts/tester"
+      "bundlePath": "experts/requirement-reviewer"
     },
     {
-      "id": "copywriter",
+      "id": "creative-director",
       "kind": "expert",
-      "name": "文案",
-      "description": "把 Brief 整理为受众、卖点与文案方向。",
-      "version": "1.0.0",
+      "name": "创意策划",
+      "description": "把传播目标转成受众、核心概念、文案与视觉创意方向。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["写作", "视觉"],
-      "tags": ["visual", "copy"],
+      "categories": ["视觉创意"],
+      "tags": ["visual", "creative", "brief"],
       "featured": true,
-      "bundlePath": "experts/copywriter"
+      "bundlePath": "experts/creative-director"
     },
     {
       "id": "visual-designer",
       "kind": "expert",
-      "name": "视觉",
-      "description": "产出可迭代图像提示词与构图约束。",
-      "version": "1.0.0",
+      "name": "视觉设计师",
+      "description": "将创意方向落为画面构图、风格规范和可执行的生图方案。",
+      "version": "2.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["视觉"],
+      "categories": ["视觉创意"],
       "tags": ["visual", "design"],
       "featured": true,
       "bundlePath": "experts/visual-designer"
+    },
+    {
+      "id": "image-producer",
+      "kind": "expert",
+      "name": "生图执行专家",
+      "description": "按生图方案生成候选图，记录参数并整理可供选版的图像交付包。",
+      "version": "2.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["视觉创意"],
+      "tags": ["visual", "image", "production"],
+      "featured": true,
+      "bundlePath": "experts/image-producer"
+    },
+    {
+      "id": "content-strategist", "kind": "expert", "name": "内容策划专家",
+      "description": "把传播目标、受众和素材转成可执行的内容策略与选题计划。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
+      "tags": ["content", "strategy"], "featured": true, "bundlePath": "experts/content-strategist"
+    },
+    {
+      "id": "longform-editor", "kind": "expert", "name": "长文编辑",
+      "description": "将零散素材组织为结构完整、论据清晰且语气一致的长文交付物。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
+      "tags": ["writing", "editing"], "featured": false, "bundlePath": "experts/longform-editor"
+    },
+    {
+      "id": "presentation-writer", "kind": "expert", "name": "汇报撰写专家",
+      "description": "将业务材料整理为面向决策者的汇报逻辑、页面大纲与讲解要点。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
+      "tags": ["presentation", "report"], "featured": false, "bundlePath": "experts/presentation-writer"
+    },
+    {
+      "id": "data-analyst", "kind": "expert", "name": "数据分析师",
+      "description": "围绕业务问题检查数据、设计指标并输出可复核的分析结论。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "tags": ["data", "analysis"], "featured": true, "bundlePath": "experts/data-analyst"
+    },
+    {
+      "id": "business-insight-analyst", "kind": "expert", "name": "商业洞察专家",
+      "description": "结合指标变化与业务上下文，识别异常、驱动因素和决策机会。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "tags": ["business", "insight"], "featured": false, "bundlePath": "experts/business-insight-analyst"
+    },
+    {
+      "id": "data-report-editor", "kind": "expert", "name": "数据报告专家",
+      "description": "把分析过程和数据结论整理为可沟通、可追溯的数据报告。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "tags": ["data", "report"], "featured": false, "bundlePath": "experts/data-report-editor"
+    },
+    {
+      "id": "solution-architect", "kind": "expert", "name": "解决方案架构师",
+      "description": "将需求和约束转化为可评审的系统边界、组件划分与技术方案。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["软件研发"],
+      "tags": ["architecture", "engineering"], "featured": true, "bundlePath": "experts/solution-architect"
+    },
+    {
+      "id": "software-engineer", "kind": "expert", "name": "软件开发工程师",
+      "description": "在明确仓库和验收标准后实现代码变更，并提供测试与变更证据。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["软件研发"],
+      "tags": ["software", "implementation"], "featured": false, "bundlePath": "experts/software-engineer"
+    },
+    {
+      "id": "qa-engineer", "kind": "expert", "name": "质量测试专家",
+      "description": "根据需求和变更证据设计测试，输出风险分级的验收结论。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["软件研发"],
+      "tags": ["quality", "testing"], "featured": false, "bundlePath": "experts/qa-engineer"
+    },
+    {
+      "id": "research-analyst", "kind": "expert", "name": "研究分析师",
+      "description": "围绕研究问题组织证据、比较观点，产出带来源与不确定性的结论。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["知识研究"],
+      "tags": ["research", "evidence"], "featured": true, "bundlePath": "experts/research-analyst"
+    },
+    {
+      "id": "knowledge-curator", "kind": "expert", "name": "知识策展专家",
+      "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["知识研究"],
+      "tags": ["knowledge", "curation"], "featured": false, "bundlePath": "experts/knowledge-curator"
+    },
+    {
+      "id": "fact-checker", "kind": "expert", "name": "事实核查专家",
+      "description": "逐项核对关键陈述与来源，标记证据强度、冲突和无法确认项。",
+      "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["知识研究"],
+      "tags": ["fact-check", "evidence"], "featured": false, "bundlePath": "experts/fact-checker"
     },
     {
       "id": "feishu",
@@ -209,19 +307,6 @@
       "tags": ["game", "production"],
       "featured": true,
       "bundlePath": "skills/game-production"
-    },
-    {
-      "id": "game-studio-partner",
-      "kind": "expert",
-      "name": "游戏工作室伙伴",
-      "description": "手机游戏研发工作伙伴，覆盖策划、研发、测试与制作。",
-      "version": "1.0.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["游戏"],
-      "tags": ["game", "studio"],
-      "featured": true,
-      "bundlePath": "experts/game-studio-partner"
     },
     {
       "id": "knowledge-steward",

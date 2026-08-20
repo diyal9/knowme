@@ -11,14 +11,24 @@ function create(ctx) {
   ctx.app.on('before-quit', () => { ctx.isQuitting = true })
   ctx.app.on('will-quit', () => ctx.globalShortcut.unregisterAll())
   process.on('uncaughtException', err => {
-    console.error('[fatal]', err?.stack || err)
+    if (ctx.logger.isBrokenPipe?.(err)) {
+      ctx.logger.disableBrokenPipe?.('stdout')
+      ctx.logger.disableBrokenPipe?.('stderr')
+      return
+    }
+    try { console.error('[fatal]', err?.stack || err) } catch { /* broken console must not recurse */ }
     try {
       ctx.logger.error('system', 'uncaught-exception', String(err?.message || err).slice(0, 300), { stack: String(err?.stack || '').slice(0, 2000) })
     }
     catch { /* ignore */ }
   })
   process.on('unhandledRejection', err => {
-    console.error('[unhandled]', err?.stack || err)
+    if (ctx.logger.isBrokenPipe?.(err)) {
+      ctx.logger.disableBrokenPipe?.('stdout')
+      ctx.logger.disableBrokenPipe?.('stderr')
+      return
+    }
+    try { console.error('[unhandled]', err?.stack || err) } catch { /* broken console must not recurse */ }
     try {
       ctx.logger.error('system', 'unhandled-rejection', String(err?.message || err).slice(0, 300), { stack: String(err?.stack || '').slice(0, 2000) })
     }

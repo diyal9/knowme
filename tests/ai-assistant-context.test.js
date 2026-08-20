@@ -20,7 +20,7 @@ describe('ai-assistant-context', () => {
   it('keeps chat-tier core shorter than the full KnowMe base prompt', () => {
     const chat = assembleCorePrompt({ tier: 'chat', toolsEnabled: false })
     const full = assembleCorePrompt({ tier: 'assist', toolsEnabled: true })
-    assert.ok(chat.includes('你是 KnowMe（知我）Agent'))
+    assert.ok(chat.includes('你是用户的智能工作伙伴（KnowMe/知我）'))
     assert.ok(chat.includes('禁止幻觉'))
     assert.ok(!chat.includes('feishu.search_docs'))
     assert.ok(!chat.includes('```suggestion'))
@@ -36,7 +36,7 @@ describe('ai-assistant-context', () => {
   })
 
   it('positions the assistant as a work partner instead of a prompt tool', () => {
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('你是 KnowMe（知我）Agent'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('你是用户的智能工作伙伴（KnowMe/知我）'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('不得自称“WorkBuddy”'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('推动工作真正完成'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('普通问候、宽泛意图和默认建议中禁止主动推荐提示词'));
@@ -44,6 +44,7 @@ describe('ai-assistant-context', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('规划任务、分析问题、创作内容、推进工作或检索知识'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.search_docs'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止声称'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('作者、权限、金额、日期、数量'));
   });
 
   it('routes external links to fetch_web_page and feishu links to read_doc', () => {

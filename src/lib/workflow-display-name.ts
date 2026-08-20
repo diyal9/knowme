@@ -14,6 +14,9 @@ const DISPLAY_NAME_BY_ID = Object.freeze({
   'official-office-meeting-loop': '会议闭环',
   'official-engineering-team-delivery': '三角色协作交付',
   'official-visual-brief-review': 'Brief 出图审阅',
+  'official-product-requirement': '写产品需求',
+  'official-art-image-production': '美术生图',
+  'official-daily-office': '日常办公',
 })
 
 const MINE_SUFFIX_RE = /(?:（我的版本）|\(我的版本\))\s*$/u

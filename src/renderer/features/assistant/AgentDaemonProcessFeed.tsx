@@ -33,7 +33,9 @@ export function AgentDaemonProcessFeed({
             <span className="agent-daemon-progress-status">{compact.statusLabel || ''}</span>
           </div>
           <div className="agent-daemon-progress-meta">{compact.progressLine || status}</div>
-          <div className="agent-daemon-progress-bar" aria-hidden="true"><span style={{ width: `${barWidth}%` }} /></div>
+          <div className="agent-daemon-progress-bar" role="progressbar" aria-label="管线完成进度" aria-valuemin={0} aria-valuemax={100} aria-valuenow={ratio}>
+            <span style={{ width: `${barWidth}%` }} />
+          </div>
           {showTip ? <p className="agent-daemon-progress-tip">{compact.tip}</p> : null}
           {isGenerating ? (
             <div className="agent-daemon-progress-actions">
@@ -62,6 +64,8 @@ export function AgentDaemonProcessFeed({
               type="button"
               className="agent-daemon-process-toggle"
               data-daemon-process-toggle="progress"
+              aria-expanded={!progressCollapsed}
+              aria-controls="agentDaemonProcessProgress"
               onClick={() => setProgressCollapsed((value) => !value)}
             >
               {progressCollapsed ? '展开摘要' : '收起摘要'}
@@ -82,12 +86,14 @@ export function AgentDaemonProcessFeed({
               type="button"
               className="agent-daemon-process-toggle"
               data-daemon-process-toggle="logs"
+              aria-expanded={!logsCollapsed}
+              aria-controls="agentDaemonProcessLogBody"
               onClick={() => setLogsCollapsed((value) => !value)}
             >
               {logsCollapsed ? '展开' : '收起'}
             </button>
           </header>
-          <div className="agent-daemon-process-body">
+          <div className="agent-daemon-process-body" id="agentDaemonProcessLogBody">
             {logLines.length === 0 ? (
               <div className="agent-daemon-process-empty">{transcript?.logs?.emptyLabel || '等待 daemon 过程输出…'}</div>
             ) : (

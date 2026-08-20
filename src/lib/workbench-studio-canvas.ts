@@ -29,6 +29,8 @@
     llm: { w: 260, h: 160 },
     tool: { w: 236, h: 128 },
     knowledge: { w: 236, h: 128 },
+    mcp: { w: 248, h: 160 },
+    request: { w: 260, h: 184 },
     condition: { w: 220, h: 120 },
     join: { w: 120, h: 72 },
     gate: { w: 200, h: 96 },
@@ -39,9 +41,13 @@
     start: 'play',
     end: 'square',
     agent: 'users',
+    human: 'users',
+    action: 'component',
     llm: 'optimize',
     tool: 'component',
     knowledge: 'bookOpen',
+    mcp: 'component',
+    request: 'link',
     condition: 'workflow',
     join: 'network',
     gate: 'clipboardCheck',
@@ -269,7 +275,7 @@
     }
 
     // Shared title for editable exec nodes
-    if (['agent', 'llm', 'tool', 'knowledge'].includes(kind)) {
+    if (['agent', 'llm', 'tool', 'knowledge', 'mcp', 'request'].includes(kind)) {
       fields.push(makeField({
         bind: 'name',
         type: 'text',
@@ -386,6 +392,47 @@
       return fields
     }
 
+    if (kind === 'mcp') {
+      fields.push(makeField({
+        bind: 'inputSpec', type: 'text', section: '输入', value: node.inputSpec || '', placeholder: '上游结果', max: 200,
+      }))
+      fields.push(makeField({
+        bind: 'config.connectorName', type: 'text', section: 'MCP 服务', value: cfg.connectorName || cfg.connectorId || '', placeholder: 'MCP 服务标识', max: 160,
+      }))
+      fields.push(makeField({
+        bind: 'config.toolName', type: 'text', section: '工具', value: cfg.toolName || '', placeholder: '工具名称', max: 160,
+      }))
+      fields.push(makeField({
+        bind: 'config.arguments', type: 'textarea', section: '参数', value: cfg.arguments || '{}', placeholder: 'JSON 参数', max: 4000,
+      }))
+      fields.push(makeField({
+        bind: 'outputSpec', type: 'text', section: '输出', value: node.outputSpec || '', placeholder: '工具结果', max: 200,
+      }))
+      return fields
+    }
+
+    if (kind === 'request') {
+      fields.push(makeField({
+        bind: 'inputSpec', type: 'text', section: '输入', value: node.inputSpec || '', placeholder: '上游结果', max: 200,
+      }))
+      fields.push(makeField({
+        bind: 'config.method', type: 'select', section: '请求', label: '方法', value: cfg.method || 'GET', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map(value => ({ value, label: value })),
+      }))
+      fields.push(makeField({
+        bind: 'config.url', type: 'text', section: '请求', label: 'URL', value: cfg.url || '', placeholder: 'https://…', max: 1200,
+      }))
+      fields.push(makeField({
+        bind: 'config.headers', type: 'textarea', section: '请求', label: 'Headers', value: cfg.headers || '{}', placeholder: 'JSON 请求头', max: 4000,
+      }))
+      fields.push(makeField({
+        bind: 'config.body', type: 'textarea', section: '请求', label: 'Body', value: cfg.body || '', placeholder: 'JSON 请求体（可选）', max: 8000,
+      }))
+      fields.push(makeField({
+        bind: 'outputSpec', type: 'text', section: '输出', value: node.outputSpec || '', placeholder: '响应结果', max: 200,
+      }))
+      return fields
+    }
+
     // agent
     fields.push(makeField({
       bind: 'inputSpec',
@@ -419,6 +466,8 @@
       llm: '大模型节点',
       tool: '工具节点',
       knowledge: '知识库节点',
+      mcp: 'MCP 节点',
+      request: 'HTTP 请求节点',
       agent: '专家节点',
     })[kind] || '节点'
   }
@@ -598,6 +647,8 @@
     if (kind === 'llm') body = text(node.config?.prompt || node.intent || '配置 Prompt 与模型', 160)
     if (kind === 'tool') body = text(node.config?.skillName || node.config?.skillId || '绑定一项技能', 160)
     if (kind === 'knowledge') body = text(node.config?.knowledgeName || node.config?.knowledgeId || '绑定知识库', 160)
+    if (kind === 'mcp') body = text(node.config?.toolName || node.config?.connectorName || '配置 MCP 工具', 160)
+    if (kind === 'request') body = text(node.config?.url || '配置 HTTP 请求', 160)
     if (kind === 'condition') {
       body = `${node.config?.left || 'input'} ${node.config?.compare || 'equal'} ${node.config?.right || '…'}`
     }
@@ -613,6 +664,8 @@
       llm: node.name || '大模型节点',
       tool: node.name || '工具节点',
       knowledge: node.name || '知识库节点',
+      mcp: node.name || 'MCP 节点',
+      request: node.name || 'HTTP 请求节点',
       condition: node.name || '条件判断',
       join: node.name || '汇合',
       gate: node.name || '人工确认',
@@ -625,6 +678,8 @@
       llm: '大模型',
       tool: '工具',
       knowledge: '知识库',
+      mcp: 'MCP',
+      request: 'Request',
       condition: '条件',
       join: '汇合',
       gate: '确认',
@@ -651,7 +706,7 @@
       relation: node.relation || '',
       selectable: true,
       agentPackageId: node.agentPackageId || '',
-      agent: kind === 'agent' || kind === 'llm' || kind === 'tool' || kind === 'knowledge',
+      agent: kind === 'agent' || kind === 'llm' || kind === 'tool' || kind === 'knowledge' || kind === 'mcp' || kind === 'request',
       wired: kind !== 'start',
       canOutput: kind !== 'end',
       canInput: kind !== 'start',
@@ -967,13 +1022,14 @@
     return [
       { id: 'start', kind: 'start', title: '开始', hint: '入参与流程目标', system: true, group: 'flow', groupTitle: '流程' },
       { id: 'end', kind: 'end', title: '结束', hint: '出参与交付结果', system: true, group: 'flow', groupTitle: '流程' },
-      { id: 'agent', kind: 'agent', title: '专家', hint: '从工作台选择完整 Agent 专家', system: false, group: 'capability', groupTitle: '能力' },
-      { id: 'llm', kind: 'llm', title: '大模型', hint: '选择 Hub 模型 + Prompt，直连生成', system: false, group: 'capability', groupTitle: '能力' },
-      { id: 'tool', kind: 'tool', title: '工具', hint: '绑定技能并直接执行', system: false, group: 'capability', groupTitle: '能力' },
-      { id: 'knowledge', kind: 'knowledge', title: '知识库', hint: '绑定知识库并检索', system: false, group: 'capability', groupTitle: '能力' },
+      { id: 'agent', kind: 'agent', title: '专家', hint: '由专业 Agent 完成一个工作步骤', system: false, group: 'capability', groupTitle: '执行' },
+      { id: 'tool', kind: 'tool', title: '工具', hint: '调用已安装的技能或工具', system: false, group: 'capability', groupTitle: '执行' },
+      { id: 'knowledge', kind: 'knowledge', title: '知识库', hint: '检索本地、飞书或 RAG 知识库', system: false, group: 'capability', groupTitle: '执行' },
+      { id: 'mcp', kind: 'mcp', title: 'MCP', hint: '调用 MCP 服务工具', system: false, group: 'capability', groupTitle: '执行' },
+      { id: 'request', kind: 'request', title: 'Request', hint: '发起 HTTP 请求', system: false, group: 'capability', groupTitle: '执行' },
       { id: 'condition', kind: 'condition', title: '条件', hint: '分支：成立 / 不成立', system: false, group: 'control', groupTitle: '控制' },
-      { id: 'join', kind: 'join', title: '汇合', hint: '「同时执行」后自动出现', system: true, group: 'control', groupTitle: '控制' },
-      { id: 'gate', kind: 'gate', title: '人工确认', hint: '「执行前确认」后自动出现', system: true, group: 'control', groupTitle: '控制' },
+      { id: 'join', kind: 'join', title: '汇合', hint: '等待多条分支完成后再继续', system: true, group: 'control', groupTitle: '控制' },
+      { id: 'gate', kind: 'gate', title: '人工确认', hint: '暂停执行，等待人工确认后继续', system: false, group: 'control', groupTitle: '控制' },
     ]
   }
 

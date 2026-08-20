@@ -9,7 +9,7 @@ const {
   forkWorkflowPackage,
 } = require('./workflow-package')
 
-const STORE_VERSION = 1
+const STORE_VERSION = 2
 
 function nowIso() {
   return new Date().toISOString()
@@ -47,7 +47,7 @@ function createStore(options = {}) {
   function load() {
     const raw = readJson(file, fsImpl)
     const packages = {}
-    if (raw?.version === STORE_VERSION && raw.packages && typeof raw.packages === 'object') {
+    if ((raw?.version === 1 || raw?.version === STORE_VERSION) && raw.packages && typeof raw.packages === 'object') {
       for (const [key, value] of Object.entries(raw.packages)) {
         const normalized = normalizeWorkflowPackage({ ...value, id: value.id || key })
         if (normalized.ok) packages[normalized.package.id] = normalized.package
@@ -97,6 +97,29 @@ function createStore(options = {}) {
     state.packages[validation.package.id] = validation.package
     save(state)
     return { ok: true, package: validation.package }
+  }
+
+  function publish(id, evidence = {}, options = {}) {
+    const current = get(id)
+    if (!current.ok) return current
+    if (current.package.status !== 'draft') return { ok: false, code: 'not_draft', error: '只有草稿可以发布' }
+    const successfulRunId = String(evidence.successfulRunId || evidence.runId || '').trim()
+    if (!successfulRunId || evidence.success === false) {
+      return { ok: false, code: 'successful_run_required', error: '发布前至少需要一次完整成功 Run' }
+    }
+    return savePackage({
+      ...current.package,
+      status: 'published',
+      publication: {
+        ...(current.package.publication || {}),
+        visibility: evidence.visibility || current.package.publication?.visibility || 'private',
+        successfulRunId,
+        successfulRunHash: evidence.successfulRunHash || evidence.runHash || '',
+        uncoveredBranches: Array.isArray(evidence.uncoveredBranches) ? evidence.uncoveredBranches : [],
+        publishedAt: nowIso(),
+      },
+      updatedAt: nowIso(),
+    }, options)
   }
 
   function fork(id, options = {}) {
@@ -224,6 +247,7 @@ function createStore(options = {}) {
     save: savePackage,
     fork,
     archive,
+    publish,
     clearExpertRefs,
   }
 }

@@ -27,12 +27,13 @@ export type AssistantMessageVirtuosoProps = {
 function renderMessageRow(
   m: ChatMessage,
   index: number,
-  ctx: Omit<AssistantMessageVirtuosoProps, 'messages' | 'chatLogRef' | 'footer'>,
+  ctx: Omit<AssistantMessageVirtuosoProps, 'messages' | 'chatLogRef' | 'footer'> & { messagesBefore: ChatMessage[] },
 ) {
   const images = extractImageUrls(m.text)
   const userIdx = m.role === 'user' ? index : undefined
   const role = m.role === 'user' ? 'user' : 'assistant'
   const isLastAssistant = m.id === ctx.lastAssistantId && m.role === 'assistant'
+  const userInput = [...ctx.messagesBefore].reverse().find((item) => item.role === 'user')?.text || ''
   return (
     <div className="agent-virtuoso-row" data-message-index={index}>
       <AgentMessageBubble
@@ -44,6 +45,7 @@ function renderMessageRow(
         error={m.role === 'error'}
         message={m.role === 'assistant' ? m : undefined}
         modeId={ctx.modeId}
+        userInput={userInput}
         showFollowUps={isLastAssistant && !ctx.isGenerating && m.role !== 'error' && m.text !== INCOMPLETE_ASSISTANT_REPLY}
         onFollowUp={ctx.onFollowUp}
         onStructuredPick={ctx.onStructuredPick}
@@ -102,7 +104,7 @@ export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMess
       return (
         <div className="agent-chat-static-list" data-testid="agent-message-static-list">
           {messages.map((m, index) => (
-            <div key={m.id}>{renderMessageRow(m, index, rowCtx)}</div>
+            <div key={m.id}>{renderMessageRow(m, index, { ...rowCtx, messagesBefore: messages.slice(0, index) })}</div>
           ))}
           {footer}
         </div>
@@ -125,7 +127,7 @@ export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMess
         components={{
           Footer: footer ? () => <>{footer}</> : undefined,
         }}
-        itemContent={(index, m) => renderMessageRow(m, index, rowCtx)}
+        itemContent={(index, m) => renderMessageRow(m, index, { ...rowCtx, messagesBefore: messages.slice(0, index) })}
       />
     )
   },

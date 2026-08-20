@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react'
-import './console.css'
 import { runNextAction, runProgressLabel, runStatusSummary } from '../../../domain/run-telemetry'
 import { useAppStore, selectProcessView } from '../../app/store'
-import { Icon } from '../../app/Icon'
+import { BackButton } from '../../app/BackButton'
 import { useKnowMeIcons } from '../../app/useKnowMeIcons'
 import { DaemonReviewPanel } from './DaemonReviewPanel'
 import { RunAgentsSection, RunGraphSection } from './RunAgentsGraph'
@@ -145,14 +144,11 @@ export function RunSurface({ taskRoom = false }: { taskRoom?: boolean }) {
           </div>
           <div className="wb-run-topbar-meta">
             {outcome ? (
-              <span className="wb-run-outcome" id="wbRunOutcome" role="status" aria-live="polite">{outcome}</span>
+              <span className={`wb-run-outcome tone-${run.phase}`} id="wbRunOutcome" role="status" aria-live="polite">{outcome}</span>
             ) : null}
           </div>
         </div>
-        <button type="button" className="wb-task-back" id="wbRunBack" onClick={returnToShelf} aria-label="返回">
-          <Icon name="chevronLeft" />
-          <span>返回</span>
-        </button>
+        <BackButton label={run.lane === 'pipeline' ? '返回管线服务' : '返回工作流'} id="wbRunBack" onClick={returnToShelf} />
       </header>
       <div className="wb-run-body" id="wbRunBody">
         {run.phase === 'input' ? (
@@ -245,9 +241,7 @@ export function RunSurface({ taskRoom = false }: { taskRoom?: boolean }) {
               </div>
               <div className="wb-run-result-actions wb-run-input-actions" id="wbRunResultActions" data-testid="run-footer-actions">
                 <p>本轮已结束。</p>
-                <button type="button" className="wb-modal-btn" onClick={returnToShelf}>
-                  {run.lane === 'pipeline' ? '返回管线服务' : '返回工作流'}
-                </button>
+                <BackButton label={run.lane === 'pipeline' ? '返回管线服务' : '返回工作流'} onClick={returnToShelf} />
                 <button type="button" className="wb-modal-btn" onClick={() => void rerun()}>再跑一次</button>
                 <button type="button" className="wb-modal-btn" onClick={toggleProcessLog}>
                   {run.showProcess ? '隐藏执行过程' : '查看执行过程'}

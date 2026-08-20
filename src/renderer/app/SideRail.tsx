@@ -3,7 +3,7 @@ import { Icon } from './Icon'
 import { useAppStore } from './store'
 
 const ICONS: Record<AppRoute, string> = {
-  assistant: 'chat',
+  assistant: 'robot',
   workbench: 'workbench',
   capabilities: 'capabilityStack',
   automation: 'automation',

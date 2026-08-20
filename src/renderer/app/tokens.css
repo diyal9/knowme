@@ -4,37 +4,111 @@
 
    Accent 双层语义（有意保留，禁止同屏主 CTA 混用）：
    - 壳层 / Rail / 设置主操作 → --accent（炭黑）
-   - 工作台 / 货架 / 管线 / Studio / Hub 主 CTA → --wb-accent（墨绿）
+   - 工作台 / 货架 / 管线 / Studio / Hub 主 CTA → --wb-accent（矿物青绿）
    详见 align-production-ui-visual-parity design.md */
 :root {
-  --app-chrome: #ebeae7;
-  --app-chrome-line: #e2e0dc;
+  --app-chrome: #f5f6f7;
+  --app-chrome-line: #e3e6e8;
   --titlebar-height: env(titlebar-area-height, 0px);
-  --bg-app: #f1efec;
-  --bg-side: #f0eeeb;
+  --bg-app: #f7f8f9;
+  --bg-side: #f3f4f5;
   --bg-card: #ffffff;
-  --div: rgba(0, 0, 0, 0.08);
-  --text: #1c1917;
-  --text2: #57534e;
-  --text3: #a8a29e;
-  /* 壳层炭黑：导航选中、设置主按钮、助理 chrome 强调 */
-  --accent: #3d3a36;
-  --accent-bg: rgba(61, 58, 54, 0.08);
-  --accent-b: rgba(61, 58, 54, 0.20);
-  /* 工作台墨绿：主 CTA / 成功态；勿用于设置 primary */
-  --wb-accent: #2f6f5e;
-  --wb-accent-soft: #e8f0ec;
-  --wb-success: #34735e;
-  --wb-border: #e2ded5;
-  --wb-line: #deddd7;
+  --div: rgba(32, 35, 38, 0.10);
+  --text: #202326;
+  --text2: #51575d;
+  --text3: #70777e;
+  /* 壳层炭黑：导航选中、设置主按钮、智能伙伴 chrome 强调 */
+  --accent: #303438;
+  --accent-bg: rgba(48, 52, 56, 0.08);
+  --accent-b: rgba(48, 52, 56, 0.22);
+  /* 矿物青绿：成长、行动与成功；避免灰暗墨绿。 */
+  --wb-accent: #27786a;
+  --wb-accent-hover: #21695d;
+  --wb-accent-soft: #e7f2ee;
+  --wb-success: #2d7a63;
+  --wb-border: #dce1e4;
+  --wb-line: #e2e6e9;
   --wb-surface: #ffffff;
   --green: #16a34a;
   --red: #dc2626;
-  --rail-width: 120px;
-  --ui: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  --rail-width: 108px;
+  /* Typography contract: one native, ClearType-friendly stack for every surface. */
+  --font-family-ui: 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
+  --font-family-display: var(--font-family-ui);
+  --font-family-mono: 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  --ui: var(--font-family-ui);
+  --display: var(--font-family-display);
+  --mono: var(--font-family-mono);
+  --font-xs: 12px;
+  --font-sm: 13px;
+  --font-md: 14px;
+  --font-lg: 15px;
+  --font-xl: 18px;
+  --font-2xl: 22px;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --line-tight: 1.25;
+  --line-normal: 1.5;
+  --line-relaxed: 1.65;
+  /* Typography roles: surfaces choose a role instead of inventing a size. */
+  --type-page: var(--weight-semibold) var(--font-2xl)/var(--line-tight) var(--display);
+  --type-section: var(--weight-semibold) var(--font-xl)/var(--line-tight) var(--display);
+  --type-card: var(--weight-semibold) var(--font-lg)/1.35 var(--ui);
+  --type-body: var(--weight-regular) var(--font-md)/var(--line-normal) var(--ui);
+  --type-support: var(--weight-regular) var(--font-sm)/var(--line-normal) var(--ui);
+  --type-meta: var(--weight-medium) var(--font-xs)/1.4 var(--ui);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --control-sm: 28px;
+  --control-md: 32px;
+  --control-lg: 36px;
+  --radius-sm: 5px;
+  --radius-md: 7px;
+  --radius-lg: 10px;
   /* 交互时长：微交互 / 面板开合 */
   --motion-micro: 160ms;
   --motion-panel: 280ms;
+  --focus-ring: rgba(39, 120, 106, 0.30);
+  --surface-shadow: 0 1px 2px rgba(24, 31, 36, 0.03), 0 8px 24px rgba(24, 31, 36, 0.04);
+  --radius-control: 7px;
+
+  /* Semantic layer: components consume these names, never raw palette values. */
+  --surface-page: var(--bg-app);
+  --surface-panel: var(--bg-card);
+  --surface-subtle: var(--bg-side);
+  --surface-hover: #f3f5f6;
+  --surface-selected: #e9edef;
+  --text-primary: var(--text);
+  --text-secondary: var(--text2);
+  --text-muted: var(--text3);
+  --border-subtle: rgba(32, 35, 38, 0.07);
+  --border-default: var(--wb-line);
+  --border-strong: #c9d0d5;
+  --action-primary: var(--wb-accent);
+  --action-primary-hover: var(--wb-accent-hover);
+  --action-primary-soft: var(--wb-accent-soft);
+  --shadow-float: 0 12px 32px rgba(24, 31, 36, 0.10);
+  --page-max: 1120px;
+  --page-gutter: 24px;
+  --toolbar-height: 44px;
+  /* Conversation contract: shared by personal, expert, workflow and pipeline chat. */
+  --conversation-track-max: 920px;
+  /* 对话正文采用窄于输入框的阅读轨，避免回复呈现成长文档。 */
+  --conversation-reading-max: 880px;
+  --conversation-body-size: 15px;
+  --conversation-user-size: 14px;
+  --conversation-composer-size: 14px;
+  --conversation-body-leading: 1.68;
+  --conversation-turn-gap: 16px;
+  --conversation-composer-min: 88px;
+  --conversation-composer-input-min: 48px;
+  --conversation-composer-input-max: 180px;
 }
 
 *,
@@ -48,4 +122,8 @@ html, body, #root {
   background: var(--app-chrome);
   color: var(--text);
   font-family: var(--ui);
+  font-size: var(--font-md);
+  font-weight: var(--weight-regular);
+  line-height: var(--line-normal);
+  font-kerning: normal;
 }

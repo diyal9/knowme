@@ -8,7 +8,7 @@
 const crypto = require('crypto')
 const { formatToolLabelForUser } = require('./agent-grounding-labels')
 
-const EXECUTION_CLAIM_RE = /(已读取|已创建|已发送|已执行|已完成读取|已成功读取|读取完成|读取成功)/i
+const EXECUTION_CLAIM_RE = /(已(?:经)?读取|已(?:经)?创建(?:文件|目录|文档)|已(?:经)?写入|已(?:经)?保存|已(?:经)?修改(?:文件|代码)|已(?:经)?导入|已(?:经)?安装|已(?:经)?发送|已(?:经)?发布|已(?:经)?删除|已(?:经)?运行(?:测试|脚本|命令)|已(?:经)?执行|已完成读取|已成功读取|读取完成|读取成功|imported|installed|published|deleted|tests? passed)/i
 const EXTERNAL_FACT_RE = /(议题[：:]|负责人[：:]|责任人[：:]|日期[：:]|待办[：:]|结论[：:]|会议时间|组织者[：:])/i
 const PENDING_OK_RE = /(我将|我会|需要先|尚未读取|需先|请允许|下一步|正在准备)/i
 const NUMERIC_INPUT_RE = /^(?:第?\s*(\d{1,2})\s*(?:条|项|个|号)?|(\d{1,2}))$/

@@ -14,14 +14,16 @@ function tmpDir() {
 
 describe('logger', () => {
   let dir
+  let tempDirs
   beforeEach(() => {
     logger._reset()
-    dir = tmpDir()
+    tempDirs = []
+    dir = tmpDir(); tempDirs.push(dir)
     logger.init({ dir, level: 'debug', mirrorConsole: false })
   })
   afterEach(() => {
     logger._reset()
-    fs.rmSync(dir, { recursive: true, force: true })
+    for (const tempDir of tempDirs) fs.rmSync(tempDir, { recursive: true, force: true })
   })
 
   it('writes JSONL entries that can be queried by category', () => {
@@ -63,12 +65,57 @@ describe('logger', () => {
   it('buffers pre-init logs and flushes after init', () => {
     logger._reset()
     logger.operation('early', '初始化前')
-    const d2 = tmpDir()
+    const d2 = tmpDir(); tempDirs.push(d2)
     logger.init({ dir: d2, level: 'debug', mirrorConsole: false })
     const res = logger.query({})
     assert.ok(res.total >= 1)
     assert.ok(res.entries.some(e => e.event === 'early'))
-    fs.rmSync(d2, { recursive: true, force: true })
+  })
+
+  it('prunes expired logs and enforces file-count and total-size limits on init', () => {
+    logger._reset()
+    const now = Date.now()
+    for (let i = 0; i < 6; i += 1) {
+      const file = path.join(dir, `knowme-2026-08-${String(10 + i).padStart(2, '0')}-${i}.jsonl`)
+      fs.writeFileSync(file, 'x'.repeat(64), 'utf8')
+      fs.utimesSync(file, new Date(now - i * 1000), new Date(now - i * 1000))
+    }
+    const expired = path.join(dir, 'knowme-2020-01-01.jsonl')
+    fs.writeFileSync(expired, 'old', 'utf8')
+    fs.utimesSync(expired, new Date(0), new Date(0))
+
+    logger.init({
+      dir,
+      mirrorConsole: false,
+      retentionDays: 7,
+      maxFiles: 3,
+      maxBytes: 128,
+      maxTotalBytes: 192,
+    })
+
+    const files = fs.readdirSync(dir).filter(name => name.startsWith('knowme-'))
+    const total = files.reduce((sum, name) => sum + fs.statSync(path.join(dir, name)).size, 0)
+    assert.ok(files.length <= 3)
+    assert.ok(total <= 192)
+    assert.equal(fs.existsSync(expired), false)
+  })
+
+  it('rotates before a write would exceed the configured per-file limit', () => {
+    logger._reset()
+    logger.init({ dir, level: 'debug', mirrorConsole: false, maxBytes: 300 })
+    for (let i = 0; i < 10; i += 1) logger.operation(`event-${i}`, 'x'.repeat(80))
+    const sizes = fs.readdirSync(dir)
+      .filter(name => name.startsWith('knowme-'))
+      .map(name => fs.statSync(path.join(dir, name)).size)
+    assert.ok(sizes.length > 1)
+    assert.ok(sizes.every(size => size <= 300))
+  })
+
+  it('recognizes broken pipes so the failing console stream can be disabled', () => {
+    assert.equal(logger.isBrokenPipe({ code: 'EPIPE' }), true)
+    assert.equal(logger.isBrokenPipe(new Error('broken pipe, write')), true)
+    assert.equal(logger.isBrokenPipe(new Error('disk full')), false)
+    assert.doesNotThrow(() => logger.disableBrokenPipe('stderr'))
   })
 
   it('reports category counts', () => {

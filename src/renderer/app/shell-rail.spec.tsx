@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from './AppShell'
+import { useAppStore } from './store'
 import { mockApi, resetAppStore } from '../test/helpers'
 
 describe('shell-rail', () => {
@@ -14,14 +15,14 @@ describe('shell-rail', () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: '办公助理' })).toHaveAttribute('aria-pressed', 'false')
+expect(screen.getByRole('button', { name: '智能伙伴' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('returns to 助理 when assistant rail is clicked', () => {
+it('returns to 智能伙伴 when assistant rail is clicked', () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
-    fireEvent.click(screen.getByRole('button', { name: '办公助理' }))
-    expect(screen.getByRole('button', { name: '办公助理' })).toHaveAttribute('aria-pressed', 'true')
+fireEvent.click(screen.getByRole('button', { name: '智能伙伴' }))
+expect(screen.getByRole('button', { name: '智能伙伴' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'false')
   })
 
@@ -32,14 +33,24 @@ describe('shell-rail', () => {
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
   })
 
-  it('returns to 专家协作 after visiting automation via 助理', async () => {
+  it('returns to 专家协作 after visiting automation via 智能伙伴', async () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '自动化' }))
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '办公助理' }))
+fireEvent.click(screen.getByRole('button', { name: '智能伙伴' }))
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'true')
-    expect(await screen.findByRole('heading', { name: '安排专家协作' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '专家任务' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: '按你的节奏自动推进工作' })).not.toBeInTheDocument()
+  })
+
+  it('clears a stale automation panel when opening 工作台 directly', async () => {
+    render(<AppShell />)
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'manage', managePanel: 'automation' })
+    fireEvent.click(screen.getByRole('button', { name: '工作台' }))
+    expect(useAppStore.getState().workbenchSurface).toBe('taskhome')
+    expect(useAppStore.getState().managePanel).toBe('daemon')
+    expect(await screen.findByRole('heading', { name: '专家任务' })).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: '按你的节奏自动推进工作' })).not.toBeInTheDocument()
   })
 

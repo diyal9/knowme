@@ -27,7 +27,7 @@
     "eval:nightly": "node scripts/agent-eval.js --suite self-e2e-controlled --baseline v2 --advisory-ok --out openspec/changes/establish-knowme-evals-system/evidence/eval-report",
     "eval:benchmark": "node scripts/agent-benchmark.js --suite core-10 --out openspec/changes/establish-knowme-evals-system/evidence/benchmark-report",
     "eval:weekly": "node scripts/agent-benchmark.js --suite core-10 --out openspec/changes/establish-knowme-evals-system/evidence/benchmark-report",
-    "lint": "node scripts/lint.js && node scripts/check-script-scope.js",
+    "lint": "node scripts/lint.js && node scripts/check-workbench-css-cascade.js && node scripts/check-script-scope.js",
     "typecheck": "node scripts/check-jsdoc.js",
     "typecheck:renderer": "tsc --noEmit -p tsconfig.json",
     "typecheck:lib": "node scripts/check-no-ts-nocheck.js && tsc --noEmit -p tsconfig.lib.json",

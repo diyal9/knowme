@@ -370,6 +370,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             allowedConnectorIds: bindings.allowedConnectorIds,
             signal: childCtx.signal,
             budget: runtime.manager.getRun(childRunId).run?.budget || null,
+            requiredTools: childCtx.executionContract?.requiredTools || [],
             recordReceipt: receipt => runtime.store.writeReceipt(childRunId, receipt.idempotencyKey || receipt.auditId || `receipt_${Date.now()}`, { result: receipt.envelope || receipt }),
             connectorBuild: options => ctx.connectorToolRuntime.buildConnectorToolSurface(ctx.app.getPath('userData'), {
                 extraTools: options.extraTools,
@@ -406,7 +407,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             effectivePersonalization: { applied: [], omitted: [] },
             ctxBundle: {
                 contextInfo: { workbenchAgentGraph: true, goal, sourceRoot: sourceRoot || '' },
-                taskFrame: null,
+                taskFrame: childCtx.executionContract || null,
             },
             loadAgentSessions: ctx.loadAgentSessions,
             saveAgentSessions: ctx.saveAgentSessions,

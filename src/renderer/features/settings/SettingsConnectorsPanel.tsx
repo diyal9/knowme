@@ -57,10 +57,10 @@ export function SettingsConnectorsPanel({ form, onPatch, flash }: Props) {
     <>
       <div className="settings-section">
         <div className="settings-section-head">
-          <div className="settings-section-title">连接器</div>
-          <span className="settings-badge">公司系统 / 飞书</span>
+          <div className="settings-section-title">外部服务与授权</div>
+          <span className="settings-badge">飞书 / MCP / Agent Service</span>
         </div>
-        <p className="settings-intro">点击一次即可完成飞书连接和当前项目所需权限授权。Token 不会被 KnowMe 持久化保存。</p>
+        <p className="settings-intro">这里管理真实外部服务的连接、授权和本机服务配置。能力中心的“连接器”是由配置中心或后台封装好的能力包，可能通过 MCP、固定 HTTP、公司 CLI 或 npx 运行，两者不是同一层。Token 不会被 KnowMe 持久化保存。</p>
         <SettingsFeishuSection
           feishu={feishu}
           status={feishuStatus}

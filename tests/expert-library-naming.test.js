@@ -7,15 +7,15 @@ const path = require('path')
 
 const src = path.join(__dirname, '..', 'src')
 
-describe('expert library naming', () => {
+describe('Agent center naming', () => {
   const railTs = fs.readFileSync(path.join(src, 'domain', 'rail.ts'), 'utf8')
   const sideRail = fs.readFileSync(path.join(src, 'renderer', 'app', 'SideRail.tsx'), 'utf8')
   const hubSurface = fs.readFileSync(path.join(src, 'renderer', 'features', 'capability-hub', 'CapabilityHubSurface.tsx'), 'utf8')
 
-  it('rail and hub chrome use 专家库', () => {
-    assert.match(railTs, /label: '专家库'/)
+  it('rail and hub chrome use 能力中心', () => {
+    assert.match(railTs, /label: '能力中心'/)
     assert.match(sideRail, /capabilities/)
-    assert.match(hubSurface, /专家库/)
+    assert.match(hubSurface, /能力中心/)
     assert.match(hubSurface, /hub-tab/)
   })
 

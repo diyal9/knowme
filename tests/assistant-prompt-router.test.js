@@ -70,6 +70,30 @@ describe('assistant-prompt-router', () => {
     assert.doesNotMatch(user, /场景策略/)
   })
 
+  it('separates user profile from partner soul, capability and self-drive blocks', () => {
+    const prompt = buildUserPrompt({
+      userProfile: '负责客户端研发',
+      industry: 'software',
+      occupationId: 'client-engineer',
+      agentDisplayName: '九仔',
+      agentSoul: '可靠、克制的长期伙伴',
+      agentDomainCapabilities: '项目推进与会议总结',
+      agentCollaboration: '先给结论',
+      agentSelfDriveLevel: 'proactive',
+      agentSelfDriveRules: '发布前必须确认',
+    })
+    assert.match(prompt, /【关于用户】/)
+    assert.match(prompt, /【事实边界】/)
+    assert.match(prompt, /【用户岗位】/)
+    assert.match(prompt, /【智能伙伴称呼｜最高优先级】[\s\S]*九仔/)
+    assert.match(prompt, /禁止自称“KnowMe”/)
+    assert.match(prompt, /【智能伙伴 Soul】/)
+    assert.match(prompt, /【智能伙伴领域能力】/)
+    assert.match(prompt, /【智能伙伴协作偏好】/)
+    assert.match(prompt, /主动负责/)
+    assert.match(prompt, /发布前必须确认/)
+  })
+
   it('lets a single turn opt out of the collaboration preference', () => {
     const settings = { userProfile: '产品经理', userPrompt: '回答简洁' }
     assert.match(buildUserPrompt(settings, 'general'), /协作偏好/)

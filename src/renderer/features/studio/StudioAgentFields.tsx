@@ -35,6 +35,11 @@ function withSkillRefs(node: StudioNode, ids: string[]): Record<string, unknown>
   return { profile, config }
 }
 
+function skillShortName(item: { id: string; name?: string }): string {
+  const fullName = String(item.name || item.id || '技能').replace(/\s+/g, '').trim()
+  return Array.from(fullName).slice(0, 6).join('') || '技能'
+}
+
 export function StudioAgentFields({ node, simpleMode, hasNextStep, onPatch }: Props) {
   const hubItems = useAppStore((s) => s.hubItems)
   const modes = useAppStore((s) => s.modes)
@@ -88,16 +93,14 @@ export function StudioAgentFields({ node, simpleMode, hasNextStep, onPatch }: Pr
           ) : null}
           <div className="wb-studio-skill-list">
             {visibleSkills.map((item) => (
-              <label key={item.id} className="wb-studio-skill-option">
+              <label key={item.id} className="wb-studio-skill-option" title={item.name || item.id}>
                 <input
                   type="checkbox"
+                  aria-label={item.name || item.id}
                   checked={selectedSkills.includes(item.id)}
                   onChange={() => toggleSkill(item.id)}
                 />
-                <span>
-                  <strong>{item.name || item.id}</strong>
-                  {item.description ? <small>{item.description}</small> : null}
-                </span>
+                <span>{skillShortName(item)}</span>
               </label>
             ))}
           </div>
@@ -121,7 +124,7 @@ export function StudioAgentFields({ node, simpleMode, hasNextStep, onPatch }: Pr
 
   const relationField = (
     <label className="wb-studio-field">
-      <span>与下一节点关系</span>
+      <span>进入下一步前</span>
       <select
         value={node.relation || 'serial'}
         onChange={(e) => onPatch({ relation: e.target.value })}
@@ -133,69 +136,9 @@ export function StudioAgentFields({ node, simpleMode, hasNextStep, onPatch }: Pr
     </label>
   )
 
-  if (simpleMode) {
-    const hitlToggle = hasNextStep ? (
-      <label className="wb-studio-check">
-        <input
-          type="checkbox"
-          checked={node.relation === 'approval'}
-          onChange={(e) => onPatch({ relation: e.target.checked ? 'approval' : 'serial' })}
-        />
-        <span>完成后需人工确认再进入下一步</span>
-      </label>
-    ) : null
-    return (
-      <>
-        <p className="wb-studio-guide">填写本步骤目标即可运行；其余项可稍后再完善。</p>
-        <label className="wb-studio-field">
-          <span>本步骤目标</span>
-          <textarea rows={5} maxLength={1200} value={String(node.intent || '')} placeholder="例如：整理需求并输出可执行清单" onChange={(e) => onPatch({ intent: e.target.value })} />
-        </label>
-        {skillGroup}
-        <details className="wb-studio-advanced">
-          <summary>高级选项</summary>
-          <div className="wb-studio-advanced-body">
-            <label className="wb-studio-field">
-              <span>步骤名称</span>
-              <input maxLength={120} value={node.name || ''} onChange={(e) => onPatch({ name: e.target.value })} />
-            </label>
-            <label className="wb-studio-field">
-              <span>步骤角色</span>
-              <input maxLength={200} value={node.role || ''} placeholder="可选：本流程中的职责称呼" onChange={(e) => onPatch({ role: e.target.value })} />
-            </label>
-            <label className="wb-studio-field">
-              <span>本步骤输入</span>
-              <textarea rows={2} maxLength={500} value={node.inputSpec || ''} placeholder="例如：需求文档、历史缺陷列表" onChange={(e) => onPatch({ inputSpec: e.target.value })} />
-            </label>
-            <label className="wb-studio-field">
-              <span>本步骤输出</span>
-              <textarea rows={2} maxLength={500} value={node.outputSpec || ''} placeholder="例如：技术方案、风险清单" onChange={(e) => onPatch({ outputSpec: e.target.value })} />
-            </label>
-            {hitlToggle}
-            {hasNextStep ? (
-              <label className="wb-studio-field">
-                <span>确认说明</span>
-                <input
-                  maxLength={240}
-                  value={node.approvalNote || ''}
-                  placeholder="可选：请负责人确认方案后再实现"
-                  onChange={(e) => onPatch({ approvalNote: e.target.value })}
-                />
-              </label>
-            ) : null}
-            {tune}
-          </div>
-        </details>
-      </>
-    )
-  }
-
   return (
     <>
-      <label className="wb-studio-field">
-        <span>节点名称</span>
-        <input maxLength={120} value={node.name || ''} onChange={(e) => onPatch({ name: e.target.value })} />
-      </label>
+      {simpleMode ? <p className="wb-studio-guide">选择执行专家并填写目标即可运行。</p> : null}
       <label className="wb-studio-field">
         <span>执行专家</span>
         <select
@@ -212,24 +155,44 @@ export function StudioAgentFields({ node, simpleMode, hasNextStep, onPatch }: Pr
         </select>
       </label>
       <label className="wb-studio-field">
-        <span>本节点目标</span>
+        <span>本步骤目标</span>
         <textarea rows={4} maxLength={1200} value={String(node.intent || '')} placeholder="这位专家在当前工作流中要完成什么" onChange={(e) => onPatch({ intent: e.target.value })} />
       </label>
-      <label className="wb-studio-field">
-        <span>节点角色</span>
-        <input maxLength={200} value={node.role || ''} placeholder="可选：本流程中的职责称呼" onChange={(e) => onPatch({ role: e.target.value })} />
-      </label>
-      <label className="wb-studio-field">
-        <span>本节点输入</span>
-        <textarea rows={2} maxLength={500} value={node.inputSpec || ''} placeholder="例如：需求文档、上下文资料" onChange={(e) => onPatch({ inputSpec: e.target.value })} />
-      </label>
-      <label className="wb-studio-field">
-        <span>本节点输出</span>
-        <textarea rows={2} maxLength={500} value={node.outputSpec || ''} placeholder="例如：阶段产物、结论报告" onChange={(e) => onPatch({ outputSpec: e.target.value })} />
-      </label>
-      {relationField}
-      {skillGroup}
-      {tune}
+      <details className="wb-studio-advanced">
+        <summary>更多设置</summary>
+        <div className="wb-studio-advanced-body">
+          <label className="wb-studio-field">
+            <span>步骤名称</span>
+            <input maxLength={120} value={node.name || ''} onChange={(e) => onPatch({ name: e.target.value })} />
+          </label>
+          <label className="wb-studio-field">
+            <span>步骤角色</span>
+            <input maxLength={200} value={node.role || ''} placeholder="可选：本流程中的职责称呼" onChange={(e) => onPatch({ role: e.target.value })} />
+          </label>
+          <label className="wb-studio-field">
+            <span>本步骤输入</span>
+            <textarea rows={2} maxLength={500} value={node.inputSpec || ''} placeholder="例如：需求文档、上下文资料" onChange={(e) => onPatch({ inputSpec: e.target.value })} />
+          </label>
+          <label className="wb-studio-field">
+            <span>本步骤输出</span>
+            <textarea rows={2} maxLength={500} value={node.outputSpec || ''} placeholder="例如：阶段产物、结论报告" onChange={(e) => onPatch({ outputSpec: e.target.value })} />
+          </label>
+          {hasNextStep ? relationField : null}
+          {hasNextStep && node.relation === 'approval' ? (
+            <label className="wb-studio-field">
+              <span>确认说明</span>
+              <input
+                maxLength={240}
+                value={node.approvalNote || ''}
+                placeholder="可选：请负责人确认后再继续"
+                onChange={(e) => onPatch({ approvalNote: e.target.value })}
+              />
+            </label>
+          ) : null}
+          {skillGroup}
+          {tune}
+        </div>
+      </details>
     </>
   )
 }

@@ -33,10 +33,14 @@ const PALETTE_LABELS: Record<string, string> = {
   llm: '大模型',
   tool: '工具',
   knowledge: '知识库',
+  mcp: 'MCP',
+  request: 'Request',
   condition: '条件判断',
   join: '汇合',
   gate: '人工确认',
   agent: '专家节点',
+  human: '人工节点',
+  action: '动作节点',
 }
 
 function needsLeaveStudioConfirm(draft: StudioDraft | null): boolean {
@@ -85,6 +89,45 @@ function openDirtyLeaveConfirm(
 
 function blankStudioDraft(): StudioDraft {
   return ensureStudioFreeGraph(createStudioDraft({ name: '我的专家协作' }), false)
+}
+
+type ExpertTaskHandoff = {
+  mode: 'reuse' | 'overflow'
+  taskId: string
+  expertName: string
+  goal: string
+  resultLabel?: string
+  resultSummary?: string
+}
+
+function draftFromExpertTask(payload: ExpertTaskHandoff): StudioDraft {
+  const expertName = String(payload.expertName || '专家').trim() || '专家'
+  const goal = String(payload.goal || '').trim()
+  const resultLabel = String(payload.resultLabel || '本次专家成果').trim() || '本次专家成果'
+  const summary = String(payload.resultSummary || '').trim().slice(0, 500)
+  const draft = blankStudioDraft()
+  return updateStudioDraft(draft, {
+    name: payload.mode === 'reuse' ? `${expertName}成果后续工作流` : `${expertName}任务协作工作流`,
+    goal: payload.mode === 'reuse'
+      ? `以已验收的「${resultLabel}」为输入，继续完成：${goal || '后续专业处理'}`
+      : goal || '将原专家任务拆分为多个专业节点协同完成',
+    inputs: normalizeStudioIoList([{
+      id: payload.mode === 'reuse' ? 'expert-result' : 'expert-task-context',
+      label: payload.mode === 'reuse' ? resultLabel : '原专家任务目标与上下文',
+      type: 'text',
+      required: true,
+      example: summary || goal,
+      description: `来自 ${expertName} 的专家任务 ${payload.taskId}`,
+    }], 'input'),
+    outputs: normalizeStudioIoList([{
+      id: 'workflow-result',
+      label: '多专家协作最终成果',
+      type: 'text',
+      required: true,
+      description: '由至少两个专家节点完成明确交接后产出',
+    }], 'output'),
+    dirty: true,
+  })
 }
 
 /** 把已保存的 Workflow Package 还原成可编辑草稿（dirty=false）。 */
@@ -253,6 +296,34 @@ export function createStudioManageSlice(set: StoreSet, get: StoreGet) {
       void openStudioSurface(set, get, source, workflowId)
     },
 
+    enterStudioFromExpertTask: (payload: ExpertTaskHandoff) => {
+      const openHandoffDraft = () => {
+        captureStudioReturn(set, get, 'taskhome')
+        set({
+          studioDraft: draftFromExpertTask(payload),
+          studioIssues: [],
+          expertRoom: null,
+          route: 'workbench',
+          workbenchSurface: 'studio',
+        })
+        void get().loadStudioKnowledgeProviders()
+        void get().loadHubCapabilities()
+        void get().loadWorkbenchModes()
+      }
+      if (needsLeaveStudioConfirm(get().studioDraft)) {
+        openDirtyLeaveConfirm(
+          get,
+          openHandoffDraft,
+          async () => {
+            const saved = await get().saveStudio()
+            if (saved) openHandoffDraft()
+          },
+        )
+        return
+      }
+      openHandoffDraft()
+    },
+
     forkWorkflow: async (workflowId: string) => {
       try {
         const card = get().shelfCards.find((item) => item.id === workflowId)
@@ -321,6 +392,15 @@ export function createStudioManageSlice(set: StoreSet, get: StoreGet) {
       }
       if (kind === 'llm') {
         seed.config = { modelName: 'auto', prompt: '', temperature: '0.2' }
+      }
+      if (kind === 'knowledge') {
+        seed.config = { knowledgeId: '', knowledgeName: '', mode: 'selected' }
+      }
+      if (kind === 'mcp') {
+        seed.config = { connectorId: '', connectorName: '', toolName: '', arguments: '{}' }
+      }
+      if (kind === 'request') {
+        seed.config = { method: 'GET', url: '', headers: '{}', body: '' }
       }
       set({ studioDraft: addStudioNodeOfKind(draft, seed), studioIssues: [] })
     },

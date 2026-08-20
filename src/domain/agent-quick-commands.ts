@@ -27,3 +27,31 @@ export const ASSISTANT_QUICK_COMMANDS = [
 ] as const
 
 export type AssistantQuickCommand = (typeof ASSISTANT_QUICK_COMMANDS)[number]
+
+export type ConfiguredQuickAction = {
+  id: string
+  title: string
+  subtitle: string
+  prompt: string
+  skillRef?: string
+}
+
+export function parseConfiguredQuickActions(raw: unknown): ConfiguredQuickAction[] {
+  try {
+    const items = JSON.parse(String(raw || ''))
+    if (!Array.isArray(items)) return []
+    return items.slice(0, 4).map((item) => ({
+      id: String(item?.id || '').trim(),
+      title: String(item?.title || '').trim(),
+      subtitle: String(item?.subtitle || '').trim(),
+      prompt: String(item?.prompt || '').trim(),
+      skillRef: String(item?.skillRef || '').trim() || undefined,
+    })).filter((item) => item.id && item.title && (item.prompt || item.skillRef))
+  } catch {
+    return []
+  }
+}
+
+export function serializeConfiguredQuickActions(items: ConfiguredQuickAction[]): string {
+  return JSON.stringify(items.slice(0, 4).map(({ id, title, subtitle, prompt, skillRef }) => ({ id, title, subtitle, prompt, ...(skillRef ? { skillRef } : {}) })))
+}

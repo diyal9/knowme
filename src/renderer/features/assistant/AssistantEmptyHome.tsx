@@ -4,7 +4,7 @@
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { PackEmptyGroup } from '../../../shared/api'
-import { ASSISTANT_QUICK_COMMANDS } from '../../../domain/agent-quick-commands'
+import { ASSISTANT_QUICK_COMMANDS, parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
 import {
   emptyShortcutIcon,
   modeSectionMeta,
@@ -55,6 +55,7 @@ export function AssistantEmptyHome({
   const setComposer = useAppStore((s) => s.setComposer)
   const sendMessage = useAppStore((s) => s.sendMessage)
   const [packGroups, setPackGroups] = useState<PackEmptyGroup[]>([])
+  const [configuredCards, setConfiguredCards] = useState<EmptyShortcutCard[] | null>(null)
 
   const active = sessions.find((item) => item.id === activeSessionId)
   const modeId = modeIdProp || resolveAssistantModeId(active?.agentId || active?.expertId)
@@ -76,6 +77,16 @@ export function AssistantEmptyHome({
     return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    void window.api?.personalAgentGet?.().then((result) => {
+      if (cancelled) return
+      const parsed = parseConfiguredQuickActions(result?.profile?.taskPreferences?.quickActions)
+      if (parsed.length) setConfiguredCards(parsed)
+    }).catch(() => undefined)
+    return () => { cancelled = true }
+  }, [])
+
   const cards = useMemo(() => {
     if (packGroup?.scenes?.length) {
       return packGroup.scenes.slice(0, 4).map((scene) => ({
@@ -85,8 +96,8 @@ export function AssistantEmptyHome({
         prompt: scene.prompt || '',
       }))
     }
-    return resolveModeCards(modeId)
-  }, [modeId, packGroup])
+    return configuredCards || resolveModeCards(modeId)
+  }, [configuredCards, modeId, packGroup])
 
   function run(prompt: string) {
     const text = prompt.trim()
@@ -110,7 +121,9 @@ export function AssistantEmptyHome({
             key={item.id}
             type="button"
             className="agent-empty-act"
-            onClick={() => run(item.prompt)}
+            onClick={() => run((item as { skillRef?: string }).skillRef
+              ? `请使用 Skill「${(item as { skillRef?: string }).skillRef}」执行这项快捷操作。`
+              : item.prompt)}
           >
             <span className="agent-empty-act-mark" aria-hidden="true">
               <Icon name={QUICK_ICONS[item.id] || emptyShortcutIcon(item.id)} />

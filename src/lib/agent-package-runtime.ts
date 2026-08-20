@@ -17,9 +17,9 @@ const PACKAGE_ID_RE = /^[a-z][a-z0-9-]{0,62}$/
 const SEMVER_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/
 const VALID_NODE_TYPES = new Set([
   'agent', 'gate', 'join', 'human', 'terminal', 'condition',
-  'llm', 'tool', 'knowledge',
+  'llm', 'tool', 'knowledge', 'mcp', 'request',
 ])
-const SPECIALTY_NODE_TYPES = new Set(['llm', 'tool', 'knowledge'])
+const SPECIALTY_NODE_TYPES = new Set(['llm', 'tool', 'knowledge', 'mcp', 'request'])
 const VALID_JOIN_STRATEGIES = new Set(['allSucceeded', 'all', 'any', 'anySucceeded'])
 const VALID_BACKENDS = new Set(['local-executor', 'cursor-package', 'claude-package', 'daemon-agent'])
 const BUILDER_BACKEND_MAP = Object.freeze({
@@ -290,6 +290,9 @@ function validateAgentPackage(raw = {}) {
     capabilities: normalizeCapabilities(raw.capabilities),
     inputs,
     outputs,
+    executionContract: raw.executionContract && typeof raw.executionContract === 'object'
+      ? JSON.parse(JSON.stringify(raw.executionContract))
+      : {},
     gates: normalizeGates(raw.gates),
     tests: normalizeTests(raw.tests),
     compatibility: {
@@ -369,6 +372,21 @@ function validateWorkflowDag(workflow = {}) {
       const knowledgeId = String(node.config?.knowledgeId || node.knowledgeId || '').trim()
       if (!knowledgeId) {
         issues.push(issue('missing_knowledge', 'knowledge 节点缺少 knowledgeId', `workflow.nodes.${id}.config.knowledgeId`))
+      }
+      node.config = node.config && typeof node.config === 'object' ? node.config : {}
+    }
+    if (type === 'mcp') {
+      const connectorId = String(node.config?.connectorId || node.config?.connectorName || '').trim()
+      const toolName = String(node.config?.toolName || '').trim()
+      if (!connectorId || !toolName) {
+        issues.push(issue('missing_mcp_tool', 'mcp 节点缺少服务或工具', `workflow.nodes.${id}.config`))
+      }
+      node.config = node.config && typeof node.config === 'object' ? node.config : {}
+    }
+    if (type === 'request') {
+      const url = String(node.config?.url || node.url || '').trim()
+      if (!url) {
+        issues.push(issue('missing_request_url', 'request 节点缺少 URL', `workflow.nodes.${id}.config.url`))
       }
       node.config = node.config && typeof node.config === 'object' ? node.config : {}
     }

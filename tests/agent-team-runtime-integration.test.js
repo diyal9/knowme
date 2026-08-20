@@ -154,6 +154,25 @@ describe('agent-team-runtime integration', () => {
     assert.equal(isFakeSpawnResult({ ok: true, launched: true, report: result.report }), false)
   })
 
+  it('fails a child run that returns text without completing its execution contract', async () => {
+    const { launcher } = createHarness()
+    const runId = `child_contract_${Date.now()}`
+    let terminal = null
+    const { handle } = await launcher.launch({
+      runId,
+      prompt: 'import the project',
+      parentRunId: 'parent_contract',
+      executionContract: { requiredTools: ['import_project'] },
+    }, {
+      onTerminal: value => { terminal = value },
+    })
+    const result = await handle.runPromise
+    assert.equal(result.terminal, RunPhase.ERROR)
+    assert.equal(terminal.terminal, RunPhase.ERROR)
+    assert.equal(terminal.code, 'execution_contract_unmet')
+    assert.equal(terminal.executionEvidence.gateStatus, 'blocked')
+  })
+
   it('delegate then await completes real child run', async () => {
     const { orch } = createHarness('parent_delegate_await')
     const { handlers } = orch

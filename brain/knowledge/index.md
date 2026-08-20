@@ -14,6 +14,7 @@ OKF v0.1 长期知识库。概念 ID = 文件路径去掉 `.md` 后缀。
 * [Electron IPC](concepts/electron-ipc.md) - IPC 与安全约定
 * [LLM Runtime And Cursor Benchmark](concepts/llm-processing-and-cursor-benchmark.md) - LLM 处理链路、能力对标与差距边界
 * [Production Agent Team Runtime](concepts/production-agent-team-runtime.md) - 真实子 Run、持久化编排、跨 Builder 治理与恢复
+* [Conversation Reading Layout](concepts/conversation-reading-layout.md) - 助手回复阅读轨、字号与间距规范
 
 ## Decisions
 

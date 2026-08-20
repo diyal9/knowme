@@ -35,7 +35,7 @@ describe('workbench dialogue send', () => {
     expect(generate).not.toHaveBeenCalled()
     const messages = useAppStore.getState().run?.dialogueMessages || []
     expect(messages.some((item) => item.role === 'user' && item.text.includes('补充材料'))).toBe(true)
-    expect(messages.some((item) => item.role === 'assistant' && item.text.includes('澄清'))).toBe(true)
+    expect(messages.some((item) => item.role === 'assistant' && item.text.includes('补充信息'))).toBe(true)
   })
 
   it('acks running pipeline text without hitting the LLM', async () => {

@@ -57,12 +57,12 @@ describe('capability pack runtime', () => {
     ])
   })
 
-  it('ensureDefaultPacks enables game-studio and office-partner', () => {
+  it('ensureDefaultPacks enables only the production office pack', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-pack-defaults-'))
     const rt = createCapabilityPackRuntime({ userData: tmpDir })
     const ensured = rt.ensureDefaultPacks()
     assert.equal(ensured.ok, true)
-    assert.ok(rt.isPackEnabled('game-studio'))
+    assert.equal(rt.isPackEnabled('game-studio'), false)
     assert.ok(rt.isPackEnabled('office-partner'))
   })
 
@@ -81,12 +81,12 @@ describe('capability pack runtime', () => {
     })
     const ensured = rt.ensureDefaultPacks()
     assert.equal(ensured.ok, true)
-    assert.ok(installed.includes('game-studio-partner'))
+    assert.ok(!installed.includes('game-studio-partner'))
     assert.ok(installed.includes('office-partner'))
-    assert.ok(fs.existsSync(path.join(tmpDir, 'capabilities', 'experts', 'game-studio-partner', 'EXPERT.md')))
+    assert.ok(!fs.existsSync(path.join(tmpDir, 'capabilities', 'experts', 'game-studio-partner', 'EXPERT.md')))
   })
 
-  it('already-enabled pack still backfills missing expert on ensureDefaultPacks', () => {
+  it('already-enabled non-default pack is not re-seeded by ensureDefaultPacks', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-pack-backfill-'))
     const rt1 = createCapabilityPackRuntime({ userData: tmpDir })
     assert.equal(rt1.installPack('game-studio', 'bundled').ok, true)
@@ -101,9 +101,9 @@ describe('capability pack runtime', () => {
     assert.ok(rt2.isPackEnabled('game-studio'))
     const ensured = rt2.ensureDefaultPacks()
     assert.equal(ensured.ok, true)
-    assert.ok(installed.includes('game-studio-partner'))
+    assert.ok(!installed.includes('game-studio-partner'))
     const gameResult = (ensured.results || []).find((item) => item.packId === 'game-studio')
-    assert.equal(gameResult?.expert?.expertId, 'game-studio-partner')
+    assert.equal(gameResult, undefined)
   })
 
   it('blocks path traversal for pack files', () => {

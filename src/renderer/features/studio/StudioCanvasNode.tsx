@@ -103,6 +103,11 @@ export function StudioCanvasNodeCard({
   const hubItems = useAppStore((s) => s.hubItems)
   const kind = node.kind
   const title = node.title || node.name || node.id
+  const showTypeLabel = Boolean(
+    node.typeLabel
+      && title !== node.typeLabel
+      && title !== `${node.typeLabel}节点`,
+  )
   const removable = kind !== 'start' && kind !== 'end'
   const boundExpert = kind === 'agent' && node.agentPackageId
     ? hubItems.find((item) => item.id === node.agentPackageId)
@@ -150,7 +155,7 @@ export function StudioCanvasNodeCard({
           </span>
         )}
         <span className="wb-studio-flow-titles">
-          {node.typeLabel ? <em className="wb-studio-flow-type">{node.typeLabel}</em> : null}
+          {showTypeLabel ? <em className="wb-studio-flow-type">{node.typeLabel}</em> : null}
           <strong title={title}>{title}</strong>
           {node.subtitle ? <small title={node.subtitle}>{node.subtitle}</small> : null}
         </span>

@@ -73,3 +73,44 @@ export function expertQuickBadge(agent: ExpertLike): { text: string; installed: 
 export function expertCardTitle(agent: ExpertLike): string {
   return String(agent.name || agent.title || agent.id || '专家').trim()
 }
+
+const EXPERT_NAME_ALIASES: Record<string, string> = {
+  'office-partner': '办公伙伴',
+  personal: '我的 KnowMe',
+}
+
+export function expertDisplayName(value: unknown): string {
+  const name = String(value || '').trim()
+  return EXPERT_NAME_ALIASES[name] || name || '专业专家'
+}
+
+export function expertDeliverableTitle(value: unknown): string {
+  const title = String(value || '').trim()
+  if (!title || /^[a-z0-9-]+任务成果$/i.test(title)) return '任务交付物'
+  return title.replace(/office-partner/gi, '办公伙伴')
+}
+
+const TASK_EVENT_LABELS: Record<string, string> = {
+  task_created: '已创建任务',
+  preflight_started: '开始预检',
+  preflight_passed: '预检完成',
+  preflight_failed: '预检未通过',
+  task_started: '专家已开始工作',
+  input_requested: '等待补充信息',
+  input_provided: '已补充信息',
+  deliverable_created: '已生成交付物',
+  deliverable_submitted: '交付物等待验收',
+  deliverable_accepted: '已接受交付物',
+  changes_requested: '你退回并提出修改意见',
+  revision_ready: '专家提交了修改版本',
+  task_completed: '任务已完成',
+  task_failed: '任务执行失败',
+  task_cancelled: '任务已取消',
+}
+
+export function expertTaskEventLabel(type: unknown, summary?: unknown): string {
+  const key = String(type || '').trim()
+  if (TASK_EVENT_LABELS[key]) return TASK_EVENT_LABELS[key]
+  const text = String(summary || '').trim()
+  return text ? text.replace(/office-partner/gi, '办公伙伴').replace(/任务成果/g, '交付物') : '任务状态已更新'
+}
