@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -160,6 +161,110 @@ func TestPutPublicConfigRequiresAdminKey(t *testing.T) {
 	}
 }
 
+func TestProductActivationAndMe(t *testing.T) {
+	srv, _ := testEngine(t, "dev-key")
+	createBody := bytes.NewBufferString(`{"plan_id":"trial","count":1}`)
+	req, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/admin/activation-codes", createBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Admin-Key", "dev-key")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("create code status=%d", res.StatusCode)
+	}
+	var created struct {
+		Items []struct {
+			Code string `json:"Code"`
+		} `json:"items"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&created); err != nil {
+		t.Fatal(err)
+	}
+	if len(created.Items) != 1 || created.Items[0].Code == "" {
+		t.Fatalf("unexpected codes: %#v", created)
+	}
+
+	body, _ := json.Marshal(map[string]string{"code": created.Items[0].Code, "device_id": "device-test-1"})
+	activationRes, err := http.Post(srv.URL+"/v1/activation/activate", "application/json", bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer activationRes.Body.Close()
+	if activationRes.StatusCode != http.StatusOK {
+		raw, _ := io.ReadAll(activationRes.Body)
+		t.Fatalf("activation status=%d body=%s", activationRes.StatusCode, raw)
+	}
+	var activation struct {
+		Token string `json:"access_token"`
+	}
+	if err := json.NewDecoder(activationRes.Body).Decode(&activation); err != nil {
+		t.Fatal(err)
+	}
+	if activation.Token == "" {
+		t.Fatal("missing access token")
+	}
+
+	meReq, _ := http.NewRequest(http.MethodGet, srv.URL+"/v1/me", nil)
+	meReq.Header.Set("Authorization", "Bearer "+activation.Token)
+	meRes, err := http.DefaultClient.Do(meReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer meRes.Body.Close()
+	if meRes.StatusCode != http.StatusOK {
+		t.Fatalf("me status=%d", meRes.StatusCode)
+	}
+
+	modelsRes, err := http.Get(srv.URL + "/v1/models")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer modelsRes.Body.Close()
+	if modelsRes.StatusCode != http.StatusOK {
+		t.Fatalf("models status=%d", modelsRes.StatusCode)
+	}
+}
+
+func TestProductActivationRequiresDeviceLimit(t *testing.T) {
+	srv, _ := testEngine(t, "dev-key")
+	createBody := bytes.NewBufferString(`{"plan_id":"trial","count":1}`)
+	req, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/admin/activation-codes", createBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Admin-Key", "dev-key")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	var created struct {
+		Items []struct {
+			Code string `json:"Code"`
+		} `json:"items"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&created); err != nil {
+		t.Fatal(err)
+	}
+	code := created.Items[0].Code
+	activate := func(device string) int {
+		body, _ := json.Marshal(map[string]string{"code": code, "device_id": device})
+		response, err := http.Post(srv.URL+"/v1/activation/activate", "application/json", bytes.NewReader(body))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer response.Body.Close()
+		return response.StatusCode
+	}
+	if status := activate("device-one"); status != http.StatusOK {
+		t.Fatalf("first activation status=%d", status)
+	}
+	if status := activate("device-two"); status != http.StatusUnauthorized {
+		t.Fatalf("second activation status=%d", status)
+	}
+}
+
 func TestWebConfigSavesFeishuAllowlistFromMultiSelect(t *testing.T) {
 	srv, st := testEngine(t, "dev-key")
 	ctx := context.Background()
@@ -189,10 +294,10 @@ func TestWebConfigSavesFeishuAllowlistFromMultiSelect(t *testing.T) {
 	}
 
 	saveForm := url.Values{
-		"provider":        {"dashscope"},
-		"model":           {"qwen-plus"},
-		"endpoint":        {"https://example/v1/chat/completions"},
-		"feature_flags":   {"{}"},
+		"provider":         {"dashscope"},
+		"model":            {"qwen-plus"},
+		"endpoint":         {"https://example/v1/chat/completions"},
+		"feature_flags":    {"{}"},
 		"feishu_allowlist": {""},
 	}
 	saveForm.Add("feishu_allowlist_items", "feishu.search_docs")
@@ -223,10 +328,10 @@ func TestWebConfigSavesFeishuAllowlistFromMultiSelect(t *testing.T) {
 	}
 
 	saveForm = url.Values{
-		"provider":        {"dashscope"},
-		"model":           {"qwen-plus"},
-		"endpoint":        {"https://example/v1/chat/completions"},
-		"feature_flags":   {"{}"},
+		"provider":         {"dashscope"},
+		"model":            {"qwen-plus"},
+		"endpoint":         {"https://example/v1/chat/completions"},
+		"feature_flags":    {"{}"},
 		"feishu_allowlist": {""},
 	}
 	saveRes, err = client.PostForm(srv.URL+"/admin/config", saveForm)

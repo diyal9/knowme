@@ -23,10 +23,19 @@ func New(cfg config.Config, st store.Store) *Server {
 func (s *Server) Register(r *gin.Engine) {
 	r.GET("/healthz", s.healthz)
 	r.GET("/v1/config/public", s.getPublicConfig)
+	r.POST("/v1/activation/activate", s.activateProduct)
+	r.GET("/v1/models", s.publicModels)
+	product := r.Group("/v1", s.requireProductAuth())
+	product.GET("/me", s.productMe)
 	s.registerWeb(r)
 	admin := r.Group("/v1/admin")
 	admin.Use(s.adminWriteAuth())
 	admin.PUT("/config/public", s.putPublicConfig)
+	admin.GET("/plans", s.adminPlans)
+	admin.GET("/activations", s.adminActivations)
+	admin.POST("/activation-codes", s.adminCreateActivationCodes)
+	admin.GET("/models", s.adminModels)
+	admin.PUT("/models", s.adminUpsertModel)
 }
 
 func (s *Server) healthz(c *gin.Context) {
@@ -63,7 +72,6 @@ func (s *Server) putPublicConfig(c *gin.Context) {
 		"updated_at": pc.UpdatedAt.Format(time.RFC3339),
 	})
 }
-
 
 func NewEngine(cfg config.Config, st store.Store) *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)

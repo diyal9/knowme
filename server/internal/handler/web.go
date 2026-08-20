@@ -6,6 +6,8 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,11 +75,65 @@ func (s *Server) registerWeb(r *gin.Engine) {
 	})
 
 	r.GET("/admin", func(c *gin.Context) {
-		c.Redirect(http.StatusFound, "/admin/config")
+		c.Redirect(http.StatusFound, "/admin/dashboard")
 	})
 
 	adminWeb := r.Group("/admin")
 	adminWeb.Use(s.requireWebAuth())
+	adminWeb.GET("/dashboard", func(c *gin.Context) {
+		plans, _ := s.store.ListPlans(c.Request.Context())
+		activations, _ := s.store.ListActivations(c.Request.Context())
+		models, _ := s.store.ListModels(c.Request.Context(), true)
+		_ = tpl.ExecuteTemplate(c.Writer, "dashboard.html", gin.H{"User": s.webUser(c), "Plans": plans, "Activations": activations, "Models": models})
+	})
+	adminWeb.GET("/activation-codes", func(c *gin.Context) {
+		plans, _ := s.store.ListPlans(c.Request.Context())
+		_ = tpl.ExecuteTemplate(c.Writer, "activation-codes.html", gin.H{"User": s.webUser(c), "Plans": plans, "Codes": c.QueryArray("code"), "Error": c.Query("error")})
+	})
+	adminWeb.POST("/activation-codes", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/activation-codes?error=无权限")
+			return
+		}
+		count := 1
+		if n, err := strconv.Atoi(c.PostForm("count")); err == nil {
+			count = n
+		}
+		items, err := s.store.CreateActivationCodes(c.Request.Context(), strings.TrimSpace(c.PostForm("plan_id")), count, nil)
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/activation-codes?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		query := "?"
+		for _, item := range items {
+			query += "code=" + url.QueryEscape(item.Code) + "&"
+		}
+		c.Redirect(http.StatusFound, "/admin/activation-codes"+query)
+	})
+	adminWeb.GET("/models", func(c *gin.Context) {
+		models, _ := s.store.ListModels(c.Request.Context(), true)
+		_ = tpl.ExecuteTemplate(c.Writer, "models.html", gin.H{"User": s.webUser(c), "Models": models, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
+	})
+	adminWeb.POST("/models", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/models?error=无权限")
+			return
+		}
+		model := store.Model{ID: strings.TrimSpace(c.PostForm("id")), Label: strings.TrimSpace(c.PostForm("label")), Provider: strings.TrimSpace(c.PostForm("provider")), ContextWindow: 32768, MaxOutput: 4096, SupportsTools: c.PostForm("supports_tools") == "on", Enabled: c.PostForm("enabled") == "on", RequiredPlan: strings.TrimSpace(c.PostForm("required_plan"))}
+		if n, err := strconv.Atoi(c.PostForm("context_window")); err == nil && n > 0 {
+			model.ContextWindow = n
+		}
+		if n, err := strconv.Atoi(c.PostForm("max_output")); err == nil && n > 0 {
+			model.MaxOutput = n
+		}
+		if err := s.store.UpsertModel(c.Request.Context(), model); err != nil {
+			c.Redirect(http.StatusFound, "/admin/models?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/models?saved=1")
+	})
 	adminWeb.GET("/config", func(c *gin.Context) {
 		u := s.webUser(c)
 		data := s.configFormData(c, u, false, "", "")
@@ -109,11 +165,11 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		u := s.webUser(c)
 		users, _ := s.store.ListUsers(c.Request.Context())
 		_ = tpl.ExecuteTemplate(c.Writer, "users.html", gin.H{
-			"User":        u,
-			"Users":       users,
-			"CanManage":   u.Role == store.RoleAdmin,
-			"UserError":   c.Query("error"),
-			"UserSaved":   c.Query("saved") == "1",
+			"User":      u,
+			"Users":     users,
+			"CanManage": u.Role == store.RoleAdmin,
+			"UserError": c.Query("error"),
+			"UserSaved": c.Query("saved") == "1",
 		})
 	})
 	adminWeb.POST("/users", func(c *gin.Context) {
@@ -184,17 +240,17 @@ func (s *Server) configFormData(c *gin.Context, u store.User, saved bool, update
 	}
 	allowlistOptions, allowlistValue := feishuAllowlistOptions(allowlist)
 	return gin.H{
-		"User":              u,
-		"CanWrite":          u.Role == store.RoleAdmin,
-		"Provider":          strField(profile, "provider"),
-		"Model":             strField(profile, "model"),
-		"Endpoint":          strField(profile, "endpoint"),
-		"FeatureFlagsJSON":  string(flagsJSON),
-		"FeishuAllowlist":   allowlistValue,
-		"FeishuTools":       allowlistOptions,
-		"Saved":             saved,
-		"UpdatedAt":         updatedAt,
-		"Error":             errMsg,
+		"User":             u,
+		"CanWrite":         u.Role == store.RoleAdmin,
+		"Provider":         strField(profile, "provider"),
+		"Model":            strField(profile, "model"),
+		"Endpoint":         strField(profile, "endpoint"),
+		"FeatureFlagsJSON": string(flagsJSON),
+		"FeishuAllowlist":  allowlistValue,
+		"FeishuTools":      allowlistOptions,
+		"Saved":            saved,
+		"UpdatedAt":        updatedAt,
+		"Error":            errMsg,
 	}
 }
 

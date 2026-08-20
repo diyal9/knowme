@@ -57,6 +57,65 @@ CREATE TABLE IF NOT EXISTS sessions (
   expires_at TEXT NOT NULL,
   FOREIGN KEY(user_id) REFERENCES users(id)
 );
+CREATE TABLE IF NOT EXISTS plans (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  trial_days INTEGER NOT NULL DEFAULT 0,
+  daily_token_limit INTEGER NOT NULL DEFAULT 0,
+  monthly_token_limit INTEGER NOT NULL DEFAULT 0,
+  max_devices INTEGER NOT NULL DEFAULT 1,
+  features_json TEXT NOT NULL DEFAULT '{}',
+  enabled INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS activation_codes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code_hash TEXT NOT NULL UNIQUE,
+  code_prefix TEXT NOT NULL,
+  plan_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'unused',
+  expires_at TEXT,
+  activated_at TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(plan_id) REFERENCES plans(id)
+);
+CREATE TABLE IF NOT EXISTS product_activations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  code_id INTEGER NOT NULL,
+  device_id TEXT NOT NULL,
+  plan_id TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  started_at TEXT NOT NULL,
+  expires_at TEXT NOT NULL,
+  last_seen_at TEXT NOT NULL,
+  UNIQUE(code_id, device_id),
+  FOREIGN KEY(code_id) REFERENCES activation_codes(id)
+);
+CREATE TABLE IF NOT EXISTS product_tokens (
+  token_hash TEXT PRIMARY KEY,
+  activation_id INTEGER NOT NULL,
+  expires_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY(activation_id) REFERENCES product_activations(id)
+);
+CREATE TABLE IF NOT EXISTS models (
+  id TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  provider TEXT NOT NULL,
+  context_window INTEGER NOT NULL DEFAULT 32768,
+  max_output INTEGER NOT NULL DEFAULT 4096,
+  supports_tools INTEGER NOT NULL DEFAULT 1,
+  input_price REAL NOT NULL DEFAULT 0,
+  output_price REAL NOT NULL DEFAULT 0,
+  required_plan TEXT NOT NULL DEFAULT '',
+  enabled INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
+INSERT OR IGNORE INTO plans (id, name, trial_days, daily_token_limit, monthly_token_limit, max_devices, features_json)
+  VALUES ('trial', '体验版', 7, 100000, 1000000, 1, '{"cloudModel":true,"workbench":true}');
+INSERT OR IGNORE INTO models (id, label, provider, context_window, max_output, supports_tools, updated_at)
+  VALUES ('gpt-4o-mini', 'GPT-4o mini', 'openai', 128000, 8192, 1, datetime('now'));
+INSERT OR IGNORE INTO models (id, label, provider, context_window, max_output, supports_tools, updated_at)
+  VALUES ('qwen-plus', 'Qwen Plus', 'dashscope', 131072, 8192, 1, datetime('now'));
 `)
 	return err
 }
