@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -149,6 +150,20 @@ func (s *Server) adminPlans(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true, "plans": plans})
 }
+
+func (s *Server) adminUpsertPlan(c *gin.Context) {
+	var plan store.Plan
+	if err := c.ShouldBindJSON(&plan); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid JSON body"})
+		return
+	}
+	plan.ID = strings.TrimSpace(c.Param("id"))
+	if err := s.store.UpsertPlan(c.Request.Context(), plan); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
 func (s *Server) adminActivations(c *gin.Context) {
 	items, err := s.store.ListActivations(c.Request.Context())
 	if err != nil {
@@ -156,6 +171,46 @@ func (s *Server) adminActivations(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true, "items": items})
+}
+
+func (s *Server) adminSetActivationStatus(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid activation id"})
+		return
+	}
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid JSON body"})
+		return
+	}
+	if err := s.store.SetActivationStatus(c.Request.Context(), id, body.Status); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
+func (s *Server) adminExtendActivation(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid activation id"})
+		return
+	}
+	var body struct {
+		Days int `json:"days"`
+	}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid JSON body"})
+		return
+	}
+	if err := s.store.ExtendActivation(c.Request.Context(), id, body.Days); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
 }
 
 func (s *Server) adminModels(c *gin.Context) {

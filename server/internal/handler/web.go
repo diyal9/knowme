@@ -84,11 +84,46 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		plans, _ := s.store.ListPlans(c.Request.Context())
 		activations, _ := s.store.ListActivations(c.Request.Context())
 		models, _ := s.store.ListModels(c.Request.Context(), true)
-		_ = tpl.ExecuteTemplate(c.Writer, "dashboard.html", gin.H{"User": s.webUser(c), "Plans": plans, "Activations": activations, "Models": models})
+		_ = tpl.ExecuteTemplate(c.Writer, "dashboard.html", gin.H{"User": s.webUser(c), "Plans": plans, "Activations": activations, "Models": models, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
 	})
 	adminWeb.GET("/activation-codes", func(c *gin.Context) {
 		plans, _ := s.store.ListPlans(c.Request.Context())
 		_ = tpl.ExecuteTemplate(c.Writer, "activation-codes.html", gin.H{"User": s.webUser(c), "Plans": plans, "Codes": c.QueryArray("code"), "Error": c.Query("error")})
+	})
+	adminWeb.POST("/activations/:id/status", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/dashboard?error=无权限")
+			return
+		}
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err == nil {
+			err = s.store.SetActivationStatus(c.Request.Context(), id, c.PostForm("status"))
+		}
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/dashboard?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/dashboard?saved=1")
+	})
+	adminWeb.POST("/activations/:id/extend", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/dashboard?error=无权限")
+			return
+		}
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		days, parseErr := strconv.Atoi(c.PostForm("days"))
+		if err == nil && parseErr == nil {
+			err = s.store.ExtendActivation(c.Request.Context(), id, days)
+		} else if err == nil {
+			err = parseErr
+		}
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/dashboard?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/dashboard?saved=1")
 	})
 	adminWeb.POST("/activation-codes", func(c *gin.Context) {
 		u := s.webUser(c)

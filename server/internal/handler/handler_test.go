@@ -240,7 +240,7 @@ func TestProductActivationAndMe(t *testing.T) {
 	}
 	var quota struct {
 		Data struct {
-			DailyUsed int64 `json:"DailyUsed"`
+			DailyUsed int64 `json:"daily_used"`
 		} `json:"quota"`
 	}
 	if err := json.NewDecoder(quotaRes.Body).Decode(&quota); err != nil {
@@ -358,7 +358,7 @@ func TestChatCompletionsRecordsProviderUsage(t *testing.T) {
 	defer quotaRes.Body.Close()
 	var quota struct {
 		Data struct {
-			DailyUsed int64 `json:"DailyUsed"`
+			DailyUsed int64 `json:"daily_used"`
 		} `json:"quota"`
 	}
 	if err := json.NewDecoder(quotaRes.Body).Decode(&quota); err != nil {

@@ -36,6 +36,16 @@ func (s *SQLiteStore) ListPlans(ctx context.Context) ([]Plan, error) {
 	return out, rows.Err()
 }
 
+func (s *SQLiteStore) UpsertPlan(ctx context.Context, plan Plan) error {
+	plan.ID = strings.TrimSpace(plan.ID)
+	plan.Name = strings.TrimSpace(plan.Name)
+	if plan.ID == "" || plan.Name == "" || plan.TrialDays < 0 || plan.MaxDevices < 1 || plan.DailyTokenLimit < 0 || plan.MonthlyTokenLimit < 0 {
+		return fmt.Errorf("invalid plan")
+	}
+	_, err := s.db.ExecContext(ctx, `INSERT INTO plans (id,name,trial_days,daily_token_limit,monthly_token_limit,max_devices,features_json,enabled) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,trial_days=excluded.trial_days,daily_token_limit=excluded.daily_token_limit,monthly_token_limit=excluded.monthly_token_limit,max_devices=excluded.max_devices,features_json=excluded.features_json,enabled=excluded.enabled`, plan.ID, plan.Name, plan.TrialDays, plan.DailyTokenLimit, plan.MonthlyTokenLimit, plan.MaxDevices, plan.FeaturesJSON, boolInt(plan.Enabled))
+	return err
+}
+
 func (s *SQLiteStore) CreateActivationCodes(ctx context.Context, planID string, count int, expiresAt *time.Time) ([]ActivationCode, error) {
 	if count < 1 || count > 1000 {
 		return nil, fmt.Errorf("count must be between 1 and 1000")
@@ -193,6 +203,45 @@ func (s *SQLiteStore) ListActivations(ctx context.Context) ([]ProductActivation,
 		out = append(out, a)
 	}
 	return out, rows.Err()
+}
+
+func (s *SQLiteStore) SetActivationStatus(ctx context.Context, id int64, status string) error {
+	status = strings.ToLower(strings.TrimSpace(status))
+	if status != "active" && status != "frozen" && status != "revoked" {
+		return fmt.Errorf("invalid activation status")
+	}
+	result, err := s.db.ExecContext(ctx, `UPDATE product_activations SET status = ?, last_seen_at = ? WHERE id = ?`, status, time.Now().UTC().Format(time.RFC3339Nano), id)
+	if err != nil {
+		return err
+	}
+	if n, _ := result.RowsAffected(); n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+
+func (s *SQLiteStore) ExtendActivation(ctx context.Context, id int64, days int) error {
+	if days < 1 || days > 3650 {
+		return fmt.Errorf("days must be between 1 and 3650")
+	}
+	var raw string
+	if err := s.db.QueryRowContext(ctx, `SELECT expires_at FROM product_activations WHERE id = ?`, id).Scan(&raw); err != nil {
+		return err
+	}
+	now := time.Now().UTC()
+	expires := parseTime(raw)
+	if expires.Before(now) {
+		expires = now
+	}
+	expires = expires.Add(time.Duration(days) * 24 * time.Hour)
+	result, err := s.db.ExecContext(ctx, `UPDATE product_activations SET expires_at = ?, status = 'active', last_seen_at = ? WHERE id = ?`, expires.Format(time.RFC3339Nano), now.Format(time.RFC3339Nano), id)
+	if err != nil {
+		return err
+	}
+	if n, _ := result.RowsAffected(); n == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (s *SQLiteStore) ListModels(ctx context.Context, includeDisabled bool) ([]Model, error) {
