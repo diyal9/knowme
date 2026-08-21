@@ -1,0 +1,14 @@
+{{define "sidebar"}}
+<aside class="sidebar">
+  <div class="sidebar-brand"><div class="brand-mark">K</div><div><strong>KnowMe 管理后台</strong><span class="eyebrow">运营与服务管理</span></div></div>
+  <div class="sidebar-user"><span class="eyebrow">当前账号</span>{{.User.Username}} <span class="role">{{.User.Role}}</span></div>
+  <nav class="side-nav">
+    <div class="nav-group"><span>工作台</span><a href="/admin/dashboard">概览</a></div>
+    <div class="nav-group"><span>产品与授权</span><a href="/admin/plans">套餐</a><a href="/admin/activation-codes">授权码</a><a href="/admin/dashboard#activations">激活设备</a></div>
+    <div class="nav-group"><span>AI 服务</span><a href="/admin/models">模型目录</a><a href="/admin/providers">Provider</a></div>
+    <div class="nav-group"><span>内容与数据</span><a href="/admin/usage">用量与成本</a><a href="/admin/announcements">公告</a><a href="/admin/version-policy">版本发布</a></div>
+    <div class="nav-group"><span>系统设置</span><a href="/admin/config">公共配置</a><a href="/admin/users">用户与权限</a><a href="/admin/audit">审计日志</a></div>
+  </nav>
+  <form method="post" action="/admin/logout" class="sidebar-logout"><button class="btn secondary" type="submit">退出登录</button></form>
+</aside>
+{{end}}

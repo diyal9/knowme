@@ -7,15 +7,7 @@
 <link rel="stylesheet" href="/admin/static/admin.css">
 </head>
 <body>
-<header>
-<strong>KnowMe 管理后台</strong>
-<span class="muted">{{.User.Username}} ({{.User.Role}})</span>
-<nav>
-<a href="/admin/config">组织配置</a>
-<a href="/admin/users" class="active">用户</a>
-<form method="post" action="/admin/logout"><button class="btn secondary" type="submit">退出</button></form>
-</nav>
-</header>
+{{template "sidebar" .}}
 <main>
 <div class="card">
 <h1>用户</h1>
