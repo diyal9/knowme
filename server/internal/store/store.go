@@ -87,6 +87,35 @@ type Quota struct {
 	MonthlyRemaining int64
 }
 
+type Announcement struct {
+	ID          int64
+	Title       string
+	Body        string
+	Level       string
+	MinVersion  string
+	Published   bool
+	PublishedAt *time.Time
+	ExpiresAt   *time.Time
+	CreatedAt   time.Time
+}
+
+type VersionPolicy struct {
+	LatestVersion  string
+	MinimumVersion string
+	ForceUpdate    bool
+	DownloadURL    string
+	ReleaseNotes   string
+	UpdatedAt      time.Time
+}
+
+type UsageSummary struct {
+	Requests    int64
+	Successes   int64
+	Failures    int64
+	TotalTokens int64
+	TotalCost   float64
+}
+
 type Store interface {
 	GetPublicConfig(ctx context.Context) (PublicConfig, error)
 	SetPublicConfig(ctx context.Context, config map[string]any) (PublicConfig, error)
@@ -108,6 +137,11 @@ type Store interface {
 	SetModelEnabled(ctx context.Context, id string, enabled bool) error
 	RecordUsage(ctx context.Context, event UsageEvent) error
 	GetQuota(ctx context.Context, activationID int64) (Quota, error)
+	GetUsageSummary(ctx context.Context, from, to *time.Time) (UsageSummary, error)
+	ListAnnouncements(ctx context.Context, publicOnly bool) ([]Announcement, error)
+	CreateAnnouncement(ctx context.Context, item Announcement) (Announcement, error)
+	GetVersionPolicy(ctx context.Context) (VersionPolicy, error)
+	SetVersionPolicy(ctx context.Context, policy VersionPolicy) (VersionPolicy, error)
 	Close() error
 }
 

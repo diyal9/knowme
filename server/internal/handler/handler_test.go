@@ -297,6 +297,78 @@ func TestProductActivationRequiresDeviceLimit(t *testing.T) {
 	}
 }
 
+func TestChatCompletionsRecordsProviderUsage(t *testing.T) {
+	provider := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer provider-key" {
+			t.Fatalf("missing provider authorization")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"id":"chat-1","choices":[{"message":{"role":"assistant","content":"hello"}}],"usage":{"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}}`))
+	}))
+	defer provider.Close()
+	t.Setenv("KNOWME_OPENAI_BASE_URL", provider.URL)
+	t.Setenv("KNOWME_OPENAI_API_KEY", "provider-key")
+	srv, _ := testEngine(t, "dev-key")
+	createBody := bytes.NewBufferString(`{"plan_id":"trial","count":1}`)
+	req, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/admin/activation-codes", createBody)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-Admin-Key", "dev-key")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	var created struct {
+		Items []struct {
+			Code string `json:"Code"`
+		} `json:"items"`
+	}
+	if err := json.NewDecoder(res.Body).Decode(&created); err != nil {
+		t.Fatal(err)
+	}
+	body, _ := json.Marshal(map[string]string{"code": created.Items[0].Code, "device_id": "gateway-device"})
+	activationRes, err := http.Post(srv.URL+"/v1/activation/activate", "application/json", bytes.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer activationRes.Body.Close()
+	var activation struct {
+		Token string `json:"access_token"`
+	}
+	if err := json.NewDecoder(activationRes.Body).Decode(&activation); err != nil {
+		t.Fatal(err)
+	}
+	chatReq, _ := http.NewRequest(http.MethodPost, srv.URL+"/v1/chat/completions", bytes.NewBufferString(`{"model":"gpt-4o-mini","messages":[{"role":"user","content":"hi"}]}`))
+	chatReq.Header.Set("Content-Type", "application/json")
+	chatReq.Header.Set("Authorization", "Bearer "+activation.Token)
+	chatRes, err := http.DefaultClient.Do(chatReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer chatRes.Body.Close()
+	if chatRes.StatusCode != http.StatusOK {
+		t.Fatalf("chat status=%d", chatRes.StatusCode)
+	}
+	quotaReq, _ := http.NewRequest(http.MethodGet, srv.URL+"/v1/quota", nil)
+	quotaReq.Header.Set("Authorization", "Bearer "+activation.Token)
+	quotaRes, err := http.DefaultClient.Do(quotaReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer quotaRes.Body.Close()
+	var quota struct {
+		Data struct {
+			DailyUsed int64 `json:"DailyUsed"`
+		} `json:"quota"`
+	}
+	if err := json.NewDecoder(quotaRes.Body).Decode(&quota); err != nil {
+		t.Fatal(err)
+	}
+	if quota.Data.DailyUsed != 15 {
+		t.Fatalf("expected 15 used tokens, got %#v", quota)
+	}
+}
+
 func TestWebConfigSavesFeishuAllowlistFromMultiSelect(t *testing.T) {
 	srv, st := testEngine(t, "dev-key")
 	ctx := context.Background()

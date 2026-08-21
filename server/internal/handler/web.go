@@ -115,6 +115,44 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		models, _ := s.store.ListModels(c.Request.Context(), true)
 		_ = tpl.ExecuteTemplate(c.Writer, "models.html", gin.H{"User": s.webUser(c), "Models": models, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
 	})
+	adminWeb.GET("/usage", func(c *gin.Context) {
+		summary, _ := s.store.GetUsageSummary(c.Request.Context(), nil, nil)
+		_ = tpl.ExecuteTemplate(c.Writer, "usage.html", gin.H{"User": s.webUser(c), "Summary": summary})
+	})
+	adminWeb.GET("/announcements", func(c *gin.Context) {
+		items, _ := s.store.ListAnnouncements(c.Request.Context(), false)
+		_ = tpl.ExecuteTemplate(c.Writer, "announcements.html", gin.H{"User": s.webUser(c), "Items": items, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
+	})
+	adminWeb.POST("/announcements", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/announcements?error=无权限")
+			return
+		}
+		_, err := s.store.CreateAnnouncement(c.Request.Context(), store.Announcement{Title: c.PostForm("title"), Body: c.PostForm("body"), Level: c.PostForm("level"), MinVersion: c.PostForm("min_version"), Published: c.PostForm("published") == "on"})
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/announcements?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/announcements?saved=1")
+	})
+	adminWeb.GET("/version-policy", func(c *gin.Context) {
+		policy, _ := s.store.GetVersionPolicy(c.Request.Context())
+		_ = tpl.ExecuteTemplate(c.Writer, "version-policy.html", gin.H{"User": s.webUser(c), "Policy": policy, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
+	})
+	adminWeb.POST("/version-policy", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/version-policy?error=无权限")
+			return
+		}
+		_, err := s.store.SetVersionPolicy(c.Request.Context(), store.VersionPolicy{LatestVersion: c.PostForm("latest_version"), MinimumVersion: c.PostForm("minimum_version"), ForceUpdate: c.PostForm("force_update") == "on", DownloadURL: c.PostForm("download_url"), ReleaseNotes: c.PostForm("release_notes")})
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/version-policy?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/version-policy?saved=1")
+	})
 	adminWeb.POST("/models", func(c *gin.Context) {
 		u := s.webUser(c)
 		if u.Role != store.RoleAdmin {

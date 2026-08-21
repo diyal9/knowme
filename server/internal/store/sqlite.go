@@ -124,6 +124,27 @@ CREATE TABLE IF NOT EXISTS usage_events (
   created_at TEXT NOT NULL,
   FOREIGN KEY(activation_id) REFERENCES product_activations(id)
 );
+CREATE TABLE IF NOT EXISTS announcements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  level TEXT NOT NULL DEFAULT 'info',
+  min_version TEXT NOT NULL DEFAULT '',
+  published INTEGER NOT NULL DEFAULT 0,
+  published_at TEXT,
+  expires_at TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS version_policy (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  latest_version TEXT NOT NULL DEFAULT '',
+  minimum_version TEXT NOT NULL DEFAULT '',
+  force_update INTEGER NOT NULL DEFAULT 0,
+  download_url TEXT NOT NULL DEFAULT '',
+  release_notes TEXT NOT NULL DEFAULT '',
+  updated_at TEXT NOT NULL
+);
+INSERT OR IGNORE INTO version_policy (id, updated_at) VALUES (1, datetime('now'));
 INSERT OR IGNORE INTO plans (id, name, trial_days, daily_token_limit, monthly_token_limit, max_devices, features_json)
   VALUES ('trial', '体验版', 7, 100000, 1000000, 1, '{"cloudModel":true,"workbench":true}');
 INSERT OR IGNORE INTO models (id, label, provider, context_window, max_output, supports_tools, updated_at)

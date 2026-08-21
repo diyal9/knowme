@@ -23,12 +23,15 @@ func New(cfg config.Config, st store.Store) *Server {
 func (s *Server) Register(r *gin.Engine) {
 	r.GET("/healthz", s.healthz)
 	r.GET("/v1/config/public", s.getPublicConfig)
+	r.GET("/v1/app/version-policy", s.getVersionPolicy)
+	r.GET("/v1/announcements", s.getAnnouncements)
 	r.POST("/v1/activation/activate", s.activateProduct)
 	r.GET("/v1/models", s.publicModels)
 	product := r.Group("/v1", s.requireProductAuth())
 	product.GET("/me", s.productMe)
 	product.GET("/quota", s.productQuota)
 	product.POST("/usage/events", s.recordProductUsage)
+	product.POST("/chat/completions", s.chatCompletions)
 	s.registerWeb(r)
 	admin := r.Group("/v1/admin")
 	admin.Use(s.adminWriteAuth())
@@ -38,6 +41,11 @@ func (s *Server) Register(r *gin.Engine) {
 	admin.POST("/activation-codes", s.adminCreateActivationCodes)
 	admin.GET("/models", s.adminModels)
 	admin.PUT("/models", s.adminUpsertModel)
+	admin.GET("/usage/summary", s.adminUsageSummary)
+	admin.GET("/announcements", s.adminAnnouncements)
+	admin.POST("/announcements", s.adminCreateAnnouncement)
+	admin.GET("/version-policy", s.adminVersionPolicy)
+	admin.PUT("/version-policy", s.adminSetVersionPolicy)
 }
 
 func (s *Server) healthz(c *gin.Context) {
