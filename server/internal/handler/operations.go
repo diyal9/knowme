@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"knowme/server/internal/store"
 	"net/http"
@@ -25,12 +27,31 @@ func (s *Server) getAnnouncements(c *gin.Context) {
 }
 func (s *Server) adminUsageSummary(c *gin.Context) {
 	var from, to *time.Time
+	if value := strings.TrimSpace(c.Query("from")); value != "" {
+		if parsed, err := time.Parse(time.RFC3339, value); err == nil {
+			from = &parsed
+		}
+	}
+	if value := strings.TrimSpace(c.Query("to")); value != "" {
+		if parsed, err := time.Parse(time.RFC3339, value); err == nil {
+			to = &parsed
+		}
+	}
 	summary, err := s.store.GetUsageSummary(c.Request.Context(), from, to)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true, "summary": summary})
+}
+
+func (s *Server) adminAudit(c *gin.Context) {
+	items, err := s.store.ListAudit(c.Request.Context(), 100)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true, "items": items})
 }
 func (s *Server) adminAnnouncements(c *gin.Context) {
 	items, err := s.store.ListAnnouncements(c.Request.Context(), false)

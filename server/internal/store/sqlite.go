@@ -204,11 +204,34 @@ func (s *SQLiteStore) SetPublicConfig(ctx context.Context, config map[string]any
 }
 
 func (s *SQLiteStore) InsertAudit(ctx context.Context, entry AuditEntry) error {
+	entry.CreatedAt = time.Now().UTC()
 	_, err := s.db.ExecContext(ctx,
 		`INSERT INTO audit_logs (request_id, method, path, status, created_at) VALUES (?, ?, ?, ?, ?)`,
 		entry.RequestID, entry.Method, entry.Path, entry.Status, time.Now().UTC().Format(time.RFC3339Nano),
 	)
 	return err
+}
+
+func (s *SQLiteStore) ListAudit(ctx context.Context, limit int) ([]AuditEntry, error) {
+	if limit < 1 || limit > 500 {
+		limit = 100
+	}
+	rows, err := s.db.QueryContext(ctx, `SELECT request_id,method,path,status,created_at FROM audit_logs ORDER BY id DESC LIMIT ?`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []AuditEntry
+	for rows.Next() {
+		var item AuditEntry
+		var raw string
+		if err := rows.Scan(&item.RequestID, &item.Method, &item.Path, &item.Status, &raw); err != nil {
+			return nil, err
+		}
+		item.CreatedAt = parseTime(raw)
+		out = append(out, item)
+	}
+	return out, rows.Err()
 }
 
 func (s *SQLiteStore) Close() error {

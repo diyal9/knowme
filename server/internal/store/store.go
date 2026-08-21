@@ -12,10 +12,11 @@ type PublicConfig struct {
 }
 
 type AuditEntry struct {
-	RequestID string
-	Method    string
-	Path      string
-	Status    int
+	RequestID string    `json:"request_id"`
+	Method    string    `json:"method"`
+	Path      string    `json:"path"`
+	Status    int       `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Plan struct {
@@ -32,6 +33,7 @@ type Plan struct {
 type ActivationCode struct {
 	ID          int64      `json:"id"`
 	Code        string     `json:"code,omitempty"`
+	CodePrefix  string     `json:"code_prefix"`
 	PlanID      string     `json:"plan_id"`
 	Status      string     `json:"status"`
 	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
@@ -140,6 +142,7 @@ type Store interface {
 	ListPlans(ctx context.Context) ([]Plan, error)
 	UpsertPlan(ctx context.Context, plan Plan) error
 	CreateActivationCodes(ctx context.Context, planID string, count int, expiresAt *time.Time) ([]ActivationCode, error)
+	ListActivationCodes(ctx context.Context) ([]ActivationCode, error)
 	Activate(ctx context.Context, code, deviceID string) (ProductActivation, string, error)
 	ActivationByToken(ctx context.Context, token string) (ProductActivation, error)
 	ListActivations(ctx context.Context) ([]ProductActivation, error)
@@ -151,6 +154,7 @@ type Store interface {
 	RecordUsage(ctx context.Context, event UsageEvent) error
 	GetQuota(ctx context.Context, activationID int64) (Quota, error)
 	GetUsageSummary(ctx context.Context, from, to *time.Time) (UsageSummary, error)
+	ListAudit(ctx context.Context, limit int) ([]AuditEntry, error)
 	ListAnnouncements(ctx context.Context, publicOnly bool) ([]Announcement, error)
 	CreateAnnouncement(ctx context.Context, item Announcement) (Announcement, error)
 	GetVersionPolicy(ctx context.Context) (VersionPolicy, error)

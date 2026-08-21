@@ -173,6 +173,15 @@ func (s *Server) adminActivations(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"ok": true, "items": items})
 }
 
+func (s *Server) adminActivationCodes(c *gin.Context) {
+	items, err := s.store.ListActivationCodes(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true, "items": items})
+}
+
 func (s *Server) adminSetActivationStatus(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {

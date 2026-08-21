@@ -79,6 +79,27 @@ func (s *SQLiteStore) CreateActivationCodes(ctx context.Context, planID string, 
 	return out, nil
 }
 
+func (s *SQLiteStore) ListActivationCodes(ctx context.Context) ([]ActivationCode, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT id,code_prefix,plan_id,status,expires_at,activated_at,created_at FROM activation_codes ORDER BY id DESC LIMIT 500`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []ActivationCode
+	for rows.Next() {
+		var item ActivationCode
+		var expires, activated, created sql.NullString
+		if err := rows.Scan(&item.ID, &item.CodePrefix, &item.PlanID, &item.Status, &expires, &activated, &created); err != nil {
+			return nil, err
+		}
+		item.ExpiresAt = parseNullableTime(expires)
+		item.ActivatedAt = parseNullableTime(activated)
+		item.CreatedAt = parseTime(created.String)
+		out = append(out, item)
+	}
+	return out, rows.Err()
+}
+
 func nullableTime(value *time.Time) any {
 	if value == nil {
 		return nil

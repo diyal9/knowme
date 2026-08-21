@@ -86,9 +86,31 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		models, _ := s.store.ListModels(c.Request.Context(), true)
 		_ = tpl.ExecuteTemplate(c.Writer, "dashboard.html", gin.H{"User": s.webUser(c), "Plans": plans, "Activations": activations, "Models": models, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
 	})
+	adminWeb.GET("/plans", func(c *gin.Context) {
+		plans, _ := s.store.ListPlans(c.Request.Context())
+		_ = tpl.ExecuteTemplate(c.Writer, "plans.html", gin.H{"User": s.webUser(c), "Plans": plans, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
+	})
+	adminWeb.POST("/plans", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/plans?error=无权限")
+			return
+		}
+		trialDays, _ := strconv.Atoi(c.PostForm("trial_days"))
+		daily, _ := strconv.ParseInt(c.PostForm("daily_token_limit"), 10, 64)
+		monthly, _ := strconv.ParseInt(c.PostForm("monthly_token_limit"), 10, 64)
+		devices, _ := strconv.Atoi(c.PostForm("max_devices"))
+		err := s.store.UpsertPlan(c.Request.Context(), store.Plan{ID: c.PostForm("id"), Name: c.PostForm("name"), TrialDays: trialDays, DailyTokenLimit: daily, MonthlyTokenLimit: monthly, MaxDevices: devices, FeaturesJSON: c.PostForm("features_json"), Enabled: c.PostForm("enabled") == "on"})
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/plans?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/plans?saved=1")
+	})
 	adminWeb.GET("/activation-codes", func(c *gin.Context) {
 		plans, _ := s.store.ListPlans(c.Request.Context())
-		_ = tpl.ExecuteTemplate(c.Writer, "activation-codes.html", gin.H{"User": s.webUser(c), "Plans": plans, "Codes": c.QueryArray("code"), "Error": c.Query("error")})
+		codes, _ := s.store.ListActivationCodes(c.Request.Context())
+		_ = tpl.ExecuteTemplate(c.Writer, "activation-codes.html", gin.H{"User": s.webUser(c), "Plans": plans, "Codes": c.QueryArray("code"), "History": codes, "Error": c.Query("error"), "Saved": c.Query("saved") == "1"})
 	})
 	adminWeb.POST("/activations/:id/status", func(c *gin.Context) {
 		u := s.webUser(c)
@@ -151,8 +173,24 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		_ = tpl.ExecuteTemplate(c.Writer, "models.html", gin.H{"User": s.webUser(c), "Models": models, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
 	})
 	adminWeb.GET("/usage", func(c *gin.Context) {
-		summary, _ := s.store.GetUsageSummary(c.Request.Context(), nil, nil)
-		_ = tpl.ExecuteTemplate(c.Writer, "usage.html", gin.H{"User": s.webUser(c), "Summary": summary})
+		var from, to *time.Time
+		if value := strings.TrimSpace(c.Query("from")); value != "" {
+			if parsed, err := time.Parse("2006-01-02", value); err == nil {
+				from = &parsed
+			}
+		}
+		if value := strings.TrimSpace(c.Query("to")); value != "" {
+			if parsed, err := time.Parse("2006-01-02", value); err == nil {
+				end := parsed.Add(24 * time.Hour)
+				to = &end
+			}
+		}
+		summary, _ := s.store.GetUsageSummary(c.Request.Context(), from, to)
+		_ = tpl.ExecuteTemplate(c.Writer, "usage.html", gin.H{"User": s.webUser(c), "Summary": summary, "From": c.Query("from"), "To": c.Query("to")})
+	})
+	adminWeb.GET("/audit", func(c *gin.Context) {
+		items, _ := s.store.ListAudit(c.Request.Context(), 100)
+		_ = tpl.ExecuteTemplate(c.Writer, "audit.html", gin.H{"User": s.webUser(c), "Items": items})
 	})
 	adminWeb.GET("/announcements", func(c *gin.Context) {
 		items, _ := s.store.ListAnnouncements(c.Request.Context(), false)
