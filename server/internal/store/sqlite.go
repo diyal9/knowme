@@ -144,6 +144,14 @@ CREATE TABLE IF NOT EXISTS version_policy (
   release_notes TEXT NOT NULL DEFAULT '',
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS providers (
+  id TEXT PRIMARY KEY,
+  label TEXT NOT NULL,
+  base_url TEXT NOT NULL,
+  priority INTEGER NOT NULL DEFAULT 100,
+  enabled INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
 INSERT OR IGNORE INTO version_policy (id, updated_at) VALUES (1, datetime('now'));
 INSERT OR IGNORE INTO plans (id, name, trial_days, daily_token_limit, monthly_token_limit, max_devices, features_json)
   VALUES ('trial', '体验版', 7, 100000, 1000000, 1, '{"cloudModel":true,"workbench":true}');

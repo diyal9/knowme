@@ -46,6 +46,8 @@ func (s *Server) Register(r *gin.Engine) {
 	admin.POST("/announcements", s.adminCreateAnnouncement)
 	admin.GET("/version-policy", s.adminVersionPolicy)
 	admin.PUT("/version-policy", s.adminSetVersionPolicy)
+	admin.GET("/providers", s.adminProviders)
+	admin.PUT("/providers", s.adminUpsertProvider)
 }
 
 func (s *Server) healthz(c *gin.Context) {

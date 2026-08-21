@@ -116,6 +116,16 @@ type UsageSummary struct {
 	TotalCost   float64
 }
 
+type Provider struct {
+	ID            string
+	Label         string
+	BaseURL       string
+	Priority      int
+	Enabled       bool
+	KeyConfigured bool
+	UpdatedAt     time.Time
+}
+
 type Store interface {
 	GetPublicConfig(ctx context.Context) (PublicConfig, error)
 	SetPublicConfig(ctx context.Context, config map[string]any) (PublicConfig, error)
@@ -142,6 +152,8 @@ type Store interface {
 	CreateAnnouncement(ctx context.Context, item Announcement) (Announcement, error)
 	GetVersionPolicy(ctx context.Context) (VersionPolicy, error)
 	SetVersionPolicy(ctx context.Context, policy VersionPolicy) (VersionPolicy, error)
+	ListProviders(ctx context.Context) ([]Provider, error)
+	UpsertProvider(ctx context.Context, provider Provider) error
 	Close() error
 }
 

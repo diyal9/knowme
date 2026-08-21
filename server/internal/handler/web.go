@@ -140,6 +140,27 @@ func (s *Server) registerWeb(r *gin.Engine) {
 		policy, _ := s.store.GetVersionPolicy(c.Request.Context())
 		_ = tpl.ExecuteTemplate(c.Writer, "version-policy.html", gin.H{"User": s.webUser(c), "Policy": policy, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
 	})
+	adminWeb.GET("/providers", func(c *gin.Context) {
+		providers, _ := s.store.ListProviders(c.Request.Context())
+		_ = tpl.ExecuteTemplate(c.Writer, "providers.html", gin.H{"User": s.webUser(c), "Providers": providers, "Saved": c.Query("saved") == "1", "Error": c.Query("error")})
+	})
+	adminWeb.POST("/providers", func(c *gin.Context) {
+		u := s.webUser(c)
+		if u.Role != store.RoleAdmin {
+			c.Redirect(http.StatusFound, "/admin/providers?error=无权限")
+			return
+		}
+		priority := 100
+		if n, err := strconv.Atoi(c.PostForm("priority")); err == nil {
+			priority = n
+		}
+		err := s.store.UpsertProvider(c.Request.Context(), store.Provider{ID: c.PostForm("id"), Label: c.PostForm("label"), BaseURL: c.PostForm("base_url"), Priority: priority, Enabled: c.PostForm("enabled") == "on"})
+		if err != nil {
+			c.Redirect(http.StatusFound, "/admin/providers?error="+url.QueryEscape(err.Error()))
+			return
+		}
+		c.Redirect(http.StatusFound, "/admin/providers?saved=1")
+	})
 	adminWeb.POST("/version-policy", func(c *gin.Context) {
 		u := s.webUser(c)
 		if u.Role != store.RoleAdmin {

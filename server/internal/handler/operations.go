@@ -74,3 +74,24 @@ func (s *Server) adminSetVersionPolicy(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"ok": true, "policy": saved})
 }
+
+func (s *Server) adminProviders(c *gin.Context) {
+	items, err := s.store.ListProviders(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"ok": false, "error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true, "providers": items})
+}
+func (s *Server) adminUpsertProvider(c *gin.Context) {
+	var p store.Provider
+	if err := c.ShouldBindJSON(&p); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "invalid JSON body"})
+		return
+	}
+	if err := s.store.UpsertProvider(c.Request.Context(), p); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"ok": false, "error": "provider is invalid"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
