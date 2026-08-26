@@ -13,6 +13,7 @@ export function ExpertDeliverableArtifact({
   title,
   type,
   version,
+  showToolbar = true,
 }: {
   artifact?: AgentRunArtifact | null
   fallback?: string
@@ -20,6 +21,7 @@ export function ExpertDeliverableArtifact({
   title?: string
   type?: string
   version?: number
+  showToolbar?: boolean
 }) {
   const artifactType = artifact?.type || type || 'document'
   const kind = expertArtifactKind(artifactType)
@@ -29,13 +31,15 @@ export function ExpertDeliverableArtifact({
 
   return (
     <section className={`wb-artifact-view is-${kind}`} data-testid="expert-artifact-view" data-artifact-kind={kind}>
-      <header className="wb-artifact-toolbar">
-        <div>
-          <span>{summaryFallback ? '成果摘要' : expertArtifactKindLabel(artifactType)}</span>
-          {displayTitle ? <strong>{displayTitle}</strong> : null}
-        </div>
-        <span>第 {version || 1} 版</span>
-      </header>
+      {showToolbar ? (
+        <header className="wb-artifact-toolbar">
+          <div>
+            <span>{summaryFallback ? '成果摘要' : expertArtifactKindLabel(artifactType)}</span>
+            {displayTitle ? <strong>{displayTitle}</strong> : null}
+          </div>
+          <span>第 {version || 1} 版</span>
+        </header>
+      ) : null}
       {loading ? (
         <div className="wb-artifact-loading" role="status">
           <span aria-hidden="true" />

@@ -8,6 +8,13 @@
   if (global.CapabilityHubIcons) return
 
   const DOMAIN_ICONS = Object.freeze({
+    产品与研究: 'clipboardCheck',
+    内容写作: 'pencilLine',
+    视觉创意: 'image',
+    日常办公: 'clipboardCheck',
+    数据分析: 'optimize',
+    软件研发: 'code',
+    知识研究: 'bookOpen',
     写作: 'pencilLine',
     游戏: 'gamepad',
     研发: 'code',

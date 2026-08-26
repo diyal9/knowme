@@ -83,12 +83,22 @@ function assembleCapabilityContext(opts = {}) {
   let persona = null
   let bindings = { skills: null, connectors: null }
   if (expertRuntime && typeof expertRuntime.getSessionPersona === 'function') {
-    const res = expertRuntime.getSessionPersona(session.id, session.expertId)
-    if (res?.ok) {
-      persona = res.persona
-      bindings = {
-        skills: Array.isArray(res.bindings?.skills) ? res.bindings.skills : null,
-        connectors: Array.isArray(res.bindings?.connectors) ? res.bindings.connectors : null,
+    const personaExpertId = String(session.personaExpertId || session.expertId || '').trim()
+    const personaProjection = expertRuntime.getSessionPersona(session.id, personaExpertId)
+    if (personaProjection?.ok) {
+      persona = personaProjection.persona
+    }
+    // personaExpertId only shapes identity. Capability bindings still require
+    // an execution expertId, so discussion-only sessions cannot regain tools.
+    if (session.expertId) {
+      const bindingProjection = personaExpertId === session.expertId
+        ? personaProjection
+        : expertRuntime.getSessionPersona(session.id, session.expertId)
+      if (bindingProjection?.ok) {
+        bindings = {
+          skills: Array.isArray(bindingProjection.bindings?.skills) ? bindingProjection.bindings.skills : null,
+          connectors: Array.isArray(bindingProjection.bindings?.connectors) ? bindingProjection.bindings.connectors : null,
+        }
       }
     }
   }
@@ -177,6 +187,7 @@ function assembleCapabilityContext(opts = {}) {
     groundingContract,
     bindings,
     resolvedSlashIds,
+    personaName: String(persona?.name || '').trim(),
     personaSource: persona ? (session.snapshotPath ? 'snapshot' : 'live') : 'none',
     layers: layered.layers,
     agenticType: resolvedProfile.agenticType,

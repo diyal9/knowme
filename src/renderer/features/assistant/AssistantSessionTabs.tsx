@@ -270,7 +270,7 @@ export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => vo
           aria-expanded={historyOpen}
           onClick={(e) => { e.stopPropagation(); setHistoryOpen((open) => !open); setMoreOpen(false) }}
         >
-          <Icon name="chatHistory" />
+          <Icon name="history" />
         </button>
         <button
           type="button"

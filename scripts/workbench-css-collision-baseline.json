@@ -135,7 +135,7 @@
         "features/run/console.css",
         "features/workbench/workbench-chrome.css"
       ],
-      "fingerprint": "2e5703c33fdfbb9d"
+      "fingerprint": "0c90ff52e6f41ff7"
     },
     {
       "selector": ".wb-head-sub",
@@ -216,7 +216,7 @@
         "features/workbench/workbench-chrome.css",
         "features/workbench/workbench-layout.css"
       ],
-      "fingerprint": "0556f52e0565089f"
+      "fingerprint": "1e14c8736e55a9b1"
     },
     {
       "selector": ".wb-mode-tab::after",

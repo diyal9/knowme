@@ -6,10 +6,25 @@ import { mockApi, resetAppStore } from '../../test/helpers'
 
 const workflowGraph = {
   nodes: [
-    { id: 'producer', type: 'agent', agentPackageId: 'producer', name: '制作人' },
+    {
+      id: 'producer',
+      type: 'agent',
+      agentPackageId: 'producer',
+      name: '制作人',
+      intent: '澄清需求、确定范围并拆分可执行工作。',
+      outputSpec: '可执行任务清单',
+    },
     { id: 'developer', type: 'agent', agentPackageId: 'developer', name: '开发' },
   ],
   edges: [{ from: 'producer', to: 'developer' }],
+  layout: {
+    start: { x: 340, y: 32 },
+    nodes: {
+      producer: { x: 92, y: 174 },
+      developer: { x: 472, y: 326 },
+    },
+    end: { x: 350, y: 492 },
+  },
 }
 
 const fixture = {
@@ -70,10 +85,10 @@ describe('workbench-workflow-shelf', () => {
       expect(screen.getByText('会议闭环')).toBeInTheDocument()
     })
     expect(screen.getByText('官方')).toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('wbShelfGridToggle'))
     expect(screen.getByText('我的派生')).toBeInTheDocument()
     expect(screen.getByText('我的')).toBeInTheDocument()
     expect(screen.getByText('共享')).toBeInTheDocument()
+    expect(screen.queryByTestId('wbShelfGridToggle')).not.toBeInTheDocument()
     expect(screen.queryByText('会议资料 → 纪要与待办')).not.toBeInTheDocument()
     expect(screen.queryByText('demo-test10')).not.toBeInTheDocument()
   })
@@ -86,6 +101,9 @@ describe('workbench-workflow-shelf', () => {
     const runHeading = screen.getByRole('heading', { name: '运行记录' })
     const catalogHeading = screen.getByRole('heading', { name: '选择工作流' })
     expect(runHeading.compareDocumentPosition(catalogHeading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(runHeading.closest('section')).toHaveClass('wb-section-gradient-divider')
+    expect(screen.getByTestId('shelf-catalog-section')).toHaveClass('wb-home-primary-section')
+    expect(screen.getByTestId('shelf-catalog-section')).not.toHaveClass('wb-section-gradient-divider')
     expect(screen.queryByText('最近运行')).not.toBeInTheDocument()
     expect(screen.queryByText('工作流目录')).not.toBeInTheDocument()
     const shelfStatus = screen.getByTestId('shelf-status')
@@ -101,7 +119,7 @@ describe('workbench-workflow-shelf', () => {
     expect(shelfStatus).toHaveTextContent('3 个可运行')
   })
 
-  it('keeps workflow filters scoped to the catalog and presents runs as a board', async () => {
+  it('keeps workflow filters scoped to the catalog and presents runs as a unified inbox', async () => {
     mockApi({
       workbenchLoad: async () => fixture,
       workbenchTaskList: async () => ({ items: [
@@ -116,9 +134,17 @@ describe('workbench-workflow-shelf', () => {
     const board = await screen.findByTestId('wbWorkflowRun-board')
     expect(within(board).getByText('研发协作运行')).toBeInTheDocument()
     expect(within(board).getByText('视觉产物运行')).toBeInTheDocument()
-    expect(within(board).getByText('待我处理')).toBeInTheDocument()
-    expect(within(board).getByText('进行中')).toBeInTheDocument()
-    expect(within(board).getByText('异常')).toBeInTheDocument()
+    expect(within(board).getByRole('tab', { name: /^当前/ })).toHaveAttribute('aria-selected', 'true')
+    expect(within(board).getByRole('tab', { name: /^待我处理/ })).toBeInTheDocument()
+    expect(within(board).getByRole('tab', { name: /^进行中/ })).toBeInTheDocument()
+    expect(within(board).getByRole('tab', { name: /^异常/ })).toBeInTheDocument()
+    expect(within(board).getByRole('tab', { name: /^已完成/ })).toBeInTheDocument()
+    expect(board.querySelector('.wb-task-inbox-columns')).toHaveTextContent('任务工作流更新状态')
+
+    fireEvent.click(within(board).getByRole('tab', { name: /^异常/ }))
+    expect(within(board).getByText('视觉产物运行')).toBeInTheDocument()
+    expect(within(board).queryByText('研发协作运行')).not.toBeInTheDocument()
+    fireEvent.click(within(board).getByRole('tab', { name: /^当前/ }))
 
     fireEvent.click(screen.getByRole('button', { name: '办公' }))
     expect(within(screen.getByTestId('shelf-catalog-section')).queryByText('团队共享流')).not.toBeInTheDocument()
@@ -126,12 +152,18 @@ describe('workbench-workflow-shelf', () => {
     expect(within(board).getByText('视觉产物运行')).toBeInTheDocument()
   })
 
-  it('keeps collaboration paths to one ellipsized line', async () => {
+  it('keeps home cards compact and leaves detailed descriptions and paths to the detail page', async () => {
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('会议闭环')).toBeInTheDocument())
-    const paths = screen.getAllByLabelText('简要流程')
-    expect(paths.length).toBeGreaterThan(0)
-    expect(paths[0].querySelector('.wb-shelf-brief-flow-text')).toHaveAttribute('title', '制作人 → 开发')
+    const card = screen.getByLabelText('查看工作流：会议闭环')
+    expect(card.querySelector('.wb-shelf-mark [data-icon="clipboardCheck"]')).toBeTruthy()
+    expect(within(card).getByText('会议纪要')).toBeInTheDocument()
+    expect(within(card).getByText('2 个节点')).toBeInTheDocument()
+    expect(card.querySelector('.wb-shelf-card-sub')).toHaveTextContent('官方·2 个节点')
+    expect(within(card).getByText('查看详情')).toBeInTheDocument()
+    expect(within(card).queryByText('把会议资料整理成可跟进的纪要与待办。')).not.toBeInTheDocument()
+    expect(within(card).queryByText('制作人 → 开发')).not.toBeInTheDocument()
+    expect(within(card).queryByText('协作路径')).not.toBeInTheDocument()
   })
 
   it('manages workflow runs with workflow data instead of expert collaboration tasks', async () => {
@@ -160,7 +192,9 @@ describe('workbench-workflow-shelf', () => {
     })
 
     render(<AppShell />)
-    await waitFor(() => expect(screen.getByRole('button', { name: '管理工作流运行' })).toBeInTheDocument())
+    const board = await screen.findByTestId('wbWorkflowRun-board')
+    fireEvent.click(within(board).getByRole('tab', { name: /^已完成/ }))
+    await waitFor(() => expect(within(board).getByRole('button', { name: '管理工作流运行' })).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: '管理工作流运行' }))
 
     const modal = screen.getByTestId('task-manage-modal')
@@ -206,6 +240,9 @@ describe('workbench-workflow-shelf', () => {
       expect(headerActions).toBeTruthy()
       expect(within(headerActions as HTMLElement).getByRole('button', { name: '返回工作流' })).toBeInTheDocument()
       expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+      expect(screen.getByRole('tab', { name: '专家协作', hidden: true })).not.toBeVisible()
+      expect(screen.getByRole('tab', { name: '工作流', hidden: true })).not.toBeVisible()
+      expect(screen.getByRole('tab', { name: '管线服务', hidden: true })).not.toBeVisible()
     })
     const summary = screen.getByTestId('workflow-detail-summary')
     const path = screen.getByTestId('workflow-detail-path')
@@ -218,7 +255,22 @@ describe('workbench-workflow-shelf', () => {
     expect(within(path).getByTestId('workflow-dag')).toBeInTheDocument()
     expect(within(path).getByTestId('workflow-canvas-start')).toHaveTextContent('开始节点')
     expect(within(path).getByTestId('workflow-canvas-end')).toHaveTextContent('结束节点')
+    expect(within(path).getByTestId('workflow-canvas-node-producer')).toHaveStyle({ left: '92px', top: '174px' })
     expect(screen.getAllByTestId('workflow-dag-edge')).toHaveLength(3)
+    fireEvent.click(within(path).getByRole('button', { name: '预览流转' }))
+    expect(within(path).getByTestId('workflow-canvas-start')).toHaveClass('is-current')
+    expect(within(path).getByTestId('workflow-canvas-start')).toHaveTextContent('运行中')
+    expect(within(path).getByTestId('workflow-preview-progress')).toHaveTextContent('第 1/4 步')
+    expect(within(path).getByText('接收本次运行目标和输入材料，并整理为流程可使用的输入。')).toBeInTheDocument()
+    expect(within(path).getByTestId('workflow-canvas-node-producer')).toHaveClass('is-pending')
+    fireEvent.click(within(path).getByRole('button', { name: '下一步：制作人' }))
+    expect(within(path).getByTestId('workflow-canvas-start')).toHaveClass('is-complete')
+    expect(within(path).getByTestId('workflow-canvas-node-producer')).toHaveClass('is-current')
+    const producerTip = within(path).getByRole('tooltip', { name: /制作人/ })
+    expect(producerTip).toHaveTextContent('澄清需求、确定范围并拆分可执行工作。')
+    expect(producerTip).toHaveTextContent('可执行任务清单')
+    expect(producerTip).not.toHaveTextContent('正在流转')
+    expect(within(path).getByRole('button', { name: '下一步：开发' })).toBeInTheDocument()
     fireEvent.click(within(summary).getByRole('button', { name: '使用此工作流' }))
     const drawer = await screen.findByTestId('workflow-launch-drawer')
     expect(drawer).toHaveAttribute('aria-modal', 'true')
@@ -292,10 +344,12 @@ describe('workbench-workflow-shelf', () => {
       }),
     })
     render(<AppShell />)
-    await waitFor(() => expect(screen.getByTestId('shelf-recent-list')).toHaveTextContent('上次会议闭环'))
+    const board = await screen.findByTestId('wbWorkflowRun-board')
+    fireEvent.click(within(board).getByRole('tab', { name: /^已完成/ }))
+    await waitFor(() => expect(board).toHaveTextContent('上次会议闭环'))
     const runCard = screen.getByTestId('task-open-r1')
     expect(within(runCard).getByText('已完成')).toHaveClass('wb-task-card-status', 'is-done')
-    expect(runCard.querySelector('.wb-task-card-heading-icon [data-icon="workflow"]')).toBeTruthy()
+    expect(runCard.querySelector('.wb-task-inbox-owner-icon [data-icon="workflow"]')).toBeTruthy()
     fireEvent.click(runCard)
     await waitFor(() => expect(screen.getByTestId('workflow-run')).toBeInTheDocument())
     expect(screen.getByTestId('workflow-room')).toBeInTheDocument()
@@ -304,16 +358,36 @@ describe('workbench-workflow-shelf', () => {
   })
 
   it('keeps the catalog collapsed and expands more cards', async () => {
+    const extendedFixture = {
+      ...fixture,
+      workflowPackages: [
+        ...fixture.workflowPackages,
+        {
+          id: 'visual-review-flow',
+          name: '视觉评审流',
+          description: '检查视觉交付并形成评审意见。',
+          source: 'team',
+          provenance: { domain: 'visual' },
+          graph: workflowGraph,
+        },
+      ],
+    }
     mockApi({
-      workbenchLoad: async () => fixture,
+      workbenchLoad: async () => extendedFixture,
       workbenchTaskList: async () => ({ items: [{ id: 'r1', title: '上次会议闭环', status: 'done', workflowId: 'official-office-meeting-loop', workflowName: '会议闭环' }] }),
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('会议闭环')).toBeInTheDocument())
-    expect(screen.getByTestId('shelf-recent-list')).toHaveTextContent('上次会议闭环')
-    expect(screen.queryByText('我的派生')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByTestId('wbShelfGridToggle'))
+    const board = await screen.findByTestId('wbWorkflowRun-board')
+    fireEvent.click(within(board).getByRole('tab', { name: /^已完成/ }))
+    expect(board).toHaveTextContent('上次会议闭环')
     expect(screen.getByText('我的派生')).toBeInTheDocument()
+    expect(screen.queryByText('视觉评审流')).not.toBeInTheDocument()
+    const toggle = screen.getByTestId('wbShelfGridToggle')
+    expect(toggle).toHaveTextContent('更多（1）')
+    fireEvent.click(toggle)
+    expect(document.getElementById('wbShelfGrid')).toHaveClass('is-expanded')
+    expect(screen.getByText('视觉评审流')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '管理工作流' }))
     await waitFor(() => expect(screen.getByTestId('manage-workflows')).toBeInTheDocument())
   })

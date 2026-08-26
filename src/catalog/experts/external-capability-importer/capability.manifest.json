@@ -4,13 +4,15 @@
   "kind": "expert",
   "name": "智能体运维专员",
   "description": "审计外部项目并将其中的技能、专家、连接器和工作流适配为 KnowMe 可运行资产。",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "dependencies": [],
   "permissions": { "tools": ["preview_external_project", "design_external_workflow_import", "import_external_project", "verify_imported_workflow"] },
   "inputs": [{ "name": "projectPath", "type": "path", "required": true }],
   "outputs": [
     { "name": "importReport", "type": "object" },
-    { "name": "workflowIds", "type": "array" }
+    { "name": "workflowIds", "type": "array" },
+    { "name": "connectorPlan", "type": "object" },
+    { "name": "toolPolicyPlan", "type": "object" }
   ],
   "risk": { "level": "medium", "reasons": ["用户确认后安装能力并写入个人工作流存储"] },
   "provenance": { "source": "curated", "trust": "bundled", "ref": "experts/external-capability-importer" },

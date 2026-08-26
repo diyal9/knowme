@@ -27,10 +27,13 @@ function parseMcpAgentToolName(agentName) {
 
 function mcpConfigKey(mcp = {}) {
   return JSON.stringify({
+    transport: mcp?.transport || (mcp?.url ? 'streamable-http' : 'stdio'),
+    url: mcp?.url || '',
     command: mcp?.command || '',
     args: mcp?.args || [],
     cwd: mcp?.cwd || '',
     envKeys: mcp?.envKeys || [],
+    env: mcp?.env || {},
   })
 }
 

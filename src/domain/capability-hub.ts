@@ -29,10 +29,12 @@ export type HubSourceFilter = '全部来源' | '官方' | '组织' | '我的'
 
 export const HUB_EXPERT_SOURCE_FILTERS: HubSourceFilter[] = ['全部来源', '官方', '组织', '我的']
 
+const EXPERT_DOMAIN_CATEGORIES = ['全部', '收藏', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究']
+
 export const HUB_TAB_CATEGORIES: Record<CapabilityKind, string[]> = {
-  expert: ['全部', '收藏', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究'],
-  skill: ['全部', '收藏', '写作', '游戏', '研发', '办公'],
-  connector: ['全部', '收藏', '飞书', 'MCP', '知识库', '自定义'],
+  expert: EXPERT_DOMAIN_CATEGORIES,
+  skill: [...EXPERT_DOMAIN_CATEGORIES],
+  connector: ['全部', '收藏', '办公协作', '视觉创作', '游戏研发', '知识与数据', '研发工具', '通用连接'],
 }
 
 export const HUB_TAB_COPY: Record<CapabilityKind, { catalog: string; empty: string; featured: string; unit: string }> = {
@@ -73,6 +75,12 @@ const DOMAIN_ICONS: Record<string, string> = {
   视觉: 'image',
   效率: 'clipboardCheck',
   飞书: 'clipboardCheck',
+  办公协作: 'clipboardCheck',
+  视觉创作: 'image',
+  游戏研发: 'gamepad',
+  知识与数据: 'bookOpen',
+  研发工具: 'code',
+  通用连接: 'network',
   能力包: 'optimize',
 }
 
@@ -114,8 +122,49 @@ export function hubCategoryChips(items: CapabilityItem[]): string[] {
 }
 
 export function hubDisplayChips(items: CapabilityItem[], kind: CapabilityKind = 'expert'): string[] {
-  void items
+  if (kind === 'connector') {
+    const present = new Set(
+      items
+        .filter((item) => item.kind === 'connector')
+        .map((item) => connectorBroadCategory(item as HubCapabilityItem)),
+    )
+    return HUB_TAB_CATEGORIES.connector.filter((category) => (
+      category === '全部' || category === '收藏' || present.has(category)
+    ))
+  }
   return HUB_TAB_CATEGORIES[kind] || ['全部']
+}
+
+/**
+ * 连接器筛选使用用户任务域，不把厂商名、协议或来源当作一级分类。
+ * 未识别的新连接器稳定落入“通用连接”，因此导入后不会从筛选中消失。
+ */
+export function connectorBroadCategory(item: HubCapabilityItem): string {
+  const text = [
+    item.id,
+    item.name,
+    item.description,
+    item.category,
+    ...(item.categories || []),
+    ...(item.tags || []),
+  ].filter(Boolean).join(' ').toLowerCase()
+
+  if (/feishu|lark|飞书|dingtalk|钉钉|wecom|企业微信|slack|teams|outlook|gmail|calendar|mail|会议|文档协作/.test(text)) {
+    return '办公协作'
+  }
+  if (/photoshop|adobe|figma|canva|视觉|设计|图像|图片|image|design|creative|psd/.test(text)) {
+    return '视觉创作'
+  }
+  if (/cocos|creator|unity|unreal|游戏|game|artbundle|prefab/.test(text)) {
+    return '游戏研发'
+  }
+  if (/知识|knowledge|rag|搜索|search|数据库|database|vector|向量|notion|obsidian|wiki|sql|data/.test(text)) {
+    return '知识与数据'
+  }
+  if (/github|gitlab|devops|ci\b|代码|code|研发|开发|terminal|shell|cli|playwright|browser|自动化|automation/.test(text)) {
+    return '研发工具'
+  }
+  return '通用连接'
 }
 
 export function isCuratedExpert(item: HubCapabilityItem): boolean {
@@ -151,6 +200,9 @@ export function myExpertOriginLabel(item: HubCapabilityItem): string {
 export function matchesHubCategory(item: HubCapabilityItem, category: string): boolean {
   if (!category || category === '全部') return true
   if (category === '收藏') return !!item.favorite
+  if (item.kind === 'connector' && HUB_TAB_CATEGORIES.connector.includes(category)) {
+    return connectorBroadCategory(item) === category
+  }
   if (item.category === category) return true
   return (item.categories || []).some((cat) => String(cat) === category)
 }

@@ -9,6 +9,7 @@ const {
   applySsePayload,
   applyCompletionJson,
   getStreamSnapshot,
+  parseTextToolCalls,
 } = require('../src/lib/agent-stream')
 
 function sseLine(obj) {
@@ -16,6 +17,20 @@ function sseLine(obj) {
 }
 
 describe('agent-stream', () => {
+  it('recovers explicit tool_code emitted by gateways without structured tool calls', () => {
+    const calls = parseTextToolCalls('<tool_code>\nprint(search_web(query="上海今天的天气", mode="web"))\n</tool_code>')
+    assert.deepEqual(calls, [{
+      index: 0,
+      id: 'text_tool_1',
+      name: 'search_web',
+      arguments: JSON.stringify({ query: '上海今天的天气', mode: 'web' }),
+    }])
+  })
+
+  it('does not recover ordinary code outside the explicit tool_code envelope', () => {
+    assert.deepEqual(parseTextToolCalls('print(search_web(query="not a call"))'), [])
+  })
+
   it('accumulates content deltas from SSE chunks', () => {
     const acc = createStreamAccumulator()
     feedSse(acc, sseLine({ choices: [{ delta: { content: '你' } }] }))

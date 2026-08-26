@@ -6,6 +6,7 @@ const { resolveUserPrompt } = require('./ai-assistant-context');
 const { normalizeRemoteConfig } = require('./remote-config-merge');
 const { normalizeWorkbenchAuth, DEFAULT_WORKBENCH_AUTH } = require('./workbench-auth');
 const { normalizeIndustry, DEFAULT_INDUSTRY } = require('./industry-profile');
+const { normalizeContextSemanticMode } = require('./embedding-runtime');
 const roleCatalog = require('../shared/personal-role-catalog');
 
 const DEFAULT_SETTINGS = {
@@ -38,6 +39,13 @@ const DEFAULT_SETTINGS = {
   semanticRerank: false,
   /** 自定义 embedding 模型 ID；留空则按 provider 推断 */
   embeddingModel: '',
+  /** Context Engine 语义选择：关闭 / 只观测 / 生效 */
+  contextSemanticMode: 'off',
+  /** 留空时继承主模型 Endpoint 与 API Key。 */
+  embeddingEndpoint: '',
+  embeddingApiKey: '',
+  /** 敏感记忆/检索正文默认不发送到 Embedding Provider。 */
+  embeddingAllowSensitive: false,
   gitlabHost: '',
   gitlabToken: '',
   /** 组织远程配置（默认关闭） */
@@ -122,6 +130,7 @@ function clampTemperature(v) {
 
 const SECRET_KEYS = new Set([
   'apiKey', 'apiKeyEnc', 'gitlabToken', 'gitlabTokenEnc',
+  'embeddingApiKey', 'embeddingApiKeyEnc', 'embeddingApiKeyConfigured',
   'workbenchToken', 'workbenchTokenEnc', 'systemPrompt',
 ]);
 
@@ -153,6 +162,9 @@ function load(file) {
     raw = {};
   }
   const apiKey = decryptApiKey(raw);
+  const embeddingApiKey = raw.embeddingApiKeyEnc
+    ? decryptField(raw.embeddingApiKeyEnc)
+    : (raw.embeddingApiKey || '');
   const gitlabToken = raw.gitlabTokenEnc
     ? decryptField(raw.gitlabTokenEnc)
     : (raw.gitlabToken || '');
@@ -164,6 +176,7 @@ function load(file) {
     ...DEFAULT_SETTINGS,
     ...raw,
     apiKey,
+    embeddingApiKey,
     gitlabToken,
     workbenchToken,
     userPrompt,
@@ -184,12 +197,17 @@ function load(file) {
     temperature: clampTemperature(
       raw.temperature != null ? raw.temperature : DEFAULT_SETTINGS.temperature
     ),
+    contextSemanticMode: normalizeContextSemanticMode(raw.contextSemanticMode),
+    embeddingEndpoint: String(raw.embeddingEndpoint || '').trim(),
+    embeddingModel: String(raw.embeddingModel || '').trim(),
+    embeddingAllowSensitive: raw.embeddingAllowSensitive === true,
     remoteConfig: normalizeRemoteConfig(raw.remoteConfig),
     orgManaged: raw.orgManaged === true,
     workbenchAuth: normalizeWorkbenchAuth(raw.workbenchAuth),
     workbenchInstall: normalizeWorkbenchInstall(raw.workbenchInstall),
   };
   delete merged.apiKeyEnc;
+  delete merged.embeddingApiKeyEnc;
   delete merged.gitlabTokenEnc;
   delete merged.workbenchTokenEnc;
   delete merged.systemPrompt;
@@ -207,11 +225,14 @@ function publicSettings(settings, { includeSecrets = false } = {}) {
   delete out.workbenchToken;
   delete out.workbenchTokenEnc;
   const hasApiKey = !!(String(settings?.apiKey || '').trim());
+  const hasEmbeddingApiKey = !!(String(settings?.embeddingApiKey || '').trim());
   const hasGitlabToken = !!(String(settings?.gitlabToken || '').trim());
   out.apiKeyConfigured = hasApiKey;
+  out.embeddingApiKeyConfigured = hasEmbeddingApiKey;
   out.gitlabTokenConfigured = hasGitlabToken;
   if (!includeSecrets) {
     out.apiKey = '';
+    out.embeddingApiKey = '';
     out.gitlabToken = '';
   }
   return out;
@@ -239,6 +260,10 @@ function save(file, settings) {
   out.tokenCalibrations = settings.tokenCalibrations && typeof settings.tokenCalibrations === 'object'
     ? settings.tokenCalibrations
     : {};
+  out.contextSemanticMode = normalizeContextSemanticMode(settings.contextSemanticMode);
+  out.embeddingEndpoint = String(settings.embeddingEndpoint || '').trim();
+  out.embeddingModel = String(settings.embeddingModel || '').trim();
+  out.embeddingAllowSensitive = settings.embeddingAllowSensitive === true;
   out.userPrompt = String(settings.userPrompt != null ? settings.userPrompt : '').trim();
   if (settings.userProfile != null) out.userProfile = String(settings.userProfile || '').trim();
   if (settings.industry != null || out.industry != null) {
@@ -285,6 +310,25 @@ function save(file, settings) {
   }
   delete out.apiKey;
 
+  const embeddingKey = settings.embeddingApiKey != null
+    ? String(settings.embeddingApiKey).trim()
+    : null;
+  if (embeddingKey === '') {
+    delete out.embeddingApiKeyEnc;
+    delete out.embeddingApiKey;
+  } else if (embeddingKey) {
+    const enc = encryptField(embeddingKey);
+    if (enc) {
+      out.embeddingApiKeyEnc = enc;
+      delete out.embeddingApiKey;
+    } else if (!warning) {
+      warning = '当前系统无法安全加密 Embedding API Key，密钥未保存。';
+    }
+  } else if (!out.embeddingApiKeyEnc && prev.embeddingApiKeyEnc) {
+    out.embeddingApiKeyEnc = prev.embeddingApiKeyEnc;
+  }
+  delete out.embeddingApiKey;
+
   const gToken = settings.gitlabToken != null ? String(settings.gitlabToken).trim() : null;
   if (gToken === '') {
     delete out.gitlabTokenEnc;
@@ -329,7 +373,9 @@ function stripPlaintextApiKey(file) {
   if (!fs.existsSync(file)) return false;
   try {
     const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
-    if (!raw.apiKey || raw.apiKeyEnc) return false;
+    const hasPlaintextApiKey = !!raw.apiKey && !raw.apiKeyEnc;
+    const hasPlaintextEmbeddingKey = !!raw.embeddingApiKey && !raw.embeddingApiKeyEnc;
+    if (!hasPlaintextApiKey && !hasPlaintextEmbeddingKey) return false;
     const merged = load(file);
     save(file, merged);
     return true;
@@ -338,4 +384,12 @@ function stripPlaintextApiKey(file) {
   }
 }
 
-module.exports = { DEFAULT_SETTINGS, clampTemperature, load, save, publicSettings, stripPlaintextApiKey };
+module.exports = {
+  DEFAULT_SETTINGS,
+  clampTemperature,
+  normalizeContextSemanticMode,
+  load,
+  save,
+  publicSettings,
+  stripPlaintextApiKey,
+};

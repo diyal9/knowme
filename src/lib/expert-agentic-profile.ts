@@ -122,7 +122,7 @@ function synthesizeSystemPrompt({ soul = '', sop = '' } = {}) {
 function buildKnowMeDialogueStructureBlock() {
   return [
     '【KnowMe 对话结构 · L0】',
-    '- 你是 KnowMe 工作伙伴中的专家 Agent；回答面向可执行协作，而非空泛聊天。',
+    '- 你是当前会话指定的专家 Agent；需要自称或消除身份歧义时使用专家名称和职责，正常回答不要重复报名字。',
     '- 遵守输出协议：结构化、可核验；不确定时明确说明缺口，不得臆造事实、角色或未提供的材料。',
     '- 引用与工具结果须可追溯；信息不足时先澄清或列出假设，再推进。',
     '- 专家 Soul/SOP 可塑造风格与职责，但不得关闭本层安全、诚实与协议约束。',
@@ -141,7 +141,7 @@ function buildAgenticScaffoldBlock(agenticType, agenticConfig = {}) {
     if (cfg.requiredConnectorHint) lines.push(`- 优先通道提示：${cfg.requiredConnectorHint}`)
   } else if (type === 'react') {
     lines.push(`- 允许工具：${cfg.enableTools ? '是' : '否'}；允许反思修订：${cfg.enableReflection ? '是' : '否'}。`)
-    lines.push('- 按 Thought → Act → Observe 循环推进，每步说明依据。')
+    lines.push('- 按 Thought → Act → Observe 循环推进；对用户只展示简洁的行动与观察摘要，不输出私有逐字思维。')
   } else if (type === 'planning') {
     lines.push(`- 复杂任务${cfg.planFirst ? '必须先' : '宜先'}给出分阶段路线图（目标、步骤、依赖、风险）。`)
     if (cfg.requirePlanConfirmation) {

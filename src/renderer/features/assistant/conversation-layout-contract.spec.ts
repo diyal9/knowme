@@ -12,10 +12,10 @@ describe('shared conversation layout contract', () => {
   it('defines one reading and composer token set', () => {
     const tokens = read('app/tokens.css')
     expect(tokens).toMatch(/--conversation-track-max:\s*920px/)
-    expect(tokens).toMatch(/--conversation-reading-max:\s*880px/)
-    expect(tokens).toMatch(/--conversation-body-size:\s*15px/)
+    expect(tokens).toMatch(/--conversation-reading-max:\s*840px/)
+    expect(tokens).toMatch(/--conversation-body-size:\s*14px/)
     expect(tokens).toMatch(/--conversation-composer-size:\s*14px/)
-    expect(tokens).toMatch(/--conversation-body-leading:\s*1\.68/)
+    expect(tokens).toMatch(/--conversation-body-leading:\s*1\.72/)
     expect(tokens).toMatch(/--conversation-turn-gap:\s*16px/)
   })
 

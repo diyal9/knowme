@@ -91,7 +91,12 @@ export interface SettingsForm {
   githubToken?: string
   promptCacheControl?: boolean
   semanticRerank?: boolean
+  contextSemanticMode?: 'off' | 'shadow' | 'active'
+  embeddingEndpoint?: string
   embeddingModel?: string
+  embeddingApiKey?: string
+  embeddingApiKeyConfigured?: boolean
+  embeddingAllowSensitive?: boolean
   remoteConfig?: {
     enabled?: boolean
     endpoint?: string
@@ -148,7 +153,12 @@ export interface ConnectorRecord {
   status?: string | ConnectorStatus
   enabled?: boolean
   allowlist?: string[]
-  mcp?: { command?: string; args?: string[]; cwd?: string }
+  agentVisible?: boolean
+  configState?: string
+  capabilities?: string[]
+  secretSlots?: { key: string; label?: string; required?: boolean; target?: string; name?: string; configured?: boolean }[]
+  toolPolicies?: { match?: string; risk?: string; sideEffects?: boolean; requiresApproval?: boolean; timeoutMs?: number }[]
+  mcp?: { transport?: 'stdio' | 'streamable-http' | 'sse' | string; command?: string; args?: string[]; cwd?: string; url?: string; envKeys?: string[]; env?: Record<string, string> }
 }
 
 export interface FeishuPermissionPlan {
@@ -233,6 +243,15 @@ export interface KnowMeExtendedApi {
   onWorkspaceOpenSettings?: (cb: (tab: string) => void) => () => void
   saveSettings?: (settings: SettingsForm) => Promise<unknown>
   getSettings?: () => SettingsForm
+  embeddingProbe?: (payload?: Partial<SettingsForm>) => Promise<{
+    ok?: boolean
+    error?: string
+    code?: string
+    latencyMs?: number
+    host?: string
+    model?: string
+    dimensions?: number
+  }>
   llmModels?: () => Promise<{ presets?: { id: string; label?: string }[] }>
   llmSetModel?: (payload: { model?: string; provider?: string }) => Promise<{ ok?: boolean; error?: string }>
   sourcesAddLocal?: () => Promise<{ ok?: boolean; error?: string }>
@@ -250,6 +269,9 @@ export interface KnowMeExtendedApi {
   connectorsFeishuAuthStart?: (options?: Record<string, unknown>) => Promise<ConnectorStatus>
   connectorsUpsert?: (patch: Record<string, unknown>) => Promise<{ ok?: boolean; error?: string }>
   connectorsSetAllowlist?: (id: string, allowlist: string[]) => Promise<{ ok?: boolean; error?: string }>
+  connectorsSetSecrets?: (id: string, secrets: Record<string, string>) => Promise<{ ok?: boolean; error?: string; message?: string }>
+  connectorsTools?: (id: string) => Promise<{ ok?: boolean; error?: string; message?: string; availableTools?: { rawName: string; projectedName?: string; description?: string; selected?: boolean }[] }>
+  connectorsReferences?: (id: string) => Promise<{ ok?: boolean; references?: { id: string; kind?: string; name?: string; required?: boolean }[] }>
   workbenchAuthStatus?: () => Promise<{
     ok?: boolean
     auth?: {

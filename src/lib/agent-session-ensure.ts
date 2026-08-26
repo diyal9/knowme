@@ -18,7 +18,26 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
   const laneId = String(sessionId || '').trim()
   const found = laneId ? list.find((item) => item.id === laneId) : null
   const nextUi = ui && typeof ui === 'object' ? { ...ui } : {}
+  const collaborationOnly = opts.conversationMode === 'expert-planning'
+    || opts.conversationMode === 'expert-discussion'
   if (found) {
+    if (collaborationOnly) {
+      const personaExpertId = String(
+        opts.personaExpertId || opts.expertId || found.personaExpertId || found.expertId || '',
+      ).trim()
+      const upgraded = {
+        ...found,
+        agentId: 'general',
+        expertId: '',
+        personaExpertId,
+        executionPolicy: 'no-tools',
+        taskRef: opts.taskRef || found.taskRef,
+        referenceState: undefined,
+      }
+      const index = list.findIndex(item => item.id === found.id)
+      list[index] = upgraded
+      return { session: upgraded, sessions: list, ui: nextUi, created: false, upgraded: true }
+    }
     const workbench = isWorkbenchLaneId(laneId) || opts.ephemeral === true || opts.surface === 'workbench'
     if (!workbench && !found.profileId) {
       const upgraded = {
@@ -38,7 +57,11 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
   const role = String(opts.role || opts.agentId || 'general')
   const session = createSession(role, list.filter((item) => item.agentId === role).length + 1, {
     ephemeral: workbench,
-    expertId: opts.expertId || '',
+    expertId: collaborationOnly ? '' : (opts.expertId || ''),
+    personaExpertId: collaborationOnly
+      ? String(opts.personaExpertId || opts.expertId || '').trim()
+      : String(opts.personaExpertId || '').trim(),
+    executionPolicy: collaborationOnly ? 'no-tools' : String(opts.executionPolicy || '').trim(),
     role,
     taskRef: opts.taskRef || (workbench ? taskRefForLane(laneId, role) : undefined),
     goal: workbench ? '当前工作' : opts.goal,

@@ -41,6 +41,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   assistantModels: [],
   assistantModelGroups: [],
   assistantModelId: '',
+  assistantPartnerName: '',
   assistantSkills: [],
   assistantStatus: '',
   assistantProcessFeed: '',

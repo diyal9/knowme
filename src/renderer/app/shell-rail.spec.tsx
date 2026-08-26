@@ -15,14 +15,14 @@ describe('shell-rail', () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'true')
-expect(screen.getByRole('button', { name: '智能伙伴' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '伙伴' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-it('returns to 智能伙伴 when assistant rail is clicked', () => {
+  it('returns to 伙伴 when assistant rail is clicked', () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
-fireEvent.click(screen.getByRole('button', { name: '智能伙伴' }))
-expect(screen.getByRole('button', { name: '智能伙伴' })).toHaveAttribute('aria-pressed', 'true')
+    fireEvent.click(screen.getByRole('button', { name: '伙伴' }))
+    expect(screen.getByRole('button', { name: '伙伴' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'false')
   })
 
@@ -30,14 +30,16 @@ expect(screen.getByRole('button', { name: '智能伙伴' })).toHaveAttribute('ar
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '自动化' }))
     expect(screen.getByRole('button', { name: '自动化' })).toHaveAttribute('aria-pressed', 'true')
+    expect(document.getElementById('wbHead')).toHaveTextContent('自动化')
+    expect(screen.getByRole('tab', { name: '任务' })).toHaveAttribute('aria-selected', 'true')
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
   })
 
-  it('returns to 专家协作 after visiting automation via 智能伙伴', async () => {
+  it('returns to 专家协作 after visiting automation via 伙伴', async () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '自动化' }))
     expect(await screen.findByRole('heading', { name: '按你的节奏自动推进工作' })).toBeInTheDocument()
-fireEvent.click(screen.getByRole('button', { name: '智能伙伴' }))
+    fireEvent.click(screen.getByRole('button', { name: '伙伴' }))
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))
     expect(screen.getByRole('button', { name: '工作台' })).toHaveAttribute('aria-pressed', 'true')
     expect(await screen.findByRole('heading', { name: '专家任务' })).toBeInTheDocument()

@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { AgentRunArtifact, WorkbenchTask } from '../../../shared/api'
 import { expertDeliverableTitle } from '../../../domain/expert-present'
+import { expertArtifactKindLabel } from '../../../domain/expert-artifact'
 import { Icon } from '../../app/Icon'
 import { ExpertDeliverableArtifact } from './ExpertDeliverableArtifact'
 
@@ -28,16 +29,17 @@ export function ExpertArtifactPreviewDialog({
   }, [onClose])
 
   const title = expertDeliverableTitle(item.title)
+  const artifactType = artifact?.type || item.type || 'document'
 
   return (
     <div className="wb-expert-artifact-mask" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
       <section className="wb-expert-artifact-dialog" role="dialog" aria-modal="true" aria-labelledby="expertArtifactDialogTitle">
         <header>
-          <div>
-            <span>成果物预览</span>
-            <h2 id="expertArtifactDialogTitle">{title}</h2>
+          <h2 id="expertArtifactDialogTitle">{title}</h2>
+          <div className="wb-expert-artifact-dialog-actions">
+            <span>{expertArtifactKindLabel(artifactType)} · 第 {item.version || 1} 版</span>
+            <button type="button" aria-label="关闭成果物预览" onClick={onClose}><Icon name="close" /></button>
           </div>
-          <button type="button" aria-label="关闭成果物预览" onClick={onClose}><Icon name="close" /></button>
         </header>
         <div className="wb-expert-artifact-dialog-body">
           <ExpertDeliverableArtifact
@@ -47,6 +49,7 @@ export function ExpertArtifactPreviewDialog({
             title={title}
             type={item.type}
             version={item.version}
+            showToolbar={false}
           />
         </div>
       </section>

@@ -112,13 +112,50 @@ function toolCallsToArray(toolCalls) {
     }))
 }
 
+// Some OpenAI-compatible gateways emit a Python-shaped request in text
+// instead of returning structured tool_calls. Only recover calls inside the
+// explicit envelope; ordinary code in an answer must never be executed.
+function parseTextToolCalls(content) {
+  const calls = []
+  const envelopeRe = /<tool_code>\s*\n?([\s\S]*?)\n?\s*<\/tool_code>/gi
+  let envelope
+  while ((envelope = envelopeRe.exec(String(content || '')))) {
+    const body = envelope[1].trim()
+    const callRe = /(?:print\s*\(\s*)?([A-Za-z][\w.-]*)\s*\(([^()]*)\)\s*\)?/g
+    let match
+    while ((match = callRe.exec(body))) {
+      const args = {}
+      const argRe = /([A-Za-z_]\w*)\s*=\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^,\s]+))/g
+      let arg
+      while ((arg = argRe.exec(match[2]))) {
+        const raw = arg[2] ?? arg[3] ?? arg[4] ?? ''
+        args[arg[1]] = arg[2] != null || arg[3] != null
+          ? raw.replace(/\\([\\"'])/g, '$1')
+          : raw
+      }
+      calls.push({
+        index: calls.length,
+        id: `text_tool_${calls.length + 1}`,
+        name: match[1],
+        arguments: JSON.stringify(args),
+      })
+    }
+  }
+  return calls
+}
+
+function getToolCalls(accumulator) {
+  const structured = toolCallsToArray(accumulator.toolCalls)
+  return structured.length ? structured : parseTextToolCalls(accumulator.content)
+}
+
 function getStreamSnapshot(accumulator) {
   return {
     content: accumulator.content,
     hasReasoning: accumulator.hasReasoning,
     finishReason: accumulator.finishReason,
     usage: accumulator.usage ? { ...accumulator.usage } : null,
-    toolCalls: toolCallsToArray(accumulator.toolCalls),
+    toolCalls: getToolCalls(accumulator),
   }
 }
 
@@ -161,5 +198,6 @@ module.exports = {
   applyCompletionJson,
   getStreamSnapshot,
   toolCallsToArray,
+  parseTextToolCalls,
   mergeToolCallDelta,
 }

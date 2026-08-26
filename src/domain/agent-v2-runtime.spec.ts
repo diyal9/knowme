@@ -10,6 +10,12 @@ import {
 } from './agent-v2-runtime'
 
 describe('agent-v2-runtime', () => {
+  const turn = {
+    userMessageId: 'user-1',
+    assistantMessageId: 'assistant-1',
+    userCreatedAt: '2026-08-26T00:00:00.000Z',
+  }
+
   it('builds generate payload with runId, agentId, grounding and skill refs', () => {
     const runId = createAgentRunId()
     const payload = buildAgentGeneratePayload({
@@ -18,8 +24,10 @@ describe('agent-v2-runtime', () => {
       agentId: 'general',
       runId,
       history: [],
+      turn,
     })
     expect(payload.runId).toBe(runId)
+    expect(payload.turn).toEqual(turn)
     expect(payload.sessionId).toBe('s1')
     expect(payload.agentId).toBe('general')
     expect(payload.skillRefs).toEqual(['summarize'])
@@ -38,11 +46,34 @@ describe('agent-v2-runtime', () => {
       taskRef: { id: 'writer', kind: 'expert-chat' },
       runId: createAgentRunId(),
       history: [],
+      turn,
     })
     expect(payload.sessionId).toBe('wb-expert-writer')
     expect(payload.role).toBe('writing')
     expect(payload.expertId).toBe('writer')
     expect(payload.surface).toBe('workbench')
+  })
+
+  it('marks expert discussion as a tool-free collaboration request', () => {
+    const payload = buildAgentGeneratePayload({
+      prompt: '解释当前成果',
+      sessionId: 'wb-expert-task-discussion-v2',
+      agentId: 'general',
+      role: 'general',
+      surface: 'workbench',
+      taskRef: { id: 'task-1', kind: 'expert-discussion' },
+      conversationMode: 'expert-discussion',
+      expertDiscussionContext: {
+        taskId: 'task-1', goal: '解释成果', status: 'review', resultSummary: '', deliverables: [], recentEvents: [],
+      },
+      runId: createAgentRunId(),
+      history: [],
+      turn,
+    })
+    expect(payload.conversationMode).toBe('expert-discussion')
+    expect(payload.agentId).toBe('general')
+    expect(payload.expertDiscussionContext).toMatchObject({ taskId: 'task-1', goal: '解释成果' })
+    expect(payload.taskRef).toEqual({ id: 'task-1', kind: 'expert-discussion' })
   })
 
   it('reduces v2 stage + answer.committed onto the message', () => {

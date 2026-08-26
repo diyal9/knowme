@@ -50,6 +50,7 @@ describe('surface CSS contract', () => {
     ]) {
       expect(tokens, token).toContain(token)
     }
+    expect(tokens).toMatch(/--surface-page:\s*var\(--bg-card\)/)
     expect(read('app/ui-system.css')).toMatch(/\.ui-button/)
   })
 
@@ -158,6 +159,19 @@ describe('surface CSS contract', () => {
     expect(css).not.toMatch(/\.wb-workflow-detail\s*\{[^}]*background:#f6f7f7/s)
   })
 
+  it('lets long workflow summaries scroll from the true top instead of clipping centered content', () => {
+    const css = read('features/shelf/shelf.css')
+    expect(css).toMatch(/\.wb-workflow-detail-panel\s*\{[^}]*min-height:0/s)
+    expect(css).toMatch(/\.wb-workflow-detail-panel\.is-contract\s*\{[^}]*justify-content:flex-start[^}]*overflow-y:auto[^}]*overflow-x:hidden/s)
+    expect(css).not.toMatch(/\.wb-workflow-detail-panel\.is-contract\s*\{[^}]*justify-content:center/s)
+  })
+
+  it('gives desktop workflow details the available vertical space without stacked page insets', () => {
+    const css = read('features/shelf/shelf.css')
+    expect(css).toMatch(/#workbench:has\(\.wb-workflow-detail\)\s*>\s*\.wb-body\s*\{[^}]*padding-block:8px 12px/s)
+    expect(css).toMatch(/#workbench:has\(\.wb-workflow-detail\)\s+\.wb-workflow-detail\s*\{[^}]*height:100%[^}]*padding-block:0/s)
+  })
+
   it('keeps workflow catalog filters owned by the shelf surface', () => {
     const shelf = read('features/shelf/shelf.css')
     const consoleCss = read('features/run/console.css')
@@ -166,11 +180,29 @@ describe('surface CSS contract', () => {
     expect(consoleCss).not.toMatch(/\.wb-domain-(?:switcher|chip)/)
   })
 
+  it('reuses the expert collaboration list-toggle appearance on the workflow shelf', () => {
+    const shared = read('features/workbench/workbench-layout.css')
+    const shelf = read('features/shelf/shelf.css')
+    expect(shared).toMatch(/\.wb-team-toggle, \.wb-list-toggle\s*\{[^}]*border:0[^}]*background:transparent/s)
+    expect(shelf).not.toMatch(/\.wb-shelf-catalog\s*>\s*\.wb-list-toggle/)
+    expect(shelf).toMatch(/\.wb-shelf-catalog\.expanded \.wb-list-toggle-mark/)
+  })
+
   it('keeps workflow delivery dominant and shelf filters position-stable', () => {
     const workflow = read('features/workflow/workflow-room.css')
     const chrome = read('features/workbench/workbench-chrome.css')
     expect(workflow).toMatch(/#appShell\.mode-workbench\[data-workbench-layout="task-room"\]\[data-workbench-task-kind="workflow-chat"\] \.main\s*\{[^}]*grid-template-columns:clamp\(380px, 34%, 600px\) minmax\(0, 1fr\)/s)
     expect(chrome).toMatch(/\.workbench > \.wb-body\s*\{[^}]*scrollbar-gutter:stable/s)
+  })
+
+  it('keeps the pipeline home in two columns until a genuinely narrow viewport', () => {
+    const css = read('features/run/console.css')
+    const shelf = read('features/shelf/shelf.css')
+    expect(css).toMatch(/@media \(min-width:981px\) and \(max-width:1100px\)\s*\{\s*\.wb-daemon-home-shell\s*\{[^}]*minmax\(420px, \.74fr\)/s)
+    expect(css).toMatch(/@media \(max-width:980px\)\s*\{\s*\.wb-daemon-home-shell\s*\{[^}]*grid-template-rows:auto minmax\(340px, 45vh\)/s)
+    expect(css).toMatch(/@media \(max-width:980px\)[\s\S]*?\.wb-daemon-compose-panel\s*\{[^}]*min-height:620px/s)
+    expect(css).not.toMatch(/@media \(max-width:1050px\)\s*\{\s*\.wb-daemon-home-shell/s)
+    expect(shelf).not.toMatch(/\.wb-manage-panel \.wb-daemon-/)
   })
 
   it('enforces one crisp typography contract across renderer surfaces', () => {

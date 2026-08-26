@@ -1,6 +1,7 @@
 import type { ChatMessage } from '../../../shared/api'
 import { compactUserShortcutBubbleText } from '../../../domain/agent-shortcut-display'
-import { createAgentRunId } from '../../../domain/agent-v2-runtime'
+import { conversationMessageId, createAgentRunId, INCOMPLETE_ASSISTANT_REPLY } from '../../../domain/agent-v2-runtime'
+import { settleExecutionTrace } from '../../../domain/agent-execution-timeline'
 import { finalizeGenerateReply, historyTurns, seedStreamingAssistant } from '../../../domain/agent-generate-contract'
 import { api, type StoreGet, type StoreSet } from '../../app/store-types'
 import { invokeStreamingGenerate } from './store-generate-invoke'
@@ -27,15 +28,20 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
   const displayText = compactUserShortcutBubbleText(text)
     || (attachment ? `（附件：${attachment.name}）` : '')
   const runId = createAgentRunId()
+  const userCreatedAt = new Date().toISOString()
   const session = get().sessions.find((item) => item.id === sessionId)
-  const assistantId = `a-${Date.now()}`
+  const assistantDisplayName = get().assistantPartnerName || 'KnowMe'
+  const userId = conversationMessageId(runId, 'user')
+  const assistantId = conversationMessageId(runId, 'assistant')
   const user: ChatMessage = {
-    id: `u-${Date.now()}`,
+    id: userId,
     role: 'user',
     text: displayText,
+    runId,
+    createdAt: userCreatedAt,
     attachmentName: attachment?.name,
   }
-  const assistant = seedStreamingAssistant(assistantId, runId)
+  const assistant = seedStreamingAssistant(assistantId, runId, userCreatedAt)
 
   set((state) => ({
     isGenerating: true,
@@ -63,13 +69,23 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
       role: session?.agentId,
       surface: 'assistant',
       history: historyTurns(slice.messages),
+      turn: {
+        userMessageId: userId,
+        assistantMessageId: assistantId,
+        userCreatedAt,
+      },
       attachment,
     })
     if (get().generateRunId !== runId) return
 
     set((state) => {
       const existing = getSessionSlice(state.sessionStates, sessionId).messages.find((m) => m.id === assistantId)
-      const final = finalizeGenerateReply(existing, result)
+      const final = finalizeGenerateReply(existing, { ...result, displayName: assistantDisplayName })
+      const terminalStatus = result.cancelled
+        ? 'cancelled' as const
+        : (result.resultError || final.role === 'error' || final.text === INCOMPLETE_ASSISTANT_REPLY)
+          ? 'error' as const
+          : 'done' as const
       return {
         isGenerating: false,
         generateRunId: '',
@@ -86,6 +102,7 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
           streaming: false,
           thinking: false,
           activity: final.activity,
+          trace: settleExecutionTrace(msg.trace, terminalStatus),
           elapsedMs: msg.startedAt ? Date.now() - msg.startedAt : msg.elapsedMs,
           firstTokenMs: msg.firstTokenMs || (final.text && msg.startedAt ? Date.now() - msg.startedAt : msg.firstTokenMs),
         })),

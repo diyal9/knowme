@@ -32,6 +32,16 @@ const {
   PENDING_OK_RE,
 } = require('./agent-grounding-state')
 
+// Kept in the shared binding for compatibility with the grounding split
+// contract; explicit uncertainty is intentionally checked locally below.
+void PENDING_OK_RE
+
+// Search/candidate tools locate sources; they are not authoritative evidence
+// for concrete facts such as owners, dates, conclusions or action items.
+// Requiring a subsequent read (or a purpose-built data tool) prevents a
+// plausible search snippet from being promoted into a fabricated conclusion.
+const DISCOVERY_TOOL_RE = /(?:^|[._-])(search|candidate(?:s)?|suggest(?:ion)?|lookup|find)(?:$|[._-])/i
+
 function createEvidenceLedger(seed = {}) {
   return {
     runId: seed.runId || newId('run'),
@@ -52,6 +62,45 @@ function digestText(text = '', max = 240) {
   return src.length <= max ? src : `${src.slice(0, max)}…`
 }
 
+function parseResultObject(text = '') {
+  try {
+    const parsed = JSON.parse(String(text || '').trim())
+    return parsed && typeof parsed === 'object' ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+function collectSourceIdentity(value, out = {}) {
+  if (!value || typeof value !== 'object') return out
+  const keys = ['doc_token', 'document_token', 'minute_token', 'wiki_token', 'token', 'url', 'source_url', 'document_url']
+  for (const key of keys) {
+    const val = String(value[key] || '').trim()
+    if (val) out[key] = val
+  }
+  for (const key of ['source', 'document', 'doc', 'data', 'meta', 'result']) {
+    if (value[key] && typeof value[key] === 'object') collectSourceIdentity(value[key], out)
+  }
+  return out
+}
+
+function extractToolSourceIdentity(args = {}, text = '') {
+  const expected = collectSourceIdentity(args)
+  const actual = collectSourceIdentity(parseResultObject(text) || {})
+  return { expected, actual }
+}
+
+function validateToolResultBinding(args = {}, text = '') {
+  const { expected, actual } = extractToolSourceIdentity(args, text)
+  const expectedValues = Object.values(expected).filter(Boolean)
+  const actualValues = Object.values(actual).filter(Boolean)
+  if (!expectedValues.length || !actualValues.length) return { matched: true, expected, actual }
+  const matched = expectedValues.some(wanted => actualValues.some(found =>
+    found === wanted || found.includes(wanted) || wanted.includes(found)
+  ))
+  return { matched, expected, actual, mismatch: !matched }
+}
+
 function classifyToolResultQuality(toolName, result = {}) {
   const text = String(result.text || result.preview || '').trim()
   const ok = result.ok !== false
@@ -63,6 +112,14 @@ function classifyToolResultQuality(toolName, result = {}) {
   let parsed = null
   try { parsed = JSON.parse(text) } catch { /* ignore */ }
   if (parsed && typeof parsed === 'object') {
+    // Import/verification tools return structured contracts (tokens, counts,
+    // id maps, or verification objects), not a document body. Treat a
+    // successful structured response as usable evidence instead of
+    // misclassifying it as "short body" / truncated content.
+    const structuredImportResult = /^(?:preview_external_project|design_external_workflow_import|import_external_project|verify_imported_workflow)$/.test(String(toolName || ''))
+      && parsed.ok !== false
+      && Boolean(parsed.previewToken || parsed.planToken || parsed.counts || parsed.idMaps || parsed.verification || parsed.plan || parsed.preview)
+    if (structuredImportResult) return { status: 'ok', truncated: false, empty: false }
     const body = String(parsed.body || parsed.content || parsed.plain_text || parsed.summary || '').trim()
     const titleOnly = String(parsed.title || parsed.name || '').trim()
     const thinBody = !body || body.length < 40
@@ -120,19 +177,27 @@ function mergeToolResultsIntoLedgers({ toolLedger, evidenceLedger, toolMessages 
       text: item.text,
       preview: item.text,
     })
+    const binding = validateToolResultBinding(item.args || {}, item.text)
+    const boundStatus = binding.mismatch ? 'fail' : quality.status
     tl = recordToolCall(tl, {
       id: item.toolCallId,
       name: item.toolName,
-      status: quality.status === 'fail' ? 'fail' : 'ok',
-      truncated: quality.truncated,
+      status: boundStatus === 'fail' ? 'fail' : 'ok',
+      truncated: quality.truncated || binding.mismatch === true,
       durationMs: item.durationMs,
     })
     el = appendEvidence(el, {
       source: 'tool',
       toolCallId: item.toolCallId,
-      status: quality.status,
+      status: boundStatus,
       digest: item.text,
-      provenance: { tool: item.toolName, callId: item.toolCallId },
+      provenance: {
+        tool: item.toolName,
+        callId: item.toolCallId,
+        ...(Object.keys(binding.expected).length ? { expectedSource: binding.expected } : {}),
+        ...(Object.keys(binding.actual).length ? { actualSource: binding.actual } : {}),
+        ...(binding.mismatch ? { bindingStatus: 'mismatch' } : {}),
+      },
     })
   }
   return { toolLedger: tl, evidenceLedger: el }
@@ -147,6 +212,19 @@ function hasOkEvidenceForTool(evidenceLedger, toolName) {
     e.status === 'ok' && !['truncated', 'empty', 'fail'].includes(e.status) &&
     (e.provenance?.tool === toolName)
   )
+}
+
+// A discovery result is not evidence for meeting conclusions, owners or dates,
+// but it is valid evidence for the narrow intermediate response that presents
+// the returned candidates and asks the user to select one. Without this
+// distinction the output gate replaces a real candidate list with a generic
+// "no正文证据" refusal, breaking the deterministic meeting workflow.
+function isVerifiedCandidatePresentation(text = '', toolLedger) {
+  const src = String(text || '').trim()
+  if (!src) return false
+  const hasCandidateCall = hasOkToolCall(toolLedger, 'feishu.meeting_candidates')
+  if (!hasCandidateCall) return false
+  return /(?:候选|会议记录|智能纪要|回复\s*序号|选择(?:一场|第)|minute[_ ]?token|最近\s*\d+\s*(?:个)?自然日)/i.test(src)
 }
 
 function evaluateRequiredTools(taskFrame, toolLedger) {
@@ -267,11 +345,25 @@ function verifyClaims({
     }
   }
 
-  const hasSupportingEvidence = el.entries.some(e => e.status === 'ok' && !e.status.includes?.('truncated'))
+  const hasSupportingEvidence = el.entries.some(e =>
+    e.status === 'ok' && !e.status.includes?.('truncated') && !DISCOVERY_TOOL_RE.test(String(e.provenance?.tool || ''))
+  )
   const hasOkEvidence = el.entries.some(e => e.status === 'ok')
-  if (EXTERNAL_FACT_RE.test(text) && !hasOkEvidence) {
-    if (!PENDING_OK_RE.test(text)) {
-      violations.push({ code: 'ungrounded_external_fact', message: '外部事实无 EvidenceLedger 支撑' })
+  const sourceMismatch = el.entries.some(e => e.provenance?.bindingStatus === 'mismatch')
+  if (sourceMismatch) {
+    violations.push({
+      code: 'source_mismatch',
+      message: '工具返回内容与用户指定的文档或资源不一致',
+    })
+  }
+  const candidatePresentation = isVerifiedCandidatePresentation(text, tl)
+  if (EXTERNAL_FACT_RE.test(text) && !hasSupportingEvidence && !candidatePresentation) {
+    // Planning language alone ("下一步" / "我会") must not launder a
+    // fabricated fact. Only an explicit uncertainty/refusal can pass without
+    // supporting evidence.
+    const explicitUncertainty = /(无法(?:确认|核实|读取)|不能(?:确认|据此)|尚未(?:读取|找到|确认)|未读取到|缺少(?:正文|证据)|证据不足|请(?:提供|补充).*(?:链接|token|正文))/i.test(text)
+    if (!explicitUncertainty) {
+      violations.push({ code: 'ungrounded_external_fact', message: '具体事实没有正文或权威数据证据支撑' })
     }
   }
 
@@ -293,6 +385,9 @@ function verifyClaims({
 }
 
 function buildHonestRefusal(verification, taskFrame) {
+  if (verification.violations.some(v => v.code === 'source_mismatch')) {
+    return '工具返回的内容与您指定的文档或资源不一致。为避免误答，我不会使用这份内容；请核对链接/token 后重试。'
+  }
   const missingTools = verification.violations.find(v => v.code === 'missing_required_tools')?.missingTools || []
   const tfTools = taskFrame?.requiredTools || []
   const tools = missingTools.length ? missingTools : tfTools
@@ -361,4 +456,7 @@ module.exports = {
   verifyClaims,
   buildHonestRefusal,
   applyOutputGate,
+  isVerifiedCandidatePresentation,
+  extractToolSourceIdentity,
+  validateToolResultBinding,
 }

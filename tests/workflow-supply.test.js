@@ -79,6 +79,20 @@ describe('resolveAgentId', () => {
 })
 
 describe('workflow supply collection', () => {
+  it('uses the current product name for an already imported PSD workflow', () => {
+    const result = supply({
+      personal: [{
+        id: 'th-art-psd-to-artbundle',
+        name: '固定 PSD → 标准 ArtBundle',
+        source: 'team',
+        status: 'published',
+        executionBackends: ['local-team'],
+        graph: { nodes: [{ id: 'psd_intake', type: 'tool' }], edges: [] },
+      }],
+    })
+    assert.equal(result.packages[0].name, 'PSD导Artbundle')
+  })
+
   it('does not invent built-in demo vertical seeds when verticals are empty', () => {
     const result = supply({ verticals: [] })
     for (const id of ['office-meeting-to-actions', 'engineering-delivery', 'visual-brief-to-export']) {

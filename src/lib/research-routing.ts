@@ -22,6 +22,10 @@ function normalizeText(value, max = 800) {
   return String(value || '').replace(/\s+/g, ' ').trim().slice(0, max)
 }
 
+function selectResearchPrompt({ prompt = '', displayPrompt = '' } = {}) {
+  return normalizeText(displayPrompt) || normalizeText(prompt)
+}
+
 function classifyResearchIntent(prompt = '') {
   const text = normalizeText(prompt)
   if (!text || FALSE_POSITIVE_RE.test(text)) {
@@ -188,6 +192,12 @@ function buildResearchRoute({ prompt = '', toolRecords = [] } = {}) {
   }
 }
 
+function reconcileResearchTaskFrame(taskFrame, prompt = '') {
+  if (!taskFrame || taskFrame.workflowId !== 'realtime-public-research') return taskFrame || null
+  const intent = classifyResearchIntent(prompt)
+  return intent.active && ['public', 'mixed'].includes(intent.scope) ? taskFrame : null
+}
+
 function injectResearchContext(messages = [], context = '') {
   const list = Array.isArray(messages) ? messages.map(message => ({ ...message })) : []
   const text = String(context || '').trim()
@@ -201,6 +211,7 @@ function injectResearchContext(messages = [], context = '') {
 module.exports = {
   FRESHNESS_RE,
   RESEARCH_RE,
+  selectResearchPrompt,
   classifyResearchIntent,
   promoteIntentTier,
   classifyToolRecord,
@@ -208,5 +219,6 @@ module.exports = {
   buildResearchContext,
   buildResearchTaskFrame,
   buildResearchRoute,
+  reconcileResearchTaskFrame,
   injectResearchContext,
 }

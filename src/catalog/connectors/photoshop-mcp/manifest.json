@@ -1,0 +1,34 @@
+{
+  "id": "photoshop-mcp",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "Photoshop MCP",
+  "name": "Photoshop MCP",
+  "description": "通过本机 stdio MCP 连接 Photoshop，用于 PSD 图层预读、状态检查和受控切图。安装后需填写 Node 命令、服务入口与 Photoshop 路径。",
+  "capabilities": ["photoshop", "psd-read", "psd-slice"],
+  "mcp": {
+    "transport": "stdio",
+    "command": "",
+    "args": [],
+    "cwd": "",
+    "env": {
+      "PHOTOSHOP_PATH": "",
+      "LOG_LEVEL": "info"
+    }
+  },
+  "allowlist": ["photoshop_ping", "photoshop_get_version", "photoshop_get_document_info", "photoshop_get_layers"],
+  "healthCheck": { "tool": "photoshop_ping", "timeoutMs": 15000 },
+  "toolPolicies": [
+    { "match": "photoshop_ping", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "photoshop_get_*", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "photoshop_export_*", "risk": "write", "sideEffects": true, "requiresApproval": true, "timeoutMs": 120000 },
+    { "match": "*", "risk": "external", "sideEffects": true, "requiresApproval": true }
+  ],
+  "permissions": {
+    "tools": ["photoshop_ping", "photoshop_get_version", "photoshop_get_document_info", "photoshop_get_layers"],
+    "externalSystem": "photoshop",
+    "process": true,
+    "fileWrite": true
+  }
+}

@@ -4,6 +4,11 @@ const crypto = require('crypto')
 
 const agentRun = require('./agent-run')
 const { normalizeAssistantOutput } = require('./assistant-output-style')
+const {
+  projectConversationHistory,
+  reconcileConversationLog,
+  withConversationIdentity,
+} = require('./agent-conversation-log')
 
 const AGENTS = [
 { id: 'personal', name: '智能伙伴', icon: 'chat', description: '持续积累、按情境协作的个人工作代理' },
@@ -16,6 +21,7 @@ const AGENTS = [
 const MAX_MESSAGES = 80
 const MAX_CONTEXT_CHARS = 24000
 const KEEP_MESSAGES_AFTER_COMPACT = 12
+const MAX_RECENT_CONTEXT_MESSAGES = 24
 const DEFAULT_TITLE = '新助手'
 /** 空会话占位名；含重构前英文标题，normalize 时收成 DEFAULT_TITLE */
 const PLACEHOLDER_TITLES = new Set([DEFAULT_TITLE, 'New Agent', '新对话', '对话', '当前协作'])
@@ -67,6 +73,8 @@ function createSession(agentId = 'personal', index = 1, runOpts = {}) {
     profileId: String(runOpts.profileId || (!runOpts.taskRef ? 'my-knowme' : '')).trim(),
     contextId: String(runOpts.contextId || '').trim(),
     expertId: String(runOpts.expertId || '').trim(),
+    personaExpertId: String(runOpts.personaExpertId || '').trim(),
+    executionPolicy: String(runOpts.executionPolicy || '').trim(),
     capabilitySnapshotId: String(runOpts.capabilitySnapshotId || '').trim(),
     snapshotPath: String(runOpts.snapshotPath || '').trim(),
     ephemeral: runOpts.ephemeral === true,
@@ -140,7 +148,7 @@ function normalizeStructuredUi(raw) {
   }).filter(Boolean)
 }
 
-function normalizeMessage(raw) {
+function normalizeMessage(raw, options = {}) {
   if (!raw || typeof raw !== 'object') return null
   const role = raw.role
   if (!['user', 'assistant', 'tool'].includes(role)) return null
@@ -150,7 +158,17 @@ function normalizeMessage(raw) {
     : []
   const ui = role === 'assistant' ? normalizeStructuredUi(raw.ui) : []
   if (!text.trim() && !trace.length && !ui.length) return null
-  const message = { role, text }
+  const identity = withConversationIdentity(raw, {
+    sessionId: options.sessionId || 'session',
+    index: options.index || 0,
+  })
+  const message = {
+    id: identity.id,
+    role,
+    text,
+    ...(identity.runId ? { runId: identity.runId } : {}),
+    ...(identity.createdAt ? { createdAt: identity.createdAt } : {}),
+  }
   if (role === 'assistant') {
     if (trace.length) message.trace = trace
     if (ui.length) message.ui = ui
@@ -168,14 +186,21 @@ function normalizeMessage(raw) {
   return message
 }
 
-function normalizeSession(raw, fallbackIndex = 1) {
+function normalizeSession(raw, fallbackIndex = 1, options = {}) {
   const base = createSession(raw?.agentId || 'general', fallbackIndex, { taskRef: raw?.taskRef })
-  const messages = Array.isArray(raw?.messages)
+  const sessionId = String(raw?.id || base.id)
+  const normalizedMessages = Array.isArray(raw?.messages)
     ? raw.messages
-      .map(normalizeMessage)
+      .map((message, index) => normalizeMessage(message, { sessionId, index }))
       .filter(Boolean)
-      .slice(-MAX_MESSAGES)
     : []
+  const reconciledMessages = reconcileConversationLog(normalizedMessages, [], { sessionId })
+  const messageLimit = options.messageLimit === Infinity
+    ? Infinity
+    : Math.max(1, Number(options.messageLimit) || MAX_MESSAGES)
+  const messages = Number.isFinite(messageLimit)
+    ? reconciledMessages.slice(-messageLimit)
+    : reconciledMessages
   const rawTitle = String(raw?.title || '').trim()
   const title = isPlaceholderTitle(rawTitle) ? DEFAULT_TITLE : rawTitle
   const run = raw?.run != null ? agentRun.normalizeRun(raw.run) : undefined
@@ -188,6 +213,8 @@ function normalizeSession(raw, fallbackIndex = 1) {
     profileId: String(raw?.profileId || '').trim().slice(0, 80),
     contextId: String(raw?.contextId || '').trim().slice(0, 80),
     expertId: String(raw?.expertId || '').trim(),
+    personaExpertId: String(raw?.personaExpertId || '').trim(),
+    executionPolicy: String(raw?.executionPolicy || '').trim().slice(0, 40),
     capabilitySnapshotId: String(raw?.capabilitySnapshotId || raw?.snapshotId || '').trim(),
     snapshotPath: String(raw?.snapshotPath || '').trim(),
     ephemeral: raw?.ephemeral === true,
@@ -243,6 +270,17 @@ function buildSessionDigest(messages, max = 8000) {
   if (users.length > 1) {
     sections.push(`### 用户约束与待办\n${users.slice(-3).map(m => `- ${compactMessageText(m.text, 700)}`).join('\n')}`)
   }
+  if (list.length) {
+    const chronology = list.map(message => {
+      const label = message.role === 'user'
+        ? '用户'
+        : message.role === 'assistant'
+          ? '助手'
+          : `工具(${message.toolName || 'tool'})`
+      return `- ${label}：${compactMessageText(message.text, 500)}`
+    }).join('\n')
+    sections.push(`### 历史对话线索\n${chronology}`)
+  }
   const digest = sections.join('\n\n')
   if (digest.length <= max) return digest
   const sectionBudget = Math.max(220, Math.floor(max / sections.length))
@@ -257,8 +295,10 @@ function limitSummary(text, max) {
   return `${value.slice(0, left)}\n…（摘要已压缩）…\n${value.slice(-right)}`
 }
 
-function compactSession(session) {
-  const normalized = normalizeSession(session)
+function compactSession(session, fallbackIndex = 1) {
+  // Compaction must inspect the complete input before enforcing storage caps;
+  // otherwise messages beyond MAX_MESSAGES disappear without entering summary.
+  const normalized = normalizeSession(session, fallbackIndex, { messageLimit: Infinity })
   if (estimateChars(normalized) <= MAX_CONTEXT_CHARS && normalized.messages.length <= MAX_MESSAGES) {
     return { session: normalized, compacted: false }
   }
@@ -282,14 +322,29 @@ function compactSession(session) {
   }
 }
 
-function contextMessages(session) {
+function contextMessages(session, options = {}) {
   const compacted = compactSession(session).session
-  const history = []
-  if (compacted.summary) {
-    history.push({ role: 'user', text: `[会话历史摘要]\n${compacted.summary}` })
-    history.push({ role: 'assistant', text: '已了解以上会话背景，我会继续基于当前 Session 作答。' })
+  const excluded = new Set((options.excludeMessageIds || []).map(String).filter(Boolean))
+  const available = compacted.messages.filter(message => !excluded.has(String(message?.id || '')))
+  let remainingChatMessages = MAX_RECENT_CONTEXT_MESSAGES
+  let recentStart = available.length
+  for (let index = available.length - 1; index >= 0; index -= 1) {
+    if (available[index]?.role === 'user' || available[index]?.role === 'assistant') {
+      remainingChatMessages -= 1
+    }
+    recentStart = index
+    if (remainingChatMessages <= 0) break
   }
-  return history.concat(compacted.messages.filter(m => m.role === 'user' || m.role === 'assistant'))
+  const older = remainingChatMessages <= 0 ? available.slice(0, recentStart) : []
+  const recent = remainingChatMessages <= 0 ? available.slice(recentStart) : available
+  const projectedSummary = older.length ? buildSessionDigest(older, 8000) : ''
+  const summaryText = [compacted.summary, projectedSummary].filter(Boolean).join('\n\n')
+  const history = []
+  if (summaryText) {
+    history.push({ id: `summary_${compacted.id}_user`, role: 'user', text: `[会话历史摘要]\n${summaryText}` })
+    history.push({ id: `summary_${compacted.id}_assistant`, role: 'assistant', text: '已了解以上会话背景，我会继续基于当前 Session 作答。' })
+  }
+  return history.concat(projectConversationHistory(recent))
 }
 
 function sessionDisplayTitle(session) {
@@ -391,8 +446,8 @@ function normalizeUi(rawUi, sessions) {
 
 function migrateStore(raw) {
   const sessions = Array.isArray(raw?.sessions)
-    ? raw.sessions.map((s, i) => normalizeSession(s, i + 1))
-    : (Array.isArray(raw) ? raw.map((s, i) => normalizeSession(s, i + 1)) : [])
+    ? raw.sessions.map((s, i) => compactSession(s, i + 1).session)
+    : (Array.isArray(raw) ? raw.map((s, i) => compactSession(s, i + 1).session) : [])
   const ui = normalizeUi(raw?.ui, sessions)
   return { sessions, ui }
 }
@@ -407,7 +462,7 @@ function forkSession(source, agentId) {
 }
 
 module.exports = {
-  AGENTS, MAX_MESSAGES, MAX_CONTEXT_CHARS, KEEP_MESSAGES_AFTER_COMPACT, DEFAULT_TITLE,
+  AGENTS, MAX_MESSAGES, MAX_CONTEXT_CHARS, KEEP_MESSAGES_AFTER_COMPACT, MAX_RECENT_CONTEXT_MESSAGES, DEFAULT_TITLE,
   MAX_OPEN_TABS, MAX_HISTORY, MAX_TRACE_EVENTS, MAX_KNOWLEDGE_REFS, normalizeKnowledgeRefs,
   normalizeTaskRef, createSession, normalizeMessage, normalizeTraceEvent, normalizeSession,
   compactSession, contextMessages, sessionDisplayTitle, buildSummaryText, buildResumeProjection,

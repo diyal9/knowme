@@ -50,6 +50,11 @@ function createMcpSession(opts = {}) {
     const k = String(key || '').trim()
     if (k && process.env[k] != null) env[k] = process.env[k]
   }
+  if (opts.env && typeof opts.env === 'object') {
+    for (const [key, value] of Object.entries(opts.env)) {
+      if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(key) && value != null) env[key] = String(value)
+    }
+  }
 
   let child = null
   let rl = null
@@ -240,14 +245,7 @@ function createMcpHostRegistry() {
 
     if (prev) await disconnect(id)
 
-    const session = createMcpSession({
-      command: mcpConfig.command,
-      args: mcpConfig.args,
-      cwd: mcpConfig.cwd,
-      envKeys: mcpConfig.envKeys,
-      spawnImpl: opts.spawnImpl,
-      timeoutMs: opts.timeoutMs,
-    })
+    const session = createMcpSessionForTransport(mcpConfig, opts)
     clients.set(id, { session, configKey: key })
     return session
   }
@@ -340,10 +338,198 @@ function createStreamableHttpSession(opts = {}) {
   }
 }
 
+/**
+ * Legacy MCP SSE transport: GET event stream announces a POST endpoint, while
+ * JSON-RPC responses arrive as `message` events on the stream.
+ */
+function createLegacySseSession(opts = {}) {
+  const url = String(opts.url || '').trim()
+  const fetchImpl = typeof opts.fetchImpl === 'function' ? opts.fetchImpl : global.fetch
+  const timeoutMs = Number.isFinite(opts.timeoutMs) ? opts.timeoutMs : DEFAULT_TIMEOUT_MS
+  const headers = { ...(opts.headers || {}) }
+  if (opts.accessToken) headers.Authorization = `Bearer ${opts.accessToken}`
+  const aborter = new AbortController()
+  const pending = new Map()
+  let nextId = 1
+  let endpoint = ''
+  let streamStarted = false
+  let initialized = false
+  let endpointResolve
+  let endpointReject
+  const endpointReady = new Promise((resolve, reject) => {
+    endpointResolve = resolve
+    endpointReject = reject
+  })
+
+  function failPending(error) {
+    for (const [, item] of pending) item.reject(error)
+    pending.clear()
+  }
+
+  function handleEvent(block) {
+    let event = 'message'
+    const data = []
+    for (const line of String(block || '').split(/\r?\n/)) {
+      if (line.startsWith('event:')) event = line.slice(6).trim()
+      else if (line.startsWith('data:')) data.push(line.slice(5).trimStart())
+    }
+    const payload = data.join('\n').trim()
+    if (!payload) return
+    if (event === 'endpoint') {
+      try {
+        endpoint = new URL(payload, url).toString()
+        endpointResolve(endpoint)
+      } catch (error) { endpointReject(error) }
+      return
+    }
+    let message
+    try { message = JSON.parse(payload) } catch { return }
+    if (message.id == null || !pending.has(message.id)) return
+    const item = pending.get(message.id)
+    pending.delete(message.id)
+    if (message.error) item.reject(new Error(message.error.message || 'MCP SSE error'))
+    else item.resolve(message.result)
+  }
+
+  async function consumeBody(body) {
+    let buffer = ''
+    const accept = (chunk) => {
+      buffer += Buffer.from(chunk).toString('utf8')
+      let marker = buffer.search(/\r?\n\r?\n/)
+      while (marker >= 0) {
+        const block = buffer.slice(0, marker)
+        const matched = buffer.slice(marker).match(/^\r?\n\r?\n/)[0]
+        buffer = buffer.slice(marker + matched.length)
+        handleEvent(block)
+        marker = buffer.search(/\r?\n\r?\n/)
+      }
+    }
+    if (body?.getReader) {
+      const reader = body.getReader()
+      while (true) {
+        const part = await reader.read()
+        if (part.done) break
+        accept(part.value)
+      }
+    } else if (body?.[Symbol.asyncIterator]) {
+      for await (const chunk of body) accept(chunk)
+    } else {
+      throw new Error('MCP SSE 响应不包含可读事件流')
+    }
+  }
+
+  async function startStream() {
+    if (streamStarted) return endpointReady
+    streamStarted = true
+    try {
+      const response = await fetchImpl(url, {
+        method: 'GET',
+        headers: { Accept: 'text/event-stream', ...headers },
+        signal: aborter.signal,
+      })
+      if (!response.ok) throw new Error(`MCP SSE 连接失败: HTTP ${response.status}`)
+      Promise.resolve(consumeBody(response.body)).catch((error) => {
+        endpointReject(error)
+        failPending(error)
+      })
+    } catch (error) {
+      endpointReject(error)
+      throw error
+    }
+    return Promise.race([
+      endpointReady,
+      new Promise((_, reject) => setTimeout(() => reject(new Error('MCP SSE endpoint 等待超时')), timeoutMs)),
+    ])
+  }
+
+  async function post(payload) {
+    const target = endpoint || await startStream()
+    const response = await fetchImpl(target, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...headers },
+      body: JSON.stringify(payload),
+      signal: aborter.signal,
+    })
+    if (!response.ok) throw new Error(`MCP SSE 消息发送失败: HTTP ${response.status}`)
+  }
+
+  async function rpc(method, params = {}) {
+    await startStream()
+    const id = nextId++
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        pending.delete(id)
+        reject(new Error(`MCP SSE 请求超时: ${method}`))
+      }, timeoutMs)
+      pending.set(id, {
+        resolve: (value) => { clearTimeout(timer); resolve(value) },
+        reject: (error) => { clearTimeout(timer); reject(error) },
+      })
+      post({ jsonrpc: '2.0', id, method, params }).catch((error) => {
+        clearTimeout(timer)
+        pending.delete(id)
+        reject(error)
+      })
+    })
+  }
+
+  async function ensureInitialized() {
+    if (initialized) return
+    await rpc('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: { name: 'knowme', version: '0.3.0' },
+    })
+    await post({ jsonrpc: '2.0', method: 'notifications/initialized' })
+    initialized = true
+  }
+
+  return {
+    transport: 'sse',
+    async listTools() {
+      try {
+        await ensureInitialized()
+        const result = await rpc('tools/list', {})
+        return { ok: true, tools: Array.isArray(result?.tools) ? result.tools : [] }
+      } catch (error) {
+        return { ok: false, code: 'mcp_error', message: String(error?.message || error).slice(0, 400), tools: [] }
+      }
+    },
+    async callTool(name, args = {}) {
+      try {
+        await ensureInitialized()
+        const result = await rpc('tools/call', { name: String(name || ''), arguments: args })
+        const content = Array.isArray(result?.content) ? result.content : []
+        const text = content.map((item) => item?.type === 'text' ? item.text : JSON.stringify(item)).join('\n').slice(0, 24000)
+        return { ok: !result?.isError, text: text || JSON.stringify(result || {}) }
+      } catch (error) {
+        return { ok: false, code: 'mcp_error', message: String(error?.message || error).slice(0, 400), text: '' }
+      }
+    },
+    async healthCheck() {
+      const listed = await this.listTools()
+      return { ok: listed.ok, transport: 'sse', url, toolCount: listed.tools?.length || 0, message: listed.message }
+    },
+    async close() {
+      aborter.abort()
+      failPending(new Error('MCP SSE 会话已关闭'))
+    },
+  }
+}
+
 function createMcpSessionForTransport(mcpConfig = {}, opts = {}) {
   const transport = String(mcpConfig.transport || 'stdio').trim().toLowerCase()
   if (transport === 'streamable-http' || transport === 'http') {
     return createStreamableHttpSession({
+      url: mcpConfig.url,
+      accessToken: opts.accessToken,
+      fetchImpl: opts.fetchImpl,
+      timeoutMs: opts.timeoutMs,
+      headers: opts.headers,
+    })
+  }
+  if (transport === 'sse') {
+    return createLegacySseSession({
       url: mcpConfig.url,
       accessToken: opts.accessToken,
       fetchImpl: opts.fetchImpl,
@@ -356,6 +542,7 @@ function createMcpSessionForTransport(mcpConfig = {}, opts = {}) {
     args: mcpConfig.args,
     cwd: mcpConfig.cwd,
     envKeys: mcpConfig.envKeys,
+    env: { ...(mcpConfig.env || {}), ...(opts.env || {}) },
     spawnImpl: opts.spawnImpl,
     timeoutMs: opts.timeoutMs,
   })
@@ -380,6 +567,7 @@ module.exports = {
   mcpConfigKey,
   createMcpSession,
   createStreamableHttpSession,
+  createLegacySseSession,
   createMcpSessionForTransport,
   projectMcpTools,
   createMcpHostRegistry,

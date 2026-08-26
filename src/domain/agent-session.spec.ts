@@ -112,9 +112,11 @@ describe('agent session helpers', () => {
       title: '协作',
       updatedAt: '2026-08-18T02:00:00.000Z',
     })?.updatedAt).toBe('2026-08-18T02:00:00.000Z')
-    expect(chatMessagesFromSession({
+    const messages = chatMessagesFromSession({
       session: { messages: [{ id: 'u1', role: 'user', text: 'hi' }] },
-    }).map((m) => m.text)).toEqual(['hi'])
+    })
+    expect(messages.map((m) => m.text)).toEqual(['hi'])
+    expect(messages[0].id).toBe('u1')
   })
 
   it('does not replay persisted tool payloads as assistant messages', () => {

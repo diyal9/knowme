@@ -185,13 +185,14 @@ function registerWorkbenchLoadIpc(ipcMain, deps) {
 
   ipcMain.handle('workbench-pick-files', async (e, payload = {}) => {
     try {
+      const directory = payload.directory === true
       const multi = payload.multi !== false
       const { canceled, filePaths } = await showOpenDialogFor(e.sender, {
         title: String(payload.title || '选择文件'),
-        properties: multi ? ['openFile', 'multiSelections'] : ['openFile'],
-        filters: Array.isArray(payload.filters) && payload.filters.length
+        properties: directory ? ['openDirectory'] : (multi ? ['openFile', 'multiSelections'] : ['openFile']),
+        filters: !directory && Array.isArray(payload.filters) && payload.filters.length
           ? payload.filters
-          : [
+          : directory ? undefined : [
             { name: '补充材料', extensions: ['md', 'markdown', 'txt', 'doc', 'docx', 'pdf', 'png', 'jpg', 'jpeg', 'webp', 'fig', 'xlsx', 'xls', 'csv', 'json'] },
             { name: '全部文件', extensions: ['*'] },
           ],

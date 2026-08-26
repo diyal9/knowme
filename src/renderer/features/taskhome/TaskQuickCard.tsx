@@ -40,7 +40,7 @@ export function TaskQuickCard({
     return (
       <button type="button" className={`wb-task-quick-card wb-studio-expert-pick-card${selected ? ' is-selected' : ''}`} style={{ '--index': index } as CSSProperties} aria-label={`查看专家 ${title}`} onClick={onOpen}>
         {body}
-        <div className="wb-task-quick-foot"><span className="wb-task-quick-badge installed">选择专家</span><span className="wb-task-quick-version">单专家任务</span></div>
+      <div className="wb-task-quick-foot"><span className="wb-task-quick-badge installed">查看专家</span><span className="wb-task-quick-version">进入详情后发起任务</span></div>
       </button>
     )
   }
@@ -61,14 +61,16 @@ export function TaskQuickCard({
     >
       {body}
       <div className="wb-task-quick-foot">
-        <button
-          type="button"
-          className="wb-task-quick-start"
-          aria-label={`向${title}发起快捷任务`}
-          onClick={(event) => { event.stopPropagation(); onStart?.() }}
-        >
-          快捷任务
-        </button>
+        {onStart ? (
+          <button
+            type="button"
+            className="wb-task-quick-start"
+            aria-label={`向${title}发起快捷任务`}
+            onClick={(event) => { event.stopPropagation(); onStart() }}
+          >
+            快捷任务
+          </button>
+        ) : <span className="wb-task-quick-start">查看详情</span>}
       </div>
     </article>
   )

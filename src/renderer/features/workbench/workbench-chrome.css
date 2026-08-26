@@ -4,8 +4,8 @@
  */
 
 .wb-head {
-  min-height: 52px;
-  height: 52px;
+  min-height: var(--surface-tab-height, 46px);
+  height: var(--surface-tab-height, 46px);
   flex-shrink: 0;
   padding: 0 14px 0 18px;
   display: flex;
@@ -15,6 +15,7 @@
   border-bottom: 1px solid color-mix(in srgb, var(--wb-line, #deddd7) 52%, transparent);
 }
 .wb-head[hidden] { display: none !important; }
+.workbench > .wb-head { border-bottom-color: color-mix(in srgb, var(--wb-line, #deddd7) 52%, transparent); }
 
 .workbench > .wb-body {
   flex:1 1 auto;
@@ -42,6 +43,22 @@
   color: #27786a;
   flex-shrink: 0;
 }
+.wb-automation-head-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  margin-right: 4px;
+  padding-right: 16px;
+  border-right: 1px solid color-mix(in srgb, var(--wb-line, #deddd7) 72%, transparent);
+  color: #292a28;
+  font: 600 13px/1 var(--ui);
+}
+.wb-automation-head-title .ico {
+  width: 16px;
+  height: 16px;
+  color: var(--wb-accent, #27786a);
+}
 .wb-head-sub {
   font: 12px var(--ui);
   color: #787878;
@@ -51,7 +68,7 @@
 }
 
 .wb-mode-tabs {
-  height: 52px;
+  height: var(--surface-tab-height, 46px);
   display: inline-flex;
   align-items: stretch;
   gap: 12px;
@@ -61,7 +78,7 @@
 
 .wb-mode-tab {
   position: relative;
-  min-height: 52px;
+  min-height: var(--surface-tab-height, 46px);
   padding: 0 8px;
   border: 0;
   border-radius: 0;
@@ -106,6 +123,7 @@
 .wb-head-detail-actions:empty { display:none; }
 .wb-detail-header-back { margin:0; }
 .workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-shelf-search { display:none; }
+.workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-mode-tabs { display:none; }
 
 /* 搜索框属于 AppShell 常驻顶栏，必须随 chrome 静态加载。 */
 .wb-shelf-search {

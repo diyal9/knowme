@@ -63,10 +63,15 @@ export function enrichChatMessage(raw: unknown, fallback: Partial<ChatMessage>):
     : undefined
   const startedAt = Number(rec.startedAt || fallback.startedAt)
   const elapsedMs = Number(rec.elapsedMs || fallback.elapsedMs)
+  const createdAtValue = String(rec.createdAt || fallback.createdAt || '').trim()
+  const createdAt = createdAtValue && !Number.isNaN(new Date(createdAtValue).getTime())
+    ? new Date(createdAtValue).toISOString()
+    : undefined
   return {
     id: String(rec.id || fallback.id || ''),
     role,
     text: String(rec.text || rec.content || fallback.text || ''),
+    createdAt,
     streaming: rec.streaming === true || fallback.streaming,
     thinking: rec.thinking === true || fallback.thinking,
     activity: String(rec.activity || fallback.activity || '').trim() || undefined,

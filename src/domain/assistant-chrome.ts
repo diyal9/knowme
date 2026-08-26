@@ -5,6 +5,7 @@ export type AssistantModelOption = {
   label: string
   contextWindow?: number
   supportsTools?: boolean
+  supportsVision?: boolean
 }
 
 export type AssistantModelGroup = {
@@ -28,6 +29,7 @@ function parseModelOption(raw: unknown): AssistantModelOption | null {
     label: String(rec.label || rec.id || ''),
     contextWindow: Number(rec.contextWindow) || undefined,
     supportsTools: rec.supportsTools === false ? false : true,
+    supportsVision: rec.supportsVision === true,
   }
 }
 

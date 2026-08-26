@@ -11,6 +11,7 @@
 
 const workflowPackage = require('./workflow-package')
 const workbenchModel = require('./workbench-model')
+const { enrichExternalWorkflowPackage } = require('./external-workflow-recipes')
 
 const MAX_REPO_WORKFLOWS = 32
 
@@ -85,7 +86,7 @@ function graphFromDefinition(definition, entry = {}) {
 }
 
 function candidateFrom(raw, origin, meta = {}) {
-  const normalized = workflowPackage.normalizeWorkflowPackage(raw)
+  const normalized = workflowPackage.normalizeWorkflowPackage(enrichExternalWorkflowPackage(raw))
   if (!normalized.ok) return null
   return {
     origin,

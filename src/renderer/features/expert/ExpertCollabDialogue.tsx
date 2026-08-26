@@ -1,9 +1,8 @@
 import { expertCardTitle, expertQuickSub } from '../../../domain/expert-present'
-import { resolveKernelRole } from '../../../domain/dialogue-lanes'
-import type { CapabilityItem } from '../../../shared/api'
+import type { CapabilityItem, ChatMessage } from '../../../shared/api'
 import { TaskDialogueLaunch } from '../task-dialogue/TaskDialogueLaunch'
-import { TaskDialogueMessages } from '../task-dialogue/TaskDialogueMessages'
 import { TaskDialogueShell } from '../task-dialogue/TaskDialogueShell'
+import { ContentView } from '../content-view/ContentView'
 import { ExpertAvatarMark } from './ExpertAvatarMark'
 
 const QUICK_PROMPTS = [
@@ -12,36 +11,78 @@ const QUICK_PROMPTS = [
   { title: '带上材料', subtitle: '需要什么 · 如何处理', prompt: '我有一批材料尚未整理。请告诉我需要哪些文件/数据，以及拿到后会怎么处理。' },
 ]
 
+function ExpertDialogueMessages({
+  expert,
+  messages,
+  generating,
+}: {
+  expert: CapabilityItem
+  messages: ChatMessage[]
+  generating: boolean
+}) {
+  const name = expertCardTitle(expert)
+  return (
+    <ol className="wb-expert-dialogue-list" aria-label="协作对话">
+      {messages.map((message, index) => {
+        const isUser = message.role === 'user'
+        const isPending = !isUser && message.streaming && !String(message.text || '').trim()
+        return (
+          <li
+            key={message.id}
+            className={`wb-expert-dialogue-turn ${isUser ? 'is-user' : 'is-expert'}${message.role === 'error' ? ' is-error' : ''}`}
+            data-testid={isUser ? 'expert-user-message' : 'expert-reply-message'}
+          >
+            {isUser ? null : (
+              <ExpertAvatarMark agent={expert} className="wb-expert-dialogue-avatar" size={34} />
+            )}
+            <article>
+              <header><strong>{isUser ? '我' : name}</strong></header>
+              {isUser ? (
+                <p>{message.text}</p>
+              ) : isPending ? (
+                <p className="wb-expert-dialogue-pending">正在回复<span aria-hidden="true">…</span></p>
+              ) : (
+                <ContentView source={message.text} streaming={message.streaming === true} />
+              )}
+              {message.attachmentName ? <small>附件 · {message.attachmentName}</small> : null}
+            </article>
+          </li>
+        )
+      })}
+      {generating && !messages.some((message) => message.streaming) ? (
+        <li className="wb-expert-dialogue-turn is-expert" data-testid="expert-reply-pending">
+          <ExpertAvatarMark agent={expert} className="wb-expert-dialogue-avatar" size={34} />
+          <article><header><strong>{name}</strong></header><p className="wb-expert-dialogue-pending">正在回复<span aria-hidden="true">…</span></p></article>
+        </li>
+      ) : null}
+    </ol>
+  )
+}
+
 export function ExpertCollabDialogue({
   expert,
   messages,
   empty,
   generating = false,
+  composer = true,
   onPrompt,
 }: {
   expert: CapabilityItem
   messages: import('../../../shared/api').ChatMessage[]
   empty: boolean
   generating?: boolean
+  composer?: boolean
   onPrompt: (prompt: string) => void
 }) {
   const name = expertCardTitle(expert)
   const role = expert.category || '专家'
-  const modeId = resolveKernelRole({
-    agentId: expert.id,
-    expertId: expert.id,
-    category: expert.category,
-    kind: expert.kind,
-    name: expert.name,
-    description: expert.description,
-  })
-
   return (
     <TaskDialogueShell
       variant="expert"
       launch={empty}
       label="专家协作对话"
       logTestId="expert-collab-log"
+      showComposer={composer}
     >
       {empty ? (
         <TaskDialogueLaunch
@@ -58,12 +99,10 @@ export function ExpertCollabDialogue({
           onPrompt={onPrompt}
         />
       ) : (
-        <TaskDialogueMessages
+        <ExpertDialogueMessages
+          expert={expert}
           messages={messages}
           generating={generating}
-          modeId={modeId}
-          followUps
-          onPrompt={onPrompt}
         />
       )}
     </TaskDialogueShell>

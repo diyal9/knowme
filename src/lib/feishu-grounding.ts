@@ -1,7 +1,19 @@
 'use strict'
 
 function hasFeishuMention(prompt = '') {
-  return /(飞书|feishu|lark|会议纪要|会议记录|会后纪要|智能纪要|妙记|minutes)/i.test(String(prompt || ''))
+  // The built-in “会议总结” shortcut intentionally omits the connector name;
+  // treat it as the Feishu meeting workflow so it still starts with candidate
+  // discovery instead of falling through to an ungrounded generic answer.
+  return /(飞书|feishu|lark|会议总结|会议纪要|会议记录|会后纪要|智能纪要|妙记|minutes)/i.test(String(prompt || ''))
+}
+
+// A concrete Feishu Docx/Wiki URL is already the user's locator.  It must not
+// be downgraded into a broad meeting search just because the surrounding text
+// says “会议记录” or “总结”.  The URL is the source of truth and should be
+// read directly through feishu.read_doc.
+function hasExplicitFeishuDocLocator(prompt = '') {
+  return /https?:\/\/[^\s)]+\/(?:docx|wiki)\//i.test(String(prompt || ''))
+    || /(?:^|[\s（(])(?:doc_token|document_token)\s*[=:：]/i.test(String(prompt || ''))
 }
 
 function isRelatedChatsIntent(prompt = '') {
@@ -29,6 +41,7 @@ function isDocKbSuggestIntent(prompt = '') {
 
 function detectFeishuIntent(prompt = '') {
   const text = String(prompt || '')
+  const directDocRead = hasExplicitFeishuDocLocator(text)
   const asksRelatedChats = isRelatedChatsIntent(text)
   const asksTodayPriority = isTodayPriorityIntent(text)
   const asksDocKbSuggest = isDocKbSuggestIntent(text)
@@ -39,19 +52,22 @@ function detectFeishuIntent(prompt = '') {
       needsSearch: false,
       needsContentRead: false,
       asksMinutes: false,
+      directDocRead: false,
       asksRelatedChats: false,
       asksTodayPriority: false,
       asksDocKbSuggest: false,
     }
   }
-  const asksMinutes = /(妙记|minutes|会议纪要|会议记录|会后纪要|智能纪要|智能纪要助手)/i.test(text)
+  const asksMinutes = !directDocRead && /(妙记|minutes|会议总结|会议纪要|会议记录|会后纪要|智能纪要|智能纪要助手)/i.test(text)
     && !asksRelatedChats
     && !asksTodayPriority
     && !asksDocKbSuggest
   let needsContentRead = /(读取|read|详读|原文|全文|内容|摘要|总结|提炼|待办|行动项|结论|参会|发言|时间点)/i.test(text) || asksMinutes
   // IM digest / today-priority / doc-kb suggest are not Feishu document body.
   if (asksRelatedChats || asksTodayPriority || asksDocKbSuggest) needsContentRead = false
-  const needsSearch = (asksRelatedChats || asksTodayPriority || asksDocKbSuggest)
+  const needsSearch = directDocRead
+    ? false
+    : (asksRelatedChats || asksTodayPriority || asksDocKbSuggest)
     ? false
     : (/(搜索|查询|查找|检索|找)/i.test(text) || needsContentRead)
   return {
@@ -59,6 +75,7 @@ function detectFeishuIntent(prompt = '') {
     needsSearch,
     needsContentRead,
     asksMinutes,
+    directDocRead,
     asksRelatedChats,
     asksTodayPriority,
     asksDocKbSuggest,
@@ -242,6 +259,27 @@ function isFeishuToolName(name = '') {
   return /^(feishu\.|lark[._-]|lark$)/i.test(String(name || '').trim())
 }
 
+function hasReadableContentPayload(text = '') {
+  const src = String(text || '').trim()
+  if (!src || isToolFailureText(src)) return false
+  const parsed = safeJsonParse(src)
+  if (!parsed || typeof parsed !== 'object') return true
+  const doc = parsed.doc && typeof parsed.doc === 'object' ? parsed.doc : parsed.data?.doc
+  const candidates = [
+    parsed.content, parsed.body, parsed.summary, parsed.plain_text,
+    parsed.transcript, parsed.minutes, parsed.text,
+    parsed.data?.content, parsed.data?.body, parsed.data?.summary,
+    parsed.data?.plain_text, parsed.data?.transcript, parsed.data?.minutes,
+    doc?.content, doc?.body, doc?.summary, doc?.plain_text,
+    doc?.transcript, doc?.minutes,
+  ]
+  return candidates.some(value => {
+    if (value == null) return false
+    const body = typeof value === 'string' ? value.trim() : JSON.stringify(value)
+    return body.length > 0 && !isToolFailureText(body)
+  })
+}
+
 const MEETING_TITLE_SIGNAL = /(会议|纪要|妙记|minutes|meeting|会后纪要|周会|例会|评审会)/i
 const MEETING_CONTENT_SIGNAL = /(参会|议题|结论|行动项|待办|主持|发言|会议时间|会议地点|会议纪要|会议记录|会后纪要|minutes|meeting)/i
 const MINUTES_OWNER_SIGNAL = /(智能纪要助手|minutes\s*assistant)/i
@@ -253,7 +291,11 @@ function extractMeetingLikeReadEvidence(item = {}) {
   const parsed = safeJsonParse(text)
 
   const titleCandidates = []
-  const contentCandidates = [text]
+  // For structured connector responses, do not scan the entire JSON blob as
+  // meeting content.  Titles, tokens and metadata commonly contain words
+  // like “会议/纪要” even when the actual transcript/body was never returned.
+  // Only body-bearing fields may establish meeting evidence.
+  const contentCandidates = []
   if (parsed && typeof parsed === 'object') {
     const doc = parsed.doc && typeof parsed.doc === 'object' ? parsed.doc : parsed.data?.doc
     if (doc && typeof doc === 'object') {
@@ -263,17 +305,36 @@ function extractMeetingLikeReadEvidence(item = {}) {
         doc.body,
         doc.summary,
         doc.plain_text,
+        doc.transcript,
+        doc.minutes,
       )
     }
     titleCandidates.push(parsed.title, parsed.name)
-    contentCandidates.push(parsed.content, parsed.body, parsed.summary, parsed.text)
+    contentCandidates.push(
+      parsed.content,
+      parsed.body,
+      parsed.summary,
+      parsed.plain_text,
+      parsed.transcript,
+      parsed.minutes,
+      parsed.data?.content,
+      parsed.data?.body,
+      parsed.data?.summary,
+      parsed.data?.plain_text,
+      parsed.data?.transcript,
+      parsed.data?.minutes,
+    )
+  } else {
+    // Plain-text tool results have no separate metadata channel, so the whole
+    // response is the only available body candidate.
+    contentCandidates.push(text)
   }
 
   const titleText = titleCandidates.filter(Boolean).map(v => String(v)).join('\n')
   const contentText = contentCandidates.filter(Boolean).map(v => String(v)).join('\n')
   const titleMatched = MEETING_TITLE_SIGNAL.test(titleText)
   const contentMatched = MEETING_CONTENT_SIGNAL.test(contentText)
-  return { matched: titleMatched || contentMatched, titleMatched, contentMatched }
+  return { matched: contentMatched, titleMatched, contentMatched }
 }
 
 // lark-cli surfaces the authoritative missing scopes both as a human hint
@@ -333,8 +394,9 @@ function analyzeFeishuToolEvidence(entries = []) {
   const hasSearchResults = Number.isFinite(bestSearchHitCount) && bestSearchHitCount > 0
   const hasContentRead = readSuccess.some(item => {
     const text = String(item.text || '').trim()
-    if (!text) return true
-    return !isToolFailureText(text)
+    // A successful tool envelope without a payload is not evidence. Treating
+    // it as readable content lets the model invent details from a title/token.
+    return hasReadableContentPayload(text)
   })
   const meetingReadSignals = readSuccess.map(extractMeetingLikeReadEvidence)
   const meetingLikeReadCount = meetingReadSignals.filter(s => s.matched).length
@@ -445,6 +507,7 @@ function requiredFeishuToolsForIntent(intent = {}) {
   if (intent.asksRelatedChats) return ['feishu.related_chats']
   if (intent.asksTodayPriority) return ['feishu.today_priority']
   if (intent.asksDocKbSuggest) return ['feishu.doc_kb_suggest']
+  if (intent.directDocRead) return ['feishu.read_doc']
   if (intent.asksMinutes) return ['feishu.meeting_candidates', 'feishu.meeting_read']
   const required = []
   if (intent.needsSearch) required.push('feishu.search_docs')
@@ -651,6 +714,8 @@ module.exports = {
   hasFeishuMention,
   isTodayPriorityIntent,
   detectFeishuIntent,
+  hasExplicitFeishuDocLocator,
+  requiredFeishuToolsForIntent,
   analyzeFeishuToolEvidence,
   buildFeishuGroundingHint,
   extractScopesFromText,

@@ -203,6 +203,20 @@ function normalizeWorkflowPackage(raw = {}) {
     actionRefs: (Array.isArray(source.actionRefs) ? source.actionRefs : [])
       .map(item => normalizeRef(item, 'action'))
       .filter(Boolean),
+    connectorDependencies: (Array.isArray(source.connectorDependencies)
+      ? source.connectorDependencies
+      : (Array.isArray(source.dependencies) ? source.dependencies.filter(item => item?.kind === 'connector') : []))
+      .slice(0, MAX_ITEMS)
+      .map(item => ({
+        id: cleanText(item?.id || item, 80),
+        kind: 'connector',
+        required: item?.required !== false,
+        requiredWhen: cleanText(item?.requiredWhen, 40),
+        reason: cleanText(item?.reason, MAX_TEXT),
+        tools: uniqueIds(item?.tools, MAX_ITEMS),
+        route: cleanText(item?.route || 'capability-hub', 80),
+      }))
+      .filter(item => item.id),
     graph: normalizeGraph(source.graph || source.composition || source),
     executionBackends: backends.length ? backends : ['local-team'],
     governance: clone(source.governance || {}),

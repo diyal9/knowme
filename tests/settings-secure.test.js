@@ -213,4 +213,31 @@ describe('settings-secure', () => {
     assert.equal(full.gitlabToken, 'gl-secret');
     restoreLoad();
   });
+
+  it('encrypts independent Embedding credentials and normalizes semantic mode', () => {
+    const { save, load, publicSettings } = loadSettingsSecure(true);
+    const result = save(settingsFile, {
+      apiEndpoint: 'https://chat.example.com/v1',
+      apiKey: 'main-key',
+      model: 'gpt-4o-mini',
+      embeddingEndpoint: 'https://vector.example.com/v1',
+      embeddingApiKey: 'vector-key',
+      embeddingModel: 'embed-test',
+      contextSemanticMode: 'ACTIVE',
+      embeddingAllowSensitive: true,
+    });
+    assert.equal(result.ok, true);
+    const raw = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
+    assert.ok(raw.embeddingApiKeyEnc);
+    assert.equal(raw.embeddingApiKey, undefined);
+    const loaded = load(settingsFile);
+    assert.equal(loaded.embeddingApiKey, 'vector-key');
+    assert.equal(loaded.contextSemanticMode, 'active');
+    assert.equal(loaded.embeddingAllowSensitive, true);
+    const redacted = publicSettings(loaded);
+    assert.equal(redacted.embeddingApiKey, '');
+    assert.equal(redacted.embeddingApiKeyConfigured, true);
+    assert.equal(publicSettings(loaded, { includeSecrets: true }).embeddingApiKey, 'vector-key');
+    restoreLoad();
+  });
 });

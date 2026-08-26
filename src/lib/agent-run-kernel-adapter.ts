@@ -9,6 +9,7 @@ const llmUsage = require('./llm-usage')
 const agentRun = require('./agent-run')
 const agentSessions = require('./agent-sessions')
 const groundingRuntime = require('./agent-grounding-runtime')
+const { reconcileConversationLog } = require('./agent-conversation-log')
 const { bindRunRuntimeContext, unbindRunRuntimeContext } = require('./tool-contract-registry')
 
 const DEFAULT_CANCEL_BUDGET_MS = 3000
@@ -66,6 +67,42 @@ function buildProductionRunPorts(state) {
   const remainingMs = () => {
     if (!Number.isFinite(effectiveWallTimeoutMs)) return null
     return Math.max(0, effectiveWallTimeoutMs - (Date.now() - startedAt))
+  }
+
+  const mergeWithLatestSession = (incomingSession, options = {}) => {
+    const latestSessions = loadAgentSessions()
+    const latest = latestSessions.find(item => item.id === incomingSession.id)
+    const replaceKnownMessageIds = options.replaceKnownMessageIds instanceof Set
+      ? options.replaceKnownMessageIds
+      : null
+    const mergedMessages = latest
+      ? (replaceKnownMessageIds
+          ? reconcileConversationLog(
+              incomingSession.messages,
+              (latest.messages || []).filter(item => !replaceKnownMessageIds.has(String(item?.id || ''))),
+              { sessionId: incomingSession.id },
+            )
+          : reconcileConversationLog(latest.messages, incomingSession.messages, {
+              sessionId: incomingSession.id,
+            }))
+      : incomingSession.messages
+    const merged = latest
+      ? {
+          ...latest,
+          ...incomingSession,
+          messages: mergedMessages,
+        }
+      : incomingSession
+    return { latestSessions, merged }
+  }
+
+  const saveMergedSession = (incomingSession, options = {}) => {
+    const { latestSessions, merged } = mergeWithLatestSession(incomingSession, options)
+    const next = latestSessions.some(item => item.id === merged.id)
+      ? latestSessions.map(item => item.id === merged.id ? merged : item)
+      : [...latestSessions, merged]
+    saveAgentSessions(next)
+    return merged
   }
 
   const runtimeRef = {
@@ -161,7 +198,7 @@ function buildProductionRunPorts(state) {
       }),
     },
     llm: {
-      complete: async ({ messages, tools, toolsEnabled, policy: reqPolicy, round, onSnapshot, finalize }) => {
+      complete: async ({ messages, tools, toolsEnabled, forceToolCall, policy: reqPolicy, round, onSnapshot, finalize }) => {
         const msgs = messages || apiMessages
         const body = {
           model: routedModel.model || 'gpt-4o-mini',
@@ -171,7 +208,7 @@ function buildProductionRunPorts(state) {
             : reqPolicy?.outputTokens || policy.outputTokens,
           temperature: reqPolicy?.temperature || policy.temperature,
           stream: true,
-          ...(toolsEnabled && tools?.length ? { tools, tool_choice: 'auto' } : {}),
+          ...(toolsEnabled && tools?.length ? { tools, tool_choice: forceToolCall ? 'required' : 'auto' } : {}),
         }
         const wrappedSnapshot = (snapshot) => {
           onSnapshot?.(snapshot)
@@ -233,7 +270,7 @@ function buildProductionRunPorts(state) {
         if (incomingSession) session = incomingSession
         try {
           await persistLedgersCheckpoint({ phase: 'session', emit: emitFn, ...rest })
-          saveAgentSessions(loadAgentSessions().map(item => item.id === session.id ? session : item))
+          session = saveMergedSession(session)
           const plan = session?.run?.plan
           if (plan?.items?.length) {
             emitFn?.({
@@ -264,9 +301,12 @@ function buildProductionRunPorts(state) {
           session = state.writingArtifactHook(session, fullText) || session
         }
         session.updatedAt = new Date().toISOString()
+        session = mergeWithLatestSession(session).merged
+        const preCompactMessageIds = new Set(
+          (session.messages || []).map(item => String(item?.id || '')).filter(Boolean),
+        )
         const compacted = agentSessions.compactSession(session).session
-        saveAgentSessions(loadAgentSessions().map(item => item.id === session.id ? compacted : item))
-        session = compacted
+        session = saveMergedSession(compacted, { replaceKnownMessageIds: preCompactMessageIds })
         try {
           await persistLedgersCheckpoint({ phase: 'persist', metrics, answerHash, protocolVersion })
           const plan = compacted?.run?.plan

@@ -21,6 +21,22 @@ src/ipc                   主进程 IPC 处理（TypeScript）
 src/lib                   无 DOM 应用服务（TypeScript；Electron/测试经 register-ts.js 加载）
 ```
 
+## Context Engine
+
+主助手会话进入模型的系统上下文统一经过 `src/lib/context-engine/`。Renderer 只提交原始用户输入、场景标识和结构化任务事实；Main 负责解析可信 persona、执行权限与候选 ContextBlock。标题生成等无会话 one-shot 任务保持独立、最小化的固定契约。
+
+装配顺序为稳定核心、当前场景、当前 persona、必需事实、相关可选块、对话历史、原始用户输入。Block 必须声明来源、权限层级、信任级别、关键性、预算和缓存策略；检索、记忆与 Renderer 投影始终按不可信数据处理，并以 JSON 数据封装进入 user role，禁止进入 system role。专家规划和成果讨论使用独立 persona，但执行策略固定为 `no-tools`，运行时必须投影空工具面。
+
+内置提示词按 locale 存放在 `src/lib/context-engine/prompts/`，通过稳定 block ID 读取；未提供对应语言时回退 `zh-CN`。旧提示词 API 只作为兼容 facade，不得成为新增规则的事实源。
+
+每轮装配输出不含原文的 ContextManifest，用于观测身份、阶段、权限、预算、入选/省略块和冲突。安全、身份和权限不得由向量相似度决定；向量只可作为 optional block 的补充排序信号，失败时必须回退确定性与词面选择。
+
+远程 Embedding 由 `src/lib/embedding-runtime.ts` 提供 OpenAI-compatible 插件实现，Context Engine 在 `semantic.ts` 中负责按条目/字节双预算缓存、取消隔离 single-flight、短超时、熔断和 shadow/active 策略。同步 assembler 不访问网络，只接收预计算的 `vectorScores` 与匿名 telemetry。默认 `contextSemanticMode=off`，候选不超过 topK 时不得请求；敏感 block 未获用户授权时不得发送正文。
+
+知识检索 `semanticRerank` 与 Context Engine `contextSemanticMode` 是两个独立能力开关。Embedding Endpoint/API Key 留空时继承主模型设置；填写不同 Host 时必须使用独立密钥，禁止把主模型密钥静默转发到第三方地址。独立密钥必须经 `safeStorage` 加密，日志和 ContextManifest 不得出现 endpoint、模型名、query、正文或密钥。
+
+core、scene、tool contract 属于不可截断关键控制面。assembler 与最终对话预算器执行双层预算检查，无法同时完整保留关键规则和当前用户输入时必须 fail-closed。`context-engine/metrics.ts` 聚合延迟、降级、缓存、token 节省和安全不变量，黄金评测固定身份、权限、注入与选择行为。
+
 ## 单一事实源
 
 一条产品规则只允许一个模块导出。禁止 `lib` 一份 + `domain` 再包 `globalThis` + fixtures 再留一份。

@@ -185,6 +185,78 @@ assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管�
     assert.ok(buildTranscriptText(session).includes('Tool (search_knowledge)'))
   })
 
+  it('migrates stable message IDs without collapsing repeated text', () => {
+    const raw = {
+      id: 's_identity',
+      agentId: 'general',
+      messages: [
+        { role: 'user', text: 'hi' },
+        { role: 'assistant', text: '你好' },
+        { role: 'user', text: 'hi' },
+      ],
+    }
+    const first = normalizeSession(raw)
+    const second = normalizeSession(raw)
+    assert.equal(first.messages.length, 3)
+    assert.notEqual(first.messages[0].id, first.messages[2].id)
+    assert.deepEqual(first.messages.map(item => item.id), second.messages.map(item => item.id))
+
+    const roundTrip = normalizeSession(first)
+    assert.deepEqual(roundTrip.messages.map(item => item.id), first.messages.map(item => item.id))
+  })
+
+  it('projects ordered context while excluding only the active retry IDs', () => {
+    const session = normalizeSession({
+      id: 's_context_identity',
+      agentId: 'general',
+      messages: [
+        { id: 'u1', role: 'user', text: 'hi' },
+        { id: 'a1', role: 'assistant', text: '第一次回答' },
+        { id: 'u2', role: 'user', text: 'hi' },
+      ],
+    })
+    const projected = contextMessages(session, { excludeMessageIds: ['u2'] })
+    assert.deepEqual(projected.map(item => item.id), ['u1', 'a1'])
+  })
+
+  it('summarizes older short messages before the model projection drops them', () => {
+    const session = normalizeSession({
+      id: 's_projection_budget',
+      agentId: 'general',
+      messages: Array.from({ length: 30 }, (_, index) => ({
+        id: `m${index}`,
+        role: index % 2 === 0 ? 'user' : 'assistant',
+        text: `短消息-${index}`,
+      })),
+    })
+    const projected = contextMessages(session)
+    assert.equal(projected[0].id, 'summary_s_projection_budget_user')
+    assert.match(projected[0].text, /短消息-0/)
+    assert.deepEqual(projected.slice(-2).map(item => item.id), ['m28', 'm29'])
+    assert.equal(projected.filter(item => /^m\d+$/.test(item.id)).length, 24)
+  })
+
+  it('compacts more than the storage cap before limiting messages', () => {
+    const raw = {
+      id: 's_over_storage_cap',
+      agentId: 'general',
+      messages: Array.from({ length: 100 }, (_, index) => ({
+        id: `cap-${index}`,
+        role: index % 2 === 0 ? 'user' : 'assistant',
+        text: `第 ${index} 条短消息`,
+      })),
+    }
+    const compacted = compactSession(raw)
+    assert.equal(compacted.compacted, true)
+    assert.equal(compacted.session.messages.length, 12)
+    assert.match(compacted.session.summary, /第 0 条短消息/)
+    assert.equal(compacted.session.messages.at(-1).id, 'cap-99')
+
+    const migrated = migrateStore({ sessions: [raw], ui: {} }).sessions[0]
+    assert.match(migrated.summary, /第 0 条短消息/)
+    assert.equal(migrated.messages.at(-1).id, 'cap-99')
+  })
+
   it('preserves v2 assistant metadata, choices and review state', () => {
     const session = normalizeSession({
       id: 's_v2',
@@ -261,5 +333,24 @@ assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管�
     assert.deepEqual(ui.openSessionIds, ['s_assistant'])
     assert.equal(ui.activeSessionId, 's_assistant')
     assert.equal(sessions[0].id, 'wb-expert-writer')
+  })
+
+  it('removes stale expert execution state from an existing discussion session', () => {
+    const { ensureSessionInStore } = require('../src/lib/agent-session-ensure')
+    const existing = createSession('writing', 1, { expertId: 'office-partner' })
+    existing.id = 'wb-expert-task-1-discussion-v2'
+    existing.referenceState = { taskFrame: { requiredTools: ['feishu.read_doc'] } }
+    const result = ensureSessionInStore([existing], {}, existing.id, {
+      role: 'general',
+      surface: 'workbench',
+      conversationMode: 'expert-discussion',
+      taskRef: { id: 'task-1', kind: 'expert-discussion' },
+    })
+    assert.equal(result.session.agentId, 'general')
+    assert.equal(result.session.expertId, '')
+    assert.equal(result.session.personaExpertId, 'office-partner')
+    assert.equal(result.session.executionPolicy, 'no-tools')
+    assert.equal(result.session.referenceState, undefined)
+    assert.deepEqual(result.session.taskRef, { id: 'task-1', kind: 'expert-discussion' })
   })
 })

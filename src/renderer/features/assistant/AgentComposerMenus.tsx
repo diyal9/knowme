@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { AgentContextInfo, CapabilityItem } from '../../../shared/api'
-import { ASSISTANT_QUICK_COMMANDS, parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
-import { buildIntelligentRecommendations, type IntelligentRecommendation } from '../../../domain/assistant-recommendations'
+import { parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
+import { buildIntelligentRecommendations, buildMemoryCapabilityRecommendations, buildMemoryTopicRecommendations, type IntelligentRecommendation } from '../../../domain/assistant-recommendations'
 import {
   buildContextUsageViewModel,
   contextUsageSectionLabel,
   formatTokenCount,
 } from '../../../domain/agent-context-usage'
 import { Icon } from '../../app/Icon'
+import { resolveHubIcon } from '../../../domain/capability-hub'
 
-export type ModelPreset = { id: string; label: string; contextWindow?: number; supportsTools?: boolean }
+export type ModelPreset = { id: string; label: string; contextWindow?: number; supportsTools?: boolean; supportsVision?: boolean }
 export type ModelGroup = { id: string; label: string; models: ModelPreset[] }
 
 type KnowledgeEntry = { path: string; title?: string }
@@ -185,32 +186,42 @@ export function AgentQuickMenu({
   onPick: (prompt: string) => void
 }) {
   const [memoryHints, setMemoryHints] = useState<string[]>([])
-  const [commonActions, setCommonActions] = useState<IntelligentRecommendation[]>(() => ASSISTANT_QUICK_COMMANDS.map((item) => ({
-    label: item.title,
-    description: item.subtitle,
-    prompt: item.prompt,
-  })))
+  const [commonActions, setCommonActions] = useState<IntelligentRecommendation[]>([])
   useEffect(() => {
     let active = true
-    void window.api?.personalAgentGet?.().then((result) => {
+    void Promise.all([
+      window.api?.personalAgentGet?.(),
+      window.api?.memoryOverview?.(),
+    ]).then(([result, memory]) => {
       if (!active) return
       const profile = result?.profile
-      setMemoryHints([
-        String(profile?.promptOverlay || '').trim(),
+      const profileHints = [
+        String(profile?.taskPreferences?.industry || '').trim(),
+        String(profile?.taskPreferences?.occupationId || '').trim(),
         String(profile?.taskPreferences?.domainCapabilities || '').trim(),
-      ].filter(Boolean).map((item) => item.slice(0, 120)))
+        String(profile?.promptOverlay || '').trim(),
+        String(profile?.roleOverlay || '').trim(),
+      ]
+      const globalHints = (memory?.globalMemories || []).map((item) => String(item?.text || '').trim())
+      const consolidatedHints = (memory?.consolidated?.preview || []).map((item) => String(item?.text || '').trim())
+      const nextMemoryHints = [...profileHints, ...globalHints, ...consolidatedHints].filter(Boolean).map((item) => item.slice(0, 120))
+      setMemoryHints(nextMemoryHints)
       const configured = parseConfiguredQuickActions(profile?.taskPreferences?.quickActions)
       if (configured.length) {
         setCommonActions(configured.map((item) => ({
           label: item.title,
           description: item.subtitle,
           prompt: item.prompt || `请使用 Skill「${item.skillRef}」执行这项操作。`,
+          badges: ['常用', ...(item.skillRef ? ['已授权'] : [])],
         })))
-      }
+      } else setCommonActions(buildMemoryCapabilityRecommendations(nextMemoryHints))
     }).catch(() => undefined)
     return () => { active = false }
   }, [])
-  const recommendations = buildIntelligentRecommendations(context || '当前工作', 'general', { memoryHints })
+  const memoryRecommendations = !context.trim() ? buildMemoryTopicRecommendations(memoryHints) : []
+  const recommendations = memoryRecommendations.length
+    ? memoryRecommendations
+    : buildIntelligentRecommendations(context || '当前工作', 'general', { memoryHints })
   const items = recommendations
   const commonItems = commonActions
   const allItems = [...items, ...commonItems]
@@ -274,12 +285,12 @@ export function AgentQuickMenu({
           </div>
         </section>
         <section className="agent-quick-section" aria-labelledby="agentQuickCommonTitle">
-          <h3 id="agentQuickCommonTitle">我的常用</h3>
-          <div className="agent-command-results" role="listbox" aria-label="我的常用操作">
+          <h3 id="agentQuickCommonTitle">相关能力与习惯</h3>
+          <div className="agent-command-results" role="listbox" aria-label="相关能力与习惯">
             {commonItems.map((item, index) => (
               <button key={`${item.label}-${item.prompt}`} type="button" className={`agent-command-item${activeIndex === items.length + index ? ' active' : ''}`} role="menuitem" aria-current={activeIndex === items.length + index ? 'true' : undefined} data-quick-command="1" onMouseEnter={() => setActiveIndex(items.length + index)} onClick={() => onPick(item.prompt)}>
                 <Icon name="history" />
-                <span className="agent-command-copy"><strong>{item.label}</strong><small>{item.description}</small></span>
+                <span className="agent-command-copy"><strong>{item.label}</strong><small>{item.description}</small>{item.badges?.length ? <span className="agent-command-badges">{item.badges.map((badge) => <em key={badge}>{badge}</em>)}</span> : null}</span>
               </button>
             ))}
           </div>
@@ -328,7 +339,7 @@ export function AgentSlashMenu({
         <div className="agent-pop-empty">没有匹配的已安装技能</div>
       ) : items.map((item, index) => (
         <button key={item.id} type="button" className={`agent-slash-item${index === activeIndex ? ' active' : ''}`} aria-selected={index === activeIndex} onMouseEnter={() => onActiveChange?.(index)} onMouseDown={(e) => { e.preventDefault(); onPick(item) }}>
-          <Icon name="bookOpen" />
+          <Icon name={item.icon || resolveHubIcon(item as never)} />
           <span className="slash-copy">
             <strong>{item.name || item.id}</strong>
             <small>{item.description || '已安装技能'}</small>

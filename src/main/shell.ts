@@ -555,6 +555,9 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
     const workspaceOpts = {
         width: Math.min(1280, ww - 80), height: Math.min(820, wh - 60),
         minWidth: 900, minHeight: 560, center: true,
+        // 工作台必须在创建时就拥有可见的原生窗口，避免某些 Windows 会话中
+        // ready-to-show 没有对应顶层窗口句柄而导致“进程在、窗口不见”。
+        show: true,
         frame: true, autoHideMenuBar: true, backgroundColor: WORKSPACE_CHROME_BG,
         title: ctx.APP_DISPLAY_NAME,
         icon: ctx.getWindowIconOption(),
@@ -580,6 +583,68 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
         };
     }
     ctx.workspaceWin = new ctx.BrowserWindow(workspaceOpts);
+    // 再显式恢复一次，兼容 Electron 在启动阶段把窗口标记为隐藏的情况。
+    ctx.workspaceWin.show();
+    ctx.workspaceWin.focus();
+    const debugWorkspaceWindow = (tag = 'tick') => {
+        if (!ctx.workspaceWin || ctx.workspaceWin.isDestroyed())
+            return;
+        try {
+            const isMinimized = ctx.workspaceWin.isMinimized();
+            const isVisible = ctx.workspaceWin.isVisible();
+            const isFocused = ctx.workspaceWin.isFocused();
+            const bounds = ctx.workspaceWin.getBounds();
+            console.log(`[workspace-window] ${tag}`, { isVisible, isMinimized, isFocused, ...bounds });
+        }
+        catch (err) {
+            console.warn('[workspace-window] state-log-fail', err?.message || err);
+        }
+    };
+    ctx.workspaceWin.once('ready-to-show', () => {
+        if (ctx.workspaceWin && !ctx.workspaceWin.isDestroyed()) {
+            if (!ctx.workspaceWin.isVisible())
+                console.log('[workspace-window] ready-to-show -> show');
+            ctx.workspaceWin.show();
+            ctx.workspaceWin.focus();
+            debugWorkspaceWindow('ready-to-show');
+        }
+    });
+    setTimeout(() => {
+        if (!ctx.workspaceWin || ctx.workspaceWin.isDestroyed())
+            return;
+        if (!ctx.workspaceWin.isVisible()) {
+            console.log('[workspace-window] fallback-show');
+            ctx.workspaceWin.show();
+        }
+        if (ctx.workspaceWin.isMinimized())
+            ctx.workspaceWin.restore();
+        if (!ctx.workspaceWin.isFocused())
+            ctx.workspaceWin.focus();
+        debugWorkspaceWindow('fallback-show');
+        ctx.workspaceWin.focus();
+    }, 400);
+    setTimeout(() => {
+        if (!ctx.workspaceWin || ctx.workspaceWin.isDestroyed())
+            return;
+        if (ctx.workspaceWin.isMinimized())
+            ctx.workspaceWin.restore();
+        ctx.workspaceWin.setAlwaysOnTop(true);
+        const d = ctx.screen.getPrimaryDisplay();
+        const workArea = d.workArea;
+        const bounds = ctx.workspaceWin.getBounds();
+        const nextX = Math.max(workArea.x, workArea.x + Math.floor((workArea.width - bounds.width) / 2));
+        const nextY = Math.max(workArea.y, workArea.y + Math.floor((workArea.height - bounds.height) / 2));
+        ctx.workspaceWin.setBounds({ x: nextX, y: nextY, width: bounds.width, height: bounds.height });
+        if (!ctx.workspaceWin.isVisible())
+            ctx.workspaceWin.show();
+        ctx.workspaceWin.focus();
+        debugWorkspaceWindow('delayed-show');
+        setTimeout(() => {
+            if (!ctx.workspaceWin || ctx.workspaceWin.isDestroyed())
+                return;
+            ctx.workspaceWin.setAlwaysOnTop(false);
+        }, 1200);
+    }, 1200);
     void ctx.loadRendererEntry(ctx.workspaceWin, {
         legacyFile: 'workspace.html',
         viteEntry: 'workspace',

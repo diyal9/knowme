@@ -62,6 +62,39 @@ export function shelfDomainIcon(domain: string): string {
   return 'workflow'
 }
 
+/**
+ * 首页图标优先表达工作流的实际用途，而不是让同一领域下的卡片重复使用一个符号。
+ * 匹配不到明确用途时才回退到领域图标。
+ */
+export function shelfWorkflowIcon(item: {
+  id?: string
+  name?: string
+  description?: string
+  goalTypes?: string[]
+  inputs?: { label?: string }[]
+  outputs?: { label?: string }[]
+  provenance?: { domain?: string }
+}, domain = workflowDomain(item)): string {
+  const text = [
+    item.id,
+    item.name,
+    item.description,
+    ...(item.goalTypes || []),
+    ...(item.inputs || []).map((input) => input.label),
+    ...(item.outputs || []).map((output) => output.label),
+  ].map((value) => String(value || '').toLowerCase()).join(' ')
+
+  if (/(?:psd|artbundle|prefab|photoshop|creator|转换|转为|导出|导入|迁移)/i.test(text)) return 'arrowLeftRight'
+  if (/(?:验收|质检|质量|review|audit|\bqa\b|测试)/i.test(text)) return 'badgeCheck'
+  if (/(?:总结|纪要|报告|清单|需求|brief|document|文档|归档)/i.test(text)) return 'clipboardCheck'
+  if (/(?:生图|图像|视觉|美术|设计|image|graphic|creative)/i.test(text)) return 'image'
+  if (/(?:数据|分析|统计|database|dataset|analytics)/i.test(text)) return 'database'
+  if (/(?:自动化|定时|循环|automation|schedule)/i.test(text)) return 'automation'
+  if (/(?:协作|团队|交接|collaboration|handoff|team)/i.test(text)) return 'users'
+  if (/(?:研发|开发|代码|构建|部署|engineering|software|coding|release)/i.test(text)) return 'code'
+  return shelfDomainIcon(domain)
+}
+
 export interface ShelfCardModel {
   id: string
   name: string
@@ -138,7 +171,7 @@ export function toShelfCard(item: {
     provenanceLabel: shelfProvenanceLabel(item.source || ''),
     provenanceKind: shelfProvenanceKind(item.source || ''),
     domain,
-    markIcon: shelfDomainIcon(domain),
+    markIcon: shelfWorkflowIcon(item, domain),
     inputLabel: String(item.inputs?.[0]?.label || '一句话目标'),
     outcomeLabel: String(item.outputs?.[0]?.label || '可查看、可追溯的工作结果'),
     backendLabel: executionBackendLabel(item),

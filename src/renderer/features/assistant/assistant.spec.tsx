@@ -14,10 +14,11 @@ describe('assistant chat', () => {
 
   it('allows sending without an open editor file', async () => {
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     expect(screen.getByText('你好')).toBeInTheDocument()
-    expect(screen.getByTestId('agent-execution-timeline')).toHaveTextContent('正在整理相关内容')
+    expect(screen.getByTestId('agent-thinking-status')).toHaveTextContent('正在整理相关内容')
+    expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('你好，我是知我。需要我帮你做什么？')).toBeInTheDocument()
     })
@@ -45,7 +46,7 @@ describe('assistant chat', () => {
       },
     })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => {
       expect(screen.getByText('迟到的完整答复')).toBeInTheDocument()
@@ -55,7 +56,7 @@ describe('assistant chat', () => {
   it('hides follow-up chips when the reply is incomplete', async () => {
     mockApi({ aiGenerate: async () => ({}) })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => {
       expect(screen.getByText('未能收到完整答复，请重试。')).toBeInTheDocument()
@@ -65,7 +66,7 @@ describe('assistant chat', () => {
 
   it('isolates messages when switching session tabs', async () => {
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '会话一' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '会话一' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => expect(screen.getByText('会话一')).toBeInTheDocument())
     await waitFor(() => expect(screen.getByText('你好，我是知我。需要我帮你做什么？')).toBeInTheDocument())
@@ -91,7 +92,7 @@ describe('assistant chat', () => {
       },
     })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '测流式' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '测流式' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => {
       expect(screen.getByText(/流式片段/)).toBeInTheDocument()
@@ -111,7 +112,7 @@ describe('assistant chat', () => {
     })
     render(<AppShell />)
     await waitFor(() => expect(window.api?.sourcesTree).toBeDefined())
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '@rea' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '@rea' } })
     await waitFor(() => {
       expect(screen.getByTestId('agent-at-menu')).toBeInTheDocument()
       expect(screen.getByTestId('agent-at-item')).toHaveTextContent('README.md')
@@ -177,8 +178,9 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByLabelText('任务入口')).toBeInTheDocument())
     expect(screen.getByText(/今天想让 KnowMe 做什么/)).toBeInTheDocument()
     expect(screen.queryByText('开始使用')).not.toBeInTheDocument()
-    expect(screen.getByText(/最近三天会议/)).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/给 KnowMe 发送消息/)).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: '常用入口' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/智能推荐可从输入框左下角打开/)).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/)).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /^新主题/ })).toBeInTheDocument()
     expect(screen.queryByLabelText('选择本次对话知识库')).not.toBeInTheDocument()
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
@@ -187,7 +189,7 @@ describe('assistant chat', () => {
     expect(screen.getByTestId('agent-model-btn').querySelector('svg')).toBeNull()
     expect(screen.getByTestId('agent-model-btn')).not.toHaveClass('has-usage')
     expect(screen.getByTestId('agent-model-btn').querySelector('.agent-model-usage-ring')).toBeNull()
-    expect(screen.getByRole('button', { name: /会议总结/ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /查找和整理资料|分析相关信息|会议总结|回顾近期工作/ })).not.toBeInTheDocument()
     expect(screen.queryByText(/我专注于协助您完成具体工作任务/)).not.toBeInTheDocument()
   })
 
@@ -203,7 +205,7 @@ describe('assistant chat', () => {
 
   it('opens quick task menu only via Ctrl+K when conversation has user turns', async () => {
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => expect(screen.getByText('你好')).toBeInTheDocument())
     expect(screen.queryByTestId('agent-quick-menu')).not.toBeInTheDocument()
@@ -213,13 +215,9 @@ describe('assistant chat', () => {
     expect(quickMenu.closest('#agentComposer')).toBeNull()
     expect(quickMenu.closest('.agent-col-foot')).toBeTruthy()
     expect(screen.getByRole('heading', { name: '智能推荐' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '我的常用' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '相关能力与习惯' })).toBeInTheDocument()
     const menu = screen.getByTestId('agent-quick-menu')
     const recommended = within(menu).getAllByRole('menuitem')
-    expect(recommended[0]).toHaveClass('active')
-    fireEvent.keyDown(menu, { key: 'ArrowRight' })
-    expect(recommended[4]).toHaveClass('active')
-    fireEvent.keyDown(menu, { key: 'ArrowLeft' })
     expect(recommended[0]).toHaveClass('active')
   })
 
@@ -272,9 +270,9 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByTestId('agent-model-btn')).toHaveTextContent('GPT'))
     fireEvent.click(screen.getByTestId('agent-model-btn'))
     expect(screen.getByTestId('agent-model-menu')).toHaveTextContent('GPT')
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '/' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '/' } })
     await waitFor(() => expect(screen.getByTestId('agent-slash-menu')).toHaveTextContent('summarize'))
-    fireEvent.keyDown(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { key: 'Escape' })
+    fireEvent.keyDown(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { key: 'Escape' })
     expect(screen.queryByTestId('agent-slash-menu')).not.toBeInTheDocument()
   })
 
@@ -293,9 +291,9 @@ describe('assistant chat', () => {
       },
     })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
-    await waitFor(() => expect(screen.getByTestId('agent-execution-timeline')).toHaveTextContent('内容整理完成'))
+    await waitFor(() => expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument())
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     expect(screen.queryByText('返回工作台')).not.toBeInTheDocument()
     useAppStore.setState({
@@ -323,6 +321,26 @@ describe('assistant chat', () => {
     await waitFor(() => expect(screen.getByTestId('agent-attachments')).toHaveTextContent('notes.md'))
   })
 
+  it('renders pasted image attachments as compact preview cards', async () => {
+    render(<AppShell />)
+    useAppStore.getState().addComposerAttachment({
+      name: 'image.png',
+      kind: 'image',
+      dataUrl: 'data:image/png;base64,aGVsbG8=',
+    })
+    await waitFor(() => {
+      const image = screen.getByAltText('image.png')
+      expect(image).toHaveClass('agent-attachment-thumb')
+      expect(image.closest('.agent-attachment')).toHaveClass('is-image')
+      expect(screen.getByRole('button', { name: '预览 image.png' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: '移除 image.png' })).toBeInTheDocument()
+    })
+    fireEvent.click(screen.getByRole('button', { name: '预览 image.png' }))
+    expect(screen.getByRole('dialog', { name: '预览 image.png' })).toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: '预览 image.png' })).not.toBeInTheDocument()
+  })
+
   it('shows topic rail as soon as a meaningful user turn exists', async () => {
     render(<AppShell />)
     useAppStore.setState({
@@ -345,10 +363,10 @@ describe('assistant chat', () => {
     expect(screen.queryByTestId('agent-topic-viewport')).not.toBeInTheDocument()
   })
 
-  it('shows compact shortcut bubble and live execution progress for meeting summary', async () => {
+  it('keeps the empty home focused on composer and live execution progress', async () => {
     const generate = vi.fn(async (payload: Record<string, unknown>) => {
-      expect(String(payload.prompt)).toContain('feishu.meeting_read')
-      expect(payload.displayPrompt).toBe('会议总结')
+      expect(String(payload.prompt)).toContain('你好')
+      expect(payload.displayPrompt).toContain('你好')
       return { text: '候选会议已列出', streamed: true }
     })
     mockApi({
@@ -356,12 +374,12 @@ describe('assistant chat', () => {
       aiGenerate: generate,
     })
     render(<AppShell />)
-    fireEvent.click(screen.getByRole('button', { name: /会议总结/ }))
-    expect(screen.getByTestId('msg-user')).toHaveTextContent('会议总结')
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+    expect(screen.getByTestId('msg-user')).toHaveTextContent('你好')
     expect(screen.queryByTestId('msg-user')?.textContent).not.toMatch(/feishu\.meeting_read/)
-    expect(screen.getByTestId('agent-execution-timeline')).toHaveTextContent('正在整理相关内容')
-    expect(screen.getByTestId('agent-execution-timeline')).toHaveClass('is-compact')
-    expect(screen.queryByTestId('agent-thinking-status')).not.toBeInTheDocument()
+    expect(screen.getByTestId('agent-thinking-status')).toHaveTextContent('正在整理相关内容')
+    expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument()
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     await waitFor(() => expect(generate).toHaveBeenCalled())
   })
@@ -393,16 +411,12 @@ describe('assistant chat', () => {
     })
   })
 
-  it('places empty-home composer after starter cards (baseline order)', async () => {
+  it('keeps empty-home focused on the composer without starter cards', async () => {
     render(<AppShell />)
     const home = await screen.findByTestId('assistant-empty-home')
-    const cards = home.querySelector('.agent-empty-actions')
     const composer = home.querySelector('[data-testid="assistant-empty-composer"]')
-    expect(cards).toBeTruthy()
     expect(composer).toBeTruthy()
-    expect(
-      Boolean(cards && composer && (cards.compareDocumentPosition(composer) & Node.DOCUMENT_POSITION_FOLLOWING)),
-    ).toBe(true)
+    expect(home.querySelector('.agent-empty-actions')).toBeNull()
   })
 
   it('does not show sticky-notes apply-to-file on assistant replies', async () => {
@@ -611,7 +625,7 @@ describe('assistant chat', () => {
   it('shows guided recovery after a failed generate', async () => {
     mockApi({ aiGenerate: async () => ({ error: '远程超时' }) })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => {
       expect(screen.getByTestId('guided-recovery-panel')).toBeInTheDocument()
@@ -625,7 +639,7 @@ describe('assistant chat', () => {
       aiCancelRun: async () => ({ ok: true }),
     })
     render(<AppShell />)
-    fireEvent.change(screen.getByPlaceholderText(/给 KnowMe 发送消息/), { target: { value: '你好' } })
+    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     await waitFor(() => expect(screen.getByRole('button', { name: '停止生成' })).toBeInTheDocument())
     fireEvent.click(screen.getByRole('button', { name: '停止生成' }))

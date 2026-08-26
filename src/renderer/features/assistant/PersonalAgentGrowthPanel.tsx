@@ -1,20 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as AgentIdentity from '@knowme-lib/agent-identity'
 import type {
+  CapabilityItem,
+  KnowledgeEntry,
   PersonalAgentGrowthEvent,
   PersonalAgentProfile,
   PersonalAgentProposal,
+  WorkbenchTask,
 } from '../../../shared/api'
-import type { MemoryPattern } from '../../../shared/api-extended'
+import type { MemoryOverview, MemoryPattern } from '../../../shared/api-extended'
+import { buildPersonalGrowthSnapshot } from '../../../domain/personal-growth'
 import { Icon } from '../../app/Icon'
+import { useAppStore } from '../../app/store'
 import { resolveAvatarAssetUrl } from '../../lib/avatar-urls'
-import { ASSISTANT_QUICK_COMMANDS, parseConfiguredQuickActions, serializeConfiguredQuickActions, type ConfiguredQuickAction } from '../../../domain/agent-quick-commands'
+import { PersonalGrowthTab } from './PersonalGrowthTab'
 import '../../styles/personal-agent.css'
 
 type LoadState = 'loading' | 'ready' | 'error'
 type AvatarPreset = { id: string; label?: string; src?: string }
 type EditableConfigField = 'soul' | 'capabilities' | 'collaboration' | 'drive-rules'
-type GrowthTab = 'core' | 'quick' | 'drive' | 'memory'
+export type GrowthTab = 'core' | 'drive' | 'memory' | 'growth'
 
 const listPresetAvatars = (AgentIdentity as unknown as {
   listPresetAvatars: () => AvatarPreset[]
@@ -41,7 +46,13 @@ function isReviewReadyMemory(item: MemoryPattern) {
   return item.review_ready ?? Number(item.count || 0) >= 3
 }
 
-export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
+export function PersonalAgentGrowthPanel({
+  onClose,
+  initialTab = 'core',
+}: {
+  onClose: () => void
+  initialTab?: GrowthTab
+}) {
   const [state, setState] = useState<LoadState>('loading')
   const [profile, setProfile] = useState<PersonalAgentProfile | null>(null)
   const [events, setEvents] = useState<PersonalAgentGrowthEvent[]>([])
@@ -53,15 +64,16 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
   const [collaborationPreference, setCollaborationPreference] = useState('')
   const [selfDriveLevel, setSelfDriveLevel] = useState<'guided' | 'balanced' | 'proactive'>('balanced')
   const [selfDriveRules, setSelfDriveRules] = useState('')
-  const [quickActions, setQuickActions] = useState<ConfiguredQuickAction[]>([...ASSISTANT_QUICK_COMMANDS])
   const [memoryPatterns, setMemoryPatterns] = useState<MemoryPattern[]>([])
+  const [memoryOverview, setMemoryOverview] = useState<MemoryOverview | null>(null)
+  const [growthTasks, setGrowthTasks] = useState<WorkbenchTask[]>([])
+  const [growthKnowledge, setGrowthKnowledge] = useState<KnowledgeEntry[]>([])
+  const [growthCapabilities, setGrowthCapabilities] = useState<CapabilityItem[]>([])
   const [teaching, setTeaching] = useState('')
   const [notice, setNotice] = useState('')
   const [saving, setSaving] = useState(false)
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
-  const [helpOpen, setHelpOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<GrowthTab>('core')
-  const [editingQuickAction, setEditingQuickAction] = useState<number | null>(null)
+  const [activeTab, setActiveTab] = useState<GrowthTab>(initialTab)
   const [editingDisplayName, setEditingDisplayName] = useState(false)
   const [editingField, setEditingField] = useState<EditableConfigField | null>(null)
   const avatarPresets = useMemo(() => listPresetAvatars(), [])
@@ -69,10 +81,13 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
   const load = useCallback(async () => {
     setState('loading')
     try {
-      const [agent, growth, memory] = await Promise.all([
+      const [agent, growth, memory, taskResult, knowledgeResult, capabilityResult] = await Promise.all([
         window.api?.personalAgentGet?.(),
         window.api?.personalAgentGrowthList?.({ limit: 50 }),
         window.api?.memoryOverview?.(),
+        window.api?.workbenchTaskList?.(),
+        window.api?.knowledgeOsList?.(),
+        window.api?.capabilityList?.(),
       ])
       if (!agent?.ok || !agent.profile) throw new Error(agent?.error || '无法读取个人代理')
       setProfile(agent.profile)
@@ -84,11 +99,13 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
       const loadedSelfDrive = String(agent.profile.taskPreferences?.selfDriveLevel || 'balanced')
       setSelfDriveLevel(loadedSelfDrive === 'guided' || loadedSelfDrive === 'proactive' ? loadedSelfDrive : 'balanced')
       setSelfDriveRules(String(agent.profile.taskPreferences?.selfDriveRules || ''))
-      const configuredActions = parseConfiguredQuickActions(agent.profile.taskPreferences?.quickActions)
-      setQuickActions(configuredActions.length ? configuredActions : [...ASSISTANT_QUICK_COMMANDS])
       setEvents(growth?.events || agent.recentGrowth || [])
       setProposals(growth?.proposals || [])
       setMemoryPatterns((memory?.patterns || []).filter(isReviewReadyMemory))
+      setMemoryOverview(memory || null)
+      setGrowthTasks(taskResult?.items || [])
+      setGrowthKnowledge([...(knowledgeResult?.wiki || []), ...(knowledgeResult?.okf || [])])
+      setGrowthCapabilities(capabilityResult?.items || [])
       setState('ready')
     } catch {
       setState('error')
@@ -96,9 +113,18 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
   }, [])
 
   useEffect(() => { void load() }, [load])
+  useEffect(() => { setActiveTab(initialTab) }, [initialTab])
 
   const pending = useMemo(() => proposals.filter((item) => item.status === 'pending'), [proposals])
   const attentionCount = pending.length + memoryPatterns.length
+  const growthSnapshot = useMemo(() => buildPersonalGrowthSnapshot({
+    profile,
+    growthEvents: events,
+    memory: memoryOverview,
+    tasks: growthTasks,
+    knowledge: growthKnowledge,
+    capabilities: growthCapabilities,
+  }), [events, growthCapabilities, growthKnowledge, growthTasks, memoryOverview, profile])
   const selectedAvatar = avatarPresets.find((item) => item.id === avatar)
   const avatarSrc = resolveAvatarAssetUrl(selectedAvatar?.src || avatar)
   const isDirty = Boolean(profile && (
@@ -109,7 +135,6 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
     || collaborationPreference !== (profile.promptOverlay || '')
     || selfDriveLevel !== String(profile.taskPreferences?.selfDriveLevel || 'balanced')
     || selfDriveRules !== String(profile.taskPreferences?.selfDriveRules || '')
-    || serializeConfiguredQuickActions(quickActions) !== String(profile.taskPreferences?.quickActions || serializeConfiguredQuickActions([...ASSISTANT_QUICK_COMMANDS]))
   ))
 
   async function saveProfile() {
@@ -122,7 +147,6 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
         domainCapabilities,
         selfDriveLevel,
         selfDriveRules,
-        quickActions: serializeConfiguredQuickActions(quickActions),
       },
     })
     setSaving(false)
@@ -165,6 +189,23 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
     const result = await window.api?.memoryReviewPattern?.({ id, action })
     setNotice(result?.ok === false ? (result.error || '处理失败') : (action === 'accepted' ? '已记住这项协作偏好' : '不会记住这项推测'))
     void load()
+  }
+
+  function openGrowthAction(action: 'assistant' | 'workbench' | 'knowledge' | 'skill' | 'connector') {
+    if (action === 'assistant') {
+      setActiveTab('memory')
+      return
+    }
+    if (action === 'workbench') {
+      useAppStore.getState().openWorkbenchRail()
+      return
+    }
+    if (action === 'knowledge') {
+      useAppStore.getState().setRoute('knowledge')
+      return
+    }
+    useAppStore.getState().setHubTab(action)
+    useAppStore.getState().setRoute('capabilities')
   }
 
   function renderConfigField(
@@ -210,15 +251,19 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
     <section className="personal-growth" data-testid="personal-agent-growth">
       <header className="personal-growth-head">
         <div className="personal-growth-heading">
-        <span className="personal-growth-eyebrow">智能伙伴 · 个性与成长</span>
-          <h1>配置我的 KnowMe</h1>
-          <p>定义它是谁、擅长什么、如何与你协作，以及在什么边界内主动推进工作。</p>
+          <span className="personal-growth-eyebrow">伙伴设置</span>
+          <h1>塑造我的 KnowMe</h1>
+          <p>让它越来越懂你</p>
         </div>
         <div className="personal-growth-head-actions">
           {notice ? <span className="personal-notice" role="status">{notice}</span> : null}
-          <button type="button" className="personal-save" disabled={!isDirty || saving} onClick={() => void saveProfile()}>
-            {saving ? '保存中…' : isDirty ? '保存更改' : '已保存'}
-          </button>
+          {isDirty || saving ? (
+            <button type="button" className="personal-save" disabled={saving} onClick={() => void saveProfile()}>
+              {saving ? '保存中…' : '保存更改'}
+            </button>
+          ) : !notice ? (
+            <span className="personal-save-state"><Icon name="check" />已保存</span>
+          ) : null}
           <button type="button" className="personal-growth-close" onClick={onClose} aria-label="返回对话">
             <Icon name="close" />
           </button>
@@ -239,7 +284,7 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
 
       {state === 'ready' && profile ? (
         <main className="personal-growth-shell">
-          <aside className="personal-profile-rail" aria-label="伙伴身份与积累">
+          <aside className="personal-profile-rail" aria-label="伙伴身份与成长">
             <div className="personal-avatar-block">
               <button type="button" className="personal-avatar-button" aria-label="更换伙伴头像" aria-expanded={avatarPickerOpen} onClick={() => setAvatarPickerOpen((open) => !open)}>
                 <img src={avatarSrc} alt="" /><span><Icon name="edit" /></span>
@@ -261,7 +306,7 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
                     {displayName || '我的 KnowMe'}
                   </button>
                 )}
-                <span>我的长期工作代理</span>
+                <span>长期工作伙伴</span>
               </div>
             </div>
 
@@ -277,82 +322,54 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
 
             <div className="personal-rail-rule" />
             <div className="personal-rail-section">
-              <span className="personal-rail-label">当前积累</span>
+              <span className="personal-rail-label">懂你进度</span>
               <dl className="personal-facts">
-                <div><dt>工作情境</dt><dd>{profile.contexts.length}</dd></div>
-                <div><dt>Skill</dt><dd>{profile.skillRefs?.length || 0}</dd></div>
-                <div><dt>知识来源</dt><dd>{profile.knowledgeRefs?.length || 0}</dd></div>
-                <div><dt>连接器</dt><dd>{profile.connectorRefs?.length || 0}</dd></div>
+                {growthSnapshot.dimensions.map((item) => (
+                  <div key={item.id}>
+                    <dt>{item.label}</dt>
+                    <dd>Lv.{item.level}</dd>
+                    <span aria-label={`${item.label}进度 ${item.progress}%`}><i style={{ width: `${item.progress}%` }} /></span>
+                  </div>
+                ))}
               </dl>
+              <button type="button" className="personal-growth-center-link" onClick={() => setActiveTab('growth')}>
+                <span>查看成长详情</span><Icon name="chevronRight" />
+              </button>
             </div>
             <div className="personal-rail-rule" />
             <div className="personal-policy-list">
               <div><span>记忆范围</span><strong>{profile.memoryPolicy?.scope === 'global' ? '跨主题' : '当前主题'}</strong></div>
-              <div><span>权限变化</span><strong>每次确认</strong></div>
-              <div><span>档案位置</span><strong>仅存本机</strong></div>
+              <div><span>关键操作</span><strong>始终确认</strong></div>
+              <div><span>数据位置</span><strong>仅存本机</strong></div>
             </div>
           </aside>
 
           <div className="personal-growth-content">
-            <nav className="personal-tabs" aria-label="KnowMe 配置分类">
-              {([['core', '伙伴内核'], ['quick', '快捷操作'], ['drive', '主动边界'], ['memory', '记忆与变更']] as const).map(([id, label]) => (
+            <nav className="personal-tabs" aria-label="伙伴设置分类">
+              {([['core', '伙伴内核'], ['drive', '主动边界'], ['memory', '记忆与变更'], ['growth', '成长']] as const).map(([id, label]) => (
                 <button key={id} type="button" className={activeTab === id ? 'active' : ''} onClick={() => setActiveTab(id)}>{label}</button>
               ))}
             </nav>
-            <section className="personal-section personal-profile-section">
+            <section className={`personal-section personal-profile-section${activeTab !== 'core' && activeTab !== 'drive' ? ' personal-tab-inactive' : ''}`}>
               <div className="personal-section-head">
-                <div><span>伙伴内核</span><h2>定义它如何思考与行动</h2><p>用户行业、岗位和基本情况已移到设置；这里仅配置智能伙伴本身。</p></div>
-                <div className="personal-help-anchor">
-                  <button
-                    type="button"
-                    className="personal-help-button"
-                    aria-label="KnowMe 配置方法"
-                    aria-expanded={helpOpen}
-                    aria-controls="personal-help-tooltip"
-                    onClick={() => setHelpOpen((open) => !open)}
-                  >
-                    ?
-                  </button>
-                  {helpOpen ? (
-                    <div id="personal-help-tooltip" className="personal-help-tooltip" role="tooltip">
-                      <strong>KnowMe 配置方法</strong>
-                      <ol>
-                        <li>在“设置 → 个人档案”填写工作领域、岗位和基本情况。</li>
-                        <li>在这里配置伙伴的 Soul、领域能力、协作偏好和主动边界。</li>
-                        <li>点击字段右上角编辑，完成后点击顶部“保存更改”。</li>
-                        <li>能力、知识、连接器和权限变化都会等待确认。</li>
-                      </ol>
-                    </div>
-                  ) : null}
-                </div>
+                {activeTab === 'drive' ? (
+                  <div><span>主动边界</span><h2>它可以主动到哪一步</h2><p>选择推进方式，明确必须由你确认的事项。</p></div>
+                ) : (
+                  <div><span>伙伴内核</span><h2>它如何思考与协作</h2><p>设定它的人格、工作重点和协作方式。</p></div>
+                )}
               </div>
               <div className={`personal-agent-core-grid${activeTab !== 'core' ? ' personal-tab-inactive' : ''}`}>
-                <div className="personal-soul-field">{renderConfigField('soul', 'Soul · 核心人格', soul, '定义稳定身份、价值取向与判断原则；不要写用户履历。', setSoul)}</div>
-                {renderConfigField('capabilities', '领域能力', domainCapabilities, '例如：会议总结、产品分析、项目推进、办公写作。真实 Skill 和连接器需另行授权。', setDomainCapabilities)}
-                {renderConfigField('collaboration', '协作偏好', collaborationPreference, '例如：先给结论；重要结论附依据；不确定时先提问。', setCollaborationPreference)}
-              </div>
-              <div className={`personal-quick-actions${activeTab !== 'quick' ? ' personal-tab-inactive' : ''}`} data-testid="personal-quick-actions">
-                <div className="personal-subsection-head"><span>快捷操作</span><small>默认使用内置提示词；关联 Skill 后仅使用该 Skill。</small></div>
-                <div className="personal-quick-action-list">
-                  {quickActions.map((action, index) => (
-                    <div className="personal-quick-action" key={action.id}>
-                      <div className="personal-quick-action-title"><strong>{index + 1}. {action.title || '快捷操作'}</strong><button type="button" className="personal-field-edit" aria-label={`编辑快捷操作${index + 1}`} onClick={() => setEditingQuickAction(editingQuickAction === index ? null : index)}><Icon name={editingQuickAction === index ? 'check' : 'edit'} /></button></div>
-                      {editingQuickAction === index ? <>
-                        <input aria-label={`快捷操作${index + 1}名称`} value={action.title} onChange={(event) => setQuickActions((items) => items.map((item, i) => i === index ? { ...item, title: event.target.value } : item))} placeholder="操作名称" />
-                        <input aria-label={`快捷操作${index + 1} Skill`} value={action.skillRef || ''} onChange={(event) => { const skillRef = event.target.value.trim(); setQuickActions((items) => items.map((item, i) => i === index ? { ...item, skillRef: skillRef || undefined, prompt: skillRef ? '' : item.prompt } : item)) }} placeholder="关联 Skill（与提示词二选一）" />
-                        {!action.skillRef ? <textarea aria-label={`快捷操作${index + 1}指令`} value={action.prompt} onChange={(event) => setQuickActions((items) => items.map((item, i) => i === index ? { ...item, prompt: event.target.value, skillRef: undefined } : item))} placeholder="点击后发送给伙伴的执行指令" /> : <div className="personal-preview-value">已绑定 Skill：{action.skillRef}</div>}
-                      </> : <div className="personal-preview-value">{action.skillRef ? `Skill：${action.skillRef}` : (action.prompt || '未设置提示词')}</div>}
-                    </div>
-                  ))}
-                </div>
+                <div className="personal-soul-field">{renderConfigField('soul', '核心人格', soul, '例如：理性、可靠、主动澄清，对重要判断保持审慎。', setSoul)}</div>
+                {renderConfigField('capabilities', '工作侧重', domainCapabilities, '例如：产品分析、会议总结和项目推进。这里只描述工作重点，不会自动获得 Skill。', setDomainCapabilities)}
+                {renderConfigField('collaboration', '协作方式', collaborationPreference, '例如：先给结论；重要结论附依据；不确定时先提问。', setCollaborationPreference)}
               </div>
               <div className={`personal-self-drive${activeTab !== 'drive' ? ' personal-tab-inactive' : ''}`} data-testid="self-drive-config">
-                <div className="personal-self-drive-head"><div><span>自我驱动</span><strong>选择主动推进工作的程度</strong></div><small>权限、发送、发布、破坏性操作需确认</small></div>
+                <div className="personal-self-drive-head"><strong>推进方式</strong><small>发送、发布、授权和破坏性操作始终确认</small></div>
                 <div className="personal-drive-options" role="radiogroup" aria-label="自我驱动程度">
                   {([
-                    ['guided', '依指令', '只完成明确交代的步骤，不主动扩展范围。'],
-                    ['balanced', '协作推进', '主动补全计划、提示遗漏，并等待关键决定。'],
-                    ['proactive', '主动负责', '在授权边界内持续推进，遇到阻塞再请求介入。'],
+                    ['guided', '按指令', '只执行明确指令，不主动延伸。'],
+                    ['balanced', '协作推进', '主动补全步骤、提醒遗漏，关键决定等你确认。'],
+                    ['proactive', '主动推进', '在授权范围内持续推进，遇到边界或阻塞再询问。'],
                   ] as const).map(([id, label, description]) => (
                     <label key={id} className={selfDriveLevel === id ? 'selected' : ''}>
                       <input type="radio" name="self-drive" value={id} checked={selfDriveLevel === id} onChange={() => setSelfDriveLevel(id)} />
@@ -360,26 +377,27 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
                     </label>
                   ))}
                 </div>
-                {renderConfigField('drive-rules', '主动边界', selfDriveRules, '例如：可自行整理资料；发布、删除、授权前先询问。', setSelfDriveRules, 'personal-drive-rules')}
+                {renderConfigField('drive-rules', '补充边界', selfDriveRules, '例如：可自行整理资料；对外发送、删除或授权前先询问。', setSelfDriveRules, 'personal-drive-rules')}
               </div>
             </section>
 
             <section className={`personal-section personal-teach-section${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
-              <div className="personal-section-head compact"><div><span>提交到我的记忆</span><h2>告诉 KnowMe 一条长期协作规则</h2></div></div>
+              <div className="personal-section-head"><div><span>记忆与变更</span><h2>决定它长期记住什么</h2><p>规则可直接提交；推测和变更需要确认。</p></div></div>
+              <label className="personal-composer-label" htmlFor="personal-teaching">新增长期规则</label>
               <div className="personal-teach-composer">
-                <textarea value={teaching} onChange={(event) => setTeaching(event.target.value)} placeholder="例如：记住我希望所有方案先写结论，再补充依据。" />
-                <div><span>明确偏好会保存到全局“我的记忆”；智能伙伴不维护另一套私有记忆。</span><button type="button" disabled={!teaching.trim()} onClick={() => void teach()}>记住</button></div>
+                <textarea id="personal-teaching" value={teaching} onChange={(event) => setTeaching(event.target.value)} placeholder="例如：所有方案先写结论，再补充依据。" />
+                <div><span>保存到“我的记忆”，可随时撤销。</span><button type="button" disabled={!teaching.trim()} onClick={() => void teach()}>记住</button></div>
               </div>
             </section>
 
             <section className={`personal-section personal-attention-section${attentionCount ? ' has-items' : ''}${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
-              <div className="personal-section-head compact"><div><span>变更控制</span><h2>需要你确认</h2><p>能力变更与长期记忆分开处理；工作活动本身不会成为能力或知识。</p></div><b>{attentionCount}</b></div>
+              <div className="personal-section-head compact"><div><span>变更控制</span><h2>等待确认</h2><p>只有你确认后，记忆、能力或权限才会改变。</p></div><b>{attentionCount}</b></div>
               <div className="personal-memory-policy" data-testid="personal-memory-policy">
-                <strong>全局记忆准入规则</strong>
-                <span>只接收协作偏好与纠正；同一推测至少出现 3 次才进入确认。</span>
-                <span>任务名、工作入口和完成记录只保留为本机工作记忆，不改变能力、知识或权限。</span>
+                <strong>保护规则</strong>
+                <span>同一协作习惯至少出现 3 次，才会请你确认。</span>
+                <span>任务记录不会自动改变记忆、能力或权限。</span>
               </div>
-              {!attentionCount ? <div className="personal-quiet-state"><Icon name="check" /><span>没有等待确认的能力变更或长期记忆</span></div> : null}
+              {!attentionCount ? <div className="personal-quiet-state"><Icon name="check" /><span>目前没有待确认内容</span></div> : null}
               {pending.length ? <div className="personal-review-group-label">能力、知识与权限变更</div> : null}
               {pending.map((item) => (
                 <div className="personal-review-row" key={item.id}>
@@ -398,17 +416,19 @@ export function PersonalAgentGrowthPanel({ onClose }: { onClose: () => void }) {
 
             <section className={`personal-section personal-log-section${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
               <details>
-                <summary><span><small>审计记录</small><strong>最近的记忆与变更</strong></span><span>{events.length} 条 <Icon name="chevronRight" /></span></summary>
+                <summary><span><small>历史记录</small><strong>最近的记忆与变更</strong></span><span>{events.length} 条 <Icon name="chevronRight" /></span></summary>
                 <div className="personal-log-list">
                   {events.length ? events.map((item) => (
                     <div className="personal-log-row" key={item.id}>
                       <div><strong>{item.summary || GROWTH_LABELS[item.type] || '记录'}</strong><span>{GROWTH_LABELS[item.type] || item.type}</span></div>
                       {item.reversible && item.status !== 'reverted' ? <button type="button" onClick={() => void undo(item.id)}>撤销</button> : null}
                     </div>
-                  )) : <div className="personal-quiet-state"><span>第一次教导后，这里会留下可追溯记录。</span></div>}
+                  )) : <div className="personal-quiet-state"><span>产生记忆或变更后，这里会保留记录。</span></div>}
                 </div>
               </details>
             </section>
+
+            {activeTab === 'growth' ? <PersonalGrowthTab snapshot={growthSnapshot} onAction={openGrowthAction} /> : null}
           </div>
         </main>
       ) : null}

@@ -153,6 +153,20 @@ function validateSessionContextPatch(patch = {}) {
 }
 
 /** 能力包 skill 主分类：按工作域推断，避免一律标成「能力包」导致技能 chip 空筛 */
+function normalizeSkillDomainCategory(value = '', source = {}) {
+  const category = String(value || '').trim()
+  if (category === '写作') return '内容写作'
+  if (category === '办公') return '日常办公'
+  if (category === '研发' || category === '开发') return '软件研发'
+  if (category === '知识') return '知识研究'
+  if (category === '视觉') return '视觉创意'
+  if (category === '游戏') {
+    const text = `${String(source.id || '')} ${String(source.name || '')}`.toLowerCase()
+    return /需求|策划|production|requirement/.test(text) ? '产品与研究' : '软件研发'
+  }
+  return category
+}
+
 function inferPackSkillDomainCategory(source = {}, manifest = {}) {
   const id = String(source.id || '').trim().toLowerCase()
   const name = String(source.name || '').trim().toLowerCase()
@@ -164,16 +178,15 @@ function inferPackSkillDomainCategory(source = {}, manifest = {}) {
       ? String(source.categories[0] || '').trim()
       : '')
   if (fromManifest && !['能力包', '飞书', '效率', '连接器', 'pack'].includes(fromManifest)) {
-    if (fromManifest === '开发') return '研发'
-    return fromManifest
+    return normalizeSkillDomainCategory(fromManifest, source)
   }
-  if (/^game[-_]|游戏/.test(id) || /游戏/.test(name)) return '游戏'
-  if (/^feishu[-_]|飞书|lark/.test(id) || /飞书|feishu|lark/.test(hay)) return '办公'
-  if (/^office[-_]|^writing[-_]|写作|润色|文稿|文档/.test(id) || /写作|润色/.test(name)) return '写作'
-  if (/code|review|研发|开发|engineering|engineer/.test(hay)) return '研发'
-  if (packId.includes('game')) return '游戏'
-  if (packId.includes('office')) return '办公'
-  return '能力包'
+  if (/^game[-_]|游戏/.test(id) || /游戏/.test(name)) return normalizeSkillDomainCategory('游戏', source)
+  if (/^feishu[-_]|飞书|lark/.test(id) || /飞书|feishu|lark/.test(hay)) return '日常办公'
+  if (/^office[-_]|^writing[-_]|写作|润色|文稿|文档/.test(id) || /写作|润色/.test(name)) return '内容写作'
+  if (/code|review|研发|开发|engineering|engineer/.test(hay)) return '软件研发'
+  if (packId.includes('game')) return normalizeSkillDomainCategory('游戏', source)
+  if (packId.includes('office')) return '日常办公'
+  return '知识研究'
 }
 
 function mapPackSkillToHub(source = {}, manifest = {}) {
@@ -182,11 +195,14 @@ function mapPackSkillToHub(source = {}, manifest = {}) {
     ? manifest.experienceWarnings
     : (Array.isArray(source.experienceWarnings) ? source.experienceWarnings : [])
   const domain = inferPackSkillDomainCategory(source, manifest)
+  const experienceTasks = manifest.metadata?.knowme?.experience?.tasks
+  const icon = Array.isArray(experienceTasks) ? String(experienceTasks[0]?.icon || '').trim() : ''
   return {
     id: source.id,
     kind: 'skill',
     name: source.name || source.id,
     description: source.description || '',
+    ...(icon ? { icon } : {}),
     version: manifest.version || '1.0.0',
     source: 'pack',
     category: domain,
@@ -239,17 +255,21 @@ function mapCatalogItemToHub(entry) {
   let category = Array.isArray(entry.categories) && entry.categories.length
     ? entry.categories[0]
     : '全部'
-  if (category === '开发') category = '研发'
-  const categories = (entry.categories || []).map((cat) => (cat === '开发' ? '研发' : cat))
+  if (entry.kind === 'skill') category = normalizeSkillDomainCategory(category, entry)
+  else if (category === '开发') category = '研发'
+  const categories = (entry.categories || []).map((cat) => entry.kind === 'skill' ? normalizeSkillDomainCategory(cat, entry) : (cat === '开发' ? '研发' : cat))
   const status = entry.installed
     ? (entry.enabled ? 'enabled' : 'disabled')
     : (entry.installStatus || 'available')
+  const experienceTasks = entry.manifest?.metadata?.knowme?.experience?.tasks
+  const icon = entry.icon || (Array.isArray(experienceTasks) ? experienceTasks[0]?.icon : '')
   return {
     id: entry.id,
     kind: entry.kind,
     name: entry.name,
     originName: entry.originName || '',
     description: entry.description,
+    ...(icon ? { icon: String(icon) } : {}),
     avatar: entry.avatar || entry.manifest?.avatar || '',
     version: entry.version,
     source: entry.source,

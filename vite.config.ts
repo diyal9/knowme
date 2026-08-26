@@ -40,6 +40,7 @@ export default defineConfig({
       },
       input: {
         workspace: path.join(rendererRoot, 'workspace', 'index.html'),
+        landing: path.join(rendererRoot, 'landing', 'index.html'),
         settings: path.join(rendererRoot, 'settings', 'index.html'),
         memory: path.join(rendererRoot, 'memory', 'index.html'),
         'log-viewer': path.join(rendererRoot, 'log-viewer', 'index.html'),

@@ -13,6 +13,7 @@ module.exports = {
   agentRunResume: (runId, action) => ipcRenderer.invoke('agent-run-resume', { runId: String(runId || ''), action: String(action || 'continue') }),
   workbenchAgentGraphPlan: payload => ipcRenderer.invoke('workbench-agent-graph-plan', payload || {}),
   workbenchAgentGraphValidate: payload => ipcRenderer.invoke('workbench-agent-graph-validate', payload || {}),
+  workbenchExternalWorkflowPreflight: payload => ipcRenderer.invoke('workbench-external-workflow-preflight', payload || {}),
   workbenchAgentGraphStart: payload => ipcRenderer.invoke('workbench-agent-graph-start', payload || {}),
   workbenchAgentRunTree: rootRunId => ipcRenderer.invoke('workbench-agent-run-tree', { rootRunId: String(rootRunId || '') }),
   workbenchAgentRunDecision: payload => ipcRenderer.invoke('workbench-agent-run-decision', payload || {}),
@@ -99,6 +100,9 @@ module.exports = {
   connectorsUpsert: patch => ipcRenderer.invoke('connectors-upsert', patch || {}),
   connectorsSetAllowlist: (id, allowlist) =>
     ipcRenderer.invoke('connectors-set-allowlist', id, allowlist),
+  connectorsSetSecrets: (id, secrets) => ipcRenderer.invoke('connectors-set-secrets', id, secrets || {}),
+  connectorsTools: id => ipcRenderer.invoke('connectors-tools', id),
+  connectorsReferences: id => ipcRenderer.invoke('connectors-references', id),
   connectorsCreateDocDraft: payload =>
     ipcRenderer.invoke('connectors-create-doc-draft', payload || {}),
   toolDraftsList: () => ipcRenderer.invoke('tool-drafts-list'),

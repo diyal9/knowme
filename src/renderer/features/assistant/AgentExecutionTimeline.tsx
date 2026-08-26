@@ -3,6 +3,7 @@
  * 不负责气泡正文。
  */
 import type { ExecutionTimelineView } from '../../../domain/agent-execution-timeline'
+import { useEffect, useState } from 'react'
 
 function ExecutionMark({ running }: { running: boolean }) {
   return running
@@ -11,6 +12,15 @@ function ExecutionMark({ running }: { running: boolean }) {
 }
 
 export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }) {
+  // Keep live progress visible, then get out of the way once a successful
+  // reply is complete. Errors stay open so the user can inspect the details.
+  const hasError = view.rows.some((row) => row.status === 'error')
+  const [open, setOpen] = useState(view.running || hasError)
+  useEffect(() => {
+    if (view.running) setOpen(true)
+    else if (!hasError) setOpen(false)
+  }, [hasError, view.running])
+
   if (view.compact) {
     return (
       <div
@@ -30,7 +40,8 @@ export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }
       className={`agent-execution${view.running ? ' is-running' : ''}`}
       data-execution-timeline="1"
       data-testid="agent-execution-timeline"
-      open={view.running}
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
     >
       <summary className="agent-execution-summary">
         <ExecutionMark running={view.running} />

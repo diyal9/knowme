@@ -18,11 +18,15 @@ export function WorkbenchDetailHeaderAction({
 
     const search = document.getElementById('wbShelfSearch') as HTMLInputElement | null
     const searchWasHidden = search?.hidden === true
+    const modeTabs = document.getElementById('wbModeTabs')
+    const modeTabsWereHidden = modeTabs?.hidden === true
     if (search) search.hidden = true
+    if (modeTabs) modeTabs.hidden = true
     setTarget(candidate)
 
     return () => {
       if (search) search.hidden = searchWasHidden
+      if (modeTabs) modeTabs.hidden = modeTabsWereHidden
     }
   }, [])
 

@@ -24,6 +24,30 @@ describe('agent-tools', () => {
     assert.equal(res.code, 'unknown_tool')
   })
 
+  it('projects a genuinely empty surface when builtins are disabled', async () => {
+    const surface = tools.createToolSurface({
+      includeBuiltins: false,
+      extraDefinitions: [{
+        type: 'function',
+        function: { name: 'should_not_leak', description: 'x', parameters: { type: 'object' } },
+      }],
+    })
+    // The no-tools caller also removes extras. This assertion protects the
+    // lower-level builtin switch independently from the runtime policy.
+    const empty = tools.createToolSurface({ includeBuiltins: false, extraDefinitions: [] })
+    assert.deepEqual(empty.getToolDefinitions(), [])
+    assert.deepEqual(empty.getToolRecords(), [])
+    assert.equal(empty.isAllowedTool('search_knowledge'), false)
+    assert.equal(empty.isAllowedTool('should_not_leak'), false)
+    const result = await empty.createToolExecutor({}).executeToolCall({
+      name: 'search_knowledge',
+      arguments: '{"query":"secret"}',
+    })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'unknown_tool')
+    assert.equal(surface.isAllowedTool('should_not_leak'), true)
+  })
+
   it('blocks invalid JSON arguments', () => {
     const res = tools.validateToolCall('search_knowledge', '{query:')
     assert.equal(res.ok, false)

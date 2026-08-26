@@ -175,7 +175,7 @@ function BindingPanel({
         {field.items.length === 0 ? (
           <button type="button" className="wb-side-empty" onClick={onEmpty}>{field.emptyAction?.label || field.emptyLabel}</button>
         ) : chips.empty ? (
-          <span className="wb-side-empty">{field.key === 'knowledgeRefs' ? '默认知识范围，点击管理调整' : '点击管理添加'}</span>
+          <span className="wb-side-empty">{field.key === 'knowledgeRefs' ? '使用默认知识范围，点击管理调整' : '未配置，点击管理添加'}</span>
         ) : (
           chips.chips.map((chip) => (
             <span key={chip.id} className="wb-side-chip is-ready" title={chip.name}>

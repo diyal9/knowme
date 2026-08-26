@@ -32,7 +32,7 @@ describe('agent-generate-contract', () => {
     expect(seeded.streaming).toBe(true)
     expect(seeded.protocolVersion).toBe(2)
     expect(historyTurns([{ id: 'u', role: 'user', text: 'hi' }, seeded])).toEqual([
-      { role: 'user', text: 'hi' },
+      { id: 'u', role: 'user', text: 'hi' },
     ])
   })
 

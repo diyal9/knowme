@@ -4,8 +4,31 @@ import { Icon } from '../../app/Icon'
 import { WorkbenchListToggle } from '../workbench/WorkbenchListToggle'
 import { TaskRecentCard } from './TaskRecentCard'
 
-const ACTIVE_LIMIT = 3
-const COMPLETED_LIMIT = 3
+const INBOX_LIMIT = 6
+
+type InboxFilter = 'current' | 'attention' | 'running' | 'exception' | 'completed'
+
+const INBOX_FILTERS: { id: InboxFilter; label: string }[] = [
+  { id: 'current', label: '当前' },
+  { id: 'attention', label: '待我处理' },
+  { id: 'running', label: '进行中' },
+  { id: 'exception', label: '异常' },
+  { id: 'completed', label: '已完成' },
+]
+
+const INBOX_STATUS: Record<Exclude<InboxFilter, 'current'>, Set<string>> = {
+  attention: new Set(['review', 'needs_input', 'open', 'draft']),
+  running: new Set(['starting', 'queued', 'running', 'revising', 'pending', 'waiting', 'preparing', 'created', 'active']),
+  exception: new Set(['failed', 'error', 'timeout', 'blocked']),
+  completed: new Set(['completed', 'done', 'finished', 'success', 'succeeded']),
+}
+
+const INBOX_PRIORITY: Record<string, number> = {
+  failed: 0, error: 0, timeout: 0, blocked: 0,
+  review: 1, needs_input: 1, open: 1, draft: 1,
+  starting: 2, queued: 2, running: 2, revising: 2,
+  pending: 2, waiting: 2, preparing: 2, created: 2, active: 2,
+}
 
 function sortByLatest(items: WorkbenchTask[]) {
   return [...items].sort((left, right) => (
@@ -13,27 +36,21 @@ function sortByLatest(items: WorkbenchTask[]) {
   ))
 }
 
-function taskBoardGroups(tasks: WorkbenchTask[]) {
-  return [
-    {
-      id: 'attention',
-      label: '待我处理',
-      empty: '没有等待处理的任务',
-      tasks: sortByLatest(tasks.filter((task) => ['draft', 'open', 'needs_input', 'review'].includes(String(task.status).toLowerCase()))),
-    },
-    {
-      id: 'active',
-      label: '进行中',
-      empty: '当前没有执行中的任务',
-      tasks: sortByLatest(tasks.filter((task) => ['starting', 'running', 'revising', 'queued'].includes(String(task.status).toLowerCase()))),
-    },
-    {
-      id: 'exception',
-      label: '异常',
-      empty: '当前没有异常任务',
-      tasks: sortByLatest(tasks.filter((task) => ['failed', 'error', 'timeout', 'blocked'].includes(String(task.status).toLowerCase()))),
-    },
-  ]
+function inboxBucket(task: WorkbenchTask): Exclude<InboxFilter, 'current'> | 'other' {
+  const status = String(task.status || '').toLowerCase()
+  if (INBOX_STATUS.exception.has(status)) return 'exception'
+  if (INBOX_STATUS.attention.has(status)) return 'attention'
+  if (INBOX_STATUS.running.has(status)) return 'running'
+  if (INBOX_STATUS.completed.has(status)) return 'completed'
+  return 'other'
+}
+
+function sortInbox(items: WorkbenchTask[]) {
+  return [...items].sort((left, right) => {
+    const priority = (INBOX_PRIORITY[String(left.status).toLowerCase()] ?? 8)
+      - (INBOX_PRIORITY[String(right.status).toLowerCase()] ?? 8)
+    return priority || Date.parse(String(right.updatedAt || '')) - Date.parse(String(left.updatedAt || ''))
+  })
 }
 
 export function TaskBoard({
@@ -55,81 +72,107 @@ export function TaskBoard({
   onOpen: (task: WorkbenchTask) => void
   onManageCompleted: () => void
 }) {
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
-  const [completedExpanded, setCompletedExpanded] = useState(false)
-  const groups = useMemo(() => taskBoardGroups(tasks), [tasks])
-  const completed = useMemo(() => sortByLatest(tasks.filter((task) => (
-    ['completed', 'done', 'finished'].includes(String(task.status).toLowerCase())
-  ))), [tasks])
+  const [inboxFilter, setInboxFilter] = useState<InboxFilter>('current')
+  const [inboxExpanded, setInboxExpanded] = useState(false)
+  const inboxTasks = useMemo(() => {
+    const matching = tasks.filter((task) => {
+      const bucket = inboxBucket(task)
+      return inboxFilter === 'current' ? bucket !== 'completed' && bucket !== 'other' : bucket === inboxFilter
+    })
+    return inboxFilter === 'completed' ? sortByLatest(matching) : sortInbox(matching)
+  }, [inboxFilter, tasks])
+  const inboxCounts = useMemo(() => {
+    const counts: Record<InboxFilter, number> = { current: 0, attention: 0, running: 0, exception: 0, completed: 0 }
+    tasks.forEach((task) => {
+      const bucket = inboxBucket(task)
+      if (bucket === 'other') return
+      counts[bucket] += 1
+      if (bucket !== 'completed') counts.current += 1
+    })
+    return counts
+  }, [tasks])
+  const visibleTasks = inboxExpanded ? inboxTasks : inboxTasks.slice(0, INBOX_LIMIT)
+  const ownerLabel = workflowMode ? '工作流' : '专家'
+  const emptyText: Record<InboxFilter, string> = workflowMode
+    ? {
+        current: '当前没有运行中的工作流任务',
+        attention: '没有等待你处理的工作流任务',
+        running: '当前没有运行中的工作流任务',
+        exception: '当前没有异常的工作流任务',
+        completed: '完成的工作流任务会出现在这里',
+      }
+    : {
+        current: '当前没有需要处理的专家任务',
+        attention: '没有等待你处理的任务',
+        running: '当前没有进行中的任务',
+        exception: '当前没有异常任务',
+        completed: '完成的任务会出现在这里',
+      }
 
   return (
-    <div className="wb-task-board" data-testid={`${idPrefix}-board`}>
-      <div className="wb-task-status-groups" aria-label={workflowMode ? '工作流运行看板' : '专家任务看板'}>
-        {groups.map((group) => (
-          <section key={group.id} className={`wb-task-status-group is-${group.id}`}>
-            <header><strong>{group.label}</strong><b>{group.tasks.length}</b></header>
-            <div className="wb-task-recent-list">
-              {(expandedGroups[group.id] ? group.tasks : group.tasks.slice(0, ACTIVE_LIMIT)).map((task) => (
-                <TaskRecentCard
-                  key={task.id}
-                  task={task}
-                  expert={resolveExpert?.(task)}
-                  workflowMode={workflowMode}
-                  onOpen={() => onOpen(task)}
-                />
-              ))}
-              {group.tasks.length === 0 ? <div className="wb-task-group-empty">{group.empty}</div> : null}
-            </div>
-            {group.tasks.length > ACTIVE_LIMIT ? (
-              <button
-                type="button"
-                className="wb-task-group-more"
-                aria-expanded={Boolean(expandedGroups[group.id])}
-                onClick={() => setExpandedGroups((current) => ({ ...current, [group.id]: !current[group.id] }))}
-              >
-                {expandedGroups[group.id] ? '收起' : `更多（${group.tasks.length - ACTIVE_LIMIT}）`}
-              </button>
-            ) : null}
-          </section>
-        ))}
-      </div>
-
-      <section className="wb-task-completed" aria-labelledby={`${idPrefix}CompletedTitle`}>
-        <header>
-          <strong id={`${idPrefix}CompletedTitle`}>最近完成</strong>
+    <div className={`wb-task-inbox${workflowMode ? ' is-workflow' : ''}`} data-testid={`${idPrefix}-board`}>
+      <div className="wb-task-inbox-toolbar">
+        <div
+          className="wb-task-inbox-filters"
+          role="tablist"
+          aria-label={workflowMode ? '工作流运行筛选' : '专家任务筛选'}
+        >
+          {INBOX_FILTERS.map((filter) => (
+            <button
+              key={filter.id}
+              type="button"
+              role="tab"
+              aria-selected={inboxFilter === filter.id}
+              className={inboxFilter === filter.id ? 'is-active' : ''}
+              onClick={() => {
+                setInboxFilter(filter.id)
+                setInboxExpanded(false)
+              }}
+            >
+              <span>{filter.label}</span>
+              <b>{inboxCounts[filter.id]}</b>
+            </button>
+          ))}
+        </div>
+        {inboxFilter === 'completed' && inboxCounts.completed > 0 ? (
           <button
             type="button"
-            className="wb-task-completed-clean"
+            className="wb-task-inbox-manage"
             title={manageLabel}
             aria-label={manageLabel}
             onClick={onManageCompleted}
           >
             <Icon name={manageIcon} />
           </button>
-        </header>
-        {completed.length ? (
-          <>
-            <div className={`wb-task-completed-list${completedExpanded ? ' is-expanded' : ''}`}>
-              {(completedExpanded ? completed : completed.slice(0, COMPLETED_LIMIT)).map((task) => (
-                <TaskRecentCard
-                  key={task.id}
-                  task={task}
-                  expert={resolveExpert?.(task)}
-                  workflowMode={workflowMode}
-                  onOpen={() => onOpen(task)}
-                />
-              ))}
-            </div>
-            <WorkbenchListToggle
-              id={`${idPrefix}CompletedToggle`}
-              expanded={completedExpanded}
-              remaining={completed.length - COMPLETED_LIMIT}
-              hidden={completed.length <= COMPLETED_LIMIT}
-              onToggle={() => setCompletedExpanded((value) => !value)}
-            />
-          </>
-        ) : <div className="wb-task-completed-empty">完成的任务会出现在这里</div>}
-      </section>
+        ) : null}
+      </div>
+      <div className="wb-task-inbox-shell">
+        <div className="wb-task-inbox-columns" aria-hidden="true">
+          <span>任务</span><span>{ownerLabel}</span><span>更新</span><span>状态</span>
+        </div>
+        {visibleTasks.length ? (
+          <div className="wb-task-inbox-list">
+            {visibleTasks.map((task) => (
+              <TaskRecentCard
+                key={task.id}
+                task={task}
+                expert={resolveExpert?.(task)}
+                workflowMode={workflowMode}
+                presentation="inbox"
+                onOpen={() => onOpen(task)}
+              />
+            ))}
+          </div>
+        ) : <div className="wb-task-inbox-empty">{emptyText[inboxFilter]}</div>}
+      </div>
+      <WorkbenchListToggle
+        id={`${idPrefix}InboxToggle`}
+        expanded={inboxExpanded}
+        remaining={inboxTasks.length - INBOX_LIMIT}
+        label="查看全部"
+        hidden={inboxTasks.length <= INBOX_LIMIT}
+        onToggle={() => setInboxExpanded((value) => !value)}
+      />
     </div>
   )
 }

@@ -52,6 +52,7 @@ module.exports = {
   saveRemoteConfigPrefs: prefs => ipcRenderer.invoke('remote-config-save-prefs', prefs),
   pullRemoteConfig: () => ipcRenderer.invoke('remote-config-pull'),
   getSettings:  ()  => ipcRenderer.sendSync('get-settings'),
+  embeddingProbe: payload => ipcRenderer.invoke('embedding-probe', payload || {}),
   openSettings: tab => ipcRenderer.send('open-settings', tab || ''),
   openSettingsWindow: tab => ipcRenderer.send('open-settings-window', tab || ''),
   openMemoryPanel: () => ipcRenderer.send('open-memory-panel'),

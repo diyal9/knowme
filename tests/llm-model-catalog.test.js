@@ -15,11 +15,12 @@ describe('llm-model-catalog', () => {
   it('resolves a Qwen preset with its context capability', () => {
     const profile = catalog.resolveProfile({
       apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
-      model: 'qwen-plus',
+      model: 'qwen3.8-max',
     })
     assert.equal(profile.provider, 'dashscope')
-    assert.equal(profile.contextWindow, 131072)
+    assert.equal(profile.contextWindow, 1000000)
     assert.equal(profile.supportsTools, true)
+    assert.equal(profile.supportsVision, true)
   })
 
   it('keeps custom models on conservative defaults', () => {
@@ -35,13 +36,13 @@ describe('llm-model-catalog', () => {
     const listing = catalog.listCatalog({
       llmProvider: 'dashscope',
       apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-      model: 'qwen-plus',
+      model: 'qwen3.8-max',
     })
     assert.ok(Array.isArray(listing.groups))
     const dashscope = listing.groups.find(group => group.id === 'dashscope')
     assert.ok(dashscope && dashscope.models.length > 0)
     assert.equal(dashscope.models[0].id, 'auto')
-    assert.equal(listing.current.model, 'qwen-plus')
+    assert.equal(listing.current.model, 'qwen3.8-max')
   })
 
   it('puts unknown Model IDs into the custom group', () => {
@@ -58,25 +59,25 @@ describe('llm-model-catalog', () => {
   it('filters unsupported models by default', () => {
     const listing = catalog.listCatalog({
       llmProvider: 'dashscope',
-      model: 'qwen-plus',
+      model: 'qwen3.8-max',
     })
     const dashscope = listing.groups.find(group => group.id === 'dashscope')
     const long = dashscope.models.find(model => model.id === 'qwen-long')
     assert.equal(long, undefined)
   })
 
-  it('keeps current unsupported model visible to prevent lockout', () => {
+  it('keeps an unknown current model visible to prevent lockout', () => {
     const listing = catalog.listCatalog({
       llmProvider: 'dashscope',
-      model: 'qwen-long',
+      model: 'qwen-legacy-custom',
       llmProfile: {
         contextWindow: 1000000,
         maxOutput: 8192,
         supportsTools: false,
       },
     })
-    const dashscope = listing.groups.find(group => group.id === 'dashscope')
-    const long = dashscope.models.find(model => model.id === 'qwen-long')
+    const custom = listing.groups.find(group => group.id === 'custom')
+    const long = custom.models.find(model => model.id === 'qwen-legacy-custom')
     assert.ok(long)
     assert.equal(long.supportsTools, false)
     assert.equal(long.supported, false)
@@ -91,6 +92,6 @@ describe('llm-model-catalog', () => {
       prompt: '请帮我修复这个报错并给出最小代码改动',
     })
     assert.equal(routed.autoRouted, true)
-    assert.equal(routed.model, 'deepseek-v3')
+    assert.equal(routed.model, 'qwen3.6-flash')
   })
 })

@@ -13,6 +13,7 @@ export function TaskDialogueShell({
   logTestId,
   composerExtraClass,
   composerPlaceholder,
+  showComposer = true,
   children,
 }: {
   variant: 'expert' | 'workflow' | 'pipeline'
@@ -22,6 +23,7 @@ export function TaskDialogueShell({
   logTestId: string
   composerExtraClass?: string
   composerPlaceholder?: string
+  showComposer?: boolean
   children: ReactNode
 }) {
   const logRef = useRef<HTMLDivElement>(null)
@@ -48,7 +50,7 @@ export function TaskDialogueShell({
       <div className="agent-chat-log" id="agentChatLog" data-testid={logTestId} ref={logRef}>
         {children}
       </div>
-      {launch ? null : (
+      {launch || !showComposer ? null : (
         <div className="agent-col-foot">
           <AgentComposer
             extraClass={composerExtraClass}

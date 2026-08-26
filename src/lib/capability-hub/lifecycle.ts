@@ -44,6 +44,7 @@ function createCapabilityLifecycle(deps) {
     skillRuntime,
     findPackOwnedSkill,
     onExpertUninstalled,
+    ingestExternalKnowledge,
   } = deps
 
   const repositoryPreviews = new Map()
@@ -84,7 +85,7 @@ function createCapabilityLifecycle(deps) {
     const conn = connectors.find((c) => c.id === entry.id)
     if (!conn) return ok()
     if (conn.type === 'mcp' && conn.mcp) {
-      if (enabled) await connectorCaps.onConnectorEnabled(entry.id, conn.mcp)
+      if (enabled) await connectorCaps.onConnectorEnabled(entry.id, conn.mcp, getConnectorsApi()?.resolveRuntimeOptions?.(conn) || {})
       else await connectorCaps.onConnectorDisabled(entry.id)
     }
     getConnectorsApi()?.upsertConnector?.({ id: entry.id, enabled: enabled === true })
@@ -339,6 +340,9 @@ function createCapabilityLifecycle(deps) {
       additionalSkillIds: payload.additionalSkillIds,
       includeOptionalSkills: payload.includeOptionalSkills === true,
       includeConnectors: payload.includeConnectors !== false,
+      knowledgeMode: ['rag', 'source'].includes(String(payload.knowledgeMode || '').toLowerCase())
+        ? String(payload.knowledgeMode).toLowerCase()
+        : 'none',
     })
     if (!planned.ok) return planned
     const planToken = rememberRepositoryImportPlan(previewToken, planned)
@@ -424,6 +428,7 @@ function createCapabilityLifecycle(deps) {
         additionalSkillIds: cachedPlan.selection.additionalSkillIds,
         includeOptionalSkills: cachedPlan.selection.includeOptionalSkills,
         includeConnectors: cachedPlan.selection.includeConnectors,
+        knowledgeMode: cachedPlan.selection.knowledgeMode,
       })
       if (!replanned.ok) return replanned
       importPreview = replanned.preview
@@ -436,6 +441,27 @@ function createCapabilityLifecycle(deps) {
       connectorsApi: getConnectorsApi(),
       workflowStore: getWorkflowStore(),
     })
+    if (result.ok && cachedPlan?.selection?.knowledgeMode === 'rag' && typeof ingestExternalKnowledge === 'function') {
+      const knowledgeFiles = (importPreview.knowledge || []).map(item => ({
+        absPath: path.join(importPreview.root, item.path),
+      }))
+      result.knowledge = await ingestExternalKnowledge({
+        repositoryId: importPreview.repositoryId,
+        repositoryRoot: importPreview.root,
+        files: knowledgeFiles,
+      })
+      if (result.knowledge?.ok === false) {
+        result.warnings = [...(result.warnings || []), `知识库导入失败：${result.knowledge.error || '未知错误'}`]
+      }
+    } else if (cachedPlan?.selection?.knowledgeMode === 'source') {
+      result.knowledge = {
+        ok: true,
+        mode: 'source',
+        root: importPreview.root,
+        files: (importPreview.knowledge || []).length,
+        message: '已保留外部项目作为知识源，未复制到 KnowMe RAG。',
+      }
+    }
     const workflowVerification = Object.values(result.idMaps?.workflows || {})
       .map(workflowId => verifyImportedWorkflow({ workflowId }))
     result.verification = {

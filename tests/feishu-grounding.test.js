@@ -26,6 +26,24 @@ describe('feishu-grounding', () => {
     assert.equal(intent.asksMinutes, true)
   })
 
+  it('treats the built-in 会议总结 shortcut as the Feishu meeting workflow', () => {
+    const intent = detectFeishuIntent('会议总结')
+    assert.equal(intent.mentioned, true)
+    assert.equal(intent.asksMinutes, true)
+    assert.equal(intent.needsSearch, true)
+    assert.equal(intent.needsContentRead, true)
+  })
+
+  it('routes an explicit Feishu Docx URL directly to read_doc', () => {
+    const intent = detectFeishuIntent(
+      '请总结这份会议记录：https://forever9.feishu.cn/docx/Y7fHdNvnIoC9nTxye9gc1xJ5ngg?dcuId=6909385442765619201'
+    )
+    assert.equal(intent.directDocRead, true)
+    assert.equal(intent.needsSearch, false)
+    assert.equal(intent.asksMinutes, false)
+    assert.deepEqual(require('../src/lib/feishu-grounding').requiredFeishuToolsForIntent(intent), ['feishu.read_doc'])
+  })
+
   it('requires tool evidence before claiming feishu result', () => {
     const hint = buildFeishuGroundingHint('请查飞书文档并总结', [])
     assert.ok(hint.includes('还没有拿到任何飞书工具返回结果'))
@@ -276,8 +294,35 @@ describe('feishu-grounding', () => {
     ])
     assert.equal(evidence.hasAny, true)
     assert.equal(evidence.hasSearch, false)
-    assert.equal(evidence.hasContentRead, true)
+    assert.equal(evidence.hasContentRead, false)
     assert.equal(evidence.meetingLikeReadCount, 0)
+  })
+
+  it('does not treat a meeting title and token metadata as meeting正文', () => {
+    const entries = [{
+      toolName: 'feishu.meeting_read',
+      status: 'done',
+      text: JSON.stringify({
+        title: '会议总结 2026-08-21',
+        minute_token: 'obcn_test_only',
+        organizer: '未知',
+        participants: [],
+      }),
+    }]
+    const evidence = analyzeFeishuToolEvidence(entries)
+    assert.equal(evidence.hasContentRead, false)
+    assert.equal(evidence.meetingLikeReadCount, 0)
+    const hint = buildFeishuGroundingHint('请读取这个会议纪要并总结结论和待办', entries, '会议已完成总结，结论是……')
+    assert.ok(hint.includes('正文为空'))
+    assert.ok(!hint.includes('会议已完成总结'))
+  })
+
+  it('does not treat an empty successful meeting read as evidence', () => {
+    const entries = [{ toolName: 'feishu.meeting_read', status: 'done', text: '' }]
+    const evidence = analyzeFeishuToolEvidence(entries)
+    assert.equal(evidence.hasContentRead, false)
+    const hint = buildFeishuGroundingHint('请读取这个会议纪要并总结', entries, '已完成会议总结')
+    assert.ok(hint.includes('正文为空'))
   })
 
   it('counts meeting-like read evidence', () => {

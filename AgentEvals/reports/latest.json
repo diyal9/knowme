@@ -1,0 +1,903 @@
+{
+  "version": "1.0.0",
+  "rubric": "AgentEvals v1",
+  "evaluatedAt": "2026-08-25T18:43:32.484Z",
+  "source": "src/catalog/experts",
+  "total": 22,
+  "averageDesignScore": 94,
+  "averageOverallScore": 94,
+  "agents": [
+    {
+      "agentId": "action-owner",
+      "name": "行动项管理员",
+      "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项",
+      "useCases": [
+        "会议行动项拆解",
+        "项目跟进清单",
+        "跨团队责任确认"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [
+        "feishu"
+      ],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 0,
+        "package": 100
+      },
+      "designScore": 80,
+      "issues": [
+        {
+          "severity": "warning",
+          "message": "缺少证据、来源、数据或不确定性策略"
+        }
+      ],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 80,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "business-insight-analyst",
+      "name": "商业洞察专家",
+      "description": "结合指标变化与业务上下文，识别异常、驱动因素和决策机会",
+      "useCases": [
+        "经营指标复盘",
+        "业务异常归因与机会识别"
+      ],
+      "skills": [
+        "business-metrics-analysis",
+        "business-cause-analysis",
+        "business-insight-report"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 100,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "content-strategist",
+      "name": "内容策划专家",
+      "description": "把传播目标、受众和素材转成可执行的内容策略与选题计划",
+      "useCases": [
+        "内容专题和栏目策划",
+        "品牌内容节奏与选题规划"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "creative-director",
+      "name": "创意策划",
+      "description": "把传播目标转成受众、核心概念、文案与视觉创意方向",
+      "useCases": [
+        "宣传主视觉",
+        "社交媒体配图",
+        "产品概念图"
+      ],
+      "skills": [
+        "writing-polish",
+        "visual-brief-prompt"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 100,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "data-analyst",
+      "name": "数据分析师",
+      "description": "围绕业务问题检查数据、设计指标并输出可复核的分析结论",
+      "useCases": [
+        "指标异常分析和专项分析",
+        "数据口径检查与指标设计"
+      ],
+      "skills": [
+        "business-metrics-analysis",
+        "business-cause-analysis"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 100,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "data-report-editor",
+      "name": "数据报告专家",
+      "description": "把分析过程和数据结论整理为可沟通、可追溯的数据报告",
+      "useCases": [
+        "周月度数据报告",
+        "专项分析的管理层摘要"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "external-capability-importer",
+      "name": "智能体运维专员",
+      "description": "审计外部项目并将其中的技能、专家、连接器和工作流适配为 KnowMe 可运行资产",
+      "useCases": [
+        "把其它 Agent 项目完整迁入 KnowMe",
+        "将项目专用管线打包为专家和工作流",
+        "导入 th-art 固定 PSD 到 ArtBundle 产线"
+      ],
+      "skills": [],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "fact-checker",
+      "name": "事实核查专家",
+      "description": "逐项核对关键陈述与来源，标记证据强度、冲突和无法确认项",
+      "useCases": [
+        "报告、文章和需求文档的关键陈述核查",
+        "多来源冲突检查"
+      ],
+      "skills": [
+        "knowledge-steward"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "image-producer",
+      "name": "生图执行专家",
+      "description": "按生图方案生成候选图，记录参数并整理可供选版的图像交付包",
+      "useCases": [
+        "宣传图候选生成",
+        "概念图探索",
+        "多比例视觉变体"
+      ],
+      "skills": [
+        "visual-brief-prompt"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 0,
+        "package": 100
+      },
+      "designScore": 80,
+      "issues": [
+        {
+          "severity": "warning",
+          "message": "缺少证据、来源、数据或不确定性策略"
+        }
+      ],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 80,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "knowledge-curator",
+      "name": "知识策展专家",
+      "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+      "useCases": [
+        "项目知识库初建和重构",
+        "文档去重、分类与过期检查"
+      ],
+      "skills": [
+        "knowledge-steward"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "longform-editor",
+      "name": "长文编辑",
+      "description": "将零散素材组织为结构完整、论据清晰且语气一致的长文交付物",
+      "useCases": [
+        "深度文章、白皮书和案例稿",
+        "已有草稿的结构性编辑"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "meeting-scribe",
+      "name": "会议纪要专家",
+      "description": "将会议记录整理为可追溯的结论、决议、分歧和待确认项",
+      "useCases": [
+        "项目例会纪要",
+        "评审会结论整理",
+        "客户访谈记录"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [
+        "feishu"
+      ],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "office-partner",
+      "name": "办公协作专家",
+      "description": "将纪要、行动项和背景材料整理为可直接发送的办公交付物",
+      "useCases": [
+        "工作同步与周报",
+        "邮件和群消息草拟",
+        "会议后的协作闭环"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [
+        "feishu"
+      ],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "presentation-writer",
+      "name": "汇报撰写专家",
+      "description": "将业务材料整理为面向决策者的汇报逻辑、页面大纲与讲解要点",
+      "useCases": [
+        "项目汇报、复盘和方案沟通",
+        "管理层决策材料"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "product-manager",
+      "name": "产品经理",
+      "description": "将业务目标和用户问题整理为边界清晰、可评审的产品需求",
+      "useCases": [
+        "新功能需求说明",
+        "现有体验改版",
+        "业务规则与异常流程梳理"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "qa-engineer",
+      "name": "质量测试专家",
+      "description": "根据需求和变更证据设计测试，输出风险分级的验收结论",
+      "useCases": [
+        "功能验收和回归风险评估",
+        "需求可测性审查"
+      ],
+      "skills": [
+        "code-review"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "requirement-reviewer",
+      "name": "需求评审专家",
+      "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论",
+      "useCases": [
+        "PRD 正式评审",
+        "验收标准检查",
+        "范围、依赖与风险复核"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "research-analyst",
+      "name": "研究分析师",
+      "description": "围绕研究问题组织证据、比较观点，产出带来源与不确定性的结论",
+      "useCases": [
+        "行业、竞品和专题桌面研究",
+        "多来源观点比较与研究综述"
+      ],
+      "skills": [
+        "knowledge-steward",
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 100,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "software-engineer",
+      "name": "软件开发工程师",
+      "description": "在明确仓库和验收标准后实现代码变更，并提供测试与变更证据",
+      "useCases": [
+        "功能开发、缺陷修复和小型重构",
+        "代码审查后的明确修订"
+      ],
+      "skills": [
+        "code-review"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "solution-architect",
+      "name": "解决方案架构师",
+      "description": "将需求和约束转化为可评审的系统边界、组件划分与技术方案",
+      "useCases": [
+        "新系统和跨系统集成方案",
+        "架构改造与技术选型评审"
+      ],
+      "skills": [
+        "code-review"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "user-researcher",
+      "name": "用户研究员",
+      "description": "从访谈、反馈和业务材料中提炼用户问题、证据与机会点",
+      "useCases": [
+        "用户反馈归因",
+        "访谈材料整理",
+        "需求机会与优先级判断"
+      ],
+      "skills": [
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 95,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 95,
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "visual-designer",
+      "name": "视觉设计师",
+      "description": "将创意方向落为画面构图、风格规范和可执行的生图方案",
+      "useCases": [
+        "主视觉方案设计",
+        "生图提示词与构图规划",
+        "品牌视觉一致性检查"
+      ],
+      "skills": [
+        "visual-brief-prompt"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 75,
+        "grounding": 0,
+        "package": 100
+      },
+      "designScore": 80,
+      "issues": [
+        {
+          "severity": "warning",
+          "message": "缺少证据、来源、数据或不确定性策略"
+        }
+      ],
+      "runtime": {
+        "sampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ]
+      },
+      "overallScore": 80,
+      "confidence": "unverified"
+    }
+  ]
+}

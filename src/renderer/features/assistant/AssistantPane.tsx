@@ -19,7 +19,7 @@ import { AssistantSessionTabs } from './AssistantSessionTabs'
 import { AssistantStreamStatus } from './AssistantStreamStatus'
 import { GuidedRecoveryPanel } from './GuidedRecoveryPanel'
 import { AssistantTopicNav } from './AssistantTopicNav'
-import { PersonalAgentGrowthPanel } from './PersonalAgentGrowthPanel'
+import { PersonalAgentGrowthPanel, type GrowthTab } from './PersonalAgentGrowthPanel'
 
 /** 停止滚动后多久藏起右侧细滚动条 */
 const SCROLLBAR_HIDE_MS = 700
@@ -48,6 +48,7 @@ export function AssistantPane() {
   const chatLogRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const [growthOpen, setGrowthOpen] = useState(false)
+  const [growthTab, setGrowthTab] = useState<GrowthTab>('core')
   const empty = isAssistantLaunchEmpty(messages)
   const activeSession = sessions.find((item) => item.id === activeSessionId)
   const modeId = resolveAssistantModeId(activeSession?.agentId || activeSession?.expertId)
@@ -59,7 +60,11 @@ export function AssistantPane() {
   }, [loadAssistantSessions, loadAssistantChrome])
 
   useEffect(() => {
-    const openGrowth = () => setGrowthOpen(true)
+    const openGrowth = (event: Event) => {
+      const requestedTab = (event as CustomEvent<{ tab?: GrowthTab }>).detail?.tab
+      setGrowthTab(requestedTab || 'core')
+      setGrowthOpen(true)
+    }
     window.addEventListener('knowme:open-personal-growth', openGrowth)
     return () => window.removeEventListener('knowme:open-personal-growth', openGrowth)
   }, [])
@@ -139,11 +144,13 @@ export function AssistantPane() {
   return (
     <>
       <aside className={`agent-col conversation-surface${empty ? ' agent-launch-state' : ''}`} id="agentCol" aria-label="助手对话">
-      <div className="agent-col-head">
-        <AssistantSessionTabs onOpenGrowth={() => setGrowthOpen(true)} />
-      </div>
+      {!growthOpen ? (
+        <div className="agent-col-head">
+          <AssistantSessionTabs onOpenGrowth={() => setGrowthOpen(true)} />
+        </div>
+      ) : null}
       {growthOpen ? (
-        <PersonalAgentGrowthPanel onClose={() => setGrowthOpen(false)} />
+        <PersonalAgentGrowthPanel initialTab={growthTab} onClose={() => setGrowthOpen(false)} />
       ) : null}
       {!growthOpen && !empty ? (
         <AssistantTopicNav

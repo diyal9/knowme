@@ -26,6 +26,13 @@ describe('assistant-prompt-router', () => {
     assert.match(buildScenePrompt({ scene: 'assistant' }), /自然对话/)
   })
 
+  it('changes casual-chat policy when the session already has history', () => {
+    const prompt = buildScenePrompt({ scene: 'assistant', hasHistory: true })
+    assert.match(prompt, /已有本次会话历史/)
+    assert.match(prompt, /不要重复首次接待/)
+    assert.doesNotMatch(buildScenePrompt({ scene: 'assistant' }), /不要重复首次接待/)
+  })
+
   it('routes work turns to the work scene', () => {
     assert.equal(resolveScene({ mode: 'general', tier: 'assist' }), 'work')
     assert.equal(resolveScene({ mode: 'general', tier: 'chat', hasNoteContext: true }), 'work')
@@ -81,17 +88,31 @@ describe('assistant-prompt-router', () => {
       agentCollaboration: '先给结论',
       agentSelfDriveLevel: 'proactive',
       agentSelfDriveRules: '发布前必须确认',
-    })
+    }, 'general', { includeIdentityName: true })
     assert.match(prompt, /【关于用户】/)
-    assert.match(prompt, /【事实边界】/)
+    assert.doesNotMatch(prompt, /【事实边界】/)
     assert.match(prompt, /【用户岗位】/)
-    assert.match(prompt, /【智能伙伴称呼｜最高优先级】[\s\S]*九仔/)
-    assert.match(prompt, /禁止自称“KnowMe”/)
+    assert.match(prompt, /【助手身份元数据】[\s\S]*九仔/)
+    assert.match(prompt, /正常回答直接回应问题/)
     assert.match(prompt, /【智能伙伴 Soul】/)
     assert.match(prompt, /【智能伙伴领域能力】/)
     assert.match(prompt, /【智能伙伴协作偏好】/)
     assert.match(prompt, /主动负责/)
     assert.match(prompt, /发布前必须确认/)
+  })
+
+  it('can exclude the generic partner persona for an active expert scene', () => {
+    const prompt = buildUserPrompt({
+      userProfile: '产品经理',
+      userPrompt: '回答简洁',
+      agentDisplayName: '九仔',
+      agentSoul: '长期工作伙伴',
+      agentDomainCapabilities: '通用办公',
+      assistantModeConfig: { soul: '通用伙伴风格', general: '以长期搭档身份回答' },
+    }, 'general', { includeAgentPersona: false })
+    assert.match(prompt, /产品经理/)
+    assert.match(prompt, /回答简洁/)
+    assert.doesNotMatch(prompt, /九仔|长期工作伙伴|通用办公|通用伙伴风格|长期搭档/)
   })
 
   it('lets a single turn opt out of the collaboration preference', () => {

@@ -611,6 +611,21 @@ describe('feishu-cli allowlist builders', () => {
     assert.equal(searches.some(argv => argv.includes('--participant-ids')), false)
   })
 
+  it('surfaces the associated meeting-notes Docx when note +detail provides one', async () => {
+    const result = await executeMeetingCandidates({ days: 3 }, {
+      spawnImpl: spawnJson((argv) => {
+        if (argv.includes('auth') && argv.includes('status')) return IDENTITY_ME
+        if (argv[0] === 'vc' && argv[1] === '+search') return { data: { items: [{ id: 'm-note', display_info: '中战路会\n今天 09:03 | 组织者：yoyo-刘洋', meta_data: {} }] } }
+        if (argv[0] === 'vc' && argv[1] === '+detail') return vcDetail({ meeting_id: 'm-note', topic: '2026-年中战略会', start_time: '2026-08-21 09:03', note_id: 'note-y7', minute_token: 'mt-y7' })
+        if (argv[0] === 'note' && argv[1] === '+detail') return { data: { note: { note_id: 'note-y7', note_doc_token: 'Y7fHdNvnIoC9nTxye9gc1xJ5ngg' } } }
+        return { data: {} }
+      }),
+    })
+    assert.equal(result.meta.candidates[0].noteDocToken, 'Y7fHdNvnIoC9nTxye9gc1xJ5ngg')
+    assert.match(result.meta.candidates[0].url, /\/docx\/Y7fHdNvnIoC9nTxye9gc1xJ5ngg$/)
+    assert.equal(result.text.includes('/minutes/mt-y7'), false)
+  })
+
   it('defaults meeting candidate workflow to three natural days', async () => {
     const searches = []
     const result = await executeMeetingCandidates({}, {
@@ -709,6 +724,34 @@ describe('feishu-cli allowlist builders', () => {
     assert.equal(result.text.trim().startsWith('{'), false)
   })
 
+  it('follows a minute token to the associated AI meeting-notes document', async () => {
+    const calls = []
+    const result = await executeMeetingRead({ minute_token: 'mt_with_note' }, {
+      spawnImpl: spawnJson((argv) => {
+        calls.push(argv.slice())
+        if (argv[0] === 'minutes' && argv[1] === '+detail') {
+          // The minute exists, but has no readable Smart Minutes artifact.
+          return { data: { minutes: [{ minute_token: 'mt_with_note', note_id: 'note_42', artifacts: {} }] } }
+        }
+        if (argv[0] === 'note' && argv[1] === '+detail') {
+          assert.ok(argv.includes('--note-id'))
+          assert.ok(argv.includes('note_42'))
+          return { data: { note: { note_id: 'note_42', note_doc_token: 'doc_42' } } }
+        }
+        if (argv[0] === 'docs' && argv[1] === '+fetch') {
+          assert.ok(argv.includes('--doc'))
+          assert.ok(argv.includes('doc_42'))
+          return { data: { content: '# 会议纪要\n\n会议议题：版本发布\n结论：下周完成验收。' } }
+        }
+        return { data: {} }
+      }),
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.meta.kind, 'note_doc')
+    assert.match(result.text, /版本发布/)
+    assert.ok(calls.some(argv => argv[0] === 'minutes' && argv.includes('--transcript')))
+  })
+
   it('meeting workflow rejects non-meeting minute body', async () => {
     const result = await executeMeetingRead({ minute_token: 'mt_x' }, {
       spawnImpl: spawnJson((argv) => {
@@ -748,6 +791,32 @@ describe('feishu-cli allowlist builders', () => {
     assert.ok(String(result.message || '').includes('obcn_denied'))
     assert.ok(String(result.message || '').includes('申请'))
     assert.equal(String(result.message || '').includes('minutes:minutes.search:read'), false)
+  })
+
+  it('preserves row-level user authorization errors from a successful CLI envelope', async () => {
+    const result = await executeMeetingRead({ minute_token: 'obcn_auth' }, {
+      spawnImpl: spawnRaw(JSON.stringify({
+        ok: false,
+        data: { minutes: [{ minute_token: 'obcn_auth', error: 'failed to query minute: need_user_authorization (user: ou_demo)' }] },
+      }), 0),
+    })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'user_authorization_required')
+    assert.ok(String(result.message || '').includes('未授权'))
+    assert.equal(result.minutePermissionDenied, undefined)
+  })
+
+  it('humanizes invalid minute tokens and never exposes the JSON envelope', async () => {
+    const result = await executeMeetingRead({ minute_token: 'obcn_invalid' }, {
+      spawnImpl: spawnRaw(JSON.stringify({
+        code: 400,
+        msg: 'invalid minute token',
+        data: {},
+      }), 0),
+    })
+    assert.equal(result.ok, false)
+    assert.match(String(result.message || ''), /token 无效或已失效/)
+    assert.equal(String(result.text || '').trim().startsWith('{'), false)
   })
 
   it('normalizes missing user identity error', async () => {

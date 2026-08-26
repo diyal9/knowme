@@ -5,6 +5,19 @@ import { Icon } from '../../app/Icon'
 import { ExpertAvatarMark } from '../expert/ExpertAvatarMark'
 
 const TASK_THEME_MAX_LENGTH = 20
+const CAPABILITY_THEME_LABELS: Record<string, string> = {
+  'business-insight': '业务洞察',
+  'business-insight-analysis': '业务洞察',
+  'business-insight-analyst': '业务洞察',
+  'business insight analyst': '业务洞察',
+  'data-analysis': '数据分析',
+  'data-analyst': '数据分析',
+  'data analyst': '数据分析',
+  'longform-editor': '长文编辑',
+  'longform editor': '长文编辑',
+  'qa-engineer': '质量工程',
+  'qa engineer': '质量工程',
+}
 
 function clampTaskTheme(value: string): string {
   const characters = Array.from(value)
@@ -20,7 +33,9 @@ export function compactTaskTheme(value: unknown): string {
   if (!original) return '未命名任务'
 
   const capabilityCheck = original.match(/^\[能力验收\]\s*(.+)$/i)
-  if (capabilityCheck?.[1]) return clampTaskTheme(`${capabilityCheck[1].trim()}能力验收`)
+  if (capabilityCheck?.[1]) return clampTaskTheme(`${humanizeCapabilityLabel(capabilityCheck[1])}验收`)
+  const bareCapabilityCheck = original.match(/^([a-z0-9][a-z0-9 _-]*)能力验收$/i)
+  if (bareCapabilityCheck?.[1]) return clampTaskTheme(`${humanizeCapabilityLabel(bareCapabilityCheck[1])}验收`)
   if (/[A-Za-z]:[\\/]/.test(original) && original.includes('扫描') && original.includes('导入')) {
     return '扫描并导入项目资源'
   }
@@ -36,10 +51,19 @@ export function compactTaskTheme(value: unknown): string {
   return clampTaskTheme(concise || original)
 }
 
+function humanizeCapabilityLabel(value: string): string {
+  const normalized = value.trim().toLowerCase()
+  return CAPABILITY_THEME_LABELS[normalized] || value.trim().replace(/[-_]+/g, ' ')
+}
+
 function taskCardContent(task: WorkbenchTask, source: string, theme: string): string {
   const goal = String(task.brief?.goal || task.goal || '').trim()
-  if (goal) return goal
-  return source !== theme ? source : ''
+  const display = goal || (source !== theme ? source : '')
+  if (!display || display === theme) return ''
+  return display
+    .replace(/[A-Za-z]:[\\/][^，。；;,]+/g, '项目')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 const EXPERT_STATUS_LABEL: Record<string, string> = {
@@ -73,11 +97,13 @@ export function TaskRecentCard({
   task,
   expert,
   workflowMode = false,
+  presentation = 'card',
   onOpen,
 }: {
   task: WorkbenchTask
   expert?: CapabilityItem
   workflowMode?: boolean
+  presentation?: 'card' | 'inbox'
   onOpen: () => void
 }) {
   const source = String(task.title || task.brief?.goal || task.goal || task.id).trim()
@@ -94,13 +120,44 @@ export function TaskRecentCard({
   const when = taskRelTime(task.updatedAt) || '刚刚'
   const state = taskCardStatus(task.status, workflowMode)
 
+  if (presentation === 'inbox') {
+    return (
+      <article className={`wb-task-card wb-task-inbox-row is-${state.tone}`}>
+        <button
+          type="button"
+          className="wb-task-card-main wb-task-inbox-row-main"
+          data-testid={`task-open-${task.id}`}
+          onClick={onOpen}
+        >
+          <span className="wb-task-inbox-task">
+            <span className="wb-task-name" data-testid={`task-theme-${task.id}`} title={source}>{theme}</span>
+            {content ? <span className="wb-task-card-content" title={content}>{content}</span> : null}
+          </span>
+          <span className="wb-task-inbox-expert">
+            {workflowMode ? (
+              <span className="wb-task-inbox-owner-icon" aria-hidden="true"><Icon name="workflow" /></span>
+            ) : (
+              <ExpertAvatarMark agent={avatarAgent} className="wb-task-card-avatar" size={18} />
+            )}
+            <span className="wb-task-card-owner-name" title={actor}>{actor}</span>
+          </span>
+          <time className="wb-task-inbox-updated" dateTime={task.updatedAt || undefined}>{when}</time>
+          <span className={`wb-task-card-status wb-task-inbox-state is-${state.tone}`}>
+            {state.label}
+            <Icon name="chevronRight" />
+          </span>
+        </button>
+      </article>
+    )
+  }
+
   return (
     <article className="wb-task-card">
       <button type="button" className="wb-task-card-main" data-testid={`task-open-${task.id}`} onClick={onOpen}>
         <span className="wb-task-card-heading">
-          <span className="wb-task-card-heading-icon" aria-hidden="true">
-            <Icon name={workflowMode ? 'workflow' : 'clipboardCheck'} />
-          </span>
+          {workflowMode ? (
+            <span className="wb-task-card-heading-icon" aria-hidden="true"><Icon name="workflow" /></span>
+          ) : null}
           <span className="wb-task-name" data-testid={`task-theme-${task.id}`} title={source}>{theme}</span>
         </span>
         {content ? <span className="wb-task-card-content" title={content}>{content}</span> : null}
@@ -117,6 +174,7 @@ export function TaskRecentCard({
           </span>
           <span className={`wb-task-card-status is-${state.tone}`}>{state.label}</span>
         </span>
+        {state.tone === 'attention' ? <span className="wb-task-card-action">继续处理</span> : null}
       </button>
     </article>
   )

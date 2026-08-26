@@ -7,6 +7,7 @@
 
 /** 在 workbench.create 之后注册，避免 logger/app 尚未挂上。 */
 function create(ctx) {
+  const isRelaunchedFromGpuCrash = process.argv.includes('--gpu-crash-relaunched')
   ctx.app.on('window-all-closed', () => { })
   ctx.app.on('before-quit', () => { ctx.isQuitting = true })
   ctx.app.on('will-quit', () => ctx.globalShortcut.unregisterAll())
@@ -44,7 +45,7 @@ function create(ctx) {
       catch { /* ignore */ }
     }
     // GPU 崩溃：落盘回退并自动重启一次，无需用户配环境变量
-    if (type === 'GPU' && process.platform === 'win32' && !ctx._gpuCrashRelaunching) {
+    if (type === 'GPU' && process.platform === 'win32' && !ctx._gpuCrashRelaunching && !isRelaunchedFromGpuCrash) {
       try {
         const { markGpuCrash } = require('../lib/windows-gpu-fallback')
         markGpuCrash(ctx.app.getPath('userData'), ctx.fs, ctx.path)
@@ -52,8 +53,15 @@ function create(ctx) {
       } catch { /* ignore */ }
       ctx._gpuCrashRelaunching = true
       try {
-        ctx.app.relaunch()
+        const nextArgs = process.argv.slice(1).filter(arg => arg !== '--gpu-crash-relaunched')
+        nextArgs.push('--gpu-crash-relaunched')
+        ctx.app.relaunch({ args: nextArgs })
         ctx.app.exit(0)
+      } catch { /* ignore */ }
+    }
+    if (type === 'GPU' && isRelaunchedFromGpuCrash) {
+      try {
+        ctx.logger.warn('system', 'gpu-policy', 'GPU crash repeated after relaunch; skip auto-relaunch')
       } catch { /* ignore */ }
     }
   })

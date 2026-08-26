@@ -40,7 +40,12 @@ describe('capability hub overlay', () => {
     expect(within(hub).queryByRole('button', { name: '关闭' })).not.toBeInTheDocument()
     expect(within(hub).getByRole('button', { name: '我的专家' })).toBeInTheDocument()
     expect(within(hub).getAllByRole('button', { name: '添加能力' })).toHaveLength(1)
-    expect(within(hub).getByRole('button', { name: '添加能力' }).querySelector('[data-icon="component"]')).toBeTruthy()
+    const addButton = within(hub).getByRole('button', { name: '添加能力' })
+    expect(addButton.closest('.hub-nav')).toBeTruthy()
+    expect(addButton).toHaveAttribute('title', '添加能力')
+    expect(addButton).toHaveAttribute('data-tooltip', '添加能力')
+    expect(addButton.querySelector('[data-icon="component"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-command-actions #hubBtnAdd')).toBeNull()
     expect(within(hub).queryByRole('group', { name: '专家来源' })).not.toBeInTheDocument()
     expect(within(hub).queryByRole('button', { name: '官方' })).not.toBeInTheDocument()
     expect(within(hub).queryByText('精选')).not.toBeInTheDocument()
@@ -79,8 +84,8 @@ describe('capability hub overlay', () => {
     await waitFor(() => expect(within(hub).queryByRole('heading', { name: '未收藏专家' })).not.toBeInTheDocument())
     expect(hub.querySelector('.hub-card-version')).toBeNull()
     expect(hub.querySelector('.hub-card-foot-actions .hub-card-fav')).toBeTruthy()
-    expect(within(hub).getAllByText('已添加').length).toBeGreaterThan(0)
-    expect(hub.querySelector('.hub-badge.installed [data-icon="component"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-badge.installed.icon-only[aria-label="已添加"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-badge.installed [data-icon="wrench"]')).toBeTruthy()
   })
 
   it('shows three featured cards first and expands the remaining recommendations', async () => {
@@ -139,6 +144,8 @@ describe('capability hub overlay', () => {
       expect(within(hub).getByRole('heading', { name: '写纪要' })).toBeInTheDocument()
       expect(within(hub).queryByRole('heading', { name: '产品经理' })).not.toBeInTheDocument()
     })
+    expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('产品与研究')
+    expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('软件研发')
     expect(within(hub).queryByText('精选')).not.toBeInTheDocument()
     expect(within(hub).queryByText('能力目录')).not.toBeInTheDocument()
   })
@@ -168,6 +175,50 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(drawer).getByRole('button', { name: '安装' }))
     await waitFor(() => expect(install).toHaveBeenCalledWith({ id: 's1', kind: 'skill' }))
     await waitFor(() => expect(within(screen.getByTestId('hub-detail-drawer')).getByLabelText('在新会话中使用')).toBeInTheDocument())
+  })
+
+  it('configures, tests and authorizes an installed MCP connector in the hub', async () => {
+    const upsert = vi.fn(async () => ({ ok: true }))
+    const setSecrets = vi.fn(async () => ({ ok: true }))
+    const setAllowlist = vi.fn(async () => ({ ok: true }))
+    mockApi({
+      capabilityList: async (opts) => ({
+        ok: true,
+        items: opts?.kind === 'connector' ? [{
+          id: 'cocos-creator-mcp', kind: 'connector' as const, name: 'Cocos Creator MCP',
+          description: 'Creator 编辑器连接器', category: '游戏研发', installed: true, enabled: true,
+        }] : [],
+      }),
+      connectorsList: async () => ({ connectors: [{
+        id: 'cocos-creator-mcp', title: 'Cocos Creator MCP', type: 'mcp', enabled: true,
+        mcp: { transport: 'sse', url: 'http://127.0.0.1:3103/sse' },
+        secretSlots: [{ key: 'access_token', label: 'Access Token', required: true, configured: false }],
+      }] }),
+      connectorsReferences: async () => ({ ok: true, references: [{ id: 'psd-flow', kind: 'workflow', name: 'PSD 工作流', required: true }] }),
+      connectorsStatus: async () => ({ ok: true, connector: { id: 'cocos-creator-mcp', status: { ok: true, state: 'online', message: 'MCP 在线' } } }),
+      connectorsTools: async () => ({ ok: true, availableTools: [{ rawName: 'get_editor_context', description: '读取编辑器状态', selected: false }] }),
+      connectorsUpsert: upsert,
+      connectorsSetSecrets: setSecrets,
+      connectorsSetAllowlist: setAllowlist,
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('tab', { name: '连接器' }))
+    fireEvent.click(await within(hub).findByRole('button', { name: '管理连接器：Cocos Creator MCP' }))
+    const manager = await screen.findByTestId('hub-connector-manager')
+    expect(within(manager).getByLabelText('传输方式')).toHaveValue('sse')
+    expect(within(manager).getByText(/PSD 工作流/)).toBeInTheDocument()
+    fireEvent.change(within(manager).getByLabelText('Access Token（必填）'), { target: { value: 'secret-once' } })
+    fireEvent.click(within(manager).getByRole('button', { name: '保存配置' }))
+    await waitFor(() => expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ id: 'cocos-creator-mcp' })))
+    expect(setSecrets).toHaveBeenCalledWith('cocos-creator-mcp', { access_token: 'secret-once' })
+    fireEvent.click(within(manager).getByRole('button', { name: '测试连接' }))
+    await waitFor(() => expect(within(manager).getByRole('status')).toHaveTextContent('MCP 在线'))
+    fireEvent.click(within(manager).getByRole('button', { name: '发现工具' }))
+    const tool = await within(manager).findByRole('checkbox')
+    fireEvent.click(tool)
+    fireEvent.click(within(manager).getByRole('button', { name: '保存工具授权' }))
+    await waitFor(() => expect(setAllowlist).toHaveBeenCalledWith('cocos-creator-mcp', ['get_editor_context']))
   })
 
   it('adds a catalog expert to My Experts and the workbench in one action', async () => {
@@ -322,11 +373,12 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
     expect(within(hub).queryByText('测试专家')).not.toBeInTheDocument()
     fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
-    expect(within(hub).getAllByText('认证').length).toBeGreaterThan(0)
+    expect(hub.querySelector('.hub-badge.verified.icon-only[aria-label="认证"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-badge.verified [data-icon="badgeCheck"]')).toBeTruthy()
     fireEvent.click(within(hub).getByRole('heading', { name: '产品经理' }))
     const drawer = screen.getByTestId('hub-detail-drawer')
     expect(drawer).toHaveClass('secondary-dialog')
-    expect(drawer).toHaveTextContent('已添加')
+    expect(drawer.querySelector('.hub-badge.installed.icon-only[aria-label="已添加"]')).toBeTruthy()
     expect(within(drawer).getByRole('button', { name: '已召唤' })).toBeDisabled()
     fireEvent.click(within(drawer).getByRole('button', { name: '关闭详情' }))
     fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))

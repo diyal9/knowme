@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react'
-import type { AgentRunArtifact, AgentSession, WorkbenchTask } from '../../../shared/api'
+import type { AgentRunArtifact, AgentSession, CapabilityItem, WorkbenchTask } from '../../../shared/api'
 import { workbenchTaskBackLabel, workbenchTaskModeLabel } from '../../../domain/workbench-task-room'
-import { expertArtifactKindLabel, parseExpertArtifactRef } from '../../../domain/expert-artifact'
+import { parseExpertArtifactRef } from '../../../domain/expert-artifact'
 import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
 import { DialogueStatusBar } from '../workbench/DialogueStatusBar'
-import { expertDeliverableTitle, expertDisplayName, expertTaskEventLabel } from '../../../domain/expert-present'
+import { expertDeliverableTitle, expertDisplayName } from '../../../domain/expert-present'
 import { ExpertArtifactPreviewDialog } from './ExpertArtifactPreviewDialog'
 import { ExpertAvatarMark } from './ExpertAvatarMark'
+import { ExpertDeliverableArtifact } from './ExpertDeliverableArtifact'
+import { ExpertTaskCapabilities } from './ExpertTaskCapabilities'
+import { ExpertTaskTimeline } from './ExpertTaskTimeline'
+import { ExpertCollabDialogue } from './ExpertCollabDialogue'
+import { ExpertCollabStageRail, expertCollabStage } from './ExpertCollabStageRail'
+import { AgentComposer } from '../assistant/AgentComposer'
+import { parseExpertWorkbenchDetail, type ExpertWorkbenchDetail } from '../../../domain/expert-workbench-detail'
+import { buildExpertDiscussionContext } from '../../../domain/expert-discussion'
+import { extractExpertPlanSteps, formatExpertPlanMaterial } from '../../../domain/expert-collab-plan'
+import { describeExpertInputNeed } from '../../../domain/expert-input-need'
 
 const STATUS_LABEL: Record<string, string> = {
   draft: '草稿', starting: '正在预检', needs_input: '等待补充', running: '专家执行中',
@@ -15,11 +25,6 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_FOCUS: Record<string, { title: string; detail: string }> = {
-  starting: { title: '正在检查任务条件', detail: '预检通过后会自动开始，无需再次确认。' },
-  running: { title: '专家正在工作', detail: '完成后会在这里提交可验收的正式成果。' },
-  review: { title: '成果等待你验收', detail: '你可以接受成果，或写下具体意见退回修改。' },
-  revising: { title: '专家正在按意见修改', detail: '新版本生成后，旧版本仍会保留。' },
-  completed: { title: '任务已完成', detail: '所有必需交付物均已通过验收。' },
   failed: { title: '本次执行未完成', detail: '执行证据和失败原因保留在任务记录中。' },
   cancelled: { title: '任务已取消', detail: '已产生的任务记录仍可查看。' },
 }
@@ -34,8 +39,17 @@ export function ExpertTaskRoom() {
   const openConfirm = useAppStore((s) => s.openConfirm)
   const enterStudioFromExpertTask = useAppStore((s) => s.enterStudioFromExpertTask)
   const showToast = useAppStore((s) => s.showToast)
+  const loadTasks = useAppStore((s) => s.loadTasks)
+  const hubItems = useAppStore((s) => s.hubItems)
+  const isGenerating = useAppStore((s) => s.isGenerating)
+  const setWorkbenchComposer = useAppStore((s) => s.setWorkbenchComposer)
+  const setRoute = useAppStore((s) => s.setRoute)
+  const setHubTab = useAppStore((s) => s.setHubTab)
+  const setHubQuery = useAppStore((s) => s.setHubQuery)
   const [task, setTask] = useState<WorkbenchTask | null>(null)
-  const [inputNote, setInputNote] = useState('')
+  const [taskResolved, setTaskResolved] = useState(false)
+  const [startingPlan, setStartingPlan] = useState(false)
+  const [expertDetail, setExpertDetail] = useState<ExpertWorkbenchDetail | null>(null)
   const [reviewComment, setReviewComment] = useState('')
   const [reviewingAction, setReviewingAction] = useState('')
   const [reviewError, setReviewError] = useState('')
@@ -43,21 +57,35 @@ export function ExpertTaskRoom() {
   const [artifacts, setArtifacts] = useState<Record<string, AgentRunArtifact>>({})
   const [artifactLoading, setArtifactLoading] = useState<Record<string, boolean>>({})
   const [previewDeliverableId, setPreviewDeliverableId] = useState('')
-  const [activePane, setActivePane] = useState<'process' | 'deliverables'>('process')
   const [reviewEditorId, setReviewEditorId] = useState('')
 
   async function load() {
     if (!expertRoom?.id) return
-    const result = await window.api?.expertTaskGet?.(expertRoom.id).catch(() => null)
+    const result = await window.api?.expertTaskGet?.(expertRoom.taskId || expertRoom.id).catch(() => null)
     setTask(result?.task || null)
+    setTaskResolved(true)
   }
 
   useEffect(() => {
+    setTaskResolved(false)
     void load()
     if (!expertRoom?.id) return undefined
+    if (!expertRoom.taskId) return undefined
     const timer = window.setInterval(() => void load(), 1600)
     return () => window.clearInterval(timer)
-  }, [expertRoom?.id])
+  }, [expertRoom?.id, expertRoom?.taskId])
+
+  useEffect(() => {
+    if (!expertRoom) return
+    const expertId = String(task?.expertId || expertRoom.expertId || expertRoom.id)
+    const fallback = hubItems.find((item) => item.id === expertId) || ({ id: expertId, name: expertRoom.name, kind: 'expert' } as CapabilityItem)
+    setExpertDetail(parseExpertWorkbenchDetail(null, fallback))
+    let active = true
+    void window.api?.expertGet?.(expertId).then((result) => {
+      if (active) setExpertDetail(parseExpertWorkbenchDetail(result, fallback))
+    }).catch(() => null)
+    return () => { active = false }
+  }, [expertRoom?.expertId, expertRoom?.id, expertRoom?.name, hubItems, task?.expertId])
 
   const artifactSignature = (task?.deliverables || [])
     .map((item) => String(item.artifactRef || '').trim())
@@ -98,35 +126,146 @@ export function ExpertTaskRoom() {
   }, [artifactSignature])
 
   useEffect(() => {
-    if (!task?.id) return
-    setActivePane(['review', 'completed'].includes(String(task.status)) ? 'deliverables' : 'process')
-  }, [task?.id, task?.status])
+    if (!task || !expertRoom?.id) return
+    const discussionContext = buildExpertDiscussionContext(task, artifacts)
+    const current = useAppStore.getState().expertRoom
+    if (!current || current.id !== expertRoom.id) return
+    if (JSON.stringify(current.discussionContext) === JSON.stringify(discussionContext)) return
+    useAppStore.setState({
+      expertRoom: {
+        ...current,
+        taskId: current.taskId || task.id,
+        expertId: current.expertId || task.expertId || current.id,
+        discussionContext,
+      },
+    })
+  }, [task, artifacts, expertRoom?.id])
 
   if (!expertRoom) return null
-  const status = String(task?.status || 'starting')
+  const isDraft = taskResolved && !task && !expertRoom.taskId
+  const status = isDraft ? 'draft' : String(task?.status || 'starting')
   const expertName = expertDisplayName(task?.expertName || expertRoom.name)
-  const goal = task?.brief?.goal || task?.goal || expertRoom.goal || ''
-  const materials = task?.brief?.materials || []
+  const expertId = String(task?.expertId || expertRoom.expertId || expertRoom.id)
+  const expertItem = hubItems.find((item) => item.id === expertId)
+    || ({ id: expertId, name: expertName, kind: 'expert', description: expertDetail?.description || '' } as CapabilityItem)
+  const userMessages = expertRoom.messages.filter((message) => message.role === 'user' && String(message.text || '').trim())
+  const firstUserMessage = userMessages[0]
+  const draftGoal = String(expertRoom.goal || firstUserMessage?.text || '').trim()
+  const goal = task?.brief?.goal || task?.goal || draftGoal
   const deliverables = task?.deliverables || []
   const processEvents = task?.events || []
+  const hasActiveProcessStep = ['starting', 'running', 'revising'].includes(status)
   const previewDeliverable = deliverables.find((item) => String(item.deliverableId) === previewDeliverableId) || null
-  const statusFocus = STATUS_FOCUS[status] || {
-    title: STATUS_LABEL[status] || '任务状态更新中',
-    detail: status === 'needs_input' ? '补充所需信息后，专家会继续执行。' : '正在同步最新任务状态。',
-  }
+  const dynamicPlanSteps = extractExpertPlanSteps(expertRoom.messages)
+  const hasDynamicPlan = dynamicPlanSteps.length >= 2
+  const planReady = isDraft && hasDynamicPlan && !isGenerating
+  const stageIndex = expertCollabStage(status, hasDynamicPlan)
+  const stageLabel = ['澄清需求', '确认计划', '专业执行', '验收结果', '任务完成'][stageIndex]
+  const inputNeed = status === 'needs_input'
+    ? describeExpertInputNeed(task?.events?.at(-1)?.summary, goal)
+    : null
+  const statusFocus = inputNeed
+    ? { title: inputNeed.title, detail: inputNeed.detail }
+    : STATUS_FOCUS[status]
+  const showStatusFocus = Boolean(statusFocus)
+  const hasPendingReview = deliverables.some((item) => item.acceptanceStatus === 'pending')
+  const showInteraction = Boolean(reviewNotice)
+    || ['needs_input', 'completed', 'failed', 'revising'].includes(status)
+    || hasPendingReview
 
-  async function provideInput() {
-    if (!task || !inputNote.trim()) return
-    const result = await window.api?.expertTaskProvideInput?.({
-      taskId: task.id,
-      note: inputNote.trim(),
-      materials: [{ id: `followup-${Date.now()}`, type: 'text', title: '补充说明', content: inputNote.trim() }],
-    })
+  async function provideInput(noteOverride?: string) {
+    const note = String(noteOverride || '').trim()
+    if (!task || !note) return
+    const result = await window.api?.expertTaskProvideInput?.({ taskId: task.id, note }).catch(() => null)
+    if (!result?.task) {
+      showToast(result?.error || '未能继续任务，请稍后重试')
+      return
+    }
     if (result?.task) {
       setTask(result.task)
       publishTaskUpdate(result.task)
     }
-    setInputNote('')
+    setWorkbenchComposer('')
+  }
+
+  function sendClarifyingPrompt(prompt: string) {
+    setWorkbenchComposer(prompt)
+    queueMicrotask(() => useAppStore.getState().sendWorkbenchMessage())
+  }
+
+  function focusComposerWith(text: string) {
+    setWorkbenchComposer(text)
+    queueMicrotask(() => document.getElementById('agentInput')?.focus())
+  }
+
+  function openRequiredCapability() {
+    if (!inputNeed || inputNeed.kind !== 'capability') return
+    setHubTab(/技能|Skill/i.test(inputNeed.item) ? 'skill' : 'connector')
+    setHubQuery(inputNeed.item)
+    setRoute('capabilities')
+  }
+
+  async function continueRequiredExecution() {
+    if (!inputNeed || inputNeed.kind !== 'execution') return
+    await provideInput(`请先完成「${inputNeed.item}」，并基于真实读取结果继续执行。`)
+  }
+
+  async function continueWithReroutedSource() {
+    if (!inputNeed || inputNeed.kind !== 'reroute') return
+    await provideInput(`不要进行「${inputNeed.item}」。请改用已授权的飞书连接器读取${inputNeed.alternative || '任务所需内容'}，并按原目标继续。`)
+  }
+
+  async function confirmPlan() {
+    const room = expertRoom
+    if (!room || !isDraft || !draftGoal || startingPlan) return
+    const expertId = String(room.expertId || room.id)
+    const outputs = expertDetail?.outputs?.length
+      ? expertDetail.outputs
+      : [{ id: 'primary', label: '可验收的专业成果' }]
+    const conversation = userMessages.map((message) => String(message.text || '').trim()).filter(Boolean).join('\n\n')
+    const planMaterial = formatExpertPlanMaterial(dynamicPlanSteps)
+    setStartingPlan(true)
+    try {
+      const result = await window.api?.expertTaskCreateStart?.({
+        title: draftGoal.replace(/\s+/g, ' ').slice(0, 20),
+        expertId,
+        expertName,
+        knowledgeRefs: room.knowledgeRefs,
+        brief: {
+          goal: draftGoal,
+          materials: [
+            ...(conversation ? [{ id: 'clarification-record', type: 'text', title: '需求澄清记录', content: conversation }] : []),
+            ...(planMaterial ? [{ id: 'confirmed-plan', type: 'text', title: '已确认的执行计划', content: planMaterial }] : []),
+          ],
+          requiresMaterials: expertDetail?.requiresMaterials === true,
+          constraints: [],
+          deliverables: outputs.map((item) => ({ id: item.id, title: item.label, type: 'document', required: true })),
+        },
+      })
+      if (!result?.ok || !result.task?.id) throw new Error(result?.error || '任务未能开始')
+      setTask(result.task)
+      setTaskResolved(true)
+      useAppStore.setState({
+        expertRoom: {
+          ...room,
+          id: result.task.id,
+          taskId: result.task.id,
+          expertId,
+          goal: draftGoal,
+          messages: [
+            ...room.messages,
+            { id: `plan-${Date.now()}`, role: 'assistant', text: '计划已确认。我会按约定执行，并在需要你判断时停下来。' },
+          ],
+        },
+      })
+      publishTaskUpdate(result.task)
+      await loadTasks()
+      showToast('计划已确认，专家开始执行')
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : '任务未能开始')
+    } finally {
+      setStartingPlan(false)
+    }
   }
 
   async function review(deliverableId: string, decision: 'accept' | 'changes_requested') {
@@ -185,6 +324,13 @@ export function ExpertTaskRoom() {
       confirmLabel: '删除任务',
       danger: true,
       onConfirm: async () => {
+        if (!['failed', 'cancelled', 'completed'].includes(status)) {
+          const cancelled = await window.api?.expertTaskCancel?.(task.id).catch(() => null)
+          if (cancelled && cancelled.ok === false) {
+            showToast(cancelled.error || '停止任务失败，未删除任务记录')
+            return
+          }
+        }
         const result = await window.api?.workbenchTaskArchive?.(task.id).catch(() => null)
         if (!result?.ok) {
           showToast(result?.error || '删除任务失败，请稍后重试')
@@ -220,6 +366,129 @@ export function ExpertTaskRoom() {
     })
   }
 
+  function renderInteractionTurn() {
+    if (!showInteraction) return null
+    const interactionTitle = hasPendingReview
+      ? '请验收成果'
+      : status === 'needs_input'
+        ? inputNeed?.kind === 'execution'
+          ? '补做读取后继续'
+          : inputNeed?.kind === 'reroute'
+            ? '调整路径后继续'
+          : inputNeed?.kind === 'capability'
+            ? '启用后继续'
+            : '补充后继续'
+        : status === 'completed'
+          ? '成果已完成'
+          : status === 'failed'
+            ? '执行未完成'
+            : '继续修改'
+
+    return (
+      <div className="wb-expert-action-turn" data-testid="expert-action-turn">
+        <span className="wb-expert-process-actor" aria-hidden="true">
+          <span className="wb-expert-system-mark"><Icon name="check" /></span>
+        </span>
+        <section className="wb-expert-hil-panel" aria-labelledby="expertInteractionTitle">
+          <div className="wb-expert-hil-heading">
+            <h2 id="expertInteractionTitle">{interactionTitle}</h2>
+          </div>
+          {reviewNotice ? <div className="wb-review-notice" role="status">{reviewNotice}</div> : null}
+          {status === 'needs_input' ? (
+            <div className={`wb-delivery-attention is-${inputNeed?.kind || 'information'}`} data-testid="expert-needs-input">
+              <dl className="wb-expert-input-need">
+                <div>
+                  <dt>{inputNeed?.kind === 'execution' ? '尚未完成' : inputNeed?.kind === 'reroute' ? '无需' : inputNeed?.kind === 'capability' ? '缺少能力' : '需要补充'}</dt>
+                  <dd>{inputNeed?.item}</dd>
+                </div>
+                <div>
+                  <dt>{inputNeed?.kind === 'reroute' ? '改用' : '下一步'}</dt>
+                  <dd>{inputNeed?.kind === 'reroute' ? inputNeed.alternative : inputNeed?.nextStep}</dd>
+                </div>
+              </dl>
+              <div className="wb-expert-terminal-actions">
+                {inputNeed?.kind === 'reroute' ? (
+                  <button type="button" className="wb-modal-btn primary" onClick={() => void continueWithReroutedSource()}>改用飞书内容继续</button>
+                ) : inputNeed?.kind === 'execution' ? (
+                  <>
+                    <button type="button" className="wb-modal-btn primary" onClick={() => void continueRequiredExecution()}>继续执行读取</button>
+                    <button type="button" className="wb-modal-btn" onClick={() => focusComposerWith(`不再执行${inputNeed.item}，请仅根据现有材料继续完成任务。`)}>仅用现有材料</button>
+                  </>
+                ) : inputNeed?.kind === 'capability' ? (
+                  <>
+                    <button type="button" className="wb-modal-btn primary" onClick={openRequiredCapability}>前往能力中心</button>
+                    <button type="button" className="wb-modal-btn" onClick={() => focusComposerWith(`不使用${inputNeed.item}，请调整方案并继续。`)}>调整任务要求</button>
+                  </>
+                ) : (
+                  <button type="button" className="wb-modal-btn primary" onClick={() => focusComposerWith('')}>在下方补充</button>
+                )}
+              </div>
+            </div>
+          ) : status === 'completed' ? (
+            <div className="wb-expert-reuse">
+              <div><strong>继续流转成果</strong><span>将已验收成果作为后续流程输入。</span></div>
+              <button type="button" className="wb-modal-btn" onClick={() => proposeWorkflow('reuse')}>加入工作流</button>
+            </div>
+          ) : status === 'failed' ? (
+            <div className="wb-expert-reuse is-overflow">
+              <div><strong>本次执行未完成</strong><span>可以重试，或改用多专家流程。</span></div>
+              <div className="wb-expert-terminal-actions">
+                <button type="button" className="wb-modal-btn primary" onClick={() => void retryTask()}>重新执行</button>
+                <button type="button" className="wb-modal-btn" onClick={() => proposeWorkflow('overflow')}>转为工作流</button>
+              </div>
+            </div>
+          ) : status === 'revising' ? (
+            <div className="wb-expert-reuse is-overflow">
+              <div><strong>继续生成新版本</strong><span>上次修改未完成，可从保留的意见和产物继续执行。</span></div>
+              <button type="button" className="wb-modal-btn primary" onClick={() => void retryTask()}>继续修改</button>
+            </div>
+          ) : hasPendingReview ? (
+            <div className="wb-expert-review-actions-list">
+              {deliverables.filter((item) => item.acceptanceStatus === 'pending').map((item) => {
+                const deliverableId = String(item.deliverableId)
+                const returning = reviewingAction === `${deliverableId}:changes_requested`
+                const accepting = reviewingAction === `${deliverableId}:accept`
+                const editorOpen = reviewEditorId === deliverableId
+                return (
+                  <div className="wb-deliverable-review" key={`review-${deliverableId}`}>
+                    <div className="wb-deliverable-review-title">
+                      <span>待验收</span>
+                      <strong>{expertDeliverableTitle(item.title)}</strong>
+                    </div>
+                    {editorOpen ? (
+                      <>
+                        <label className="wb-sr-only" htmlFor={`expert-review-${deliverableId}`}>修改「{expertDeliverableTitle(item.title)}」</label>
+                        <textarea
+                          id={`expert-review-${deliverableId}`}
+                          value={reviewComment}
+                          onChange={(event) => { setReviewComment(event.target.value); setReviewError('') }}
+                          placeholder="写明需要修改的内容"
+                          rows={3}
+                          autoFocus
+                          aria-invalid={reviewError ? 'true' : undefined}
+                        />
+                        <span className="wb-review-error" role="alert">{reviewError}</span>
+                        <div className="wb-deliverable-review-actions">
+                          <button type="button" className="wb-modal-btn" disabled={!!reviewingAction} onClick={() => { setReviewEditorId(''); setReviewError('') }}>取消</button>
+                          <button type="button" className="wb-modal-btn primary" disabled={!!reviewingAction} onClick={() => void review(deliverableId, 'changes_requested')}>{returning ? '正在退回…' : '确认退回'}</button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="wb-deliverable-review-actions is-compact">
+                        <button type="button" className="wb-modal-btn" disabled={!!reviewingAction} onClick={() => setReviewEditorId(deliverableId)}>退回修改</button>
+                        <button type="button" className="wb-modal-btn primary" disabled={!!reviewingAction} onClick={() => void review(deliverableId, 'accept')}>{accepting ? '正在接受…' : '接受成果'}</button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+        </section>
+      </div>
+    )
+  }
+
   return (
     <>
       <DialogueStatusBar
@@ -228,213 +497,135 @@ export function ExpertTaskRoom() {
         onBack={closeExpertRoom}
         backLabel={workbenchTaskBackLabel('expert-chat')}
       />
-      <main className="wb-expert-workspace" aria-label="专家协作工作区">
-        <aside className="wb-expert-control" data-testid="expert-room" aria-label="智能体与任务概况">
-          <section className="wb-expert-agent-card" aria-label="执行智能体">
-            <ExpertAvatarMark
-              agent={{ id: task?.expertId || expertRoom.id, name: expertName }}
-              className="wb-expert-agent-avatar"
-              size={48}
-            />
-            <div>
-              <span>执行智能体</span>
-              <strong>{expertName}</strong>
-              <small>专家协作 · 单一专业节点</small>
-            </div>
-          </section>
-          <section className="wb-expert-brief-card" aria-labelledby="expertBriefTitle">
-            <span className="wb-expert-side-label" id="expertBriefTitle">本次委托</span>
-            <div className="wb-expert-brief-field">
-              <span>交付目标</span>
-              <p>{goal || '等待同步用户输入目标。'}</p>
-            </div>
-            <div className="wb-expert-brief-field is-materials">
-              <span>任务材料</span>
-              {materials.length ? (
-                <ul>
-                  {materials.map((item) => (
-                    <li key={item.id || `${item.title}-${item.ref || ''}`}>
-                      <strong>{item.title || '补充材料'}</strong>
-                      {item.content || item.ref ? <p>{item.content || item.ref}</p> : null}
-                    </li>
-                  ))}
-                </ul>
-              ) : <p className="is-empty">未提供额外材料</p>}
-            </div>
-          </section>
-
-          <section className="wb-expert-side-actions" aria-labelledby="expertInteractionTitle">
-            <h2 className="wb-sr-only" id="expertInteractionTitle">操作交互</h2>
-            {reviewNotice ? <div className="wb-review-notice" role="status">{reviewNotice}</div> : null}
-            {status === 'needs_input' ? (
-              <div className="wb-delivery-attention" data-testid="expert-needs-input">
-                <div><strong>补充后继续</strong><p>{task?.events?.at(-1)?.summary || '请补充专家继续工作所需的材料。'}</p></div>
-                <textarea value={inputNote} onChange={(event) => setInputNote(event.target.value)} placeholder="补充背景、数据或限制条件" rows={3} />
-                <button type="button" className="wb-modal-btn primary" onClick={() => void provideInput()}>提交并继续</button>
-              </div>
-            ) : status === 'completed' ? (
-              <div className="wb-expert-reuse">
-                <div><strong>继续流转成果</strong><span>将已验收成果作为后续流程输入。</span></div>
-                <button type="button" className="wb-modal-btn" onClick={() => proposeWorkflow('reuse')}>加入工作流</button>
-              </div>
-            ) : status === 'failed' ? (
-              <div className="wb-expert-reuse is-overflow">
-                <div><strong>本次执行未完成</strong><span>可以重试，或改用多专家流程。</span></div>
-                <div className="wb-expert-terminal-actions">
-                  <button type="button" className="wb-modal-btn primary" onClick={() => void retryTask()}>重新执行</button>
-                  <button type="button" className="wb-modal-btn" onClick={() => proposeWorkflow('overflow')}>转为工作流</button>
+      <main className="wb-expert-workspace" data-testid="expert-room" aria-label="专家协作工作区">
+        <section className="wb-expert-review-pane is-flat" data-testid="expert-delivery-room" aria-label="执行过程与成果">
+          {showStatusFocus ? (
+            <header className="wb-expert-pane-bar">
+              <div className="wb-expert-pane-status" aria-label={`当前状态：${STATUS_LABEL[status] || status}`}>
+                <span className={`wb-task-state-dot ${status === 'failed' ? 'failed' : 'running'}`} aria-hidden="true" />
+                <div>
+                  <strong>{statusFocus.title}</strong>
+                  <small>{statusFocus.detail}</small>
                 </div>
               </div>
-            ) : deliverables.some((item) => item.acceptanceStatus === 'pending') ? (
-              <div className="wb-expert-review-actions-list">
-                {deliverables.filter((item) => item.acceptanceStatus === 'pending').map((item) => {
-                  const deliverableId = String(item.deliverableId)
-                  const returning = reviewingAction === `${deliverableId}:changes_requested`
-                  const accepting = reviewingAction === `${deliverableId}:accept`
-                  const editorOpen = reviewEditorId === deliverableId
-                  return (
-                    <div className="wb-deliverable-review" key={`review-${deliverableId}`}>
-                      <div className="wb-deliverable-review-title">
-                        <span>待验收</span>
-                        <strong>{expertDeliverableTitle(item.title)}</strong>
-                      </div>
-                      {editorOpen ? (
-                        <>
-                          <label className="wb-sr-only" htmlFor={`expert-review-${deliverableId}`}>修改「{expertDeliverableTitle(item.title)}」</label>
-                          <textarea
-                            id={`expert-review-${deliverableId}`}
-                            value={reviewComment}
-                            onChange={(event) => { setReviewComment(event.target.value); setReviewError('') }}
-                            placeholder="写明需要修改的内容"
-                            rows={3}
-                            autoFocus
-                            aria-invalid={reviewError ? 'true' : undefined}
-                          />
-                          <span className="wb-review-error" role="alert">{reviewError}</span>
-                          <div className="wb-deliverable-review-actions">
-                            <button type="button" className="wb-modal-btn" disabled={!!reviewingAction} onClick={() => { setReviewEditorId(''); setReviewError('') }}>取消</button>
-                            <button type="button" className="wb-modal-btn primary" disabled={!!reviewingAction} onClick={() => void review(deliverableId, 'changes_requested')}>{returning ? '正在退回…' : '确认退回'}</button>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="wb-deliverable-review-actions is-compact">
-                          <button type="button" className="wb-modal-btn" disabled={!!reviewingAction} onClick={() => setReviewEditorId(deliverableId)}>退回修改</button>
-                          <button type="button" className="wb-modal-btn primary" disabled={!!reviewingAction} onClick={() => void review(deliverableId, 'accept')}>{accepting ? '正在接受…' : '接受成果'}</button>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="wb-expert-action-hint">
-                <strong>{['starting', 'running', 'revising'].includes(status) ? '专家正在处理' : '当前无需操作'}</strong>
-                <span>{statusFocus.detail}</span>
-              </div>
-            )}
-            {['failed', 'cancelled', 'completed'].includes(status) ? (
-              <button type="button" className="wb-expert-delete-link" onClick={requestDeleteTask}>删除本任务</button>
-            ) : null}
-          </section>
-        </aside>
-        <section className="wb-expert-review-pane is-flat" data-testid="expert-delivery-room" aria-label="执行过程与成果">
-          <header className="wb-expert-pane-bar">
-            <div className="wb-expert-pane-status" aria-label={`当前状态：${STATUS_LABEL[status] || status}`}>
-              <span className={`wb-task-state-dot ${status === 'completed' ? 'done' : status === 'failed' ? 'failed' : 'running'}`} aria-hidden="true" />
-              <strong>{statusFocus.title}</strong>
-              <span>{statusFocus.detail}</span>
-            </div>
-            <nav className="wb-expert-pane-tabs" role="tablist" aria-label="任务详情">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activePane === 'process'}
-                className={activePane === 'process' ? 'active' : ''}
-                onClick={() => setActivePane('process')}
-              >
-                <Icon name="history" />
-                <span className="wb-expert-pane-tab-label">执行过程</span>
-                <span className="wb-expert-pane-tab-count">{task?.events?.length || 0}</span>
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={activePane === 'deliverables'}
-                className={activePane === 'deliverables' ? 'active' : ''}
-                onClick={() => setActivePane('deliverables')}
-              >
-                <Icon name="note" />
-                <span className="wb-expert-pane-tab-label">成果物</span>
-                <span className="wb-expert-pane-tab-count">{deliverables.length}</span>
-              </button>
-            </nav>
-          </header>
+            </header>
+          ) : null}
+          <ExpertCollabStageRail active={stageIndex} />
 
           <div className="wb-expert-pane-content">
-            {activePane === 'process' ? (
-              <section role="tabpanel" aria-label="执行过程">
-                <h2 className="wb-sr-only">执行过程</h2>
-                {processEvents.length ? (
-                  <ol className="wb-expert-process-list">
-                    {processEvents.map((event, index) => (
-                      <li key={event.id}>
-                        <span className="wb-expert-process-index">{index + 1}</span>
-                        <div>
-                          <strong>{expertTaskEventLabel(event.type, event.summary)}</strong>
-                          {event.summary ? <p>{event.summary}</p> : null}
-                        </div>
-                        <time>{event.createdAt ? new Date(event.createdAt).toLocaleString() : ''}</time>
-                      </li>
-                    ))}
-                  </ol>
-                ) : <p className="wb-expert-flat-empty">任务记录将在预检后出现。</p>}
+            {!taskResolved ? (
+              <div className="wb-expert-room-loading" role="status"><span /><strong>正在进入协作</strong></div>
+            ) : isDraft ? (
+              <section className="wb-expert-draft-room" role="tabpanel" aria-label="需求澄清与计划">
+                <ExpertCollabDialogue
+                  expert={expertItem}
+                  messages={expertRoom.messages}
+                  empty={!expertRoom.messages.length}
+                  generating={isGenerating}
+                  composer={false}
+                  onPrompt={sendClarifyingPrompt}
+                />
+                {!firstUserMessage ? (
+                  <div className="wb-expert-clarify-choices" aria-label="常见协作目标">
+                    <button type="button" onClick={() => sendClarifyingPrompt('我需要你分析现状，给出专业判断和下一步建议。')}>分析并给建议</button>
+                    <button type="button" onClick={() => sendClarifyingPrompt('我需要你把现有材料整理成一份可以直接使用的文档。')}>整理成文档</button>
+                    <button type="button" onClick={() => sendClarifyingPrompt('我有一份现有成果，希望你检查问题并提出改进方案。')}>检查并改进</button>
+                  </div>
+                ) : null}
+                {planReady ? (
+                  <section className="wb-expert-plan-card" aria-labelledby="expertPlanTitle">
+                    <header>
+                      <span className="wb-expert-plan-mark"><Icon name="check" /></span>
+                      <div><span>协作计划</span><h2 id="expertPlanTitle">建议按 {dynamicPlanSteps.length} 步执行</h2></div>
+                      <small>待确认</small>
+                    </header>
+                    <dl>
+                      <div><dt>目标</dt><dd>{draftGoal}</dd></div>
+                      <div><dt>交付</dt><dd>{expertDetail?.outputs?.map((item) => item.label).join('、') || '可验收的专业成果'}</dd></div>
+                      <div><dt>验收</dt><dd>目标完整、结论可核验、结果可直接使用</dd></div>
+                    </dl>
+                    <ol aria-label="本次执行步骤">
+                      {dynamicPlanSteps.map((step, index) => <li key={`${index}-${step}`}><span>{index + 1}</span><strong>{step}</strong></li>)}
+                    </ol>
+                    <footer>
+                      <button type="button" className="wb-modal-btn" onClick={() => document.getElementById('agentInput')?.focus()}>继续澄清</button>
+                      <button type="button" className="wb-modal-btn primary" disabled={startingPlan} onClick={() => void confirmPlan()}>{startingPlan ? '正在开始…' : '确认计划并执行'}</button>
+                    </footer>
+                  </section>
+                ) : null}
               </section>
             ) : (
-              <section role="tabpanel" aria-label="成果物">
-                <h2 className="wb-sr-only">成果物</h2>
-                {deliverables.length ? (
-                  <div className="wb-expert-output-list">
-                    {deliverables.map((item) => {
-                      const comments = item.comments || []
-                      const revising = item.acceptanceStatus === 'changes_requested' && ['revising', 'running'].includes(status)
-                      const stateLabel = item.acceptanceStatus === 'accepted'
-                        ? '已接受'
-                        : revising
-                          ? '专家修改中'
-                          : item.acceptanceStatus === 'changes_requested'
-                            ? '已退回修改'
-                            : '等待验收'
-                      return (
-                        <article className="wb-expert-output-group" key={`${item.deliverableId}-${item.version}`}>
-                          <button
-                            type="button"
-                            className="wb-expert-output-row"
-                            aria-label={`预览成果物 ${expertDeliverableTitle(item.title)}`}
-                            onClick={() => setPreviewDeliverableId(String(item.deliverableId))}
-                          >
-                            <span className="wb-expert-output-icon" aria-hidden="true"><Icon name="note" /></span>
-                            <span className="wb-expert-output-copy">
-                              <strong>{expertDeliverableTitle(item.title)}</strong>
-                              <small>{expertArtifactKindLabel(item.type || 'document')} · 第 {item.version || 1} 版</small>
-                            </span>
-                            <span className={`wb-deliverable-state is-${revising ? 'revising' : item.acceptanceStatus || 'pending'}`}>{stateLabel}</span>
-                            <Icon name="chevronRight" />
-                          </button>
-                          {comments.length ? <p className="wb-expert-output-note">最近修改意见：{comments.at(-1)?.body}</p> : null}
-                        </article>
-                      )
-                    })}
+              <section aria-label="专家协作记录">
+                <h2 className="wb-sr-only">专家协作记录</h2>
+                <ExpertTaskTimeline
+                  events={processEvents}
+                  expertId={expertId}
+                  expertName={expertName}
+                  hasActiveStep={hasActiveProcessStep}
+                />
+                {deliverables.map((item) => {
+                  const revising = item.acceptanceStatus === 'changes_requested' && ['revising', 'running'].includes(status)
+                  const stateLabel = item.acceptanceStatus === 'accepted'
+                    ? '已接受'
+                    : revising
+                      ? '修改中'
+                      : item.acceptanceStatus === 'changes_requested'
+                        ? '已退回'
+                        : '待验收'
+                  const artifact = item.artifactRef ? artifacts[item.artifactRef] : null
+                  return (
+                    <article className="wb-expert-inline-result" key={`${item.deliverableId}-${item.version}`}>
+                      <header>
+                        <ExpertAvatarMark agent={{ id: expertId, name: expertName }} className="wb-expert-inline-result-avatar" size={32} />
+                        <div><strong>{expertName}</strong><span>提交了成果</span></div>
+                        <span className={`wb-deliverable-state is-${revising ? 'revising' : item.acceptanceStatus || 'pending'}`}>{stateLabel}</span>
+                      </header>
+                      <div className="wb-expert-inline-result-body">
+                        <ExpertDeliverableArtifact
+                          artifact={artifact}
+                          fallback={task?.resultSummary}
+                          loading={Boolean(item.artifactRef && artifactLoading[item.artifactRef])}
+                          title={expertDeliverableTitle(item.title)}
+                          type={item.type}
+                          version={item.version}
+                        />
+                      </div>
+                      <footer>
+                        <button type="button" onClick={() => setPreviewDeliverableId(String(item.deliverableId))}>展开查看 <Icon name="chevronRight" /></button>
+                      </footer>
+                    </article>
+                  )
+                })}
+                {expertRoom.messages.length > 1 ? (
+                  <div className="wb-expert-followup-thread">
+                    <ExpertCollabDialogue
+                      expert={expertItem}
+                      messages={expertRoom.messages}
+                      empty={false}
+                      generating={isGenerating}
+                      composer={false}
+                      onPrompt={sendClarifyingPrompt}
+                    />
                   </div>
-                ) : (
-                  <div className="wb-delivery-empty">
-                    <strong>{status === 'failed' ? '本次执行未产生可验收成果' : '专家正在准备交付物'}</strong>
-                    <span>{task?.events?.at(-1)?.summary || '完成后会在这里出现版本化成果。'}</span>
-                  </div>
-                )}
+                ) : null}
+                {renderInteractionTurn()}
               </section>
             )}
           </div>
+          <div className="wb-expert-composer-dock">
+            <AgentComposer
+              surface="workbench"
+              placeholder={isDraft ? '回答专家的问题，或补充目标和材料… @ 选文件' : inputNeed?.composerPlaceholder || '继续讨论、补充材料或调整要求… @ 选文件'}
+              onSubmit={status === 'needs_input' ? (text) => provideInput(text) : undefined}
+            />
+          </div>
         </section>
+        <ExpertTaskCapabilities
+          task={task}
+          stageLabel={stageLabel}
+          goal={goal}
+          onDelete={task ? requestDeleteTask : undefined}
+        />
       </main>
       {previewDeliverable ? (
         <ExpertArtifactPreviewDialog

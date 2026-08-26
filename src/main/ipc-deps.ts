@@ -130,6 +130,7 @@ function agentDeps(ctx) {
     getAgentTeamRuntime: () => ctx.agentTeamRuntime,
     workbenchAgentRunControllers: ctx.workbenchAgentRunControllers,
     workbenchAgentRunEvents: ctx.workbenchAgentRunEvents,
+    workbenchExternalRunContexts: ctx.workbenchExternalRunContexts,
     createWorkbenchAgentPortFactory: ctx.createWorkbenchAgentPortFactory,
     agentRuntimePortFactories: ctx.agentRuntimePortFactories,
     getWorkbenchAgentTeamRunner: ctx.getWorkbenchAgentTeamRunner,

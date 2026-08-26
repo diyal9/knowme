@@ -14,15 +14,43 @@ ctx.crypto = require('crypto');
 ctx.https = require('https');
 ctx.http = require('http');
 ctx.__bind_spawn = require('child_process'), ctx.spawn = ctx.__bind_spawn.spawn;
+
+function resolveWritableUserDataPath(ctx, preferred) {
+    const candidates = [];
+    const safeAppend = (dir) => {
+        if (dir && !candidates.includes(dir))
+            candidates.push(dir);
+    };
+    safeAppend(preferred);
+    safeAppend(ctx.path.join(ctx.app.getPath('appData'), 'KnowMe'));
+    safeAppend(ctx.path.join(ctx.app.getPath('temp'), 'KnowMe'));
+    for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
+        try {
+            ctx.fs.mkdirSync(candidate, { recursive: true });
+            const marker = ctx.path.join(candidate, '.knowme_write_test');
+            const content = `${Date.now()}`;
+            ctx.fs.writeFileSync(marker, content, 'utf8');
+            ctx.fs.unlinkSync(marker);
+            return candidate;
+        }
+        catch {
+            continue;
+        }
+    }
+    return ctx.path.join(ctx.app.getPath('temp'), 'KnowMe');
+}
 // 知我 KnowMe：独立 userData，不迁移旧版应用数据
 ctx.app.setName('KnowMe');
 try {
     const testUserData = process.env.KNOWME_TEST_SEAM === '1'
         ? String(process.env.KNOWME_TEST_USER_DATA_DIR || '').trim()
         : '';
-    ctx.app.setPath('userData', testUserData
+    const preferredUserData = testUserData
         ? ctx.path.resolve(testUserData)
-        : ctx.path.join(ctx.app.getPath('appData'), 'KnowMe'));
+        : ctx.path.join(ctx.app.getPath('appData'), 'KnowMe');
+    const finalUserData = resolveWritableUserDataPath(ctx, preferredUserData);
+    ctx.app.setPath('userData', finalUserData);
 }
 catch { /* path may already be locked */ }
 /** @type {'' | 'remote' | 'crash' | 'env'} */
@@ -53,6 +81,7 @@ if (process.platform === 'win32') {
         if (windowsGpuPolicy.applyRdpSwiftShader) {
             ctx.app.commandLine.appendSwitch('in-process-gpu');
             ctx.app.commandLine.appendSwitch('use-angle', 'swiftshader');
+            ctx.app.commandLine.appendSwitch('use-gl', 'swiftshader');
         }
         ctx.app.commandLine.appendSwitch('disable-gpu');
         ctx.app.commandLine.appendSwitch('disable-gpu-compositing');
@@ -182,7 +211,10 @@ ctx.agentProfileStore = require('../lib/agent-profile-store');
 ctx.workbenchContextStore = require('../lib/workbench-context-store');
 ctx.workbenchLaunchController = require('../lib/workbench-launch-controller');
 ctx.getConnectorsApi = function getConnectorsApi() {
-    return ctx.connectorsLib.bindUserData(() => ctx.app.getPath('userData'));
+    return ctx.connectorsLib.bindUserData(() => ctx.app.getPath('userData'), {
+        safeStorage: ctx.safeStorage,
+        getWorkflowStore: () => ctx.getWorkbenchWorkflowPackageStore(),
+    });
 };
 ctx.CATALOG_ROOT = (() => {
     const resolved = ctx.path.resolve(ctx.path.join(__dirname, '..', 'catalog'));
@@ -260,6 +292,13 @@ ctx.ensureCapabilityHub = function ensureCapabilityHub() {
             getKnowledgeCatalog: () => ctx.listProvidersRedacted(),
             resolveProviderById: (id) => ctx.resolveProviderById(id),
             getActiveProvider: () => ctx.resolveActiveProvider(),
+            ingestExternalKnowledge: async ({ files, repositoryRoot }) => {
+                const userData = ctx.app.getPath('userData');
+                const source = repositoryRoot ? { id: `import-${Date.now()}`, type: 'local', rootPath: repositoryRoot } : null;
+                return ctx.llmwikiService.ingest(userData, { files }, {
+                    sources: source ? [source] : [],
+                });
+            },
             // 专家卸载后清理工作模式绑定 + 个人工作流引用，避免编排保存撞上幽灵专家
             onExpertUninstalled: (expertId) => {
                 let modeCleanup = null;

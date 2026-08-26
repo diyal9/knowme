@@ -18,7 +18,7 @@
     'coffee', 'mail', 'wechat',
     // 工作台：必须用 24 viewBox，否则 path 被 16 裁切显得「残缺」
     'workbench', 'workflow', 'users', 'play', 'step', 'refresh', 'automation', 'clock',
-    'database', 'component', 'capabilityStack', 'network', 'flask', 'server', 'clipboardCheck',
+    'database', 'component', 'capabilityStack', 'network', 'flask', 'server', 'clipboardCheck', 'wrench', 'badgeCheck',
     'panelsTopLeft', 'terminal', 'arrowLeftRight',
     'save', 'alignLeft', 'alignTop', 'alignCenterH', 'layoutTidy', 'square',
     'gamepad',
@@ -192,6 +192,8 @@
     flask: `<path d="M9 3h6"/><path d="M10 3v6.5l-5.4 8.1A2.3 2.3 0 0 0 6.5 21h11a2.3 2.3 0 0 0 1.9-3.4L14 9.5V3"/><path d="M8 15h8"/>`,
     server: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 7h.01"/><path d="M7 11h.01"/><path d="M7 15h.01"/><path d="M11 7h6"/><path d="M11 11h6"/><path d="M11 15h6"/>`,
     clipboardCheck: `<rect width="16" height="18" x="4" y="3" rx="2"/><path d="M9 3V2h6v1"/><path d="m8 13 2 2 5-5"/>`,
+    wrench: `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/>`,
+    badgeCheck: `<path d="M3.85 8.62a4 4 0 0 1 4.77-4.77 4 4 0 0 1 6.76 0 4 4 0 0 1 4.77 4.77 4 4 0 0 1 0 6.76 4 4 0 0 1-4.77 4.77 4 4 0 0 1-6.76 0 4 4 0 0 1-4.77-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/>`,
     panelsTopLeft: `<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>`,
     terminal: `<polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/>`,
     users: `<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>`,

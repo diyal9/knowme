@@ -2,12 +2,14 @@ export function WorkbenchListToggle({
   id,
   expanded,
   remaining,
+  label,
   hidden,
   onToggle,
 }: {
   id: string
   expanded: boolean
   remaining: number
+  label?: string
   hidden?: boolean
   onToggle: () => void
 }) {
@@ -21,7 +23,7 @@ export function WorkbenchListToggle({
       data-testid={id}
       onClick={onToggle}
     >
-      <span className="wb-list-toggle-text">{expanded ? '收起' : `更多（${remaining}）`}</span>
+      <span className="wb-list-toggle-text">{expanded ? '收起' : label ? `${label} ${remaining} 条` : `更多（${remaining}）`}</span>
       <span className="wb-list-toggle-mark" aria-hidden="true" />
     </button>
   )

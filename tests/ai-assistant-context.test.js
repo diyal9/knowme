@@ -5,6 +5,7 @@ const { describe, it } = require('node:test');
 const assert = require('node:assert');
 const {
   assembleCorePrompt,
+  corePromptBlockIds,
   capPromptText,
 } = require('../src/lib/knowme-system-prompt')
 const {
@@ -20,12 +21,14 @@ describe('ai-assistant-context', () => {
   it('keeps chat-tier core shorter than the full KnowMe base prompt', () => {
     const chat = assembleCorePrompt({ tier: 'chat', toolsEnabled: false })
     const full = assembleCorePrompt({ tier: 'assist', toolsEnabled: true })
-    assert.ok(chat.includes('你是用户的智能工作伙伴（KnowMe/知我）'))
-    assert.ok(chat.includes('禁止幻觉'))
+    assert.ok(chat.includes('你运行在 KnowMe（知我）中'))
+    assert.ok(chat.includes('事实与权限'))
     assert.ok(!chat.includes('feishu.search_docs'))
-    assert.ok(!chat.includes('```suggestion'))
+    assert.ok(!chat.includes('结构化选择'))
     assert.ok(full.includes('feishu.search_docs'))
     assert.ok(chat.length < full.length)
+    assert.ok(chat.length <= 1200)
+    assert.ok(full.length <= 2200)
   })
 
   it('caps oversized user preferences', () => {
@@ -35,39 +38,45 @@ describe('ai-assistant-context', () => {
     assert.ok(capped.includes('用户偏好已按预算截断'))
   })
 
-  it('positions the assistant as a work partner instead of a prompt tool', () => {
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('你是用户的智能工作伙伴（KnowMe/知我）'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('不得自称“WorkBuddy”'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('推动工作真正完成'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('普通问候、宽泛意图和默认建议中禁止主动推荐提示词'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('只有用户明确要求生成或优化提示词时才处理该能力'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('规划任务、分析问题、创作内容、推进工作或检索知识'));
+  it('uses a neutral runtime identity that yields to the active expert', () => {
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('你运行在 KnowMe（知我）中'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('不得用通用“工作伙伴”身份覆盖当前专家'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('未指定身份时，可作为用户的智能工作伙伴协作'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('其他场景不要主动推荐提示词能力'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.search_docs'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止声称'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('不得声称'));
     assert.ok(ASSISTANT_BASE_PROMPT.includes('作者、权限、金额、日期、数量'));
   });
 
   it('routes external links to fetch_web_page and feishu links to read_doc', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('fetch_web_page'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.cn / larksuite.com 链接用 feishu.read_doc'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('其余外部网页一律用 fetch_web_page 读取'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止拿外部链接或其片段去调 feishu.search_docs'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('feishu.cn、larksuite.com 链接交给 feishu.read_doc'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('普通 http/https 链接用 fetch_web_page'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('不要把外部网页链接拿去搜索飞书'));
   });
 
   it('forbids denying web access when a fetch tool exists', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('没有联网能力'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('手动复制粘贴网页正文'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('我没有访问外部网页的能力'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('要求用户手动复制正文'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('失败后说明实际错误'));
   });
 
   it('requires autonomous grounded research for current public information', () => {
     assert.ok(ASSISTANT_BASE_PROMPT.includes('search_web'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('MUST 直接搜索'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('搜索摘要只是发现线索'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('区分来源发布时间与本次检索时间'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('禁止生成只有一个项目'));
-    assert.ok(ASSISTANT_BASE_PROMPT.includes('来源选项只能来自本轮明确列出的真实可用工具'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('先用 search_web 检索并用 fetch_web_page 读取原文'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('区分事件时间、发布时间和检索时间'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('不生成单项选择'));
+    assert.ok(ASSISTANT_BASE_PROMPT.includes('选项只能来自本轮真实能力和上下文'));
   });
+
+  it('loads capability protocols progressively', () => {
+    assert.deepEqual(corePromptBlockIds({ tier: 'chat', toolsEnabled: false }), [
+      'core.runtime', 'core.conversation', 'core.integrity', 'core.output',
+    ])
+    assert.deepEqual(corePromptBlockIds({
+      tier: 'assist', toolsEnabled: true, capabilityIds: ['search_web'],
+    }), ['core.runtime', 'core.conversation', 'core.integrity', 'core.output', 'tool.web'])
+  })
 
   it('detects legacy default system prompt fingerprint', () => {
     assert.equal(isLegacyDefaultSystemPrompt(LEGACY_DEFAULT_SYSTEM_PROMPT), true);
@@ -146,18 +155,27 @@ describe('ai-assistant-context', () => {
     });
     assert.equal(messages[0].role, 'system');
     assert.equal(messages[0].content, 'BASE');
-    assert.equal(messages[1].role, 'system');
-    assert.equal(messages[1].content, 'DYN');
-    assert.equal(messages[2].role, 'user');
-    assert.equal(messages[2].content, '第一问');
-    assert.equal(messages[3].role, 'assistant');
-    assert.equal(messages[3].content, '第一答');
-    assert.equal(messages[4].role, 'user');
-    assert.ok(messages[4].content.includes('便签正文'));
-    assert.ok(messages[4].content.includes('参考文件正文'));
-    assert.ok(messages[4].content.includes('第二问'));
-    assert.ok(!messages[4].content.includes('需求：'));
+    assert.equal(messages[1].role, 'user');
+    assert.equal(messages[1].content, '第一问');
+    assert.equal(messages[2].role, 'assistant');
+    assert.equal(messages[2].content, '第一答');
+    assert.equal(messages[3].role, 'user');
+    assert.ok(messages[3].content.includes('便签正文'));
+    assert.ok(messages[3].content.includes('DYN'));
+    assert.ok(messages[3].content.includes('不可信参考数据'));
+    assert.ok(messages[3].content.includes('第二问'));
+    assert.ok(!messages[3].content.includes('需求：'));
   });
+
+  it('keeps Context Engine data out of system messages', () => {
+    const messages = buildChatMessages({
+      systemMessages: [{ role: 'system', content: 'TRUSTED', _contextCritical: true }],
+      dataMessages: [{ role: 'user', content: 'UNTRUSTED ATTACK' }],
+      prompt: '当前问题',
+    })
+    assert.deepEqual(messages.filter(message => message.role === 'system').map(message => message.content), ['TRUSTED'])
+    assert.match(messages.at(-1).content, /UNTRUSTED ATTACK[\s\S]*当前问题/)
+  })
 
   it('sends plain greeting without demand prefix', () => {
     const messages = buildChatMessages({

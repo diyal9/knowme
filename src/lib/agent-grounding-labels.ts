@@ -14,6 +14,12 @@ const TOOL_USER_LABELS = {
   'feishu.get_wiki_node': '飞书知识库读取',
   'feishu.search_docs': '飞书文档搜索',
   'feishu.draft_minute_permission': '飞书妙记权限申请',
+  'preview_external_project': '扫描外部项目',
+  'design_external_workflow_import': '生成导入方案',
+  'import_external_project': '执行项目导入',
+  'verify_imported_workflow': '验证导入工作流',
+  'emit_artbundle_specs': '提交 ArtBundle 规格文件',
+  'create_artifact': '保存交付物',
 }
 
 const RAW_TOOL_ID_RE = /[a-zA-Z0-9_-]+\.[a-zA-Z0-9_.-]+/g
@@ -52,7 +58,12 @@ function formatViolationForUser(violation) {
     return '缺少必需读取，暂不能给出具体细节'
   }
   if (code === 'missing_required_evidence') {
-    return '工具返回的内容不足，无法据此生成具体事实'
+    const unmet = Array.isArray(violation.unmet) ? violation.unmet : []
+    const tools = [...new Set(unmet.map(rule => formatToolLabelForUser(rule?.tool)).filter(Boolean))]
+    if (tools.length) {
+      return `还缺少可核验结果：${tools.join('、')}。通常不需要补充背景，请确认任务路径和选择后点击“重新执行”。`
+    }
+    return '工具返回的内容不足，无法完成验收。通常不需要补充背景，请确认任务输入后点击“重新执行”。'
   }
   if (code === 'false_execution_claim') {
     return '当前还没有成功的读取结果，不能声称已完成读取'

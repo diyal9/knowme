@@ -2,6 +2,7 @@ import type { ChatMessage } from '../../../shared/api'
 import { chatMessagesFromSession } from '../../../domain/agent-session'
 import { applyRuntimeStreamEvent } from '../../../domain/agent-v2-runtime'
 import { stampStreamTiming } from '../../../domain/agent-execution-timeline'
+import { stripLeadingAssistantIdentity } from '../../../domain/assistant-identity'
 import {
   laneHasMessage,
   laneHasStreaming,
@@ -133,7 +134,12 @@ function flushStreamChunkBuffer() {
   if (text == null || !set || !assistantId || !sessionId) return
   set((state: AppState) => patchLiveAssistantMessage(state, assistantId, (msg) => {
     if (msg.protocolVersion === 2 || msg.v2AnswerCommitted) return msg
-    return stampStreamTiming({ ...msg, text, thinking: false, streaming: true })
+    return stampStreamTiming({
+      ...msg,
+      text: stripLeadingAssistantIdentity(text, state.assistantPartnerName || 'KnowMe'),
+      thinking: false,
+      streaming: true,
+    })
   }, sessionId))
 }
 

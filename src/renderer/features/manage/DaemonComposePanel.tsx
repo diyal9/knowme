@@ -191,15 +191,6 @@ export function DaemonComposePanel() {
                     <h1 id="wbDaemonComposeTitle">创建开发任务</h1>
                     <p className="wb-daemon-compose-lead">选择交付路径，补充目标与材料，管线会按流程持续推进。</p>
                   </div>
-                  <span className={`wb-daemon-compose-status${offline ? ' is-offline' : connectionPending ? ' is-loading' : ' is-live'}`} role="status" aria-live="polite">
-                    <span className="wb-daemon-health-signal" aria-hidden="true">
-                      <i />
-                      <i />
-                      <i />
-                      <i />
-                    </span>
-                    {connectionPending ? '正在连接' : offline ? '服务离线' : '运行正常'}
-                  </span>
                 </header>
                 <div className="wb-daemon-compose-body">
                   <div className="wb-daemon-compose-field">
@@ -227,7 +218,6 @@ export function DaemonComposePanel() {
                           {!overviewReady ? (
                             <span className="wb-daemon-loading-dots" aria-hidden="true"><i /><i /><i /></span>
                           ) : null}
-                          {paths.length ? <small>点击切换交付路径</small> : null}
                         </span>
                         <span className="wb-daemon-path-trigger-action" aria-hidden="true">
                           <span>{pathOpen ? '收起' : '选择'}</span>
@@ -300,18 +290,14 @@ export function DaemonComposePanel() {
                       onChange={(e) => setIntent(e.target.value)}
                       placeholder="业务目标、范围、验收标准与约束（建议≥20 字）"
                       disabled={offline}
-                      aria-describedby="wbDaemonComposeIntentHint"
                     />
-                    <small className="wb-daemon-compose-field-help" id="wbDaemonComposeIntentHint">
-                      至少填写 {DAEMON_MIN_INTENT_CHARS} 字，或添加一份补充材料。
-                    </small>
                   </label>
                   <div className="wb-daemon-compose-materials">
                     <button
                       type="button"
                       className="wb-daemon-compose-dropzone"
                       disabled={offline}
-                      aria-label="选择本地补充材料"
+                      aria-label="选择文件"
                       onClick={() => void pickMaterials()}
                     >
                       <span className="wb-daemon-compose-dropzone-ico" aria-hidden="true">
@@ -321,7 +307,7 @@ export function DaemonComposePanel() {
                           <path d="m8.5 15.5 3.5-3.5 3.5 3.5" />
                         </svg>
                       </span>
-                      <span className="wb-daemon-compose-dropzone-line">选择本地补充材料</span>
+                      <span className="wb-daemon-compose-dropzone-line">选择文件</span>
                       <small>需求文档、参考资料或现有产物</small>
                     </button>
                     {materials.length ? (
@@ -356,7 +342,7 @@ export function DaemonComposePanel() {
                   <h2 id="wbDaemonRunsTitle">最近运行</h2>
                 </div>
                 <div className="wb-daemon-linkbar" id="wbDaemonModeStatus" role="status" aria-live="polite">
-                  <div className={`wb-daemon-link${offline ? ' is-offline' : ' is-online'}`}>
+                  <div className={`wb-daemon-link${connectionPending ? ' is-loading' : offline ? ' is-offline' : ' is-online'}`}>
                     <span className="wb-daemon-pulse" aria-hidden="true" />
                     <div className="wb-daemon-link-copy">
                       <strong>{connectionPending ? '正在连接' : offline ? '服务离线' : '本机已连接'}</strong>
@@ -442,20 +428,21 @@ export function DaemonComposePanel() {
                         </span>
                       </button>
                       {item.sourceUrl ? (
-                        <button
-                          type="button"
-                          className="wb-daemon-task-source"
-                          data-testid={`daemon-run-source-${item.slug}`}
-                          title={item.sourceUrl}
-                          onClick={() => void openTaskSource(item.sourceUrl || '', item.sourceLabel || '相关链接', sourceTitle)}
-                        >
-                          <Icon name="file" />
-                          <span className="wb-daemon-task-source-copy">
-                            <strong>{sourceTitle || item.sourceLabel || '相关链接'}</strong>
-                            <small>{sourceTitle ? (item.sourceLabel || '相关链接') : '点击查看文档'}</small>
-                          </span>
-                          <Icon name="externalLink" />
-                        </button>
+                        <div className="wb-daemon-task-footer">
+                          <button
+                            type="button"
+                            className="wb-daemon-task-source"
+                            data-testid={`daemon-run-source-${item.slug}`}
+                            title={item.sourceUrl}
+                            onClick={() => void openTaskSource(item.sourceUrl || '', item.sourceLabel || '相关链接', sourceTitle)}
+                          >
+                            <Icon name="file" />
+                            <span className="wb-daemon-task-source-title">
+                              {sourceTitle || item.sourceLabel || '相关链接'}
+                            </span>
+                            <Icon name="externalLink" />
+                          </button>
+                        </div>
                       ) : null}
                     </article>
                     )

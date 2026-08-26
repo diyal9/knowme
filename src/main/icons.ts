@@ -85,6 +85,11 @@ function create(ctx) {
         return appIcon.resize({ width: 16, height: 16, quality: 'best' })
       return appIcon.resize({ width: 32, height: 32, quality: 'best' })
     }
+    if (process.platform === 'win32' && process.execPath) {
+      const fallback = ctx.nativeImage.createFromPath(process.execPath)
+      if (!fallback.isEmpty())
+        return fallback.resize({ width: 16, height: 16, quality: 'best' })
+    }
     return ctx.nativeImage.createEmpty()
   }
 }

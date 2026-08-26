@@ -24,8 +24,8 @@ function listConnectors() {
   return getApi().listConnectors()
 }
 
-function bindUserData(getUserData) {
-  _api = createConnectorsApi({ getUserData })
+function bindUserData(getUserData, options = {}) {
+  _api = createConnectorsApi({ getUserData, ...options })
   return _api
 }
 

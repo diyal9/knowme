@@ -4,6 +4,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { attentionKicker } from '../../domain/attention'
+import { buildPersonalGrowthSnapshot, type PersonalGrowthSnapshot } from '../../domain/personal-growth'
 import { Icon } from './Icon'
 import { useAppStore } from './store'
 
@@ -16,6 +17,7 @@ const FAB_SIZE = 34
 const STUDIO_NAV_CLEARANCE = 52
 
 export type FabInset = { right: number; bottom: number }
+type GrowthRecommendation = PersonalGrowthSnapshot['recommendations'][number]
 
 /** 按路由/表面计算铃铛边距：水平始终贴右；仅编排画布抬高底边。 */
 export function resolveFabInset(
@@ -56,6 +58,8 @@ export function WorkspaceFab() {
   const setAttentionPulse = useAppStore((s) => s.setAttentionPulse)
   const [open, setOpen] = useState(false)
   const [top, setTop] = useState<number | null>(() => readFabTop())
+  const [growthRecommendation, setGrowthRecommendation] = useState<GrowthRecommendation | null>(null)
+  const growthLoadingRef = useRef(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const movedRef = useRef(false)
 
@@ -125,6 +129,62 @@ export function WorkspaceFab() {
   }
   const ariaLabel = hasInput ? '通知，有待处理事项' : '通知'
 
+  async function loadGrowthRecommendation() {
+    if (growthLoadingRef.current) return
+    growthLoadingRef.current = true
+    try {
+      const [agent, growth, memory, tasks, knowledge, capabilities] = await Promise.all([
+        window.api?.personalAgentGet?.(),
+        window.api?.personalAgentGrowthList?.({ limit: 50 }),
+        window.api?.memoryOverview?.(),
+        window.api?.workbenchTaskList?.(),
+        window.api?.knowledgeOsList?.(),
+        window.api?.capabilityList?.(),
+      ])
+      if (!agent?.ok || !agent.profile) {
+        setGrowthRecommendation(null)
+        return
+      }
+      const snapshot = buildPersonalGrowthSnapshot({
+        profile: agent.profile,
+        growthEvents: growth?.events || agent.recentGrowth || [],
+        memory: memory || null,
+        tasks: tasks?.items || [],
+        knowledge: [...(knowledge?.wiki || []), ...(knowledge?.okf || [])],
+        capabilities: capabilities?.items || [],
+      })
+      setGrowthRecommendation(snapshot.recommendations[0] || null)
+    } catch {
+      setGrowthRecommendation(null)
+    } finally {
+      growthLoadingRef.current = false
+    }
+  }
+
+  function openPartnerGrowth(tab: 'memory' | 'growth') {
+    const openPanel = () => window.dispatchEvent(new CustomEvent('knowme:open-personal-growth', { detail: { tab } }))
+    if (useAppStore.getState().route === 'assistant') openPanel()
+    else {
+      useAppStore.getState().setRoute('assistant')
+      window.setTimeout(openPanel, 0)
+    }
+    setOpen(false)
+  }
+
+  function activateGrowthRecommendation(item: GrowthRecommendation) {
+    if (item.action === 'assistant') {
+      openPartnerGrowth('memory')
+      return
+    }
+    if (item.action === 'workbench') useAppStore.getState().openWorkbenchRail()
+    else if (item.action === 'knowledge') useAppStore.getState().setRoute('knowledge')
+    else {
+      useAppStore.getState().setHubTab(item.action)
+      useAppStore.getState().setRoute('capabilities')
+    }
+    setOpen(false)
+  }
+
   return (
     <div
       ref={rootRef}
@@ -179,6 +239,23 @@ export function WorkspaceFab() {
         ) : (
           <div id="km-fab-notify" hidden />
         )}
+        {growthRecommendation ? (
+          <section className="km-fab-growth" aria-label="下一步培养" data-testid="km-fab-growth">
+            <div className="km-fab-growth-head">
+              <span>下一步培养</span>
+              <button type="button" onClick={() => openPartnerGrowth('growth')}>查看全部</button>
+            </div>
+            <button
+              type="button"
+              className="km-fab-growth-card"
+              onClick={() => activateGrowthRecommendation(growthRecommendation)}
+            >
+              <strong>{growthRecommendation.title}</strong>
+              <p>{growthRecommendation.description}</p>
+              <span>{growthRecommendation.actionLabel}<Icon name="chevronRight" /></span>
+            </button>
+          </section>
+        ) : null}
         <div className="km-fab-actions" role="group" aria-label="功能">
           <button
             type="button"
@@ -219,6 +296,7 @@ export function WorkspaceFab() {
             return
           }
           if (!open) setAttentionPulse(false)
+          if (!open) void loadGrowthRecommendation()
           setOpen((v) => !v)
         }}
       >

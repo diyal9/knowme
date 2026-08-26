@@ -132,7 +132,7 @@ async function runModelToolLoop(deps) {
       role: 'user',
       content: '请基于当前对话和已经返回的工具结果，直接给出最终答复。不要再调用工具，不要解释执行预算或内部流程；如果信息不足，请明确说明缺少什么。',
     })
-    const completion = await ports.llm.complete({
+    let completion = await ports.llm.complete({
       messages: llmRuntime.applyCacheControlMessages(finalMessages, promptCachePolicy),
       tools: undefined,
       policy: { ...policy, outputTokens: Math.min(policy.maxOutput || 2400, 2400) },
@@ -162,10 +162,29 @@ async function runModelToolLoop(deps) {
     const roundTitle = round === 1 ? '正在等待模型响应…' : `正在继续生成（第 ${round} 轮）…`
     stage('stage_generate', roundTitle, 'pending', { runPhase: RunPhase.MODEL })
 
-    const completion = await ports.llm.complete({
+    const requiredToolState = ctxBundle.taskFrame?.requiredTools?.length
+      ? groundingRuntime.evaluateRequiredTools(ctxBundle.taskFrame, toolLedger)
+      : { missing: [] }
+    const requiredEvidenceState = ctxBundle.taskFrame?.requiredEvidence?.length
+      ? groundingRuntime.evaluateRequiredEvidence(ctxBundle.taskFrame, evidenceLedger)
+      : { unmet: [] }
+    const autonomousImportContract = Boolean(ctxBundle.taskFrame && [
+      ...(ctxBundle.taskFrame.requiredTools || []),
+      ...(ctxBundle.taskFrame.requiredEvidence || []).map(item => item.tool),
+    ].some(name => /^(?:preview_external_project|design_external_workflow_import|import_external_project|verify_imported_workflow)$/.test(String(name || ''))))
+    const contractActive = Boolean(ctxBundle.taskFrame && (
+      ctxBundle.taskFrame.requiredTools?.length || ctxBundle.taskFrame.requiredEvidence?.length
+    ))
+    const contractMissing = [
+      ...requiredToolState.missing,
+      ...requiredEvidenceState.unmet.map(item => item.tool || item.kind || 'requiredEvidence'),
+    ]
+    const forceToolCall = toolsEnabled && autonomousImportContract && contractMissing.length > 0 && round <= Math.min(maxRounds, 5)
+    let completion = await ports.llm.complete({
       messages: llmRuntime.applyCacheControlMessages(apiMessages, promptCachePolicy),
       tools: toolsEnabled && toolSurface?.getToolDefinitions ? toolSurface.getToolDefinitions() : undefined,
       toolsEnabled,
+      forceToolCall,
       policy,
       round,
       onSnapshot: (snapshot) => {
@@ -181,6 +200,30 @@ async function runModelToolLoop(deps) {
     })
 
     if (completion.cancelled || signal.aborted) return cancelled()
+    if (completion.error && forceToolCall && toolsEnabled && completion.status && [400, 404, 422].includes(completion.status)) {
+      // Some OpenAI-compatible gateways support tools but reject the newer
+      // `tool_choice: required` value. Retry with `auto` so the tool surface
+      // remains available; the prompt-level guard below still prevents a
+      // text-only completion from satisfying the contract.
+      completion = await ports.llm.complete({
+        messages: llmRuntime.applyCacheControlMessages(apiMessages, promptCachePolicy),
+        tools: toolsEnabled && toolSurface?.getToolDefinitions ? toolSurface.getToolDefinitions() : undefined,
+        toolsEnabled,
+        forceToolCall: false,
+        policy,
+        round,
+        onSnapshot: (nextSnapshot) => {
+          if (nextSnapshot.content) {
+            ingestSnapshot(assembler, nextSnapshot.content)
+            lastModelText = nextSnapshot.content
+            setLastModelText(lastModelText)
+            if (metrics.firstTokenMs == null) markFirstToken()
+            streamed = true
+            setStreamed(streamed)
+          }
+        },
+      })
+    }
     if (completion.error) {
       if (toolsEnabled && completion.status && [400, 404, 422].includes(completion.status)) {
         toolsEnabled = false
@@ -202,6 +245,20 @@ async function runModelToolLoop(deps) {
     const calls = Array.isArray(snapshot.toolCalls) ? snapshot.toolCalls : []
 
     if (!calls.length) {
+      if (forceToolCall && contractMissing.length) {
+        apiMessages.push({
+          role: 'user',
+          content: [
+            requiredToolState.missing.length ? `仍缺少必需工具调用：${requiredToolState.missing.join('、')}` : '',
+            requiredEvidenceState.unmet.length ? `工具结果证据不足：${requiredEvidenceState.unmet.map(item => item.tool || item.kind || 'requiredEvidence').join('、')}` : '',
+            '请自主诊断参数、重新调用相关工具并返回完整结果，不要只返回文字说明。',
+          ].filter(Boolean).join('；'),
+        })
+        fullText = ''
+        clearCandidate(assembler)
+        discardRoundDraft('required_tools_no_call')
+        continue
+      }
       fullText = snapshot.content || lastModelText || assembler.roundDraft || fullText
       const evalResult = agentVerify.evaluatePlanCompletion(session?.run?.plan, {
         canExpand: false,
@@ -465,9 +522,23 @@ async function runModelToolLoop(deps) {
         text: result.text,
         toolCallId: callId,
         toolName,
+        args: validation.args,
+        meta: result.meta && typeof result.meta === 'object' ? result.meta : undefined,
+        sources: Array.isArray(result.sources) ? result.sources : [],
         status: result.ok !== false ? 'done' : 'error',
         durationMs,
       })
+      // Keep the live ledgers in sync with the model loop. Grounding is
+      // re-built before persistence, but required-tool forcing needs to know
+      // about successful calls during the next model round.
+      const liveLedgers = groundingRuntime.mergeToolResultsIntoLedgers({
+        toolLedger,
+        evidenceLedger,
+        toolMessages: [toolMessages.at(-1)],
+      })
+      toolLedger = liveLedgers.toolLedger
+      evidenceLedger = liveLedgers.evidenceLedger
+      ports.grounding?.setLedgers?.({ evidenceLedger, toolLedger })
       if (isOrchestration && result?.meta?.subRunId) {
         const childMetric = {
           runId: String(result.meta.subRunId),
@@ -553,7 +624,7 @@ async function runModelToolLoop(deps) {
     }
 
     const roundMissingHint = buildMissingResourceHint(roundToolMessages)
-    if (roundMissingHint && allRoundToolsErrored) {
+    if (roundMissingHint && allRoundToolsErrored && !(contractActive && autonomousImportContract)) {
       fullText = roundMissingHint
       setCandidate(assembler, fullText)
       stage('stage_generate', '已返回缺失资源提示', 'done', { fallback: true, runPhase: RunPhase.MODEL })
@@ -561,7 +632,7 @@ async function runModelToolLoop(deps) {
     }
 
     const roundToolFailureHint = buildToolFailureHint(roundToolMessages)
-    if (roundToolFailureHint && allRoundToolsErrored) {
+    if (roundToolFailureHint && allRoundToolsErrored && !(contractActive && autonomousImportContract)) {
       fullText = roundToolFailureHint
       setCandidate(assembler, fullText)
       stage('stage_generate', '已返回工具失败提示', 'done', { fallback: true, runPhase: RunPhase.MODEL })

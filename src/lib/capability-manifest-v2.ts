@@ -273,7 +273,16 @@ function adaptLegacyCapability(kind, raw = {}, options = {}) {
     metadata: {
       legacy: true,
       knowme: { experience: { tasks: [] } },
-      ...(kind === 'connector' ? { connector: clonePlain({ type: raw.type || 'mcp', mcp: raw.mcp || {}, allowlist: raw.allowlist || [] }, {}) } : {}),
+      ...(kind === 'connector' ? { connector: clonePlain({
+        type: raw.type || 'mcp',
+        mcp: raw.mcp || {},
+        allowlist: raw.allowlist || [],
+        secretSlots: raw.secretSlots || raw.requiredSecrets || [],
+        toolPolicies: raw.toolPolicies || [],
+        healthCheck: raw.healthCheck || null,
+        capabilities: raw.capabilities || [],
+        configState: raw.configState || 'ready',
+      }, {}) } : {}),
     },
     mcp: raw.mcp,
     type: raw.type,

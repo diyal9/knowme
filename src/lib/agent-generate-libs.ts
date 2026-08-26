@@ -9,6 +9,8 @@ const { app } = require('electron')
 const path = require('path')
 const promptRouter = require('./assistant-prompt-router')
 const { buildSystemContent, buildChatMessages } = require('./ai-assistant-context')
+const contextEngine = require('./context-engine')
+const { buildCoreContextBlocks } = require('./knowme-system-prompt')
 const { normalizeAssistantOutput } = require('./assistant-output-style')
 const productKnowledge = require('./product-knowledge')
 const productMemory = require('./product-memory')
@@ -82,7 +84,7 @@ function createKnowledgeTools({ app, fabricRetrieval, retrievalScope, embedFn, e
 }
 
 module.exports = {
-  app, path, promptRouter, buildSystemContent, buildChatMessages, normalizeAssistantOutput,
+  app, path, promptRouter, buildSystemContent, buildChatMessages, contextEngine, buildCoreContextBlocks, normalizeAssistantOutput,
   productKnowledge, productMemory, conversationGrounding, agentSessions, agentRun, agentTools,
   agentVerify, agentSandbox, agentPlanTools, agentWebTools, resolveAgentExecutorMode,
   resolveGroundingRuntimeMode, groundingRuntime, feishuGroundingAdapter, AgentRunExecutor,

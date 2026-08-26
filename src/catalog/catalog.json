@@ -7,7 +7,7 @@
       "kind": "expert",
       "name": "智能体运维专员",
       "description": "审计外部项目并将技能、专家、连接器和工作流适配为 KnowMe 可运行资产。",
-      "version": "1.1.0",
+      "version": "1.3.0",
       "source": "curated",
       "trust": "bundled",
       "categories": ["软件研发"],
@@ -23,7 +23,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["写作"],
+      "categories": ["内容写作"],
       "tags": ["writing", "polish"],
       "featured": true,
       "bundlePath": "skills/writing-polish"
@@ -36,7 +36,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["研发"],
+      "categories": ["软件研发"],
       "tags": ["code", "review"],
       "featured": true,
       "bundlePath": "skills/code-review"
@@ -183,6 +183,24 @@
       "tags": ["data", "analysis"], "featured": true, "bundlePath": "experts/data-analyst"
     },
     {
+      "id": "business-metrics-analysis", "kind": "skill", "name": "业务指标分析",
+      "description": "分析业务指标的趋势、同比环比、漏斗、留存、分群与异常，明确口径、计算过程和数据缺口。",
+      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "tags": ["business", "metrics", "analysis"], "featured": true, "bundlePath": "skills/business-metrics-analysis"
+    },
+    {
+      "id": "business-cause-analysis", "kind": "skill", "name": "业务异常归因",
+      "description": "对业务指标异常进行驱动因素拆解、竞争性假设和验证设计，输出带证据强度的归因判断。",
+      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "tags": ["business", "causal", "hypothesis"], "featured": true, "bundlePath": "skills/business-cause-analysis"
+    },
+    {
+      "id": "business-insight-report", "kind": "skill", "name": "商业洞察报告",
+      "description": "将业务指标分析整理为可追溯的商业洞察报告，包含结论、证据、限制、优先级和行动建议。",
+      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析", "内容写作"],
+      "tags": ["business", "insight", "report"], "featured": true, "bundlePath": "skills/business-insight-report"
+    },
+    {
       "id": "business-insight-analyst", "kind": "expert", "name": "商业洞察专家",
       "description": "结合指标变化与业务上下文，识别异常、驱动因素和决策机会。",
       "version": "2.0.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
@@ -257,6 +275,32 @@
       "bundlePath": "connectors/mcp-generic"
     },
     {
+      "id": "photoshop-mcp",
+      "kind": "connector",
+      "name": "Photoshop MCP",
+      "description": "本机 PSD 图层预读、Photoshop 状态检查与受控切图连接器。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["连接器", "视觉"],
+      "tags": ["mcp", "photoshop", "psd"],
+      "featured": true,
+      "bundlePath": "connectors/photoshop-mcp"
+    },
+    {
+      "id": "cocos-creator-mcp",
+      "kind": "connector",
+      "name": "Cocos Creator MCP",
+      "description": "Creator 编辑器资源刷新、ArtBundle/DSL 导入与 Prefab 验收连接器。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["连接器", "游戏研发"],
+      "tags": ["mcp", "cocos-creator", "artbundle"],
+      "featured": true,
+      "bundlePath": "connectors/cocos-creator-mcp"
+    },
+    {
       "id": "game-requirement-doc",
       "kind": "skill",
       "name": "游戏需求案",
@@ -264,7 +308,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["游戏"],
+      "categories": ["产品与研究"],
       "tags": ["game", "design", "requirement"],
       "featured": true,
       "bundlePath": "skills/game-requirement-doc"
@@ -277,7 +321,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["游戏"],
+      "categories": ["软件研发"],
       "tags": ["game", "dev", "daemon"],
       "featured": true,
       "bundlePath": "skills/game-dev-delivery"
@@ -290,7 +334,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["游戏"],
+      "categories": ["软件研发"],
       "tags": ["game", "qa"],
       "featured": true,
       "bundlePath": "skills/game-qa-acceptance"
@@ -303,7 +347,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["游戏"],
+      "categories": ["产品与研究"],
       "tags": ["game", "production"],
       "featured": true,
       "bundlePath": "skills/game-production"
@@ -316,7 +360,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["知识"],
+      "categories": ["知识研究"],
       "tags": ["wiki", "okf", "steward"],
       "featured": false,
       "bundlePath": "skills/knowledge-steward"
@@ -329,7 +373,7 @@
       "version": "1.0.0",
       "source": "curated",
       "trust": "bundled",
-      "categories": ["视觉", "写作"],
+      "categories": ["视觉创意", "内容写作"],
       "tags": ["visual", "brief", "prompt"],
       "featured": true,
       "bundlePath": "skills/visual-brief-prompt"

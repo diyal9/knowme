@@ -5,7 +5,7 @@
  */
 const agentProcessTools = require('../lib/agent-process-tools')
 const agentOrchestration = require('../lib/agent-orchestration')
-const { probeLlmConnection } = require('../lib/main-llm-bridge')
+const { probeLlmConnection, probeEmbeddingConnection } = require('../lib/main-llm-bridge')
 
 function registerAiAssistIpc(ipcMain, deps) {
   const {
@@ -55,6 +55,25 @@ function registerAiAssistIpc(ipcMain, deps) {
     }
     if (overlay.apiKey) s.apiKey = String(overlay.apiKey)
     return probeLlmConnection(s)
+  })
+
+  ipcMain.handle('embedding-probe', async (_e, payload = {}) => {
+    const saved = loadSettings()
+    const overlay = payload && typeof payload === 'object' ? payload : {}
+    const s = {
+      ...saved,
+      embeddingEndpoint: overlay.embeddingEndpoint != null
+        ? String(overlay.embeddingEndpoint).trim()
+        : saved.embeddingEndpoint,
+      embeddingModel: overlay.embeddingModel != null
+        ? String(overlay.embeddingModel).trim()
+        : saved.embeddingModel,
+    }
+    if (Object.prototype.hasOwnProperty.call(overlay, 'embeddingApiKey')) {
+      s.embeddingApiKey = String(overlay.embeddingApiKey || '')
+    }
+    if (overlay.apiKey) s.apiKey = String(overlay.apiKey)
+    return probeEmbeddingConnection(s)
   })
 
   ipcMain.handle('ai-cancel-run', async (_e, runId = '') => {

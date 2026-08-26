@@ -1,5 +1,7 @@
 'use strict'
 
+const { enrichExternalWorkflowPackage } = require('../lib/external-workflow-recipes')
+
 /**
  * Workbench local stores: todo / task draft / task / workflow-package.
  */
@@ -35,11 +37,18 @@ function registerWorkbenchLocalStoresIpc(ipcMain, deps) {
   ipcMain.handle('workbench-task-archive', (_e, id = '') =>
     getWorkbenchTaskStore().archive(id))
 
-  ipcMain.handle('workbench-workflow-package-list', (_e, filter = {}) =>
-    getWorkbenchWorkflowPackageStore().list(filter || {}))
+  ipcMain.handle('workbench-workflow-package-list', (_e, filter = {}) => {
+    const result = getWorkbenchWorkflowPackageStore().list(filter || {})
+    return result?.ok && Array.isArray(result.packages)
+      ? { ...result, packages: result.packages.map(enrichExternalWorkflowPackage) }
+      : result
+  })
   ipcMain.handle('workbench-workflow-package-get', (_e, id) => {
     try {
-      return getWorkbenchWorkflowPackageStore().get(String(id || ''))
+      const result = getWorkbenchWorkflowPackageStore().get(String(id || ''))
+      return result?.ok && result.package
+        ? { ...result, package: enrichExternalWorkflowPackage(result.package) }
+        : result
     } catch (error) {
       return { ok: false, error: (error && error.message) || '无法读取流程' }
     }

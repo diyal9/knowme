@@ -16,6 +16,7 @@ const {
 let builtinSurfaceTools = null
 
 function createToolSurface(options = {}) {
+  const includeBuiltins = options.includeBuiltins !== false
   if (options.SEARCH_KNOWLEDGE_TOOL) {
     builtinSurfaceTools = {
       SEARCH_KNOWLEDGE_TOOL: options.SEARCH_KNOWLEDGE_TOOL,
@@ -37,6 +38,7 @@ function createToolSurface(options = {}) {
       handlers: projected.handlers,
       requiredTools: options.requiredTools,
       toolBudget: options.toolBudget,
+      includeBuiltins,
       SEARCH_KNOWLEDGE_TOOL,
       FABRIC_SEARCH_TOOL,
       KB_QUERY_TOOL,
@@ -49,24 +51,31 @@ function createToolSurface(options = {}) {
     budget: options.toolBudget,
   })
   const handlers = options.handlers && typeof options.handlers === 'object' ? options.handlers : {}
-  const allowed = new Set(['search_knowledge', 'fabric_search', 'kb_query', 'kb_get', ...extras.map((d) => d.function.name)])
+  const builtinNames = includeBuiltins
+    ? ['search_knowledge', 'fabric_search', 'kb_query', 'kb_get']
+    : []
+  const allowed = new Set([...builtinNames, ...extras.map((d) => d.function.name)])
 
   function getToolDefinitions() {
     return [
-      { type: SEARCH_KNOWLEDGE_TOOL.type, function: SEARCH_KNOWLEDGE_TOOL.function },
-      { type: FABRIC_SEARCH_TOOL.type, function: FABRIC_SEARCH_TOOL.function },
-      { type: KB_QUERY_TOOL.type, function: KB_QUERY_TOOL.function },
-      { type: KB_GET_TOOL.type, function: KB_GET_TOOL.function },
+      ...(includeBuiltins ? [
+        { type: SEARCH_KNOWLEDGE_TOOL.type, function: SEARCH_KNOWLEDGE_TOOL.function },
+        { type: FABRIC_SEARCH_TOOL.type, function: FABRIC_SEARCH_TOOL.function },
+        { type: KB_QUERY_TOOL.type, function: KB_QUERY_TOOL.function },
+        { type: KB_GET_TOOL.type, function: KB_GET_TOOL.function },
+      ] : []),
       ...extras.map(({ type, function: fn }) => ({ type, function: fn })),
     ]
   }
 
   function getToolRecords() {
     return [
-      SEARCH_KNOWLEDGE_TOOL,
-      FABRIC_SEARCH_TOOL,
-      KB_QUERY_TOOL,
-      KB_GET_TOOL,
+      ...(includeBuiltins ? [
+        SEARCH_KNOWLEDGE_TOOL,
+        FABRIC_SEARCH_TOOL,
+        KB_QUERY_TOOL,
+        KB_GET_TOOL,
+      ] : []),
       ...extras.map(def => ({
         type: def.type,
         function: { ...def.function },

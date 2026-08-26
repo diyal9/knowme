@@ -3,6 +3,7 @@ import type { CapabilityItem } from '../shared/api'
 import {
   featuredHubItems,
   filterHubItems,
+  connectorBroadCategory,
   hubCategoryChips,
   hubDisplayChips,
   hubItemBadges,
@@ -43,8 +44,28 @@ describe('capability hub filters', () => {
 
   it('uses fixed scene chips instead of dynamic categories', () => {
     expect(hubDisplayChips(items.filter((i) => i.kind === 'expert'), 'expert')).toEqual([
-      '全部', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究',
+      '全部', '收藏', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究',
     ])
+    expect(hubDisplayChips(items.filter((i) => i.kind === 'skill'), 'skill')).toEqual([
+      '全部', '收藏', '产品与研究', '内容写作', '视觉创意', '日常办公', '数据分析', '软件研发', '知识研究',
+    ])
+  })
+
+  it('groups connector filters by user-facing business domains', () => {
+    const connectors: HubCapabilityItem[] = [
+      { id: 'feishu', kind: 'connector', name: '飞书', category: '飞书' },
+      { id: 'photoshop-mcp', kind: 'connector', name: 'Photoshop MCP', categories: ['连接器', '视觉'] },
+      { id: 'cocos-creator-mcp', kind: 'connector', name: 'Cocos Creator MCP', category: '游戏研发' },
+      { id: 'mcp-default', kind: 'connector', name: 'mcp-default', category: '自定义' },
+    ]
+    expect(connectors.map(connectorBroadCategory)).toEqual([
+      '办公协作', '视觉创作', '游戏研发', '通用连接',
+    ])
+    expect(hubDisplayChips(connectors, 'connector')).toEqual([
+      '全部', '收藏', '办公协作', '视觉创作', '游戏研发', '通用连接',
+    ])
+    expect(filterHubItems(connectors, { kind: 'connector', category: '视觉创作' }).map((item) => item.id)).toEqual(['photoshop-mcp'])
+    expect(filterHubItems(connectors, { kind: 'connector', category: '通用连接' }).map((item) => item.id)).toEqual(['mcp-default'])
   })
 
   it('resolves domain icons and installed badges', () => {

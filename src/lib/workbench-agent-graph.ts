@@ -13,7 +13,7 @@ const {
 } = require('./agent-package-runtime')
 
 const MAX_MEMBERS = 8
-const MAX_NODES = 16
+const MAX_NODES = 32
 const MAX_EDGES = 32
 const MAX_GOAL_LENGTH = 2000
 const MAX_PARALLELISM = 4
@@ -190,6 +190,9 @@ function normalizeNode(raw, index, memberById, issues) {
     role: stableString(raw.role || member?.role || agentPackageId),
     description: stableString(raw.description || ''),
     relation: stableString(raw.relation || raw.relationToNext || 'serial'),
+  }
+  if (raw.executionContract && typeof raw.executionContract === 'object') {
+    normalized.executionContract = JSON.parse(JSON.stringify(raw.executionContract))
   }
   if (type === 'agent') {
     normalized.agentPackageId = agentPackageId
@@ -496,7 +499,7 @@ function buildTemplateGraph(templateId, members, gates, joinStrategy) {
 
 function ensureTerminalNode(nodes, edges, issues) {
   const nodeIds = new Set(nodes.map(node => node.id))
-  if (nodeIds.has(TERMINAL_NODE_ID)) return { nodes, edges }
+  if (nodeIds.has(TERMINAL_NODE_ID) || nodes.some(node => node.type === 'terminal')) return { nodes, edges }
 
   const outgoing = new Map([...nodeIds].map(id => [id, 0]))
   for (const edge of edges) {

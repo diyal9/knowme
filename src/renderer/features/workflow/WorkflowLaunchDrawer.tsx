@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { ShelfCardModel } from '../../../domain/shelf'
 import { Icon } from '../../app/Icon'
 
@@ -14,6 +14,10 @@ interface WorkflowLaunchField {
   placeholder: string
   description: string
   initialValue: string
+  hidden: boolean
+  advanced: boolean
+  control: 'text' | 'file' | 'directory'
+  extensions: string[]
 }
 
 const GOAL_IDS = new Set(['goal', 'brief', 'intent', 'objective', 'task'])
@@ -24,7 +28,10 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {}
 }
 
-function workflowFields(workflowPackage: Record<string, unknown> | null, card: ShelfCardModel) {
+function workflowFields(
+  workflowPackage: Record<string, unknown> | null,
+  card: ShelfCardModel,
+): { fields: WorkflowLaunchField[]; goalId: string } {
   const rows = Array.isArray(workflowPackage?.inputs) ? workflowPackage.inputs : []
   const parsed = rows.map((raw, index): WorkflowLaunchField => {
     const item = asRecord(raw)
@@ -37,6 +44,10 @@ function workflowFields(workflowPackage: Record<string, unknown> | null, card: S
       placeholder: String(item.placeholder || `请填写${label}`).trim(),
       description: String(item.description || item.hint || '').trim(),
       initialValue: String(item.defaultValue || item.default || '').trim(),
+      hidden: item.hidden === true,
+      advanced: item.advanced === true,
+      control: item.control === 'file' || item.control === 'directory' ? item.control : 'text',
+      extensions: Array.isArray(item.extensions) ? item.extensions.map(String).filter(Boolean) : [],
     }
   })
 
@@ -52,6 +63,10 @@ function workflowFields(workflowPackage: Record<string, unknown> | null, card: S
         placeholder: '说明这次要完成什么，以及你希望如何验收',
         description: '',
         initialValue: '',
+        hidden: false,
+        advanced: false,
+        control: 'text',
+        extensions: [],
       },
       ...parsed,
     ],
@@ -85,7 +100,9 @@ export function WorkflowLaunchDrawer({
     schema.fields.map((field) => [field.id, field.initialValue]),
   ))
   const [submitting, setSubmitting] = useState(false)
-  const firstFieldRef = useRef<HTMLTextAreaElement>(null)
+  const firstFieldRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null)
+  const primaryFields = schema.fields.filter((field) => !field.hidden && !field.advanced)
+  const advancedFields = schema.fields.filter((field) => !field.hidden && field.advanced)
 
   useEffect(() => {
     firstFieldRef.current?.focus()
@@ -118,6 +135,62 @@ export function WorkflowLaunchDrawer({
     }
   }
 
+  async function pickPath(field: WorkflowLaunchField) {
+    const directory = field.control === 'directory'
+    const result = await window.api?.workbenchPickFiles?.({
+      title: directory ? `选择${field.label}` : `选择${field.label}`,
+      multi: false,
+      directory,
+      filters: directory || !field.extensions.length
+        ? undefined
+        : [{ name: field.label, extensions: field.extensions }],
+    })
+    const selected = result?.ok === false || result?.canceled ? '' : String(result?.files?.[0]?.path || '')
+    if (selected) setValues((current) => ({ ...current, [field.id]: selected }))
+  }
+
+  function renderField(field: WorkflowLaunchField, focus = false) {
+    const fieldId = `workflowLaunchField-${field.id}`
+    const onKeyDown = (event: ReactKeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && canSubmit) {
+        event.preventDefault()
+        void submit()
+      }
+    }
+    return (
+      <div key={field.id} className={`wb-studio-field wb-workflow-launch-field${field.id === schema.goalId ? ' wb-task-goal-field' : ''}`}>
+        <label htmlFor={fieldId}>{field.label} {field.required ? <em>必填</em> : <small>可选</small>}</label>
+        {field.control === 'file' || field.control === 'directory' ? (
+          <div className="wb-workflow-launch-path-control">
+            <input
+              id={fieldId}
+              ref={focus ? (node) => { firstFieldRef.current = node } : undefined}
+              type="text"
+              maxLength={8000}
+              placeholder={field.placeholder}
+              value={values[field.id] || ''}
+              onChange={(event) => setValues((current) => ({ ...current, [field.id]: event.target.value }))}
+              onKeyDown={onKeyDown}
+            />
+            <button type="button" onClick={() => void pickPath(field)}>选择</button>
+          </div>
+        ) : (
+          <textarea
+            id={fieldId}
+            ref={focus ? (node) => { firstFieldRef.current = node } : undefined}
+            rows={field.id === schema.goalId ? 3 : 2}
+            maxLength={8000}
+            placeholder={field.placeholder}
+            value={values[field.id] || ''}
+            onChange={(event) => setValues((current) => ({ ...current, [field.id]: event.target.value }))}
+            onKeyDown={onKeyDown}
+          />
+        )}
+        {field.description ? <small className="wb-workflow-launch-field-hint">{field.description}</small> : null}
+      </div>
+    )
+  }
+
   return (
     <div
       className="wb-modal-mask is-task-composer is-workflow-launch-drawer"
@@ -148,27 +221,15 @@ export function WorkflowLaunchDrawer({
           </section>
 
           <section className="wb-workflow-launch-fields" aria-label="本次运行输入">
-            {schema.fields.map((field, index) => (
-              <label key={field.id} className={`wb-studio-field${field.id === schema.goalId ? ' wb-task-goal-field' : ''}`}>
-                <span>{field.label} {field.required ? <em>必填</em> : <small>可选</small>}</span>
-                <textarea
-                  ref={index === 0 ? firstFieldRef : undefined}
-                  rows={field.id === schema.goalId ? 3 : 2}
-                  maxLength={8000}
-                  placeholder={field.placeholder}
-                  value={values[field.id] || ''}
-                  onChange={(event) => setValues((current) => ({ ...current, [field.id]: event.target.value }))}
-                  onKeyDown={(event) => {
-                    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && canSubmit) {
-                      event.preventDefault()
-                      void submit()
-                    }
-                  }}
-                />
-                {field.description ? <small className="wb-workflow-launch-field-hint">{field.description}</small> : null}
-              </label>
-            ))}
+            {primaryFields.map((field, index) => renderField(field, index === 0))}
           </section>
+
+          {advancedFields.length ? (
+            <details className="wb-workflow-launch-advanced">
+              <summary>高级设置 <span>{advancedFields.length} 项</span></summary>
+              <div className="wb-workflow-launch-fields">{advancedFields.map((field) => renderField(field))}</div>
+            </details>
+          ) : null}
 
           <section className="wb-task-output-preview" aria-label="本次工作流产出">
             <header><span>将交付</span><small>{outputs.length} 项</small></header>

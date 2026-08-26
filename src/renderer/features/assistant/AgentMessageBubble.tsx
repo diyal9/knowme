@@ -23,7 +23,9 @@ function useLiveNow(active: boolean) {
   const [now, setNow] = useState(() => Date.now())
   useEffect(() => {
     if (!active) return
-    const ms = window.knowme?.perf?.liveNowIntervalMs || 500
+    // Elapsed time is secondary information; updating it twice per second
+    // makes the thinking shell feel like it is flashing during short replies.
+    const ms = window.knowme?.perf?.liveNowIntervalMs || 1000
     const timer = window.setInterval(() => setNow(Date.now()), ms)
     return () => window.clearInterval(timer)
   }, [active])
@@ -211,7 +213,13 @@ function AgentMessageBubbleImpl({
     thinking ? 'thinking' : '',
     error ? 'err' : '',
   ].filter(Boolean).join(' ')
-  const timeline = message ? buildExecutionTimelineView(message, now) : null
+  const rawTimeline = message ? buildExecutionTimelineView(message, now) : null
+  // A lone prepare/model stage is an internal lifecycle detail. Keep simple
+  // chat on one stable thinking surface, but retain the timeline for genuine
+  // tools/sub-runs and multi-step reasoning (the expandable process view).
+  const hasRealExecution = Boolean(message?.trace?.some((item) => item.kind === 'tool' || item.kind === 'subrun'))
+  const hasMultiStepTrace = (message?.trace?.length || 0) > 1
+  const timeline = rawTimeline && (hasRealExecution || hasMultiStepTrace) ? rawTimeline : null
   const elapsed = Number.isFinite(message?.elapsedMs)
     ? Number(message?.elapsedMs)
     : (live && Number(message?.startedAt) ? now - Number(message?.startedAt) : 0)
@@ -225,15 +233,19 @@ function AgentMessageBubbleImpl({
       data-testid="msg-assistant"
       aria-label="KnowMe 回复"
     >
-      {timeline ? <AgentExecutionTimeline view={timeline} /> : null}
-      {showThinking && !body ? (
-        <div className="thinking-status" data-testid="agent-thinking-status">
-          <span className="agent-execution-orb" aria-hidden="true" />
-          <span className="thinking-dots" aria-hidden="true"><i /><i /><i /></span>
-          <span>
-            {userStatusLabel(message?.activity || '正在处理')}
-            {elapsedLabel ? ` · ${elapsedLabel}` : ''}
-          </span>
+      {(timeline || (showThinking && !body)) ? (
+        <div className="agent-activity-surface" data-testid="agent-activity-surface">
+          {timeline ? <AgentExecutionTimeline view={timeline} /> : null}
+          {showThinking && !body ? (
+            <div className="thinking-status" data-testid="agent-thinking-status">
+              <span className="agent-execution-orb" aria-hidden="true" />
+              <span className="thinking-dots" aria-hidden="true"><i /><i /><i /></span>
+              <span>
+                {userStatusLabel(message?.activity || '正在处理')}
+                {elapsedLabel ? ` · ${elapsedLabel}` : ''}
+              </span>
+            </div>
+          ) : null}
         </div>
       ) : null}
       {body || children ? (

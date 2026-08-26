@@ -1,5 +1,7 @@
 'use strict'
 
+const { formatViolationForUser } = require('./agent-grounding-labels')
+
 const { runAgentGenerate } = require('./agent-generate-runner')
 const { validateExecutionCompletion } = require('./agent-execution-contract')
 
@@ -275,7 +277,7 @@ function createExpertTaskRuntime(deps) {
           executionEvidence: [...(existingEvidence || []), executionEvidence],
           events: [...(latestBeforePersist.ok ? latestBeforePersist.task.events : task.events), {
             type: 'execution_blocked',
-            summary: executionEvidence.violations?.[0]?.message || '缺少真实工具执行证据',
+            summary: formatViolationForUser(executionEvidence.violations?.[0]) || '缺少真实工具执行证据，请确认任务输入后重新执行',
           }],
         })
       }
@@ -452,12 +454,19 @@ function createExpertTaskRuntime(deps) {
     const store = deps.getWorkbenchTaskStore()
     const current = store.get(id)
     if (!current.ok) return current
-    if (!['failed', 'cancelled'].includes(current.task.status)) {
+    if (controllers.has(current.task.id)) {
+      return { ok: false, error: '专家仍在执行，无需重复启动' }
+    }
+    if (!['failed', 'cancelled', 'needs_input', 'starting', 'running', 'revising'].includes(current.task.status)) {
       return { ok: false, error: '当前任务不需要重新执行' }
     }
+    const resuming = ['starting', 'running', 'revising'].includes(current.task.status)
     const updated = store.update(current.task.id, {
       status: 'starting',
-      events: [...current.task.events, { type: 'retried', summary: '用户重新执行任务' }],
+      events: [...current.task.events, {
+        type: resuming ? 'resumed' : 'retried',
+        summary: resuming ? '用户继续上次未完成的执行' : '用户重新执行任务',
+      }],
     })
     if (updated.ok) void execute(updated.task.id)
     return { ...updated, started: Boolean(updated.ok) }

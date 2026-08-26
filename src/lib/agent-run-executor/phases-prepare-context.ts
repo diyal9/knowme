@@ -2,6 +2,11 @@
 
 const llmRuntime = require('../llm-runtime')
 const { EventType } = require('../agent-output-protocol')
+const {
+  resolveTurnIdentity,
+  upsertConversationMessage,
+  withConversationIdentity,
+} = require('../agent-conversation-log')
 
 /**
  * PREPARE + CONTEXT 阶段：加载设置、构建上下文，处理 grounding 阻断早退。
@@ -62,15 +67,19 @@ async function runPrepareContext(deps) {
     })
     enterPhase(RunPhase.PERSIST)
     const blockedCanonical = commitCanonicalAnswer(blockedText)
-    session.messages = session.messages || []
-    session.messages.push({
+    const turnIdentity = resolveTurnIdentity(input, runId)
+    const assistantMessage = withConversationIdentity({
+      id: turnIdentity.assistantMessageId,
       role: 'assistant',
       text: blockedCanonical.text.slice(0, 12000),
+      runId,
+      createdAt: new Date().toISOString(),
       trace: [],
       protocolVersion: OUTPUT_PROTOCOL_VERSION,
       answerHash: blockedCanonical.hash,
       ui: blockedCanonical.ui,
-    })
+    }, { sessionId: session.id })
+    session.messages = upsertConversationMessage(session.messages || [], assistantMessage)
     ports.session.set?.(session)
     await ports.session.persist?.({
       session,

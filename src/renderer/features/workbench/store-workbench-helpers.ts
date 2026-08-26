@@ -137,7 +137,11 @@ export function workflowRunProjection(rawPackage: unknown, rawTree: unknown) {
     const runtimeNode = runtimeByWorkflowNode.get(id) || {}
     const outputLabel = workflowResultText(nodeResult.output)
       || workflowResultText(nodeResult.summary)
+      || workflowResultText(nodeResult.message)
+      || workflowResultText(nodeResult.stopReason)
+      || workflowResultText(nodeResult.code)
       || workflowResultText(runtimeNode.summary)
+      || workflowResultText(runtimeNode.stopReason)
     const runtimeStatus = String(runtimeNode.status || '')
     return {
       id,
@@ -151,11 +155,15 @@ export function workflowRunProjection(rawPackage: unknown, rawTree: unknown) {
   })
   const pendingGates = Array.isArray(tree.pendingGates) ? tree.pendingGates.map(asRecord) : []
   const latestActive = [...graphNodes].reverse().find((node) => ['running', 'waiting'].includes(node.status))
-  const rootStatus = String(root.status || '')
-  const terminal = ['done', 'completed', 'failed', 'cancelled', 'canceled'].includes(rootStatus.toLowerCase())
+  // Older/restarted desktop processes can expose the run status on the tree
+  // rather than on `tree.root`. Treat those terminal states as authoritative so
+  // the room does not remain at 0/N "执行中" forever after a restart.
+  const rootStatus = String(root.status || tree.status || tree.phase || '')
+  const normalizedRootStatus = rootStatus.toLowerCase()
+  const terminal = ['done', 'completed', 'failed', 'error', 'interrupted', 'cancelled', 'canceled'].includes(normalizedRootStatus)
   if (terminal && !graphNodes.some((node) => ['running', 'waiting', 'failed'].includes(node.status))) {
     for (const node of graphNodes) {
-      if (node.status === 'pending') node.status = 'completed'
+      if (node.status === 'pending') node.status = ['failed', 'error', 'interrupted'].includes(normalizedRootStatus) ? 'failed' : 'completed'
     }
   }
   const log = events.map((event) => String(event.summary || event.message || event.type || '')).filter(Boolean)

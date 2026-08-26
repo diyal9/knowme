@@ -28,6 +28,20 @@ describe('agent grounding user labels', () => {
     assert.ok(text.includes('飞书会议妙记读取'))
   })
 
+  it('explains missing importer evidence with an actionable next step', () => {
+    const text = formatViolationForUser({
+      code: 'missing_required_evidence',
+      unmet: [
+        { kind: 'tool_result', tool: 'preview_external_project' },
+        { kind: 'tool_result', tool: 'design_external_workflow_import' },
+      ],
+    })
+    assert.ok(text.includes('扫描外部项目'))
+    assert.ok(text.includes('生成导入方案'))
+    assert.ok(text.includes('重新执行'))
+    assert.ok(!text.includes('requiredEvidence'))
+  })
+
   it('stripRawToolIdsFromText replaces dotted tool ids', () => {
     const text = stripRawToolIdsFromText('需要先调用 feishu.meeting_read 再总结')
     assert.ok(!text.includes('feishu.meeting_read'))

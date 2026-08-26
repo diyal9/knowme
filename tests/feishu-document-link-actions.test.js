@@ -78,6 +78,34 @@ describe('feishu document link actions', () => {
     assert.equal(titleFromCliResult(JSON.stringify({ data: { title: '飞书知识库' } }), 'wiki'), '')
   })
 
+  it('reads a rendered Feishu title in a hidden browser when CLI metadata is unavailable', async () => {
+    const { resolveFeishuBrowserTitle } = require('../src/ipc/open-external')
+    let destroyed = false
+    class FakeBrowserWindow {
+      constructor(options) {
+        assert.equal(options.show, false)
+        assert.equal(options.webPreferences.partition, 'persist:knowme-preview')
+        this.webContents = {
+          executeJavaScript: async () => '【FF项目】0元礼包',
+          getURL: () => 'https://forever9.feishu.cn/wiki/wikcn123',
+        }
+      }
+      async loadURL(url) { assert.equal(url, 'https://forever9.feishu.cn/wiki/wikcn123') }
+      isDestroyed() { return destroyed }
+      destroy() { destroyed = true }
+    }
+    const result = await resolveFeishuBrowserTitle('https://forever9.feishu.cn/wiki/wikcn123', {
+      BrowserWindow: FakeBrowserWindow,
+    })
+    assert.deepEqual(result, {
+      ok: true,
+      title: '【FF项目】0元礼包',
+      finalUrl: 'https://forever9.feishu.cn/wiki/wikcn123',
+      via: 'hidden-browser',
+    })
+    assert.equal(destroyed, true)
+  })
+
   it('classifies common Feishu resources without network metadata', () => {
     assert.deepEqual(classifyFeishuResource('/docx/abc'), { type: 'doc', label: '飞书文档', glyph: '文' })
     assert.equal(classifyFeishuResource('/sheets/abc').type, 'sheet')

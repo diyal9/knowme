@@ -67,7 +67,7 @@ function resolveWindowsGpuPolicy(opts = {}) {
     return buildResult({
       isRemoteDesktop,
       disableGpu: true,
-      applyRdpSwiftShader: isRemoteDesktop,
+      applyRdpSwiftShader: true,
       useInProcessGpu: false,
       uiThrottle: true,
       reason: 'crash',
@@ -86,13 +86,16 @@ function resolveWindowsGpuPolicy(opts = {}) {
     })
   }
 
+  // Windows 环境下 GPU 子进程曾以 -1073741515 崩溃，导致 Electron
+  // 在窗口创建后直接销毁渲染器。默认走软件路径，KNOWME_FORCE_GPU=1
+  // 仍可用于显式恢复硬件加速探测。
   return buildResult({
     isRemoteDesktop: false,
-    disableGpu: false,
+    disableGpu: true,
     applyRdpSwiftShader: false,
     useInProcessGpu: false,
-    uiThrottle: false,
-    reason: '',
+    uiThrottle: true,
+    reason: 'crash',
   })
 }
 

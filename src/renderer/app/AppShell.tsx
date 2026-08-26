@@ -49,6 +49,8 @@ const T = {
   reloadWb: '\u5237\u65b0\u5de5\u4f5c\u53f0',
   shelf: '\u5de5\u4f5c\u6d41\u8d27\u67b6',
   automation: '\u81ea\u52a8\u5316\u4e2d\u5fc3',
+  automationTab: '\u81ea\u52a8\u5316',
+  automationTask: '\u4efb\u52a1',
   manageWf: '\u7ba1\u7406\u5de5\u4f5c\u6d41',
   studio: '\u642d\u5efa',
   run: '\u8fd0\u884c',
@@ -91,9 +93,12 @@ export function AppShell() {
 
   const isStudio = surfaceId === 'studio'
   const workflowManageActive = surfaceId === 'manage' && managePanel === 'workflows'
+  const daemonManageActive = surfaceId === 'manage' && managePanel === 'daemon'
   const showModeTabs = route === 'workbench'
     && managePanel !== 'automation'
     && ['taskhome', 'shelf', 'manage'].includes(surfaceId)
+  const showAutomationTab = route === 'automation'
+  const showTopTabs = showModeTabs || showAutomationTab
   const activeTabMode = resolveWorkbenchTabMode(surfaceId, managePanel)
   const backLabel = studioReturnLabel(studioReturnSurface)
   const headTitle = workbenchHeadTitle(route, surfaceId)
@@ -152,16 +157,31 @@ export function AppShell() {
             aria-label={T.workbench}
           >
             <header className="wb-head" id="wbHead" hidden={taskRoomActive || surfaceId === 'run'}>
-              {!isStudio && !showModeTabs ? (
+              {showAutomationTab ? (
+                <div className="wb-automation-head-title" aria-label={T.automationTab}>
+                  <Icon name="automation" />
+                  <span>{T.automationTab}</span>
+                </div>
+              ) : !isStudio && !showTopTabs ? (
                 <div className="wb-head-title">
-                  <Icon name={route === 'automation' ? 'automation' : 'workbench'} />
+                  <Icon name="workbench" />
                   <span id="wbHeadTitle">{headTitle}</span>
                   <span className="wb-head-sub" id="wbHeadSub" />
                 </div>
               ) : null}
               {isStudio ? <StudioHeadNav /> : null}
-              <div className="wb-mode-tabs" id="wbModeTabs" role="tablist" aria-label={T.wbViews} hidden={!showModeTabs}>
-                {WB_TABS.map((tab) => {
+              <div className="wb-mode-tabs" id="wbModeTabs" role="tablist" aria-label={showAutomationTab ? T.automation : T.wbViews} hidden={!showTopTabs}>
+                {showAutomationTab ? (
+                  <button
+                    type="button"
+                    className="wb-mode-tab active"
+                    role="tab"
+                    aria-selected="true"
+                    onClick={() => useAppStore.getState().openAutomationCenter()}
+                  >
+                    {T.automationTask}
+                  </button>
+                ) : WB_TABS.map((tab) => {
                   const selected = activeTabMode === tab.mode
                   return (
                     <button
@@ -192,7 +212,7 @@ export function AppShell() {
                   id="wbShelfSearch"
                   placeholder={T.searchPh}
                   autoComplete="off"
-                  hidden={isStudio || workflowManageActive}
+                  hidden={isStudio || workflowManageActive || daemonManageActive}
                   value={shelfQuery}
                   onChange={(e) => setShelfQuery(e.target.value)}
                 />

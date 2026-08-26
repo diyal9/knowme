@@ -1,0 +1,34 @@
+{
+  "id": "cocos-creator-mcp",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "Cocos Creator MCP",
+  "name": "Cocos Creator MCP",
+  "description": "通过 legacy SSE MCP 连接 Cocos Creator 编辑器，用于刷新资源、导入 ArtBundle/DSL、打开场景和结构验收。",
+  "capabilities": ["cocos-creator", "artbundle-import", "prefab-verify"],
+  "mcp": {
+    "transport": "sse",
+    "url": "http://127.0.0.1:3103/sse"
+  },
+  "secretSlots": [
+    { "key": "access_token", "label": "Creator MCP Access Token", "required": true, "target": "bearer" }
+  ],
+  "allowlist": ["ping", "get_project_info", "get_editor_context", "query_scene_hierarchy"],
+  "healthCheck": { "tool": "ping", "timeoutMs": 15000 },
+  "toolPolicies": [
+    { "match": "ping", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "get_*", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "query_*", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "capture_*", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "refresh_assets", "risk": "write", "sideEffects": true, "requiresApproval": false },
+    { "match": "open_scene", "risk": "write", "sideEffects": true, "requiresApproval": false },
+    { "match": "import_*", "risk": "external", "sideEffects": true, "requiresApproval": true, "timeoutMs": 180000 },
+    { "match": "*", "risk": "external", "sideEffects": true, "requiresApproval": true }
+  ],
+  "permissions": {
+    "tools": ["ping", "get_project_info", "get_editor_context", "query_scene_hierarchy"],
+    "externalSystem": "cocos-creator",
+    "network": ["http://127.0.0.1:3103"]
+  }
+}

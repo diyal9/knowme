@@ -58,6 +58,44 @@ describe('settings-surface', () => {
     await waitFor(() => expect(screen.getByText(/连通（42ms）/)).toBeInTheDocument())
   })
 
+  it('keeps Context Engine semantic selection separate and probes Embedding', async () => {
+    const embeddingProbe = vi.fn(async () => ({
+      ok: true,
+      latencyMs: 36,
+      host: 'vector.example.com',
+      model: 'embed-test',
+      dimensions: 1536,
+    }))
+    mockApi({
+      getSettings: () => ({
+        model: 'gpt-4o-mini',
+        apiEndpoint: 'https://api.example.com/v1',
+        semanticRerank: false,
+        contextSemanticMode: 'off',
+        embeddingEndpoint: 'https://vector.example.com/v1',
+        embeddingModel: 'embed-test',
+      }),
+      initSettings: (cb) => cb({
+        contextSemanticMode: 'off',
+        embeddingEndpoint: 'https://vector.example.com/v1',
+        embeddingModel: 'embed-test',
+      }),
+      sourcesList: async () => ({ sources: [] }),
+      embeddingProbe,
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: '系统配置' }))
+    fireEvent.change(screen.getByLabelText('Context Engine 语义选择'), { target: { value: 'shadow' } })
+    expect(screen.getByLabelText('Context Engine 语义选择')).toHaveValue('shadow')
+    fireEvent.click(screen.getByRole('button', { name: '测试 Embedding' }))
+    await waitFor(() => expect(embeddingProbe).toHaveBeenCalledWith(expect.objectContaining({
+      contextSemanticMode: 'shadow',
+      embeddingEndpoint: 'https://vector.example.com/v1',
+      embeddingModel: 'embed-test',
+    })))
+    await waitFor(() => expect(screen.getByText(/Embedding 可用：1536 维，36ms/)).toBeInTheDocument())
+  })
+
   it('keeps memory data controls separate from personal-agent attributes', async () => {
     mockApi({
       getSettings: () => ({ userProfile: '独立开发者', userPrompt: '先给结论', industry: 'software' }),

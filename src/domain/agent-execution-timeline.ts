@@ -13,6 +13,15 @@ export type AgentTraceItem = {
   round?: number
 }
 
+/** 生成请求收到终态后，将遗留的进行中步骤收敛，避免历史气泡永久显示运行中。 */
+export function settleExecutionTrace<T extends { status?: string }>(
+  trace: T[] | undefined,
+  status: Extract<AgentTraceStatus, 'done' | 'error' | 'cancelled'>,
+): T[] | undefined {
+  if (!trace?.length) return trace
+  return trace.map((item) => item.status === 'pending' ? { ...item, status } as T : item)
+}
+
 export type ExecutionTimelineRow = {
   id: string
   kind: AgentTraceItem['kind']

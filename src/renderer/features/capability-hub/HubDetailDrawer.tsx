@@ -13,6 +13,7 @@ import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
 import { HubCapabilityIcon } from './HubCapabilityIcon'
 import { HubStatusBadges } from './HubStatusBadges'
+import { HubConnectorManager } from './HubConnectorManager'
 
 type Props = {
   item: HubCapabilityItem
@@ -136,7 +137,7 @@ export function HubDetailDrawer({ item, isMine = false, onClose, onChanged, onEd
             <HubCapabilityIcon item={item} className="hub-card-icon" />
             <strong>{item.category || '未分类'} · {hubSourceLabel(item.source)}</strong>
             <p>{item.description || '暂无描述'}</p>
-            <HubStatusBadges item={item} />
+            <HubStatusBadges item={item} compact />
           </div>
           <section className="hub-drawer-section">
             <h3>元信息</h3>
@@ -153,14 +154,22 @@ export function HubDetailDrawer({ item, isMine = false, onClose, onChanged, onEd
           {item.kind === 'expert' ? (
             <section className="hub-drawer-section">
               <h3>装配</h3>
-              <p>{listValues(item.skills || []).join('、') || '未装配技能，它只会依据 persona 回答。'}</p>
-              <p>{listValues(item.connectors || []).join('、') || '未装配连接器，它不会访问外部系统。'}</p>
+              <dl className="hub-detail-list">
+                <div><dt>技能</dt><dd>{listValues(item.skills || []).join('、') || '未装配；仅依据 persona 回答'}</dd></div>
+                <div><dt>连接器</dt><dd>{listValues(item.connectors || []).join('、') || '未装配；不会访问外部系统'}</dd></div>
+              </dl>
             </section>
           ) : null}
           {item.kind === 'skill' ? (
             <section className="hub-drawer-section hub-skill-usage-note">
               <h3>技能如何使用</h3>
               <p>技能不会作为独立伙伴出现在工作台。安装后，可以装备给智能伙伴或“我的专家”。</p>
+            </section>
+          ) : null}
+          {item.kind === 'connector' && installed ? (
+            <section className="hub-drawer-section">
+              <h3>连接器实例</h3>
+              <HubConnectorManager connectorId={item.id} onChanged={onChanged} />
             </section>
           ) : null}
           <section className="hub-drawer-section">
@@ -173,10 +182,16 @@ export function HubDetailDrawer({ item, isMine = false, onClose, onChanged, onEd
           </section>
           <section className="hub-drawer-section">
             <h3>输入 / 输出</h3>
-            <h4>输入</h4>
-            {inputs.length ? <ul>{inputs.map((value) => <li key={value}>{value}</li>)}</ul> : <p>未声明</p>}
-            <h4>输出</h4>
-            {outputs.length ? <ul>{outputs.map((value) => <li key={value}>{value}</li>)}</ul> : <p>未声明</p>}
+            <div className="hub-io-grid">
+              <div className="hub-io-item">
+                <span>输入</span>
+                <p>{inputs.length ? inputs.join('、') : '未声明'}</p>
+              </div>
+              <div className="hub-io-item">
+                <span>输出</span>
+                <p>{outputs.length ? outputs.join('、') : '未声明'}</p>
+              </div>
+            </div>
           </section>
           <section className="hub-drawer-section">
             <h3>风险与来源</h3>

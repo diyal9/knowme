@@ -28,12 +28,22 @@ describe('shelf domain', () => {
   it('classifies imported art workflow tags as visual without explicit provenance', () => {
     const card = toShelfCard({
       id: 'th-art-psd-to-artbundle',
-      name: '固定 PSD → 标准 ArtBundle',
+      name: 'PSD导Artbundle',
       source: 'team',
       goalTypes: ['ui', 'psd', 'artbundle', 'factory', 'creator'],
     })
     expect(card.domain).toBe('visual')
+    expect(card.markIcon).toBe('arrowLeftRight')
     expect(filterShelfCards([card], '', 'visual')).toEqual([card])
+  })
+
+  it('assigns workflow icons by purpose before falling back to its domain', () => {
+    expect(toShelfCard({ id: 'daily-summary', name: '飞书日常总结' }).markIcon).toBe('clipboardCheck')
+    expect(toShelfCard({ id: 'qa-check', name: '发布质量验收' }).markIcon).toBe('badgeCheck')
+    expect(toShelfCard({ id: 'image-flow', name: '美术生图' }).markIcon).toBe('image')
+    expect(toShelfCard({ id: 'data-flow', name: '经营数据分析' }).markIcon).toBe('database')
+    expect(toShelfCard({ id: 'team-flow', name: '跨团队交接' }).markIcon).toBe('users')
+    expect(toShelfCard({ id: 'unknown', name: '未分类流程' }).markIcon).toBe('workflow')
   })
 
   it('explains empty shelf supply by daemon status', () => {

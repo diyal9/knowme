@@ -4,6 +4,7 @@ import { MODE_FOLLOWUP_PRESETS } from './assistant-modes'
 export type IntelligentRecommendation = FollowUpPreset & {
   description: string
   reason?: string
+  badges?: string[]
 }
 
 type RecommendationRule = {
@@ -12,6 +13,13 @@ type RecommendationRule = {
 }
 
 const RULES: RecommendationRule[] = [
+  {
+    test: /(待确认|工作主题|匹配专家|匹配.*工作流|下一步|输出结论)/i,
+    items: [
+      { label: '确认主题范围', description: '围绕当前输出提炼目标、依据和待确认项', prompt: '请基于刚才的输出，提炼需要我确认的主题范围、关键依据和缺失信息；只引用当前上下文已有内容，不要补造事实。' },
+      { label: '匹配专家或工作流', description: '根据当前结论推荐合适的后续处理能力', prompt: '请基于刚才的输出内容，推荐最适合的专家、Skill 或工作流，并说明匹配依据、预计产出和开始前需要确认的事项；不要直接执行。' },
+    ],
+  },
   {
     test: /(需求|目标|为什么|不清楚|澄清|想法|问题)/i,
     items: [
@@ -83,6 +91,59 @@ export function buildIntelligentRecommendations(
 
 export function hasDynamicRecommendations(body: string): boolean {
   return RULES.some((rule) => rule.test.test(String(body || '')))
+}
+
+/**
+ * 空白会话的主题入口：以低门槛的回顾和澄清问题作为工作入口。
+ * 这些只是建议，不代表系统已经读取了对应数据；每个 prompt 都要求先确认范围和可用来源。
+ */
+export function buildMemoryTopicRecommendations(memoryHints: string[]): IntelligentRecommendation[] {
+  const hints = memoryHints.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 3)
+  const focus = hints[0]?.slice(0, 36)
+  const contextNote = focus ? `结合「${focus}」` : '结合最近的工作资料'
+  return [
+    {
+      label: '回顾昨天的工作',
+      description: `${contextNote}盘点事项、进展和未完成项`,
+      prompt: '我想盘点昨天做了哪些事。请先确认“昨天”对应的日期，以及你可以读取的会话、会议、文档或本地资料范围；确认后只基于可验证内容列出事项、进展、未完成项和需要我补充的信息，不要猜测。',
+    },
+    {
+      label: '提炼近期工作结论',
+      description: '从已有记录中区分结论、依据和待确认项',
+      prompt: '请帮我提炼近期工作的结论。先确认时间范围和需要覆盖的资料来源；再只根据可验证内容整理结论、依据、影响、待确认事项，并区分事实与推断。',
+    },
+    {
+      label: '盘点最近的会议',
+      description: '整理会议主题、结论、待办和风险',
+      prompt: '请帮我盘点最近的会议。先确认时间范围，以及是否只读取已授权的会议来源；确认后列出会议主题、关键结论、待办负责人和截止时间、风险与需要跟进的事项。只有读到会议正文或妙记内容后才总结，不要根据标题猜测。',
+    },
+    {
+      label: '确认今天的重点',
+      description: '结合近期记录澄清今天最重要的 1 至 3 件事',
+      prompt: '请帮我确认今天的工作重点。先询问我希望覆盖的时间范围、资料来源和优先级约束；再结合可验证的近期记录提出不超过 3 个重点，并为每个重点说明依据、下一步和待确认信息。',
+    },
+  ]
+}
+
+/** 右栏能力来源：只展示有记忆依据的习惯/判断，不使用固定办公入口。 */
+export function buildMemoryCapabilityRecommendations(memoryHints: string[]): IntelligentRecommendation[] {
+  const hints = memoryHints.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 2)
+  if (!hints.length) return []
+  const focus = hints[0].slice(0, 44)
+  return [
+    {
+      label: '沿用我的工作习惯',
+      description: `基于「${focus}」组织下一步`,
+      prompt: '请根据我的全局记忆和当前上下文，沿用我已确认的工作习惯组织下一步；先列出采用的记忆依据，遇到冲突或缺失信息先向我确认。',
+      badges: ['基于记忆'],
+    },
+    {
+      label: '优先匹配相关能力',
+      description: '从已授权 Skill、专家和工作流中选择',
+      prompt: '请根据当前上下文和我的全局记忆，只从已授权的 Skill、专家或工作流中推荐最匹配的能力；说明匹配依据、预计产出和权限状态，不要编造能力。',
+      badges: ['已授权', '需确认'],
+    },
+  ]
 }
 
 /** 对话结束区只允许真实的后续操作，不展示方法论入口。 */

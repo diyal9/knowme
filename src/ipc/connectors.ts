@@ -35,6 +35,10 @@ function registerConnectorsIpc(ipcMain, deps) {
   ipcMain.handle('connectors-upsert', (_e, patch) => getConnectorsApi().upsertConnector(patch || {}))
   ipcMain.handle('connectors-set-allowlist', (_e, id, allowlist) =>
     getConnectorsApi().setAllowlist(id, allowlist))
+  ipcMain.handle('connectors-set-secrets', (_e, id, secrets) =>
+    getConnectorsApi().setSecrets(id, secrets || {}))
+  ipcMain.handle('connectors-tools', (_e, id) => getConnectorsApi().getConnectorTools(id))
+  ipcMain.handle('connectors-references', (_e, id) => getConnectorsApi().listConnectorReferences(id))
   ipcMain.handle('tool-drafts-list', () => ({
     ok: true,
     drafts: toolDraftsStore.listPendingDrafts(app.getPath('userData')),

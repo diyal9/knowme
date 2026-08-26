@@ -56,4 +56,37 @@ describe('workflowRunProjection', () => {
       outputLabel: '已生成飞书消息处理清单。',
     })
   })
+
+  it('does not leave interrupted runs looking active after a process restart', () => {
+    const projection = workflowRunProjection(
+      { graph: { nodes: [{ id: 'psd_intake', type: 'agent', name: 'PSD 读取' }] } },
+      { status: 'INTERRUPTED', nodes: {}, events: [] },
+    )
+
+    expect(projection.phase).toBe('done')
+    expect(projection.status).toBe('INTERRUPTED')
+    expect(projection.graphNodes[0].status).toBe('failed')
+  })
+
+  it('keeps a failed node reason available to the recovery interface', () => {
+    const projection = workflowRunProjection(
+      { graph: { nodes: [{ id: 'psd_read', type: 'action', name: '读取 PSD' }] } },
+      {
+        root: { status: 'failed' },
+        events: [{
+          type: 'workbench.graph.terminal',
+          result: {
+            results: {
+              psd_read: { status: 'failed', code: 'psd_not_found', message: '没有找到指定的 PSD 文件' },
+            },
+          },
+        }],
+      },
+    )
+
+    expect(projection.graphNodes[0]).toMatchObject({
+      status: 'failed',
+      outputLabel: '没有找到指定的 PSD 文件',
+    })
+  })
 })

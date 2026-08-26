@@ -17,6 +17,7 @@ const {
 const { resolveCurrentUserIdentity } = require('./scopes')
 
 const MINUTES_DOMAIN = 'https://forever9.feishu.cn/minutes/'
+const DOC_DOMAIN = 'https://forever9.feishu.cn/docx/'
 
 /** vc +search enumerates meetings the authorized user attended/organized. */
 function buildVcSearchArgs({ start, end, pageSize = 20, pageToken = '' } = {}) {
@@ -30,9 +31,14 @@ function buildVcDetailArgs(meetingId) {
   return ['vc', '+detail', '--meeting-ids', String(meetingId), '--format', 'json']
 }
 
-/** minutes +detail returns the Smart Minutes body (summary/todo/chapter). */
+/** minutes +detail returns the Smart Minutes body and its associated note_id. */
 function buildMinutesDetailArgs(minuteToken) {
-  return ['minutes', '+detail', '--minute-tokens', String(minuteToken), '--summary', '--todo', '--chapter', '--format', 'json']
+  return ['minutes', '+detail', '--minute-tokens', String(minuteToken), '--summary', '--todo', '--chapter', '--transcript', '--format', 'json']
+}
+
+/** note +detail resolves the separate AI meeting-notes document chain. */
+function buildNoteDetailArgs(noteId) {
+  return ['note', '+detail', '--note-id', String(noteId), '--as', 'user', '--format', 'json']
 }
 
 /** Parse the human-readable display_info blob returned by vc +search. */
@@ -73,6 +79,7 @@ function formatMinuteBodyForSummary(row = {}) {
   const summary = artifacts.summary || artifacts.Summary || ''
   const todo = artifacts.todo || artifacts.todos || artifacts.Todo || ''
   const chapter = artifacts.chapter || artifacts.chapters || artifacts.Chapter || ''
+  const transcript = artifacts.transcript || artifacts.transcripts || artifacts.Transcript || ''
   const sections = [
     `# 会议纪要：${title}`,
     token ? `minute_token: ${token}` : '',
@@ -88,6 +95,7 @@ function formatMinuteBodyForSummary(row = {}) {
   pushSection('摘要', summary)
   pushSection('待办', todo)
   pushSection('章节', chapter)
+  pushSection('逐字稿', transcript)
   if (sections.length <= 3) {
     const fallback = minuteArtifactText(row).trim()
     if (fallback) {
@@ -127,6 +135,14 @@ function formatMeetingCandidates(items = [], days = 3, identity = null) {
   return lines.join('\n')
 }
 
+async function resolveAssociatedNoteDocToken(noteId, opts = {}) {
+  const id = String(noteId || '').trim()
+  if (!id) return ''
+  const detail = await runLarkCliWithRetry(buildNoteDetailArgs(id), opts, { retries: 1 })
+  if (!detail.ok) return ''
+  return extractNoteDocToken(parseCliJsonOutput(detail.text))
+}
+
 function extractDocParticipants(content = '') {
   const src = String(content || '')
   const ids = new Set()
@@ -160,8 +176,9 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
   // vc/minutes `--participant-ids` filter silently drops valid rows. But
   // `vc +search` is already scoped to meetings the authorized user attended or
   // organized, so a plain time-range query yields "my meetings". We enumerate
-  // via vc +search, then hydrate each meeting via vc +detail to obtain the
-  // Smart Minutes token used for reading the body.
+  // via vc +search, then hydrate each meeting via vc +detail. If a note_id is
+  // present, resolve note_doc_token as well so the candidate points at the
+  // actual meeting record rather than only the recording artifact.
   const meetings = []
   const seenIds = new Set()
   const seenPageTokens = new Set()
@@ -204,17 +221,22 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
       : (dp?.data && typeof dp.data === 'object' ? dp.data : null)
     if (!row) continue
     const minuteToken = String(row.minute_token || '').trim()
+    const noteId = String(row.note_id || '').trim()
+    // VC meetings may have both a recording and a separate AI meeting-notes
+    // Docx. Resolve note_id -> note_doc_token while building candidates so the
+    // displayed link points to the actual meeting record when it exists.
+    const noteDocToken = noteId ? await resolveAssociatedNoteDocToken(noteId, opts) : ''
     candidates.push({
       meetingId: meeting.id,
       title: String(row.topic || meeting.topic || '').trim() || '(未命名会议)',
       meetingTime: String(row.start_time || meeting.timeText || '').trim(),
       organizer: meeting.organizer,
       minuteToken,
-      noteId: String(row.note_id || '').trim(),
-      // The vc `app_link` (applink.feishu.cn/client/vctab/open) is rejected by
-      // the Feishu desktop client with「暂不支持该功能」, so it must never be the
-      // user-facing link; only /minutes/<token> opens the Smart Minutes page.
-      url: minuteToken ? `${MINUTES_DOMAIN}${minuteToken}` : '',
+      noteId,
+      noteDocToken,
+      // The vc app_link is not a stable readable source and must never be
+      // shown. Prefer the associated Docx; fall back to the minutes page.
+      url: noteDocToken ? `${DOC_DOMAIN}${noteDocToken}` : (minuteToken ? `${MINUTES_DOMAIN}${minuteToken}` : ''),
       appLink: meeting.appLink || '',
     })
   }
@@ -228,6 +250,95 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
 
 function hasMeetingContent(text = '') {
   return /(会议|纪要|妙记|参会|议题|结论|行动项|待办|主持|发言|会议时间|会议记录|minutes|meeting)/i.test(String(text || ''))
+}
+
+function normalizeDocumentBody(raw = '') {
+  const source = String(raw || '').trim()
+  if (!source) return ''
+  let parsed = null
+  try { parsed = JSON.parse(source) } catch { /* plain text */ }
+  const decode = value => String(value || '')
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\"/g, '"')
+  if (parsed && typeof parsed === 'object') {
+    const queue = [parsed]
+    const keys = ['content', 'body', 'plain_text', 'plainText', 'markdown', 'text', 'doc_content']
+    while (queue.length) {
+      const item = queue.shift()
+      if (!item || typeof item !== 'object') continue
+      for (const key of keys) {
+        if (typeof item[key] === 'string' && item[key].trim()) return decode(item[key]).trim()
+      }
+      for (const value of Object.values(item)) {
+        if (value && typeof value === 'object') queue.push(value)
+      }
+    }
+  }
+  return decode(source)
+}
+
+function firstObject(value) {
+  if (Array.isArray(value)) return value.find(item => item && typeof item === 'object') || null
+  return value && typeof value === 'object' ? value : null
+}
+
+function extractMinuteRow(payload) {
+  const candidates = [
+    payload?.data?.minutes,
+    payload?.minutes,
+    payload?.data?.items,
+    payload?.items,
+  ]
+  for (const candidate of candidates) {
+    const row = firstObject(candidate)
+    if (row) return row
+  }
+  return firstObject(payload?.data) || null
+}
+
+function findStringByKeys(value, keys, seen = new Set()) {
+  if (!value || typeof value !== 'object' || seen.has(value)) return ''
+  seen.add(value)
+  for (const key of keys) {
+    if (typeof value[key] === 'string' && value[key].trim()) return value[key].trim()
+  }
+  for (const child of Object.values(value)) {
+    const found = findStringByKeys(child, keys, seen)
+    if (found) return found
+  }
+  return ''
+}
+
+function extractNoteId(payload, row) {
+  return findStringByKeys(row, ['note_id', 'noteId']) || findStringByKeys(payload, ['note_id', 'noteId'])
+}
+
+function extractNoteDocToken(payload) {
+  return findStringByKeys(payload, ['note_doc_token', 'noteDocToken', 'main_doc_token', 'mainDocToken'])
+}
+
+async function readAssociatedMeetingNote(noteId, opts = {}) {
+  const id = String(noteId || '').trim()
+  if (!id) return { ok: false, code: 'missing_note_id', message: '会议没有关联的飞书会议纪要', text: '' }
+  const detail = await runLarkCliWithRetry(buildNoteDetailArgs(id), opts, { retries: 1 })
+  if (!detail.ok) {
+    const msg = normalizeCliErrorMessage(detail.message, detail.text, 'feishu.note_detail')
+    return { ...detail, message: msg, text: msg }
+  }
+  const payload = parseCliJsonOutput(detail.text)
+  const noteDocToken = extractNoteDocToken(payload)
+  if (!noteDocToken) {
+    return { ok: false, code: 'missing_note_document', message: '已找到会议纪要，但飞书未返回可读取的纪要文档', text: '已找到会议纪要，但没有可读取的会议纪要文档。' }
+  }
+  const doc = await executeFeishuRead('feishu.read_doc', { doc_token: noteDocToken }, opts)
+  if (!doc.ok) return doc
+  const body = normalizeDocumentBody(doc.text)
+  if (!hasMeetingContent(body)) {
+    return { ok: false, code: 'not_meeting_document', message: '关联文档没有会议纪要证据，已拒绝总结', text: '关联文档没有明确会议纪要/会议记录内容，已拒绝总结。' }
+  }
+  return { ok: true, text: body, meta: { workflow: 'meeting_read', source: noteDocToken, kind: 'note_doc', noteId: id } }
 }
 
 async function executeMeetingRead(args = {}, opts = {}) {
@@ -244,21 +355,41 @@ async function executeMeetingRead(args = {}, opts = {}) {
     // contains the literal key "minutes", which would spuriously satisfy the
     // meeting-content check.
     const payload = parseCliJsonOutput(res.text)
-    const row = Array.isArray(payload?.data?.minutes) ? payload.data.minutes[0] : null
-    if (!hasMeetingContent(minuteArtifactText(row))) {
+    const row = extractMinuteRow(payload)
+    // lark-cli may exit successfully while returning an envelope whose
+    // individual minute row failed (for example need_user_authorization or
+    // per-minute ACL denial). Preserve that authoritative error instead of
+    // degrading it to “no meeting body”, which hides the correct next step.
+    const rowError = findStringByKeys(row, ['error', 'message'])
+    const topError = String(payload?.msg || payload?.message || '').trim()
+    const codeFailure = Number(payload?.code) >= 400
+    if (rowError || topError || payload?.ok === false || codeFailure) {
+      const rawFailure = rowError || topError || findStringByKeys(payload, ['error', 'message']) || `飞书返回错误码 ${payload?.code}`
+      const msg = normalizeCliErrorMessage(rawFailure, res.text, 'feishu.meeting_read')
+      const minuteAcl = /No read permission for minute|没有查看权限|缺少可阅读权限/i.test(`${rawFailure}\n${msg}`)
       return {
         ok: false,
-        code: 'not_meeting_document',
-        message: '读取到的纪要没有会议内容，已拒绝总结无关文档',
-        text: '读取到的妙记正文没有明确会议纪要/会议记录内容，已拒绝将其作为会议记录总结。',
+        code: minuteAcl ? 'minute_permission_denied' : (/need_user_authorization|identity is missing|no token in keychain/i.test(rawFailure) ? 'user_authorization_required' : 'cli_error'),
+        message: msg,
+        text: msg,
+        ...(minuteAcl ? { minutePermissionDenied: true } : {}),
       }
     }
-    const body = formatMinuteBodyForSummary({ ...row, minute_token: minuteToken })
-    return {
-      ok: true,
-      text: body || res.text,
-      meta: { workflow: 'meeting_read', source: minuteToken, kind: 'minute' },
+    const artifactText = minuteArtifactText(row)
+    if (hasMeetingContent(artifactText)) {
+      const body = formatMinuteBodyForSummary({ ...row, minute_token: minuteToken })
+      return { ok: true, text: body || res.text, meta: { workflow: 'meeting_read', source: minuteToken, kind: 'minute' } }
     }
+    // A recording/Smart Minutes token can also point to a separate AI meeting
+    // note. Resolve that note before declaring the read a failure; never let
+    // the model infer a meeting summary from the card metadata alone.
+    const noteId = extractNoteId(payload, row)
+    if (noteId) {
+      const note = await readAssociatedMeetingNote(noteId, opts)
+      if (note.ok) return note
+      return note
+    }
+    return { ok: false, code: 'not_meeting_document', message: '读取到的妙记没有会议正文或可关联的会议纪要', text: '读取到的妙记没有会议正文，也没有可关联的会议纪要文档，已拒绝编造总结。' }
   }
   // Fallback: legacy Smart Minutes docx by token/url.
   const doc = String(args.doc_token || args.url || '').trim()
@@ -268,7 +399,8 @@ async function executeMeetingRead(args = {}, opts = {}) {
     url: args.url,
   }, opts)
   if (!result.ok) return result
-  if (!hasMeetingContent(result.text)) {
+  const body = normalizeDocumentBody(result.text)
+  if (!hasMeetingContent(body)) {
     return {
       ok: false,
       code: 'not_meeting_document',
@@ -278,7 +410,7 @@ async function executeMeetingRead(args = {}, opts = {}) {
   }
   return {
     ok: true,
-    text: result.text,
+    text: body,
     meta: { workflow: 'meeting_read', source: doc, kind: 'doc' },
   }
 }
@@ -288,9 +420,11 @@ module.exports = {
   buildVcSearchArgs,
   buildVcDetailArgs,
   buildMinutesDetailArgs,
+  buildNoteDetailArgs,
   parseMeetingDisplayInfo,
   extractMinuteToken,
   formatMinuteBodyForSummary,
+  normalizeDocumentBody,
   extractDocParticipants,
   docContainsParticipant,
   executeMeetingCandidates,

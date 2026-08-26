@@ -41,6 +41,7 @@ const DESIGN_EXTERNAL_WORKFLOW_IMPORT = {
         additional_skill_ids: { type: 'array', items: { type: 'string' }, description: 'Entry or runtime skills not declared by an expert manifest.' },
         include_optional_skills: { type: 'boolean', description: 'Include optional skills declared by selected experts.' },
         include_connectors: { type: 'boolean', description: 'Include safe project connector definitions and report blocked connectors.' },
+        knowledge_mode: { type: 'string', enum: ['none', 'source', 'rag'], description: 'Knowledge handling: source keeps the project bound; rag copies Markdown/text into KnowMe knowledge retrieval.' },
       },
       required: ['preview_token', 'workflow_ids'],
       additionalProperties: false,
@@ -135,6 +136,9 @@ function buildCapabilityImportTools(options = {}) {
           additionalSkillIds: Array.isArray(args.additional_skill_ids) ? args.additional_skill_ids : [],
           includeOptionalSkills: args.include_optional_skills === true,
           includeConnectors: args.include_connectors !== false,
+          knowledgeMode: ['rag', 'source'].includes(String(args.knowledge_mode || '').toLowerCase())
+            ? String(args.knowledge_mode).toLowerCase()
+            : 'none',
         })
         return {
           ok: result?.ok !== false,

@@ -37,7 +37,7 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
       set((state) => ({ sessionStates: patchSession(state.sessionStates, get().activeSessionId, { composer }) }))
     },
 
-    addComposerAttachment: (file: { name: string; text?: string }) => {
+    addComposerAttachment: (file: { name: string; kind?: 'text' | 'image'; text?: string; mimeType?: string; dataUrl?: string }) => {
       const sessionId = get().activeSessionId
       set((state) => {
         const slice = getSessionSlice(state.sessionStates, sessionId)
@@ -204,18 +204,24 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
 
     loadAssistantChrome: async () => {
       try {
-        const [models, profile, skills, providers] = await Promise.all([
+        const [models, profile, partnerResult, skills, providers] = await Promise.all([
           api()?.llmModels?.(),
           api()?.llmProfile?.(),
+          api()?.personalAgentGet?.(),
           api()?.capabilityList?.({ kind: 'skill' }),
           api()?.knowledgeProviderList?.().catch(() => null),
         ])
         const { groups, presets, defaultModelId } = parseAssistantModelCatalog(models)
         const providerList = (providers?.providers || []) as KnowledgeProviderItem[]
+        const partnerProfile = partnerResult?.profile || null
+        const assistantPartnerName = String(
+          partnerProfile?.identity?.displayName || partnerProfile?.name || '',
+        ).trim() || 'KnowMe'
         set({
           assistantModels: presets,
           assistantModelGroups: groups,
           assistantModelId: parseAssistantProfileModel(profile, defaultModelId),
+          assistantPartnerName,
           assistantSkills: parseAssistantSkills(skills),
           ...(providerList.length ? {
             knowledgeProviders: providerList,
@@ -223,7 +229,9 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
           } : {}),
         })
       } catch {
-        /* ignore */
+        // Keep the identity slot stable on a failed preload, but never render
+        // the product fallback before this request has settled.
+        set({ assistantPartnerName: 'KnowMe' })
       }
       // wiki/okf 仍延后；provider 已在上面预载供专家模式知识菜单
       window.setTimeout(() => {

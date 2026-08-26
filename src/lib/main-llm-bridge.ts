@@ -11,6 +11,7 @@ const http = require('http')
 const agentStream = require('./agent-stream')
 const llmModelCatalog = require('./llm-model-catalog')
 const logger = require('./logger')
+const embeddingRuntime = require('./embedding-runtime')
 
 try {
   // Windows 上 AAAA 优先时，死掉的 IPv6/VIP 会让套接字挂到 idle 超时才失败
@@ -120,48 +121,11 @@ function normalizeChatEndpoint(endpoint) {
   return trimmed
 }
 
-function normalizeEmbeddingsEndpoint(endpoint) {
-  const trimmed = String(endpoint || '').trim().replace(/\/+$/, '')
-  if (!trimmed) return ''
-  if (/\/embeddings(\?|$)/.test(trimmed)) return trimmed
-  if (/\/chat\/completions$/.test(trimmed)) return trimmed.replace(/\/chat\/completions$/, '/embeddings')
-  if (/\/v1$/.test(trimmed) || /\/compatible-mode\/v1$/.test(trimmed)) return `${trimmed}/embeddings`
-  return `${trimmed}/embeddings`
-}
-
-function buildEmbedFn(settings) {
-  if (!settings || settings.semanticRerank !== true || !settings.apiKey) return null
-  const endpoint = normalizeEmbeddingsEndpoint(settings.apiEndpoint)
-  if (!endpoint || typeof fetch !== 'function') return null
-  const apiKey = settings.apiKey
-  const model = String(settings.embeddingModel || '').trim()
-    || (settings.llmProvider === 'dashscope' ? 'text-embedding-v3' : 'text-embedding-3-small')
-  const embed = async (texts) => {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 8000)
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify({ model, input: texts }),
-        signal: controller.signal,
-      })
-      if (!res.ok) throw new Error(`embeddings ${res.status}`)
-      const json = await res.json()
-      const data = Array.isArray(json?.data) ? json.data : []
-      const ordered = [...data].sort((a, b) => (Number(a?.index) || 0) - (Number(b?.index) || 0))
-      const vectors = ordered.map((d) => d.embedding)
-      if (vectors.length !== texts.length) {
-        throw new Error(`embeddings count mismatch: ${vectors.length}/${texts.length}`)
-      }
-      return vectors
-    } finally {
-      clearTimeout(timer)
-    }
-  }
-  embed.cacheKey = `${endpoint}|${model}`
-  return embed
-}
+const {
+  normalizeEmbeddingsEndpoint,
+  buildEmbedFn,
+  probeEmbeddingConnection,
+} = embeddingRuntime
 
 function parseSseLines(buffer, onDelta) {
   const lines = buffer.split('\n')
@@ -443,6 +407,7 @@ module.exports = {
   normalizeChatEndpoint,
   normalizeEmbeddingsEndpoint,
   buildEmbedFn,
+  probeEmbeddingConnection,
   parseSseLines,
   extractChatText,
   requestAgentCompletion,

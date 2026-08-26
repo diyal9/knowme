@@ -30,6 +30,57 @@ describe('workspace overlays', () => {
     expect(screen.getByText('待审核任务')).toBeInTheDocument()
   })
 
+  it('shows the next growth task and opens the complete growth view', async () => {
+    mockApi({
+      personalAgentGet: async () => ({
+        ok: true,
+        profile: {
+          profileVersion: 3,
+          id: 'my-knowme',
+          agentId: 'personal',
+          profileKind: 'personal',
+          identity: { displayName: '小知', avatar: 'other/partner' },
+          contexts: [],
+          taskPreferences: {},
+        },
+      }),
+      personalAgentGrowthList: async () => ({ ok: true, events: [], proposals: [] }),
+    })
+    render(<AppShell />)
+    fireEvent.click(screen.getByRole('button', { name: '通知' }))
+
+    await waitFor(() => expect(screen.getByTestId('km-fab-growth')).toBeInTheDocument())
+    expect(screen.getByText('完成一个真实工作任务')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /完成一个真实工作任务/ })).toHaveTextContent('前往工作台')
+
+    fireEvent.click(screen.getByRole('button', { name: '查看全部' }))
+    await waitFor(() => expect(screen.getByTestId('personal-growth-tab')).toBeVisible())
+    expect(screen.getByRole('heading', { name: '下一步，可以这样培养' })).toBeInTheDocument()
+  })
+
+  it('routes directly from a growth task to its action surface', async () => {
+    mockApi({
+      personalAgentGet: async () => ({
+        ok: true,
+        profile: {
+          profileVersion: 3,
+          id: 'my-knowme',
+          agentId: 'personal',
+          profileKind: 'personal',
+          identity: { displayName: '小知', avatar: 'other/partner' },
+          contexts: [],
+          taskPreferences: {},
+        },
+      }),
+      personalAgentGrowthList: async () => ({ ok: true, events: [], proposals: [] }),
+    })
+    render(<AppShell />)
+    fireEvent.click(screen.getByRole('button', { name: '通知' }))
+    const task = await screen.findByRole('button', { name: /完成一个真实工作任务/ })
+    fireEvent.click(task)
+    expect(useAppStore.getState().route).toBe('workbench')
+  })
+
   it('adapts FAB inset for studio canvas while staying right-edge aligned', async () => {
     expect(resolveFabInset('workbench', 'studio')).toEqual({ right: 6, bottom: 52 })
     expect(resolveFabInset('assistant', 'taskhome')).toEqual({ right: 6, bottom: 6 })

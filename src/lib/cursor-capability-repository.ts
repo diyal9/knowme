@@ -7,6 +7,7 @@ const { parseSkillFrontmatter } = require('./skill-runtime')
 const { deriveExpertDisplayName } = require('./expert-display-name')
 const { scanSecrets } = require('./capability-import')
 const { resolvePaths } = require('./capability-store')
+const { ARTBUNDLE_RECIPE_ID, enrichExternalWorkflowPackage } = require('./external-workflow-recipes')
 const {
   SIDECAR_FILE,
   adaptLegacyCapability,
@@ -20,6 +21,28 @@ const LIMITS = Object.freeze({
   workflows: 64,
   fileBytes: 2 * 1024 * 1024,
 })
+
+const KNOWLEDGE_EXTENSIONS = new Set(['.md', '.markdown', '.txt'])
+
+function scanRepositoryKnowledge(root) {
+  const files = []
+  const roots = ['knowledge', 'docs', '.cursor/rules', '.cursor/skills']
+  const visit = (dir, base, depth = 0) => {
+    if (files.length >= 500 || depth > 6 || !fs.existsSync(dir)) return
+    let entries = []
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }) } catch { return }
+    for (const entry of entries) {
+      if (files.length >= 500 || entry.name.startsWith('.') && entry.name !== '.cursor') continue
+      const abs = path.join(dir, entry.name)
+      if (entry.isDirectory() && !['node_modules', '.git'].includes(entry.name)) visit(abs, base, depth + 1)
+      else if (entry.isFile() && KNOWLEDGE_EXTENSIONS.has(path.extname(entry.name).toLowerCase())) {
+        files.push({ path: path.relative(base, abs).replace(/\\/g, '/'), bytes: fs.statSync(abs).size })
+      }
+    }
+  }
+  visit(root, root)
+  return files
+}
 
 function fail(code, error, extra = {}) {
   return { ok: false, code, error, ...extra }
@@ -215,6 +238,9 @@ function scanAgents(root, skills, warnings) {
       requiredSkills: skillGroups.required.filter((id) => skillIds.has(id)),
       optionalSkills: skillGroups.optional.filter((id) => skillIds.has(id)),
       missingSkills,
+      declaredConnectors: Array.isArray(manifest.connectors)
+        ? manifest.connectors.map(item => String(item?.id || item || '').trim()).filter(Boolean)
+        : [],
       contentHash: hashText(`${markdown}\n${JSON.stringify(manifest)}`),
     })
   }
@@ -232,14 +258,50 @@ function scanConnectors(root, warnings) {
   const connectors = []
   for (const [sourceId, raw] of Object.entries(servers).slice(0, LIMITS.connectors)) {
     if (!raw || typeof raw !== 'object') continue
-    if (!raw.command || raw.url || raw.type === 'http' || raw.type === 'sse') {
-      warnings.push({ code: 'unsupported_mcp', path: `.cursor/mcp.json#${sourceId}`, message: `${sourceId} 不是受支持的 stdio MCP 配置` })
+    const rawUrl = String(raw.url || '').trim()
+    const transport = rawUrl
+      ? (raw.type === 'sse' || /\/sse(?:[/?#]|$)/i.test(rawUrl) ? 'sse' : 'streamable-http')
+      : 'stdio'
+    if (transport === 'stdio' && !raw.command) {
+      warnings.push({ code: 'invalid_mcp', path: `.cursor/mcp.json#${sourceId}`, message: `${sourceId} 缺少 stdio command` })
       continue
     }
-    const secretHit = scanSecrets(raw.env || {})
-    const blocked = Boolean(secretHit)
-    if (blocked) {
-      warnings.push({ code: 'mcp_secret', path: `.cursor/mcp.json#${sourceId}`, message: `${sourceId} 含明文敏感字段，已阻止连接器注册` })
+    let cleanUrl = rawUrl
+    const secretSlots = []
+    if (rawUrl) {
+      try {
+        const parsed = new URL(rawUrl)
+        if (parsed.username || parsed.password) {
+          secretSlots.push({ key: 'url_credentials', label: 'URL credentials', required: true, target: 'header', name: 'Authorization' })
+          parsed.username = ''
+          parsed.password = ''
+        }
+        for (const key of [...parsed.searchParams.keys()]) {
+          if (/(?:token|secret|password|api[_-]?key|auth)/i.test(key)) {
+            secretSlots.push({ key: slug(key, 'url_secret'), label: key, required: true, target: 'header', name: key })
+            parsed.searchParams.delete(key)
+          }
+        }
+        cleanUrl = parsed.toString()
+      } catch {
+        warnings.push({ code: 'invalid_mcp_url', path: `.cursor/mcp.json#${sourceId}`, message: `${sourceId} URL 无效` })
+        cleanUrl = ''
+      }
+    }
+    const cleanEnv = {}
+    for (const [key, value] of Object.entries(raw.env && typeof raw.env === 'object' ? raw.env : {})) {
+      const sensitive = /(?:token|secret|password|api[_-]?key|authorization|credential)/i.test(key)
+        || Boolean(scanSecrets({ [key]: value }))
+      if (sensitive) secretSlots.push({ key: slug(key, 'env_secret'), label: key, required: true, target: 'env', name: key })
+      else cleanEnv[key] = String(value || '').slice(0, 600)
+    }
+    for (const [key] of Object.entries(raw.headers && typeof raw.headers === 'object' ? raw.headers : {})) {
+      const bearer = /^authorization$/i.test(key)
+      secretSlots.push({ key: bearer ? 'access_token' : slug(key, 'header_secret'), label: key, required: true, target: bearer ? 'bearer' : 'header', name: key })
+    }
+    const uniqueSecretSlots = [...new Map(secretSlots.map(slot => [slot.key, slot])).values()]
+    if (uniqueSecretSlots.length) {
+      warnings.push({ code: 'mcp_secret_stripped', path: `.cursor/mcp.json#${sourceId}`, message: `${sourceId} 的敏感值已剥离；导入后需在能力中心重新配置` })
     }
     let cwd = String(raw.cwd || '').trim()
     if (cwd) {
@@ -259,19 +321,27 @@ function scanConnectors(root, warnings) {
       description: `来自 ${path.basename(root)} 的 MCP 连接器`,
       version: '1.0.0',
       originPath: `.cursor/mcp.json#${sourceId}`,
-      blocked: blocked || !cwd,
-      blockReason: blocked ? secretHit.error : (!cwd ? 'cwd 超出仓库' : ''),
+      blocked: !cwd || (transport !== 'stdio' && !cleanUrl),
+      blockReason: !cwd ? 'cwd 超出仓库' : ((transport !== 'stdio' && !cleanUrl) ? 'MCP URL 无效' : ''),
+      configState: uniqueSecretSlots.length ? 'needs_configuration' : 'ready',
+      secretSlots: uniqueSecretSlots,
       mcp: {
-        command: String(raw.command),
+        transport,
+        command: String(raw.command || ''),
         args: Array.isArray(raw.args) ? raw.args.map(String).slice(0, 32) : [],
         cwd,
-        envKeys: raw.env && typeof raw.env === 'object' ? Object.keys(raw.env).slice(0, 32) : [],
+        url: cleanUrl,
+        envKeys: Object.keys(cleanEnv).slice(0, 32),
+        env: cleanEnv,
       },
       contentHash: hashText(JSON.stringify({
+        transport,
         command: raw.command,
         args: raw.args,
         cwd,
-        envKeys: raw.env && typeof raw.env === 'object' ? Object.keys(raw.env) : [],
+        url: cleanUrl,
+        envKeys: Object.keys(cleanEnv),
+        secretKeys: uniqueSecretSlots.map(slot => slot.key),
       })),
     })
   }
@@ -383,6 +453,7 @@ function scanCursorRepository(folderPath) {
   const experts = scanAgents(root, skills, warnings)
   const connectors = scanConnectors(root, warnings)
   const workflows = scanWorkflows(root, warnings)
+  const knowledge = scanRepositoryKnowledge(root)
   if (!skills.length && !experts.length && !connectors.length && !workflows.length) {
     return fail('no_capabilities', '仓库中未发现可导入的 Cursor 能力')
   }
@@ -420,6 +491,7 @@ function scanCursorRepository(folderPath) {
     experts,
     connectors,
     workflows,
+    knowledge,
     warnings,
     contentHash: hashText([
       ...skills.map((item) => item.contentHash),
@@ -437,6 +509,7 @@ function publicPreview(preview, token = '') {
     skills: preview.skills.length,
     connectors: preview.connectors.length,
     workflows: preview.workflows.length,
+    knowledge: (preview.knowledge || []).length,
     blocked: [...preview.connectors, ...preview.workflows].filter((item) => item.blocked).length,
   }
   const project = (item) => ({
@@ -469,7 +542,7 @@ function publicPreview(preview, token = '') {
         reasons: [`专家 ${counts.experts} · 技能 ${counts.skills} · 连接器 ${counts.connectors} · 工作流 ${counts.workflows}`],
       },
       compatibility: { status: 'compatible' },
-      estimatedCost: { level: 'medium', estimate: `将注册 ${counts.experts + counts.skills + counts.connectors + counts.workflows - counts.blocked} 项` },
+      estimatedCost: { level: 'medium', estimate: `将注册 ${counts.experts + counts.skills + counts.connectors + counts.workflows - counts.blocked} 项，知识资料 ${counts.knowledge} 份可选入库` },
       rollbackHint: '能力可逐项卸载；导入工作流可在工作流管理中归档。',
       counts,
     },
@@ -478,6 +551,7 @@ function publicPreview(preview, token = '') {
     skills: preview.skills.map(project),
     connectors: preview.connectors.map(project),
     workflows: preview.workflows.map(project),
+    knowledge: (preview.knowledge || []).map(item => ({ path: item.path, bytes: item.bytes })),
     warnings: preview.warnings,
   }
 }
@@ -580,12 +654,14 @@ function planCursorRepositoryImport(preview, options = {}) {
     skills,
     experts: scopedExperts,
     connectors,
+    knowledge: options.knowledgeMode === 'rag' ? (preview.knowledge || []) : [],
     workflows,
     selection: {
       workflowIds: workflows.map(item => item.sourceId),
       additionalSkillIds: uniqueStrings([...(options.additionalSkillIds || []), ...retypedSkillIds]),
       includeOptionalSkills: options.includeOptionalSkills === true,
       includeConnectors: options.includeConnectors !== false,
+      knowledgeMode: ['rag', 'source'].includes(options.knowledgeMode) ? options.knowledgeMode : 'none',
     },
   }
   return {
@@ -601,6 +677,10 @@ function planCursorRepositoryImport(preview, options = {}) {
       counts: { workflows: workflows.length, experts: scopedExperts.length, skills: skills.length, connectors: connectors.length },
       selection: scopedPreview.selection,
       warnings: preview.warnings || [],
+      knowledge: {
+        mode: scopedPreview.selection.knowledgeMode,
+        files: scopedPreview.knowledge.length,
+      },
     },
   }
 }
@@ -702,7 +782,15 @@ function mapWorkflowPackage(item, preview, idMaps) {
 
   const skillIds = Object.values(idMaps.skills)
   const domain = inferWorkflowDomain(item)
-  return {
+  const importedConnectorDependencies = item.sourceId === ARTBUNDLE_RECIPE_ID
+    ? Object.entries(idMaps.connectors).map(([sourceId, id]) => ({
+        id,
+        kind: 'connector',
+        required: /photoshop/i.test(sourceId),
+        reason: `由外部项目连接器 ${sourceId} 提供`,
+      }))
+    : []
+  return enrichExternalWorkflowPackage({
     id: chooseWorkflowId(item, preview.repositoryId, preview.workflowStore),
     name: item.name,
     description: item.description,
@@ -714,6 +802,7 @@ function mapWorkflowPackage(item, preview, idMaps) {
     outputs: [{ id: 'delivery', label: '工作流交付物与验收证据' }],
     agentRefs: [...expertIds].map(id => ({ id })),
     skillRefs: skillIds.map(id => ({ id })),
+    connectorDependencies: importedConnectorDependencies,
     executionBackends: ['local-team'],
     qualityGates: gates.map(gate => ({ id: gate.id, label: gate.title })),
     provenance: {
@@ -742,7 +831,7 @@ function mapWorkflowPackage(item, preview, idMaps) {
       parallelism: 1,
       joinStrategy: 'allSucceeded',
     },
-  }
+  })
 }
 
 function chooseInstallId(desired, kind, originPath, repositoryId, entries, claimed) {
@@ -780,6 +869,8 @@ function writeConnectorManifest(userData, id, item) {
     type: 'mcp',
     mcp: item.mcp,
     allowlist: [],
+    secretSlots: item.secretSlots || [],
+    configState: item.configState || 'ready',
     repositoryId: item.repositoryId,
     originPath: item.originPath,
   }
@@ -890,6 +981,8 @@ function registerCursorRepository(preview, deps = {}) {
         type: 'mcp',
         mcp: item.mcp,
         allowlist: [],
+        secretSlots: item.secretSlots || [],
+        configState: item.configState || 'ready',
       })
       if (!unified.ok) throw new Error(unified.issues?.[0]?.message || '统一声明无效')
       writeConnectorManifest(userData, id, item)
@@ -901,6 +994,8 @@ function registerCursorRepository(preview, deps = {}) {
         agentVisible: true,
         allowlist: [],
         mcp: item.mcp,
+        secretSlots: item.secretSlots || [],
+        configState: item.configState || 'ready',
         meta: { identityHint: `来自 Cursor 仓库 ${preview.name}；环境变量值不由 KnowMe 保存` },
       })
       store.upsertEntry({
@@ -960,9 +1055,12 @@ function registerCursorRepository(preview, deps = {}) {
     const boundSkills = (item.declaredSkills.length ? item.declaredSkills : preview.skills.map((skill) => skill.sourceId))
       .map((sourceId) => idMaps.skills[sourceId])
       .filter(Boolean)
+    const boundConnectors = (item.declaredConnectors?.length
+      ? item.declaredConnectors.map(sourceId => idMaps.connectors[sourceId])
+      : allConnectorIds).filter(Boolean)
     const unified = buildRepositoryManifest('expert', id, item, preview, {
       skills: boundSkills,
-      connectors: allConnectorIds,
+      connectors: boundConnectors,
     })
     if (!unified.ok) {
       result.failed.push({ kind: 'expert', sourceId: item.sourceId, error: unified.issues?.[0]?.message || '统一声明无效' })
@@ -974,7 +1072,7 @@ function registerCursorRepository(preview, deps = {}) {
       description: item.description,
       avatar: '',
       skills: boundSkills,
-      connectors: allConnectorIds,
+      connectors: boundConnectors,
       systemPrompt: item.systemPrompt,
     })
     if (!saved.ok) {

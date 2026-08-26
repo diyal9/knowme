@@ -10,6 +10,7 @@ type Props = {
 
 export function SettingsSystemPanel({ form, onPatch, flash }: Props) {
   const [autostart, setAutostart] = useState(false)
+  const [embeddingTesting, setEmbeddingTesting] = useState(false)
   const rc = form.remoteConfig || {}
 
   useEffect(() => {
@@ -147,9 +148,30 @@ export function SettingsSystemPanel({ form, onPatch, flash }: Props) {
           <SettingsToggle
             checked={!!form.semanticRerank}
             onChange={(next) => onPatch({ semanticRerank: next })}
-            label="向量语义重排"
-            sub="检索结果按语义再排序"
+            label="知识检索向量重排"
+            sub="只影响知识检索候选，不影响 Context Engine"
           />
+          <div className="settings-field">
+            <label htmlFor="contextSemanticMode">Context Engine 语义选择</label>
+            <select
+              id="contextSemanticMode"
+              value={form.contextSemanticMode || 'off'}
+              onChange={(e) => onPatch({ contextSemanticMode: e.target.value as 'off' | 'shadow' | 'active' })}
+            >
+              <option value="off">关闭（本地词面排序）</option>
+              <option value="shadow">Shadow（只观测，不改变选择）</option>
+              <option value="active">启用（参与可选上下文排序）</option>
+            </select>
+          </div>
+          <div className="settings-field">
+            <label htmlFor="embeddingEndpoint">Embedding Endpoint</label>
+            <input
+              id="embeddingEndpoint"
+              value={form.embeddingEndpoint || ''}
+              onChange={(e) => onPatch({ embeddingEndpoint: e.target.value })}
+              placeholder="留空则继承主模型 Endpoint"
+            />
+          </div>
           <div className="settings-field">
             <label htmlFor="embeddingModel">Embedding 模型 ID</label>
             <input
@@ -159,11 +181,55 @@ export function SettingsSystemPanel({ form, onPatch, flash }: Props) {
               placeholder="留空则按 Provider 推断"
             />
           </div>
+          <div className="settings-field">
+            <label htmlFor="embeddingApiKey">Embedding API Key</label>
+            <input
+              id="embeddingApiKey"
+              type="password"
+              value={form.embeddingApiKey || ''}
+              onChange={(e) => onPatch({ embeddingApiKey: e.target.value })}
+              placeholder={form.embeddingApiKeyConfigured
+                ? '已配置；清空后仅在继承/同源 Endpoint 时复用主密钥'
+                : '继承/同源 Endpoint 可留空；独立 Host 必须填写'}
+              autoComplete="off"
+            />
+          </div>
+          <SettingsToggle
+            checked={!!form.embeddingAllowSensitive}
+            onChange={(next) => onPatch({ embeddingAllowSensitive: next })}
+            label="允许发送敏感上下文"
+            sub="允许把标记为敏感的记忆和检索候选发送到 Embedding Provider；默认关闭"
+          />
           <div className="settings-actions">
+            <button
+              type="button"
+              className="settings-btn"
+              disabled={embeddingTesting}
+              onClick={async () => {
+                setEmbeddingTesting(true)
+                try {
+                  const result = await window.api?.embeddingProbe?.(form)
+                  if (result?.ok) {
+                    flash(`Embedding 可用：${result.dimensions || 0} 维，${result.latencyMs || 0}ms`)
+                  } else {
+                    flash(result?.error || 'Embedding 连接失败', 'err')
+                  }
+                } catch {
+                  flash('Embedding 连接失败', 'err')
+                } finally {
+                  setEmbeddingTesting(false)
+                }
+              }}
+            >
+              {embeddingTesting ? '测试中…' : '测试 Embedding'}
+            </button>
             <button type="button" className="settings-btn" onClick={() => window.api?.openKnowledgeDir?.()}>
               打开知识库目录
             </button>
           </div>
+          <p className="settings-intro">
+            只有候选超过 topK 时才请求。Shadow 不改变实际选择；任何超时或非法向量都会回退本地排序。
+          </p>
         </details>
       </div>
     </>

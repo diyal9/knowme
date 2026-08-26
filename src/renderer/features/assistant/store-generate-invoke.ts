@@ -2,6 +2,8 @@ import { connectorFromStatusPayload, maybeAugmentFeishuPrompt } from '../../../d
 import { buildAgentGeneratePayload } from '../../../domain/agent-v2-runtime'
 import { api, type StoreGet } from '../../app/store-types'
 import { detachStreamListener, waitForStreamFlush } from './store-session'
+import type { ExpertDiscussionContext, ExpertDiscussionMode } from '../../../domain/expert-discussion'
+import type { AgentTurnIdentity, ConversationHistoryTurn } from '../../../shared/api'
 
 export async function invokeStreamingGenerate(input: {
   get: StoreGet
@@ -14,10 +16,13 @@ export async function invokeStreamingGenerate(input: {
   expertId?: string
   surface?: string
   taskRef?: { id?: string; kind?: string } | null
-  history: { role: string; text: string }[]
-  attachment?: { name?: string; text?: string }
+  history: ConversationHistoryTurn[]
+  turn: AgentTurnIdentity
+  attachment?: { name?: string; text?: string; kind?: 'text' | 'image'; mimeType?: string; dataUrl?: string }
   task?: unknown
   skillRefs?: string[]
+  conversationMode?: ExpertDiscussionMode
+  expertDiscussionContext?: ExpertDiscussionContext
 }): Promise<{ cancelled: boolean; resultError: string; resultText: string }> {
   const bridge = api()
   let resultText = ''
@@ -39,9 +44,12 @@ export async function invokeStreamingGenerate(input: {
       taskRef: input.taskRef,
       runId: input.runId,
       history: input.history,
+      turn: input.turn,
       attachment: input.attachment,
       task: input.task,
       skillRefs: input.skillRefs,
+      conversationMode: input.conversationMode,
+      expertDiscussionContext: input.expertDiscussionContext,
     }))
     cancelled = Boolean(result?.cancelled)
     resultError = String(result?.error || '').trim()

@@ -1,5 +1,8 @@
 'use strict'
 
+const externalWorkflowRecipes = require('../lib/external-workflow-recipes')
+const connectorDependencies = require('../lib/connectors/dependency-resolver')
+
 /**
  * Workbench local Agent Graph plan / validate / start / run-tree / gate decision.
  */
@@ -20,7 +23,58 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
     workbenchAgentGateWaiters,
     agentArtifactTools,
     workbenchAgentEventList,
+    getWorkbenchWorkflowPackageStore,
+    getConnectorsApi,
   } = deps
+  const externalRunContexts = deps.workbenchExternalRunContexts || new Map()
+  const externalPreflightDeps = () => ({
+    assessConnectors: (pkg, context) => connectorDependencies.assessConnectorRequirements(pkg, context, {
+      getConnectorStatus: id => getConnectorsApi().getConnectorStatus(id),
+    }),
+  })
+
+  const loadExecutionPackage = (workflowId) => {
+    const id = String(workflowId || '').trim()
+    if (!id || typeof getWorkbenchWorkflowPackageStore !== 'function') return null
+    const hit = getWorkbenchWorkflowPackageStore().get(id)
+    return hit?.ok && hit.package
+      ? externalWorkflowRecipes.enrichExternalWorkflowPackage(hit.package)
+      : null
+  }
+
+  const graphPayloadFromPackage = (payload, pkg) => {
+    if (!pkg) return payload
+    const nodes = Array.isArray(pkg.graph?.nodes) ? pkg.graph.nodes : []
+    return {
+      ...payload,
+      teamPackageId: pkg.id,
+      teamName: pkg.name,
+      version: pkg.version,
+      nodes,
+      edges: Array.isArray(pkg.graph?.edges) ? pkg.graph.edges : [],
+      gates: Array.isArray(pkg.graph?.gates) ? pkg.graph.gates : [],
+      parallelism: Number(pkg.graph?.parallelism || 1),
+      joinStrategy: String(pkg.graph?.joinStrategy || 'allSucceeded'),
+      members: nodes.filter(node => node.type === 'agent' && node.agentPackageId).map(node => ({
+        id: node.id,
+        expertId: node.agentPackageId,
+        agentPackageId: node.agentPackageId,
+        profileId: node.profileId || '',
+        role: node.role || node.name || node.id,
+        intent: node.intent || payload.goal || '',
+      })),
+    }
+  }
+
+  ipcMain.handle('workbench-external-workflow-preflight', async (_e, payload = {}) => {
+    const pkg = loadExecutionPackage(payload.workflowId || payload.teamPackageId)
+    if (!pkg || !externalWorkflowRecipes.isArtBundlePackage(pkg)) {
+      return { ok: true, supported: false, checks: [] }
+    }
+    const result = await externalWorkflowRecipes.preflightExternalWorkflow(pkg, payload.inputs || {}, externalPreflightDeps())
+    if (!result.ok) return { ...result, context: undefined }
+    return { ...result, context: undefined }
+  })
 
   ipcMain.handle('workbench-agent-graph-plan', (_e, payload = {}) => {
     const goal = String(payload.goal || '').trim()
@@ -45,11 +99,22 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
   ))
 
   ipcMain.handle('workbench-agent-graph-start', async (_e, payload = {}) => {
-    const compiled = payload.teamPackage && payload.snapshot
-      ? workbenchAgentGraph.compileWorkbenchAgentGraph(payload.composition || payload, {
+    const executionPackage = loadExecutionPackage(payload.teamPackageId || payload.workflowId)
+    const executionPayload = graphPayloadFromPackage(payload, executionPackage)
+    if (executionPackage && externalWorkflowRecipes.isArtBundlePackage(executionPackage)) {
+      const preflight = await externalWorkflowRecipes.preflightExternalWorkflow(executionPackage, payload.inputs || {}, externalPreflightDeps())
+      if (!preflight.ok) return { ...preflight, context: undefined }
+    } else if (executionPackage) {
+      const connectorGate = await connectorDependencies.assessConnectorRequirements(executionPackage, payload.inputs || {}, {
+        getConnectorStatus: id => getConnectorsApi().getConnectorStatus(id),
+      })
+      if (!connectorGate.ok) return connectorGate
+    }
+    const compiled = executionPayload.teamPackage && executionPayload.snapshot
+      ? workbenchAgentGraph.compileWorkbenchAgentGraph(executionPayload.composition || executionPayload, {
         resolveAgentPackage: resolveWorkbenchAgentPackage,
       })
-      : compileWorkbenchAgentGraphPayload(payload)
+      : compileWorkbenchAgentGraphPayload(executionPayload)
     if (!compiled.ok) return compiled
     const settings = loadSettings()
     if (!settings.apiKey || !settings.apiEndpoint) {
@@ -93,6 +158,11 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
     })
     if (!adopted.ok) return adopted
     workbenchAgentRunControllers.set(rootRunId, controller)
+    externalRunContexts.set(rootRunId, {
+      package: executionPackage,
+      inputs: payload.inputs || {},
+      permissions,
+    })
     workbenchAgentRunEvents.set(rootRunId, [{
       type: 'workbench.graph.started',
       rootRunId,
@@ -104,6 +174,8 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
         rootRunId,
         goal: compiled.composition.goal,
         permissions,
+        workflowPackage: executionPackage,
+        workflowInputs: payload.inputs || {},
       })
     } catch (error) {
       runtime.manager.completeAdoptedRun(rootRunId, {
@@ -114,6 +186,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
       })
       workbenchAgentRunControllers.delete(rootRunId)
       agentRuntimePortFactories.delete(rootRunId)
+      externalRunContexts.delete(rootRunId)
       return { ok: false, code: 'runtime_setup_failed', error: error.message || '本地 Agent Runtime 初始化失败' }
     }
     const runner = getWorkbenchAgentTeamRunner()
@@ -137,6 +210,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
       workbenchAgentRunEvents.set(rootRunId, events.slice(-120))
       workbenchAgentRunControllers.delete(rootRunId)
       agentRuntimePortFactories.delete(rootRunId)
+      externalRunContexts.delete(rootRunId)
       for (const [key, waiter] of workbenchAgentGateWaiters.entries()) {
         if (waiter.rootRunId === rootRunId) workbenchAgentGateWaiters.delete(key)
       }
@@ -151,6 +225,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
       workbenchAgentRunEvents.set(rootRunId, events.slice(-120))
       workbenchAgentRunControllers.delete(rootRunId)
       agentRuntimePortFactories.delete(rootRunId)
+      externalRunContexts.delete(rootRunId)
     })
     return {
       ok: true,

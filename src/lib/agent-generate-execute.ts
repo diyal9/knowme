@@ -15,7 +15,7 @@ async function executeAgentGenerate(env) {
   const {
     AgentRunExecutor, buildProductionRunPorts, resolveAgentExecutorMode, resolveGroundingRuntimeMode,
     feishuGrounding, feishuGroundingAdapter, agentVerify, agentRun, writingWorkflow, llmUsage,
-    productMemory, normalizeAssistantOutput, agentProcessTools, logger,
+    productMemory, normalizeAssistantOutput, agentProcessTools, logger, contextEngine,
   } = L
   const {
     loadSettings, saveSettings_, loadAgentSessions, saveAgentSessions, getFeishuGroundingContext,
@@ -73,7 +73,9 @@ async function executeAgentGenerate(env) {
       tier,
       apiMessages,
       session,
-      toolsEnabled: tier !== 'chat' && modelProfile.supportsTools !== false,
+      toolsEnabled: contextEngine.isToolExecutionAllowed(prepared.executionPolicy)
+        && tier !== 'chat'
+        && modelProfile.supportsTools !== false,
       requestAgentCompletion: env.deps.requestAgentCompletion,
       onStreamChunk: null,
       runStartedAt,
@@ -114,6 +116,19 @@ async function executeAgentGenerate(env) {
       },
       postProcessHooks: async ({ fullText, toolMessages: toolMsgs, session: sess }) => {
         const feishuGroundingContext = await getFeishuGroundingContext()
+        // The meeting-candidates tool is a deterministic intermediate step.
+        // Always surface its own returned list (including an explicit empty
+        // result) before asking the model to compose a final answer. This
+        // prevents a model's generic "no evidence" sentence from replacing a
+        // valid candidate response during FINALIZE/grounding.
+        const latestMeetingCandidates = [...(Array.isArray(toolMsgs) ? toolMsgs : [])]
+          .reverse()
+          .find(item => item?.toolName === 'feishu.meeting_candidates' && item?.status === 'done')
+        const hasMeetingRead = (Array.isArray(toolMsgs) ? toolMsgs : [])
+          .some(item => item?.toolName === 'feishu.meeting_read' && item?.status === 'done')
+        if (latestMeetingCandidates && !hasMeetingRead && String(latestMeetingCandidates.text || '').trim()) {
+          return String(latestMeetingCandidates.text).trim()
+        }
         if (resolveGroundingRuntimeMode() === 'legacy') {
           const feishuHint = feishuGrounding.buildFeishuGroundingHint(prompt, toolMsgs, fullText, {
             ...feishuGroundingContext,
@@ -140,7 +155,12 @@ async function executeAgentGenerate(env) {
       },
     })
     try {
-      const kernelResult = await AgentRunExecutor.run(payload, ports, emit)
+      const kernelResult = await AgentRunExecutor.run({
+        ...payload,
+        // Keep the configured name available to the final output gate. It is
+        // identity metadata, never a required response prefix.
+        assistantDisplayName: effectivePersonalization.agentDisplayName || '',
+      }, ports, emit)
       const failed = Boolean(kernelResult.error && (kernelResult.terminal === 'ERROR' || kernelResult.terminal === 'FAILED'))
       env.settleAdoptedRun = null
       teamRuntime.manager.completeAdoptedRun(runId, {

@@ -36,8 +36,21 @@ function alignmentFromSeparator(cell: string): string {
   return ''
 }
 
+/**
+ * Some model gateways emit tool-shaped text instead of structured tool calls.
+ * Keep it as display-only text, but render the payload as a code block so it
+ * cannot be mistaken for an executed tool call.
+ */
+export function normalizeDisplayCodeTags(src: string): string {
+  return String(src || '')
+    .replace(/<tool_code>\s*\n?([\s\S]*?)\n?\s*<\/tool_code>/gi, (_match, body: string) => {
+      const code = String(body || '').replace(/^\n+|\n+$/g, '')
+      return `\n\n\`\`\`text\n${code}\n\`\`\`\n\n`
+    })
+}
+
 export function parseContentBlocks(src: string): ContentBlock[] {
-  const lines = String(src || '').replace(/\r\n/g, '\n').split('\n')
+  const lines = normalizeDisplayCodeTags(src).replace(/\r\n/g, '\n').split('\n')
   const out: ContentBlock[] = []
   let list: { ordered: boolean; items: InlineNode[][] } | null = null
   let inCode = false

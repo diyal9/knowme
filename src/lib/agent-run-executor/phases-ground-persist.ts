@@ -4,8 +4,14 @@ const agentRun = require('../agent-run')
 const { normalizeAssistantOutput, enforceAssistantOutputGate } = require('../assistant-output-style')
 const { resolveGroundingRuntimeMode } = require('../agent-run-ports')
 const groundingRuntime = require('../agent-grounding-runtime')
+const feishuGroundingAdapter = require('../agent-grounding-feishu-adapter')
 const { EventType } = require('../agent-output-protocol')
 const { mergeArtifactRefs } = require('./hints')
+const {
+  resolveTurnIdentity,
+  upsertConversationMessage,
+  withConversationIdentity,
+} = require('../agent-conversation-log')
 const {
   mergeExecutionContracts,
   validateExecutionCompletion,
@@ -57,12 +63,14 @@ async function runGroundAndPersist(deps) {
   let verification = null
   let outputGateStatus = 'not_required'
   const groundingMode = resolveGroundingRuntimeMode()
+  const collaborationOnly = input.conversationMode === 'expert-planning'
+    || input.conversationMode === 'expert-discussion'
 
   if (ports.hooks?.postProcess) {
     fullText = await ports.hooks.postProcess({ fullText, toolMessages, session, input }) || fullText
   }
 
-  if (groundingMode === 'runtime') {
+  if (groundingMode === 'runtime' && !collaborationOnly) {
     enterPhase(RunPhase.GROUND)
     stage('stage_ground', '正在核对依据…', 'pending', { runPhase: RunPhase.GROUND })
     const merged = groundingRuntime.mergeToolResultsIntoLedgers({
@@ -73,6 +81,19 @@ async function runGroundAndPersist(deps) {
     toolLedger = merged.toolLedger
     evidenceLedger = merged.evidenceLedger
     ports.grounding?.setLedgers?.({ evidenceLedger, toolLedger })
+    // Re-apply the candidate payload immediately before persistence. The model
+    // loop updates the live port state, but a finalize/grounding transition can
+    // otherwise carry an older snapshot into the session. Numeric follow-ups
+    // must always be able to bind to the meeting card shown just above.
+    const latestMeetingCandidates = [...(Array.isArray(toolMessages) ? toolMessages : [])]
+      .reverse()
+      .find(item => item?.toolName === 'feishu.meeting_candidates' && item?.status === 'done')
+    if (latestMeetingCandidates) {
+      referenceState = feishuGroundingAdapter.applyMeetingCandidatesToReferenceState(
+        referenceState,
+        latestMeetingCandidates,
+      )
+    }
     session.referenceState = groundingRuntime.serializeReferenceState(referenceState)
     stage('stage_ground', '依据核对完成', 'done', { runPhase: RunPhase.GROUND })
 
@@ -142,22 +163,38 @@ async function runGroundAndPersist(deps) {
   const outputGate = enforceAssistantOutputGate(fullText, {
     allowRawJson: /原始\s*json|json\s*原文|原始数据/i.test(String(input.prompt || '')),
   })
-  fullText = normalizeAssistantOutput(outputGate.text)
+  fullText = normalizeAssistantOutput(outputGate.text, {
+    displayName: input.assistantDisplayName,
+  })
 
   const committed = commitCanonicalAnswer(fullText)
   fullText = committed.text
 
   enterPhase(RunPhase.PERSIST)
   for (const item of trace) session = agentRun.upsertStep(session, item)
-  session.messages = session.messages || []
-  session.messages.push(...toolMessages, {
+  const turnIdentity = resolveTurnIdentity(input, input.runId)
+  let persistedMessages = Array.isArray(session.messages) ? session.messages : []
+  for (const [index, toolMessage] of (Array.isArray(toolMessages) ? toolMessages : []).entries()) {
+    const identifiedTool = withConversationIdentity(toolMessage, {
+      sessionId: session.id,
+      runId: input.runId,
+      index,
+      createdAt: new Date().toISOString(),
+    })
+    persistedMessages = upsertConversationMessage(persistedMessages, identifiedTool)
+  }
+  const assistantMessage = withConversationIdentity({
+    id: turnIdentity.assistantMessageId,
     role: 'assistant',
     text: fullText.slice(0, 12000),
+    runId: input.runId,
+    createdAt: new Date().toISOString(),
     trace,
     protocolVersion: OUTPUT_PROTOCOL_VERSION,
     answerHash: committed.hash,
     ui: committed.ui,
-  })
+  }, { sessionId: session.id })
+  session.messages = upsertConversationMessage(persistedMessages, assistantMessage)
   session.updatedAt = new Date().toISOString()
   ports.session.set?.(session)
 

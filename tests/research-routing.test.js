@@ -28,6 +28,32 @@ describe('research-routing', () => {
     assert.equal(researchRouting.classifyResearchIntent('实现动态规划算法').active, false)
   })
 
+  it('uses the visible formal-task goal instead of internal prompt scaffolding', () => {
+    const prompt = [
+      '当前时间：2026-08-23T15:00:00.000Z',
+      '已确认的执行计划：检索会议内容',
+      '材料：不要执行公开网络搜索',
+    ].join('\n')
+    const selected = researchRouting.selectResearchPrompt({
+      prompt,
+      displayPrompt: '分析我上周五的会议',
+    })
+    assert.equal(selected, '分析我上周五的会议')
+    assert.equal(researchRouting.classifyResearchIntent(selected).active, false)
+  })
+
+  it('clears a stale public-research requirement from an internal meeting task', () => {
+    const frame = {
+      workflowId: 'realtime-public-research',
+      requiredTools: ['search_web'],
+    }
+    assert.equal(researchRouting.reconcileResearchTaskFrame(frame, '分析我上周五的会议'), null)
+    assert.equal(
+      researchRouting.reconcileResearchTaskFrame(frame, '帮我看下今天关于 AI 的资讯'),
+      frame,
+    )
+  })
+
   it('activates conversation grounding for a research request', () => {
     const result = conversationGrounding.buildGrounding({
       prompt: '帮我看下今天关于 AI 的资讯',

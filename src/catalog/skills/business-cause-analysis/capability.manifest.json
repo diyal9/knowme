@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "business-cause-analysis",
+  "kind": "skill",
+  "name": "业务异常归因",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "businessCauseAnalysis",
+          "title": "异常归因",
+          "subtitle": "驱动因素、竞争性假设与验证",
+          "icon": "search",
+          "group": "business-analysis",
+          "modes": ["analysis", "research"],
+          "surfaces": ["scene", "workflow"],
+          "prompt": "请拆解业务异常的可能驱动因素，列出竞争性假设、证据强度和最小验证方案。"
+        }]
+      }
+    }
+  }
+}

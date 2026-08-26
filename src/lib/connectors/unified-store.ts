@@ -41,6 +41,11 @@ function connectorManifest(connector) {
     type: conn.type,
     agentVisible: conn.agentVisible !== false,
     allowlist: conn.allowlist || [],
+    secretSlots: conn.secretSlots || [],
+    toolPolicies: conn.toolPolicies || [],
+    healthCheck: conn.healthCheck || null,
+    capabilities: conn.capabilities || [],
+    configState: conn.configState || 'ready',
     ...(conn.type === 'mcp' ? { mcp: conn.mcp || {} } : {}),
     permissions: connector.permissions || {
       tools: conn.allowlist || [],
@@ -114,6 +119,11 @@ function createUnifiedConnectorStore(options = {}) {
       agentVisible: raw.agentVisible !== false,
       allowlist: raw.allowlist || normalizedManifest.manifest.permissions?.tools || [],
       mcp: raw.mcp || normalizedManifest.manifest.metadata?.connector?.mcp || {},
+      secretSlots: raw.secretSlots || normalizedManifest.manifest.metadata?.connector?.secretSlots || [],
+      toolPolicies: raw.toolPolicies || normalizedManifest.manifest.metadata?.connector?.toolPolicies || [],
+      healthCheck: raw.healthCheck || normalizedManifest.manifest.metadata?.connector?.healthCheck || null,
+      capabilities: raw.capabilities || normalizedManifest.manifest.metadata?.connector?.capabilities || [],
+      configState: raw.configState || normalizedManifest.manifest.metadata?.connector?.configState || 'ready',
       meta: raw.meta || { identityHint: raw.description || '' },
     })
     return {

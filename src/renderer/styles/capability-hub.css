@@ -301,8 +301,8 @@ button, input, select, textarea { font-family: inherit; }
 .hub-app { background: var(--hub-bg); }
 
 .hub-nav {
-  height: 52px;
-  min-height: 52px;
+  height: var(--surface-tab-height, 46px);
+  min-height: var(--surface-tab-height, 46px);
   flex-shrink: 0;
   padding: 0 18px 0 22px;
   display: flex;
@@ -494,7 +494,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 }
 
 .hub-app .hub-tabs {
-  height: 52px;
+  height: var(--surface-tab-height, 46px);
   display: inline-flex;
   align-items: stretch;
   gap: 12px;
@@ -511,7 +511,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 52px;
+  min-height: var(--surface-tab-height, 46px);
   padding: 0 8px;
   border: 0;
   border-radius: 0;
@@ -548,6 +548,12 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 }
 .hub-app .hub-tab.active::after { transform: scaleX(1); }
 .hub-app .hub-tab:active { transform: translateY(1px); }
+
+/* 三类能力共用同一条 Tab 底线；筛选行不再重复绘制顶线。 */
+.hub-app[data-tab="experts"] .hub-category-row,
+.hub-app[data-tab="skills"] .hub-category-row {
+  border-top-color: transparent;
+}
 
 /* 「我的」列表首位：虚线创建卡片 */
 .hub-card.hub-card-create {
@@ -2124,6 +2130,18 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   border-radius: 10px;
   background: #f8fbfa;
 }
+.hub-connector-manager { display:grid; gap:12px; }
+.hub-connector-manager .hub-field { display:grid; gap:6px; }
+.hub-connector-manager .hub-field input,
+.hub-connector-manager .hub-field select,
+.hub-connector-manager .hub-field textarea { width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid var(--hub-div); border-radius:8px; background:#fff; color:var(--hub-text); }
+.hub-connector-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.hub-connector-status { margin:0; padding:9px 10px; border-radius:8px; background:var(--hub-accent-bg); color:var(--hub-accent); }
+.hub-connector-tools { display:grid; gap:8px; padding-top:10px; border-top:1px solid var(--hub-div); }
+.hub-connector-tools > label { display:flex; align-items:flex-start; gap:8px; }
+.hub-connector-tools > label span { display:grid; gap:2px; }
+.hub-connector-tools small { color:var(--hub-text3); }
+.hub-connector-references { padding-top:10px; border-top:1px solid var(--hub-div); }
 
 @media (max-width: 820px) {
   .hub-mine-context { align-items: flex-start; flex-direction: column; gap: 10px; }
@@ -2146,3 +2164,236 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-field input,
 .hub-field select,
 .hub-field textarea { font:var(--type-body); }
+
+/* Production polish: make the single import affordance discoverable and keep card rhythm predictable. */
+.hub-nav .hub-nav-add-btn {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border: 1px solid rgba(39, 120, 106, 0.2);
+  border-radius: 8px;
+  background: rgba(39, 120, 106, 0.08);
+  color: var(--hub-accent);
+  box-shadow: 0 1px 2px rgba(24, 31, 36, 0.04);
+}
+.hub-nav .hub-nav-add-btn:hover {
+  border-color: rgba(39, 120, 106, 0.34);
+  background: rgba(39, 120, 106, 0.14);
+  color: var(--hub-accent);
+  box-shadow: 0 3px 10px rgba(39, 120, 106, 0.12);
+}
+.hub-nav .hub-nav-add-btn:focus-visible {
+  outline: 2px solid var(--hub-accent-b);
+  outline-offset: 2px;
+}
+.hub-nav .hub-nav-add-btn .ico { width: 16px; height: 16px; }
+.hub-nav .hub-nav-add-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  padding: 5px 8px;
+  border: 1px solid rgba(24, 31, 36, 0.1);
+  border-radius: 6px;
+  background: #273139;
+  color: #fff;
+  font: 500 12px/1 var(--ui);
+  white-space: nowrap;
+  box-shadow: 0 5px 14px rgba(24, 31, 36, 0.14);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-2px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.hub-nav .hub-nav-add-btn:hover::after,
+.hub-nav .hub-nav-add-btn:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hub-featured-row,
+.hub-grid { gap: 14px; }
+.hub-card {
+  min-height: 150px;
+  padding: 16px;
+}
+.hub-card:hover { background: var(--surface-panel); }
+.hub-card-head { gap: 12px; }
+.hub-card-icon { width: 40px; height: 40px; }
+.hub-card-title { font: var(--type-card); }
+.hub-card-desc { font: var(--type-body); }
+.hub-card-foot { min-height: 22px; }
+.hub-card-foot-actions .hub-card-fav {
+  width: 28px;
+  height: 28px;
+  margin: -3px -3px -3px 0;
+  border: 1px solid transparent;
+}
+.hub-card-foot-actions .hub-card-fav:hover {
+  border-color: rgba(217, 119, 6, 0.18);
+  background: rgba(245, 158, 11, 0.12);
+}
+.hub-badge.icon-only {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 7px;
+  cursor: help;
+}
+.hub-badge.icon-only .ico { margin-right: 0; }
+.hub-badge.icon-only .ico svg { width: 8px; height: 8px; }
+
+/* Skill cards: keep featured and catalog cards on one predictable information rhythm. */
+.hub-card {
+  min-height: 164px;
+  gap: 11px;
+  cursor: pointer;
+}
+.hub-card-head { min-width: 0; }
+.hub-card-meta { padding-top: 1px; }
+.hub-card-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
+}
+.hub-card-desc {
+  min-height: 3.1em;
+  max-height: 3.1em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.hub-card-foot {
+  min-height: 30px;
+  padding-top: 9px;
+  border-top: 1px solid color-mix(in srgb, var(--hub-div) 72%, transparent);
+}
+.hub-card-foot-actions { margin-left: auto; }
+.hub-card-featured {
+  min-height: 164px;
+  background: linear-gradient(180deg, #fff, var(--surface-panel));
+}
+.hub-card-featured:hover {
+  background: var(--surface-panel);
+  box-shadow: 0 8px 18px rgba(24, 31, 36, 0.06);
+}
+.hub-card-featured .hub-card-foot { padding-top: 9px; }
+.hub-card-action { min-height: 28px; }
+
+@media (max-width: 620px) {
+  .hub-card,
+  .hub-card-featured { min-height: 150px; }
+}
+
+@media (max-width: 620px) {
+  .hub-featured-row,
+  .hub-grid { gap: 10px; }
+  .hub-card { min-height: 142px; padding: 14px; }
+}
+
+/* Detail drawer: use quiet separators and compact label/value rows instead of stacked prose. */
+.hub-drawer-body > .hub-drawer-section {
+  margin: 0;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hub-div);
+}
+.hub-drawer-body > .hub-drawer-section:last-child { border-bottom: 0; }
+.hub-drawer-body > .hub-drawer-section h3 {
+  margin: 0 0 10px;
+  color: var(--hub-text);
+  font: 600 13px/1.35 var(--ui);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.hub-drawer-body > .hub-drawer-section p,
+.hub-drawer-body > .hub-drawer-section li {
+  color: var(--hub-text2);
+  font: var(--type-support);
+  line-height: 1.55;
+}
+.hub-drawer-body > .hub-drawer-section ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+}
+.hub-detail-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+.hub-detail-list > div {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+.hub-detail-list dt,
+.hub-io-item > span {
+  color: var(--hub-text3);
+  font: 600 12px/1.4 var(--ui);
+}
+.hub-detail-list dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--hub-text2);
+  font: var(--type-support);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.hub-io-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.hub-io-item {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--hub-div);
+  border-radius: 9px;
+  background: var(--hub-surface);
+}
+.hub-io-item p { margin: 4px 0 0; }
+
+@media (max-width: 620px) {
+  .hub-io-grid { grid-template-columns: 1fr; }
+}
+
+/* Status icons need enough optical weight to read at a glance. */
+.hub-badge.icon-only.verified {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #27806d;
+}
+.hub-badge.icon-only.installed {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: #2f865a;
+}
+.hub-badge.icon-only.installed .ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: transparent;
+  color: currentColor;
+}
+.hub-badge.icon-only.installed .ico svg { width: 18px; height: 18px; }
+.hub-badge.icon-only.verified .ico {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: transparent;
+  color: currentColor;
+}
+.hub-badge.icon-only.verified .ico svg { width: 18px; height: 18px; }

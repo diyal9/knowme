@@ -13,11 +13,11 @@ async function buildRunToolSurface(env, prepared) {
     app, path, agentTools, agentSandbox, agentPlanTools, agentWebTools, agentProcessTools,
     agentArtifactTools, agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, isToolSurfaceV1,
     resolveToolSurfaceForRun, getSessionCapabilityBindings, mergeExtraTools, researchRouting,
-    llmRuntime, groundingRuntime, feishuGrounding, resolveGroundingRuntimeMode, connectorToolRuntime,
+    llmRuntime, groundingRuntime, feishuGrounding, resolveGroundingRuntimeMode, connectorToolRuntime, contextEngine,
   } = L
   const {
     ensureCapabilityHub, ensureAgentTeamRuntime, getActiveSourceRoot, kosSourcesCtx,
-    workbenchDaemon, buildActiveSourceFileTools,
+    workbenchDaemon, buildActiveSourceFileTools, getConnectorsApi,
   } = env.deps
   const { payload, runId, signal, metrics, controller } = env
   const fail = (error) => ({ early: env.fail(error) })
@@ -25,14 +25,26 @@ async function buildRunToolSurface(env, prepared) {
   let { session } = prepared
   const {
     s, slashRefs, tier, embedFn, queryKnowledge, kbQueryTool, kbGetTool,
-    policy, groundingTaskFrame: initialFrame, contextInfo, prompt,
+    policy, groundingTaskFrame: initialFrame, contextInfo, prompt, researchPrompt,
   } = prepared
   // research 路由可能改写对话消息，须 let（原先 const 会在注入时抛 Assignment to constant variable）
   let apiMessages = prepared.apiMessages
   let groundingTaskFrame = initialFrame
   let settleAdoptedRun = env.settleAdoptedRun
 
-  const needsConnectorTools = tier !== 'chat' || slashRefs.length > 0
+  const effectiveExecutionPolicy = session?.executionPolicy === 'no-tools'
+    ? 'no-tools'
+    : prepared.executionPolicy
+  const noTools = !contextEngine.isToolExecutionAllowed(effectiveExecutionPolicy)
+  const needsConnectorTools = contextEngine.shouldProjectToolSurface({
+    executionPolicy: effectiveExecutionPolicy,
+    tier,
+    slashRefs,
+  })
+  if (noTools) {
+    groundingTaskFrame = null
+    if (session && typeof session === 'object') session.referenceState = undefined
+  }
   const fileTools = needsConnectorTools
     ? buildActiveSourceFileTools(embedFn, {
       workspaceState: s.workspaceState || null,
@@ -167,29 +179,62 @@ async function buildRunToolSurface(env, prepared) {
         extraTools: cOpts.extraTools,
         allowedConnectorIds: sessionConnectorBindings.allowedConnectorIds,
         registry: cOpts.registry,
+        resolveRuntimeOptions: conn => getConnectorsApi().resolveRuntimeOptions(conn),
       }),
     })
     : {
       surface: agentTools.createToolSurface({
-        extraDefinitions: extraTools?.definitions || [],
-        handlers: extraTools?.handlers || {},
+        includeBuiltins: !noTools,
+        extraDefinitions: noTools ? [] : (extraTools?.definitions || []),
+        handlers: noTools ? {} : (extraTools?.handlers || {}),
       }),
       close: async () => {},
       mode: 'minimal',
     }
   const toolSurface = resolvedSurface.surface
   const connectorRuntime = { close: resolvedSurface.close, mcpProjectionError: resolvedSurface.mcpProjectionError }
-  const researchRoute = researchRouting.buildResearchRoute({
-    prompt,
-    toolRecords: typeof toolSurface.getToolRecords === 'function'
-      ? toolSurface.getToolRecords()
-      : toolSurface.getToolDefinitions(),
-  })
+  const researchRoute = noTools
+    ? {
+        active: false,
+        intent: researchRouting.classifyResearchIntent(researchPrompt || prompt),
+        sources: [],
+        context: '',
+        taskFrame: null,
+      }
+    : researchRouting.buildResearchRoute({
+        prompt: researchPrompt || prompt,
+        toolRecords: typeof toolSurface.getToolRecords === 'function'
+          ? toolSurface.getToolRecords()
+          : toolSurface.getToolDefinitions(),
+      })
   if (researchRoute.active) {
+    const researchAssembly = contextEngine.assembleContext({
+      policy: {
+        tier,
+        scene: 'research',
+        locale: s.locale || 'zh-CN',
+        toolsEnabled: true,
+        executionPolicy: effectiveExecutionPolicy,
+      },
+      blocks: [{
+        id: 'scene.research-runtime',
+        kind: 'scene_instruction',
+        priority: 96,
+        maxTokens: 1200,
+        cachePolicy: 'turn',
+        content: researchRoute.context,
+        source: { type: 'research-routing', id: researchRoute.intent.mode, version: '1' },
+      }],
+      budget: 1200,
+    })
     apiMessages = llmRuntime.fitConversation(
-      researchRouting.injectResearchContext(apiMessages, researchRoute.context),
+      researchRouting.injectResearchContext(apiMessages, researchAssembly.messages[0]?.content || ''),
       policy.inputBudget,
     ).messages
+    contextInfo.contextManifest = contextEngine.mergeContextManifests(
+      contextInfo.contextManifest,
+      researchAssembly.manifest,
+    )
     const frames = [groundingTaskFrame, researchRoute.taskFrame].filter(Boolean)
     groundingTaskFrame = frames.length > 1
       ? groundingRuntime.mergeGroundingContracts(frames)
@@ -225,6 +270,7 @@ async function buildRunToolSurface(env, prepared) {
 
   return {
     session,
+    noTools,
     needsConnectorTools,
     fileTools,
     sourceRoot,

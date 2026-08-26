@@ -22,7 +22,7 @@ const FEISHU_READ_TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'feishu.meeting_read',
-      description: 'Deterministic Feishu meeting workflow: read a selected meeting candidate body. Prefer minute_token (from meeting_candidates) to read the Smart Minutes summary/todo/chapter via minutes +detail; falls back to a docx token/url. Returns the body only if it contains meeting evidence.',
+      description: 'Deterministic Feishu meeting workflow: read a selected meeting candidate body. Prefer minute_token (from meeting_candidates) and request Smart Minutes summary/todo/chapter/transcript via minutes +detail; when the minute has no usable artifact, follow its note_id through note +detail to the associated AI meeting-notes doc and read it with docs +fetch; falls back to an explicit docx token/url. Returns content only when meeting evidence is present; never summarizes a card or metadata alone.',
       parameters: {
         type: 'object',
         properties: {

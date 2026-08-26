@@ -112,7 +112,7 @@ describe('cursor capability repository', () => {
     return { userData, store, catalog, expertRuntime, connectorsApi, workflowStore }
   }
 
-  it('scans skills, agents and blocks plaintext MCP secrets without exposing values', () => {
+  it('scans skills, agents and converts plaintext MCP secrets to unconfigured slots without exposing values', () => {
     createRepo(root)
     const scanned = repository.scanCursorRepository(root)
     assert.equal(scanned.ok, true)
@@ -120,9 +120,11 @@ describe('cursor capability repository', () => {
     assert.equal(scanned.experts.length, 1)
     assert.equal(scanned.connectors.length, 2)
     assert.equal(scanned.connectors.find((item) => item.sourceId === 'safe').blocked, false)
-    assert.equal(scanned.connectors.find((item) => item.sourceId === 'blocked').blocked, true)
+    assert.equal(scanned.connectors.find((item) => item.sourceId === 'blocked').blocked, false)
+    assert.equal(scanned.connectors.find((item) => item.sourceId === 'blocked').configState, 'needs_configuration')
+    assert.ok(scanned.connectors.find((item) => item.sourceId === 'blocked').secretSlots.length > 0)
     assert.ok(scanned.warnings.some((item) => item.code === 'missing_agent_skills'))
-    assert.ok(scanned.warnings.some((item) => item.code === 'mcp_secret'))
+    assert.ok(scanned.warnings.some((item) => item.code === 'mcp_secret_stripped'))
 
     const publicDto = repository.publicPreview(scanned, 'token')
     assert.equal(publicDto.previewToken, 'token')
@@ -224,8 +226,8 @@ description: Optional helper
     const second = repository.registerCursorRepository(scanned, deps())
     assert.equal(first.ok, true)
     assert.deepEqual(second.idMaps, first.idMaps)
-    assert.equal(first.counts.installed, 3)
-    assert.equal(first.counts.skipped, 1)
+    assert.equal(first.counts.installed, 4)
+    assert.equal(first.counts.skipped, 0)
 
     const installed = storeLib.loadInstallStore(userData)
     const skillId = first.idMaps.skills.alpha

@@ -30,6 +30,13 @@ function estimateTokens(value) {
   return Math.ceil(cjk / 1.5 + other / 4)
 }
 
+function contentText(content) {
+  if (Array.isArray(content)) {
+    return content.filter(item => item?.type === 'text').map(item => item.text || '').join('\n')
+  }
+  return String(content || '')
+}
+
 function getModelProfile(model, explicitProfile = {}) {
   const name = String(model || '').trim()
   const match = MODEL_PROFILES.find(profile => profile.match.test(name))
@@ -92,10 +99,37 @@ function fitText(value, maxTokens, marker = '\n…（上下文已按预算裁剪
   const text = String(value || '')
   const limit = Math.max(1, Number(maxTokens) || 1)
   if (estimateTokens(text) <= limit) return text
-  const target = Math.max(1, Math.floor(text.length * (limit / estimateTokens(text))))
-  const left = Math.max(1, Math.floor((target - marker.length) * 0.65))
-  const right = Math.max(1, target - marker.length - left)
-  return `${text.slice(0, left)}${marker}${text.slice(-right)}`
+
+  // Small budgets can be narrower than the truncation marker itself. Binary
+  // search guarantees the returned text never exceeds the declared budget.
+  const prefixWithinBudget = () => {
+    let low = 0
+    let high = text.length
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2)
+      if (estimateTokens(text.slice(0, mid)) <= limit) low = mid
+      else high = mid - 1
+    }
+    return text.slice(0, Math.max(1, low))
+  }
+  if (estimateTokens(marker) >= limit) return prefixWithinBudget()
+
+  let low = 0
+  let high = text.length
+  let fitted = marker
+  while (low <= high) {
+    const retained = Math.floor((low + high) / 2)
+    const left = Math.ceil(retained * 0.65)
+    const right = Math.max(0, retained - left)
+    const candidate = `${text.slice(0, left)}${marker}${right ? text.slice(-right) : ''}`
+    if (estimateTokens(candidate) <= limit) {
+      fitted = candidate
+      low = retained + 1
+    } else {
+      high = retained - 1
+    }
+  }
+  return fitted
 }
 
 function fitSections(sections, budget) {
@@ -130,6 +164,15 @@ function fitSections(sections, budget) {
       .filter(section => selected.has(section.index))
       .map(section => ({
         key: section.key,
+        usedTokens: estimateTokens(selected.get(section.index).text),
+      })),
+    sections: list
+      .filter(section => selected.has(section.index))
+      .map(section => ({
+        key: section.key,
+        text: selected.get(section.index).text,
+        priority: section.priority,
+        maxTokens: section.maxTokens,
         usedTokens: estimateTokens(selected.get(section.index).text),
       })),
   }
@@ -169,7 +212,8 @@ function fitMessages(messages, budget) {
 }
 
 function messageTokens(message) {
-  return estimateTokens(message?.content) +
+  return estimateTokens(contentText(message?.content)) +
+    (Array.isArray(message?.content) ? message.content.filter(item => item?.type === 'image_url').length * 1000 : 0) +
     (Array.isArray(message?.tool_calls)
       ? estimateTokens(JSON.stringify(message.tool_calls))
       : 0)
@@ -184,8 +228,10 @@ function fitConversation(messages, budget) {
   if (!source.length) {
     return { messages: [], usedTokens: 0, omittedTurns: 0, omittedMessages: 0 }
   }
-  const system = source[0]?.role === 'system' ? source[0] : null
-  const rest = system ? source.slice(1) : source
+  let systemCount = 0
+  while (source[systemCount]?.role === 'system') systemCount++
+  const systems = source.slice(0, systemCount)
+  const rest = source.slice(systemCount)
 
   const turns = []
   for (const message of rest) {
@@ -198,10 +244,47 @@ function fitConversation(messages, budget) {
 
   let remaining = Math.max(1, Number(budget) || 1)
   const head = []
-  if (system) {
-    const content = fitText(system.content, Math.min(remaining, 8000))
-    head.push({ ...system, content })
-    remaining -= estimateTokens(content)
+  if (systems.length) {
+    const systemCosts = systems.map(message => messageTokens(message))
+    const totalSystemCost = systemCosts.reduce((sum, cost) => sum + cost, 0)
+    const criticalCost = systems.reduce((sum, message, index) => (
+      sum + (message?._contextCritical === true ? systemCosts[index] : 0)
+    ), 0)
+    const tailReserve = rest.length
+      ? Math.min(512, Math.max(64, Math.floor((Number(budget) || 1) * 0.1)))
+      : 0
+    const criticalLimit = Math.min(8000, Math.max(0, remaining - tailReserve))
+    if (criticalCost > criticalLimit) {
+      const error = new Error('关键系统上下文超出模型预算，已停止请求以避免安全规则被截断')
+      error.code = 'critical_context_budget_exceeded'
+      error.details = { requiredTokens: criticalCost, budget: criticalLimit, blockIds: [] }
+      throw error
+    }
+    const systemBudget = Math.min(
+      Math.max(criticalCost, remaining - tailReserve),
+      8000,
+      Math.max(criticalCost, systems.length, Math.floor((Number(budget) || 1) * 0.45)),
+    )
+    const nonCriticalCost = Math.max(0, totalSystemCost - criticalCost)
+    const nonCriticalBudget = Math.max(0, systemBudget - criticalCost)
+    let remainingNonCriticalBudget = nonCriticalBudget
+    for (let i = 0; i < systems.length; i++) {
+      const critical = systems[i]?._contextCritical === true
+      if (!critical && remainingNonCriticalBudget <= 0) continue
+      const proportional = critical
+        ? systemCosts[i]
+        : nonCriticalCost > 0
+          ? Math.max(1, Math.floor(nonCriticalBudget * (systemCosts[i] / nonCriticalCost)))
+          : 1
+      const allowed = critical ? proportional : Math.min(remainingNonCriticalBudget, proportional)
+      const content = critical ? systems[i].content : fitText(systems[i].content, allowed)
+      const { _contextCritical, _contextData, ...safeMessage } = systems[i]
+      head.push({ ...safeMessage, content })
+      const used = estimateTokens(content)
+      remaining -= used
+      if (!critical) remainingNonCriticalBudget -= used
+    }
+    remaining = Math.max(0, remaining)
   }
 
   const keptTurns = []
@@ -220,12 +303,14 @@ function fitConversation(messages, budget) {
   const flat = keptTurns.flat()
   // 若最新一轮超出剩余预算，对其消息文本做一次裁剪保底
   const budgetLeftForTail = Math.max(1, Number(budget) || 1) -
-    (system ? estimateTokens(head[0].content) : 0)
+    head.reduce((sum, message) => sum + messageTokens(message), 0)
   let tailBudget = budgetLeftForTail
   const fitted = flat.map((message, index) => {
     const isLast = index === flat.length - 1
     const allowed = Math.min(tailBudget, isLast ? 6000 : 4000)
-    const content = fitText(message.content, Math.max(1, allowed))
+    const content = Array.isArray(message.content)
+      ? message.content
+      : fitText(message.content, Math.max(1, allowed))
     tailBudget -= estimateTokens(content)
     return { ...message, content }
   })

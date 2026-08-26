@@ -1,11 +1,30 @@
 import { describe, expect, it } from 'vitest'
 import {
   boundWorkbenchExpertIds,
+  expertHomeDomain,
   isDemoOrTestExpert,
+  shelfRowCapacity,
   workbenchHomeExperts,
 } from './workbench-home'
 
+describe('workflow shelf layout', () => {
+  it('keeps the visible card count aligned with the responsive grid', () => {
+    expect(shelfRowCapacity(1280)).toBe(3)
+    expect(shelfRowCapacity(901)).toBe(3)
+    expect(shelfRowCapacity(900)).toBe(2)
+    expect(shelfRowCapacity(601)).toBe(2)
+    expect(shelfRowCapacity(600)).toBe(1)
+    expect(shelfRowCapacity(0)).toBe(3)
+  })
+})
+
 describe('workbench home experts', () => {
+  it('maps expert categories to the same compact domains used by workflows', () => {
+    expect(expertHomeDomain({ id: 'office', name: '办公协作专家', category: '日常办公' })).toBe('office')
+    expect(expertHomeDomain({ id: 'pm', name: '产品经理', category: '产品与研究' })).toBe('engineering')
+    expect(expertHomeDomain({ id: 'creative', name: '创意策划', category: '视觉创意' })).toBe('visual')
+  })
+
   it('treats test1, qa-copy, and 测试用 prompts as demo fixtures', () => {
     expect(isDemoOrTestExpert({ id: 'test1', name: 'test1' })).toBe(true)
     expect(isDemoOrTestExpert({ id: 'qa-copy-n1fa1g', name: 'QA 自建' })).toBe(true)

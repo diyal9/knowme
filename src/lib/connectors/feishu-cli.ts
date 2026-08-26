@@ -45,6 +45,7 @@ module.exports = {
   buildVcSearchArgs: meetings.buildVcSearchArgs,
   buildVcDetailArgs: meetings.buildVcDetailArgs,
   buildMinutesDetailArgs: meetings.buildMinutesDetailArgs,
+  buildNoteDetailArgs: meetings.buildNoteDetailArgs,
   parseMeetingDisplayInfo: meetings.parseMeetingDisplayInfo,
   extractMinuteToken: meetings.extractMinuteToken,
   formatMinuteBodyForSummary: meetings.formatMinuteBodyForSummary,

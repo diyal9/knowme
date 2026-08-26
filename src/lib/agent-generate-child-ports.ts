@@ -15,7 +15,7 @@ function createChildRunPortFactory(env, prepared, surface) {
     getSessionCapabilityBindings, mergeExtraTools, connectorToolRuntime, buildProductionRunPorts,
     normalizeAssistantOutput,
   } = L
-  const { ensureCapabilityHub, loadAgentSessions, saveAgentSessions, MEMORY_DIR, requestAgentCompletion } = env.deps
+  const { ensureCapabilityHub, loadAgentSessions, saveAgentSessions, MEMORY_DIR, requestAgentCompletion, getConnectorsApi } = env.deps
   const { runId, signal } = env
   const { s, url, routedModel, policy, promptCachePolicy, tokenCalKey, modelProfile, queryKnowledge, kbQueryTool, kbGetTool } = prepared
   const {
@@ -107,6 +107,7 @@ function createChildRunPortFactory(env, prepared, surface) {
         extraTools: cOpts.extraTools,
         allowedConnectorIds: childBindings.allowedConnectorIds,
         registry: cOpts.registry,
+        resolveRuntimeOptions: conn => getConnectorsApi().resolveRuntimeOptions(conn),
       }),
     })
     const childPorts = buildProductionRunPorts({

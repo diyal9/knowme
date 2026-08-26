@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["agents"],
+  "properties": {
+    "agents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["agentId", "tasks"],
+        "properties": {
+          "agentId": { "type": "string" },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "completion": { "type": "number", "minimum": 0, "maximum": 100 },
+                "quality": { "type": "number", "minimum": 0, "maximum": 100 },
+                "evidence": { "type": "number", "minimum": 0, "maximum": 100 },
+                "efficiency": { "type": "number", "minimum": 0, "maximum": 100 },
+                "fit": { "type": "number", "minimum": 0, "maximum": 100 }
+              },
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

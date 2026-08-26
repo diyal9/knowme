@@ -2,48 +2,23 @@
 
 const MODEL_CATALOG = [
   {
-    id: 'qwen-plus',
+    id: 'qwen3.6-flash',
     provider: 'dashscope',
-    label: 'Qwen3 Plus',
-    contextWindow: 131072,
-    maxOutput: 8192,
-    supportsTools: true,
-    parameter: 'max_tokens',
-  },
-  {
-    id: 'qwen-turbo',
-    provider: 'dashscope',
-    label: 'Qwen3 Turbo',
-    contextWindow: 131072,
-    maxOutput: 8192,
-    supportsTools: true,
-    parameter: 'max_tokens',
-  },
-  {
-    id: 'qwen-max',
-    provider: 'dashscope',
-    label: 'Qwen3 Max',
-    contextWindow: 32768,
-    maxOutput: 8192,
-    supportsTools: true,
-    parameter: 'max_tokens',
-  },
-  {
-    id: 'qwen-long',
-    provider: 'dashscope',
-    label: 'Qwen3 Long',
+    label: 'Qwen 3.6 Flash',
     contextWindow: 1000000,
-    maxOutput: 8192,
-    supportsTools: false,
+    maxOutput: 64000,
+    supportsTools: true,
+    supportsVision: true,
     parameter: 'max_tokens',
   },
   {
-    id: 'deepseek-v3',
+    id: 'qwen3.8-max',
     provider: 'dashscope',
-    label: 'DeepSeek V3',
-    contextWindow: 131072,
-    maxOutput: 8192,
+    label: 'Qwen 3.8 Max',
+    contextWindow: 1000000,
+    maxOutput: 64000,
     supportsTools: true,
+    supportsVision: true,
     parameter: 'max_tokens',
   },
   {
@@ -53,6 +28,7 @@ const MODEL_CATALOG = [
     contextWindow: 128000,
     maxOutput: 8192,
     supportsTools: true,
+    supportsVision: true,
     parameter: 'max_tokens',
   },
   {
@@ -62,6 +38,7 @@ const MODEL_CATALOG = [
     contextWindow: 128000,
     maxOutput: 8192,
     supportsTools: true,
+    supportsVision: true,
     parameter: 'max_tokens',
   },
 ]
@@ -158,6 +135,7 @@ function pickAutoModel(settings = {}, routeInput = {}) {
   const candidates = supported.length ? supported : allForProvider
   const findById = id => candidates.find(item => item.id === id)
   const signals = getRouteSignals(routeInput)
+  const needsVision = routeInput.hasImage === true
 
   if (!candidates.length) {
     return {
@@ -178,11 +156,11 @@ function pickAutoModel(settings = {}, routeInput = {}) {
   }
 
   if (provider === 'dashscope') {
-    const coding = findById('deepseek-v3')
-    const heavy = findById('qwen-plus') || coding || candidates[0]
-    const fast = findById('qwen-turbo') || heavy
-    if (signals.codingHit && coding) {
-      return { provider, model: coding.id, label: coding.label, reason: 'dashscope_coding' }
+    const vision = candidates.find(item => item.supportsVision)
+    const heavy = findById('qwen3.8-max') || vision || candidates[0]
+    const fast = findById('qwen3.6-flash') || heavy
+    if (needsVision && vision) {
+      return { provider, model: vision.id, label: vision.label, reason: 'dashscope_vision' }
     }
     if (signals.highLoad || signals.heavyHit) {
       return { provider, model: heavy.id, label: heavy.label, reason: 'dashscope_heavy' }
@@ -201,7 +179,7 @@ function getPreset(provider, model) {
 
 function resolveProfile(settings = {}) {
   const provider = String(settings.llmProvider || inferProvider(settings.apiEndpoint)).trim() || 'custom'
-  const model = String(settings.model || 'gpt-4o-mini').trim()
+  const model = String(settings.model || (provider === 'dashscope' ? 'qwen3.6-flash' : 'gpt-4o-mini')).trim()
   const preset = getPreset(provider, model)
   const explicit = settings.llmProfile && typeof settings.llmProfile === 'object'
     ? settings.llmProfile
@@ -215,6 +193,9 @@ function resolveProfile(settings = {}) {
     supportsTools: explicit.supportsTools !== undefined
       ? Boolean(explicit.supportsTools)
       : preset?.supportsTools !== false,
+    supportsVision: explicit.supportsVision !== undefined
+      ? Boolean(explicit.supportsVision)
+      : preset?.supportsVision === true,
     parameter: explicit.parameter || preset?.parameter || 'max_tokens',
   }
 }
@@ -228,6 +209,7 @@ function publicProfile(settings = {}) {
     contextWindow: profile.contextWindow,
     maxOutput: profile.maxOutput,
     supportsTools: profile.supportsTools,
+    supportsVision: profile.supportsVision,
   }
 }
 
@@ -248,6 +230,7 @@ function listCatalog(settings = {}) {
       contextWindow: model.contextWindow,
       maxOutput: model.maxOutput,
       supportsTools: model.supportsTools !== false,
+      supportsVision: model.supportsVision === true,
       supported: model.supported !== false,
     })),
   }))
@@ -261,6 +244,7 @@ function listCatalog(settings = {}) {
         contextWindow: current.contextWindow,
         maxOutput: current.maxOutput,
         supportsTools: current.supportsTools !== false,
+        supportsVision: current.supportsVision === true,
         supported: current.supportsTools !== false && Number(current.contextWindow) >= 64000,
       })
     }
@@ -279,6 +263,7 @@ function listCatalog(settings = {}) {
         contextWindow: baseModel.contextWindow,
         maxOutput: baseModel.maxOutput,
         supportsTools: baseModel.supportsTools !== false,
+        supportsVision: baseModel.supportsVision === true,
         supported: false,
       })
     }
@@ -293,6 +278,7 @@ function listCatalog(settings = {}) {
       contextWindow: current.contextWindow,
       maxOutput: current.maxOutput,
       supportsTools: current.supportsTools,
+      supportsVision: current.supportsVision,
       supported: current.supportsTools !== false && Number(current.contextWindow) >= 64000,
     },
   }

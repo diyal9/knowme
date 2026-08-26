@@ -88,7 +88,7 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
   color:#646b71; cursor:pointer;
   display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:9px;
   overflow:hidden;
-  font:400 var(--font-sm) var(--ui); text-align:left;
+  font:400 var(--font-sm)/1 var(--ui); text-align:left;
   transition:background var(--motion-micro, 160ms) ease,color var(--motion-micro, 160ms) ease;
 }
 .rail-btn { position:relative; }
@@ -126,7 +126,7 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
 }
 .drawer-capability-brand,.drawer-capability-tabs,.drawer-surface-tabs { display:none; }
 .drawer.drawer-capability-hub .drawer-head {
-  display:flex !important; height:52px; min-height:52px; padding:0 18px 0 22px; gap:14px;
+  display:flex !important; height:var(--surface-tab-height, 46px); min-height:var(--surface-tab-height, 46px); padding:0 18px 0 22px; gap:14px;
   background:var(--bg-card); border-bottom:1px solid var(--div);
 }
 .drawer.drawer-capability-hub .drawer-title { display:none; }
@@ -136,11 +136,11 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
 }
 .drawer-capability-brand .ico { width:16px; height:16px; color:#27786a; }
 .drawer.drawer-capability-hub .drawer-capability-tabs {
-  height:52px; display:inline-flex; align-items:stretch; gap:12px; padding:0;
+  height:var(--surface-tab-height, 46px); display:inline-flex; align-items:stretch; gap:12px; padding:0;
   border:0; border-radius:0; background:transparent; box-shadow:none;
 }
 .drawer-capability-tab {
-  position:relative; min-height:52px; padding:0 8px; border:0; border-radius:0;
+  position:relative; min-height:var(--surface-tab-height, 46px); padding:0 8px; border:0; border-radius:0;
   background:transparent; color:#77736d; font:600 13px var(--ui); cursor:pointer;
   letter-spacing:0;
   transition:color .16s ease,transform .12s ease;
@@ -238,10 +238,10 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
 .drawer.open:not(.secondary-dialog) .drawer-title { display:none !important; font-size:13px; letter-spacing:0; color:#1c1917; }
 .drawer.open:not(.secondary-dialog) .drawer-close { margin-left:auto; }
 .app.mode-center-surface .knowledge-workspace {
-  height:100%; min-height:calc(100vh - 48px); background:var(--bg-card);
+  height:100%; min-height:calc(100vh - var(--surface-tab-height, 46px)); background:var(--bg-card);
 }
 .app.mode-center-surface .drawer-settings-frame {
-  width:100%; height:100%; min-height:calc(100vh - 48px); border:0; background:var(--bg-card);
+  width:100%; height:100%; min-height:calc(100vh - var(--surface-tab-height, 46px)); border:0; background:var(--bg-card);
 }
 .app.mode-center-surface .side-rail .rail-btn#btnKnowledgeOs.active,
 .app.mode-center-surface .side-rail .rail-btn#btnSettings.active {
@@ -253,14 +253,14 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--app-chrom
   flex:1; min-height:0; height:100%; display:flex; flex-direction:column; background:var(--bg-card);
 }
 .knowledge-tab-head {
-  flex:0 0 auto; height:48px; display:flex; align-items:center; gap:16px; padding:0 16px 0 20px;
+  flex:0 0 auto; height:var(--surface-tab-height, 46px); display:flex; align-items:center; gap:16px; padding:0 16px 0 20px;
   background:var(--bg-card); border-bottom:1px solid var(--div);
 }
 .knowledge-tabbed-surface .drawer-surface-tabs {
-  display:flex !important; height:48px; min-width:0; flex:1 1 auto; align-items:stretch; gap:12px;
+  display:flex !important; height:var(--surface-tab-height, 46px); min-width:0; flex:1 1 auto; align-items:stretch; gap:12px;
   padding:0; overflow-x:auto; border:0; background:transparent; box-shadow:none;
 }
-.knowledge-tabbed-surface .drawer-surface-tab { min-height:48px; }
+.knowledge-tabbed-surface .drawer-surface-tab { min-height:var(--surface-tab-height, 46px); }
 .knowledge-tabbed-surface .knowledge-workspace { flex:1; min-height:0; }
 .knowledge-context {
   flex:0 0 auto; padding:3px 8px; border-radius:999px; background:#ebe8e2;

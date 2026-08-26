@@ -255,6 +255,36 @@ describe('workbench-agent-graph', () => {
     assert.equal(result.snapshot.teamPackageId, 'workbench-agent-graph')
   })
 
+  it('accepts an imported custom terminal id and preserves tool execution contracts', () => {
+    const agent = validAgent({ packageId: 'known-agent' })
+    const result = graph.compileWorkbenchAgentGraph({
+      goal: '运行导入工作流',
+      version: '1.0.0',
+      members: [{ id: 'plan', agentPackageId: 'known-agent', role: 'planner' }],
+      nodes: [
+        { id: 'plan', type: 'agent', agentPackageId: 'known-agent' },
+        {
+          id: 'emit',
+          type: 'tool',
+          config: { skillId: 'artbundle', externalAction: 'bundle-build' },
+          executionContract: { requiredTools: ['emit_artbundle_specs'] },
+        },
+        { id: 'terminal_done', type: 'terminal' },
+      ],
+      edges: [
+        { from: 'plan', to: 'emit' },
+        { from: 'emit', to: 'terminal_done' },
+      ],
+    }, { resolveAgentPackage: makeResolver(agent) })
+
+    assert.equal(result.ok, true, JSON.stringify(result.issues))
+    assert.equal(result.composition.nodes.some(node => node.id === graph.TERMINAL_NODE_ID), false)
+    assert.deepEqual(
+      result.teamPackage.workflow.nodes.find(node => node.id === 'emit').executionContract.requiredTools,
+      ['emit_artbundle_specs'],
+    )
+  })
+
   it('exposes bounded graph templates', () => {
     assert.deepEqual(Object.keys(graph.GRAPH_TEMPLATES).sort(), ['gate', 'parallel', 'serial', 'single'])
     assert.equal(graph.GRAPH_TEMPLATES.parallel.minMembers, 2)

@@ -65,6 +65,7 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   workflowRunRerun?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
   workflowRunSubstitute?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
   workflowRunComment?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
+  workbenchExternalWorkflowPreflight?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
   workbenchAgentGraphStart?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
   workbenchAgentRunTree?: (rootRunId: string) => Promise<Record<string, unknown>>
   workbenchAgentRunDecision?: (payload: Record<string, unknown>) => Promise<Record<string, unknown>>
@@ -84,7 +85,7 @@ export interface KnowMeApi extends KnowMeExtendedApi {
   openSettings: (tab?: string) => void
   openSettingsWindow: (tab?: string) => void
   llmProfile: () => Promise<{ model?: string; provider?: string } | unknown>
-  llmModels?: () => Promise<{ presets?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean }[]; groups?: { id: string; label?: string; models?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean }[] }[] }>
+  llmModels?: () => Promise<{ presets?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean; supportsVision?: boolean }[]; groups?: { id: string; label?: string; models?: { id: string; label?: string; contextWindow?: number; supportsTools?: boolean; supportsVision?: boolean }[] }[] }>
   llmSetModel?: (payload: { model?: string; provider?: string }) => Promise<{ ok?: boolean; error?: string }>
   llmProbe?: (payload?: {
     apiEndpoint?: string
@@ -180,6 +181,10 @@ export interface WorkbenchTask {
   goal?: string
   resultSummary?: string
   expertId?: string
+  /** 仅用于加载当前身份/persona；不授予 Skill 或 Connector 执行权限。 */
+  personaExpertId?: string
+  /** 当前会话执行策略；专家规划/讨论固定为 no-tools。 */
+  executionPolicy?: 'no-tools' | 'tools-allowed' | string
   expertName?: string
   workflowId?: string
   workflowName?: string
@@ -205,6 +210,7 @@ export interface WorkbenchTask {
     dueAt?: string
   }
   assignmentSnapshot?: Record<string, unknown>
+  knowledgeRefs?: { id?: string; name?: string; path?: string }[] | string[]
   participants?: { id?: string; role?: string; name?: string }[]
   events?: { id?: string; type?: string; summary?: string; createdAt?: string }[]
   deliverables?: {
@@ -470,10 +476,26 @@ export interface AgentFileRef {
   updatedAt?: string
 }
 
+export interface ConversationHistoryTurn {
+  id: string
+  role: 'user' | 'assistant'
+  text: string
+  runId?: string
+  createdAt?: string
+}
+
+export interface AgentTurnIdentity {
+  userMessageId: string
+  assistantMessageId: string
+  userCreatedAt: string
+}
+
 export interface ChatMessage {
   id: string
   role: 'user' | 'assistant' | 'system' | 'error'
   text: string
+  /** Stable transcript ordering metadata; distinct from streaming performance timing. */
+  createdAt?: string
   streaming?: boolean
   thinking?: boolean
   activity?: string
@@ -520,6 +542,8 @@ export interface CapabilityItem {
   kind: CapabilityKind
   name?: string
   description?: string
+  /** Skill manifest supplied icon name, usually from experience.tasks[0].icon. */
+  icon?: string
   category?: string
   status?: string
   enabled?: boolean
@@ -583,6 +607,70 @@ export interface AgentContextInfo {
   sectionUsage?: AgentContextSectionUsage[]
   /** 因预算未纳入的分区键列表 */
   sectionOmitted?: string[]
+  /** Context Engine 的隐私安全装配清单；不包含原始上下文正文。 */
+  contextManifest?: AgentContextManifest
+  /** 进程内匿名聚合指标与 SLO 快照。 */
+  contextEngineMetrics?: Record<string, unknown>
+}
+
+export interface AgentContextManifest {
+  version: number
+  scene: string
+  phase?: string
+  identity?: string
+  executionPolicy: string
+  locale: string
+  estimatedTokens: number
+  candidateEstimatedTokens?: number
+  savedEstimatedTokens?: number
+  included: Array<{
+    id: string
+    kind: string
+    authority: string
+    trust: string
+    projectedRole?: 'system' | 'user'
+    critical?: boolean
+    usedTokens: number
+    chars: number
+    hash: string
+    truncated?: boolean
+    sensitive?: boolean
+    source?: { type?: string; idHash?: string; version?: string }
+    cachePolicy?: string
+  }>
+  omitted: Array<{
+    id: string
+    reason: string
+    source?: { type?: string; idHash?: string; version?: string }
+  }>
+  conflicts: Array<{
+    type: string
+    winner: { id: string; value: string }
+    suppressed: Array<{ id: string; value: string }>
+  }>
+  rankings?: Array<{
+    id: string
+    score: number
+    lexicalScore?: number
+    vectorScore?: number
+    confidenceScore?: number
+    freshnessScore?: number
+  }>
+  semanticSelection?: {
+    version: number
+    mode: 'off' | 'shadow' | 'active'
+    status: 'skipped' | 'degraded' | 'shadow' | 'applied'
+    reason?: string
+    providerHash?: string
+    latencyMs: number
+    candidateCount: number
+    eligibleCount: number
+    cacheHits: number
+    requested: number
+    sensitiveExcluded: number
+    wouldChange: boolean
+    limited: boolean
+  }
 }
 
 export interface AiStreamEvent {

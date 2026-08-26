@@ -8,6 +8,37 @@ const { executeFeishuRead, parseCliJsonOutput } = require('../lib/connectors/fei
 
 const schemeHandlerProbes = new Map()
 
+const FEISHU_TITLE_SCRIPT = String.raw`(() => {
+  const generic = /^(?:飞书|飞书云文档|飞书文档|飞书知识库|知识库|Feishu|Lark|分享|加载中|Loading)$/i;
+  const read = (node) => String(node?.value || node?.getAttribute?.('value') || node?.textContent || '').replace(/\s+/g, ' ').trim();
+  const usable = (value) => value && value.length <= 120 && !generic.test(value);
+  const visible = (node) => {
+    const rect = node?.getBoundingClientRect?.();
+    return rect && rect.width > 20 && rect.height > 8;
+  };
+  const selectors = [
+    '[data-testid="document-title"]', '[data-testid="doc-title"]', '[data-testid="wiki-title"]',
+    '[data-qa="document-title"]', '[data-qa="doc-title"]', 'input[class*="title"]',
+    '[class*="title"] input', '[contenteditable="true"][class*="title"]',
+    '[class*="title"][contenteditable="true"]', '[class*="title"][role="textbox"]'
+  ];
+  for (const selector of selectors) {
+    for (const node of document.querySelectorAll(selector)) {
+      const value = read(node);
+      if (visible(node) && usable(value)) return value;
+    }
+  }
+  for (const selector of ['meta[property="og:title"]', 'meta[name="twitter:title"]', 'meta[name="title"]']) {
+    const value = String(document.querySelector(selector)?.getAttribute('content') || '').trim();
+    if (usable(value)) return value;
+  }
+  return document.title || '';
+})()`
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 function decodeXmlText(value) {
   return String(value || '')
     .replace(/&lt;/g, '<')
@@ -68,6 +99,48 @@ async function resolveFeishuCliTitle(url, options = {}) {
 }
 
 /**
+ * Read the title from the rendered page, not the initial HTML response.
+ * Feishu document pages are frequently an SPA and their real title only
+ * exists after scripts, redirects and the user's persisted session run.
+ */
+async function resolveFeishuBrowserTitle(url, options = {}) {
+  const BrowserWindow = options.BrowserWindow
+  if (typeof BrowserWindow !== 'function') return { ok: false, message: '隐藏浏览器不可用' }
+  const parsed = feishuLink.parseOpenLink(url)
+  if (!parsed?.isFeishu) return { ok: false, message: '不是飞书链接' }
+  const timeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 10000
+  let win
+  try {
+    win = new BrowserWindow({
+      show: false,
+      width: 1,
+      height: 1,
+      webPreferences: {
+        partition: 'persist:knowme-preview',
+        contextIsolation: true,
+        sandbox: true,
+      },
+    })
+    await Promise.race([
+      win.loadURL(parsed.href),
+      delay(timeoutMs).then(() => { throw new Error('hidden browser timeout') }),
+    ])
+    const deadline = Date.now() + timeoutMs
+    for (const waitMs of [0, 300, 800, 1600, 3000]) {
+      if (waitMs) await delay(waitMs)
+      if (Date.now() > deadline) break
+      const title = normalizeLinkTitle(await win.webContents.executeJavaScript(FEISHU_TITLE_SCRIPT, true))
+      if (title) return { ok: true, title, finalUrl: win.webContents.getURL?.() || parsed.href, via: 'hidden-browser' }
+    }
+    return { ok: false, message: '渲染页面没有可用标题' }
+  } catch (err) {
+    return { ok: false, message: String(err?.message || '隐藏浏览器读取失败') }
+  } finally {
+    try { if (win && !win.isDestroyed()) win.destroy() } catch { /* ignore cleanup errors */ }
+  }
+}
+
+/**
  * Only hand a URL to a client scheme when the OS has a registered handler;
  * otherwise Windows shows a "no app" dialog instead of opening anything.
  */
@@ -100,7 +173,7 @@ function hasSchemeHandler(scheme) {
  * @param {{ shell: import('electron').Shell }} deps
  */
 function registerOpenExternalIpc(ipcMain, deps) {
-  const { shell } = deps
+  const { shell, BrowserWindow } = deps
 
   ipcMain.handle('open-external', async (_e, url) => {
     const raw = String(url || '').trim()
@@ -142,6 +215,8 @@ function registerOpenExternalIpc(ipcMain, deps) {
     if (parsed?.isFeishu) {
       const resolved = await resolveFeishuCliTitle(parsed.href)
       if (resolved.ok) return resolved
+      const rendered = await resolveFeishuBrowserTitle(parsed.href, { BrowserWindow })
+      if (rendered.ok) return rendered
     }
     const page = await webFetch.fetchReadablePage(raw, { timeoutMs: 8000, maxBytes: 512 * 1024 })
     const title = normalizeLinkTitle(page.title)
@@ -158,4 +233,5 @@ module.exports = {
   normalizeLinkTitle,
   titleFromCliResult,
   resolveFeishuCliTitle,
+  resolveFeishuBrowserTitle,
 }

@@ -1,10 +1,11 @@
 // @ts-nocheck — lib IIFE modules (agent-message-state / markdown-lite / grounding) are CJS at runtime.
 import * as messageStateNs from '@knowme-lib/agent-message-state'
 import * as groundingNs from '@knowme-lib/conversation-grounding'
-import type { ChatMessage } from '../shared/api'
+import type { AgentTurnIdentity, ChatMessage, ConversationHistoryTurn } from '../shared/api'
 import { parseStructuredChoiceBars } from './agent-message-ui'
 import { applyAssistantStreamEvent, stampStreamTiming } from './agent-execution-timeline'
 import { renderKnowledgeMarkdown } from './knowledge-markdown'
+import type { ExpertDiscussionContext, ExpertDiscussionMode } from './expert-discussion'
 
 type MessageReducer = {
   createMessageState: (runId: string) => unknown
@@ -45,6 +46,10 @@ const groundingApi = unwrapCjsApi<GroundingApi>(groundingNs, 'buildGrounding')
 
 export function createAgentRunId(): string {
   return `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`
+}
+
+export function conversationMessageId(runId: string, role: 'user' | 'assistant'): string {
+  return `msg_${String(runId || '').trim()}_${role}`
 }
 
 export function extractSkillRefs(prompt: string, extra: string[] = []): string[] {
@@ -134,8 +139,9 @@ export function buildAgentGeneratePayload(input: {
   sessionId: string
   agentId?: string
   runId: string
-  history: { role: string; text: string }[]
-  attachment?: { name?: string; text?: string }
+  history: ConversationHistoryTurn[]
+  turn: AgentTurnIdentity
+  attachment?: { name?: string; text?: string; kind?: 'text' | 'image'; mimeType?: string; dataUrl?: string }
   displayPrompt?: string
   task?: unknown
   role?: string
@@ -143,6 +149,8 @@ export function buildAgentGeneratePayload(input: {
   surface?: string
   taskRef?: { id?: string; kind?: string } | null
   skillRefs?: string[]
+  conversationMode?: ExpertDiscussionMode
+  expertDiscussionContext?: ExpertDiscussionContext
 }): Record<string, unknown> {
   const attachedContext = input.attachment?.text
     ? `\n\n[用户附加文件：${input.attachment.name || '未命名文件'}]\n${input.attachment.text}\n[附加文件结束]`
@@ -159,6 +167,7 @@ export function buildAgentGeneratePayload(input: {
     displayPrompt: input.displayPrompt || '',
     context: attachedContext.trim() || null,
     history: input.history,
+    turn: input.turn,
     skillRefs: [...new Set([...(input.skillRefs || []), ...extractSkillRefs(input.prompt)])],
     contentGrounding,
     sessionId: input.sessionId,
@@ -168,5 +177,9 @@ export function buildAgentGeneratePayload(input: {
     expertId: input.expertId || '',
     surface: input.surface || 'assistant',
     taskRef: input.taskRef || null,
+    hasImage: input.attachment?.kind === 'image',
+    attachments: input.attachment ? [input.attachment] : [],
+    conversationMode: input.conversationMode || '',
+    expertDiscussionContext: input.expertDiscussionContext || null,
   }
 }

@@ -82,6 +82,8 @@ function buildDynamicContext({
   const fitted = llmRuntime.fitSections(sections, fitBudget)
   return {
     dynamicContext: fitted.text,
+    candidateSections: sections.filter(section => String(section.text || '').trim()),
+    sections: fitted.sections,
     sectionUsage: fitted.allocations,
     sectionOmitted: fitted.omitted,
     memoryPolicy: memPolicy,

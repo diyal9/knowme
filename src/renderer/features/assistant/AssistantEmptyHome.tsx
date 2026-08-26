@@ -4,7 +4,10 @@
  */
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { PackEmptyGroup } from '../../../shared/api'
-import { ASSISTANT_QUICK_COMMANDS, parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
+import {
+  COMPANION_HOME_RECOMMENDATIONS,
+  parseConfiguredQuickActions,
+} from '../../../domain/agent-quick-commands'
 import {
   emptyShortcutIcon,
   modeSectionMeta,
@@ -17,7 +20,10 @@ import { useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
 
 const QUICK_ICONS: Record<string, string> = {
-  meetingSummary: 'note',
+  'companion-work-review': 'note',
+  'companion-expert-match': 'optimize',
+  'companion-knowledge-route': 'bookOpen',
+  'companion-information-route': 'chat',
   todayPriority: 'automation',
   docKbSuggest: 'bookOpen',
   relatedChats: 'chat',
@@ -38,7 +44,7 @@ function launchCardSubtitle(item: { id: string; subtitle: string }): string {
 function resolveModeCards(mode: AssistantModeId): EmptyShortcutCard[] {
   const modeCards = MODE_EMPTY_SHORTCUTS[mode]
   if (modeCards.length) return modeCards.slice(0, 4)
-  return [...ASSISTANT_QUICK_COMMANDS]
+  return [...COMPANION_HOME_RECOMMENDATIONS]
 }
 
 export function AssistantEmptyHome({
@@ -54,8 +60,10 @@ export function AssistantEmptyHome({
   const activeSessionId = useAppStore((s) => s.activeSessionId)
   const setComposer = useAppStore((s) => s.setComposer)
   const sendMessage = useAppStore((s) => s.sendMessage)
+  const loadedPartnerName = useAppStore((s) => s.assistantPartnerName)
   const [packGroups, setPackGroups] = useState<PackEmptyGroup[]>([])
   const [configuredCards, setConfiguredCards] = useState<EmptyShortcutCard[] | null>(null)
+  const [partnerName, setPartnerName] = useState('')
 
   const active = sessions.find((item) => item.id === activeSessionId)
   const modeId = modeIdProp || resolveAssistantModeId(active?.agentId || active?.expertId)
@@ -78,9 +86,15 @@ export function AssistantEmptyHome({
   }, [])
 
   useEffect(() => {
+    if (loadedPartnerName) setPartnerName(loadedPartnerName)
+  }, [loadedPartnerName])
+
+  useEffect(() => {
     let cancelled = false
     void window.api?.personalAgentGet?.().then((result) => {
       if (cancelled) return
+      const configuredName = String(result?.profile?.identity?.displayName || result?.profile?.name || '').trim()
+      if (configuredName) setPartnerName(configuredName)
       const parsed = parseConfiguredQuickActions(result?.profile?.taskPreferences?.quickActions)
       if (parsed.length) setConfiguredCards(parsed)
     }).catch(() => undefined)
@@ -92,13 +106,15 @@ export function AssistantEmptyHome({
       return packGroup.scenes.slice(0, 4).map((scene) => ({
         id: scene.id,
         title: scene.title || '开始任务',
-        subtitle: scene.subtitle || '说明你的目标，KnowMe 会继续推进',
+        subtitle: scene.subtitle || `说明你的目标，${partnerName} 会继续推进`,
         prompt: scene.prompt || '',
       }))
     }
-    return configuredCards || resolveModeCards(modeId)
-  }, [configuredCards, modeId, packGroup])
+    if (configuredCards?.length) return configuredCards.filter((item) => item.id !== 'meetingSummary').slice(0, 4)
+    return resolveModeCards(modeId)
+  }, [configuredCards, modeId, packGroup, partnerName])
 
+  const isGeneralHome = !packGroup && !MODE_EMPTY_SHORTCUTS[modeId].length
   function run(prompt: string) {
     const text = prompt.trim()
     if (!text) return
@@ -113,29 +129,38 @@ export function AssistantEmptyHome({
   return (
     <div className={`agent-empty-tips agent-empty-home${packGroup ? ' agent-empty-pack' : ''}`} aria-label={ariaLabel} data-testid="assistant-empty-home" data-pack-id={packGroup?.packId || undefined}>
       <div className="agent-launch-intro">
-        <p className="agent-empty-sub">今天想让 KnowMe 做什么？</p>
+        <p className="agent-empty-sub" aria-live="polite">
+          {partnerName ? `今天想让 ${partnerName} 做什么？` : <span className="agent-empty-sub-loading" aria-label="正在加载伙伴信息" />}
+        </p>
       </div>
-      <div className="agent-empty-actions">
-        {cards.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className="agent-empty-act"
-            onClick={() => run((item as { skillRef?: string }).skillRef
-              ? `请使用 Skill「${(item as { skillRef?: string }).skillRef}」执行这项快捷操作。`
-              : item.prompt)}
-          >
-            <span className="agent-empty-act-mark" aria-hidden="true">
-              <Icon name={QUICK_ICONS[item.id] || emptyShortcutIcon(item.id)} />
-            </span>
-            <span className="agent-empty-act-copy">
-              <strong>{item.title}</strong>
-              <span>{launchCardSubtitle(item)}</span>
-            </span>
-          </button>
-        ))}
-      </div>
+      {!isGeneralHome ? (
+        <div className="agent-empty-actions">
+          {cards.map((item) => (
+            <HomeAction key={item.id} item={item} run={run} />
+          ))}
+        </div>
+      ) : null}
       {composer}
     </div>
+  )
+}
+
+function HomeAction({ item, run }: { item: EmptyShortcutCard & { skillRef?: string }; run: (prompt: string) => void }) {
+  return (
+    <button
+      type="button"
+      className="agent-empty-act"
+      onClick={() => run(item.skillRef
+        ? `请先推荐并匹配 Skill「${item.skillRef}」，说明方案后等待我确认。`
+        : item.prompt)}
+    >
+      <span className="agent-empty-act-mark" aria-hidden="true">
+        <Icon name={QUICK_ICONS[item.id] || emptyShortcutIcon(item.id)} />
+      </span>
+      <span className="agent-empty-act-copy">
+        <strong>{item.title}</strong>
+        <span>{launchCardSubtitle(item)}</span>
+      </span>
+    </button>
   )
 }

@@ -297,8 +297,11 @@ function normalizeCliErrorMessage(message, stdoutText = '', toolName = '') {
   const raw = String(message || '').trim()
   const tool = String(toolName || '').trim()
   const out = `${raw}\n${String(stdoutText || '')}\n${tool}`
-  if (/User identity is missing|user identity is missing|no token in keychain/i.test(out)) {
+  if (/User identity is missing|user identity is missing|no token in keychain|need_user_authorization|user authorization is required/i.test(out)) {
     return '飞书用户身份未授权：请在设置 → 连接器 启用飞书后，先完成 user 授权再查询文档/知识库。'
+  }
+  if (/invalid\s+minute\s+token|minute\s+token\s+(?:is\s+)?invalid|minute_token.*(?:invalid|expired)/i.test(out)) {
+    return '飞书返回：妙记 token 无效或已失效。请从对应会议详情重新获取妙记/会议纪要链接后再试。'
   }
   // Per-minute ACL, not a missing app scope: only the minutes owner can grant it.
   const noMinutePerm = out.match(/No read permission for minute\s+([\w-]+)/i)

@@ -1,5 +1,7 @@
 'use strict'
 
+const { stripLeadingAssistantIdentity } = require('../domain/assistant-identity')
+
 ;(function (root, factory) {
   const api = factory()
   if (typeof module === 'object' && module.exports) module.exports = api
@@ -42,13 +44,39 @@ function normalizeGeneratedLine(line) {
   return `${prefix}${body}`
 }
 
-function normalizeAssistantOutput(text) {
-  const source = String(text ?? '').replace(/\r\n/g, '\n')
-  const lines = source.split('\n')
+/**
+ * Identity is prompt metadata, not a greeting template. Some models still
+ * echo the configured name as a standalone first line; remove only that
+ * unambiguous wrapper and preserve mentions inside the actual answer.
+ */
+function normalizeAssistantOutput(text, options = {}) {
+  const source = String(text ?? '')
+    .replace(/\r\n/g, '\n')
+    // Connector envelopes occasionally contain escaped line breaks in a
+    // successful doc read. Decode them before rendering so the model cannot
+    // present the payload as a single malformed paragraph.
+    .replace(/\\r\\n/g, '\n')
+    .replace(/\\n/g, '\n')
+  const identityStripped = stripLeadingAssistantIdentity(source, options.displayName)
+  const lines = identityStripped.split('\n')
   const output = []
   let inFence = false
 
   for (const line of lines) {
+    if (/^\s*(?:工具原始结果|工具返回结果|原始工具结果)\s*[:：]?\s*$/i.test(line)) continue
+    // ReAct is an internal execution protocol, never user-facing content.
+    // Some models still echo these labels despite the tool-message contract;
+    // remove only the protocol markers and retain the factual observation
+    // body, which remains subject to the grounding gate.
+    const reactLabel = line.match(/^\s*(Thought|Act|Action|Observation|Observe)\s*:\s*(.*)$/i)
+    if (reactLabel) {
+      // Thought/Act are private deliberation and tool routing; discard them.
+      // Keep only the factual body after Observe/Observation.
+      if (/^(?:Thought|Act|Action)$/i.test(reactLabel[1])) continue
+      const cleaned = String(reactLabel[2] || '')
+      if (cleaned.trim() && !/^(?:调用工具|工具返回成功)/i.test(cleaned.trim())) output.push(cleaned)
+      continue
+    }
     if (/^\s*```/.test(line)) {
       output.push(line)
       inFence = !inFence
@@ -93,5 +121,6 @@ return {
   normalizeAssistantOutput,
   normalizeGeneratedLine,
   enforceAssistantOutputGate,
+  stripLeadingIdentityLine: stripLeadingAssistantIdentity,
 }
 })

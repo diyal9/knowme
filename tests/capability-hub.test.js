@@ -28,25 +28,25 @@ describe('skill hub domain categories', () => {
 
   it('maps pack skills to work-domain primary categories', () => {
     const feishu = mapPackSkillToHub({ id: 'feishu-today-priority', name: '飞书今日优先级', ownerPackId: 'game-studio' })
-    assert.equal(feishu.category, '办公')
-    assert.ok(feishu.categories.includes('办公'))
+    assert.equal(feishu.category, '日常办公')
+    assert.ok(feishu.categories.includes('日常办公'))
     assert.ok(feishu.categories.includes('能力包'))
 
     const office = mapPackSkillToHub({ id: 'office-document', name: '办公文档', ownerPackId: 'game-studio' })
-    assert.equal(office.category, '写作')
+    assert.equal(office.category, '内容写作')
 
     const game = mapPackSkillToHub({ id: 'game-qa-acceptance', name: '游戏测试验收', ownerPackId: 'game-studio' })
-    assert.equal(game.category, '游戏')
+    assert.equal(game.category, '软件研发')
   })
 
   it('normalizes curated 开发 to 研发 and keeps code-review under 研发', () => {
     const review = catalog.entries.find((e) => e.id === 'code-review')
     assert.ok(review)
-    assert.deepEqual(review.categories, ['研发'])
+    assert.deepEqual(review.categories, ['软件研发'])
 
     const hub = mapCatalogItemToHub({ ...review, categories: ['开发'] })
-    assert.equal(hub.category, '研发')
-    assert.deepEqual(hub.categories, ['研发'])
+    assert.equal(hub.category, '软件研发')
+    assert.deepEqual(hub.categories, ['软件研发'])
   })
 })
 

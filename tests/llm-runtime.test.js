@@ -5,6 +5,12 @@ const assert = require('node:assert')
 const runtime = require('../src/lib/llm-runtime')
 
 describe('llm-runtime', () => {
+  it('never lets the truncation marker exceed a tiny token budget', () => {
+    for (const budget of [1, 2, 5, 10, 20]) {
+      const fitted = runtime.fitText('中文上下文'.repeat(500), budget)
+      assert.ok(runtime.estimateTokens(fitted) <= budget, `${budget}: ${runtime.estimateTokens(fitted)}`)
+    }
+  })
   it('estimates CJK and ASCII text conservatively', () => {
     assert.ok(runtime.estimateTokens('这是一个中文上下文') > 2)
     assert.ok(runtime.estimateTokens('a'.repeat(400)) >= 90)
@@ -75,6 +81,30 @@ describe('llm-runtime', () => {
     // 保留的一轮必须包含用户与助手，不能被拆散
     const kept = result.messages.filter(m => m.role !== 'system')
     assert.equal(kept[0].role, 'user')
+  })
+
+  it('protects every leading system block while fitting history', () => {
+    const result = runtime.fitConversation([
+      { role: 'system', content: '平台规则：保持诚实', _contextCritical: true },
+      { role: 'system', content: '场景规则：你是办公协作专家', _contextCritical: true },
+      { role: 'system', content: '任务事实：整理会议' },
+      { role: 'user', content: '旧问题'.repeat(3000) },
+      { role: 'assistant', content: '旧回答'.repeat(3000) },
+      { role: 'user', content: '你有什么能力？' },
+    ], 900)
+    assert.deepEqual(result.messages.slice(0, 3).map(message => message.role), [
+      'system', 'system', 'system',
+    ])
+    assert.match(result.messages[1].content, /办公协作专家/)
+    assert.equal(result.messages.some(message => Object.hasOwn(message, '_contextCritical')), false)
+    assert.match(result.messages.at(-1).content, /你有什么能力/)
+  })
+
+  it('fails closed when critical system controls leave no safe user budget', () => {
+    assert.throws(() => runtime.fitConversation([
+      { role: 'system', content: '关键规则'.repeat(300), _contextCritical: true },
+      { role: 'user', content: '当前请求' },
+    ], 100), error => error?.code === 'critical_context_budget_exceeded')
   })
 
   it('keeps an assistant tool call together with its tool result', () => {

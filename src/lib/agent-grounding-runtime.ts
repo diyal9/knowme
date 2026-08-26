@@ -31,7 +31,7 @@ const {
   EXTERNAL_FACT_RE,
 } = require('./agent-grounding-state')
 
-const { createEvidenceLedger, createToolLedger, digestText, classifyToolResultQuality, appendEvidence, recordToolCall, mergeToolResultsIntoLedgers, hasOkToolCall, hasOkEvidenceForTool, evaluateRequiredTools, evaluateRequiredEvidence, evaluateCompletionConditions, extractClaims, verifyClaims, buildHonestRefusal, applyOutputGate } = require('./agent-grounding-ledger')
+const { createEvidenceLedger, createToolLedger, digestText, classifyToolResultQuality, appendEvidence, recordToolCall, mergeToolResultsIntoLedgers, hasOkToolCall, hasOkEvidenceForTool, evaluateRequiredTools, evaluateRequiredEvidence, evaluateCompletionConditions, extractClaims, verifyClaims, buildHonestRefusal, applyOutputGate, isVerifiedCandidatePresentation, extractToolSourceIdentity, validateToolResultBinding } = require('./agent-grounding-ledger')
 
 function buildGroundingStatus(verification, { evidenceLedger, toolLedger } = {}) {
   const status = verification?.passed ? 'verified' : 'blocked'
@@ -62,18 +62,26 @@ function buildGroundingStatus(verification, { evidenceLedger, toolLedger } = {})
 }
 
 function meetingCandidatesToPendingSelection(candidates = [], refSetId) {
-  const options = (Array.isArray(candidates) ? candidates : []).map((c, idx) => ({
-    id: c.id || `candidate-${idx + 1}`,
-    label: c.title || c.label || `候选 ${idx + 1}`,
-    boundTool: 'feishu.meeting_read',
-    payload: {
-      minute_token: c.minute_token || c.minuteToken || '',
-      url: c.url || '',
+  const options = (Array.isArray(candidates) ? candidates : []).map((c, idx) => {
+    const minuteToken = c.minute_token || c.minuteToken || ''
+    const url = c.url || ''
+    const isMinute = Boolean(minuteToken) || /\/minutes\//i.test(String(url))
+    return {
+      id: c.id || `candidate-${idx + 1}`,
+      label: c.title || c.label || `候选 ${idx + 1}`,
+      // A Feishu meeting may point at a Smart Minutes page or at the
+      // generated docx record. Route by the actual locator instead of
+      // assuming every meeting card is a minutes artifact.
+      boundTool: isMinute ? 'feishu.meeting_read' : 'feishu.read_doc',
+      payload: {
+      minute_token: minuteToken,
+      url,
       title: c.title || c.label || '',
       startTime: c.startTime || c.time || '',
       organizer: c.organizer || '',
-    },
-  }))
+      },
+    }
+  })
   return normalizePendingSelection({ refSetId: refSetId || newId('meeting'), options })
 }
 
@@ -191,6 +199,9 @@ module.exports = {
   extractClaims,
   verifyClaims,
   applyOutputGate,
+  isVerifiedCandidatePresentation,
+  extractToolSourceIdentity,
+  validateToolResultBinding,
   buildGroundingStatus,
   buildHonestRefusal,
   meetingCandidatesToPendingSelection,

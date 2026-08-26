@@ -159,6 +159,7 @@ export function CapabilityHubSurface() {
           id="hubBtnAdd"
           aria-label="添加能力"
           title="添加能力"
+          data-tooltip="添加能力"
           onClick={() => setAddOpen(true)}
         >
           <Icon name="component" />
@@ -269,7 +270,7 @@ export function CapabilityHubSurface() {
                 {visibleFeatured.map((item, index) => (
                   <article
                     key={item.id}
-                    className={`hub-card${item.favorite ? ' is-fav' : ''}`}
+                    className={`hub-card hub-card-featured hub-card-${item.kind}${item.favorite ? ' is-fav' : ''}`}
                     tabIndex={0}
                     role="button"
                     aria-label={`查看精选推荐：${item.name || item.id}`}
@@ -291,7 +292,7 @@ export function CapabilityHubSurface() {
                     </div>
                     <div className="hub-card-desc">{item.description || '暂无描述'}</div>
                     <footer className="hub-card-foot">
-                      <HubStatusBadges item={item} omitInstallState={false} omitCategory />
+                      <HubStatusBadges item={item} omitInstallState={false} omitCategory compact />
                       <div className="hub-card-foot-actions">
                         {item.kind === 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : <span className="hub-card-version">{hubVersion(item)}</span>}
                       </div>
@@ -349,7 +350,6 @@ export function CapabilityHubSurface() {
                 const origin = hubOriginLabel(item)
                 const sub = [item.category || '未分类', mineFilter ? myExpertOriginLabel(item) : hubSourceLabel(item.source), origin].filter(Boolean).join(' · ')
                 const installed = isCapabilityInstalled(item)
-                const installStateLabel = installed ? (item.kind === 'expert' ? '已添加' : '已安装') : ''
                 const actionLabel = item.kind === 'expert'
                   ? (mineFilter ? '打开我的专家' : '查看详情')
                   : item.kind === 'skill'
@@ -363,7 +363,7 @@ export function CapabilityHubSurface() {
                 return (
                   <article
                     key={item.id}
-                    className={`hub-card${item.favorite ? ' is-fav' : ''}`}
+                    className={`hub-card hub-card-${item.kind}${item.favorite ? ' is-fav' : ''}`}
                     tabIndex={0}
                     role="button"
                     aria-label={`${mineFilter ? '打开我的专家' : '查看详情'}：${item.name || item.id}`}
@@ -386,11 +386,8 @@ export function CapabilityHubSurface() {
                     </div>
                     <div className="hub-card-desc">{item.description || '暂无描述'}</div>
                     <footer className="hub-card-foot">
-                      <HubStatusBadges item={item} omitInstallState={item.kind !== 'expert'} />
+                      <HubStatusBadges item={item} compact />
                       <div className="hub-card-foot-actions">
-                        {installStateLabel && item.kind !== 'expert' ? (
-                          <span className="hub-card-install-state"><span aria-hidden="true" />{installStateLabel}</span>
-                        ) : null}
                         {item.kind === 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : <span className="hub-card-version">{hubVersion(item)}</span>}
                         {item.kind !== 'expert' ? <button
                           type="button"

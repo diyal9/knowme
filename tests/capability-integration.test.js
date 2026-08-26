@@ -64,7 +64,7 @@ describe('capability integration wiring', () => {
 
   it('keeps GPU crash recovery active under the Electron test seam', () => {
     const guards = fs.readFileSync(path.join(__dirname, '..', 'src', 'main', 'process-guards.ts'), 'utf8')
-    assert.match(guards, /ctx\.app\.relaunch\(\)/)
+    assert.match(guards, /ctx\.app\.relaunch\(\{\s*args:\s*nextArgs\s*\}\)/)
     assert.doesNotMatch(guards, /KNOWME_TEST_SEAM.*return/)
   })
 

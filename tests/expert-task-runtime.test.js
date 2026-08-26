@@ -203,6 +203,40 @@ describe('expert task runtime', () => {
     assert.equal(result.task.events.at(-1).type, 'execution_blocked')
   })
 
+  it('allows evidence-blocked tasks to retry without inventing extra input', async () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-expert-retry-input-')), 'tasks.json')
+    const store = createStore(file)
+    const created = store.create({
+      goal: '执行导入', expertId: 'importer', status: 'needs_input',
+      brief: { goal: '执行导入', deliverables: [{ id: 'result', title: '导入结果', required: true }] },
+      execRef: { kind: 'session', id: 'session-retry-input' },
+      events: [{ type: 'execution_blocked', summary: '还缺少可核验结果' }],
+    })
+    const session = { id: 'session-retry-input', expertId: 'importer', messages: [], run: agentRun.createEmptyRun() }
+    const runtime = createExpertTaskRuntime({
+      getWorkbenchTaskStore: () => store,
+      loadSettings: () => ({ apiKey: 'key', apiEndpoint: 'https://example.com/v1/chat/completions' }),
+      normalizeChatEndpoint: value => value,
+      ensureCapabilityHub: () => ({ expertRuntime: () => ({ readSessionSnapshot: () => ({ capabilityManifest: {} }) }) }),
+      ensureAgentSession: () => ({ session, sessions: [session] }),
+      saveAgentSessions: () => {},
+      runAgentGenerate: async (_deps, payload) => ({
+        runId: payload.runId,
+        text: '已补齐导入结果',
+        executionEvidence: { gateStatus: 'not_required', verificationPassed: true },
+      }),
+      agentRun,
+    })
+
+    const retry = runtime.retry(created.task.id)
+    assert.equal(retry.ok, true)
+    const finished = await waitFor(() => {
+      const current = store.get(created.task.id)
+      return current.ok && current.task.status === 'review' ? current.task : null
+    })
+    assert.equal(finished.deliverables[0].deliverableId, 'result')
+  })
+
   it('independently blocks a required tool that failed even when the executor reports verified', async () => {
     const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-expert-failed-tool-')), 'tasks.json')
     const store = createStore(file)
@@ -314,5 +348,42 @@ describe('expert task runtime', () => {
     assert.equal(payload.taskId, undefined)
     assert.equal(payload.workbenchTaskId, created.task.id)
     assert.equal(reviewed.events.some(event => event.type === 'retried'), true)
+  })
+
+  it('resumes a revising task left behind by an interrupted runtime', async () => {
+    const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-expert-resume-')), 'tasks.json')
+    const store = createStore(file)
+    const created = store.create({
+      goal: '补齐同步稿', expertId: 'office-partner', status: 'revising',
+      brief: { goal: '补齐同步稿', deliverables: [{ id: 'primary', title: '同步稿', required: true }] },
+      execRef: { kind: 'session', id: 'session-resume' },
+      deliverables: [{
+        deliverableId: 'primary', title: '同步稿', version: 1, required: true,
+        acceptanceStatus: 'changes_requested', comments: [{ body: '补充负责人' }],
+      }],
+      events: [{ type: 'changes_requested', summary: '补充负责人' }],
+    })
+    const session = { id: 'session-resume', expertId: 'office-partner', messages: [], run: agentRun.createEmptyRun() }
+    const runtime = createExpertTaskRuntime({
+      getWorkbenchTaskStore: () => store,
+      loadSettings: () => ({ apiKey: 'key', apiEndpoint: 'https://example.com/v1/chat/completions' }),
+      normalizeChatEndpoint: value => value,
+      ensureCapabilityHub: () => ({ expertRuntime: () => ({ readSessionSnapshot: () => ({ capabilityManifest: {} }) }) }),
+      ensureAgentSession: () => ({ session, sessions: [session] }),
+      saveAgentSessions: () => {},
+      runAgentGenerate: async (_deps, value) => ({
+        runId: value.runId,
+        text: '已补充负责人的新版同步稿',
+        executionEvidence: { gateStatus: 'not_required', verificationPassed: true },
+      }),
+      agentRun,
+    })
+
+    const resumed = runtime.retry(created.task.id)
+    assert.equal(resumed.ok, true)
+    assert.equal(resumed.started, true)
+    const reviewed = await waitFor(() => store.get(created.task.id).task.status === 'review' ? store.get(created.task.id).task : null)
+    assert.equal(reviewed.deliverables[0].version, 2)
+    assert.equal(reviewed.events.some(event => event.type === 'resumed'), true)
   })
 })

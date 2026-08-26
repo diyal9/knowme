@@ -1,5 +1,8 @@
 'use strict'
 
+const externalWorkflowRecipes = require('../lib/external-workflow-recipes')
+const { createAgentToolRuntime } = require('../lib/agent-tool-runtime')
+
 /**
  * 本机专家团队运行时、Agent Package 解析与会话 store。
  * 不负责 BrowserWindow。
@@ -7,6 +10,7 @@
 
 /** 挂载团队运行时与会话 store；由组合根 create(ctx) 调用一次。 */
 function create(ctx) {
+ctx.workbenchExternalRunContexts = ctx.workbenchExternalRunContexts || new Map();
 ctx.ensureAgentTeamRuntime = function ensureAgentTeamRuntime() {
     if (ctx.agentTeamRuntime)
         return ctx.agentTeamRuntime;
@@ -222,7 +226,74 @@ ctx.getWorkbenchAgentTeamRunner = function getWorkbenchAgentTeamRunner() {
                     return { ok: false, code: 'llm_failed', message: result.error };
                 return { ok: true, summary: String(result.text || '').trim(), text: result.text };
             },
-            tool: async ({ config, upstream, node }) => {
+            tool: async ({ config, upstream, node, rootRunId }) => {
+                const externalAction = String(config?.externalAction || '').trim();
+                if (externalAction) {
+                    const externalContext = ctx.workbenchExternalRunContexts?.get(String(rootRunId || ''));
+                    if (!externalContext) {
+                        return { ok: false, code: 'external_workflow_context_missing', message: '外部工作流运行上下文不存在，请重新启动' };
+                    }
+                    const bundle = externalWorkflowRecipes.buildExternalWorkflowToolBundle(
+                        externalContext.package,
+                        externalContext.inputs,
+                    );
+                    if (!bundle) {
+                        return { ok: false, code: 'external_workflow_tools_unavailable', message: '外部工作流工具包不可用，请重新导入或执行预检' };
+                    }
+                    const signal = ctx.workbenchAgentRunControllers?.get(String(rootRunId || ''))?.signal;
+                    const externalToolAllowlist = (bundle.definitions || [])
+                        .map(definition => String(definition?.function?.name || '').trim())
+                        .filter(Boolean);
+                    const toolRef = config?.toolRef || {
+                        id: `project.th-art.${externalAction}`,
+                        version: '1.0.0',
+                        name: `th_art_${externalAction.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '')}`,
+                    };
+                    let toolRuntime;
+                    try {
+                        toolRuntime = await createAgentToolRuntime({
+                            runId: rootRunId,
+                            extraTools: bundle,
+                            permissions: externalContext.permissions || {},
+                            toolAllowlist: externalToolAllowlist,
+                            requiredTools: [toolRef.name || toolRef.id],
+                            signal,
+                            resolveToolSurfaceForRun: ctx.resolveToolSurfaceForRun,
+                        });
+                        const result = await toolRuntime.execute({
+                            id: `${rootRunId || 'workbench'}:${node?.id || externalAction}`,
+                            toolRef,
+                            args: {},
+                        });
+                        return {
+                            ...result,
+                            summary: result.summary || result.text || result.preview,
+                            upstream: upstream ? String(upstream).slice(0, 1500) : undefined,
+                        };
+                    } finally {
+                        if (toolRuntime) await toolRuntime.close();
+                    }
+                }
+                if (config?.toolRef) {
+                    const signal = ctx.workbenchAgentRunControllers?.get(String(rootRunId || ''))?.signal;
+                    let toolRuntime;
+                    try {
+                        toolRuntime = await createAgentToolRuntime({
+                            runId: rootRunId,
+                            permissions: {},
+                            requiredTools: [config.toolRef.name || config.toolRef.id],
+                            signal,
+                            resolveToolSurfaceForRun: ctx.resolveToolSurfaceForRun,
+                        });
+                        return toolRuntime.execute({
+                            id: `${rootRunId || 'workbench'}:${node?.id || 'tool'}`,
+                            toolRef: config.toolRef,
+                            args: config.arguments || config.args || {},
+                        });
+                    } finally {
+                        if (toolRuntime) await toolRuntime.close();
+                    }
+                }
                 const skillId = String(config?.skillId || '').trim();
                 if (!skillId)
                     return { ok: false, code: 'missing_skill', message: '工具节点缺少 Skill' };
@@ -279,7 +350,7 @@ ctx.getWorkbenchAgentTeamRunner = function getWorkbenchAgentTeamRunner() {
     });
     return ctx.workbenchAgentTeamRunner;
 };
-ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({ rootRunId, goal, permissions = {} } = {}) {
+ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({ rootRunId, goal, permissions = {}, workflowPackage = null, workflowInputs = {} } = {}) {
     const runtime = ctx.ensureAgentTeamRuntime();
     const settings = ctx.loadSettings();
     const endpoint = ctx.normalizeChatEndpoint(settings.apiEndpoint);
@@ -304,6 +375,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
     });
     const tokenCalKey = ctx.llmUsage.calibrationKey(routedModel.provider, routedModel.model || 'gpt-4o-mini');
     const sourceRoot = ctx.getActiveSourceRoot();
+    const externalWorkflowTools = externalWorkflowRecipes.buildExternalWorkflowToolBundle(workflowPackage, workflowInputs);
     const runPermissions = {
         ...permissions,
         sandbox: ctx.agentSandbox.normalizeSandboxPermissions(permissions, {
@@ -334,8 +406,44 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             goal: String(childCtx.prompt || '').slice(0, 2000),
         });
         childSession.run.permissions = runPermissions;
+        let externalRuntimeEvidence = null;
+        const externalContext = externalWorkflowTools?.context;
+        if (externalContext?.probePath && ctx.fs.existsSync(externalContext.probePath)) {
+            try {
+                const probe = JSON.parse(ctx.fs.readFileSync(externalContext.probePath, 'utf8'));
+                const layers = Array.isArray(probe?.layers) ? probe.layers : [];
+                externalRuntimeEvidence = {
+                    probeSucceeded: probe?.ok !== false,
+                    probePath: externalContext.probePath,
+                    document: probe?.document || null,
+                    stats: probe?.stats || null,
+                    topLevelLayers: layers
+                        .filter(layer => !String(layer?.path || '').includes('/'))
+                        .slice(0, 40)
+                        .map(layer => ({ path: layer.path, kind: layer.kind, visible: layer.visible, bounds: layer.bounds })),
+                    visibleTextLayers: layers
+                        .filter(layer => layer?.visible !== false && layer?.text?.contents)
+                        .slice(0, 60)
+                        .map(layer => ({ path: layer.path, text: layer.text.contents, fontFamily: layer.text.fontFamily, fontSize: layer.text.fontSize, bounds: layer.bounds })),
+                };
+            }
+            catch { /* runtime evidence is optional; tools remain available */ }
+        }
         const handoffText = JSON.stringify({
             goal,
+            workflowInputs,
+            externalWorkflow: externalWorkflowTools?.context ? {
+                recipeId: externalWorkflowTools.context.recipeId,
+                root: externalWorkflowTools.context.root,
+                taskSlug: externalWorkflowTools.context.taskSlug,
+                artifactRoot: externalWorkflowTools.context.artifactRoot,
+                requiredFiles: {
+                    manifest: externalWorkflowTools.context.manifestPath,
+                    nodeSpec: externalWorkflowTools.context.nodeSpecPath,
+                    sliceSpec: externalWorkflowTools.context.sliceSpecPath,
+                },
+            } : null,
+            externalRuntimeEvidence,
             task: String(childCtx.prompt || ''),
             handoff: childCtx.handoff || null,
             parentRunId: childCtx.parentRunId || null,
@@ -349,13 +457,19 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
                     expert.systemPrompt || expert.description || '',
                     '只处理当前节点和结构化交接任务；不要假设可以访问父 Agent 的完整历史。',
                     '输出应包含可核验的结论，必要时明确缺少的输入。',
+                    childCtx.executionContract?.requiredTools?.length
+                        ? `本节点必须在结束前真实调用并成功完成这些工具：${childCtx.executionContract.requiredTools.join('、')}。这些工具已由当前工作流授权，不要请求用户再次允许，也不要用文字说明代替工具调用。`
+                        : '',
+                    externalWorkflowTools?.context
+                        ? `这是外部项目工作流，不是会议或飞书任务。输入与中间文件位于 ${externalWorkflowTools.context.artifactRoot}；需要读取 JSON/Markdown 时调用 read_external_workflow_file，并使用 workflow-spec/${externalWorkflowTools.context.taskSlug}/artifacts/ 下的相对路径。`
+                        : '',
                     '当节点产出纪要、待办、报告或其他可复用交付物时，必须调用 create_artifact 保存产物，再在回答中说明结果。',
                 ].filter(Boolean).join('\n\n'),
             },
             { role: 'user', content: handoffText },
         ];
         const artifactTools = ctx.agentArtifactTools.buildArtifactTools({ runId: childRunId });
-        const extraTools = ctx.mergeExtraTools(artifactTools);
+        const extraTools = ctx.mergeExtraTools(artifactTools, externalWorkflowTools);
         const bindings = ctx.getSessionCapabilityBindings(childSession, ctx.ensureCapabilityHub().expertRuntime());
         const resolvedSurface = await ctx.resolveToolSurfaceForRun({
             userData: ctx.app.getPath('userData'),
@@ -376,6 +490,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
                 extraTools: options.extraTools,
                 allowedConnectorIds: bindings.allowedConnectorIds,
                 registry: options.registry,
+                resolveRuntimeOptions: conn => ctx.getConnectorsApi().resolveRuntimeOptions(conn),
             }),
         });
         const toolSurface = resolvedSurface.surface;
@@ -464,7 +579,7 @@ ctx.loadAgentSessions = function loadAgentSessions() {
     return ctx.loadAgentStore().sessions;
 };
 ctx.saveAgentStore = function saveAgentStore(sessions, ui) {
-    const normalized = sessions.map((s, i) => ctx.agentSessions.normalizeSession(s, i + 1));
+    const normalized = sessions.map((s, i) => ctx.agentSessions.compactSession(s, i + 1).session);
     const nextUi = ctx.agentSessions.normalizeUi(ui, normalized);
     ctx.fs.writeFileSync(ctx.AGENT_SESSIONS_FILE, JSON.stringify({ sessions: normalized, ui: nextUi }, null, 2), 'utf8');
     return { sessions: normalized, ui: nextUi };
@@ -480,7 +595,7 @@ ctx.ensureAgentSession = function ensureAgentSession(sessionId, agentId = 'gener
         agentId,
         ...opts,
     });
-    if (ensured.created) {
+    if (ensured.created || ensured.upgraded) {
         ctx.saveAgentStore(ensured.sessions, ensured.ui);
     }
     return { session: ensured.session, sessions: ensured.sessions };

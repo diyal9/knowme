@@ -4,6 +4,7 @@ import {
   buildExecutionTimelineView,
   formatReplyTiming,
   seedPrepareTrace,
+  settleExecutionTrace,
   stampStreamTiming,
   userStatusLabel,
 } from './agent-execution-timeline'
@@ -47,6 +48,17 @@ describe('agent-execution-timeline', () => {
       ],
     })
     expect(view?.summaryTitle).toBe('思考执行过程')
+  })
+
+  it('settles pending steps when a generation reaches a terminal state', () => {
+    const settled = settleExecutionTrace([
+      { id: 'prepare', kind: 'stage', title: '准备内容', status: 'done' },
+      { id: 'answer', kind: 'stage', title: '组织回答', status: 'pending' },
+    ], 'error')
+    expect(settled?.[1].status).toBe('error')
+    const view = buildExecutionTimelineView({ streaming: false, trace: settled })
+    expect(view?.running).toBe(false)
+    expect(view?.rows[1].status).toBe('error')
   })
 
   it('copies plan.updated onto the assistant message', () => {

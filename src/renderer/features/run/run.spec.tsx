@@ -5,6 +5,8 @@ import { useAppStore } from '../../app/store'
 import { makeRunState, mockApi, resetAppStore } from '../../test/helpers'
 import { toShelfCard } from '../../../domain/shelf'
 
+const originalLaunchWorkflow = useAppStore.getState().launchWorkflow
+
 function pipelineRun(overrides: Parameters<typeof makeRunState>[0]) {
   return makeRunState({ ...overrides, lane: 'pipeline' })
 }
@@ -17,6 +19,7 @@ describe('run / pipeline review', () => {
     })
     resetAppStore()
     useAppStore.setState({
+      launchWorkflow: originalLaunchWorkflow,
       route: 'workbench',
       workbenchSurface: 'run',
       run: pipelineRun({
@@ -246,7 +249,7 @@ describe('run / pipeline review', () => {
     expect(screen.queryByTestId('workflow-dialogue')).not.toBeInTheDocument()
   })
 
-  it('shows workflow graph instead of a chat while a run is live', () => {
+  it('shows workflow progress and a shared interaction composer while a run is live', () => {
     useAppStore.setState({
       run: makeRunState({
         phase: 'running',
@@ -263,7 +266,63 @@ describe('run / pipeline review', () => {
     expect(screen.getByTestId('workflow-room')).toBeInTheDocument()
     expect(screen.queryByTestId('daemon-review')).not.toBeInTheDocument()
     expect(screen.queryByTestId('pipeline-dialogue')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '发送' })).not.toBeInTheDocument()
+    expect(screen.getByRole('list', { name: '工作流推进记录' })).toHaveTextContent('制作人分析')
+    expect(screen.getByRole('complementary', { name: '工作流属性' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '发送' })).toBeInTheDocument()
+  })
+
+  it('turns a failed workflow into an actionable recovery conversation', async () => {
+    const launchWorkflow = vi.fn(async () => true)
+    const workflowRunComment = vi.fn(async () => ({ ok: true }))
+    mockApi({ workflowRunComment })
+    const card = toShelfCard({ id: 'wf-1', name: 'PSD 转换', source: 'personal', graph: { nodes: [] } })
+    useAppStore.setState({
+      launchWorkflow,
+      shelfCards: [card],
+      run: makeRunState({
+        workflowId: 'wf-1',
+        workflowName: 'PSD 转换',
+        workflowRunId: 'persisted-run-1',
+        phase: 'done',
+        daemonStatus: 'failed',
+        brief: '导出 ArtBundle',
+        launchInputs: { sourcePath: 'D:\\shop.psd' },
+        log: ['psd_layer_preread 执行失败：无法读取 PSD 图层'],
+        graphNodes: [{
+          id: 'psd_layer_preread',
+          label: '读取 PSD 图层',
+          meta: 'tool',
+          status: 'failed',
+          owner: '',
+          handoff: '',
+          outputLabel: '无法读取 PSD 图层',
+        }],
+      }),
+    })
+
+    render(<AppShell />)
+
+    expect(screen.getAllByText('运行失败').some((node) => node.classList.contains('is-failed'))).toBe(true)
+    expect(screen.getByText('本次执行停在当前节点')).toBeInTheDocument()
+    expect(screen.getByTestId('workflow-recovery')).toHaveTextContent('无法读取 PSD 图层')
+    expect(screen.queryByText('确认')).not.toBeInTheDocument()
+    expect(screen.getByRole('complementary', { name: '工作流属性' })).toHaveTextContent('读取 PSD 图层')
+
+    const replacementPsd = 'C:\\Users\\Administrator\\Downloads\\商店.psd'
+    fireEvent.change(screen.getByPlaceholderText('补充修正要求或新的文件路径，发送后重新运行… @ 选文件'), {
+      target: { value: replacementPsd },
+    })
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+
+    await waitFor(() => expect(workflowRunComment).toHaveBeenCalledWith(expect.objectContaining({
+      runId: 'persisted-run-1',
+      contextKind: 'change_request',
+      body: replacementPsd,
+    })))
+    expect(launchWorkflow).toHaveBeenCalledWith(card, expect.objectContaining({
+      goal: expect.stringContaining(`补充要求：${replacementPsd}`),
+      inputs: expect.objectContaining({ recoveryNote: replacementPsd, psdPath: replacementPsd }),
+    }))
   })
 
   it('shows workflow results directly after the run completes', () => {
@@ -286,19 +345,19 @@ describe('run / pipeline review', () => {
     const deliveryPanel = screen.getByTestId('workflow-run-results')
     const statusBar = screen.getByLabelText('任务对话状态')
     expect(deliveryPanel).toBeInTheDocument()
-    expect(screen.getByText('交付与预览')).toBeInTheDocument()
+    expect(screen.getByText('工作流推进')).toBeInTheDocument()
     expect(controlPanel).not.toHaveTextContent('工作流运行')
     expect(controlPanel).not.toHaveTextContent('本轮运行已经完成')
     expect(deliveryPanel).not.toHaveTextContent('本次交付')
     expect(deliveryPanel).not.toHaveTextContent('查看本轮各节点形成的结果')
     expect(deliveryPanel).toHaveTextContent('已整理待办、负责人和截止时间。')
-    expect(controlPanel).not.toHaveTextContent('已整理待办、负责人和截止时间。')
+    expect(controlPanel).toHaveTextContent('已整理待办、负责人和截止时间。')
     expect(within(statusBar).getByRole('button', { name: '返回工作流' })).toBeInTheDocument()
     expect(within(statusBar).queryByText('已完成')).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: '返回工作流' })).toHaveLength(1)
   })
 
-  it('switches the delivery preview from the right-side result navigator', () => {
+  it('opens a workflow result from the inline deliverable list', () => {
     useAppStore.setState({
       run: makeRunState({
         phase: 'done',
@@ -310,10 +369,11 @@ describe('run / pipeline review', () => {
     })
 
     render(<AppShell />)
-    fireEvent.click(within(screen.getByLabelText('节点交付结果')).getByRole('button', { name: /最终清单/ }))
+    const resultList = screen.getByRole('list', { name: '工作流推进记录' })
+    fireEvent.click(within(resultList).getAllByRole('button', { name: '查看节点成果' })[1])
 
     expect(useAppStore.getState().run?.selectedNodeId).toBe('n2')
-    expect(screen.getByLabelText('最终清单结果预览')).toHaveTextContent('第二份结果')
+    expect(screen.getByRole('dialog', { name: '最终清单结果预览' })).toHaveTextContent('第二份结果')
   })
 
   it('acks pipeline task-room text onto the shared bubble timeline without aiGenerate', async () => {
@@ -430,7 +490,9 @@ describe('run / pipeline review', () => {
     expect(screen.queryByText('补充目标与验收标准，工作流会按照已编排的节点执行。')).not.toBeInTheDocument()
     expect(screen.queryByText('写清目标、材料范围和验收要求')).not.toBeInTheDocument()
     expect(screen.queryByText('参与专家')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '发送' })).not.toBeInTheDocument()
+    expect(screen.queryByText('启动')).not.toBeInTheDocument()
+    expect(screen.getByRole('list', { name: '工作流推进记录' })).toHaveTextContent('节点尚未开始执行')
+    expect(screen.getByRole('button', { name: '发送' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '停止生成' })).not.toBeInTheDocument()
   })
 })

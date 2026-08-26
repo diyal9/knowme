@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   findStableContentPrefixEnd,
+  normalizeDisplayCodeTags,
   parseContentBlocks,
   parseContentBlocksStreaming,
 } from './content-blocks'
@@ -14,6 +15,13 @@ describe('content-blocks', () => {
     if (table.type !== 'table') throw new Error('expected table')
     expect(table.headers[0][0]).toEqual({ kind: 'text', text: '项' })
     expect(table.rows[0][0]).toEqual([{ kind: 'strong', text: 'A' }])
+  })
+
+  it('renders model-emitted tool-shaped text as display-only code', () => {
+    const source = '正在执行搜索…\n<tool_code>\nprint(search_web(query="上海天气"))\n</tool_code>'
+    expect(normalizeDisplayCodeTags(source)).toContain('```text')
+    const blocks = parseContentBlocks(source)
+    expect(blocks).toContainEqual({ type: 'code', text: 'print(search_web(query="上海天气"))' })
   })
 
   it('parses feishu markdown links into card nodes', () => {

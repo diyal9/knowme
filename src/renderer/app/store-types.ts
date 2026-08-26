@@ -23,6 +23,7 @@ import type {
 } from '../../shared/api'
 import type { ShelfCardModel, ShelfDomain, ShelfLayout } from '../../domain/shelf'
 import type { StudioDraft, StudioIssue } from '../../domain/studio'
+import type { ExpertDiscussionContext } from '../../domain/expert-discussion'
 
 import type { RunArtifact, RunPhase } from '../../domain/run-telemetry'
 import type { RunLane } from '../../domain/workbench-task-room'
@@ -66,6 +67,10 @@ export interface RunState {
 
 export interface ExpertRoomState {
   id: string
+  /** 正式任务 id；为空时表示尚未确认计划的协作草稿。 */
+  taskId?: string
+  /** 专家 id 与任务 id 分离，确保正式任务中的对话仍使用正确专家身份。 */
+  expertId?: string
   name: string
   goal: string
   log: string[]
@@ -73,11 +78,13 @@ export interface ExpertRoomState {
   skills: string[]
   connectors: string[]
   knowledgeRefs: string[]
+  /** 正式任务讨论所依据的当前任务与成果快照；不用于驱动任务执行。 */
+  discussionContext?: ExpertDiscussionContext
 }
 
 export interface WorkbenchDialogueSlice {
   composer: string
-  attachments: { name: string; text?: string }[]
+  attachments: ComposerAttachment[]
 }
 
 export interface DaemonOverviewCache {
@@ -96,6 +103,7 @@ export interface AssistantModelOption {
   label: string
   contextWindow?: number
   supportsTools?: boolean
+  supportsVision?: boolean
 }
 
 export interface AssistantModelGroup {
@@ -116,7 +124,15 @@ export type { AgentContextInfo }
 export interface SessionSlice {
   messages: ChatMessage[]
   composer: string
-  attachments: { name: string; text?: string }[]
+  attachments: ComposerAttachment[]
+}
+
+export interface ComposerAttachment {
+  name: string
+  kind?: 'text' | 'image'
+  text?: string
+  mimeType?: string
+  dataUrl?: string
 }
 
 export interface OverlayDrawer {
@@ -180,6 +196,8 @@ export interface AppState {
   assistantModels: AssistantModelOption[]
   assistantModelGroups: AssistantModelGroup[]
   assistantModelId: string
+  /** Stable partner label loaded before empty-home identity text is shown. */
+  assistantPartnerName: string
   assistantSkills: CapabilityItem[]
   assistantStatus: string
   assistantProcessFeed: string
@@ -287,12 +305,12 @@ export interface AppState {
   archiveTasks: (ids: string[]) => Promise<void>
   openAutomationCenter: () => void
   openWorkbenchRail: () => void
-  openExpertRoom: (room: { id: string; name: string; goal?: string }) => void
+  openExpertRoom: (room: { id: string; taskId?: string; expertId?: string; name: string; goal?: string }) => void
   closeExpertRoom: () => void
   setExpertRoomGoal: (goal: string) => void
   patchExpertRoomBindings: (patch: Partial<Pick<ExpertRoomState, 'skills' | 'connectors' | 'knowledgeRefs'>>) => void
   setWorkbenchComposer: (v: string) => void
-  addWorkbenchAttachment: (file: { name: string; text?: string }) => void
+  addWorkbenchAttachment: (file: ComposerAttachment) => void
   removeWorkbenchAttachment: (name: string) => void
   sendWorkbenchMessage: () => void
   startExpertCollab: () => Promise<void>
@@ -357,7 +375,7 @@ export interface AppState {
   clearAttention: (id?: string) => void
   activateAttention: (id: string) => void
   setAttentionPulse: (pulse: boolean) => void
-  addComposerAttachment: (file: { name: string; text?: string }) => void
+  addComposerAttachment: (file: ComposerAttachment) => void
   removeComposerAttachment: (name: string) => void
   setHubTab: (tab: CapabilityKind) => void
   setHubQuery: (q: string) => void

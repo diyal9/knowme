@@ -8,15 +8,16 @@ const {
 } = require('../src/lib/windows-gpu-policy')
 
 describe('windows-gpu-policy', () => {
-  it('keeps full performance on local console', () => {
+  it('defaults affected local Windows sessions to the crash-safe software path', () => {
     const policy = resolveWindowsGpuPolicy({
       env: { SESSIONNAME: 'Console' },
     })
-    assert.equal(policy.disableGpu, false)
-    assert.equal(policy.uiThrottle, false)
+    assert.equal(policy.disableGpu, true)
+    assert.equal(policy.uiThrottle, true)
     assert.equal(policy.useInProcessGpu, false)
-    assert.equal(policy.liveNowIntervalMs, 500)
-    assert.equal(policy.reason, '')
+    assert.equal(policy.liveNowIntervalMs, 1000)
+    assert.equal(policy.runTelemetryIntervalMs, 4000)
+    assert.equal(policy.reason, 'crash')
   })
 
   it('throttles UI on remote but keeps GPU', () => {

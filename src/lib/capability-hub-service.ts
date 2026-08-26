@@ -92,6 +92,7 @@ function createCapabilityHubService(deps = {}) {
     skillRuntime: runtime.skillRuntime,
     findPackOwnedSkill: runtime.findPackOwnedSkill,
     onExpertUninstalled,
+    ingestExternalKnowledge: deps.ingestExternalKnowledge,
   })
 
   const experts = createCapabilityExperts({

@@ -47,7 +47,7 @@ export function ShelfSurface() {
   const runnable = catalogCards.filter((card) => !card.blocked).length
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null)
   const [gridExpanded, setGridExpanded] = useState(false)
-  const [rowCapacity, setRowCapacity] = useState(2)
+  const [rowCapacity, setRowCapacity] = useState(3)
   const gridRef = useRef<HTMLDivElement>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const visibleCards = previewSlice(cards, gridExpanded, rowCapacity)
@@ -86,7 +86,7 @@ export function ShelfSurface() {
   return (
     <div ref={surfaceRef} className="wb-shelf wb-workbench-home-surface" data-testid="shelf-surface">
       <section
-        className="wb-task-home-panel wb-task-recent wb-shelf-run-board"
+        className="wb-task-home-panel wb-task-recent wb-shelf-run-board wb-section-gradient-divider"
         aria-labelledby="wbShelfRecentTitle"
       >
         <div className="wb-task-home-head">
@@ -105,7 +105,7 @@ export function ShelfSurface() {
         </div>
       </section>
 
-      <section className="wb-shelf-catalog-section wb-section-gradient-divider" data-testid="shelf-catalog-section" aria-labelledby="wbShelfCatalogTitle">
+      <section className="wb-shelf-catalog-section wb-home-primary-section" data-testid="shelf-catalog-section" aria-labelledby="wbShelfCatalogTitle">
         <header className="wb-shelf-intro">
           <div className="wb-shelf-intro-copy">
             <h2 className="wb-workbench-page-title" id="wbShelfCatalogTitle">选择工作流</h2>

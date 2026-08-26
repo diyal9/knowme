@@ -175,6 +175,7 @@ async function collectConnectorTools(userData, opts = {}) {
       ephemeralSessions: opts.ephemeralMcpSessions === true,
       fetchImpl: opts.fetchImpl,
       userData,
+      resolveRuntimeOptions: opts.resolveRuntimeOptions,
     })
     if (!mcpProjection.ok) {
       mcpProjectionError = {

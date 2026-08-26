@@ -100,6 +100,8 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
         const packageResult = await api()?.workbenchWorkflowPackageGet?.(card.id)
         const pkg = packageResult?.package
         if (!pkg) throw new Error(packageResult?.error || '工作流配置不存在')
+        const preflight = await api()?.workbenchExternalWorkflowPreflight?.({ workflowId: card.id, inputs })
+        if (preflight?.ok === false) throw new Error(String(preflight.error || '外部工作流预检失败'))
         const persisted = await api()?.workflowRunStart?.({
           workflowId: card.id,
           input: inputs,
@@ -222,9 +224,12 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
           const packageResult = await api()?.workbenchWorkflowPackageGet?.(run.workflowId)
           const pkg = packageResult?.package
           if (!pkg) throw new Error(packageResult?.error || '工作流配置不存在')
+          const workflowInputs = { ...run.launchInputs, goal: brief }
+          const preflight = await api()?.workbenchExternalWorkflowPreflight?.({ workflowId: run.workflowId, inputs: workflowInputs })
+          if (preflight?.ok === false) throw new Error(String(preflight.error || '外部工作流预检失败'))
           const persisted = await api()?.workflowRunStart?.({
             workflowId: run.workflowId,
-            input: { ...run.launchInputs, goal: brief },
+            input: workflowInputs,
             enforceProductBoundary: true,
           })
           if (persisted?.ok === false) {
@@ -238,7 +243,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
             : {}
           const started = await api()?.workbenchAgentGraphStart?.({
             ...workflowGraphPayload(pkg, brief || run.workflowName),
-            inputs: { ...run.launchInputs, goal: brief },
+            inputs: workflowInputs,
           })
           if (!started || started.ok === false) {
             throw new Error(String(started?.error || '工作流启动失败'))
@@ -522,6 +527,15 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
 
     archiveTasks: async (ids: string[]) => {
       for (const id of ids) {
+        const current = get().tasks.find((task) => task.id === id)
+        const status = String(current?.status || '').toLowerCase()
+        if (current && !['failed', 'cancelled', 'completed', 'done', 'finished'].includes(status)) {
+          const cancelled = await api()?.expertTaskCancel?.(id).catch(() => null)
+          if (cancelled && cancelled.ok === false) {
+            get().showToast(cancelled.error || '停止任务失败，未删除任务记录')
+            continue
+          }
+        }
         await api()?.workbenchTaskArchive?.(id).catch(() => null)
       }
       set({ taskManageOpen: false })
@@ -539,17 +553,19 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
     },
 
-    openExpertRoom: (room: { id: string; name: string; goal?: string }) => {
+    openExpertRoom: (room: { id: string; taskId?: string; expertId?: string; name: string; goal?: string }) => {
       const goal = String(room.goal || '').trim()
-      const intro = goal
-        ? `已进入与「${room.name}」的协作：${goal}`
-        : `已进入与「${room.name}」的协作`
+      const intro = room.taskId || goal
+        ? `我已接手这项协作。接下来会沿着已确认的目标推进，并在需要你判断时停下来。`
+        : `我们先把问题说清楚。我会通过少量关键问题确认目标，再给你一份可以直接确认的执行计划。你这次最想解决什么问题？`
       set({
         route: 'workbench',
         workbenchSurface: 'run',
         workbenchDialogue: { composer: '', attachments: [] },
         expertRoom: {
           id: room.id,
+          taskId: room.taskId,
+          expertId: room.expertId || (room.taskId ? undefined : room.id),
           name: room.name,
           goal,
           log: [intro],

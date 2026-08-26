@@ -2,6 +2,7 @@
 
 const mcpHost = require('./mcp-host')
 const normalize = require('./connectors/normalize')
+const runtimeConfig = require('./connectors/runtime-config')
 
 const MCP_DEFINITION_TTL_MS = 5 * 60 * 1000
 const mcpDefinitionCache = new Map()
@@ -16,7 +17,7 @@ function listEnabledMcpConnectors(connectors = []) {
       && c.type === 'mcp'
       && c.enabled
       && c.agentVisible !== false
-      && String(c.mcp?.command || '').trim(),
+      && (String(c.mcp?.command || '').trim() || String(c.mcp?.url || '').trim()),
   )
 }
 
@@ -64,7 +65,9 @@ function detectProjectedNameCollisions(projectedDefinitions) {
 
 function publicMcpConfigView(mcp = {}) {
   return {
+    transport: mcp.transport || (mcp.url ? 'streamable-http' : 'stdio'),
     command: mcp.command || '',
+    url: mcp.url || '',
     args: [...(mcp.args || [])],
     cwd: mcp.cwd || '',
     envKeys: [...(mcp.envKeys || [])],
@@ -75,23 +78,19 @@ function publicMcpConfigView(mcp = {}) {
  * Ephemeral health probe — does not keep client in registry.
  */
 async function probeMcpHealth(mcpConfig = {}, opts = {}) {
-  const command = String(mcpConfig.command || '').trim()
-  if (!command) {
+  const transport = mcpConfig.transport || (mcpConfig.url ? 'streamable-http' : 'stdio')
+  const configured = transport === 'stdio'
+    ? String(mcpConfig.command || '').trim()
+    : String(mcpConfig.url || '').trim()
+  if (!configured) {
     return {
       ok: false,
       state: 'unconfigured',
-      message: '请填写 MCP Server 启动命令',
+      message: transport === 'stdio' ? '请填写 MCP Server 启动命令' : '请填写 MCP Server URL',
       toolsCount: 0,
     }
   }
-  const session = mcpHost.createMcpSession({
-    command: mcpConfig.command,
-    args: mcpConfig.args,
-    cwd: mcpConfig.cwd,
-    envKeys: mcpConfig.envKeys,
-    spawnImpl: opts.spawnImpl,
-    timeoutMs: opts.timeoutMs,
-  })
+  const session = mcpHost.createMcpSessionForTransport(mcpConfig, opts)
   try {
     const listed = await session.listTools()
     if (!listed.ok) {
@@ -130,26 +129,20 @@ async function previewMcpTools(connector, opts = {}) {
     projectedAllowlist: [],
   }
 
-  if (!String(conn.mcp?.command || '').trim()) {
+  const transport = conn.mcp?.transport || (conn.mcp?.url ? 'streamable-http' : 'stdio')
+  if (!(transport === 'stdio' ? String(conn.mcp?.command || '').trim() : String(conn.mcp?.url || '').trim())) {
     return {
       ...base,
       ok: false,
       code: 'unconfigured',
-      message: '请填写 MCP Server 启动命令',
+      message: transport === 'stdio' ? '请填写 MCP Server 启动命令' : '请填写 MCP Server URL',
     }
   }
 
   const listed = opts.cachedTools
     ? { ok: true, tools: opts.cachedTools }
     : await (async () => {
-      const session = mcpHost.createMcpSession({
-        command: conn.mcp.command,
-        args: conn.mcp.args,
-        cwd: conn.mcp.cwd,
-        envKeys: conn.mcp.envKeys,
-        spawnImpl: opts.spawnImpl,
-        timeoutMs: opts.timeoutMs,
-      })
+      const session = mcpHost.createMcpSessionForTransport(conn.mcp, opts)
       try {
         return await session.listTools()
       } finally {
@@ -178,6 +171,7 @@ async function previewMcpTools(connector, opts = {}) {
       description: String(t?.description || rawName).slice(0, 500),
       allowlisted: allow.size > 0 && allow.has(rawName),
       projected: allow.size > 0 && allow.has(rawName),
+      policy: runtimeConfig.resolveToolPolicy(conn, rawName),
     }
   })
 
@@ -262,18 +256,20 @@ async function buildMcpAgentProjection(connectors = [], opts = {}) {
     let session
     try {
       if (ephemeral) {
-        session = mcpHost.createMcpSession({
-          command: conn.mcp.command,
-          args: conn.mcp.args,
-          cwd: conn.mcp.cwd,
-          envKeys: conn.mcp.envKeys,
-          spawnImpl: opts.spawnImpl,
-          timeoutMs: opts.timeoutMs,
+        const runtimeOptions = typeof opts.resolveRuntimeOptions === 'function'
+          ? opts.resolveRuntimeOptions(conn)
+          : {}
+        session = mcpHost.createMcpSessionForTransport(conn.mcp, {
+          ...opts,
+          ...runtimeOptions,
         })
       } else {
+        const runtimeOptions = typeof opts.resolveRuntimeOptions === 'function'
+          ? opts.resolveRuntimeOptions(conn)
+          : {}
         session = await registry.connect(conn.id, conn.mcp, {
-          spawnImpl: opts.spawnImpl,
-          timeoutMs: opts.timeoutMs,
+          ...opts,
+          ...runtimeOptions,
         })
       }
     } catch (err) {
@@ -299,6 +295,10 @@ async function buildMcpAgentProjection(connectors = [], opts = {}) {
 
     const projected = mcpHost.projectMcpTools(listed.tools, allowlist, conn.id)
     for (const def of projected) {
+      def._knowme = {
+        ...def._knowme,
+        ...runtimeConfig.toolContractFor(conn, def._knowme.rawToolName),
+      }
       definitions.push(def)
       const rawToolName = def._knowme.rawToolName
       const agentName = def.function.name
@@ -342,7 +342,11 @@ async function closeMcpSessions(sessions = [], opts = {}) {
 
 async function onConnectorEnabled(connectorId, mcpConfig = {}, opts = {}) {
   const registry = opts.registry || mcpHost.defaultRegistry
-  if (!String(mcpConfig?.command || '').trim()) return { ok: false, code: 'unconfigured' }
+  const transport = mcpConfig.transport || (mcpConfig.url ? 'streamable-http' : 'stdio')
+  const configured = transport === 'stdio'
+    ? String(mcpConfig?.command || '').trim()
+    : String(mcpConfig?.url || '').trim()
+  if (!configured) return { ok: false, code: 'unconfigured' }
   await registry.connect(connectorId, mcpConfig, opts)
   return { ok: true }
 }

@@ -68,6 +68,8 @@
   --control-sm: 28px;
   --control-md: 32px;
   --control-lg: 36px;
+  /* 主模块顶部 Tab 共用紧凑高度，避免跨页面切换时产生纵向跳动。 */
+  --surface-tab-height: 46px;
   --radius-sm: 5px;
   --radius-md: 7px;
   --radius-lg: 10px;
@@ -78,8 +80,8 @@
   --surface-shadow: 0 1px 2px rgba(24, 31, 36, 0.03), 0 8px 24px rgba(24, 31, 36, 0.04);
   --radius-control: 7px;
 
-  /* Semantic layer: components consume these names, never raw palette values. */
-  --surface-page: var(--bg-app);
+  /* Semantic layer: content canvases stay white; gray is reserved for shell and inset surfaces. */
+  --surface-page: var(--bg-card);
   --surface-panel: var(--bg-card);
   --surface-subtle: var(--bg-side);
   --surface-hover: #f3f5f6;
@@ -100,11 +102,11 @@
   /* Conversation contract: shared by personal, expert, workflow and pipeline chat. */
   --conversation-track-max: 920px;
   /* 对话正文采用窄于输入框的阅读轨，避免回复呈现成长文档。 */
-  --conversation-reading-max: 880px;
-  --conversation-body-size: 15px;
+  --conversation-reading-max: 840px;
+  --conversation-body-size: 14px;
   --conversation-user-size: 14px;
   --conversation-composer-size: 14px;
-  --conversation-body-leading: 1.68;
+  --conversation-body-leading: 1.72;
   --conversation-turn-gap: 16px;
   --conversation-composer-min: 88px;
   --conversation-composer-input-min: 48px;

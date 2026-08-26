@@ -1,6 +1,7 @@
 'use strict'
 
 const { createWorkflowV2Runtime } = require('../lib/workflow-v2-runtime')
+const { assessConnectorRequirements } = require('../lib/connectors/dependency-resolver')
 
 function registerWorkflowV2Ipc(ipcMain, deps) {
   const runtime = createWorkflowV2Runtime({
@@ -14,7 +15,15 @@ function registerWorkflowV2Ipc(ipcMain, deps) {
   ipcMain.handle('workflow-action-catalog', () => runtime.actionCatalog())
   ipcMain.handle('workflow-validate', (_e, payload = {}) => runtime.validate(payload))
   ipcMain.handle('workflow-publish', (_e, payload = {}) => runtime.publish(payload))
-  ipcMain.handle('workflow-run-start', (_e, payload = {}) => runtime.start(payload))
+  ipcMain.handle('workflow-run-start', async (_e, payload = {}) => {
+    const hit = deps.getWorkbenchWorkflowPackageStore().get(payload.workflowId || payload.id)
+    if (!hit.ok) return hit
+    const connectorGate = await assessConnectorRequirements(hit.package, payload.input || {}, {
+      getConnectorStatus: id => deps.getConnectorsApi().getConnectorStatus(id),
+    })
+    if (!connectorGate.ok) return connectorGate
+    return runtime.start(payload)
+  })
   ipcMain.handle('workflow-run-get', (_e, id) => runtime.get(id))
   ipcMain.handle('workflow-run-pause', (_e, payload = {}) => runtime.pause(payload.runId, payload))
   ipcMain.handle('workflow-run-resume', (_e, payload = {}) => runtime.resume(payload.runId, payload))

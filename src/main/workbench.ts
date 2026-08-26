@@ -385,7 +385,10 @@ if (ctx.gotSingleInstanceLock) {
         catch { /* */ }
         ctx.productMemory.ensureMemory(ctx.MEMORY_DIR);
         ctx.purgeEmptyClosedNotes();
-        ctx.tray = new ctx.Tray(ctx.makeTrayIcon());
+        const trayImage = ctx.makeTrayIcon();
+        const traySize = !trayImage.isEmpty() ? trayImage.getSize() : null;
+        console.log('[tray] create', { path: ctx.TRAY_ICON_PNG, empty: trayImage.isEmpty(), size: traySize });
+        ctx.tray = new ctx.Tray(trayImage);
         ctx.tray.setToolTip(`${ctx.APP_DISPLAY_NAME}  左键显示/隐藏 · 右键菜单`);
         ctx.tray.on('click', ctx.toggleAppVisibility);
         ctx.tray.on('double-click', () => ctx.restoreAppWindows());
