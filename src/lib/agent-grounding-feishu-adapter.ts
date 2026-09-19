@@ -6,6 +6,7 @@
 
 const feishuGrounding = require('./feishu-grounding')
 const groundingRuntime = require('./agent-grounding-runtime')
+const { mergeExecutionContracts, hasRules, validateExecutionCompletion } = require('./agent-execution-contract')
 
 function safeJsonParse(text = '') {
   try { return JSON.parse(String(text || '').trim()) } catch { return null }
@@ -75,6 +76,88 @@ function buildLegacyPostProcessHint(prompt, toolMessages, fullText, context = {}
   return feishuGrounding.buildFeishuGroundingHint(prompt, toolMessages, fullText, context)
 }
 
+// Legacy GROUND does not run the unified contract gate. Formal execution must
+// still validate its declared receipts before an answer can be committed.
+// This projects actual tool results, never obligations inferred from prose.
+function assertDeclaredExecutionEvidence(contracts, toolMessages = [], session = {}) {
+  const contract = mergeExecutionContracts(contracts)
+  if (!hasRules(contract)) return
+  const messages = Array.isArray(toolMessages) ? toolMessages : []
+  const { toolLedger, evidenceLedger } = groundingRuntime.mergeToolResultsIntoLedgers({ toolMessages: messages })
+  const assessment = validateExecutionCompletion(contract, {
+    executionEvidence: { toolCalls: toolLedger.calls, evidence: evidenceLedger.entries },
+    artifactRefs: [
+      ...(Array.isArray(session?.run?.artifacts) ? session.run.artifacts : []),
+      ...messages.flatMap(item => Array.isArray(item?.artifactRefs) ? item.artifactRefs : []),
+    ],
+  })
+  if (!assessment.ok) {
+    const error = new Error(assessment.violations.map(item => item.message).join('；'))
+    error.code = 'execution_contract_unmet'
+    error.violations = assessment.violations
+    throw error
+  }
+}
+
+function buildChatPostProcessHint(prompt, toolMessages, fullText, context = {}) {
+  const intent = feishuGrounding.detectFeishuIntent(prompt)
+  if (!intent.mentioned) return ''
+  const messages = Array.isArray(toolMessages) ? toolMessages : []
+  const readTools = new Set(['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read'])
+  const reads = messages.filter(item => readTools.has(item?.toolName))
+  // A successful transport status is not necessarily a qualified body. Reuse
+  // the ledger's quality and document-binding checks for candidate decisions.
+  const qualifiedReads = new Set(reads.filter(item => {
+    if (item.status !== 'done') return false
+    const { evidenceLedger } = groundingRuntime.mergeToolResultsIntoLedgers({ toolMessages: [item] })
+    return evidenceLedger.entries.some(entry => entry.status === 'ok')
+      && feishuGrounding.analyzeFeishuToolEvidence([item]).hasContentRead
+  }))
+  const candidate = [...messages].reverse().find(item => (
+    item?.toolName === 'feishu.meeting_candidates' && item.status === 'done'
+  ))
+  const candidateVerified = candidate
+    && groundingRuntime.mergeToolResultsIntoLedgers({ toolMessages: [candidate] })
+      .evidenceLedger.entries.some(entry => entry.status === 'ok')
+    && feishuGrounding.analyzeFeishuToolEvidence([candidate]).hasMeetingCandidates
+  const referenceState = context.referenceState || {}
+  const pending = referenceState.pendingSelection?.options?.length > 0
+  // Legacy mode may not have projected a fresh candidate receipt into state.
+  // Its concrete locators can establish the same intermediate selection step.
+  const freshCandidates = candidateVerified && !referenceState.activeRefId
+    && extractMeetingCandidatesFromToolText(candidate).length > 0
+  const awaitingSelection = intent.asksMinutes && !intent.directDocRead
+    && (pending || freshCandidates) && reads.length === 0 && qualifiedReads.size === 0
+  // An explicit empty discovery result is a terminal fact, not a request to
+  // choose. Preserve it without treating missing metadata as a zero-result run.
+  const emptyDiscovery = candidateVerified && candidate.meta?.workflow === 'meeting_candidates'
+    && Array.isArray(candidate.meta.candidates) && candidate.meta.candidates.length === 0
+  if (intent.asksMinutes && reads.length === 0 && emptyDiscovery && String(candidate.text || '').trim()) {
+    return candidate.text.trim()
+  }
+  if (awaitingSelection && candidateVerified && String(candidate?.text || '').trim()) return candidate.text.trim()
+
+  // Presentation-only copies: keep original receipts and session anchors
+  // untouched. Do not let the old hint's own candidate branch undo this guard,
+  // or let an empty/truncated/wrong-document read masquerade as content.
+  const hintMessages = messages.flatMap(item => {
+    if (item?.toolName === 'feishu.meeting_candidates') {
+      // Preserve failures so auth/timeout diagnostics are not relabeled as a
+      // missing call; suppress only successful, no-longer-actionable lists.
+      if (item.status === 'error') return [item]
+      if (feishuGrounding.analyzeFeishuToolEvidence([item]).hasFailure) return [{ ...item, status: 'error' }]
+      return []
+    }
+    if (readTools.has(item?.toolName) && item.status === 'done' && !qualifiedReads.has(item)) {
+      const evidence = feishuGrounding.analyzeFeishuToolEvidence([item])
+      return [{ ...item, status: 'error', text: evidence.readNotFound || evidence.hasFailure
+        ? item.text : '读取结果证据不足：正文为空、截断、过短或来源与请求不一致。' }]
+    }
+    return [item]
+  })
+  return buildLegacyPostProcessHint(prompt, hintMessages, fullText, context)
+}
+
 function resolveUserPromptWithReferenceState(referenceState, userInput, { bindRefId, allowMeetingRecovery = false } = {}) {
   const binding = groundingRuntime.bindNumericSelection(referenceState, userInput, { bindRefId })
   if (!binding.bound) {
@@ -120,6 +203,8 @@ module.exports = {
   applyMeetingCandidatesToReferenceState,
   enrichMeetingReadResult,
   buildLegacyPostProcessHint,
+  buildChatPostProcessHint,
+  assertDeclaredExecutionEvidence,
   resolveUserPromptWithReferenceState,
   analyzeFeishuToolEvidence,
 }

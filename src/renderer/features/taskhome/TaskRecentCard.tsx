@@ -1,3 +1,4 @@
+import { projectExpertTaskLifecycle } from '../../../shared/expert-task-lifecycle'
 import type { CapabilityItem, WorkbenchTask } from '../../../shared/api'
 import { taskRelTime } from '../../../domain/run-projection'
 import { expertDisplayName } from '../../../domain/expert-present'
@@ -90,7 +91,7 @@ function taskCardStatus(status: string | undefined, workflowMode: boolean): { la
         : value === 'cancelled'
           ? 'muted'
           : 'active'
-  return { label: labels[value] || '进行中', tone }
+  return { label: workflowMode ? labels[value] || '进行中' : projectExpertTaskLifecycle({ status: value }).label, tone }
 }
 
 export function TaskRecentCard({

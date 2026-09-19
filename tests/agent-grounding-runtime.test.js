@@ -3,8 +3,39 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
 const grounding = require('../src/lib/agent-grounding-runtime')
+const ledger = require('../src/lib/agent-grounding-ledger')
 
 describe('agent-grounding-runtime', () => {
+  it('treats concrete file mutations as evidence for the host write capability', () => {
+    const toolLedger = grounding.createToolLedger({ calls: [{ id: 'c1', name: 'create_file', status: 'ok' }] })
+    const evidenceLedger = grounding.createEvidenceLedger({ entries: [{
+      id: 'e1', status: 'ok', source: 'tool', provenance: { tool: 'create_file' }, digest: 'created',
+    }] })
+    assert.equal(grounding.evaluateRequiredTools({ requiredTools: ['write_file'] }, toolLedger).satisfied, true)
+    assert.equal(grounding.evaluateRequiredEvidence({ requiredEvidence: [{ tool: 'write_file' }] }, evidenceLedger).satisfied, true)
+    assert.equal(grounding.evaluateCompletionConditions({ completionConditions: [{ type: 'tool_success', tool: 'write_file' }] }, toolLedger, evidenceLedger).satisfied, true)
+    assert.equal(grounding.evaluateRequiredTools({ requiredTools: ['create_file'] }, grounding.createToolLedger({ calls: [{ id: 'c2', name: 'write_file', status: 'ok' }] })).satisfied, false)
+  })
+
+  it('treats knowledge retrieval chunks as content evidence, not discovery-only results', () => {
+    const merged = ledger.mergeToolResultsIntoLedgers({
+      toolLedger: grounding.createToolLedger(),
+      evidenceLedger: grounding.createEvidenceLedger(),
+      toolMessages: [{
+        toolName: 'search_knowledge',
+        toolCallId: 'call-rag',
+        status: 'done',
+        text: '共 1 条命中：\n1. 每日签到活动配置规则.md\n   签到周期与奖励梯度配置规则。',
+      }],
+    })
+    const verification = ledger.verifyClaims({
+      text: '每日签到活动配置规则的内容是签到周期与奖励梯度。',
+      evidenceLedger: merged.evidenceLedger,
+      toolLedger: merged.toolLedger,
+    })
+    assert.equal(verification.metadata.hasSupportingEvidence, true)
+  })
+
   it('binds numeric selection 1-based to pendingSelection option', () => {
     let state = grounding.createReferenceState()
     state = grounding.setPendingSelection(state, [
@@ -64,6 +95,40 @@ describe('agent-grounding-runtime', () => {
     assert.match(gate.text, /尚未|不能|需要先|证据不足|没有成功/)
   })
 
+  it('accepts a public web read as evidence for a page-read claim', () => {
+    const toolLedger = grounding.recordToolCall(grounding.createToolLedger(), {
+      name: 'fetch_web_page',
+      status: 'ok',
+    })
+    const verification = grounding.verifyClaims({
+      text: '已读取官方页面，并记录页面日期。',
+      evidenceLedger: grounding.createEvidenceLedger(),
+      toolLedger,
+      taskFrame: { requiredTools: ['fetch_web_page'] },
+    })
+    assert.equal(verification.passed, true)
+  })
+
+  it('accepts Feishu workflow reads as evidence for read claims', () => {
+    for (const name of [
+      'feishu.meeting_candidates',
+      'feishu.today_priority',
+      'feishu.doc_kb_suggest',
+      'feishu.related_chats',
+    ]) {
+      const toolLedger = grounding.recordToolCall(grounding.createToolLedger(), {
+        name,
+        status: 'ok',
+      })
+      const verification = grounding.verifyClaims({
+        text: '已读取飞书返回结果，并据此整理当前结果。',
+        evidenceLedger: grounding.createEvidenceLedger(),
+        toolLedger,
+      })
+      assert.equal(verification.passed, true, name)
+    }
+  })
+
   it('does not let an unrelated successful tool support an import claim', () => {
     const toolLedger = grounding.recordToolCall(grounding.createToolLedger(), {
       name: 'read_file', status: 'ok',
@@ -118,6 +183,37 @@ describe('agent-grounding-runtime', () => {
     })
     assert.equal(conclusionVerification.passed, false)
     assert.ok(conclusionVerification.violations.some(item => item.code === 'ungrounded_external_fact'))
+  })
+
+  it('allows a locally authored architecture conclusion synthesized from provided material', () => {
+    const material = {
+      items: [{
+        id: 'user-brief',
+        text: '服务端撤权后至多五分钟，客户端不得继续查询、打开或命中缓存。断网八小时只是未批准建议。',
+      }],
+    }
+    const verification = grounding.verifyClaims({
+      text: [
+        '## 必须拍板的架构结论',
+        '结论：采用五分钟短许可，并在查询、打开、缓存命中和结果交付四处校验。',
+        '这会牺牲断网超过许可期后的旧资料访问能力。',
+      ].join('\n'),
+      providedMaterials: material,
+      evidenceLedger: grounding.createEvidenceLedger(),
+      toolLedger: grounding.createToolLedger(),
+    })
+    assert.equal(verification.passed, true)
+    assert.deepEqual(verification.metadata.fieldChecks, [])
+  })
+
+  it('still blocks an externally attributed meeting conclusion', () => {
+    const verification = grounding.verifyClaims({
+      text: '会议结论：项目将在周五上线。',
+      evidenceLedger: grounding.createEvidenceLedger(),
+      toolLedger: grounding.createToolLedger(),
+    })
+    assert.equal(verification.passed, false)
+    assert.ok(verification.violations.some(item => item.code === 'ungrounded_external_fact'))
   })
 
   it('does not let planning language launder an unsupported fact', () => {

@@ -1,0 +1,127 @@
+{
+  "expectations": [
+    {
+      "text": "同基线双写明确暂停点、释放顺序与权威内容/revision观测，不用任意sleep冒充受控重叠。",
+      "passed": true,
+      "evidence": "TC03明确同基线rev/base=6，A写y在条件检查前暂停、B写z提交至7、释放A，最终观察7/z且A失败，满足一个可执行的受控同基线交错。另一TC04的错误预期另由第3条及claims否决，不能据本条通过认可整组并发设计。"
+    },
+    {
+      "text": "崩溃用例区分确认前后，前者允许旧或完整新状态，不能要求一定回滚；两者都排除内容/版本混合。",
+      "passed": false,
+      "evidence": "TC02/06确认前崩溃允许旧/新完整态并排除混合，但六个新用例都没有ack确认后重启且必须保持新态的设计。E1是他方已有样本，不能补作候选缺少的确认前/后用例区分。"
+    },
+    {
+      "text": "不发明冲突响应码或自动合并规则，不把候选业务设计写成硬预期。",
+      "passed": false,
+      "evidence": "TC04在A/B同base=6且A已持久化后，硬设B完成提交并允许最终rev=8（内容z或y）。按V1此时revision已为7，B的base=6不得再提交；若B用新base须明确为另一条件，不能默认新增该业务行为。虽未编造具体响应码/合并算法，这个硬预期仍无需求依据。"
+    },
+    {
+      "text": "E1只支持B7该他方串行持久化样本；E2不能证明B7并发覆盖，也不证明测试实际不存在。",
+      "passed": true,
+      "evidence": "E1被限定为build B7/case S1串行正常恢复，不能外推并发/异常窗口；E2只被否定为可核验通过证据，没有说测试实际不存在。未把任何截图当B7并发覆盖。"
+    },
+    {
+      "text": "新设计均未执行、他方已执行证据单独保留；关键并发/恢复待验，发布范围明确，不超6条及800混合字数。",
+      "passed": true,
+      "evidence": "全文明确静态设计、6行均未执行，E1单列他方样本且发布不整体通过；关键并发/恢复待补执行证据。6条、全文混合554≤800。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "professionalScorable": true,
+  "professionalVerdict": "hard_fail",
+  "binding": {
+    "evalId": "QA02",
+    "configuration": "with_skill",
+    "taskId": "task-mtox1n0a-196qg",
+    "sessionId": "wb-expert-task-mtox1n0a-196qg",
+    "runId": "expert_task-mtox1n0a-196qg_mtox1ne6",
+    "agentVersion": "2.1.0",
+    "taskStatus": "review",
+    "deliverableId": "output-1",
+    "inputMatchesFrozen": true,
+    "checkpointRunIdVerified": true,
+    "sourceRoot": "D:/UserCaches/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de"
+  },
+  "contextAudit": [
+    {
+      "runId": "expert_task-mtox1n0a-196qg_mtox1ne6",
+      "skillRefs": [
+        "qa-test-design"
+      ],
+      "explicitContent": [
+        {
+          "id": "skill.explicit-content",
+          "hash": "7fd29382fb4eaf38",
+          "chars": 1016,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "output_chars": 1019,
+    "transcript_chars": 3252
+  },
+  "length": {
+    "han": 464,
+    "alnum_blocks": 90,
+    "mixed": 554,
+    "punctuation": 156,
+    "mixed_plus_punctuation": 710,
+    "raw_codepoints": 1019,
+    "limit": 800,
+    "within_limit": true,
+    "method": "Whole answer, including headings/tables/extra prose; Han characters + /[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/ blocks. Punctuation and raw Markdown reported separately, not used as Chinese length failure."
+  },
+  "claims": [
+    {
+      "claim": "TC04：同base=6两请求在A持久化后B仍提交，最终rev=8。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "A提交已将revision升至7；未改变B base=6时V1禁止第二次提交。预期允许8及y/z互选没有条件依据，并可能把违反V1的实现判为通过。"
+    },
+    {
+      "claim": "TC01：初始rev=6、base=5，检查前重启应读取内容非x。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "初始内容没有设为非x，原内容本来就可为x；V1要求不覆盖/保持旧内容，而不是内容必须不等于待写x。且检查前重启尚未运行版本比较，不能据此证明过期写拒绝。"
+    },
+    {
+      "claim": "TC02集合表达允许rev∈{6,7}、内容∈{旧,x}。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "同句另明确“禁混合”，TC06也限定完整旧/新配对；不脱离上下文把集合写法单独判作允许交叉混合。但可改为显式配对增强可执行性。"
+    },
+    {
+      "claim": "E2不构成可核验通过证据。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "缺日志/用例且为B6，不支持B7发布通过；不等价于测试不存在。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "No model rerun or application test performed by grader; static designs are not personal execution claims."
+    ],
+    "needs_review": [
+      "All extra expectations must be grounded in requirements or explicit conditional decisions; passing frozen assertions does not override hard-fail claims."
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言之外需逐条检查所有测试预期是否由需求推出；关键词、正确主表或较高断言通过率不能掩盖附加错误。"
+      }
+    ],
+    "overall": "两道已披露回归题、四份整包配置输出；2.1.0 vs 2.0.0不是纯Skill因果，也不是专家生产认证。"
+  }
+}

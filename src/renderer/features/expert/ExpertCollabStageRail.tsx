@@ -1,26 +1,10 @@
-const STAGES = ['澄清', '确认计划', '执行', '验收', '完成']
-
-export function expertCollabStage(status: string, draftHasGoal = false) {
-  if (status === 'draft') return draftHasGoal ? 1 : 0
-  if (status === 'review' || status === 'revising') return 3
-  if (status === 'completed') return 4
-  return 2
-}
-
-export function ExpertCollabStageRail({ active }: { active: number }) {
-  return (
-    <ol className="wb-expert-stage-rail" aria-label={`协作阶段：${STAGES[active]}`}>
-      {STAGES.map((label, index) => (
-        <li
-          key={label}
-          className={index < active ? 'is-done' : index === active ? 'is-active' : ''}
-          aria-current={index === active ? 'step' : undefined}
-          title={`${index + 1}. ${label}`}
-        >
-          <span>{index < active ? '✓' : index + 1}</span>
-          <strong>{label}</strong>
-        </li>
-      ))}
-    </ol>
-  )
+export function expertCollabStatus(status: string, draftHasPlan = false) {
+  if (status === 'draft') return draftHasPlan ? '等待确认计划' : '正在理解需求'
+  if (status === 'needs_input') return '等待你补充'
+  if (status === 'review') return '等待你验收'
+  if (status === 'revising') return '专家修改中'
+  if (status === 'completed') return '本次协作已完成'
+  if (status === 'failed') return '本次执行未完成'
+  if (status === 'cancelled') return '本次协作已取消'
+  return '专家执行中'
 }

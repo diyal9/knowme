@@ -1,0 +1,480 @@
+{
+  "suite": "RQA62",
+  "executedAt": "2026-09-07T06:58:45Z",
+  "results": [
+    {
+      "evalId": "PM05",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "create": {
+        "ok": true,
+        "task": {
+          "taskVersion": 2,
+          "activityContractVersion": 1,
+          "id": "task-mtqw0yw0-jae0u",
+          "projectId": null,
+          "projectSnapshot": null,
+          "kind": "expert",
+          "title": "[RQA61 PM05] 修改访客二维码有效期",
+          "expertId": "product-manager",
+          "expertName": "product-manager",
+          "workflowId": "",
+          "workflowName": "",
+          "goal": "请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。",
+          "brief": {
+            "goal": "请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。",
+            "plan": null,
+            "requiresMaterials": false,
+            "requiredInputs": [],
+            "materials": [
+              {
+                "id": "provided-context",
+                "type": "text",
+                "title": "冻结验收题",
+                "ref": "",
+                "content": "请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。"
+              }
+            ],
+            "deliverables": [
+              {
+                "id": "primary",
+                "title": "产品需求文档",
+                "type": "document",
+                "required": true,
+                "acceptanceCriteria": [],
+                "requiredTools": [],
+                "requiredSkills": [
+                  "product-definition-method"
+                ],
+                "requiredConnectorIds": [],
+                "requiredEvidence": [],
+                "requiredArtifacts": [],
+                "minArtifacts": 0,
+                "completionConditions": []
+              }
+            ],
+            "constraints": [
+              "不得执行外部写入。",
+              "不得调用工具。",
+              "不得声称已运行测试。"
+            ],
+            "dueAt": ""
+          },
+          "assignmentSnapshot": {
+            "agentId": "product-manager",
+            "agentVersion": "2.2.0",
+            "agentHash": "906c354ac2becf3d",
+            "hashes": {
+              "expert": "906c354ac2becf3d",
+              "skills": {
+                "product-definition-method": "f3ef51b538b2fd12",
+                "writing-polish": "1186da38fb069bbb"
+              },
+              "connectors": {}
+            },
+            "profileId": "",
+            "profileVersion": "",
+            "profileHash": "",
+            "snapshotRef": "expert-snapshot:wb-expert-task-mtqw0yw0-jae0u",
+            "bindings": {
+              "skills": [
+                "product-definition-method",
+                "writing-polish"
+              ],
+              "connectors": []
+            },
+            "permissions": {
+              "connectors": {
+                "allowedConnectorIds": []
+              },
+              "tools": {
+                "allowlist": []
+              },
+              "network": false,
+              "write": false,
+              "externalWrite": false
+            },
+            "plan": null,
+            "sop": {
+              "version": "2.2.0",
+              "hash": "906c354ac2becf3d"
+            }
+          },
+          "visibility": "private",
+          "participants": [],
+          "events": [
+            {
+              "id": "event-1",
+              "type": "created",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 1,
+              "summary": "已确认委托单并开始预检",
+              "actorId": "",
+              "createdAt": "2026-09-07T06:56:51.360Z"
+            },
+            {
+              "id": "event-2",
+              "type": "preflight_passed",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 2,
+              "summary": "预检通过",
+              "actorId": "",
+              "createdAt": "2026-09-07T06:56:51.996Z"
+            }
+          ],
+          "attention": null,
+          "progress": {
+            "phase": "preflight",
+            "label": "执行条件检查通过",
+            "detail": "",
+            "startedAt": "2026-09-07T06:56:51.976Z",
+            "updatedAt": "2026-09-07T06:56:51.976Z",
+            "heartbeatAt": "2026-09-07T06:56:51.976Z"
+          },
+          "inputQueue": null,
+          "deliverables": [],
+          "executionEvidence": [],
+          "resultSummary": "",
+          "status": "starting",
+          "execRef": {
+            "kind": "session",
+            "id": "wb-expert-task-mtqw0yw0-jae0u"
+          },
+          "taskRef": null,
+          "knowledgeRefs": [],
+          "pinned": false,
+          "schedule": {
+            "type": "daily",
+            "dailyTime": "09:00",
+            "intervalValue": 24,
+            "intervalUnit": "hour",
+            "onceAt": "",
+            "cronExpr": ""
+          },
+          "scheduleEnabled": false,
+          "scheduleLabel": "",
+          "nextRunAt": "",
+          "lastScheduledAt": "",
+          "scheduleParentId": "",
+          "legacySchedule": {
+            "scheduleEnabled": false,
+            "schedule": {
+              "type": "daily",
+              "dailyTime": "09:00",
+              "intervalValue": 24,
+              "intervalUnit": "hour",
+              "onceAt": "",
+              "cronExpr": ""
+            },
+            "scheduleLabel": ""
+          },
+          "createdAt": "2026-09-07T06:56:51.360Z",
+          "updatedAt": "2026-09-07T06:56:51.996Z"
+        },
+        "started": true,
+        "preflightIssues": []
+      },
+      "steps": [
+        {
+          "action": "first_delivery",
+          "task": {
+            "id": "task-mtqw0yw0-jae0u",
+            "status": "failed",
+            "resultSummary": "",
+            "deliverables": [],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:51.360Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:51.996Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:52.164Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:52.499Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:52.499Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:52.499Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:56:52.570Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:57:44.729Z"
+              },
+              {
+                "id": "event-9",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "生成失败",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:58:44.643Z"
+              },
+              {
+                "id": "event-10",
+                "type": "failed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+                "actorId": "",
+                "createdAt": "2026-09-07T06:58:44.765Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:f79a4507e73c3a44d8e9797d84ae779761b7ff62e45b0d6b9cf012c4dab9a9fe",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:f79a4507e73c3a44d8e9797d84ae779761b7ff62e45b0d6b9cf012c4dab9a9fe",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "product-manager",
+                "version": "2.2.0",
+                "hash": "906c354ac2becf3d"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f3ef51b538b2fd12"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": "1186da38fb069bbb"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": false,
+              "passed": false,
+              "rewritten": false,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T06:58:45.919Z"
+          }
+        }
+      ],
+      "final": {
+        "id": "task-mtqw0yw0-jae0u",
+        "status": "failed",
+        "resultSummary": "",
+        "deliverables": [],
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:51.360Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:51.996Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:52.164Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:52.499Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:52.499Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:52.499Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:56:52.570Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:57:44.729Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:58:44.643Z"
+          },
+          {
+            "id": "event-10",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+            "actorId": "",
+            "createdAt": "2026-09-07T06:58:44.765Z"
+          }
+        ],
+        "configurationId": "expert-config-v1:f79a4507e73c3a44d8e9797d84ae779761b7ff62e45b0d6b9cf012c4dab9a9fe",
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:f79a4507e73c3a44d8e9797d84ae779761b7ff62e45b0d6b9cf012c4dab9a9fe",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "product-manager",
+            "version": "2.2.0",
+            "hash": "906c354ac2becf3d"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f3ef51b538b2fd12"
+            },
+            {
+              "id": "writing-polish",
+              "hash": "1186da38fb069bbb"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": false,
+          "passed": false,
+          "rewritten": false,
+          "initialPassed": false,
+          "finalPassed": false
+        },
+        "updatedAt": "2026-09-07T06:58:45.919Z"
+      }
+    }
+  ]
+}

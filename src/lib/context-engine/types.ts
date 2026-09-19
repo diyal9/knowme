@@ -23,6 +23,7 @@ const KINDS = new Set([
 
 const AUTHORITIES = new Set(Object.keys(AUTHORITY_ORDER))
 const TRUST_LEVELS = new Set(['trusted', 'untrusted'])
+const SOURCE_TRUST_LEVELS = new Set(['platform', 'bundled', 'user', 'external'])
 const CACHE_POLICIES = new Set(['stable', 'session', 'turn'])
 
 const KIND_DEFAULTS = Object.freeze({
@@ -64,6 +65,16 @@ function normalizeSource(source = {}) {
   }
 }
 
+function inferSourceTrust({ kind, authority, trust, sourceTrust, source } = {}) {
+  if (SOURCE_TRUST_LEVELS.has(sourceTrust)) return sourceTrust
+  if (trust === 'untrusted') return 'external'
+  if (authority === 'platform') return 'platform'
+  if (authority === 'scene' || kind === 'scene_instruction' || kind === 'tool_contract') return 'bundled'
+  const sourceType = String(source?.type || '').trim().toLowerCase()
+  if (['prompt-registry', 'context-engine', 'workflow-runtime'].includes(sourceType)) return 'bundled'
+  return 'user'
+}
+
 function normalizeAppliesTo(appliesTo = {}) {
   const raw = appliesTo && typeof appliesTo === 'object' ? appliesTo : {}
   return {
@@ -91,6 +102,7 @@ function normalizeContextBlock(raw = {}, index = 0) {
   const id = clean(raw.id || `${kind}:${index + 1}`, 180)
   if (!id) return null
   const meta = raw.meta && typeof raw.meta === 'object' ? { ...raw.meta } : {}
+  const source = normalizeSource(raw.source)
   return {
     id,
     kind,
@@ -98,7 +110,8 @@ function normalizeContextBlock(raw = {}, index = 0) {
     trust,
     priority: Number.isFinite(Number(raw.priority)) ? Number(raw.priority) : defaults.priority,
     maxTokens: positiveInt(raw.maxTokens, 1600),
-    source: normalizeSource(raw.source),
+    source,
+    sourceTrust: inferSourceTrust({ kind, authority, trust, sourceTrust: raw.sourceTrust, source }),
     locale: clean(raw.locale, 32),
     cachePolicy: CACHE_POLICIES.has(raw.cachePolicy) ? raw.cachePolicy : defaults.cachePolicy,
     appliesTo: normalizeAppliesTo(raw.appliesTo),
@@ -120,10 +133,12 @@ module.exports = {
   AUTHORITY_ORDER,
   KINDS,
   KIND_DEFAULTS,
+  SOURCE_TRUST_LEVELS,
   clean,
   list,
   normalizeContextBlock,
   normalizeAppliesTo,
   normalizeSource,
+  inferSourceTrust,
   authorityRank,
 }

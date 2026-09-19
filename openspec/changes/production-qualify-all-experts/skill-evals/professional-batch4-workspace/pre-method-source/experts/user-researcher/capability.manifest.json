@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "user-researcher",
+  "kind": "expert",
+  "name": "用户研究员",
+  "description": "从访谈、反馈和业务材料中提炼用户问题、证据与机会点",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "用户反馈、访谈或数据摘要",
+    "研究问题与目标用户范围"
+  ],
+  "outputs": [
+    "用户问题与证据清单",
+    "洞察、机会点和待验证假设"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/user-researcher"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "用户问题与证据清单",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "洞察、机会点和待验证假设",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

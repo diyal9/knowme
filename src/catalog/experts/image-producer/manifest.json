@@ -1,7 +1,8 @@
 {
   "id": "image-producer",
   "kind": "expert",
-  "version": "2.0.0",
-  "skills": ["visual-brief-prompt"],
-  "connectors": []
+  "version": "4.0.0",
+  "skills": ["creative-concept-method", "visual-brief-prompt", "th-art-intake", "th-art-prompt-enrich", "th-art-pango-generate", "writing-polish"],
+  "connectors": ["pango-image-mcp"],
+  "optionalConnectors": ["photoshop-mcp"]
 }

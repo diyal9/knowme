@@ -1,24 +1,24 @@
 export const KNOWLEDGE_SURFACE_TABS = [
-  { id: 'status', label: '我的知识' },
-  { id: 'review', label: '待我确认' },
-  { id: 'connect', label: '来源' },
+  { id: 'status', label: 'Brain' },
+  { id: 'libraries', label: '知识库' },
+  { id: 'rag', label: 'RAG' },
 ] as const
 
 export type KnowledgePrimaryTab = (typeof KNOWLEDGE_SURFACE_TABS)[number]['id']
-export type KnowledgePage = KnowledgePrimaryTab | 'health' | 'organize'
+export type KnowledgePage = KnowledgePrimaryTab | 'review' | 'health' | 'organize'
 
 export function normalizeKnowledgePage(tab?: string | null): KnowledgePage {
   const key = String(tab || '').trim()
-  if (key === 'sources') return 'connect'
+  if (key === 'sources' || key === 'connect') return 'libraries'
   if (key === 'browse') return 'status'
-  if (key === 'health' || key === 'organize') return key
-  if (key === 'status' || key === 'review' || key === 'connect') return key
+  if (key === 'health' || key === 'organize' || key === 'review') return key
+  if (key === 'status' || key === 'libraries' || key === 'rag') return key
   return 'status'
 }
 
 export function primaryKnowledgeTab(page: KnowledgePage): KnowledgePrimaryTab {
-  if (page === 'review') return 'review'
-  if (page === 'connect') return 'connect'
+  if (page === 'libraries') return 'libraries'
+  if (page === 'rag') return 'rag'
   return 'status'
 }
 

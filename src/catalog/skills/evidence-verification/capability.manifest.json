@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 2,
+  "id": "evidence-verification",
+  "kind": "skill",
+  "name": "证据核查",
+  "version": "1.0.0"
+}

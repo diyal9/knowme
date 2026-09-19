@@ -1,0 +1,126 @@
+{
+  "expectations": [
+    {
+      "text": "以5月12日为基准使用生效v2截止7月15日，6月30日原文判过时/错误。",
+      "passed": true,
+      "evidence": "标题基准日2026-05-12；第1项写v2于5月8日发布、5月10日生效，7月15日是现行截止，6月30日判错误。"
+    },
+    {
+      "text": "解释B明确替代A，不把两版本简单判有争议或要求用户自行选择。",
+      "passed": true,
+      "evidence": "第1项明确“已明确替代v1第4条”“旧版不构成未解决冲突”，不要求用户选择版本。"
+    },
+    {
+      "text": "100美元优惠券不改成人民币100元/现金；保留不可提现和满300美元门槛。",
+      "passed": true,
+      "evidence": "第3项和替换文均保留100美元、不可提现优惠券、满300美元使用、非现金，没有换算汇率。"
+    },
+    {
+      "text": "符合审核条件非每位必得，引用A/B/C具体位置不编造汇率。",
+      "passed": false,
+      "evidence": "正确引用C第3条及v1第4条，限定符合审核条件者非人人必得；但未标明B第2条，冻结的A/B/C具体位置要求未全部满足。这是定位缺口，不是资格/金额事实错误。"
+    },
+    {
+      "text": "350字以内替换文保留基准日与条件，没有新增未支持断言或外部动作。",
+      "passed": false,
+      "evidence": "可独立复制的修正文写2026年7月15日及5月10日生效v2，但没有2026-05-12核查基准日（该日只在全篇标题）。条件保留正确，无新增事实或外部动作；长度186/228均低于350，扣分只因冻结基准日要求。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "claims": [
+    {
+      "claim": "现行截止2026年7月15日，v2替代v1",
+      "type": "factual",
+      "verified": true,
+      "evidence": "B第2条在5月12日基准日之前已生效并明确替代A第4条。"
+    },
+    {
+      "claim": "符合审核条件者可获100美元不可提现优惠券，满300美元使用，非现金",
+      "type": "factual",
+      "verified": true,
+      "evidence": "符合C第3条全部条件，未把美元写成人民币或把优惠券写成现金。"
+    },
+    {
+      "claim": "所提供回执中未见外部读取或知识库/文件写入工具动作",
+      "type": "process",
+      "verified": true,
+      "evidence": "receipts tools=[]、run.toolsUsed=[]、applyLog=[]，成果类型answer。仅限提交记录；平台“输出验证通过”不是专业认证。"
+    }
+  ],
+  "professional_review": {
+    "verdict": "not_qualified",
+    "hard_fail": false,
+    "hard_failures": [],
+    "contract_failures": [
+      "B第2条定位缺失。",
+      "独立修正文未保留2026-05-12基准日。"
+    ],
+    "qualified_boundary": "版本替代、截止日、奖励资格、美元金额及优惠券限制的事实核心合格；定位和独立修正文基准日未达冻结契约。",
+    "production_certification": false
+  },
+  "length_check": {
+    "method": "去除Markdown表分隔行/竖线/强调/标题/引用/列表标记；CJK逐字 + 连续[A-Za-z0-9]+词块；另加Unicode标点数。仅heuristic，非官方中文字数或token。",
+    "cjk_chars": 156,
+    "alnum_blocks": 30,
+    "cjk_plus_alnum_blocks": 186,
+    "with_punctuation": 228,
+    "raw_markdown_chars": 271,
+    "limit": 350,
+    "used_raw_markdown_length_as_chinese_limit": false
+  },
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "evidence_limits": {
+    "user_notes_present": false,
+    "executor_metrics_present": false,
+    "timing_present": false,
+    "note": "无独立metrics/timing文件，不伪填耗时或token；长度为评分者本地计数。"
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言不变；未来将CEO身份未知与引语文本错误显式分开，并独立核查修正文状态/来源范围/发布计划，避免只查主表。"
+      }
+    ],
+    "overall": "三种冻结反例各两配置，六输出不是六独立反例。历史baseline不是同时重跑，版本和方法装配不同，不能独立归因Skill；单次通过也不构成生产认证。"
+  },
+  "provenance": {
+    "scope": "仅提交的虚构材料；未调用外部API、未改源码/冻结输入/原始evidence JSON。证据按主代理在用户评估任务范围内授权的task ID重绑定，正文/回执SHA原样保留。",
+    "configuration": "baseline",
+    "task_id": "wb-expert-task-mtorajpa-dm81w",
+    "answer_sha256": "1099D365D64EF78A6D77D7FBC63DED44652B21369BDD528C3BB4A6C7957CB6FF",
+    "receipts_sha256": "D970967F7A7F54988D75E725524E18E31BC3752EE0E2AD51A040ADDFF5FB238B",
+    "transcript_sha256": "F2749E74BA19A98CCF07D8087AAB57544FFC2BA8FC61AE1337B8A7C5EEDAE878",
+    "eval_metadata_sha256": "AC4D3CB058B3F9FA907D059BCFE1AB76813180E0281DFC793078DE4A4AF10FBE",
+    "historical_baseline": true,
+    "binding_audit": "../../binding-repair-audit-2026-09-06.json",
+    "binding_verified": {
+      "configuration": "FC02/baseline",
+      "task_id": "wb-expert-task-mtorajpa-dm81w",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  }
+}

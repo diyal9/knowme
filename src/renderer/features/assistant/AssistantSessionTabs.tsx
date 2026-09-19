@@ -4,12 +4,11 @@
  */
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { hasErrorMessage, lastErrorMessageText } from '../../../domain/agent-message-ui'
-import { resolveAssistantModeId } from '../../../domain/assistant-modes'
 import { sortSessionTabs, resolveSessionTabLabel } from '../../../domain/agent-session'
 import { taskRelTime } from '../../../domain/run-projection'
 import { selectActiveMessages, useAppStore } from '../../app/store'
 import { Icon } from '../../app/Icon'
-import { AssistantTabContextMenu, ModeAvatarMark } from './AssistantTabContextMenu'
+import { AssistantTabContextMenu } from './AssistantTabContextMenu'
 
 type MenuState = { id: string; x: number; y: number }
 
@@ -59,6 +58,7 @@ export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => vo
   const renameSession = useAppStore((s) => s.renameSession)
   const forkSession = useAppStore((s) => s.forkSession)
   const closeSessionTab = useAppStore((s) => s.closeSessionTab)
+  const clearSessionHistory = useAppStore((s) => s.clearSessionHistory)
   const copySessionTranscript = useAppStore((s) => s.copySessionTranscript)
   const showToast = useAppStore((s) => s.showToast)
   const [menu, setMenu] = useState<MenuState | null>(null)
@@ -168,6 +168,13 @@ export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => vo
         showToast('复制失败')
       }
     }
+  }
+
+  async function handleClearHistory() {
+    if (!history.length) return
+    if (!window.confirm('清空后将删除全部伙伴历史对话，且无法恢复。确定继续吗？')) return
+    setHistoryOpen(false)
+    await clearSessionHistory()
   }
 
   function openContextMenu(sessionId: string, clientX: number, clientY: number) {
@@ -340,13 +347,14 @@ export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => vo
                     setHistoryOpen(false)
                   }}
                 >
-                  <ModeAvatarMark modeId={resolveAssistantModeId(item.agentId || item.expertId)} />
                   <span className="pop-copy">
-                    <span className="pop-label">{label}</span>
+                    <span className="pop-heading">
+                      <span className="pop-label">{label}</span>
+                      {openIds.has(item.id) ? <span className="pop-meta">已打开</span> : null}
+                    </span>
                     {item.summary ? <span className="pop-summary">{item.summary}</span> : null}
                     {when ? <span className="pop-when">{when}</span> : null}
                   </span>
-                  {openIds.has(item.id) ? <span className="pop-meta">已打开</span> : null}
                 </button>
               )
               })}
@@ -354,6 +362,11 @@ export function AssistantSessionTabs({ onOpenGrowth }: { onOpenGrowth?: () => vo
           {historyItems.length < matchingHistoryCount ? (
             <button type="button" className="agent-pop-item history-pop-more" onClick={() => setHistoryLimit((limit) => limit + 10)}>
               <span>展开显示</span><span className="pop-meta">还有 {matchingHistoryCount - historyItems.length} 条</span>
+            </button>
+          ) : null}
+          {history.length ? (
+            <button type="button" className="agent-pop-item history-pop-clear" onClick={() => void handleClearHistory()}>
+              <span>清空历史对话</span>
             </button>
           ) : null}
         </div>

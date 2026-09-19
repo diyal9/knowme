@@ -16,6 +16,8 @@ describe('agent grounding user labels', () => {
   it('maps known feishu tools to friendly Chinese labels', () => {
     assert.equal(formatToolLabelForUser('feishu.meeting_read'), '飞书会议妙记读取')
     assert.equal(formatToolLabelForUser('feishu.search_docs'), '飞书文档搜索')
+    assert.equal(formatToolLabelForUser('feishu.today_priority'), '飞书今日安排与待办读取')
+    assert.equal(formatToolLabelForUser('today priority'), '飞书今日安排与待办读取')
   })
 
   it('formatViolationForUser hides raw tool ids in missing_required_tools', () => {

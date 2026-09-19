@@ -94,7 +94,15 @@ export function useSettingsForm(initialTab?: string) {
   const save = useCallback(async () => {
     setSaving(true)
     try {
-      await window.api?.saveSettings?.(form)
+      const result = await window.api?.saveSettings?.(form) as {
+        ok?: boolean
+        warning?: string
+        error?: string
+      } | undefined
+      if (!result || result.ok === false) {
+        flash(result?.warning || result?.error || '设置未保存，请检查安全存储与配置', 'err')
+        return
+      }
       setDirty(false)
       flash('设置已保存')
     } catch {

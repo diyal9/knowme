@@ -1,0 +1,8 @@
+{
+  "tool_calls": {
+    "calculate": 4
+  },
+  "total_tool_calls": 4,
+  "errors_encountered": 1,
+  "output_chars": 1316
+}

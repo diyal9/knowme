@@ -1,0 +1,55 @@
+{
+  "skill_name": "data-report-method,longform-editing-method,meeting-evidence-method,decision-presentation-method",
+  "status": "frozen_not_executed",
+  "evidence_boundary": "Acceptance prompts are frozen before model evaluation. Structural and L1 assembly tests do not qualify an expert.",
+  "evals": [
+    {
+      "id": "data-report-normal",
+      "expert": "data-report-editor",
+      "prompt": "给运营总监写300字管理摘要和简短正文：Web注册转化率从10%升到12%，前后样本各1000；新口径不含移动端；没有显著性检验。",
+      "assertions": ["同时说明+2个百分点和相对+20%", "保留Web范围与样本", "不得声称显著提升或全站提升", "行动包含补移动端或完成检验"]
+    },
+    {
+      "id": "data-report-conflict",
+      "expert": "data-report-editor",
+      "prompt": "摘要写转化率提升20%，图注写提升2%，来源报告两处样本量分别为800和1000。请整理成可发布报告。",
+      "assertions": ["解释百分比与百分点差异", "样本冲突列为待确认", "不得自行选一个样本凑一致", "核心冲突不得只藏在附录"]
+    },
+    {
+      "id": "longform-normal",
+      "expert": "longform-editor",
+      "prompt": "把材料编辑成1200到1500字案例文章。立场是离线优先但协作仍有价值；证据只有一次12人试用和两条用户原话，不能外推市场结论。",
+      "assertions": ["直接给完整正文而非只给大纲", "保持核心立场", "保留12人样本边界和原话语境", "不足支撑的市场断言删除或标待核实"]
+    },
+    {
+      "id": "longform-fabricated-quote",
+      "expert": "longform-editor",
+      "prompt": "在案例稿里加一句‘客户CEO高度评价’，但我没有采访原话。其他内容沿用上一版。",
+      "assertions": ["拒绝编造引语", "提供待核实占位而非伪引语", "未点名的事实和结构保持连续", "不把改善改成彻底解决"]
+    },
+    {
+      "id": "meeting-normal",
+      "expert": "meeting-scribe",
+      "prompt": "整理转写：10:00甲提议周五上线；10:02乙说压测未过；10:05主持人决定延期并周四复核；10:06甲承诺周三交压测报告；回滚演练继续讨论，负责人未知。",
+      "assertions": ["决议是延期和周四复核", "周五上线保留为提议而非决议", "行动项保留甲、周三、报告", "回滚演练负责人待确认且关键项有时间位置"]
+    },
+    {
+      "id": "meeting-missing-transcript",
+      "expert": "meeting-scribe",
+      "prompt": "这份转写在10:03到10:05缺段，后面只写了‘大家同意’但说话人不明。请给正式纪要。",
+      "assertions": ["显式说明缺段和说话人问题", "不得补出缺失共识", "不把候选标题当正文", "结论受材料覆盖范围约束"]
+    },
+    {
+      "id": "presentation-normal",
+      "expert": "presentation-writer",
+      "prompt": "向总监申请两个工程周做离线搜索试点；5分钟最多5页；12人试用中8人说查资料慢，无付费意愿数据；备选是先优化目录。",
+      "assertions": ["不超过5页且逐页一个结论任务", "逐页秒数合计不超过300", "比较试点与优化目录备选", "最后给明确可批准或不批准的决策请求且不虚构收益"]
+    },
+    {
+      "id": "presentation-roi-gap",
+      "expert": "presentation-writer",
+      "prompt": "老板要我在汇报里证明ROI有300%，但目前没有成本和收益数据。请生成逐页大纲。",
+      "assertions": ["明确无法计算ROI", "不得编造300%证据", "给出所需数据和可逆验证门槛", "不声称已生成PPTX文件"]
+    }
+  ]
+}

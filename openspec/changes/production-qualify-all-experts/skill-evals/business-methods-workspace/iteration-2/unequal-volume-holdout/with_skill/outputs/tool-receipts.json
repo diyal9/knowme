@@ -1,0 +1,35 @@
+[
+  {
+    "id": "msg_expert_task-mtopn9p2-e5rm3_mtopna9b_tool_71406fc4a5f0",
+    "role": "tool",
+    "text": "{\"ok\":false,\"results\":[],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\",\"error\":\"At most 16 calculations per batch; split the request.\"}",
+    "runId": "expert_task-mtopn9p2-e5rm3_mtopna9b",
+    "createdAt": "2026-09-05T18:23:15.367Z",
+    "toolCallId": "call_fc2969e7a4e648e8bbf57322",
+    "toolName": "calculate",
+    "status": "error",
+    "durationMs": 3
+  },
+  {
+    "id": "msg_expert_task-mtopn9p2-e5rm3_mtopna9b_tool_528bbb841eb2",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"总体率_上\",\"expression\":\"100*112/2000\",\"ok\":true,\"value\":5.6},{\"label\":\"总体率_本\",\"expression\":\"100*105/2500\",\"ok\":true,\"value\":4.2},{\"label\":\"社区率_上\",\"expression\":\"100*96/1200\",\"ok\":true,\"value\":8},{\"label\":\"社区率_本\",\"expression\":\"100*45/500\",\"ok\":true,\"value\":9},{\"label\":\"推荐率_上\",\"expression\":\"100*16/800\",\"ok\":true,\"value\":2},{\"label\":\"推荐率_本\",\"expression\":\"100*60/2000\",\"ok\":true,\"value\":3},{\"label\":\"结构效应pp\",\"expression\":\"100*((500/2500-1200/2000)*(96/1200)+(2000/2500-800/2000)*(16/800))\",\"ok\":true,\"value\":-2.4},{\"label\":\"组内效应pp\",\"expression\":\"100*((500/2500)*(45/500-96/1200)+(2000/2500)*(60/2000-16/800))\",\"ok\":true,\"value\":0.9999999999999999},{\"label\":\"总变化pp\",\"expression\":\"100*(105/2500-112/2000)\",\"ok\":true,\"value\":-1.4},{\"label\":\"数量差_基期率项\",\"expression\":\"(2500-2000)*(112/2000)\",\"ok\":true,\"value\":28},{\"label\":\"数量差_率项\",\"expression\":\"2500*(105/2500-112/2000)\",\"ok\":true,\"value\":-34.99999999999999},{\"label\":\"CPA社区_上\",\"expression\":\"2400/96\",\"ok\":true,\"value\":25},{\"label\":\"CPA社区_本\",\"expression\":\"1500/45\",\"ok\":true,\"value\":33.333333333333336},{\"label\":\"CPA推荐_上\",\"expression\":\"1600/16\",\"ok\":true,\"value\":100},{\"label\":\"CPA推荐_本\",\"expression\":\"5000/60\",\"ok\":true,\"value\":83.33333333333333},{\"label\":\"总费用变化\",\"expression\":\"6500-4000\",\"ok\":true,\"value\":2500}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopn9p2-e5rm3_mtopna9b",
+    "createdAt": "2026-09-05T18:23:15.367Z",
+    "toolCallId": "call_51af61a4673c46a9b91e9654",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 3
+  },
+  {
+    "id": "msg_expert_task-mtopn9p2-e5rm3_mtopna9b_tool_050875cec695",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"社区访客降幅\",\"expression\":\"100*(500/1200-1)\",\"ok\":true,\"value\":-58.33333333333333},{\"label\":\"社区注册降幅\",\"expression\":\"100*(45/96-1)\",\"ok\":true,\"value\":-53.125},{\"label\":\"推荐访客增幅\",\"expression\":\"100*(2000/800-1)\",\"ok\":true,\"value\":150},{\"label\":\"推荐注册增幅\",\"expression\":\"100*(60/16-1)\",\"ok\":true,\"value\":275},{\"label\":\"总费用增幅\",\"expression\":\"100*(6500/4000-1)\",\"ok\":true,\"value\":62.5},{\"label\":\"混合CPA_上\",\"expression\":\"4000/112\",\"ok\":true,\"value\":35.714285714285715},{\"label\":\"混合CPA_本\",\"expression\":\"6500/105\",\"ok\":true,\"value\":61.904761904761905},{\"label\":\"预算加倍外推注册_本\",\"expression\":\"105*2\",\"ok\":true,\"value\":210}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopn9p2-e5rm3_mtopna9b",
+    "createdAt": "2026-09-05T18:23:15.367Z",
+    "toolCallId": "call_84107b3df378406ebdc2ac6d",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 3
+  }
+]

@@ -23,6 +23,12 @@ const LIMITS = Object.freeze({
 })
 
 const KNOWLEDGE_EXTENSIONS = new Set(['.md', '.markdown', '.txt'])
+// Package-local scripts execute through KnowMe's generic run_skill_script tool.
+// Only execution that cannot travel with the Skill package, or relies on an
+// undeclared connector/network contract, should reduce import qualification.
+const MCP_EXECUTION_PATTERN = /\bCallMcpTool\b/i
+const NETWORK_EXECUTION_PATTERN = /\b(?:curl|wget)\b/i
+const SCRIPT_REFERENCE_PATTERN = /(?:^|[\s"'`(])((?:(?:\.{1,2}[\\/])+|[a-zA-Z0-9_.-]+[\\/])[a-zA-Z0-9_./\\-]+\.(?:mjs|cjs|js|py|sh|bash|ps1))(?=$|[\s"'`),\\])/gmi
 
 function scanRepositoryKnowledge(root) {
   const files = []
@@ -102,6 +108,69 @@ function safeChildDirectories(parent, limit) {
   }
 }
 
+function inspectSkillContract(root, dir, skillFile, content) {
+  const issues = []
+  const missingReferences = []
+  const unportableExecutionPaths = []
+  const markdownLinkPattern = /\[[^\]]+\]\(([^)]+)\)/g
+  for (const match of String(content || '').matchAll(markdownLinkPattern)) {
+    const raw = String(match[1] || '').trim().replace(/^<|>$/g, '')
+    const ref = raw.split(/\s+["']/)[0].split('#')[0].split('?')[0]
+    const pathLike = /^[a-zA-Z]:[\\/]/.test(ref)
+      || ref.startsWith('.') || ref.startsWith('/') || ref.includes('/') || ref.includes('\\')
+      || KNOWLEDGE_EXTENSIONS.has(path.extname(ref).toLowerCase())
+    if (!ref || !pathLike || (/^(?:[a-z]+:|#)/i.test(ref) && !/^[a-zA-Z]:[\\/]/.test(ref))) continue
+    const target = ref.startsWith('/')
+      ? path.resolve(root, ref.replace(/^\/+/, ''))
+      : path.resolve(path.dirname(skillFile), ref)
+    if (!pathInside(root, target) || !fs.existsSync(target)) missingReferences.push(ref)
+  }
+
+  const sidecar = safeReadJson(path.join(dir, SIDECAR_FILE))
+  const hasActions = Array.isArray(sidecar?.actions) && sidecar.actions.length > 0
+  const hasPermissions = sidecar?.permissions && typeof sidecar.permissions === 'object'
+    && Object.keys(sidecar.permissions).length > 0
+  const hasConnectorDependency = Array.isArray(sidecar?.dependencies)
+    && sidecar.dependencies.some(item => item?.kind === 'connector')
+  const hasScripts = fs.existsSync(path.join(dir, 'scripts'))
+  const source = String(content || '')
+  for (const match of source.matchAll(SCRIPT_REFERENCE_PATTERN)) {
+    const lineStart = source.lastIndexOf('\n', match.index) + 1
+    const commandPrefix = source.slice(lineStart, match.index)
+    const runtimes = [...commandPrefix.matchAll(/\b(?:node|python(?:3)?|bash|powershell|pwsh)\b/gi)]
+    const runtime = runtimes.at(-1)
+    if (!runtime || /[\u3400-\u9fff]/.test(commandPrefix.slice((runtime.index || 0) + runtime[0].length))) continue
+    const ref = String(match[1] || '').replace(/\\/g, '/')
+    const candidates = ref.startsWith('.cursor/')
+      ? [path.resolve(root, ref)]
+      : [path.resolve(dir, ref), path.resolve(root, ref), path.resolve(path.dirname(skillFile), ref)]
+    const target = candidates.find(candidate => pathInside(root, candidate) && fs.existsSync(candidate))
+    if (!target) {
+      missingReferences.push(ref)
+      continue
+    }
+    if (!pathInside(path.join(dir, 'scripts'), target)) unportableExecutionPaths.push(ref)
+  }
+  if (missingReferences.length) issues.push('missing_local_reference')
+  if (unportableExecutionPaths.length) issues.push('unportable_execution_path')
+  if (MCP_EXECUTION_PATTERN.test(source) && !hasConnectorDependency) issues.push('undeclared_connector_contract')
+  if (NETWORK_EXECUTION_PATTERN.test(source) && !hasActions && !hasPermissions && !hasConnectorDependency) {
+    issues.push('undeclared_network_contract')
+  }
+  const hasExecutionInstructions = hasScripts
+    || MCP_EXECUTION_PATTERN.test(source)
+    || NETWORK_EXECUTION_PATTERN.test(source)
+    || unportableExecutionPaths.length > 0
+  return {
+    status: issues.length ? 'limited' : 'ready',
+    issues: [...new Set(issues)],
+    missingReferences: [...new Set(missingReferences)],
+    unportableExecutionPaths: [...new Set(unportableExecutionPaths)],
+    hasScripts,
+    hasExecutionInstructions,
+  }
+}
+
 function parseAgentMarkdown(content) {
   const text = String(content || '')
   const match = text.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/)
@@ -171,6 +240,31 @@ function scanSkills(root, warnings) {
       warnings.push({ code: 'invalid_skill', path: path.relative(root, skillFile), message: `技能 ${entry.name} 缺少合法 frontmatter/name` })
       continue
     }
+    const assessment = inspectSkillContract(root, dir, skillFile, content)
+    for (const ref of assessment.missingReferences) {
+      warnings.push({
+        code: 'missing_capability_reference',
+        path: path.relative(root, skillFile).replace(/\\/g, '/'),
+        message: `${entry.name} 引用了不存在或越界的本地资源：${ref}`,
+      })
+    }
+    if (assessment.issues.includes('unportable_execution_path')) {
+      warnings.push({
+        code: 'unportable_execution_path',
+        path: path.relative(root, skillFile).replace(/\\/g, '/'),
+        message: `${entry.name} 引用了 Skill scripts/ 之外的执行路径：${assessment.unportableExecutionPaths.join(', ')}；导入后 run_skill_script 无法安全携带执行。`,
+      })
+    }
+    if (assessment.issues.includes('undeclared_connector_contract')) warnings.push({
+      code: 'undeclared_connector_contract',
+      path: path.relative(root, skillFile).replace(/\\/g, '/'),
+      message: `${entry.name} 包含 MCP 执行指令，但未声明 connector 依赖；可导入阅读，不能据此认定为可执行。`,
+    })
+    if (assessment.issues.includes('undeclared_network_contract')) warnings.push({
+      code: 'undeclared_network_contract',
+      path: path.relative(root, skillFile).replace(/\\/g, '/'),
+      message: `${entry.name} 包含直接网络命令，但未声明 action、permission 或 connector 依赖。`,
+    })
     skills.push({
       kind: 'skill',
       sourceId: entry.name,
@@ -181,12 +275,42 @@ function scanSkills(root, warnings) {
       originPath: path.relative(root, dir).replace(/\\/g, '/'),
       contentHash: hashText(content),
       body: parsed.body,
+      contractStatus: assessment.status,
+      contractIssues: assessment.issues,
+      missingReferences: assessment.missingReferences,
+      unportableExecutionPaths: assessment.unportableExecutionPaths,
+      hasScripts: assessment.hasScripts,
+      hasExecutionInstructions: assessment.hasExecutionInstructions,
     })
   }
   if (entries.length >= LIMITS.skills) {
     warnings.push({ code: 'skill_limit', message: `技能扫描最多 ${LIMITS.skills} 个目录` })
   }
   return skills
+}
+
+function assessExpertContracts(experts, skills, warnings) {
+  const skillsById = new Map(skills.map(item => [item.sourceId, item]))
+  for (const expert of experts) {
+    const boundIds = expert.requiredSkills?.length ? expert.requiredSkills : expert.declaredSkills
+    const limitedSkills = (boundIds || [])
+      .map(id => skillsById.get(id))
+      .filter(item => item?.contractStatus === 'limited')
+      .map(item => item.sourceId)
+    const issues = []
+    if ((expert.missingSkills || []).length) issues.push('missing_required_skill')
+    if (limitedSkills.length) issues.push('limited_skill_contract')
+    expert.contractStatus = issues.length ? 'limited' : 'ready'
+    expert.contractIssues = issues
+    expert.limitedSkills = limitedSkills
+    if (issues.length) {
+      warnings.push({
+        code: 'expert_contract_limited',
+        path: expert.originPath,
+        message: `${expert.sourceId} 的执行合同不完整${limitedSkills.length ? `：${limitedSkills.join(', ')}` : ''}；可导入查看，但不能据此认定为可执行专家。`,
+      })
+    }
+  }
 }
 
 function scanAgents(root, skills, warnings) {
@@ -481,6 +605,7 @@ function scanCursorRepository(folderPath) {
       contentHash: hashText(`${primary?.contentHash || ''}:${skills.map((item) => item.contentHash).join(':')}`),
     })
   }
+  assessExpertContracts(experts, skills, warnings)
 
   return {
     ok: true,
@@ -527,7 +652,12 @@ function publicPreview(preview, token = '') {
     missingSkills: item.missingSkills || [],
     requiredSkills: item.requiredSkills || [],
     optionalSkills: item.optionalSkills || [],
+    contractStatus: item.contractStatus || 'ready',
+    contractIssues: item.contractIssues || [],
+    limitedSkills: item.limitedSkills || [],
   })
+  const limitedContracts = [...preview.skills, ...preview.experts]
+    .filter(item => item.contractStatus === 'limited').length
   return {
     ok: true,
     previewToken: token,
@@ -541,7 +671,10 @@ function publicPreview(preview, token = '') {
         level: 'medium',
         reasons: [`专家 ${counts.experts} · 技能 ${counts.skills} · 连接器 ${counts.connectors} · 工作流 ${counts.workflows}`],
       },
-      compatibility: { status: 'compatible' },
+      compatibility: {
+        status: limitedContracts ? 'limited' : 'compatible',
+        ...(limitedContracts ? { reason: `${limitedContracts} 项能力缺少完整执行合同或本地引用不可达` } : {}),
+      },
       estimatedCost: { level: 'medium', estimate: `将注册 ${counts.experts + counts.skills + counts.connectors + counts.workflows - counts.blocked} 项，知识资料 ${counts.knowledge} 份可选入库` },
       rollbackHint: '能力可逐项卸载；导入工作流可在工作流管理中归档。',
       counts,
@@ -878,7 +1011,7 @@ function writeConnectorManifest(userData, id, item) {
 }
 
 function buildRepositoryManifest(kind, id, item, preview, raw = {}) {
-  return adaptLegacyCapability(kind, {
+  const adapted = adaptLegacyCapability(kind, {
     ...raw,
     id,
     name: item.name,
@@ -897,6 +1030,21 @@ function buildRepositoryManifest(kind, id, item, preview, raw = {}) {
       : (kind === 'expert' ? 'Cursor AGENT.md' : 'Cursor mcp.json'),
     hasScripts: kind === 'skill' && fs.existsSync(path.join(preview.root, item.originPath, 'scripts')),
   })
+  if (adapted.ok && item.contractStatus) {
+    adapted.manifest.metadata = {
+      ...(adapted.manifest.metadata || {}),
+      knowme: {
+        ...(adapted.manifest.metadata?.knowme || {}),
+        qualification: {
+          state: item.contractStatus,
+          issues: item.contractIssues || [],
+          limitedSkills: item.limitedSkills || [],
+          assessedAtImport: true,
+        },
+      },
+    }
+  }
+  return adapted
 }
 
 function registerCursorRepository(preview, deps = {}) {

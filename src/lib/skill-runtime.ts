@@ -17,6 +17,7 @@ const {
   validateAndNormalizeManifest,
 } = require('./capability-manifest-v2')
 const groundingRuntime = require('./agent-grounding-runtime')
+const { skillRequiredTools, skillInvocation, skillBudgetFailure, skillActivationMetadata, readSkillResourcePage, validateSkillFileBoundary } = require('./skill-progressive')
 const {
   toDisplaySafeTask,
   computeTasksRevision,
@@ -286,8 +287,8 @@ function legacyConceptId(id) {
 
 function resolveSafePath(rootDir, relativePath, allowedPrefixes = []) {
   const root = path.resolve(rootDir)
-  const rel = String(relativePath || '').replace(/\\/g, '/').replace(/^\/+/, '')
-  if (!rel || rel.includes('..') || path.isAbsolute(rel)) {
+  const rel = String(relativePath || '').replace(/\\/g, '/')
+  if (!rel || rel.includes('..') || path.isAbsolute(rel) || /^[a-z]:/i.test(rel)) {
     return { ok: false, code: 'invalid_path', message: '非法相对路径' }
   }
   const segments = rel.split('/').filter(Boolean)
@@ -319,6 +320,7 @@ function resolveSafePath(rootDir, relativePath, allowedPrefixes = []) {
  *   fsImpl?: typeof fs,
  *   getInstallStore?: () => { skills?: Record<string, { enabled?: boolean }> },
  *   runScript?: (ctx: object) => Promise<object>,
+ *   getConnectorStatus?: (id: string) => Promise<object>,
  *   l1Budget?: number,
  * }} deps
  */
@@ -331,6 +333,7 @@ function createSkillRuntime(deps = {}) {
   const getPackSkillSources =
     typeof deps.getPackSkillSources === 'function' ? deps.getPackSkillSources : null
   const runScript = typeof deps.runScript === 'function' ? deps.runScript : null
+  const getConnectorStatus = typeof deps.getConnectorStatus === 'function' ? deps.getConnectorStatus : null
   const l1Budget = Number.isFinite(deps.l1Budget) ? deps.l1Budget : DEFAULT_L1_BUDGET
 
   function skillsRoot() {
@@ -477,12 +480,16 @@ function createSkillRuntime(deps = {}) {
         const skillMd = path.join(dir, 'SKILL.md')
         if (!fsImpl.existsSync(skillMd)) continue
         const parsed = readSkillMd(skillMd)
-        if (!parsed) continue
+        // The catalog is a production surface: an incomplete package must not
+        // silently become an executable Skill. Legacy/OKF entries are handled
+        // separately and never qualify as standard packages.
+        if (!parsed?.ok || !parsed.name || !parsed.description) continue
         const id = normalizeSkillId(name)
         const hash = contentHash(fsImpl.readFileSync(skillMd, 'utf8'))
         const capabilityManifest = loadSkillCapabilityManifest(id, dir, parsed, 'standard', {
           contentHash: hash,
         })
+        if (!capabilityManifest) continue
         out.push({
           id,
           source: 'standard',
@@ -497,7 +504,9 @@ function createSkillRuntime(deps = {}) {
         seenIds.add(id)
       }
     }
-    out.push(...scanLinkedSkills(seenIds))
+    const linked = scanLinkedSkills(seenIds)
+    out.push(...linked)
+    linked.forEach(record => seenIds.add(record.id))
     const packScan = scanPackSkills(seenIds)
     out.push(...packScan.records)
     return out.sort((a, b) => a.id.localeCompare(b.id))
@@ -554,7 +563,7 @@ function createSkillRuntime(deps = {}) {
 
   function listSkillsL0(options = {}) {
     const records = filterEnabled(scanAllSkills({ includeLegacy: options.includeLegacy !== false }), options)
-    return records.map((rec) => ({
+    return records.filter(rec => options.invocation !== 'model' || skillInvocation(rec, options).ok).map((rec) => ({
       id: rec.id,
       name: rec.name,
       description: rec.description,
@@ -587,23 +596,33 @@ function createSkillRuntime(deps = {}) {
     if (!isSkillEnabled(id)) {
       return { ok: false, code: 'disabled', message: `技能已禁用: ${id}` }
     }
-
+    const invocation = skillInvocation(record, options)
+    if (!invocation.ok) return invocation
     let body = ''
+    let parsed = null
     if (record.source === 'legacy-okf') {
       body = loadLegacyBody(record)
     } else {
-      const parsed = readSkillMd(path.join(record.dir, 'SKILL.md'))
-      body = parsed?.body || ''
+      const safe = validateSkillFileBoundary(fsImpl, record.dir, path.join(record.dir, 'SKILL.md'))
+      if (!safe.ok) return safe
+      parsed = readSkillMd(safe.abs)
+      if (!parsed?.ok) return { ok: false, code: 'parse_failed', message: `技能 ${id} 的 SKILL.md 不可解析` }
+      body = parsed.body
     }
     const budget = Number.isFinite(options.maxChars) ? options.maxChars : l1Budget
-    const truncated = truncateText(body, budget)
+    if (!Number.isSafeInteger(budget) || budget < 1 || body.length > budget) return skillBudgetFailure(id, body.length, budget)
+    if (!body.trim()) return { ok: false, code: 'empty_skill_body', message: `技能内容为空: ${id}` }
+    const grounding = parsed ? groundingForRecord(record, parsed, options) : { ok: true, contract: null }
+    if (!grounding.ok) return { ok: false, code: 'invalid_grounding_contract', message: `技能 ${id} 的 grounding 契约无效：${grounding.issues.map(issue => issue.message).join('; ')}`, issues: grounding.issues }
     return {
       ok: true,
       id,
       name: record.name,
-      body: truncated.text,
-      truncated: truncated.truncated,
+      body,
+      truncated: false,
       source: record.source,
+      maxChars: budget,
+      ...skillActivationMetadata(record, grounding.contract, contentHash(JSON.stringify({ body, frontmatter: parsed?.frontmatter, manifest: record.capabilityManifest })), invocation.invocation),
     }
   }
 
@@ -625,7 +644,12 @@ function createSkillRuntime(deps = {}) {
     if (!parsed?.ok) {
       return { ok: false, code: 'parse_failed', message: parsed?.error || 'parse failed', contract: null, issues: [] }
     }
+    return groundingForRecord(record, parsed, options)
+  }
+
+  function groundingForRecord(record, parsed, options = {}) {
     const contract = groundingRuntime.parseSkillGroundingContract(parsed.frontmatter)
+    const required = skillRequiredTools(parsed.frontmatter.requiredTools)
     const experienceTasks = record.capabilityManifest?.metadata?.knowme?.experience?.tasks
     const requestedTaskId = String(options.taskId || '').trim()
     const experienceRequiredTools = Array.isArray(experienceTasks)
@@ -634,12 +658,149 @@ function createSkillRuntime(deps = {}) {
         .flatMap(task => Array.isArray(task?.requiredTools) ? task.requiredTools : [])
       : []
     contract.requiredTools = [...new Set([
-      ...(contract.requiredTools || []),
+      ...required.requiredTools,
       ...experienceRequiredTools,
     ].map(tool => String(tool || '').trim()).filter(Boolean))]
-    contract.skillId = id
+    contract.skillId = record.id
     const validation = groundingRuntime.validateGroundingContract(contract, parsed.frontmatter)
-    return { ok: validation.ok, contract, issues: validation.issues }
+    const issues = [...validation.issues, ...required.issues]
+    return { ok: issues.length === 0, contract, issues }
+  }
+
+  /**
+   * Non-executing health check for a configured Skill.
+   * This deliberately validates loading and contracts only; it must not run
+   * arbitrary Skill scripts or call external connectors.
+   */
+  async function checkSkill(skillId, options = {}) {
+    const id = normalizeSkillId(skillId)
+    if (!id) return { ok: false, status: 'invalid', code: 'invalid_id', message: '技能 ID 为空' }
+    const allow = options.allowedIds ? new Set(options.allowedIds.map(normalizeSkillId)) : null
+    if (allow && !allow.has(id)) {
+      return { ok: false, status: 'unavailable', code: 'not_allowed', message: `技能未绑定到当前 Session: ${id}` }
+    }
+    const record = findSkillRecord(id)
+    if (!record) return { ok: false, status: 'unavailable', code: 'not_found', message: `技能不存在: ${id}` }
+    if (!isSkillEnabled(id)) {
+      return { ok: false, status: 'unavailable', code: 'disabled', message: `技能已禁用: ${id}` }
+    }
+
+    // Host health inspection never returns instructions or an activation marker.
+    const loaded = loadSkillL1(id, { ...options, invocation: 'explicit-user' })
+    if (!loaded.ok) return { ok: false, status: 'unavailable', code: loaded.code, message: loaded.message }
+    if (record.source !== 'legacy-okf' && !String(loaded.body || '').trim()) {
+      return { ok: false, status: 'unavailable', code: 'empty_skill_body', message: `技能内容为空: ${id}` }
+    }
+
+    const grounding = loadSkillGroundingContract(id, options)
+    if (!grounding.ok) {
+      const firstIssue = Array.isArray(grounding.issues) ? grounding.issues[0] : null
+      return {
+        ok: false,
+        status: 'unavailable',
+        code: 'invalid_grounding_contract',
+        message: firstIssue?.message || grounding.message || `技能契约无效: ${id}`,
+        issues: grounding.issues || [],
+      }
+    }
+
+    if (record.source !== 'legacy-okf') {
+      const packageFiles = listSkillPackageFiles(id, { maxFiles: 200 })
+      if (!packageFiles.ok) {
+        return { ok: false, status: 'unavailable', code: packageFiles.code, message: packageFiles.message }
+      }
+      const hasSkillMd = packageFiles.files.some((file) => file.path === 'SKILL.md')
+      if (!hasSkillMd) {
+        return { ok: false, status: 'unavailable', code: 'missing_skill_md', message: `缺少 SKILL.md: ${id}` }
+      }
+    }
+
+    const dependencies = Array.isArray(record.capabilityManifest?.dependencies)
+      ? record.capabilityManifest.dependencies
+      : []
+    const dependencyChecks = []
+    for (const dependency of dependencies) {
+      const dependencyId = String(dependency?.id || '').trim()
+      const dependencyKind = String(dependency?.kind || '').trim() || 'unknown'
+      if (!dependencyId) continue
+      if (dependencyKind === 'connector') {
+        if (!getConnectorStatus) {
+          dependencyChecks.push({
+            id: dependencyId,
+            kind: dependencyKind,
+            required: dependency.required !== false,
+            ok: false,
+            status: 'unknown',
+            code: 'connector_status_unavailable',
+            message: '连接器状态检查不可用',
+          })
+          continue
+        }
+        try {
+          const result = await getConnectorStatus(dependencyId)
+          const connector = result?.connector || result
+          const status = connector?.status || connector || {}
+          const state = String(status.state || '').toLowerCase()
+          const healthy = result?.ok !== false
+            && status.ok !== false
+            && status.enabled !== false
+            && !['auth_required', 'offline', 'error', 'disabled', 'unknown'].includes(state)
+          dependencyChecks.push({
+            id: dependencyId,
+            kind: dependencyKind,
+            required: dependency.required !== false,
+            ok: healthy,
+            status: healthy ? 'available' : 'unavailable',
+            code: healthy ? undefined : (status.code || state || result?.code || 'connector_unavailable'),
+            message: healthy ? undefined : (status.message || result?.message || `连接器不可用: ${dependencyId}`),
+          })
+        } catch (error) {
+          dependencyChecks.push({
+            id: dependencyId,
+            kind: dependencyKind,
+            required: dependency.required !== false,
+            ok: false,
+            status: 'unavailable',
+            code: 'connector_check_failed',
+            message: error instanceof Error ? error.message : `连接器检查失败: ${dependencyId}`,
+          })
+        }
+      } else {
+        dependencyChecks.push({
+          id: dependencyId,
+          kind: dependencyKind,
+          required: dependency.required !== false,
+          ok: false,
+          status: 'unknown',
+          code: 'unsupported_dependency_kind',
+          message: `暂不支持检查依赖类型: ${dependencyKind}`,
+        })
+      }
+    }
+    const requiredDependencyFailures = dependencyChecks.filter((item) => item.required && !item.ok)
+    const optionalDependencyWarnings = dependencyChecks.filter((item) => !item.required && !item.ok)
+    if (requiredDependencyFailures.length) {
+      const first = requiredDependencyFailures[0]
+      return {
+        ok: false,
+        status: 'unavailable',
+        code: 'required_dependency_unavailable',
+        message: first.message || `必需依赖不可用: ${first.id}`,
+        dependencies: dependencyChecks,
+      }
+    }
+
+    return {
+      ok: true,
+      status: 'available',
+      id,
+      source: record.source,
+      name: record.name,
+      contentHash: record.contentHash || '',
+      grounding: grounding.contract || null,
+      dependencies: dependencyChecks,
+      warnings: optionalDependencyWarnings,
+    }
   }
 
   function readSkillResource(skillId, relativePath, options = {}) {
@@ -653,6 +814,8 @@ function createSkillRuntime(deps = {}) {
     if (!isSkillEnabled(id)) {
       return { ok: false, code: 'disabled', message: `技能已禁用: ${id}` }
     }
+    const invocation = skillInvocation(record, options)
+    if (!invocation.ok) return invocation
     if (record.source === 'legacy-okf') {
       return { ok: false, code: 'unsupported', message: 'legacy OKF 技能不支持 read_skill_resource' }
     }
@@ -675,12 +838,70 @@ function createSkillRuntime(deps = {}) {
         return { ok: false, code: 'not_found', message: `资源不可读: ${rel}` }
       }
     }
-    const stat = fsImpl.statSync(resolved.abs)
-    if (!stat.isFile()) {
-      return { ok: false, code: 'invalid_path', message: '仅支持单文件读取' }
+    const page = readSkillResourcePage(fsImpl, record.dir, resolved.abs, options)
+    return page.ok ? { ...page, id, path: resolved.rel } : page
+  }
+
+  function resolveSkillPackageFile(record, relativePath) {
+    const rel = String(relativePath || '').replace(/\\/g, '/').replace(/^\/+/, '')
+    if (!rel || rel.includes('..') || path.isAbsolute(rel)) {
+      return { ok: false, code: 'invalid_path', message: '非法技能包路径' }
     }
-    const content = fsImpl.readFileSync(resolved.abs, 'utf8')
-    return { ok: true, id, path: resolved.rel, content }
+    const first = rel.split('/')[0]
+    const allowedRoots = new Set(['SKILL.md', SIDECAR_FILE, 'references', 'assets', SCRIPT_DIR])
+    if (!allowedRoots.has(first)) {
+      return { ok: false, code: 'invalid_path', message: '仅允许读取技能包公开文件' }
+    }
+    const resolved = resolveSafePath(record.dir, rel)
+    if (!resolved.ok) return resolved
+    if (!fsImpl.existsSync(resolved.abs)) {
+      return { ok: false, code: 'not_found', message: `技能包文件不存在: ${resolved.rel}` }
+    }
+    let stat
+    try { stat = fsImpl.statSync(resolved.abs) } catch { return { ok: false, code: 'not_found', message: '技能包文件不可读' } }
+    if (!stat.isFile()) return { ok: false, code: 'invalid_path', message: '仅支持读取技能包文件' }
+    return { ok: true, abs: resolved.abs, path: resolved.rel, size: stat.size }
+  }
+
+  function listSkillPackageFiles(skillId, options = {}) {
+    const id = normalizeSkillId(skillId)
+    const record = findSkillRecord(id)
+    if (!record) return { ok: false, code: 'not_found', message: `技能不存在: ${id}`, files: [] }
+    if (record.source === 'legacy-okf' || !record.dir) {
+      return { ok: false, code: 'unsupported', message: '非标准 Skill 没有可浏览的技能包文件', files: [] }
+    }
+    const files = []
+    const maxFiles = Number.isFinite(options.maxFiles) ? Math.min(Math.max(options.maxFiles, 1), 200) : 100
+    function visit(dir, prefix = '') {
+      if (files.length >= maxFiles) return
+      let names = []
+      try { names = fsImpl.readdirSync(dir) } catch { return }
+      for (const name of names.sort()) {
+        if (files.length >= maxFiles || name === '.git' || name === 'node_modules') continue
+        const abs = path.join(dir, name)
+        const rel = prefix ? `${prefix}/${name}` : name
+        let stat
+        try { stat = fsImpl.statSync(abs) } catch { continue }
+        if (stat.isDirectory()) visit(abs, rel)
+        else if (stat.isFile() && resolveSkillPackageFile(record, rel).ok) files.push({ path: rel, size: stat.size })
+      }
+    }
+    visit(record.dir)
+    return { ok: true, id, files, truncated: files.length >= maxFiles }
+  }
+
+  function readSkillPackageFile(skillId, relativePath, options = {}) {
+    const id = normalizeSkillId(skillId)
+    const record = findSkillRecord(id)
+    if (!record) return { ok: false, code: 'not_found', message: `技能不存在: ${id}` }
+    if (record.source === 'legacy-okf' || !record.dir) {
+      return { ok: false, code: 'unsupported', message: '非标准 Skill 没有可浏览的技能包文件' }
+    }
+    const resolved = resolveSkillPackageFile(record, relativePath)
+    if (!resolved.ok) return resolved
+    const maxBytes = Number.isFinite(options.maxBytes) ? Math.min(Math.max(options.maxBytes, 1), 1024 * 1024) : 512 * 1024
+    if (resolved.size > maxBytes) return { ok: false, code: 'too_large', message: '技能包文件过大，无法在详情中预览' }
+    return { ok: true, id, path: resolved.path, content: fsImpl.readFileSync(resolved.abs, 'utf8'), size: resolved.size }
   }
 
   async function runSkillScript(skillId, scriptPath, args = {}, permissions = {}, options = {}) {
@@ -694,10 +915,13 @@ function createSkillRuntime(deps = {}) {
     if (!isSkillEnabled(id)) {
       return { ok: false, code: 'disabled', message: `技能已禁用: ${id}` }
     }
+    const invocation = skillInvocation(record, options)
+    if (!invocation.ok) return invocation
     if (record.source === 'legacy-okf') {
       return { ok: false, code: 'unsupported', message: 'legacy OKF 技能不支持 run_skill_script' }
     }
-    if (!runScript) {
+    const scriptRunner = typeof options.runScript === 'function' ? options.runScript : runScript
+    if (!scriptRunner) {
       return { ok: false, code: 'tool_unavailable', message: '脚本沙箱执行器未配置' }
     }
 
@@ -727,7 +951,11 @@ function createSkillRuntime(deps = {}) {
       return { ok: false, code: 'invalid_path', message: '脚本必须在 scripts/ 目录内' }
     }
 
-    return runScript({
+    const packageSafe = validateSkillFileBoundary(fsImpl, record.dir, scriptAbs)
+    if (!packageSafe.ok) return packageSafe
+    const safe = validateSkillFileBoundary(fsImpl, scriptsRoot, scriptAbs)
+    if (!safe.ok) return safe
+    return scriptRunner({
       skillId: id,
       scriptPath: resolved.rel,
       scriptAbs,
@@ -887,7 +1115,10 @@ function createSkillRuntime(deps = {}) {
     listSkillTasks,
     loadSkillL1,
     loadSkillGroundingContract,
+    checkSkill,
     readSkillResource,
+    listSkillPackageFiles,
+    readSkillPackageFile,
     runSkillScript,
     autoMatchSkills,
     listSlashPickerItems,
@@ -902,8 +1133,11 @@ function parseSkillGroundingFromContent(content) {
   const parsed = parseSkillFrontmatter(content)
   if (!parsed.ok) return { ok: false, contract: null, issues: [{ message: parsed.error || 'parse failed' }] }
   const contract = groundingRuntime.parseSkillGroundingContract(parsed.frontmatter)
+  const required = skillRequiredTools(parsed.frontmatter.requiredTools)
+  contract.requiredTools = required.requiredTools
   const validation = groundingRuntime.validateGroundingContract(contract, parsed.frontmatter)
-  return { ok: validation.ok, contract, issues: validation.issues }
+  const issues = [...validation.issues, ...required.issues]
+  return { ok: issues.length === 0, contract, issues }
 }
 
 module.exports = {

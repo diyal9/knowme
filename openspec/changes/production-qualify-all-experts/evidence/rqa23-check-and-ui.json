@@ -1,0 +1,52 @@
+{
+  "check": {
+    "session": 11920,
+    "command": "npm run check",
+    "exit_code": 0,
+    "backend": {
+      "total": 3316,
+      "passed": 3265,
+      "failed": 0,
+      "skipped": 51
+    },
+    "renderer": {
+      "files": 85,
+      "passed": 597
+    },
+    "lint": "passed with line-budget advisory warnings",
+    "typecheck_renderer": "passed",
+    "outputLimitations": "Full stdout not retained; backend summary and renderer summary were captured. Initial direct node --test without TS loader failed, corrected project loader passed7."
+  },
+  "ui": {
+    "task": "task-mtpgg65w-xx9wa",
+    "feedbackSent": true,
+    "feedbackVisible": true,
+    "primaryComposerCount": 1,
+    "revisionVersion": 2,
+    "previousVersionLinked": true,
+    "reloadLandsOnHome": true,
+    "reopenAfterSettled": {
+      "feedbackVisible": true,
+      "revisionBodyVisible": true,
+      "primaryComposerCount": 1
+    },
+    "initialImmediateReadBeforeRender": {
+      "primaryComposerCount": 0,
+      "revisionVisible": false
+    },
+    "screenshots": [
+      "rqa23-revision-reopen.png",
+      "rqa23-revision-reopen-settled.png"
+    ],
+    "accepted": false
+  },
+  "scope": {
+    "gitnexusAll": {
+      "changed_files": 320,
+      "changed_count": 699,
+      "affected_count": 172,
+      "risk": "critical"
+    },
+    "note": "Whole shared dirty worktree, not all authored/reviewed in RQA23. No commit/reset or daily profile change."
+  }
+}

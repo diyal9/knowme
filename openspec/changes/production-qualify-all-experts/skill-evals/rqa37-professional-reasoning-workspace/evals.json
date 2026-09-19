@@ -1,0 +1,54 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-07T00:00:00+08:00",
+  "purpose": "Candidate-only holdouts for professional reasoning. Historical 2.1 failures are context, not a same-prompt causal baseline.",
+  "evaluatorIndependence": "The main agent authors and grades these holdouts because no independent subagent surface is available. Every score therefore requires explicit claim-level evidence and carries this limitation.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "knowledgeOrConnectorWritesAllowed": false,
+    "maxWaitSeconds": 150
+  },
+  "evals": [
+    {
+      "id": "AO03",
+      "expertId": "action-owner",
+      "title": "纠错记录中的行动项与证据核验",
+      "prompt": "请把下面记录整理成可直接跟进的行动清单。不要调用工具或对外写入，不要猜绝对日期。\n\n项目：北辰上线复盘。\n09:10 主持人记录：周敏负责在评审通过后的第 2 个工作日提交迁移清单；陈默负责本周五前确认回滚窗口。\n09:18 更正：上一条责任人写错了，迁移清单由王敏负责，周敏不再负责；触发条件和期限不变。\n09:30 陈默：我建议把窗口放在凌晨，但还没确认。\n09:45 已收到王敏发来的迁移清单第 1—3 页，完整清单应为 8 页；评审尚未通过。\n10:00 运维群截图显示“已收到回滚窗口申请”，但没有审批结果。\n\n输出需区分：有效行动、已被更正的旧承诺、建议、证据状态与行动状态。控制在 650 字内。",
+      "assertions": [
+        "The active migration owner is exactly 王敏, while 周敏's earlier assignment is marked superseded rather than duplicated.",
+        "The relative deadline remains triggered by review approval and no absolute date is invented.",
+        "Receiving 3 of 8 pages is partial evidence, not proof that the action is complete.",
+        "The rollback-window suggestion is not promoted to a commitment, and receipt of an application is not approval.",
+        "The final answer is directly followable, internally consistent, within 650 Chinese characters, and performs no external action."
+      ]
+    },
+    {
+      "id": "RR03",
+      "expertId": "requirement-reviewer",
+      "title": "权限、删除状态与性能验收评审",
+      "prompt": "请评审下面的需求规则，指出真正的冲突、待决项和可测试的验收标准。不要调用工具，不要把未证实的问题写成已发生缺陷。\n\nR1：项目成员可以查看未删除的项目文档。\nR2：项目管理员可以查看本项目全部未删除文档；审计员只能查看被标记为“需审计”的未删除文档。\nR3：访客不能查看任何内部文档，即使访客同时被加入项目成员组。\nR4：文档进入“已删除”后，任何业务角色都不可读取正文；合规服务账号仅可读取删除时间、操作者和文档 ID。\nR5：软删除保留时长尚未决定，候选为 7 天或 30 天。\nR6：列表页性能目标写成“要快”，预计每项目 5 万至 20 万文档，典型并发 80，峰值 300。\n\n请用规则适用集合判断冲突，明确哪些不应被 R5 阻塞；对权限、删除、幂等与性能分别给出验收口径。控制在 900 字内。",
+      "assertions": [
+        "The review reasons over intersections of role, membership, document state, and data fields instead of comparing rule text superficially.",
+        "Independent access and deleted-body invariants are not made dependent on the unresolved retention duration in R5.",
+        "Permission and deletion oracles verify identities/fields/content, not only row counts.",
+        "Idempotency is framed with a stable operation identity and side-effect count rather than same-link equality.",
+        "Performance acceptance identifies dataset/load, timing boundaries, statistic, and a threshold as required measurable elements without inventing an implemented defect."
+      ]
+    },
+    {
+      "id": "QA03",
+      "expertId": "qa-engineer",
+      "title": "库存预占并发与崩溃窗口测试设计",
+      "prompt": "为下面机制设计高风险测试，不执行测试、不调用工具，也不要假设接口状态码。\n\n库存服务对每个 SKU 保存 generation 与 available。客户端提交 reserve(sku, qty, expectedGeneration, requestId)。仅当 expectedGeneration 等于当前 generation 且 available 足够时，系统才原子扣减库存并把 generation 加一；同一 requestId 重试不得重复扣减。服务可能在以下时点崩溃：写入持久化前、持久化后但响应前、响应后。另有 cancel(requestId) 与 reserve 完成并发。\n\n请给出精简但专业的测试设计，必须包含：同一基线的并发写、同步屏障、过期请求、三个崩溃窗口、取消/完成竞态，以及每项可核验的状态与证据。区分“设计完成”和“测试已执行”。",
+      "assertions": [
+        "Two reserve requests start from the same generation under a real synchronization barrier; at most one can commit and the stale request cannot advance generation again.",
+        "The pre-persistence crash permits the complete old state, while persisted-before-response retry preserves one committed new state without duplicate deduction.",
+        "After-response restart preserves the acknowledged new state and request identity outcome.",
+        "Cancel/complete races cover both valid orderings and reject mixed or double-effect states.",
+        "Every oracle names authoritative state/evidence, uses no invented status codes, and clearly labels all cases as designed but unexecuted."
+      ]
+    }
+  ]
+}

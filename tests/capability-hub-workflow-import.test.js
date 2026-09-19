@@ -74,6 +74,15 @@ describe('capability hub precise workflow import lifecycle', () => {
       assert.equal(verified.workflow.nodes, 2)
       assert.deepEqual(verified.experts.map(item => item.id), ['operator'])
       assert.equal(verified.skills.length, 2)
+
+      // Static references alone must not keep an expert launchable after a
+      // required dependency is disabled.
+      const disabled = await hub.disableCapability({ id: 'core-skill' })
+      assert.equal(disabled.ok, true)
+      const blocked = hub.verifyImportedWorkflow({ workflowId })
+      assert.equal(blocked.ok, false)
+      assert.equal(blocked.experts[0].ok, false)
+      assert.equal(blocked.issues.some(item => item.code === 'expert_not_ready'), true)
     } finally {
       fs.rmSync(root, { recursive: true, force: true })
       fs.rmSync(userData, { recursive: true, force: true })

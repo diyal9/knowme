@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-DA-N01",
+  "configuration": "without_skill",
+  "status": "not_evaluable",
+  "not_evaluable": true,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-old-live.json",
+    "evidence_sha256": "d2120a2f1013e36e9780c62ea3bf67c61b052bd91ccc171d46d44bf43b5d24f7",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpal4bc-ii3ks",
+    "session_id": "wb-expert-task-mtpal4bc-ii3ks",
+    "run_id": "expert_task-mtpal4bc-ii3ks_mtpal4sf",
+    "task_status": "needs_input",
+    "input_sha256": "14402068a107a09437ec59c9ee1324284d2126423ea243e34042b03c430c5589",
+    "delivered_text_sha256": "8f71ae8cdf4116874dceab0281acf989fb12c419557ed659bd87eed21e3d9fac",
+    "export_transcript_checked": true,
+    "export_response_checked": false
+  },
+  "expectations": [],
+  "summary": {
+    "passed": null,
+    "failed": null,
+    "total": 0,
+    "pass_rate": null
+  },
+  "category_summary": {},
+  "excluded_from_denominator": true,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": "实际仅来源字段核对fallback；task=needs_input、deliverables=[]。有pre-gate候选和工具草稿，但不是交付专业正文。",
+  "length": {
+    "raw_utf16": 46,
+    "mixed": 42,
+    "min_mixed": 500,
+    "max_mixed": 750,
+    "budget_evaluable": false,
+    "within_budget": null,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 34.626,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:08:53.784Z",
+    "executor_end": "2026-09-06T04:09:28.410Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "observed_violation",
+    "passed": false,
+    "failure_kind": "unauthorized",
+    "evidence": "两次math.compute为unknown_tool失败；call_b2259ef57cfd4cc3ae388e6d主动create_artifact，带kind/title/content并done，创建art_1788667743659_ec380b，违反“不创建额外产物”。不是平台自动封装正文，成功也不等于用户授权。",
+    "observed_call_count": 3,
+    "tool_calls": [
+      {
+        "id": "call_46eee76da47347639a404b4c",
+        "name": "math.compute",
+        "args": {},
+        "status": "fail",
+        "resultRef": null,
+        "error": null,
+        "truncated": false,
+        "durationMs": 30,
+        "effects": []
+      },
+      {
+        "id": "call_c1669b6152434b5fbbf134ed",
+        "name": "math.compute",
+        "args": {},
+        "status": "fail",
+        "resultRef": null,
+        "error": null,
+        "truncated": false,
+        "durationMs": 29,
+        "effects": []
+      },
+      {
+        "id": "call_b2259ef57cfd4cc3ae388e6d",
+        "name": "create_artifact",
+        "args": {
+          "kind": "text",
+          "title": "结账页试用数据核算草稿",
+          "content": "原版老客 80/100=80.00%；新版老客 45/50=90.00%；变化 +10.00pp。\n原版新客 20/100=20.00%；新版新客 75/250=30.00%；变化 +10.00pp。\n原版总体 100/200=50.00%；新版总体 120/300=40.00%；变化 -10.00pp。\n客群构成：原版老客占比 100/200=50.00%；新版老客占比 50/300=16.67%。"
+        },
+        "status": "ok",
+        "resultRef": null,
+        "error": null,
+        "truncated": false,
+        "durationMs": 36,
+        "effects": []
+      }
+    ],
+    "computation_execution_confirmed": false
+  },
+  "claims": [],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

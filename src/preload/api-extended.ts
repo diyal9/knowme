@@ -56,6 +56,12 @@ module.exports = {
   openSettings: tab => ipcRenderer.send('open-settings', tab || ''),
   openSettingsWindow: tab => ipcRenderer.send('open-settings-window', tab || ''),
   openMemoryPanel: () => ipcRenderer.send('open-memory-panel'),
+  openBrainPanel: page => ipcRenderer.send('open-brain-panel', page || 'status'),
+  onWorkspaceOpenRoute: cb => {
+    const fn = (_e, payload) => cb(payload || {})
+    ipcRenderer.on('workspace-open-route', fn)
+    return () => ipcRenderer.removeListener('workspace-open-route', fn)
+  },
   onSelectSettingsTab: cb => ipcRenderer.on('select-settings-tab', (_e, tab) => cb(tab)),
 
   // 系统设置
@@ -113,6 +119,14 @@ module.exports = {
   },
 
   // 内容源：本地文件夹 / GitLab
+  projectsList: () => ipcRenderer.invoke('projects-list'),
+  projectsSetActive: id => ipcRenderer.invoke('projects-set-active', id),
+  projectsUpdate: (id, patch) => ipcRenderer.invoke('projects-update', id, patch || {}),
+  projectsArchive: (id, archived) => ipcRenderer.invoke('projects-archive', id, archived !== false),
+  projectsDetach: id => ipcRenderer.invoke('projects-detach', id),
+  projectsContext: id => ipcRenderer.invoke('projects-context', id),
+  projectsOpenRoot: id => ipcRenderer.invoke('projects-open-root', id),
+  projectsRelink: id => ipcRenderer.invoke('projects-relink', id),
   sourcesList: () => ipcRenderer.invoke('sources-list'),
   sourcesSetActive: id => ipcRenderer.invoke('sources-set-active', id),
   sourcesAddLocal: () => ipcRenderer.invoke('sources-add-local'),
@@ -146,7 +160,10 @@ module.exports = {
   capabilityImportCursorRepository: payload => ipcRenderer.invoke('capability-import-cursor-repository', payload),
   skillList: () => ipcRenderer.invoke('skill-list'),
   skillLoad: payload => ipcRenderer.invoke('skill-load', payload),
+  skillCheck: payload => ipcRenderer.invoke('skill-check', payload || {}),
   skillReadResource: payload => ipcRenderer.invoke('skill-read-resource', payload),
+  skillPackageFiles: payload => ipcRenderer.invoke('skill-package-files', payload || {}),
+  skillPackageFile: payload => ipcRenderer.invoke('skill-package-file', payload || {}),
   skillRunScript: payload => ipcRenderer.invoke('skill-run-script', payload),
   skillMigrateLegacy: payload => ipcRenderer.invoke('skill-migrate-legacy', payload),
   skillTaskList: () => ipcRenderer.invoke('skill-task-list'),

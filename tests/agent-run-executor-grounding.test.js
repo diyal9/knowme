@@ -20,7 +20,7 @@ describe('agent-run-executor grounding', () => {
     }
     const ports = createMockRunPorts(fixture)
     const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
-    assert.equal(result.terminal, RunPhase.DONE)
+    assert.equal(result.terminal, RunPhase.ERROR)
     assert.ok(!String(result.text).includes('议题：'))
     assert.match(String(result.text), /尚未|不能|需要先|证据不足|没有成功/)
   })
@@ -62,7 +62,7 @@ describe('agent-run-executor grounding', () => {
     }
     const ports = createMockRunPorts(fixture)
     const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
-    assert.equal(result.terminal, RunPhase.DONE)
+    assert.equal(result.terminal, RunPhase.ERROR)
     assert.ok(!String(result.text).includes('三个新模型'))
     assert.match(String(result.text), /公开网络搜索|尚未|不能|需要先|证据不足/)
   })
@@ -124,7 +124,7 @@ completionConditions:
     }
     const ports = createMockRunPorts(fixture)
     const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
-    assert.equal(result.terminal, RunPhase.DONE)
+    assert.equal(result.terminal, RunPhase.ERROR)
     assert.ok(!String(result.text).includes('议题：'))
     assert.match(String(result.text), /飞书会议妙记读取|尚未|不能|需要先|证据不足/)
   })

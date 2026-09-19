@@ -4,6 +4,7 @@ import {
   buildExpertDiscussionContext,
   buildExpertDiscussionPrompt,
   isAmbiguousExpertDiscussion,
+  resolveExpertDiscussionMode,
 } from './expert-discussion'
 
 describe('expert discussion', () => {
@@ -38,5 +39,12 @@ describe('expert discussion', () => {
       taskId: 't1', goal: '', status: 'review', resultSummary: '', recentEvents: [],
       deliverables: [{ id: 'd1', title: '成果', type: 'document', version: 1, acceptanceStatus: 'pending', excerpt: '' }],
     })).toContain('查看成果内容')
+  })
+
+  it('resolves collaboration mode from task status instead of task id existence', () => {
+    expect(resolveExpertDiscussionMode('draft', { hasTask: true })).toBe('expert-planning')
+    expect(resolveExpertDiscussionMode('running', { hasTask: true })).toBe('expert-execution')
+    expect(resolveExpertDiscussionMode('review', { hasTask: true })).toBe('expert-discussion')
+    expect(resolveExpertDiscussionMode('', { hasTask: false })).toBe('expert-planning')
   })
 })

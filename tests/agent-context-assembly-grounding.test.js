@@ -71,4 +71,38 @@ describe('assembleCapabilityContext groundingContract', () => {
     })
     assert.equal(noRules.groundingContract, null)
   })
+
+  it('keeps persona, task facts, automatic skills and explicit skills as independent blocks', () => {
+    const result = assembleCapabilityContext({
+      session: { id: 's-expert', expertId: 'office', goal: '整理会议纪要' },
+      prompt: '整理会议纪要',
+      slashRefs: ['meeting-summary'],
+      tier: 'retrieval',
+      expertRuntime: {
+        getSessionPersona: () => ({
+          ok: true,
+          persona: {
+            name: '办公协作专家', soul: '严谨', sop: '先读取证据，再整理行动项', agenticType: 'planning',
+          },
+          bindings: { skills: ['meeting-summary'], connectors: ['feishu'] },
+          readiness: { state: 'ready', items: [] },
+          capabilityManifest: { provenance: { source: 'bundled' } },
+        }),
+      },
+      skillRuntime: {
+        autoMatchSkills: () => [{ id: 'meeting-summary', name: '会议总结', description: '提取行动项' }],
+        findSkillRecord: () => ({ id: 'meeting-summary', name: '会议总结', source: 'standard' }),
+        listSlashPickerItems: () => [],
+        loadSkillL1: () => ({ ok: true, id: 'meeting-summary', name: '会议总结', body: '读取会议并输出行动项' }),
+      },
+    })
+    const ids = result.contextBlocks.map(block => block.id)
+    assert.ok(ids.includes('persona.soul'))
+    assert.ok(ids.includes('persona.sop'))
+    assert.ok(ids.includes('task.expert-session'))
+    assert.ok(ids.includes('skill.auto-summary'))
+    assert.ok(ids.includes('skill.explicit-content'))
+    assert.equal(result.contextBlocks.find(block => block.id === 'skill.explicit-content').kind, 'skill')
+    assert.equal(result.contextBlocks.find(block => block.id === 'persona.sop').sourceTrust, 'bundled')
+  })
 })

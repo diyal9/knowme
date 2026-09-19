@@ -1,0 +1,31 @@
+{
+  "suite": "RQA69",
+  "evaluatedAt": "2026-09-09T02:17:13.602Z",
+  "agents": [
+    {
+      "agentId": "image-producer",
+      "currentConfigurationId": "",
+      "tasks": [
+        {
+          "taskId": "",
+          "evalId": "IP01",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "enable_secure_storage",
+            "item": "connector:pango-image-mcp secrets",
+            "detail": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

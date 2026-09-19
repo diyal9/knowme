@@ -10,7 +10,7 @@ const {
 } = require('../capability-manifest-v2')
 const { createCapabilityStore, resolvePaths } = require('../capability-store')
 const legacyStore = require('./store')
-const { BUILTIN_IDS, normalizeConnector } = require('./normalize')
+const { BUILTIN_IDS, normalizeConnector, FULL_FEISHU_ALLOWLIST, isLegacyFeishuAllowlist } = require('./normalize')
 
 const MIGRATION_FLAG = '.connectors-unified-v2'
 const VALID_MODES = new Set(['dual', 'unified', 'legacy'])
@@ -47,6 +47,9 @@ function connectorManifest(connector) {
     capabilities: conn.capabilities || [],
     configState: conn.configState || 'ready',
     ...(conn.type === 'mcp' ? { mcp: conn.mcp || {} } : {}),
+    ...(conn.type === 'cli' || conn.type === 'feishu' ? { cli: conn.cli || {} } : {}),
+    ...(conn.type === 'http' ? { http: conn.http || {} } : {}),
+    ...(conn.type === 'ssh' ? { ssh: conn.ssh || {} } : {}),
     permissions: connector.permissions || {
       tools: conn.allowlist || [],
       externalSystem: conn.type,
@@ -111,14 +114,20 @@ function createUnifiedConnectorStore(options = {}) {
       ref: path.join('connectors', id, 'manifest.json').replace(/\\/g, '/'),
     })
     if (!normalizedManifest.ok) return null
+    const storedAllowlist = raw.allowlist || normalizedManifest.manifest.permissions?.tools || []
     const config = normalizeConnector({
       id,
       title: raw.name || raw.title || id,
       type: raw.type || normalizedManifest.manifest.metadata?.connector?.type || 'mcp',
       enabled: entry.ok ? entry.entry.enabled !== false : false,
       agentVisible: raw.agentVisible !== false,
-      allowlist: raw.allowlist || normalizedManifest.manifest.permissions?.tools || [],
+      allowlist: id === 'feishu' && isLegacyFeishuAllowlist(storedAllowlist)
+        ? [...FULL_FEISHU_ALLOWLIST]
+        : storedAllowlist,
       mcp: raw.mcp || normalizedManifest.manifest.metadata?.connector?.mcp || {},
+      cli: raw.cli || normalizedManifest.manifest.metadata?.connector?.cli || {},
+      http: raw.http || normalizedManifest.manifest.metadata?.connector?.http || {},
+      ssh: raw.ssh || normalizedManifest.manifest.metadata?.connector?.ssh || {},
       secretSlots: raw.secretSlots || normalizedManifest.manifest.metadata?.connector?.secretSlots || [],
       toolPolicies: raw.toolPolicies || normalizedManifest.manifest.metadata?.connector?.toolPolicies || [],
       healthCheck: raw.healthCheck || normalizedManifest.manifest.metadata?.connector?.healthCheck || null,

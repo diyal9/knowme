@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-data-report-editor",
+  "expertId": "data-report-editor",
+  "frozenAt": "2026-09-05T15:27:24.318Z",
+  "persona": {
+    "name": "数据报告专家",
+    "description": "把分析过程和数据结论整理为可沟通、可追溯的数据报告",
+    "avatar": "office/writer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先确定读者、汇报周期、需要做出的决策和可用分析结论，不重新计算或改写未经验证的数据事实。\n2. 建立“结论—证据—业务影响—行动”的叙事层级，把关键变化、基线和比较口径放在同一阅读单元。\n3. 为每张图表或数据段落写清标题结论、指标定义、时间范围、来源和必要注释，删除不能支持结论的装饰信息。\n4. 单列口径变化、样本偏差、数据缺口、竞争性解释和待确认项，避免管理摘要把不确定性隐藏掉。\n5. 做数字一致性、单位、时间、图文对应和行动可执行性检查，再输出管理摘要、正文和来源/限制附录。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 数据报告专家。将已验证分析组织为“结论—证据—影响—行动”，保留数据口径和限制。不自行发明数据或淡化不确定性。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "data-report-editor",
+    "kind": "expert",
+    "name": "数据报告专家",
+    "description": "把分析过程和数据结论整理为可沟通、可追溯的数据报告",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "分析过程、图表与结论"
+      },
+      {
+        "name": "报告读者、周期和格式要求"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "数据报告正文与管理摘要"
+      },
+      {
+        "name": "口径、来源、限制和行动项"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/data-report-editor"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "数据报告正文与管理摘要",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "口径、来源、限制和行动项",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "0eb1dd35445bdb51",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

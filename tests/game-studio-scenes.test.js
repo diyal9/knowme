@@ -19,10 +19,17 @@ describe('game studio scenes', () => {
     assert.equal(gameStudio.resolveGameScene({ industry: 'software', mode: 'writing' }), null)
   })
 
-  it('maps legacy writing mode to game-design', () => {
+  it('does not use legacy mode mappings as ambient chat routing', () => {
     assert.equal(
       gameStudio.resolveGameScene({ industry: 'game', mode: 'writing' }),
-      'game-design',
+      null,
+    )
+  })
+
+  it('keeps a fresh general greeting on the normal assistant scene', () => {
+    assert.equal(
+      gameStudio.resolveGameScene({ industry: 'game', mode: 'general', tier: 'chat', prompt: 'hi' }),
+      null,
     )
   })
 
@@ -30,6 +37,17 @@ describe('game studio scenes', () => {
     assert.equal(
       gameStudio.resolveGameScene({ industry: 'game', mode: 'general', prompt: '启动 daemon 工作流开发客户端' }),
       'game-dev',
+    )
+  })
+
+  it('requires intent or an explicit scene instead of industry alone', () => {
+    assert.equal(
+      gameStudio.resolveGameScene({ industry: 'game', mode: 'general', tier: 'assist', prompt: '帮我写一封邮件' }),
+      null,
+    )
+    assert.equal(
+      gameStudio.resolveGameScene({ industry: 'software', explicitScene: 'game-design' }),
+      'game-design',
     )
   })
 

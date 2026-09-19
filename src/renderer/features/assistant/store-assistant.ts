@@ -202,6 +202,33 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
       }
     },
 
+    clearSessionHistory: async () => {
+      try {
+        const clearHistory = api()?.agentSessionClearHistory
+        if (!clearHistory) {
+          get().showToast('请重启应用后再清空历史对话')
+          return
+        }
+        const result = await clearHistory()
+        if (!result || result.ok === false || !result.session) {
+          get().showToast(result?.error || '清空历史失败')
+          return
+        }
+        const session = parseSessionRecord(result?.session)
+        if (session) {
+          set({
+            sessions: [session],
+            sessionHistory: [],
+            activeSessionId: session.id,
+            sessionStates: { [session.id]: emptySessionSlice() },
+          })
+        }
+        get().showToast('已清空伙伴历史对话')
+      } catch {
+        get().showToast('清空历史失败')
+      }
+    },
+
     loadAssistantChrome: async () => {
       try {
         const [models, profile, partnerResult, skills, providers] = await Promise.all([

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-DA-H02",
+  "configuration": "without_skill",
+  "status": "not_evaluable",
+  "not_evaluable": true,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-old-live.json",
+    "evidence_sha256": "d2120a2f1013e36e9780c62ea3bf67c61b052bd91ccc171d46d44bf43b5d24f7",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpal55n-5xfdv",
+    "session_id": "wb-expert-task-mtpal55n-5xfdv",
+    "run_id": "expert_task-mtpal55n-5xfdv_mtpal5n0",
+    "task_status": "failed",
+    "input_sha256": "c093b89c65628ce68bc25f8164c35962f31605d00fe651558c47226d3d3a3a21",
+    "delivered_text_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "export_transcript_checked": false,
+    "export_response_checked": false
+  },
+  "expectations": [],
+  "summary": {
+    "passed": null,
+    "failed": null,
+    "total": 0,
+    "pass_rate": null
+  },
+  "category_summary": {},
+  "excluded_from_denominator": true,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": "task=failed，无assistant专业正文或deliverables，无同run verifier capture；不推测缺失答复的专业正确性。",
+  "length": {
+    "raw_utf16": 0,
+    "mixed": 0,
+    "min_mixed": 550,
+    "max_mixed": 800,
+    "budget_evaluable": false,
+    "within_budget": null,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": null,
+  "timing_note": "timing未提供，不估算；old6导出由主线负责。",
+  "tool_adherence": {
+    "status": "not_verified",
+    "passed": null,
+    "evidence": "session.steps/toolsUsed空，但task.events有math.calculate、skill.get_detail调用进度，随后工具未注册/不可调用失败。无callId/args/result，不能按重复进度数调用、不能认证零工具或授权合规。",
+    "observed_call_count": null,
+    "observed_tool_names": [
+      "math.calculate",
+      "skill.get_detail"
+    ]
+  },
+  "claims": [],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

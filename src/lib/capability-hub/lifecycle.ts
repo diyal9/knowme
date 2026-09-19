@@ -7,7 +7,7 @@
 const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
-const { listCatalog } = require('../capability-catalog')
+const { listCatalog, loadBundledEntryManifest } = require('../capability-catalog')
 const { validateInstallDependencies } = require('../capability-import')
 const { resolvePaths } = require('../capability-store')
 const connectorCaps = require('../connector-capabilities')
@@ -25,6 +25,23 @@ const {
   mergePackSkillWarnings,
   stageMinimalPackage,
 } = require('./map')
+
+function compareSemver(left, right) {
+  const parse = value => {
+    const match = String(value || '').trim().match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+[0-9A-Za-z.-]+)?$/)
+    return match ? { core: match.slice(1, 4).map(Number), prerelease: match[4] || '' } : null
+  }
+  const a = parse(left)
+  const b = parse(right)
+  if (!a || !b) return String(left || '').localeCompare(String(right || ''))
+  for (let index = 0; index < a.core.length; index++) {
+    if (a.core[index] !== b.core[index]) return a.core[index] > b.core[index] ? 1 : -1
+  }
+  if (a.prerelease === b.prerelease) return 0
+  if (!a.prerelease) return 1
+  if (!b.prerelease) return -1
+  return a.prerelease.localeCompare(b.prerelease)
+}
 
 /**
  * 能力生命周期：目录列表、安装/导入、收藏与 Cursor 仓库注册。
@@ -94,7 +111,13 @@ function createCapabilityLifecycle(deps) {
 
   async function listCapabilities(options = {}) {
     const result = listCatalog(getUserData(), { ...options, bundledRoot })
-    const items = (result.entries || []).map(mapCatalogItemToHub)
+    // The user-facing Skill catalog is intentionally standard-only. Legacy
+    // OKF concepts remain available to migration/runtime compatibility paths,
+    // but must not look like installable production Skill packages.
+    const catalogEntries = (result.entries || []).filter((entry) => (
+      options.kind !== 'skill' || (entry.source !== 'legacy-okf' && entry.standardCompatible !== false)
+    ))
+    const items = catalogEntries.map(mapCatalogItemToHub)
     const seenIds = new Set(items.map((item) => item.id))
 
     if (getPackSkillSources) {
@@ -149,16 +172,26 @@ function createCapabilityLifecycle(deps) {
 
     try {
       const runtime = expertRuntime()
+      const skillRt = skillRuntime()
+      const availableSkills = skillRt.scanAllSkills()
+        .filter((skill) => skillRt.isSkillEnabled(skill.id))
+        .map((skill) => skill.id)
+      const availableConnectors = unifiedConnectors.loadConnectors()
+        .filter((connector) => connector.enabled !== false)
+        .map((connector) => connector.id)
       for (const item of items) {
         if (item.kind !== 'expert') continue
-        if (String(item.avatar || '').trim()) continue
         const loaded = runtime.loadExpert(item.id)
-        if (loaded?.ok && loaded.avatar) item.avatar = loaded.avatar
+        if (!loaded?.ok) continue
+        item.skills = loaded.skills || []
+        item.connectors = [...new Set([...(loaded.connectors || []), ...(loaded.optionalConnectors || [])])]
+        if (!String(item.avatar || '').trim() && loaded.avatar) item.avatar = loaded.avatar
+        item.readiness = runtime.buildBindingReadiness(loaded, { availableSkills, availableConnectors })
       }
       if (!options.kind || options.kind === 'expert') {
         for (const expert of runtime.listExperts()) {
           if (seenIds.has(expert.id)) continue
-          items.push(mapCatalogItemToHub({
+          const hubItem = mapCatalogItemToHub({
             id: expert.id,
             kind: 'expert',
             name: expert.name || expert.id,
@@ -175,13 +208,21 @@ function createCapabilityLifecycle(deps) {
             installStatus: 'enabled',
             contentHash: expert.contentHash || '',
             dependencies: expert.dependencies || [],
+            skills: expert.skills || [],
+            connectors: expert.connectors || [],
+            optionalConnectors: expert.optionalConnectors || [],
             permissions: expert.permissions || {},
             inputs: expert.inputs || [],
             outputs: expert.outputs || [],
             risk: expert.risk || { level: 'low', reasons: [] },
             provenance: expert.provenance || {},
             sourceAvailable: true,
-          }))
+          })
+          const loaded = runtime.loadExpert(expert.id)
+          if (loaded?.ok) {
+            hubItem.readiness = runtime.buildBindingReadiness(loaded, { availableSkills, availableConnectors })
+          }
+          items.push(hubItem)
           seenIds.add(expert.id)
         }
       }
@@ -269,6 +310,17 @@ function createCapabilityLifecycle(deps) {
       }
     }
     return ok({ warnings })
+  }
+
+  function bundledContentHash(entry) {
+    if (typeof store.hashDirectory !== 'function') return ''
+    const source = catalogApi.getBundledInstallSource(entry)
+    if (!source?.ok || !source.bundlePath) return ''
+    try {
+      return store.hashDirectory(source.bundlePath)
+    } catch {
+      return ''
+    }
   }
 
   function publishImportedEntry(result) {
@@ -360,8 +412,24 @@ function createCapabilityLifecycle(deps) {
     for (const ref of loaded.package.agentRefs || []) {
       const id = String(ref?.id || '').trim()
       const expert = expertRuntime().loadExpert(id)
-      experts.push({ id, ok: expert?.ok === true, name: expert?.name || id })
+      let readiness = null
+      if (expert?.ok) {
+        try {
+          const availableSkills = skillRuntime().scanAllSkills()
+            .filter(skill => skillRuntime().isSkillEnabled(skill.id))
+            .map(skill => skill.id)
+          const availableConnectors = unifiedConnectors.loadConnectors()
+            .filter(connector => connector.enabled !== false)
+            .map(connector => connector.id)
+          readiness = expertRuntime().buildBindingReadiness(expert, { availableSkills, availableConnectors })
+        } catch {
+          readiness = { state: 'limited', issues: [{ code: 'readiness_unavailable', message: '无法完成专家运行依赖检查' }] }
+        }
+      }
+      const executable = expert?.ok === true && readiness?.state !== 'limited'
+      experts.push({ id, ok: executable, name: expert?.name || id, readiness })
       if (!expert?.ok) issues.push({ code: 'missing_expert', id, message: `工作流专家不可用：${id}` })
+      else if (!executable) issues.push({ code: 'expert_not_ready', id, message: `工作流专家运行依赖未就绪：${id}`, readiness })
     }
     const entries = store.loadInstallStore().entries || {}
     const skills = (loaded.package.skillRefs || []).map(ref => {
@@ -480,11 +548,19 @@ function createCapabilityLifecycle(deps) {
     const entryResult = catalogApi.getCatalogEntry(id)
     if (!entryResult.ok) return entryResult
     if (entryResult.entry.source === 'curated' || entryResult.entry.catalogLayer === 'bundled') {
-      return importApi.installCurated(id, {
+      const dependencySync = syncBundledSkillDependencies(entryResult.entry, payload)
+      if (!dependencySync.ok) return dependencySync
+      const result = importApi.installCurated(id, {
         bundledRoot,
         enabled: payload.enabled !== false,
         riskConfirmed: payload.riskConfirmed === true,
       })
+      if (!result.ok) return result
+      return {
+        ...result,
+        dependencyUpdates: dependencySync.updates || [],
+        warnings: [...(dependencySync.warnings || []), ...(result.warnings || [])],
+      }
     }
     return fail('not_curated', '仅 curated 条目支持 catalog 安装')
   }
@@ -618,17 +694,122 @@ function createCapabilityLifecycle(deps) {
     return result
   }
 
+  function syncBundledSkillDependencies(entry, payload = {}, visited = new Set()) {
+    if (!entry?.id || visited.has(entry.id)) return ok({ updates: [], warnings: [] })
+    visited.add(entry.id)
+    const latestManifest = loadBundledEntryManifest(bundledRoot, entry) || entry.manifest || {}
+    const declaredDependencies = Array.isArray(latestManifest.dependencies) ? latestManifest.dependencies : []
+    const declaredDependencyIds = new Set(declaredDependencies.map(item => String(item?.id || '')).filter(Boolean))
+    const skillFallbackDependencies = entry.kind === 'expert'
+      ? (Array.isArray(latestManifest.skills) ? latestManifest.skills : entry.skills || [])
+        .filter(id => id && !declaredDependencyIds.has(String(id)))
+        .map(id => ({ id, kind: 'skill', required: true }))
+      : []
+    const dependencies = [...declaredDependencies, ...skillFallbackDependencies]
+      .filter(item => item?.kind === 'skill' && item.id)
+    const updates = []
+    const warnings = []
+
+    for (const dependency of dependencies.filter(item => item?.kind === 'skill' && item.id)) {
+      const required = dependency.required !== false
+      const current = store.getEntry(dependency.id)
+      if (current.ok && current.entry.kind !== 'skill') {
+        return {
+          ...fail('dependency_kind_mismatch', `依赖 ${dependency.id} 的类型不是 Skill`),
+          dependency,
+          updates,
+          warnings,
+        }
+      }
+      if (current.ok && current.entry.source !== 'curated') {
+        warnings.push({
+          code: 'dependency_update_not_managed',
+          dependency,
+          message: `Skill 依赖 ${dependency.id} 由用户来源提供，未自动覆盖`,
+        })
+        continue
+      }
+
+      const catalogResult = catalogApi.getCatalogEntry(dependency.id)
+      if (!catalogResult.ok || catalogResult.entry?.catalogLayer !== 'bundled') {
+        const issue = {
+          code: 'dependency_update_unavailable',
+          dependency,
+          message: `无法从内置目录同步 Skill 依赖: ${dependency.id}`,
+        }
+        if (required) {
+          return {
+            ...fail(issue.code, issue.message),
+            dependency,
+            updates,
+            warnings,
+          }
+        }
+        warnings.push(issue)
+        continue
+      }
+
+      if (!current.ok && !required) continue
+
+      const availableVersion = String(catalogResult.entry.version || '')
+      const installedVersion = current.ok ? String(current.entry.version || '') : ''
+      const versionOrder = compareSemver(availableVersion, installedVersion)
+      const availableHash = bundledContentHash(catalogResult.entry)
+      const installedHash = current.ok ? String(current.entry.contentHash || '') : ''
+      const sameVersionContentChanged = current.ok
+        && versionOrder === 0
+        && Boolean(availableHash)
+        && installedHash !== availableHash
+      if (current.ok && (versionOrder < 0 || (versionOrder === 0 && !sameVersionContentChanged))) continue
+
+      const nested = syncBundledSkillDependencies(catalogResult.entry, payload, visited)
+      if (!nested.ok) return nested
+      updates.push(...(nested.updates || []))
+      warnings.push(...(nested.warnings || []))
+
+      const installed = importApi.installCurated(dependency.id, {
+        bundledRoot,
+        enabled: current.ok ? current.entry.enabled !== false : true,
+        riskConfirmed: payload.riskConfirmed === true,
+      })
+      if (!installed.ok) {
+        return {
+          ...fail('dependency_update_failed', installed.error || `Skill 依赖 ${dependency.id} 更新失败`),
+          dependency,
+          cause: installed.code || 'install_failed',
+          updates,
+          warnings,
+        }
+      }
+      updates.push({
+        id: dependency.id,
+        from: installedVersion || null,
+        to: availableVersion,
+        ...(sameVersionContentChanged ? { reason: 'content_changed' } : {}),
+      })
+    }
+    return ok({ updates, warnings })
+  }
+
   async function updateCapability(payload = {}) {
     const id = String(payload.id || '').trim()
     const entryResult = catalogApi.getCatalogEntry(id)
     if (!entryResult.ok) return entryResult
     const sourceResult = catalogApi.getBundledInstallSource(entryResult.entry)
     if (!sourceResult.ok) return sourceResult
-    return importApi.installCurated(id, {
+    const dependencySync = syncBundledSkillDependencies(entryResult.entry, payload)
+    if (!dependencySync.ok) return dependencySync
+    const result = importApi.installCurated(id, {
       bundledRoot,
       enabled: true,
       riskConfirmed: payload.riskConfirmed === true,
     })
+    if (!result.ok) return result
+    return {
+      ...result,
+      dependencyUpdates: dependencySync.updates || [],
+      warnings: [...(dependencySync.warnings || []), ...(result.warnings || [])],
+    }
   }
 
   async function importCapability(payload = {}) {

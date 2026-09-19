@@ -180,13 +180,16 @@ function normalizeMentionMessage(item = {}) {
   }
 }
 
-function formatRelatedChats(mentions = [], chats = [], days = 1, identity = null) {
+function formatRelatedChats(mentions = [], chats = [], days = 1, identity = null, periodLabel = '', coverage = {}) {
   const who = identity && identity.userName ? `（授权用户：${identity.userName}）` : ''
-  const dayLabel = days === 1 ? '今天' : `最近 **${days}** 个自然日`
+  const dayLabel = periodLabel || (days === 1 ? '今天' : `最近 **${days}** 个自然日`)
   const lines = [
     `${dayLabel}与你相关的飞书聊天摘要${who}：`,
     '',
     '说明：会话名可点击跳转飞书；@我 已提炼主题与建议，仅在需要完整上下文时再打开原文。',
+    '读取范围：仅包含指定时段的 @我 消息摘要及近期会话列表；未读取全部群聊/私聊正文，也未获取未读计数。',
+    coverage.truncated ? '结果达到分页或展示上限，仅展示部分消息，不能据此推断全部消息数量。' : '',
+    coverage.chatListTruncated ? '会话列表仅展示近期的一部分，不代表全部会话。' : '',
     '',
   ]
 
@@ -214,9 +217,10 @@ function formatRelatedChats(mentions = [], chats = [], days = 1, identity = null
 
   const p2p = chats.filter(c => /p2p|private|单聊|私聊/i.test(String(c.mode || '')))
   const groups = chats.filter(c => !/p2p|private|单聊|私聊/i.test(String(c.mode || '')))
-  lines.push('', `## 今日相关会话主题（私聊 ${p2p.length} / 群聊 ${groups.length}，共 ${chats.length}）`)
+  lines.push('', `## 近期会话列表（私聊 ${p2p.length} / 群聊 ${groups.length}，共 ${chats.length}）`)
+  if (coverage.chatListError) lines.push(`会话列表读取失败：${coverage.chatListError}。这不表示没有会话；已读取的 @我 消息仍可使用。`)
   if (!chats.length) {
-    lines.push('- 未能列出近期私聊/群聊主题（可能缺权限或暂无会话）。')
+    if (!coverage.chatListError) lines.push('- 会话列表返回空结果。')
   } else {
     lines.push(`### 私聊（${p2p.length}）`)
     if (!p2p.length) {
@@ -251,18 +255,43 @@ function formatRelatedChats(mentions = [], chats = [], days = 1, identity = null
   return lines.filter(Boolean).join('\n')
 }
 
+function parseExactLocalDate(value) {
+  const text = String(value || '').trim()
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text)
+  if (!match) return null
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  if (date.getFullYear() !== Number(match[1]) || date.getMonth() !== Number(match[2]) - 1 || date.getDate() !== Number(match[3])) return null
+  return date
+}
+
+function formatLocalDate(date) {
+  const d = date instanceof Date ? date : new Date(date)
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
 async function executeRelatedChats(args = {}, opts = {}) {
-  const days = Math.max(1, Math.min(30, Math.floor(Number(args.days == null ? 1 : args.days) || 1)))
   const now = new Date()
-  const startDay = addDays(now, -(days - 1))
+  const relativeDate = String(args.date || '').trim() === '昨天'
+    ? addDays(now, -1)
+    : String(args.date || '').trim() === '前天'
+      ? addDays(now, -2)
+      : null
+  const exactDate = parseExactLocalDate(args.date) || relativeDate
+  const days = exactDate
+    ? 1
+    : Math.max(1, Math.min(30, Math.floor(Number(args.days == null ? 1 : args.days) || 1)))
+  const startDay = exactDate || addDays(now, -(days - 1))
+  const endDay = exactDate || now
   const start = formatIsoLocal(new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate()), false)
-  const end = formatIsoLocal(now, true)
+  const end = formatIsoLocal(new Date(endDay.getFullYear(), endDay.getMonth(), endDay.getDate()), true)
   const identity = await resolveCurrentUserIdentity(opts)
 
   const mentions = []
   const seenIds = new Set()
   const seenPageTokens = new Set()
   let pageToken = ''
+  let truncated = false
   for (let page = 0; page < 4; page++) {
     const res = await runLarkCli(buildMessagesSearchAtMeArgs({
       start,
@@ -284,6 +313,7 @@ async function executeRelatedChats(args = {}, opts = {}) {
     }
     const nextToken = String(payload?.data?.page_token || payload?.page_token || '').trim()
     const hasMore = Boolean(payload?.data?.has_more ?? payload?.has_more)
+    truncated = hasMore
     if (!hasMore || !nextToken || seenPageTokens.has(nextToken)) break
     seenPageTokens.add(nextToken)
     pageToken = nextToken
@@ -295,16 +325,25 @@ async function executeRelatedChats(args = {}, opts = {}) {
     page_size: 20,
   }, opts)
   const chats = chatList.ok ? (chatList.items || []).slice(0, 16) : []
+  const coverage = {
+    truncated: truncated || mentions.length > 30,
+    chatListTruncated: Boolean((chatList.items || []).length > 16 || chatList.raw?.data?.has_more || chatList.raw?.has_more),
+    chatListError: chatList.ok ? '' : String(chatList.message || chatList.code || '会话列表不可用'),
+    allMessageBodiesRead: false,
+    unreadCountsAvailable: false,
+  }
 
   return {
     ok: true,
-    text: formatRelatedChats(mentions.slice(0, 30), chats, days, identity),
+    text: formatRelatedChats(mentions.slice(0, 30), chats, days, identity, exactDate ? formatLocalDate(exactDate) : '', coverage),
     meta: {
       workflow: 'related_chats',
       days,
       mentions: mentions.slice(0, 30),
       chats,
       identity,
+      partial: Boolean(coverage.truncated || coverage.chatListTruncated || coverage.chatListError),
+      coverage,
     },
   }
 }
@@ -312,6 +351,7 @@ async function executeRelatedChats(args = {}, opts = {}) {
 module.exports = {
   formatIsoLocal,
   buildMessagesSearchAtMeArgs,
+  parseExactLocalDate,
   pickMessageSearchItems,
   sanitizeImMessageText,
   inferMentionTheme,

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "data-analysis-method",
+  "kind": "skill",
+  "name": "数据口径与可复核分析",
+  "version": "1.1.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

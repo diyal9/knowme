@@ -7,6 +7,7 @@
 
 /** 挂载内容源与 Provider 胶水；由组合根 create(ctx) 调用一次。 */
 function create(ctx) {
+const providerSecret = require('../lib/provider-secret');
 ctx.workspaceNoteBrief = function workspaceNoteBrief(n) {
     return {
         id: n.id,
@@ -50,6 +51,18 @@ ctx.saveSourcesStore = function saveSourcesStore(store) {
 };
 ctx.findSource = function findSource(id) {
     return ctx.loadSourcesStore().sources.find(s => s.id === id) || null;
+};
+ctx.loadProjectsStore = function loadProjectsStore() {
+    return ctx.projectsLib.loadStore(ctx.PROJECTS_FILE, ctx.loadSourcesStore());
+};
+ctx.saveProjectsStore = function saveProjectsStore(store) {
+    return ctx.projectsLib.saveStore(ctx.PROJECTS_FILE, store, ctx.loadSourcesStore());
+};
+ctx.getActiveProjectId = function getActiveProjectId() {
+    return ctx.loadProjectsStore().activeProjectId || null;
+};
+ctx.resolveProjectContext = function resolveProjectContext(projectId) {
+    return ctx.projectsLib.resolveProjectContext(ctx.loadProjectsStore(), ctx.loadSourcesStore(), projectId);
 };
 ctx.mainLlmBridge = require('../lib/main-llm-bridge');
 ctx.__bind_normalizeChatEndpoint_normalizeEmbedding = ctx.mainLlmBridge, ctx.normalizeChatEndpoint = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.normalizeChatEndpoint, ctx.normalizeEmbeddingsEndpoint = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.normalizeEmbeddingsEndpoint, ctx.buildEmbedFn = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.buildEmbedFn, ctx.parseSseLines = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.parseSseLines, ctx.extractChatText = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.extractChatText, ctx.requestAgentCompletion = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.requestAgentCompletion, ctx.cleanSuggestedTitle = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.cleanSuggestedTitle, ctx.localTitleFromParagraph = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.localTitleFromParagraph, ctx.chatCompletionOnce = ctx.__bind_normalizeChatEndpoint_normalizeEmbedding.chatCompletionOnce;
@@ -156,9 +169,16 @@ ctx.getActiveSourceRoot = function getActiveSourceRoot() {
 };
 ctx.buildActiveSourceFileTools = function buildActiveSourceFileTools(embed, opts = {}) {
     const store = ctx.loadSourcesStore();
-    const active = store.sources.find(s => s.id === store.activeSourceId)
-        || store.sources[0]
-        || null;
+    const projectContext = opts.projectId
+        ? ctx.resolveProjectContext(opts.projectId)
+        : null;
+    if (opts.projectId && (!projectContext?.ok || !projectContext.workspace?.available))
+        return null;
+    const active = projectContext?.workspace?.sourceId
+        ? store.sources.find(s => s.id === projectContext.workspace.sourceId) || null
+        : store.sources.find(s => s.id === store.activeSourceId)
+            || store.sources[0]
+            || null;
     if (!active?.rootPath)
         return null;
     const root = active.rootPath;
@@ -187,10 +207,12 @@ ctx.buildActiveSourceFileTools = function buildActiveSourceFileTools(embed, opts
             maxMatches: ctx.agentFileTools.MAX_GREP_MATCHES,
         }),
     };
-    const includeWrite = ctx.isToolSurfaceV1();
+    const includeWrite = ctx.isToolSurfaceV1() && projectContext?.project?.status !== 'readonly';
     const base = ctx.agentFileTools.buildFileTools(adapter, { includeWrite });
     base.fileAdapter = writeAdapter;
     base.sourceRoot = root;
+    base.sourceId = active.id;
+    base.projectId = projectContext?.project?.id || null;
     // 语义检索工具：仅在提供 embed（用户启用向量重排/embeddings）时投影。
     if (typeof embed === 'function') {
         const cacheKey = `semantic:${root}:${String(embed.cacheKey || 'default')}`;
@@ -269,9 +291,10 @@ ctx.kosSourcesCtx = function kosSourcesCtx() {
     }
 };
 ctx.listRegistryProviders = function listRegistryProviders() {
-    const cfg = ctx.knowledgeOs.loadConfig(ctx.app.getPath('userData'));
     const { providers } = ctx.listProvidersRedacted();
-    return providers.map(p => ctx.knowledgeProvider.normalizeProvider(p.id === 'local-default' ? ctx.localDefaultProvider() : p));
+    return providers.map((p) => ctx.knowledgeProvider.normalizeProvider(
+        p.id === 'local-default' ? ctx.localDefaultProvider() : (ctx.resolveProviderById(p.id) || p)
+    ));
 };
 ctx.wikiDocsForFabric = function wikiDocsForFabric(userData) {
     const list = ctx.knowledgeOs.listEntries(userData, ctx.kosSourcesCtx());
@@ -300,21 +323,12 @@ ctx.buildFabricCtx = function buildFabricCtx(extra = {}) {
         wikiDocs: ctx.wikiDocsForFabric(userData),
         embed: ctx.buildEmbedFn(s),
         ...ctx.kosSourcesCtx(),
-        fabricSearch: (ud, q, ctx) => ctx.fabricRetrieval.fabricSearch(ud, q, ctx),
-        queryProvider: (def, q, ctx) => ctx.knowledgeProvider.queryProvider(def, q, {
-            ...ctx,
+        fabricSearch: (ud, q, retrievalOptions) => ctx.fabricRetrieval.fabricSearch(ud, q, retrievalOptions),
+        queryProvider: (def, q, retrievalOptions) => ctx.knowledgeProvider.queryProvider(def, q, {
+            ...retrievalOptions,
             useFabric: false,
         }),
-        loadKbDocs: async (provider) => {
-            const extracted = ctx.fabricWeave.extractAnchors(userData, provider, ctx.kosSourcesCtx());
-            if (!extracted.ok)
-                return [];
-            return extracted.anchors.map(a => ({
-                title: a.title,
-                path: a.extRef || a.id,
-                content: `${a.title}\n${a.summary || ''}`,
-            }));
-        },
+        loadKbDocs: async (provider) => ctx.fabricWeave.loadProviderDocuments(userData, provider, ctx.kosSourcesCtx()),
         readWiki: (rel) => ctx.knowledgeOs.readEntry(userData, 'wiki', rel, ctx.kosSourcesCtx()),
         resolveRef: (ref) => ctx.fabricRetrieval.kbGet(userData, ref, {
             readWiki: rel => ctx.knowledgeOs.readEntry(userData, 'wiki', rel, ctx.kosSourcesCtx()),
@@ -344,11 +358,13 @@ ctx.encProviderKey = function encProviderKey(plain) {
         }
     }
     catch { /* ignore */ }
-    return null;
+    return providerSecret.encryptWithDpapi(String(plain));
 };
 ctx.decProviderKey = function decProviderKey(encB64) {
     if (!encB64)
         return '';
+    if (String(encB64).startsWith('dpapi:'))
+        return providerSecret.decryptWithDpapi(String(encB64));
     try {
         if (ctx.safeStorage.isEncryptionAvailable()) {
             return ctx.safeStorage.decryptString(Buffer.from(encB64, 'base64')).toString('utf8');
@@ -384,7 +400,7 @@ ctx.resolveActiveProvider = function resolveActiveProvider() {
     const stored = (Array.isArray(cfg.providers) ? cfg.providers : []).find((p) => p.id === activeId);
     if (!stored)
         return ctx.localDefaultProvider();
-    if (stored.kind === 'remote-rag') {
+    if (stored.kind === 'remote-rag' || stored.kind === 'ragflow') {
         return { ...stored, apiKey: ctx.decProviderKey(stored.apiKeyEnc) };
     }
     return stored;
@@ -398,7 +414,7 @@ ctx.resolveProviderById = function resolveProviderById(id) {
     const stored = (Array.isArray(cfg.providers) ? cfg.providers : []).find((p) => p.id === providerId);
     if (!stored)
         return null;
-    if (stored.kind === 'remote-rag') {
+    if (stored.kind === 'remote-rag' || stored.kind === 'ragflow') {
         return { ...stored, apiKey: ctx.decProviderKey(stored.apiKeyEnc) };
     }
     return ctx.knowledgeProvider.normalizeProvider(stored);
@@ -573,6 +589,7 @@ ctx.publicWorkbenchAuthStatus = function publicWorkbenchAuthStatus(settings, hea
 ctx.getWorkbenchAutomationStore = function getWorkbenchAutomationStore() {
     return ctx.workbenchAutomationStore.createStore(ctx.WORKBENCH_AUTOMATIONS_FILE, {
         resolveLaunch: (job) => ctx.workbenchConsoleModel.buildAutomationLaunchRequest(job, ctx.lastVerticalPipelineFacts || {}),
+        resolveProject: (projectId) => ctx.resolveProjectContext(projectId),
     });
 };
 ctx.getWorkbenchTodoStore = function getWorkbenchTodoStore() {

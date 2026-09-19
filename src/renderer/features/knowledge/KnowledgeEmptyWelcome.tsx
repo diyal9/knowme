@@ -65,7 +65,7 @@ export function KnowledgeEmptyWelcome() {
               + 添加第一份资料
             </button>
           </div>
-          <button type="button" className="knowledge-firsttouch-connect" onClick={() => setPage('connect')}>
+          <button type="button" className="knowledge-firsttouch-connect" onClick={() => setPage('libraries')}>
             已有飞书 / 文件夹？ 连接来源
           </button>
         </section>

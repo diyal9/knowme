@@ -4,20 +4,37 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const { LEGACY_DEMO_SEED_IDS } = require('./official-workflows')
+const { hashDirectory } = require('./capability-store')
 
-const MIGRATION_ID = 'personal-expert-roster-v7'
-const PRODUCTION_EXPERT_IDS = Object.freeze([
-  'product-manager', 'user-researcher', 'requirement-reviewer',
-  'content-strategist', 'longform-editor', 'presentation-writer',
-  'creative-director', 'visual-designer', 'image-producer',
-  'office-partner', 'meeting-scribe', 'action-owner',
-  'data-analyst', 'business-insight-analyst', 'data-report-editor',
-  'solution-architect', 'software-engineer', 'qa-engineer',
-  'research-analyst', 'knowledge-curator', 'fact-checker',
+const MIGRATION_ID = 'focused-expert-roster-v10'
+const IMAGE_PRODUCER_CAPABILITY_IDS = Object.freeze([
+  'creative-concept-method',
+  'visual-brief-prompt',
+  'th-art-intake',
+  'th-art-prompt-enrich',
+  'th-art-pango-generate',
+  'writing-polish',
+  'image-producer',
+])
+const RETAINED_EXPERT_IDS = Object.freeze([
+  'product-manager', 'office-partner', 'research-analyst',
+  'software-engineer', 'data-analyst', 'image-producer',
+  'operations-data-analyst',
+])
+const PRODUCTION_EXPERT_IDS = RETAINED_EXPERT_IDS
+const REMOVED_BUNDLED_EXPERT_IDS = Object.freeze([
+  'requirement-reviewer', 'user-researcher',
+  'meeting-scribe', 'action-owner',
+  'fact-checker', 'knowledge-curator',
+  'solution-architect', 'qa-engineer',
+  'business-insight-analyst', 'data-report-editor',
+  'creative-director', 'visual-designer',
+  'presentation-writer', 'content-strategist', 'longform-editor',
   'external-capability-importer',
 ])
 const RETIRED_EXPERT_IDS = Object.freeze([
   'producer', 'developer', 'tester', 'copywriter', 'game-studio-partner',
+  ...REMOVED_BUNDLED_EXPERT_IDS,
 ])
 const TEST_ID_RE = /^(?:demo|test|qa[-_.]?copy)(?:[-_.]|$)/i
 
@@ -32,8 +49,57 @@ function writeJsonAtomic(file, payload) {
   fs.renameSync(tmp, file)
 }
 
+function bundledContentHash(bundledRoot, entry) {
+  const bundlePath = String(entry?.bundlePath || '').trim()
+  if (!bundlePath) return ''
+  const root = path.resolve(bundledRoot, bundlePath)
+  const relative = path.relative(path.resolve(bundledRoot), root)
+  if (relative.startsWith('..') || path.isAbsolute(relative) || !fs.existsSync(root)) return ''
+  try { return hashDirectory(root) } catch { return '' }
+}
+
+/**
+ * Route dependencies are part of the expert install closure when a route
+ * declares a real tool call. This prevents an older installed sidecar from
+ * silently downgrading a route Skill to optional.
+ */
+function mergeRouteDependencies(dependencies = [], manifest = {}) {
+  const merged = new Map()
+  const add = (dependency, required = false) => {
+    const id = String(dependency?.id || '').trim()
+    const kind = String(dependency?.kind || '').trim()
+    if (!id || (kind !== 'skill' && kind !== 'connector')) return
+    const key = `${kind}:${id}`
+    const current = merged.get(key)
+    merged.set(key, {
+      ...(current || {}),
+      id,
+      kind,
+      required: Boolean(current?.required || dependency?.required === true || required),
+    })
+  }
+
+  for (const dependency of Array.isArray(dependencies) ? dependencies : []) add(dependency)
+  const execution = manifest?.metadata?.knowme?.execution || {}
+  const addRoute = (route = {}) => {
+    const hasToolContract = (Array.isArray(route.requiredTools) && route.requiredTools.length > 0)
+      || (Array.isArray(route.toolAllowlist) && route.toolAllowlist.length > 0)
+    if (!hasToolContract) return
+    for (const id of [
+      ...(Array.isArray(route.requiredSkills) ? route.requiredSkills : []),
+      route.skillId,
+    ]) add({ id, kind: 'skill' }, true)
+    // External connectors remain runtime-gated because installation does not
+    // imply authorization. Their route readiness is diagnosed separately.
+  }
+  for (const route of Array.isArray(execution.routes) ? execution.routes : []) addRoute(route)
+  for (const deliverable of Array.isArray(execution.deliverables) ? execution.deliverables : []) addRoute(deliverable)
+  return [...merged.values()]
+}
+
 function shouldRemoveExpert(id, entry = {}) {
   const key = String(id || '').trim()
+  if (entry?.source && entry.source !== 'curated') return false
   if (RETIRED_EXPERT_IDS.includes(key)) return true
   const label = `${entry.name || ''} ${entry.description || ''}`
   return TEST_ID_RE.test(key) || /(?:测试用|演示数据|demo expert)/i.test(label)
@@ -63,23 +129,6 @@ function shouldRemoveWorkflow(id, pkg = {}) {
   return isEmptyShell(pkg)
 }
 
-function backupProductionData(userData, files, expertIds) {
-  const backupRoot = path.join(userData, 'migrations', `${MIGRATION_ID}-backup`)
-  fs.mkdirSync(backupRoot, { recursive: true })
-  for (const file of files) {
-    if (!fs.existsSync(file)) continue
-    fs.copyFileSync(file, path.join(backupRoot, path.basename(file)))
-  }
-  const expertRoot = path.join(userData, 'capabilities', 'experts')
-  const backupExperts = path.join(backupRoot, 'experts')
-  for (const id of expertIds) {
-    const source = path.join(expertRoot, id)
-    if (!fs.existsSync(source)) continue
-    fs.cpSync(source, path.join(backupExperts, id), { recursive: true })
-  }
-  return backupRoot
-}
-
 function pruneOverlay(file, removeIds) {
   const raw = readJson(file)
   if (!raw?.entries || typeof raw.entries !== 'object') return 0
@@ -106,29 +155,29 @@ function pruneWorkflows(file) {
   return removed
 }
 
-function shouldRemoveTask(task = {}) {
+function shouldRemoveTask(task = {}, removedExpertIds = RETIRED_EXPERT_IDS) {
   const goal = String(task.goal || task.brief?.goal || '').trim()
   const title = String(task.title || task.name || '').trim()
   const expertId = String(task.expertId || task.owner?.expertId || '').trim()
   return goal === '三元礼包'
     || TEST_ID_RE.test(String(task.id || ''))
     || /(?:测试任务|演示任务|demo task)/i.test(`${title} ${goal}`)
-    || (RETIRED_EXPERT_IDS.includes(expertId) && /^(?:Brief 出图审阅|三角色协作交付)$/.test(title))
+    || removedExpertIds.includes(expertId)
 }
 
-function pruneTasks(file) {
+function pruneTasks(file, removedExpertIds = RETIRED_EXPERT_IDS) {
   const raw = readJson(file)
   if (!raw) return []
   const removed = []
   if (Array.isArray(raw.tasks)) {
     raw.tasks = raw.tasks.filter(task => {
-      if (!shouldRemoveTask(task)) return true
+      if (!shouldRemoveTask(task, removedExpertIds)) return true
       removed.push(String(task.id || ''))
       return false
     })
   } else if (raw.tasks && typeof raw.tasks === 'object') {
     for (const [id, task] of Object.entries(raw.tasks)) {
-      if (!shouldRemoveTask({ ...task, id: task?.id || id })) continue
+      if (!shouldRemoveTask({ ...task, id: task?.id || id }, removedExpertIds)) continue
       delete raw.tasks[id]
       removed.push(id)
     }
@@ -153,6 +202,180 @@ function boundExpertIds(raw) {
   return ids
 }
 
+/**
+ * Upgrade the bundled image expert in place while preserving user ownership.
+ * Only a currently installed curated expert opts into this dependency bundle;
+ * custom/local entries with the same ids are never overwritten.
+ */
+async function syncImageProducerCapabilities(options = {}) {
+  const userData = String(options.userData || '').trim()
+  const hub = options.hub
+  if (!userData || typeof hub?.installCapability !== 'function') {
+    return { ok: true, skipped: true, reason: 'installer_unavailable', updated: [] }
+  }
+
+  const installFile = path.join(userData, 'capabilities', 'install-store.json')
+  const installed = readJson(installFile)?.entries || {}
+  const imageExpert = installed['image-producer']
+  if (!imageExpert || imageExpert.source !== 'curated' || ['removed', 'failed', 'available'].includes(imageExpert.status)) {
+    return { ok: true, skipped: true, reason: 'curated_image_expert_not_installed', updated: [] }
+  }
+
+  const bundledCatalog = readJson(path.join(__dirname, '..', 'catalog', 'catalog.json'))
+  const bundledRoot = path.join(__dirname, '..', 'catalog')
+  const bundledEntries = new Map((bundledCatalog?.entries || []).map(entry => [String(entry.id || ''), entry]))
+  const updated = []
+  const updatedDetails = []
+  const skipped = []
+  for (const id of IMAGE_PRODUCER_CAPABILITY_IDS) {
+    const current = installed[id]
+    const bundledEntry = bundledEntries.get(id) || {}
+    const targetVersion = String(bundledEntry.version || '')
+    const targetHash = bundledContentHash(bundledRoot, bundledEntry)
+    if (current && current.source !== 'curated') {
+      skipped.push({ id, reason: 'user_owned' })
+      continue
+    }
+    const sameVersionContentChanged = current
+      && targetVersion
+      && String(current.version || '') === targetVersion
+      && targetHash
+      && String(current.contentHash || '') !== targetHash
+    if (current && targetVersion && String(current.version || '') === targetVersion && !sameVersionContentChanged) continue
+    const enabled = id === 'image-producer' ? imageExpert.enabled !== false : true
+    const result = await hub.installCapability({ id, enabled, riskConfirmed: true })
+    if (!result?.ok) {
+      return {
+        ok: false,
+        code: result?.code || 'image_capability_upgrade_failed',
+        error: result?.error || `升级能力失败：${id}`,
+        updated,
+        skipped,
+      }
+    }
+    updated.push(id)
+    updatedDetails.push({ id, reason: sameVersionContentChanged ? 'content_changed' : 'version_changed' })
+  }
+  return { ok: true, updated, updatedDetails, skipped }
+}
+
+/**
+ * Keep every installed, bundled production expert on the current package
+ * version. Retired bundled experts are removed separately, while custom/local
+ * experts are never overwritten.
+ */
+async function syncRetainedExpertCapabilities(options = {}) {
+  const userData = String(options.userData || '').trim()
+  const hub = options.hub
+  if (!userData || typeof hub?.installCapability !== 'function') {
+    return { ok: true, skipped: true, reason: 'installer_unavailable', updated: [], ignored: [] }
+  }
+
+  const installFile = path.join(userData, 'capabilities', 'install-store.json')
+  const installed = readJson(installFile)?.entries || {}
+  const bundledCatalog = readJson(path.join(__dirname, '..', 'catalog', 'catalog.json'))
+  const bundledRoot = path.join(__dirname, '..', 'catalog')
+  const bundledEntries = new Map((bundledCatalog?.entries || []).map(entry => [String(entry.id || ''), entry]))
+  const updated = []
+  const updatedDetails = []
+  const dependencyUpdates = []
+  const ignored = []
+
+  const loadBundledDependencies = (bundledEntry) => {
+    const bundlePath = String(bundledEntry?.bundlePath || '').trim()
+    const bundledRoot = path.join(__dirname, '..', 'catalog')
+    const capabilityManifest = bundlePath
+      ? readJson(path.join(bundledRoot, bundlePath, 'capability.manifest.json'))
+      : null
+    const legacyManifest = bundlePath
+      ? readJson(path.join(bundledRoot, bundlePath, 'manifest.json'))
+      : null
+    const manifest = capabilityManifest || legacyManifest || bundledEntry?.manifest || {}
+    if (Array.isArray(manifest.dependencies)) return mergeRouteDependencies(manifest.dependencies, manifest)
+    const skillIds = Array.isArray(manifest.skills)
+      ? manifest.skills
+      : (Array.isArray(bundledEntry?.skills) ? bundledEntry.skills : [])
+    return mergeRouteDependencies(skillIds.map(id => ({ id, kind: 'skill', required: true })), manifest)
+  }
+
+  const syncRequiredDependencies = async (expertId, bundledEntry) => {
+    const dependencies = loadBundledDependencies(bundledEntry)
+    for (const dependency of dependencies.filter(item => item?.required === true && item.id)) {
+      const currentDependency = installed[dependency.id]
+      const ready = currentDependency
+        && currentDependency.enabled === true
+        && !['removed', 'failed', 'available'].includes(currentDependency.status)
+      if (ready) continue
+      const result = await hub.installCapability({
+        id: dependency.id,
+        enabled: true,
+        riskConfirmed: true,
+      })
+      if (!result?.ok) {
+        return {
+          ok: false,
+          code: result?.code || 'retained_expert_dependency_install_failed',
+          error: result?.error || `安装专家依赖失败：${dependency.id}`,
+        }
+      }
+      dependencyUpdates.push({ expertId, id: dependency.id, kind: dependency.kind || 'skill' })
+      installed[dependency.id] = {
+        id: dependency.id,
+        kind: dependency.kind || 'skill',
+        enabled: true,
+        status: 'enabled',
+      }
+    }
+    return { ok: true }
+  }
+
+  for (const id of RETAINED_EXPERT_IDS) {
+    const current = installed[id]
+    if (!current || ['removed', 'failed', 'available'].includes(current.status)) continue
+    if (current.source !== 'curated') {
+      ignored.push({ id, reason: 'user_owned' })
+      continue
+    }
+    const bundledEntry = bundledEntries.get(id) || {}
+    const dependencySync = await syncRequiredDependencies(id, bundledEntry)
+    if (!dependencySync.ok) {
+      return {
+        ok: false,
+        code: dependencySync.code,
+        error: dependencySync.error,
+        updated,
+        updatedDetails,
+        dependencyUpdates,
+        ignored,
+      }
+    }
+    const targetVersion = String(bundledEntry.version || '')
+    const targetHash = bundledContentHash(bundledRoot, bundledEntry)
+    const sameVersionContentChanged = targetVersion
+      && String(current.version || '') === targetVersion
+      && targetHash
+      && String(current.contentHash || '') !== targetHash
+    if (targetVersion && String(current.version || '') === targetVersion && !sameVersionContentChanged) continue
+    const result = await hub.installCapability({
+      id,
+      enabled: current.enabled !== false,
+      riskConfirmed: true,
+    })
+    if (!result?.ok) {
+      return {
+        ok: false,
+        code: result?.code || 'retained_expert_upgrade_failed',
+        error: result?.error || `升级保留专家失败：${id}`,
+        updated,
+        ignored,
+      }
+    }
+    updated.push(id)
+    updatedDetails.push({ id, reason: sameVersionContentChanged ? 'content_changed' : 'version_changed' })
+  }
+  return { ok: true, updated, updatedDetails, dependencyUpdates, ignored }
+}
+
 /** v6 曾把整个公开目录批量安装；只回退该次生成且未驻场、无任务的本地副本。 */
 function autoInstalledCatalogIds(userData, installed, modeFile, taskFile) {
   const marker = readJson(path.join(userData, 'migrations', 'formal-catalog-v6.json'))
@@ -164,6 +387,7 @@ function autoInstalledCatalogIds(userData, installed, modeFile, taskFile) {
     const installedAt = Date.parse(entry?.installedAt || '')
     return entry?.kind === 'expert'
       && entry?.source === 'curated'
+      && !PRODUCTION_EXPERT_IDS.includes(id)
       && !protectedIds.has(id)
       && Number.isFinite(installedAt)
       && Math.abs(completedAt - installedAt) <= 15 * 60 * 1000
@@ -175,9 +399,19 @@ async function migrateProductionCatalog(options = {}) {
   const hub = options.hub
   if (!userData || !hub) return { ok: false, error: '缺少迁移上下文' }
 
+  const imageProducerUpgrade = await syncImageProducerCapabilities(options)
+  if (!imageProducerUpgrade.ok) return imageProducerUpgrade
+  const retainedExpertUpgrade = await syncRetainedExpertCapabilities(options)
+  if (!retainedExpertUpgrade.ok) return retainedExpertUpgrade
+
   const migrationRoot = path.join(userData, 'migrations')
   const marker = path.join(migrationRoot, `${MIGRATION_ID}.json`)
-  if (fs.existsSync(marker)) return { ok: true, skipped: true, migrationId: MIGRATION_ID }
+  if (fs.existsSync(marker)) {
+    return {
+      ok: true, skipped: true, migrationId: MIGRATION_ID,
+      imageProducerUpgrade, retainedExpertUpgrade,
+    }
+  }
 
   const capabilityRoot = path.join(userData, 'capabilities')
   const installFile = path.join(capabilityRoot, 'install-store.json')
@@ -186,17 +420,14 @@ async function migrateProductionCatalog(options = {}) {
   const taskFile = path.join(userData, 'workbench-tasks.json')
   const modeFile = path.join(userData, 'workbench-modes.json')
   const installed = readJson(installFile)?.entries || {}
+  const userOwnedRetiredIds = new Set(Object.entries(installed)
+    .filter(([id, entry]) => REMOVED_BUNDLED_EXPERT_IDS.includes(id) && entry?.source && entry.source !== 'curated')
+    .map(([id]) => id))
   const retiredIds = Object.entries(installed)
-    .filter(([id, entry]) => entry?.kind === 'expert' && shouldRemoveExpert(id, entry))
+    .filter(([id, entry]) => entry?.kind === 'expert' && entry?.source === 'curated' && shouldRemoveExpert(id, entry))
     .map(([id]) => id)
   const resetCatalogExperts = autoInstalledCatalogIds(userData, installed, modeFile, taskFile)
   const removeIds = [...new Set([...retiredIds, ...resetCatalogExperts])]
-  const backupRoot = backupProductionData(
-    userData,
-    [installFile, overlayFile, workflowFile, taskFile, modeFile],
-    removeIds,
-  )
-
   const removedExperts = []
   for (const id of removeIds) {
     const result = await hub.uninstallCapability({ id })
@@ -204,11 +435,13 @@ async function migrateProductionCatalog(options = {}) {
   }
   const removedOverlayEntries = pruneOverlay(overlayFile, removeIds)
   const removedWorkflows = pruneWorkflows(workflowFile)
-  const removedTasks = pruneTasks(taskFile)
+  const retiredTaskExpertIds = REMOVED_BUNDLED_EXPERT_IDS.filter(id => !userOwnedRetiredIds.has(id))
+  const removedTasks = pruneTasks(taskFile, [...new Set([...removeIds, ...retiredTaskExpertIds])])
 
   const result = {
-    ok: true, migrationId: MIGRATION_ID, backupRoot,
+    ok: true, migrationId: MIGRATION_ID,
     removedExperts, resetCatalogExperts, removedOverlayEntries, removedWorkflows, removedTasks,
+    imageProducerUpgrade, retainedExpertUpgrade,
     completedAt: new Date().toISOString(),
   }
   writeJsonAtomic(marker, result)
@@ -216,7 +449,10 @@ async function migrateProductionCatalog(options = {}) {
 }
 
 module.exports = {
-  MIGRATION_ID, PRODUCTION_EXPERT_IDS, RETIRED_EXPERT_IDS, TEST_ID_RE,
+  MIGRATION_ID, IMAGE_PRODUCER_CAPABILITY_IDS, RETAINED_EXPERT_IDS, PRODUCTION_EXPERT_IDS,
+  REMOVED_BUNDLED_EXPERT_IDS, RETIRED_EXPERT_IDS, TEST_ID_RE,
   shouldRemoveExpert, isEmptyShell, shouldRemoveWorkflow, shouldRemoveTask,
   taskExpertIds, boundExpertIds, autoInstalledCatalogIds, migrateProductionCatalog,
+  syncImageProducerCapabilities, syncRetainedExpertCapabilities,
+  mergeRouteDependencies,
 }

@@ -61,6 +61,47 @@ describe('agent-execution-timeline', () => {
     expect(view?.rows[1].status).toBe('error')
   })
 
+  it('explains failed tool calls instead of showing a generic unfinished label', () => {
+    const view = buildExecutionTimelineView({
+      streaming: false,
+      trace: [{
+        id: 'tool-error',
+        kind: 'tool',
+        toolName: 'run_python',
+        title: 'run_python',
+        status: 'error',
+        summary: '契约校验失败',
+      }],
+    })
+    expect(view?.rows[0].title).toBe('run_python 未完成')
+  })
+
+  it('keeps safe tool error code and message expandable through the stream reducer', () => {
+    const next = applyAssistantStreamEvent(
+      { id: 'a1', role: 'assistant', text: '', streaming: true, trace: [] },
+      {
+        type: 'tool.failed',
+        payload: {
+          id: 'tool-feishu',
+          kind: 'tool',
+          title: '飞书：read_doc',
+          toolName: 'feishu.read_doc',
+          status: 'error',
+          errorCode: 'invalid_args',
+          errorMessage: '文档链接格式无效',
+        },
+      },
+    )
+    const view = buildExecutionTimelineView({ ...next, streaming: false })
+    expect(view?.compact).toBe(false)
+    expect(view?.rows[0]).toMatchObject({
+      title: '飞书：read_doc 未完成',
+      errorCode: 'invalid_args',
+      errorMessage: '文档链接格式无效',
+      expandable: true,
+    })
+  })
+
   it('copies plan.updated onto the assistant message', () => {
     const next = applyAssistantStreamEvent(
       { id: 'a1', role: 'assistant', text: '', streaming: true, thinking: true },

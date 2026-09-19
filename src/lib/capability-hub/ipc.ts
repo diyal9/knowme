@@ -5,7 +5,7 @@
 'use strict'
 
 const { ipcMain } = require('electron')
-const { getSessionCapabilityBindings } = require('../agent-context-assembly')
+const { resolveSkillIpcContext } = require('./skill-ipc-context')
 const connectorCaps = require('../connector-capabilities')
 const { fail, ok } = require('./map')
 
@@ -56,7 +56,6 @@ const IPC_CHANNELS = Object.freeze({
  */
 function registerCapabilityHubIpc(deps, handlers = {}) {
   const {
-    loadAgentStore,
     listCapabilities,
     listCapabilityFavorites,
     toggleCapabilityFavorite,
@@ -129,7 +128,7 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
   })
 
   ipcMain.handle('skill-list', () => {
-    const items = skillRuntime().listSlashPickerItems()
+    const items = skillRuntime().listSlashPickerItems({ includeLegacy: false })
     const skills = items.map((item) => ({
       id: item.id,
       title: item.name,
@@ -142,42 +141,53 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
   })
 
   ipcMain.handle('skill-load', (_e, payload = {}) => {
-    const skillId = String(payload.skillId || payload.id || '').trim()
-    const sessionId = String(payload.sessionId || '').trim()
-    let filterOpts = {}
-    if (sessionId && loadAgentStore) {
-      const { sessions } = loadAgentStore()
-      const session = sessions.find((s) => s.id === sessionId)
-      if (session) {
-        const bindings = getSessionCapabilityBindings(session, expertRuntime())
-        if (bindings.allowedSkillIds) filterOpts = { allowedIds: bindings.allowedSkillIds }
-      }
-    }
-    const result = skillRuntime().loadSkillL1(skillId, filterOpts)
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
+    const result = skillRuntime().loadSkillL1(context.skillId, context.options)
+    return result.ok ? ok(result) : result
+  })
+
+  ipcMain.handle('skill-check', async (_e, payload = {}) => {
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
+    const result = await skillRuntime().checkSkill(context.skillId, context.options)
     return result.ok ? ok(result) : result
   })
 
   ipcMain.handle('skill-read-resource', (_e, payload = {}) => {
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
     const result = skillRuntime().readSkillResource(
-      payload.skillId || payload.id,
+      context.skillId,
       payload.path || payload.resource,
+      { ...context.options, offset: payload.offset, maxBytes: payload.maxBytes ?? payload.max_bytes },
     )
     return result.ok ? ok(result) : result
   })
 
+  ipcMain.handle('skill-package-files', (_e, payload = {}) => {
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
+    const result = skillRuntime().listSkillPackageFiles(context.skillId, { maxFiles: payload.maxFiles })
+    return result.ok ? ok(result) : result
+  })
+
+  ipcMain.handle('skill-package-file', (_e, payload = {}) => {
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
+    const result = skillRuntime().readSkillPackageFile(context.skillId, payload.path, { maxBytes: payload.maxBytes })
+    return result.ok ? ok(result) : result
+  })
+
   ipcMain.handle('skill-run-script', async (_e, payload = {}) => {
-    const sessionId = String(payload.sessionId || '').trim()
-    let permissions = payload.permissions || {}
-    if (sessionId && loadAgentStore) {
-      const { sessions } = loadAgentStore()
-      const session = sessions.find((s) => s.id === sessionId)
-      if (session?.run?.permissions) permissions = session.run.permissions
-    }
+    const context = resolveSkillIpcContext(deps, payload)
+    if (!context.ok) return context
     const result = await skillRuntime().runSkillScript(
-      payload.skillId || payload.id,
+      context.skillId,
       payload.script || payload.scriptPath,
       payload.args || {},
-      permissions,
+      context.permissions,
+      context.options,
     )
     return result.ok ? ok(result) : result
   })
@@ -224,7 +234,8 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
     if (conn.type !== 'mcp') {
       return ok({ state: conn.enabled ? 'enabled' : 'disabled', toolsCount: 0 })
     }
-    const probe = await connectorCaps.probeMcpHealth(conn.mcp || {})
+    const runtimeOptions = getConnectorsApi?.()?.resolveRuntimeOptions?.(conn) || {}
+    const probe = await connectorCaps.probeMcpHealth(conn.mcp || {}, runtimeOptions)
     return probe.ok ? ok(probe) : probe
   })
 
@@ -233,7 +244,8 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
     const connectors = unifiedConnectors.loadConnectors()
     const conn = connectors.find((c) => c.id === connectorId)
     if (!conn) return fail('not_found', '连接器不存在')
-    const preview = await connectorCaps.previewMcpTools(conn)
+    const runtimeOptions = getConnectorsApi?.()?.resolveRuntimeOptions?.(conn) || {}
+    const preview = await connectorCaps.previewMcpTools(conn, runtimeOptions)
     return preview.ok ? ok(preview) : preview
   })
 

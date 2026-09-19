@@ -1,0 +1,31 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-09T03:35:44.161Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:3a41b5efa02c6b4ffba48f28cdb37f6e8624b67a78dad6db65c6a09a74e31339",
+      "tasks": [
+        {
+          "taskId": "task-mttjq3ap-toeww",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:3a41b5efa02c6b4ffba48f28cdb37f6e8624b67a78dad6db65c6a09a74e31339",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "系统安全存储",
+            "detail": "Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

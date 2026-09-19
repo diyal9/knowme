@@ -11,6 +11,7 @@ const {
   projectedToolNames,
   publicConnectorView,
 } = require('../src/lib/connectors/normalize')
+const { configurationState } = require('../src/lib/connectors/runtime-config')
 const store = require('../src/lib/connectors/store')
 const { createConnectorsApi } = require('../src/lib/connectors')
 const { summarizeFeishuPermissions } = require('../src/lib/connectors/feishu-auth')
@@ -49,6 +50,21 @@ describe('connectors normalize', () => {
     })
     assert.equal(conn.type, 'feishu')
     assert.equal(conn.title, '飞书')
+  })
+
+  it('represents feishu as the built-in lark-cli connector, never as MCP', () => {
+    const conn = normalizeConnector({
+      id: 'feishu',
+      type: 'mcp',
+      enabled: true,
+      mcp: { command: 'npx', args: ['invalid-feishu-mcp'] },
+    })
+    const view = publicConnectorView(conn)
+    assert.equal(conn.type, 'feishu')
+    assert.equal(conn.cli.command, 'lark-cli')
+    assert.equal('mcp' in conn, false)
+    assert.equal('mcp' in view, false)
+    assert.equal(configurationState(conn).ready, true)
   })
 
   it('projects tools only when enabled and visible', () => {

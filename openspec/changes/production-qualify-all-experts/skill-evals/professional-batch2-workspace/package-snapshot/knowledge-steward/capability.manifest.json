@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "knowledge-steward",
+  "kind": "skill",
+  "name": "项目知识管家",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "knowledgeSteward",
+          "title": "项目知识",
+          "subtitle": "Wiki/OKF 查询、ingest 与 lint",
+          "icon": "book",
+          "group": "game-knowledge",
+          "modes": ["steward"],
+          "surfaces": ["scene"],
+          "prompt": "作为项目知识管家，先查现有 Wiki/OKF 证据，再给出整理或升格建议。"
+        }]
+      }
+    }
+  }
+}

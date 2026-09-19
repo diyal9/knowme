@@ -552,6 +552,40 @@ describe('feishu-cli allowlist builders', () => {
     assert.ok(result.text.includes('未找到明确 @你 的消息'))
   })
 
+  it('supports an exact local date for yesterday message summaries', async () => {
+    const searches = []
+    const result = await executeRelatedChats({ date: '2026-07-27', days: 30 }, {
+      spawnImpl: spawnJson((argv) => {
+        if (argv.includes('auth') && argv.includes('status')) return IDENTITY_ME
+        if (argv[0] === 'im' && argv[1] === '+messages-search') {
+          searches.push(argv)
+          return { data: { messages: [] } }
+        }
+        if (argv[0] === 'im' && argv[1] === '+chat-list') return { data: { items: [] } }
+        return { data: {} }
+      }),
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.meta.days, 1)
+    assert.ok(result.text.includes('2026-07-27与你相关的飞书聊天摘要'))
+    assert.equal(searches.length, 1)
+    assert.equal(searches[0][searches[0].indexOf('--start') + 1], '2026-07-27T00:00:00+08:00')
+    assert.equal(searches[0][searches[0].indexOf('--end') + 1], '2026-07-27T23:59:59+08:00')
+  })
+
+  it('accepts the relative date label yesterday', async () => {
+    const result = await executeRelatedChats({ date: '昨天' }, {
+      spawnImpl: spawnJson((argv) => {
+        if (argv.includes('auth') && argv.includes('status')) return IDENTITY_ME
+        if (argv[0] === 'im' && argv[1] === '+messages-search') return { data: { messages: [] } }
+        if (argv[0] === 'im' && argv[1] === '+chat-list') return { data: { items: [] } }
+        return { data: {} }
+      }),
+    })
+    assert.equal(result.ok, true)
+    assert.match(result.text, /\d{4}-\d{2}-\d{2}与你相关的飞书聊天摘要/)
+  })
+
   it('sanitizes mention markup and suggests handling for related chats', async () => {
     const { sanitizeImMessageText, inferMentionTheme, inferHandlingSuggestion, buildFeishuChatOpenUrl } = require('../src/lib/connectors/feishu-cli')
     const raw = '大家好 <at user_id="all"></at> :Lark_Emoji_Love_0: <u>篮球报名</u> 今晚截止'
@@ -595,6 +629,7 @@ describe('feishu-cli allowlist builders', () => {
     })
     assert.equal(result.ok, true)
     assert.equal(result.meta.candidates.length, 1)
+    assert.equal(result.meta.turnComplete, false)
     assert.equal(result.meta.candidates[0].minuteToken, 'mt_1')
     assert.ok(result.text.includes('对下九九AI应用规划'))
     assert.equal(result.text.includes('minute_token:'), false)
@@ -638,6 +673,7 @@ describe('feishu-cli allowlist builders', () => {
     })
     assert.equal(result.ok, true)
     assert.equal(result.meta.days, 3)
+    assert.equal(result.meta.turnComplete, true)
     assert.ok(/最近\s*\*?\*?3\*?\*?\s*个自然日/.test(result.text))
     assert.ok(searches.some(argv => argv.includes('--start') && argv.includes('--end')))
   })
@@ -974,7 +1010,7 @@ describe('feishu draft write review', () => {
     const names = runtime.surface.getToolDefinitions().map((d) => d.function.name)
     assert.ok(names.includes('feishu.meeting_candidates'))
     assert.ok(names.includes('feishu.meeting_read'))
-    assert.ok(names.includes('feishu.related_chats'))
+  assert.ok(names.includes('feishu.related_chats'))
     assert.ok(names.includes('feishu.today_priority'))
     assert.ok(names.includes('feishu.doc_kb_suggest'))
     // ACL recovery must be reachable from the same workflow.

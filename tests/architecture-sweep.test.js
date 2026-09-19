@@ -12,6 +12,11 @@ test('ai-generate no longer contains the legacy executor loop', () => {
   assert.equal(src.includes("ipcMain.handle('ai-generate'"), true)
 })
 
+test('agent generate keeps tool artifact refs available to expert task runtimes', () => {
+  const exec = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'agent-generate-execute.ts'), 'utf8')
+  assert.match(exec, /artifactRefs:\s*Array\.isArray\(kernelResult\.artifactRefs\)\s*\?\s*kernelResult\.artifactRefs\s*:\s*\[\]/)
+})
+
 test('file budget treats 1200 as advisory and 2000 as huge', () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'check-architecture.js'), 'utf8')
   assert.equal(src.includes('ADVISORY_TS_LINES = 1200'), true)

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "requirement-reviewer",
+  "kind": "expert",
+  "name": "需求评审专家",
+  "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "产品需求文档草案",
+    "已确认的用户证据与业务约束"
+  ],
+  "outputs": [
+    "评审结论与阻塞项",
+    "可直接回填的修改建议"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/requirement-reviewer"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "评审结论与阻塞项",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "可直接回填的修改建议",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

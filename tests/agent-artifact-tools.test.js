@@ -21,6 +21,29 @@ describe('agent-artifact-tools', () => {
     assert.equal(updated.ok, true)
   })
 
+  it('keeps immutable project origin on created and updated artifacts', async () => {
+    const { handlers, store } = artifactTools.buildArtifactTools({
+      runId: 'run:project',
+      projectId: 'project:knowme',
+      sourceId: 'source:local',
+      taskId: 'task:design',
+    })
+    const created = await handlers.create_artifact({ kind: 'markdown', title: 'Project plan', content: '# Plan' })
+    const id = created.artifactRefs[0].id
+    await handlers.update_artifact({ id, content: '# Updated plan' })
+    const artifact = store.get(id)
+
+    assert.equal(artifact.projectId, 'project:knowme')
+    assert.equal(artifact.sourceId, 'source:local')
+    assert.equal(artifact.taskId, 'task:design')
+    assert.deepEqual(artifact.meta, {
+      projectId: 'project:knowme',
+      sourceId: 'source:local',
+      taskId: 'task:design',
+      runId: 'run:project',
+    })
+  })
+
   it('exports csv from rows', async () => {
     const { handlers } = artifactTools.buildArtifactTools({ runId: 'r1' })
     const r = await handlers.export_artifact_csv({ title: 't', rows: [{ a: 1, b: 2 }] })

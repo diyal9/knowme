@@ -8,6 +8,7 @@ const os = require('os')
 
 const agentTools = require('../src/lib/agent-tools')
 const { buildSkillTools, validateSkillToolCall } = require('../src/lib/agent-skill-tools')
+const { buildV1Registry, buildToolSurfaceFromRegistry } = require('../src/lib/tool-surface-builder')
 
 const TMP = path.join(os.tmpdir(), `knowme-agent-skill-tools-${Date.now()}`)
 
@@ -109,5 +110,18 @@ describe('agent-skill-tools', () => {
     assert.equal(surface.isAllowedTool('load_skill'), true)
     const validation = surface.validateToolCall('load_skill', '{"skill_id":"demo"}')
     assert.equal(validation.ok, true)
+  })
+
+  it('keeps progressive skill tools in the v1 registry with valid semantics', () => {
+    const skillTools = buildSkillTools({ capabilitiesRoot })
+    const reg = buildV1Registry({ extraTools: skillTools, fileAdapter: {} })
+    assert.equal(reg.has('list_skills'), true)
+    assert.equal(reg.has('load_skill'), true)
+    assert.equal(reg.get('load_skill').contract.source, 'skill')
+    assert.equal(reg.get('run_skill_script').contract.scope, 'sandbox')
+    assert.deepEqual(reg.getRegistrationIssues(), [])
+    const projected = buildToolSurfaceFromRegistry(reg, { governancePolicy: {} }).surface
+    assert.equal(projected.isAllowedTool('load_skill'), true)
+    assert.equal(projected.isAllowedTool('run_skill_script'), true)
   })
 })

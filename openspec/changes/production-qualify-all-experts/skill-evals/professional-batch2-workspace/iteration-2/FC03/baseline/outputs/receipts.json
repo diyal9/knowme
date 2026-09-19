@@ -1,0 +1,56 @@
+{
+  "id": "wb-expert-task-mtorajue-iyjhj",
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "review",
+    "toolsUsed": [],
+    "steps": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:52.901Z"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:52.901Z"
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:52.901Z"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done",
+        "at": "2026-09-05T19:08:52.901Z"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtorajue-iyjhj_mtorajzc_primary",
+        "type": "answer",
+        "title": "核查结果",
+        "body": "**核查结论（截至 2026-05-12，仅依据所给材料）**\n\n1. “5月1日正式上线”——错误。来源A团队日志明确“正式上线日尚未确定”，仅原型演示完成。\n2. “客户CEO说它是行业最佳”——引语归属错误+无法确认。来源B仅有匿名“客户代表”，原话为“这个演示挺方便”，无姓名、职务，更无CEO身份；“行业最佳”无任何来源支持。\n3. “工作效率必然提高50%”——无法确认。来源C只有文件名“效果报告”，内容不可读，标题不构成数据支持；“必然”属因果夸大，无证据链。\n\n**修正文（可发布，约90字）**\n\n产品已于5月1日完成原型演示，正式上线日期待定。客户代表在访谈中评价“这个演示挺方便”。效率提升数据尚在整理，待效果报告核实后另行公布。\n\n如需更保守或更营销化的版本，告诉我语气方向即可。",
+        "status": "draft",
+        "meta": {
+          "taskId": "task-mtorajue-iyjhj",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtorajue-iyjhj_mtorajzc"
+        }
+      }
+    ],
+    "applyLog": []
+  },
+  "tools": [],
+  "configuration": "baseline"
+}

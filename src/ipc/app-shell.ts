@@ -6,6 +6,8 @@
 function registerAppShellIpc(ipcMain, deps) {
   const {
     app,
+    fs,
+    path,
     shell,
     clipboard,
     DATA_DIR,
@@ -13,14 +15,28 @@ function registerAppShellIpc(ipcMain, deps) {
     openSettings,
     openSettingsWindow,
     openMemoryPanel,
+    createWorkspaceWindow,
+    getWorkspaceWin,
     importPromptSpace,
   } = deps
 
   ipcMain.on('open-settings', (_e, tab) => openSettings(String(tab || '')))
   ipcMain.on('open-settings-window', (_e, tab) => openSettingsWindow(String(tab || '')))
   ipcMain.on('open-memory-panel', () => openMemoryPanel())
+  ipcMain.on('open-brain-panel', (_event, page = 'status') => {
+    createWorkspaceWindow()
+    const win = getWorkspaceWin()
+    if (!win || win.isDestroyed()) return
+    win.show()
+    win.focus()
+    win.webContents.send('workspace-open-route', { route: 'knowledge', page: String(page || 'status') })
+  })
 
   ipcMain.on('copy-to-clipboard', (_e, text) => clipboard.writeText(text))
+  ipcMain.handle('artifact-preview-resolve', (_e, source) => {
+    const { readArtifactPreviewSource } = require('../lib/artifact-preview-source')
+    return readArtifactPreviewSource(fs, path, source)
+  })
   ipcMain.on('open-data-dir', () => shell.openPath(DATA_DIR))
   ipcMain.on('open-prompt-space', () => {
     if (PROMPT_SPACE_DIR) shell.openPath(PROMPT_SPACE_DIR)

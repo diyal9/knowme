@@ -1,4 +1,5 @@
 import type { CapabilityItem, WorkbenchMode } from '../shared/api'
+import { isExpertAvailableForNewTask } from './capability-hub'
 
 export const TASK_QUICK_PREVIEW = 3
 export const TASK_RECENT_PREVIEW = 3
@@ -85,6 +86,7 @@ export function workbenchHomeExperts<T extends CapabilityItem>(
   if (!bound.size) return []
   return items.filter((item) => {
     if (item.kind && item.kind !== 'expert') return false
+    if (!isExpertAvailableForNewTask(item)) return false
     if (!bound.has(item.id)) return false
     return !isDemoOrTestExpert(item)
   })

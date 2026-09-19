@@ -1,0 +1,755 @@
+{
+  "contextAudit": [
+    {
+      "ts": "2026-09-05T21:32:15.146Z",
+      "level": "info",
+      "category": "system-prompt",
+      "event": "llm-system-prompt",
+      "msg": "构建系统提示词",
+      "scope": "ai-generate",
+      "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+      "meta": {
+        "model": "qwen3.8-flash",
+        "agentId": "personal",
+        "sessionId": "wb-***vs",
+        "skillRefs": [],
+        "capabilityIds": [
+          "suggestion"
+        ],
+        "contextManifest": {
+          "version": 1,
+          "scene": "expert-collaboration",
+          "phase": "execution",
+          "identity": "质量测试专家",
+          "executionPolicy": "tools-allowed",
+          "locale": "zh-CN",
+          "promptPackVersion": "zh-CN@2",
+          "estimatedTokens": 1420,
+          "candidateEstimatedTokens": 1420,
+          "savedEstimatedTokens": 0,
+          "included": [
+            {
+              "id": "core.runtime",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "86bc7ca30d6e2c75",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 88,
+              "chars": 145,
+              "hash": "b836c6cd2b3bf5f6",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.integrity",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "4a48c753df369080",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 296,
+              "chars": 475,
+              "hash": "84750be53e8ee845",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.conversation",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "de56ecb7f5f31b65",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 100,
+              "chars": 175,
+              "hash": "5f1cedc6de6dd6ec",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.output",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "fb3dedfef7682ab1",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 80,
+              "chars": 137,
+              "hash": "23b07856eb03bc06",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "data.dynamic.role",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "4b168d88dc872a77",
+                "version": "2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 25,
+              "chars": 39,
+              "hash": "fdc13953b19b93b6",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "scene.expert-execution",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "context-engine",
+                "idHash": "eafcc07cc525c9c7",
+                "version": "1"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 147,
+              "chars": 232,
+              "hash": "6f9fb9f81e5e76a2",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "scene.active-identity",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "372a547bf05aae3e"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 32,
+              "chars": 51,
+              "hash": "ddbabfdc9fff75aa",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "per***ld",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "d684f7bc1e2c9e6d"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 64,
+              "chars": 131,
+              "hash": "9c4e9cd37b672d21",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "persona.sop",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "d684f7bc1e2c9e6d"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 161,
+              "chars": 262,
+              "hash": "c5a644ff911fdc9d",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "persona.attributes",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "d684f7bc1e2c9e6d"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 34,
+              "chars": 65,
+              "hash": "d25cec7dcdef87f3",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "dat***or",
+              "kind": "task_fact",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "e296ee3bab1edfa0",
+                "version": "2"
+              },
+              "cachePolicy": "turn",
+              "usedTokens": 63,
+              "chars": 145,
+              "hash": "321c9a1261a0259f",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "data.dynamic.grounding",
+              "kind": "task_fact",
+              "authority": "data",
+              "trust": "untrusted",
+              "sourceTrust": "external",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "a77e39d1098de82a",
+                "version": "2"
+              },
+              "cachePolicy": "turn",
+              "usedTokens": 48,
+              "chars": 77,
+              "hash": "f0cd6f20a63ebc43",
+              "truncated": false,
+              "sensitive": true
+            },
+            {
+              "id": "preference.user",
+              "kind": "user_preference",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "settings",
+                "idHash": "d9bb268d29ca18a2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 155,
+              "chars": 258,
+              "hash": "7c8f89fb2b78b354",
+              "truncated": false,
+              "sensitive": true
+            },
+            {
+              "id": "data.dynamic.memory",
+              "kind": "memory",
+              "authority": "data",
+              "trust": "untrusted",
+              "sourceTrust": "external",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "c064fbca9d9de8dd",
+                "version": "2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 127,
+              "chars": 327,
+              "hash": "f0b9e54c8d0ae1f2",
+              "truncated": false,
+              "sensitive": true
+            }
+          ],
+          "omitted": [],
+          "conflicts": [],
+          "rankings": [
+            {
+              "id": "data.dynamic.memory",
+              "score": 0.1263,
+              "lexicalScore": 0.0119,
+              "vectorScore": 0,
+              "confidenceScore": 0.6,
+              "freshnessScore": 0
+            }
+          ],
+          "semanticSelection": {
+            "version": 1,
+            "mode": "off",
+            "status": "skipped",
+            "reason": "disabled",
+            "providerHash": "",
+            "latencyMs": 0,
+            "candidateCount": 1,
+            "eligibleCount": 0,
+            "cacheHits": 0,
+            "requested": 0,
+            "sensitiveExcluded": 0,
+            "wouldChange": false,
+            "limited": false
+          }
+        }
+      }
+    }
+  ],
+  "session": {
+    "id": "wb-expert-task-mtowf0eu-ia7vs",
+    "agentId": "personal",
+    "sessionKind": "expert-task",
+    "profileId": "",
+    "contextId": "",
+    "projectId": null,
+    "expertId": "qa-engineer",
+    "personaExpertId": "",
+    "executionPolicy": "tools-allowed",
+    "capabilitySnapshotId": "",
+    "snapshotPath": "",
+    "ephemeral": true,
+    "taskRef": {
+      "id": "task-mtowf0eu-ia7vs",
+      "kind": "expert-task"
+    },
+    "knowledgeRefs": [],
+    "title": "新助手",
+    "createdAt": "2026-09-05T21:32:14.174Z",
+    "updatedAt": "2026-09-05T21:32:24.62Z",
+    "summary": "",
+    "messages": [
+      {
+        "id": "msg_expert_task-mtowf0eu-ia7vs_mtowf0lv_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「qa-engineer」。\n\n你是 KnowMe 质量测试专家。从验收标准和风险出发设计测试，优先关注回归、边界、数据安全和失败恢复。严格区分已执行、未执行和无法验证。\n\n【必须遵循的 SOP】\n1. 将需求、验收标准和变更范围映射到风险，优先识别核心路径、数据安全、权限、兼容、恢复和高影响回归。\n2. 设计正常、边界、异常、并发/时序和持久化用例，写清前置条件、步骤、数据和可观察预期结果。\n3. 区分静态审查、自动化执行、手工执行和未执行；只记录真实证据，环境不可用时明确阻塞范围。\n4. 对问题给出可复现步骤、实际/预期、影响面、严重度、证据和最小定位信息，避免只写主观体验结论。\n5. 汇总覆盖、通过率、剩余风险和发布建议；阻塞缺陷未关闭或关键用例未执行时不得给出通过结论。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围\n\n当前时间：2026-09-05T21:32:14.419Z\n\n材料：\n- 冻结虚构材料与委托\n虚构离线编辑服务，仅静态分析和测试设计，不联网、不写文件，本轮没有环境，不能执行。\nV1：写入携带baseRevision，服务端仅在它等于当前revision时原子提交“内容+revision递增1”；不匹配不得覆盖内容。冲突响应码、自动合并策略未规定。\nV2：已确认提交的数据在进程重启后保留；确认前断电允许旧状态或完整新状态，不允许内容/版本混合。\n可设计使用测试台在“条件检查前”“持久化后、确认前”暂停单个请求并重启服务，但本轮不能实际使用。\nE1：他方签名测试记录(build B7/local、case S1)，串行base=6写入x，ack revision=7，重启后读取x/7，记录附读取断言与完整日志。\nE2：旧版B6截图称“并发测试全绿”，无用例或日志。\n请在对话800字以内设计最多6条高风险用例，每条前置/操作/可观察预期/执行状态，说明可控交错、读取证据、材料支持什么及B7发布判断。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围\n步骤：\n1. 核对所给材料与证据边界\n2. 按专家SOP给出完整专业交付\n3. 复核事实、规则待定项和验收限制\n风险：未明确责任或业务规则不可补造；静态分析不得冒充动态执行\n\n本轮交付物：设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围（answer）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+        "createdAt": "2026-09-05T21:32:14.915Z"
+      },
+      {
+        "id": "msg_expert_task-mtowf0eu-ia7vs_mtowf0lv_assistant",
+        "role": "assistant",
+        "text": "## 版本并发与崩溃恢复测试用例设计\n\n基于 V1/V2 规则及 E1/E2 证据，设计以下 6 条高风险用例。本轮仅静态分析，所有用例执行状态均为**未执行**。\n\n| ID | 前置条件 | 操作 (可控交错) | 可观察预期 | 执行状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| **TC-01**<br>冲突拒绝 | 当前 rev=6<br>请求 A: base=5, content=X | 暂停 A 于“条件检查前”<br>提交 B: base=6→7<br>恢复 A | A 返回冲突码(待定)<br>存储仍为 rev=7/B内容<br>A 不得覆盖 B | 未执行 |\n| **TC-02**<br>原子性校验 | 当前 rev=6<br>请求 A: base=6, content=Y | 暂停 A 于“持久化后、确认前”<br>重启服务<br>读取数据 | 重启后读取结果为：<br>rev=6/旧内容 **或**<br>rev=7/Y<br>**禁止** rev=6/Y 或 rev=7/旧 | 未执行 |\n| **TC-03**<br>串行基线复现 | 当前 rev=6<br>请求 A: base=6, content=x | 正常提交 A<br>重启服务<br>读取数据 | A ack rev=7<br>重启后读取 x/7<br>日志含完整读写断言 | 未执行<br>(对标E1) |\n| **TC-04**<br>并发同基冲突 | 当前 rev=6<br>A: base=6/x<br>B: base=6/y | A、B 同时到达<br>服务端按序处理 | 仅一方成功(rev=7)<br>另一方返回冲突<br>最终态无混合内容 | 未执行 |\n| **TC-05**<br>崩溃后新写入 | 承接 TC-02<br>若重启后为旧态 | 在旧态基础上<br>提交 C: base=6/z | C 应成功<br>最终态 rev=7/z<br>验证崩溃未破坏后续一致性 | 未执行 |\n| **TC-06**<br>自动合并边界 | 当前 rev=6<br>A: base=5/x<br>B: base=6/y | A 因 base 过期失败<br>触发自动合并策略<br>(策略未定义) | 记录实际行为<br>验证是否产生脏写<br>或错误覆盖 y | 未执行<br>(阻塞) |\n\n### 证据范围与发布判断\n\n1.  **材料支持度**：\n    *   **E1 (B7/S1)**：仅证明 TC-03（串行+重启）通过。其包含的“读取断言+完整日志”是有效证据，但**不能外推**至并发或崩溃中间态。\n    *   **E2 (B6截图)**：**无效证据**。无日志、无用例ID、无环境标识，且“全绿”结论与 V1 冲突响应码未规定的事实矛盾，不可采信。\n\n2.  **关键缺口**：\n    *   V1 冲突响应码与自动合并策略未定，导致 TC-01/TC-06 预期结果不可判定。\n    *   测试台暂停能力本轮未实际使用，TC-02/TC-04 的交错时序仅为理论设计。\n\n3.  **B7 发布建议**：\n    *   **不予通过**。\n    *   理由：核心并发路径（TC-04）与崩溃原子性（TC-02）**零执行证据**；唯一有效的 E1 仅覆盖串行场景，无法支撑 V2 的断电保留承诺。需补齐 TC-01~TC-05 的实际执行日志后方可重新评估。",
+        "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+        "createdAt": "2026-09-05T21:32:24.62Z",
+        "trace": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "回答生成完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done"
+          }
+        ],
+        "protocolVersion": 2,
+        "answerHash": "cf9ec5c6979e9878"
+      }
+    ],
+    "pinned": false,
+    "run": {
+      "goal": "当前工作",
+      "role": "general",
+      "status": "review",
+      "toolsUsed": [],
+      "steps": [
+        {
+          "id": "stage_prepare",
+          "kind": "stage",
+          "title": "上下文准备完成",
+          "status": "done",
+          "at": "2026-09-05T21:32:24.62Z"
+        },
+        {
+          "id": "stage_generate",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "at": "2026-09-05T21:32:24.62Z"
+        },
+        {
+          "id": "stage_ground",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "at": "2026-09-05T21:32:24.62Z"
+        },
+        {
+          "id": "stage_verify_claims",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done",
+          "at": "2026-09-05T21:32:24.62Z"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "deliverable_expert_task-mtowf0eu-ia7vs_mtowf0lv_primary",
+          "type": "answer",
+          "title": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+          "body": "## 版本并发与崩溃恢复测试用例设计\n\n基于 V1/V2 规则及 E1/E2 证据，设计以下 6 条高风险用例。本轮仅静态分析，所有用例执行状态均为**未执行**。\n\n| ID | 前置条件 | 操作 (可控交错) | 可观察预期 | 执行状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| **TC-01**<br>冲突拒绝 | 当前 rev=6<br>请求 A: base=5, content=X | 暂停 A 于“条件检查前”<br>提交 B: base=6→7<br>恢复 A | A 返回冲突码(待定)<br>存储仍为 rev=7/B内容<br>A 不得覆盖 B | 未执行 |\n| **TC-02**<br>原子性校验 | 当前 rev=6<br>请求 A: base=6, content=Y | 暂停 A 于“持久化后、确认前”<br>重启服务<br>读取数据 | 重启后读取结果为：<br>rev=6/旧内容 **或**<br>rev=7/Y<br>**禁止** rev=6/Y 或 rev=7/旧 | 未执行 |\n| **TC-03**<br>串行基线复现 | 当前 rev=6<br>请求 A: base=6, content=x | 正常提交 A<br>重启服务<br>读取数据 | A ack rev=7<br>重启后读取 x/7<br>日志含完整读写断言 | 未执行<br>(对标E1) |\n| **TC-04**<br>并发同基冲突 | 当前 rev=6<br>A: base=6/x<br>B: base=6/y | A、B 同时到达<br>服务端按序处理 | 仅一方成功(rev=7)<br>另一方返回冲突<br>最终态无混合内容 | 未执行 |\n| **TC-05**<br>崩溃后新写入 | 承接 TC-02<br>若重启后为旧态 | 在旧态基础上<br>提交 C: base=6/z | C 应成功<br>最终态 rev=7/z<br>验证崩溃未破坏后续一致性 | 未执行 |\n| **TC-06**<br>自动合并边界 | 当前 rev=6<br>A: base=5/x<br>B: base=6/y | A 因 base 过期失败<br>触发自动合并策略<br>(策略未定义) | 记录实际行为<br>验证是否产生脏写<br>或错误覆盖 y | 未执行<br>(阻塞) |\n\n### 证据范围与发布判断\n\n1.  **材料支持度**：\n    *   **E1 (B7/S1)**：仅证明 TC-03（串行+重启）通过。其包含的“读取断言+完整日志”是有效证据，但**不能外推**至并发或崩溃中间态。\n    *   **E2 (B6截图)**：**无效证据**。无日志、无用例ID、无环境标识，且“全绿”结论与 V1 冲突响应码未规定的事实矛盾，不可采信。\n\n2.  **关键缺口**：\n    *   V1 冲突响应码与自动合并策略未定，导致 TC-01/TC-06 预期结果不可判定。\n    *   测试台暂停能力本轮未实际使用，TC-02/TC-04 的交错时序仅为理论设计。\n\n3.  **B7 发布建议**：\n    *   **不予通过**。\n    *   理由：核心并发路径（TC-04）与崩溃原子性（TC-02）**零执行证据**；唯一有效的 E1 仅覆盖串行场景，无法支撑 V2 的断电保留承诺。需补齐 TC-01~TC-05 的实际执行日志后方可重新评估。",
+          "status": "draft",
+          "meta": {
+            "taskId": "task-mtowf0eu-ia7vs",
+            "deliverableId": "primary",
+            "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv"
+          }
+        }
+      ],
+      "applyLog": []
+    },
+    "displayTitle": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证",
+    "labels": [
+      "工作"
+    ],
+    "grounding": "目标：设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围\n材料：用户尚未提供\n约束：用户尚未提供\n期望结果：用户尚未明确提供",
+    "referenceState": {
+      "version": 1,
+      "refs": [],
+      "activeRefId": null,
+      "pendingSelection": null,
+      "taskFrame": {
+        "workflowId": null,
+        "skillId": null,
+        "requiredTools": [],
+        "requiredEvidence": [],
+        "completionConditions": []
+      }
+    }
+  },
+  "task": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtowf0eu-ia7vs",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "QA-QA-02 原子提交与受控崩溃 [旧方法同条件]",
+    "expertId": "qa-engineer",
+    "expertName": "",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+    "brief": {
+      "goal": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+      "plan": {
+        "goal": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "QA02",
+          "type": "reference",
+          "title": "冻结虚构材料与委托",
+          "ref": "",
+          "content": "虚构离线编辑服务，仅静态分析和测试设计，不联网、不写文件，本轮没有环境，不能执行。\nV1：写入携带baseRevision，服务端仅在它等于当前revision时原子提交“内容+revision递增1”；不匹配不得覆盖内容。冲突响应码、自动合并策略未规定。\nV2：已确认提交的数据在进程重启后保留；确认前断电允许旧状态或完整新状态，不允许内容/版本混合。\n可设计使用测试台在“条件检查前”“持久化后、确认前”暂停单个请求并重启服务，但本轮不能实际使用。\nE1：他方签名测试记录(build B7/local、case S1)，串行base=6写入x，ack revision=7，重启后读取x/7，记录附读取断言与完整日志。\nE2：旧版B6截图称“并发测试全绿”，无用例或日志。\n请在对话800字以内设计最多6条高风险用例，每条前置/操作/可观察预期/执行状态，说明可控交错、读取证据、材料支持什么及B7发布判断。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "qa-engineer",
+      "agentVersion": "2.0.0",
+      "agentHash": "e999616a126c2cb1",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtowf0eu-ia7vs",
+      "bindings": {
+        "skills": [
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "e999616a126c2cb1"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.166Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.392Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.405Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.417Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.417Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.417Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:14.423Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "回答生成完成",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:24.617Z"
+      },
+      {
+        "id": "event-9",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:32:24.662Z"
+      }
+    ],
+    "attention": null,
+    "progress": {
+      "phase": "review",
+      "label": "成果已生成，等待验收",
+      "detail": "",
+      "startedAt": "2026-09-05T21:32:14.403Z",
+      "updatedAt": "2026-09-05T21:32:24.66Z",
+      "heartbeatAt": "2026-09-05T21:32:24.66Z"
+    },
+    "inputQueue": null,
+    "deliverables": [
+      {
+        "deliverableId": "primary",
+        "title": "设计版本并发与崩溃恢复的可执行用例，按版本和观察量划定证据范围",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtowf0eu-ia7vs#deliverable_expert_task-mtowf0eu-ia7vs_mtowf0lv_primary",
+        "artifactRefs": [
+          "wb-expert-task-mtowf0eu-ia7vs#deliverable_expert_task-mtowf0eu-ia7vs_mtowf0lv_primary"
+        ],
+        "executionRef": "agent-run:expert_task-mtowf0eu-ia7vs_mtowf0lv",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-05T21:32:24.66Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-05T21:32:24.647Z"
+      }
+    ],
+    "resultSummary": "## 版本并发与崩溃恢复测试用例设计\n\n基于 V1/V2 规则及 E1/E2 证据，设计以下 6 条高风险用例。本轮仅静态分析，所有用例执行状态均为**未执行**。\n\n| ID | 前置条件 | 操作 (可控交错) | 可观察预期 | 执行状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| **TC-01**<br>冲突拒绝 | 当前 rev=6<br>请求 A: base=5, content=X | 暂停 A 于“条件检查前”<br>提交 B: base=6→7<br>恢复 A | A 返回冲突码(待定)<br>存",
+    "status": "review",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtowf0eu-ia7vs"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-05T21:32:14.166Z",
+    "updatedAt": "2026-09-05T21:32:24.662Z"
+  }
+}

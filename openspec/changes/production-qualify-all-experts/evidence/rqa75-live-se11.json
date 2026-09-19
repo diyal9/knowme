@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA75 software engineer normal coverage completion",
+  "purpose": "Add a second normal task for the retained software-engineer configuration without changing the existing lifecycle contracts.",
+  "generatedAt": "2026-09-07T22:07:14.176Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\qa\\rqa75-se11",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "SE11"
+  ],
+  "tasks": [
+    {
+      "evalId": "SE11",
+      "expertId": "software-engineer",
+      "title": "事件订阅器的完整实现",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "给出完整可替换实现，subscribe、unsubscribe、emit 接口和幂等行为一致",
+        "正确处理注册顺序、emit 快照、emit 中增删订阅和未知事件类型",
+        "单个 handler 抛错时继续调用其他 handler，并以可观察方式汇总错误",
+        "给出重复订阅、取消、快照、顺序、异常和未知类型测试设计",
+        "给出合理时间/空间复杂度并诚实区分设计与未真实运行"
+      ],
+      "status": "failed",
+      "taskId": "task-mtrsjrwg-u2kqn",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "",
+          "complete": false,
+          "missing": [
+            "skill.code-review.hash"
+          ],
+          "runtime": {
+            "hash": "7833165e45447d8a669d0489be8a90937d3dac7e621b83e3b2b46f5f7cbfae08"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.4.0",
+            "hash": "90442f5656655821"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": ""
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrsjrwg-u2kqn",
+        "expertId": "software-engineer",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "2.4.0",
+          "agentHash": "90442f5656655821",
+          "hashes": {
+            "expert": "90442f5656655821",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrsjrwg-u2kqn",
+          "bindings": {
+            "skills": [
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "90442f5656655821"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrsjrwg-u2kqn"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-07T22:07:16.537Z",
+          "updatedAt": "2026-09-07T22:07:16.537Z",
+          "heartbeatAt": "2026-09-07T22:07:16.537Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-07T22:07:16.537Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-07T22:07:16.479Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T22:07:16.534Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-07T22:07:16.538Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-07T22:07:16.479Z",
+        "updatedAt": "2026-09-07T22:07:16.538Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrsjrwg-u2kqn",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:403:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:557:19)",
+      "elapsedMs": 264,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "runtimeFailed": 1,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

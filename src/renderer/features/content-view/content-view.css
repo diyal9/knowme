@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 0;
-  color: var(--text, #1c1917);
+  color: var(--text, var(--brand-ink));
   font-size: var(--content-body-size, 14px);
   line-height: var(--content-body-leading, 1.72);
   text-wrap: pretty;
@@ -29,13 +29,13 @@
   height: 1px;
   margin: 1.05em 0 1.1em;
   border: 0;
-  background: rgba(61, 58, 54, 0.1);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
 }
 .km-content blockquote {
   margin: 0.65em 0 0.8em;
   padding: 0.42em 0 0.42em 0.9em;
-  border-left: 3px solid var(--accent-b, #c4b5a5);
-  color: var(--text2, #57534e);
+  border-left: 3px solid var(--accent-b, var(--state-warning-border));
+  color: var(--text2, var(--text-secondary));
 }
 .km-content code {
   font-family: var(--mono, ui-monospace, monospace);
@@ -46,12 +46,12 @@
   padding: 10px 12px;
   overflow: auto;
   border-radius: 8px;
-  background: rgba(61, 58, 54, 0.04);
+  background: color-mix(in srgb, var(--text-primary) 4%, transparent);
 }
 .km-content .md-table-wrap {
   margin: 0.55em 0;
   overflow-x: auto;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 8%, transparent);
   border-radius: 8px;
 }
 .km-content .md-table {
@@ -62,10 +62,10 @@
 }
 .km-content .md-table th,
 .km-content .md-table td {
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid color-mix(in srgb, var(--brand-ink) 10%, transparent);
   padding: 5px 8px;
   text-align: left;
   vertical-align: top;
   word-break: break-word;
 }
-.km-content .md-table th { background: rgba(0, 0, 0, 0.03); font-weight: 600; }
+.km-content .md-table th { background: color-mix(in srgb, var(--brand-ink) 3%, transparent); font-weight: 600; }

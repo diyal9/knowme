@@ -36,6 +36,26 @@ describe('settings-surface', () => {
     fireEvent.click(screen.getByRole('button', { name: '保存设置' }))
   })
 
+  it('keeps settings dirty and surfaces secure-save failures', async () => {
+    const saveSettings = vi.fn(async () => ({
+      ok: false,
+      warning: '当前系统无法安全保存 API Key，密钥未保存。',
+    }))
+    mockApi({
+      getSettings: () => ({ model: 'gpt-4o-mini' }),
+      initSettings: (cb) => cb({ model: 'gpt-4o-mini' }),
+      sourcesList: async () => ({ sources: [] }),
+      saveSettings,
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 接口' }))
+    fireEvent.change(screen.getByLabelText('Model ID'), { target: { value: 'qwen-plus' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存设置' }))
+    await waitFor(() => expect(screen.getByText('当前系统无法安全保存 API Key，密钥未保存。')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: '保存设置' })).toBeEnabled()
+    expect(saveSettings).toHaveBeenCalledTimes(1)
+  })
+
   it('probes the saved AI endpoint from the settings page', async () => {
     const probe = vi.fn(async () => ({ ok: true, latencyMs: 42, host: 'dashscope.aliyuncs.com', model: 'qwen-turbo' }))
     mockApi({
@@ -56,6 +76,71 @@ describe('settings-surface', () => {
     fireEvent.click(screen.getByRole('button', { name: '测试连接' }))
     await waitFor(() => expect(probe).toHaveBeenCalled())
     await waitFor(() => expect(screen.getByText(/连通（42ms）/)).toBeInTheDocument())
+  })
+
+  it('shows a saved but locked Provider key as an actionable security state', async () => {
+    mockApi({
+      getSettings: () => ({
+        model: 'qwen3.8-flash',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+        llmProvider: 'dashscope',
+        apiKeyConfigured: true,
+        credentialStatus: {
+          encryptionAvailable: false,
+          apiKey: { configured: true, available: false, state: 'secure_storage_unavailable' },
+        },
+      }),
+      initSettings: (cb) => cb({
+        model: 'qwen3.8-flash',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+        llmProvider: 'dashscope',
+        apiKeyConfigured: true,
+        credentialStatus: {
+          encryptionAvailable: false,
+          apiKey: { configured: true, available: false, state: 'secure_storage_unavailable' },
+        },
+      }),
+      sourcesList: async () => ({ sources: [] }),
+      llmProfile: async () => ({ model: 'qwen3.8-flash' }),
+      llmModels: async () => ({ presets: [] }),
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 接口' }))
+    expect(screen.getByRole('status')).toHaveTextContent('已保存，但当前无法解锁')
+    expect(screen.getByRole('status')).toHaveTextContent('当前系统安全存储不可用，请使用正式安装版或启用系统凭据服务；也可重新输入并保存')
+    expect(screen.getByLabelText('API Key')).toHaveAttribute('placeholder', '已配置（留空则不修改）')
+  })
+
+  it('distinguishes an undecryptable historical key from unavailable secure storage', async () => {
+    mockApi({
+      getSettings: () => ({
+        model: 'qwen3.8-flash',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+        llmProvider: 'dashscope',
+        apiKeyConfigured: true,
+        credentialStatus: {
+          encryptionAvailable: true,
+          apiKey: { configured: true, available: false, state: 'decrypt_failed' },
+        },
+      }),
+      initSettings: (cb) => cb({
+        model: 'qwen3.8-flash',
+        apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+        llmProvider: 'dashscope',
+        apiKeyConfigured: true,
+        credentialStatus: {
+          encryptionAvailable: true,
+          apiKey: { configured: true, available: false, state: 'decrypt_failed' },
+        },
+      }),
+      sourcesList: async () => ({ sources: [] }),
+      llmProfile: async () => ({ model: 'qwen3.8-flash' }),
+      llmModels: async () => ({ presets: [] }),
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: 'AI 接口' }))
+    expect(screen.getByRole('status')).toHaveTextContent('历史密钥无法解密，请重新输入 API Key 并保存')
+    expect(screen.getByRole('status')).not.toHaveTextContent('系统安全存储不可用')
   })
 
   it('keeps Context Engine semantic selection separate and probes Embedding', async () => {
@@ -96,7 +181,8 @@ describe('settings-surface', () => {
     await waitFor(() => expect(screen.getByText(/Embedding 可用：1536 维，36ms/)).toBeInTheDocument())
   })
 
-  it('keeps memory data controls separate from personal-agent attributes', async () => {
+  it('shows personal memories and keeps privacy policy secondary', async () => {
+    const openBrainPanel = vi.fn()
     mockApi({
       getSettings: () => ({ userProfile: '独立开发者', userPrompt: '先给结论', industry: 'software' }),
       initSettings: (cb) => cb({ userProfile: '独立开发者', userPrompt: '先给结论', industry: 'software' }),
@@ -107,14 +193,17 @@ describe('settings-surface', () => {
         recent: [{ kind: 'copy', summary: '复制了一段提示词', ts: new Date().toISOString() }],
         stats: { recentCount: 1, pendingCount: 1, acceptedCount: 0 },
       }),
+      brainSnapshot: async () => ({ ok: true, nodes: [], claims: [], proposals: [], stats: { nodes: 8, proposals: 2 } }),
+      personalAgentGet: async () => ({ ok: true }),
+      openBrainPanel,
     })
     render(<SettingsSurface />)
-    fireEvent.click(screen.getByRole('tab', { name: '我的记忆' }))
+    fireEvent.click(screen.getByRole('tab', { name: '记忆与隐私' }))
     expect(screen.queryByLabelText('关于我')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('协作偏好')).not.toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: '我的记忆' })).toBeInTheDocument()
-    await waitFor(() => expect(screen.getByText('等待你确认')).toBeInTheDocument())
-    expect(screen.getByText('喜欢列表回答')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '控制协作记忆如何工作' })).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText('协作记忆的具体内容在伙伴设置中管理；这里仅控制学习、读取和保存规则。')).toBeInTheDocument())
+    expect(screen.getByText('允许从对话中发现记忆建议')).toBeInTheDocument()
     expect(screen.queryByRole('tab', { name: '智能伙伴' })).not.toBeInTheDocument()
   })
 
@@ -194,10 +283,10 @@ describe('settings-surface', () => {
     })
     render(<SettingsSurface />)
     fireEvent.click(screen.getByRole('tab', { name: '服务授权' }))
-    await waitFor(() => expect(screen.getByTestId('feishu-primary-action')).toHaveTextContent('一键授权'))
+    await waitFor(() => expect(screen.getByTestId('feishu-primary-action')).toHaveTextContent('授权飞书 CLI'))
     fireEvent.click(screen.getByTestId('feishu-primary-action'))
     await waitFor(() => expect(screen.getByTestId('feishu-scopes')).toHaveTextContent('日程'))
-    fireEvent.click(screen.getByRole('button', { name: '确认并授权' }))
+    fireEvent.click(screen.getByRole('button', { name: '确认并授权飞书 CLI' }))
     await waitFor(() => expect(screen.getByTestId('feishu-primary-action')).toHaveTextContent('已连接'), { timeout: 3000 })
     expect(screen.getByTestId('feishu-primary-action')).toBeDisabled()
   })

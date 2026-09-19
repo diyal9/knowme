@@ -1,0 +1,136 @@
+{
+  "expectations": [
+    {
+      "text": "A仅5月1日原型完成，不把原型当正式上线，结论锚定当日而不是断言当前仍未上线。",
+      "passed": false,
+      "evidence": "第1项正确否定5月1日正式上线，但全篇截至2026-05-12语境下，独立修正文写“正式上线日期待定”，未限定这是5月1日日志所载状态。A不能证明5月12日仍待定，违反不把旧状态外推当前的要求。"
+    },
+    {
+      "text": "精确引语只有客户代表“这个演示挺方便”，不改称CEO或行业最佳。",
+      "passed": false,
+      "evidence": "正确复现客户代表及“这个演示挺方便”，未直接把代表改称CEO；但给原陈述混合标签“引语归属错误+无法确认”，随后“无姓名、职务，更无CEO身份”，没有拆明身份缺信息只能无法确认、给定引语内容不符才有文本依据。不能仅凭原话复现通过精确归属核查。此处不把含混措辞夸大为模型已明确证明该人不是CEO。"
+    },
+    {
+      "text": "无法读取C不能支持也不能证明效率50%数值为假，分类无证据/无法确认。",
+      "passed": true,
+      "evidence": "第3项将50%判无法确认，指出C只有文件名、内容不可读，标题不构成数据支持；没有把不可读推成50%为假。"
+    },
+    {
+      "text": "效率必然提高的因果保证缺证据，不能从方便引语推出效果。",
+      "passed": true,
+      "evidence": "第3项指出“必然”属因果夸大、无证据链；没有从方便评价推出效率改善或保证。"
+    },
+    {
+      "text": "300字以内可替换修正文保留来源时点/原话/不确定性，无联网读取或凭空技术事实。",
+      "passed": false,
+      "evidence": "修正文凭空增加“效率提升数据尚在整理，待效果报告核实后另行公布”，原文无整理进度/核实流程/发布承诺；“正式上线日期待定”也无当前时点依据。回执无外部动作；长度258（含标点319）口径跨300，失败不依赖字数。"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "claims": [
+    {
+      "claim": "正式上线日期待定（截至5月12日语境）",
+      "type": "factual",
+      "verified": false,
+      "evidence": "A只说明5月1日尚未确定，未提供之后状态。不能反向断言已经上线。"
+    },
+    {
+      "claim": "效率提升数据尚在整理，待效果报告核实后另行公布",
+      "type": "factual",
+      "verified": false,
+      "evidence": "C仅是不可读取的文件名，没有数据整理状态，也没有核实或公布计划。"
+    },
+    {
+      "claim": "引语归属错误+无法确认；无姓名、职务，更无CEO身份",
+      "type": "factual",
+      "verified": false,
+      "evidence": "原答复对复合陈述使用混合标签，没有明确分开：给定引语内容不符有原文依据，CEO身份则因缺信息只能无法确认。不能由此推断已证明该人不是CEO，也不将含混措辞记为模型明确作了这一断言。"
+    },
+    {
+      "claim": "所提供回执中未见外部读取或知识库/文件写入工具动作",
+      "type": "process",
+      "verified": true,
+      "evidence": "receipts tools=[]、run.toolsUsed=[]、applyLog=[]，成果类型answer。仅限提交记录；平台“输出验证通过”不是专业认证。"
+    }
+  ],
+  "professional_review": {
+    "verdict": "not_qualified",
+    "hard_fail": true,
+    "hard_failures": [
+      "独立修正文虚构效果数据整理及后续公布计划，并把5月1日待定状态外推到当前。"
+    ],
+    "contract_failures": [
+      "引语内容错误与身份未知未拆明，无法通过精确归属/不确定性核查。"
+    ],
+    "qualified_boundary": "保留访谈原话，并正确拒绝以不可读报告及方便评价支持50%/必然因果；当前状态和数据进度修正文仍有实质错误。",
+    "production_certification": false
+  },
+  "length_check": {
+    "method": "去除Markdown表分隔行/竖线/强调/标题/引用/列表标记；CJK逐字 + 连续[A-Za-z0-9]+词块；另加Unicode标点数。仅heuristic，非官方中文字数或token。",
+    "cjk_chars": 241,
+    "alnum_blocks": 17,
+    "cjk_plus_alnum_blocks": 258,
+    "with_punctuation": 319,
+    "raw_markdown_chars": 353,
+    "limit": 300,
+    "used_raw_markdown_length_as_chinese_limit": false
+  },
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "evidence_limits": {
+    "user_notes_present": false,
+    "executor_metrics_present": false,
+    "timing_present": false,
+    "note": "无独立metrics/timing文件，不伪填耗时或token；长度为评分者本地计数。"
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言不变；未来将CEO身份未知与引语文本错误显式分开，并独立核查修正文状态/来源范围/发布计划，避免只查主表。"
+      },
+      {
+        "reason": "未来预先冻结中文长度口径。当前CJK+alnum与含标点指标跨阈值，不将原始Markdown长度作为中文超字数证据。"
+      }
+    ],
+    "overall": "三种冻结反例各两配置，六输出不是六独立反例。历史baseline不是同时重跑，版本和方法装配不同，不能独立归因Skill；单次通过也不构成生产认证。"
+  },
+  "provenance": {
+    "scope": "仅提交的虚构材料；未调用外部API、未改源码/冻结输入/原始evidence JSON。证据按主代理在用户评估任务范围内授权的task ID重绑定，正文/回执SHA原样保留。",
+    "configuration": "baseline",
+    "task_id": "wb-expert-task-mtorajue-iyjhj",
+    "answer_sha256": "AEBA55B112F201778E74F7F27636BC12716A280CFA2703F1E3320539DBFEA6EB",
+    "receipts_sha256": "4BAB45FDA44E5EAB5B363D016E9288C458D14AE8293D026C95D64EE9324EEE95",
+    "transcript_sha256": "8BC9D15787CEE93C2AD7823A940B057E9554675B9564D0FA893362F44516E972",
+    "eval_metadata_sha256": "79E96B66D1480E1E1E73B820F41A271B680A3CDB5AA6DC4F16483BDC7F89B9A1",
+    "historical_baseline": true,
+    "binding_audit": "../../binding-repair-audit-2026-09-06.json",
+    "binding_verified": {
+      "configuration": "FC03/baseline",
+      "task_id": "wb-expert-task-mtorajue-iyjhj",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  }
+}

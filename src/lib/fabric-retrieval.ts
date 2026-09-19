@@ -241,13 +241,13 @@ async function fabricSearch(userData, queryText, ctx = {}) {
   const lists = [{ hits: rootHits, weight: 1.2 }]
 
   if (!routeInfo.shortCircuit) {
-    for (const kbId of routeInfo.targetKbIds) {
+    const delegated = await Promise.all(routeInfo.targetKbIds.map(async (kbId) => {
       const provider = registryProviders.find(p => p.id === kbId)
-      if (!provider) continue
-      if (provider.kind === 'remote-rag' && typeof ctx.queryProvider === 'function') {
+      if (!provider) return null
+      if (['remote-rag', 'ragflow'].includes(provider.kind) && typeof ctx.queryProvider === 'function') {
         const remote = await ctx.queryProvider(provider, q, ctx)
         if (remote.ok && remote.hits?.length) {
-          lists.push({
+          return {
             weight: 0.9 + (provider.authority || 2) * 0.05,
             hits: remote.hits.map(h => ({
               ...h,
@@ -256,9 +256,9 @@ async function fabricSearch(userData, queryText, ctx = {}) {
               scope: provider.scope,
               retrievalTier: provider.retrievalTier,
               refKey: `${provider.id}:${h.path}`,
-              source: 'remote-rag',
+              source: provider.kind,
             })),
-          })
+          }
         }
       } else if (typeof ctx.loadKbDocs === 'function') {
         const docs = await ctx.loadKbDocs(provider)
@@ -268,7 +268,7 @@ async function fabricSearch(userData, queryText, ctx = {}) {
           embed: ctx.embed,
         })
         if (local.hits?.length) {
-          lists.push({
+          return {
             weight: 0.85 + (provider.authority || 2) * 0.06,
             hits: local.hits.map(h => ({
               ...h,
@@ -277,12 +277,14 @@ async function fabricSearch(userData, queryText, ctx = {}) {
               scope: provider.scope,
               retrievalTier: provider.retrievalTier,
               refKey: `${provider.id}:${h.path}`,
-              source: 'kb-local',
+              source: provider.kind,
             })),
-          })
+          }
         }
       }
-    }
+      return null
+    }))
+    lists.push(...delegated.filter(Boolean))
   }
 
   let fused = rrfFuse(lists).slice(0, topK)
@@ -304,7 +306,7 @@ async function fabricSearch(userData, queryText, ctx = {}) {
 
 async function kbQuery(userData, collectionOrKbId, queryText, ctx = {}) {
   const provider = (ctx.providers || []).find(p => p.id === collectionOrKbId || p.collectionId === collectionOrKbId)
-  if (provider?.kind === 'remote-rag' && typeof ctx.queryProvider === 'function') {
+  if (['remote-rag', 'ragflow'].includes(provider?.kind) && typeof ctx.queryProvider === 'function') {
     return ctx.queryProvider(provider, queryText, ctx)
   }
   const docs = typeof ctx.loadKbDocs === 'function' && provider

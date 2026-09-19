@@ -2,7 +2,7 @@
  * 助手对话列：Virtuoso 虚拟列表 + 左侧主题目录跳转。
  * 不负责 Markdown 解析（见 AgentMessageBubble / ContentView）。
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { VirtuosoHandle } from 'react-virtuoso'
 import { resolveAssistantModeId } from '../../../domain/assistant-modes'
 import {
@@ -23,6 +23,12 @@ import { PersonalAgentGrowthPanel, type GrowthTab } from './PersonalAgentGrowthP
 
 /** 停止滚动后多久藏起右侧细滚动条 */
 const SCROLLBAR_HIDE_MS = 700
+const SCROLL_FOLLOW_THRESHOLD_PX = 64
+
+// AssistantPane is intentionally mounted only for the assistant route. Keep the
+// view position outside the component so leaving and returning to the route does
+// not discard the active session's reading position.
+const assistantScrollTopBySession = new Map<string, number>()
 
 function composerWrap(node: ReactNode, empty: boolean) {
   const foot = <div className="agent-col-foot">{node}</div>
@@ -46,13 +52,35 @@ export function AssistantPane() {
   const setComposer = useAppStore((s) => s.setComposer)
   const sendMessage = useAppStore((s) => s.sendMessage)
   const chatLogRef = useRef<HTMLDivElement>(null)
+  const composerDockRef = useRef<HTMLDivElement>(null)
   const virtuosoRef = useRef<VirtuosoHandle>(null)
   const [growthOpen, setGrowthOpen] = useState(false)
   const [growthTab, setGrowthTab] = useState<GrowthTab>('core')
+  const restoredSessionRef = useRef('')
+  const messageSnapshotRef = useRef<{ sessionId: string; count: number; lastTextLength: number } | null>(null)
+  const nearBottomRef = useRef(true)
   const empty = isAssistantLaunchEmpty(messages)
   const activeSession = sessions.find((item) => item.id === activeSessionId)
   const modeId = resolveAssistantModeId(activeSession?.agentId || activeSession?.expertId)
   const artifacts = selectActiveArtifacts(sessions, activeSessionId)
+
+  useLayoutEffect(() => {
+    const log = chatLogRef.current
+    const dock = composerDockRef.current
+    if (!log || !dock) return
+    const measure = () => {
+      const atBottom = log.scrollHeight - log.clientHeight - log.scrollTop <= SCROLL_FOLLOW_THRESHOLD_PX
+      log.style.setProperty('--assistant-composer-height', `${dock.getBoundingClientRect().height}px`)
+      if (atBottom) log.scrollTop = log.scrollHeight
+    }
+    measure()
+    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure)
+    observer?.observe(dock)
+    return () => {
+      observer?.disconnect()
+      log.style.removeProperty('--assistant-composer-height')
+    }
+  }, [empty, growthOpen])
 
   useEffect(() => {
     void loadAssistantSessions()
@@ -71,20 +99,47 @@ export function AssistantPane() {
 
   useEffect(() => {
     const log = chatLogRef.current
-    if (!log) return
+    const sessionId = activeSessionId
+    if (!log || !sessionId) return
     let hideTimer = 0
     const onScroll = () => {
+      const distanceFromBottom = log.scrollHeight - log.clientHeight - log.scrollTop
+      assistantScrollTopBySession.set(sessionId, Math.max(0, log.scrollTop))
+      nearBottomRef.current = distanceFromBottom <= SCROLL_FOLLOW_THRESHOLD_PX
       log.classList.add('is-scrolling')
       window.clearTimeout(hideTimer)
       hideTimer = window.setTimeout(() => log.classList.remove('is-scrolling'), SCROLLBAR_HIDE_MS)
     }
     log.addEventListener('scroll', onScroll, { passive: true })
     return () => {
+      assistantScrollTopBySession.set(sessionId, Math.max(0, log.scrollTop))
       log.removeEventListener('scroll', onScroll)
       window.clearTimeout(hideTimer)
       log.classList.remove('is-scrolling')
     }
   }, [empty, activeSessionId])
+
+  // Restore a session only once after its messages are present. This is kept
+  // separate from the new-message follow logic so hydration/session switching
+  // cannot be mistaken for a new response.
+  useLayoutEffect(() => {
+    if (empty || !messages.length || !activeSessionId || restoredSessionRef.current === activeSessionId) return
+    const log = chatLogRef.current
+    if (!log) return
+    const savedTop = assistantScrollTopBySession.get(activeSessionId)
+    const restore = () => {
+      const currentLog = chatLogRef.current
+      if (!currentLog) return
+      const maxTop = Math.max(0, currentLog.scrollHeight - currentLog.clientHeight)
+      const top = savedTop == null ? maxTop : Math.min(Math.max(0, savedTop), maxTop)
+      currentLog.scrollTop = top
+      nearBottomRef.current = maxTop - top <= SCROLL_FOLLOW_THRESHOLD_PX
+    }
+    restore()
+    const frame = requestAnimationFrame(restore)
+    restoredSessionRef.current = activeSessionId
+    return () => cancelAnimationFrame(frame)
+  }, [activeSessionId, empty, messages.length])
 
   const lastAssistantId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -98,16 +153,24 @@ export function AssistantPane() {
     : 0
 
   useEffect(() => {
-    if (empty || !messages.length) return
+    const snapshot = {
+      sessionId: activeSessionId,
+      count: messages.length,
+      lastTextLength: lastMessageTextLength,
+    }
+    const previous = messageSnapshotRef.current
+    messageSnapshotRef.current = snapshot
+    if (empty || !messages.length || !previous || previous.sessionId !== activeSessionId) return
+    const hasNewContent = previous.count !== snapshot.count || previous.lastTextLength !== snapshot.lastTextLength
+    if (!hasNewContent || !nearBottomRef.current) return
     const frame = requestAnimationFrame(() => {
-      if (messages.length > ASSISTANT_VIRTUOSO_THRESHOLD) {
-        virtuosoRef.current?.scrollToIndex({ index: messages.length - 1, align: 'end', behavior: 'smooth' })
-        return
-      }
       const log = chatLogRef.current
       if (log) {
-        if (typeof log.scrollTo === 'function') log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' })
-        else log.scrollTop = log.scrollHeight
+        const top = log.scrollHeight
+        log.scrollTop = top
+        nearBottomRef.current = true
+        // The list footer includes the fixed composer's clearance. Follow the
+        // scroll parent's end, not the last row hidden behind the composer.
       }
     })
     return () => cancelAnimationFrame(frame)
@@ -182,18 +245,25 @@ export function AssistantPane() {
               <>
                 <AssistantStreamStatus />
                 <GuidedRecoveryPanel />
-                <AgentArtifactCards artifacts={artifacts} />
+                <AgentArtifactCards artifacts={artifacts} onImageOpen={setImageViewer} />
+                <div className="assistant-composer-clearance" aria-hidden="true" />
               </>
             )}
           />
         )}
         </div>
+        {empty ? null : (
+          <div className="assistant-composer-dock" ref={composerDockRef}>
+            {composerWrap(<AgentComposer />, false)}
+          </div>
+        )}
       </div> : null}
-      {growthOpen || empty ? null : composerWrap(<AgentComposer />, false)}
       {imageViewerUrl ? (
-        <div className="agent-image-viewer show" data-testid="agent-image-viewer" onClick={() => setImageViewer('')}>
-          <button type="button" className="agent-image-viewer-close" aria-label="关闭图片" onClick={() => setImageViewer('')}>×</button>
-          <img src={imageViewerUrl} alt="" />
+        <div className="agent-image-viewer show" data-testid="agent-image-viewer" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setImageViewer('') }}>
+          <section className="agent-image-viewer-dialog" role="dialog" aria-modal="true" aria-label="图片预览" onMouseDown={(event) => event.stopPropagation()}>
+            <button type="button" className="agent-image-viewer-close" aria-label="关闭图片" onClick={() => setImageViewer('')}>×</button>
+            <img src={imageViewerUrl} alt="图片预览" />
+          </section>
         </div>
       ) : null}
     </aside>

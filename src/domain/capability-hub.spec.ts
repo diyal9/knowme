@@ -7,6 +7,9 @@ import {
   hubCategoryChips,
   hubDisplayChips,
   hubItemBadges,
+  isExpertQualificationUnverified,
+  isExpertCatalogEntry,
+  isExpertAvailableForNewTask,
   isCapabilityInstalled,
   resolveHubIcon,
   shouldShowHubFeatured,
@@ -71,8 +74,40 @@ describe('capability hub filters', () => {
   it('resolves domain icons and installed badges', () => {
     expect(resolveHubIcon({ id: 'x', kind: 'skill', category: '办公' })).toBe('clipboardCheck')
     expect(hubItemBadges({ id: 'x', kind: 'expert', installed: true })[0]).toEqual({ label: '已添加', className: 'installed' })
-    expect(hubItemBadges({ id: 'official', kind: 'expert', source: 'curated' })[0]).toEqual({ label: '认证', className: 'official verified' })
+    expect(hubItemBadges({ id: 'official', kind: 'expert', source: 'curated' })[0]).toEqual({ label: '官方', className: 'official' })
     expect(shouldShowHubFeatured([items[1]], { query: '', installedOnly: false })).toBe(true)
     expect(shouldShowHubFeatured([items[1]], { installedOnly: true })).toBe(false)
+  })
+
+  it('keeps limited experts visible for diagnosis while launchability remains gated', () => {
+    const limited: HubCapabilityItem = {
+      id: 'limited-expert',
+      kind: 'expert',
+      name: '受限专家',
+      qualification: { state: 'limited', issues: ['missing skill'] },
+    }
+    expect(isExpertCatalogEntry(limited)).toBe(true)
+    expect(filterHubItems([limited], { kind: 'expert' })).toEqual([limited])
+    expect(hubItemBadges(limited)).toEqual(expect.arrayContaining([
+      { label: '能力受限', className: 'limited' },
+    ]))
+    expect(hubItemBadges(limited)).not.toEqual(expect.arrayContaining([
+      { label: '已合并', className: 'legacy' },
+    ]))
+  })
+
+  it('marks newly saved experts as pending professional qualification without blocking trial use', () => {
+    const pending: HubCapabilityItem = {
+      id: 'pending-expert',
+      kind: 'expert',
+      name: '待验收专家',
+      lifecycle: { newTasks: true },
+      qualification: { state: 'ready', assessedAtImport: false },
+    }
+    expect(isExpertQualificationUnverified(pending)).toBe(true)
+    expect(hubItemBadges(pending)).toEqual(expect.arrayContaining([
+      { label: '待专业验收', className: 'pending' },
+    ]))
+    expect(isExpertAvailableForNewTask(pending)).toBe(true)
   })
 })

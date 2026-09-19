@@ -23,12 +23,25 @@ function normalizeText(value, max = 800) {
 }
 
 function selectResearchPrompt({ prompt = '', displayPrompt = '' } = {}) {
-  return normalizeText(displayPrompt) || normalizeText(prompt)
+  // Keep trailing user constraints; the short metadata limit must not decide
+  // whether an otherwise offline assignment acquires a mandatory web step.
+  const visible = String(displayPrompt || '').trim()
+  return (visible || String(prompt || '').trim()).slice(0, 16000)
 }
 
 function classifyResearchIntent(prompt = '') {
-  const text = normalizeText(prompt)
-  if (!text || FALSE_POSITIVE_RE.test(text)) {
+  // Quoted source statements are not instructions to this run. This remains
+  // intent routing, not an authorization boundary: explicit task contracts
+  // and the projected tool allowlist are enforced independently.
+  // Preserve explicitly adopted constraints even when users quote them.
+  const text = normalizeText(String(prompt || '').slice(0, 16000)
+    .replace(/^\s*>.*$/gm, ' ')
+    .replace(/((?:(?:本轮|当前|用户)?(?:约束|要求|限制|指令))\s*[:：]\s*)?(?:“[^”]*”|「[^」]*」|"[^"\n]*")/g,
+      (quoted, adopted) => adopted ? quoted : ' '), 16000)
+  const offline = /(?:不|不要|无需|禁止|不得)(?:再|进行)?(?:联网|上网|搜索|检索外部|访问外部)|不需要(?:补充|查询|检索)外部事实|(?:只|仅)(?:分析|使用|依据|根据)(?:这些|上述|以下|所提供|已提供|已给|给定)材料|\b(?:do not|don't|no)\s+(?:browse|browsing|web search|internet access)\b/i.test(text)
+  const localLookup = /(?:检索|搜索|查询|查阅)(?:本地|内部)(?:知识库|文件|文档)/.test(text)
+    && !/(?:不|不要|禁止|不得)(?:再)?(?:搜索|检索|查询|查阅)/.test(text)
+  if (!text || (offline && !localLookup) || FALSE_POSITIVE_RE.test(text)) {
     return {
       active: false,
       scope: 'none',
@@ -51,7 +64,7 @@ function classifyResearchIntent(prompt = '') {
 
   const internal = INTERNAL_RE.test(text)
   const external = PUBLIC_RE.test(text)
-  const scope = internal && external ? 'mixed' : (internal ? 'internal' : 'public')
+  const scope = offline && localLookup ? 'internal' : (internal && external ? 'mixed' : (internal ? 'internal' : 'public'))
   let recencyDays = 7
   if (/(今天|今日|刚刚|实时|today)/i.test(text)) recencyDays = 1
   else if (/(本月|这个月)/.test(text)) recencyDays = 30

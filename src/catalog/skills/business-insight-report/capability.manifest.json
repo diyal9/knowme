@@ -3,7 +3,7 @@
   "id": "business-insight-report",
   "kind": "skill",
   "name": "商业洞察报告",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "metadata": {
     "knowme": {
       "experience": {

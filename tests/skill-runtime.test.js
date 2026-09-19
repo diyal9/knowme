@@ -94,7 +94,7 @@ metadata:
     assert.ok(!list[0].body)
   })
 
-  it('loadSkillL1 truncates body within budget', () => {
+  it('loadSkillL1 fails without activation when the complete body exceeds budget', () => {
     writeSkill(capabilitiesRoot, 'long', 'name: Long\ndescription: Long body', 'x'.repeat(500))
     const runtime = createSkillRuntime({
       capabilitiesRoot,
@@ -102,9 +102,63 @@ metadata:
       l1Budget: 120,
     })
     const loaded = runtime.loadSkillL1('long')
-    assert.equal(loaded.ok, true)
-    assert.equal(loaded.truncated, true)
-    assert.ok(loaded.body.includes('[正文已截断]'))
+    assert.equal(loaded.ok, false)
+    assert.equal(loaded.code, 'skill_l1_budget_exceeded')
+    assert.equal(loaded.activation, undefined)
+    assert.equal(loaded.body, undefined)
+    assert.ok(loaded.requiredChars > loaded.maxChars)
+  })
+
+  it('checkSkill validates loadability without executing scripts', async () => {
+    const dir = writeSkill(capabilitiesRoot, 'checkable', 'name: Checkable\ndescription: Checkable skill', 'instructions')
+    fs.mkdirSync(path.join(dir, 'scripts'), { recursive: true })
+    fs.writeFileSync(path.join(dir, 'scripts', 'side-effect.js'), 'throw new Error("must not run")', 'utf8')
+    const runtime = createSkillRuntime({ capabilitiesRoot, knowledgeDir })
+    const result = await runtime.checkSkill('checkable')
+    assert.equal(result.ok, true)
+    assert.equal(result.status, 'available')
+  })
+
+  it('checkSkill reports disabled and missing Skills with actionable codes', async () => {
+    writeSkill(capabilitiesRoot, 'disabled', 'name: Disabled\ndescription: Disabled skill')
+    const runtime = createSkillRuntime({
+      capabilitiesRoot,
+      knowledgeDir,
+      getInstallStore: () => ({ skills: { disabled: { enabled: false } } }),
+    })
+    const disabled = await runtime.checkSkill('disabled')
+    assert.deepEqual(
+      { ok: disabled.ok, code: disabled.code },
+      { ok: false, code: 'disabled' },
+    )
+    assert.equal((await runtime.checkSkill('missing')).code, 'not_found')
+  })
+
+  it('checkSkill checks required connector dependencies and preserves optional warnings', async () => {
+    const dir = writeSkill(capabilitiesRoot, 'dependent', 'name: Dependent\ndescription: Connector dependent skill')
+    fs.writeFileSync(path.join(dir, 'capability.manifest.json'), JSON.stringify({
+      schemaVersion: 2,
+      id: 'dependent',
+      kind: 'skill',
+      name: 'Dependent',
+      version: '1.0.0',
+      dependencies: [
+        { id: 'mcp-offline', kind: 'connector', required: true },
+        { id: 'optional-connector', kind: 'connector', required: false },
+      ],
+    }), 'utf8')
+    const runtime = createSkillRuntime({
+      capabilitiesRoot,
+      knowledgeDir,
+      getConnectorStatus: async (id) => id === 'mcp-offline'
+        ? { ok: true, connector: { status: { ok: false, state: 'offline', message: '服务未启动' } } }
+        : { ok: true, connector: { status: { ok: false, state: 'auth_required', message: '需要授权' } } },
+    })
+    const result = await runtime.checkSkill('dependent')
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'required_dependency_unavailable')
+    assert.equal(result.dependencies[0].code, 'offline')
+    assert.equal(result.dependencies[1].required, false)
   })
 
   it('readSkillResource blocks traversal and allows references/assets only', () => {
@@ -193,6 +247,26 @@ metadata:
     const exported = runtime.exportLegacyToSkillMd(legacy.id, 'review-export')
     assert.equal(exported.ok, true)
     assert.ok(fs.existsSync(path.join(capabilitiesRoot, 'skills', 'review-export', 'SKILL.md')))
+  })
+
+  it('lists and reads standard package files while rejecting package traversal', () => {
+    const dir = writeSkill(capabilitiesRoot, 'production-skill', 'name: Production\ndescription: production skill')
+    fs.writeFileSync(path.join(dir, 'capability.manifest.json'), JSON.stringify({
+      schemaVersion: 2,
+      id: 'production-skill',
+      kind: 'skill',
+      name: 'Production',
+      version: '1.0.0',
+    }), 'utf8')
+    const runtime = createSkillRuntime({ capabilitiesRoot, knowledgeDir })
+    const files = runtime.listSkillPackageFiles('production-skill')
+    assert.equal(files.ok, true)
+    assert.ok(files.files.some((file) => file.path === 'SKILL.md'))
+    assert.ok(files.files.some((file) => file.path === 'capability.manifest.json'))
+    const loaded = runtime.readSkillPackageFile('production-skill', 'SKILL.md')
+    assert.equal(loaded.ok, true)
+    assert.match(loaded.content, /name: Production/)
+    assert.equal(runtime.readSkillPackageFile('production-skill', '../SKILL.md').ok, false)
   })
 
   it('resolveSafePath rejects absolute and parent segments', () => {

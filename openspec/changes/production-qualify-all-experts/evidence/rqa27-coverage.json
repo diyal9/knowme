@@ -1,0 +1,33 @@
+{
+  "scope": "isolated QA task records only, not qualification",
+  "totalTasks": 84,
+  "expertIdsWithRecords": 20,
+  "counts": {
+    "visual-designer": 1,
+    "image-producer": 6,
+    "knowledge-curator": 1,
+    "research-analyst": 1,
+    "product-manager": 1,
+    "presentation-writer": 1,
+    "longform-editor": 1,
+    "data-analyst": 11,
+    "creative-director": 6,
+    "content-strategist": 6,
+    "solution-architect": 6,
+    "user-researcher": 5,
+    "software-engineer": 6,
+    "requirement-reviewer": 5,
+    "qa-engineer": 5,
+    "action-owner": 5,
+    "fact-checker": 6,
+    "meeting-scribe": 1,
+    "data-report-editor": 1,
+    "business-insight-analyst": 9
+  },
+  "untestedInThisProfile": [
+    "office-partner",
+    "external-capability-importer",
+    "artbundle-expert",
+    "ui-expert"
+  ]
+}

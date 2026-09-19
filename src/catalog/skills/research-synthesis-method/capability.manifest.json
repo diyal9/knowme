@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "research-synthesis-method",
+  "kind": "skill",
+  "name": "研究证据综合",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": ["search_web", "fetch_web_page"] },
+    "network": true,
+    "write": false,
+    "externalWrite": false
+  }
+}

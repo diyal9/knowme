@@ -86,4 +86,15 @@ describe('daemon-compose', () => {
     expect(card.sourceLabel).toBe('飞书文档')
     expect(card.sourceTitle).toBe('')
   })
+
+  it('drops connector kind labels so the UI can resolve the rendered title', () => {
+    const [card] = daemonRunCards([{
+      slug: 'run-docs-label',
+      intent: '需求文档：https://forever9.feishu.cn/wiki/docs-label',
+      sourceTitle: 'Docs',
+    }], [], 'all', '')
+
+    expect(card.sourceTitle).toBe('')
+    expect(card.sourceLabel).toBe('飞书文档')
+  })
 })

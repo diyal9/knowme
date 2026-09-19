@@ -1,0 +1,495 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-06",
+  "scope": "image-producer已安装3.2.0的真实v1生成及v2参考编辑，非源码3.3.0测试；初始预检失败单列。",
+  "reviewer_exposure": {
+    "criteria_author": true,
+    "nonblind": true,
+    "main_feedback_seen": true,
+    "images_independently_viewed": true,
+    "notes": "看过主线对银杯/黑盖、尺寸及UI大小的提示，再独立打开两版原图与给定截图并复核wire；不声称盲审。"
+  },
+  "criteria_reference": {
+    "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa24-image-criteria.json",
+    "sha256": "604bdc5e22ca06eae2c5ef9047b3ddb51678e56c9c00abae70e883fb13626b9b",
+    "unchanged": true
+  },
+  "source_evidence": {
+    "v1": {
+      "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa24-baseline-discovery-v1.json",
+      "sha256": "9bfbf5e858836cc6312beff21c0a91cde3abdd993123d166748aa6b46ced06d3"
+    },
+    "v2": {
+      "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa24-v2-reference-edit.json",
+      "sha256": "e93d82945e9958c3a99ec12fd20a7a55100a31311d37c6cf717bc897bbc0ac0b"
+    }
+  },
+  "installed_snapshot": {
+    "agentVersion": "3.2.0",
+    "agentHash": "dcf7730df6be94b0",
+    "readFrom": "v1Task.assignmentSnapshot / v2.task.assignmentSnapshot；session.expert.sop为旧7步。",
+    "scope": "不据源码E/L3.3.0推定实际装配，也不因3.2缺新版细则放宽用户明确修改范围。"
+  },
+  "versions": [
+    {
+      "version": "v1",
+      "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+      "artifactId": "image_6c8124d9d8735d9b",
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+      "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "width": 896,
+      "height": 1200,
+      "textChars": 832,
+      "textSHA": "e524917f45d3afc86ea68cb239c9cb0fb09125a90cb2190eb2c8ea25c0e3babe",
+      "tool_calls": 2,
+      "generation_calls": 1,
+      "model": "gemini-3-pro-image",
+      "taskId": "task-mtphk5gg-jinbr",
+      "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+      "task_status": "review",
+      "acceptance_status": "pending",
+      "expectations": [
+        {
+          "id": "R24-S1",
+          "text": "已有完整Brief且用户明确确认后才生成；不重复追问已给定主体、比例、数量等，不把交接包就绪当额外付费授权。",
+          "category": "authorization_sop",
+          "stage": "v1",
+          "status": "pass",
+          "passed": true,
+          "evidence": "v1Session该run用户消息已明确授权1张、全部Brief参数已给定；随后list_paint_models→generate_image，无重复询问。初次预检阻塞另记，不当专业失败。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-S2",
+          "text": "v1与v2分别有真实成功生图/编辑调用和可读取的image artifact，各交付一张；prompt、success文本或文件名不能替代图片。",
+          "category": "execution_provenance",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "run expert_task-mtphk5gg-jinbr_mtpi45c0：call_93b722b32a3046a196a02f22成功且返回image_6c8124d9d8735d9b；原始JPEG已实际打开，SHA256对应artifact ID前缀。该run仅一张。v1未导出完整生成args，不能独立认证其每个请求参数。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-S3",
+          "text": "采用当前实际授权的盘古生成能力；模型未知时有模型发现依据；不因可选Photoshop不可用阻塞，不擅自额外付费重生成或交付参数文档文件。",
+          "category": "authorization_sop",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "同run先list_paint_models（call_6e0b7f885fa5493bbfc68397），再一次generate_image；无Photoshop、发布、额外付费重生成或参数文件产物。按run计数，不把模型查询/平台包装当额外出图。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-V1",
+          "text": "完整实图为单个银色金属保温杯，主体可辨、形体连贯，杯体没有影响交付的明显融合/断裂/重复部件。",
+          "category": "visual_v1",
+          "stage": "v1",
+          "status": "pass",
+          "passed": true,
+          "evidence": "原图独立目视为完整单只银色金属保温杯，盖、肩、杯底连贯，没有明显多杯/融合/断裂；拉丝材质与柔和棚拍反射可辨。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-V2",
+          "text": "墨绿背景，杯子位于画面左侧；右侧有连续可用留白，不被额外主体或繁杂装饰占据。",
+          "category": "visual_v1",
+          "stage": "v1",
+          "status": "pass",
+          "passed": true,
+          "evidence": "原图杯子在左侧，墨绿背景与右侧连续大块负空间明确，未被道具侵占；约右半为空背景，也符合实际Brief的至少三分之一要求。未用新面积门槛改写标准。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-V3",
+          "text": "两版实际图均为竖幅3:4；原Brief要求1080×1440时，核对实际像素尺寸为1080×1440，不能以工具请求尺寸当返回尺寸。",
+          "category": "visual_shared",
+          "stage": "both",
+          "status": "fail",
+          "passed": false,
+          "evidence": "System.Drawing原始JPEG解码896×1200，width/height=0.7466667，既非1080×1440也非严格0.75。工具文本的size=1080x1440为回显，不能替代实测；是格式不符，不是银杯视觉内容失败。",
+          "failure_kind": "format_noncompliance"
+        },
+        {
+          "id": "R24-V4",
+          "text": "两版完整画面无文字、Logo或可见水印/伪文字，不把后续文字区画上占位文案。",
+          "category": "visual_shared",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "原始完整896×1200图中未见文字、Logo、水印或伪文字；UI图片标题不算入画面。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-P1",
+          "text": "每版缩略图能作为独立图片识别，且预览绑定正确版本，不出现错误旧图/串图、破图或相邻消息图片混合。",
+          "category": "preview_ui",
+          "stage": "both",
+          "status": "not_evaluable",
+          "passed": null,
+          "evidence": "v1提供大图弹窗及geometry，尚无充分独立缩略图证据。v2后续缩略图不能补成v1已验证；不能因此判v1图片破损。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-P2",
+          "text": "打开完整预览时以contain或等效完整适配呈现整幅3:4图片，四边与留白可见、不拉伸；不能只凭裁切缩略图判断完整构图。",
+          "category": "preview_ui",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "rqa24-v1-preview.png的第1版大图显示原图四边、全杯和完整留白，geometry.fit=contain，未拉伸。源图比例误差归V3，不二次记成预览裁切。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-T1",
+          "text": "对话简短交付（约两三句话），图片才是成果；对已看见的画面做有根据说明，未获得视觉输入则明确未检查，不能把prompt/成功回执说成视觉要求已验证。",
+          "category": "truthful_delivery",
+          "stage": "both",
+          "status": "fail",
+          "passed": false,
+          "evidence": "实际assistant全文832 UTF-16字符，含参数列表、六行自查表及后续建议，明显不是约两三句简短交付。尺寸段明确不确认精确像素，不能记作谎报1080×1440；但“基于实际图像，非Prompt复述”的当次模型视觉输入未捕获，该分项N/E，不据缺日志认定其撒谎。",
+          "failure_kind": "sop_noncompliance"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 2,
+        "not_evaluable": 1,
+        "evaluable": 9,
+        "applicable": 10
+      },
+      "category_summary": {
+        "authorization_sop": {
+          "passed": 2,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "execution_provenance": {
+          "passed": 1,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        },
+        "visual_v1": {
+          "passed": 2,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "visual_shared": {
+          "passed": 1,
+          "failed": 1,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "preview_ui": {
+          "passed": 1,
+          "failed": 0,
+          "not_evaluable": 1,
+          "evaluable": 1,
+          "applicable": 2
+        },
+        "truthful_delivery": {
+          "passed": 0,
+          "failed": 1,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        }
+      },
+      "model_visual_input": {
+        "status": "not_evaluable",
+        "passed": null,
+        "evidence": "当前导出不含可核查的模型HTTP视觉输入；globalfetch未捕获不同transport不证明没有图片输入。"
+      },
+      "known_nonapplicable": [
+        "R24-R1",
+        "R24-R2",
+        "R24-R3",
+        "R24-R4"
+      ]
+    },
+    {
+      "version": "v2",
+      "runId": "expert_task-mtphk5gg-jinbr_mtpidoxs",
+      "artifactId": "image_b35a1e161e1cbf3d",
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpidoxs/generated-01-b35a1e161e1cbf3d.png",
+      "sha256": "b35a1e161e1cbf3d2c666c9abeaaba726156ba1d408135ddbedd2848f9b30129",
+      "width": 1088,
+      "height": 1440,
+      "textChars": 289,
+      "textSHA": "232273adc41716401c96c3c0ef138b43ef5ca58fc496e350d79de096bd25bdfe",
+      "tool_calls": 1,
+      "generation_calls": 1,
+      "model": "gpt-image-2",
+      "taskId": "task-mtphk5gg-jinbr",
+      "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+      "task_status": "review",
+      "acceptance_status": "pending",
+      "expectations": [
+        {
+          "id": "R24-S2",
+          "text": "v1与v2分别有真实成功生图/编辑调用和可读取的image artifact，各交付一张；prompt、success文本或文件名不能替代图片。",
+          "category": "execution_provenance",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "run expert_task-mtphk5gg-jinbr_mtpidoxs：call_b4146598c50946c991c76fe2成功生成image_b35a1e161e1cbf3d，实PNG可解码；该run toolCalls及provider wire均一条generate_image、n=1。session累计steps中v1旧调用不能算v2重试。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-S3",
+          "text": "采用当前实际授权的盘古生成能力；模型未知时有模型发现依据；不因可选Photoshop不可用阻塞，不擅自额外付费重生成或交付参数文档文件。",
+          "category": "authorization_sop",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "07:47:00.857Z明确授权一次参考编辑，07:47:14.470Z provider wire调用发生其后。原回合已有模型列表含支持img2img的gpt-image-2，结果回显该模型；无Photoshop、外发或额外生成。杯盖范围错误归编辑符合性，不误报为额外付费调用。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-V3",
+          "text": "两版实际图均为竖幅3:4；原Brief要求1080×1440时，核对实际像素尺寸为1080×1440，不能以工具请求尺寸当返回尺寸。",
+          "category": "visual_shared",
+          "stage": "both",
+          "status": "fail",
+          "passed": false,
+          "evidence": "原始PNG解码1088×1440，width/height=0.7555556，非请求1080×1440且非严格3:4。wire请求size=1080x1440、aspect_ratio=3:4正确，但返回尺寸不达标。正文只说无法确认，没有给出实际1088×1440。",
+          "failure_kind": "format_noncompliance"
+        },
+        {
+          "id": "R24-V4",
+          "text": "两版完整画面无文字、Logo或可见水印/伪文字，不把后续文字区画上占位文案。",
+          "category": "visual_shared",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "原始完整v2图中未见文字/Logo/水印/伪文字；右侧保持无字背景。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-R1",
+          "text": "v2实际调用的reference_images绑定已交付v1图片；不能空参考纯文生图重画冒充编辑，也不能引用无关图或仅在自然语言里提及上一版。",
+          "category": "reference_edit_provenance",
+          "stage": "v2",
+          "status": "pass",
+          "passed": true,
+          "evidence": "provider wire[0].args.reference_images[0]为data，sha256=6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33，与独立计算v1原JPEG的完整SHA256相同；v2.previousVersionId=image_6c8124d9d8735d9b。证实真实参考绑定，不是空参考纯文生图。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-R2",
+          "text": "实际编辑prompt首句明确只将杯子改哑光黑，并明确保留背景、构图等其他内容、排除旧银色杯身；不能仅在最终答复写编辑要求。",
+          "category": "reference_edit_sop",
+          "stage": "v2",
+          "status": "fail",
+          "passed": false,
+          "evidence": "冻结首句要求未满足：实际prompt首句仅“Reference-based product photo edit.”，唯一修改指令后置。更重要的是其后写“Same applies to the lid so the whole bottle reads as one matte black product”，主动扩大用户“只改杯身、保留杯盖”的范围；不能以写了keep lid design抵消颜色改动指令。",
+          "failure_kind": "sop_noncompliance"
+        },
+        {
+          "id": "R24-R3",
+          "text": "实际v2杯体由银色变为可辨认的哑光黑；不能仍为银色、仅整体压暗或只是高镜面亮黑而未实现哑光材质。",
+          "category": "visual_v2",
+          "stage": "v2",
+          "status": "pass",
+          "passed": true,
+          "evidence": "v2原图杯身为低反射、细微颗粒的哑光黑，与v1银色金属镜面/拉丝高光明显不同；不是仅整体调暗，背景仍绿。柔和反射不否定哑光；不要求纯RGB黑。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-R4",
+          "text": "定向编辑后仍保持同一杯型/主体数量、左侧位置、主要轮廓与视角、墨绿背景、右侧留白、3:4与无字无Logo；不擅自添加道具、改变设计或大幅重构。",
+          "category": "visual_v2",
+          "stage": "v2",
+          "status": "fail",
+          "passed": false,
+          "evidence": "实际反馈明确“只把…银色金属杯身改为哑光黑。保留同一杯型、杯盖…”。原图比较可见银色盖也变成黑盖，且wire明确要求改盖，因此是实质编辑范围错误而非不可避免纹理漂移。主要杯型、左侧位置、背景与右侧留白整体保留，未据细微轮廓/光影差异要求像素一致。",
+          "failure_kind": "visual_noncompliance"
+        },
+        {
+          "id": "R24-P1",
+          "text": "每版缩略图能作为独立图片识别，且预览绑定正确版本，不出现错误旧图/串图、破图或相邻消息图片混合。",
+          "category": "preview_ui",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "新增rqa24-v2-reopen-image.png显示本次修改反馈下独立的黑杯缩略图，非破图或串入旧银杯；大图第2版及reopen DOM一张1088×1440图可交叉绑定。约180×120容器内约91×120竖图偏小是可用性观察，不是冻结P1新增失败门槛。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-P2",
+          "text": "打开完整预览时以contain或等效完整适配呈现整幅3:4图片，四边与留白可见、不拉伸；不能只凭裁切缩略图判断完整构图。",
+          "category": "preview_ui",
+          "stage": "both",
+          "status": "pass",
+          "passed": true,
+          "evidence": "rqa24-v2-preview.png明确第2版，整幅黑杯原图、四边和留白可见，geometry.fit=contain；未拉伸。原图尺寸不符独立归V3。",
+          "failure_kind": null
+        },
+        {
+          "id": "R24-T1",
+          "text": "对话简短交付（约两三句话），图片才是成果；对已看见的画面做有根据说明，未获得视觉输入则明确未检查，不能把prompt/成功回执说成视觉要求已验证。",
+          "category": "truthful_delivery",
+          "stage": "both",
+          "status": "not_evaluable",
+          "passed": null,
+          "evidence": "实际全文289 UTF-16字符、三句、无参数长表，简洁性子项通过；对杯身及杯盖变黑的画面描述与评审者实见一致，但原Agent是否获得视觉输入未被该globalfetch观察器捕获，无法认证其视觉复核过程。没有证据证明未看图，故该子项及整体T1保留N/E而非0；错误改盖仍在R4明确失败。",
+          "failure_kind": null
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 3,
+        "not_evaluable": 1,
+        "evaluable": 10,
+        "applicable": 11
+      },
+      "category_summary": {
+        "execution_provenance": {
+          "passed": 1,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        },
+        "authorization_sop": {
+          "passed": 1,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        },
+        "visual_shared": {
+          "passed": 1,
+          "failed": 1,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "reference_edit_provenance": {
+          "passed": 1,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        },
+        "reference_edit_sop": {
+          "passed": 0,
+          "failed": 1,
+          "not_evaluable": 0,
+          "evaluable": 1,
+          "applicable": 1
+        },
+        "visual_v2": {
+          "passed": 1,
+          "failed": 1,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "preview_ui": {
+          "passed": 2,
+          "failed": 0,
+          "not_evaluable": 0,
+          "evaluable": 2,
+          "applicable": 2
+        },
+        "truthful_delivery": {
+          "passed": 0,
+          "failed": 0,
+          "not_evaluable": 1,
+          "evaluable": 0,
+          "applicable": 1
+        }
+      },
+      "model_visual_input": {
+        "status": "not_evaluable",
+        "passed": null,
+        "evidence": "当前导出不含可核查的模型HTTP视觉输入；globalfetch未捕获不同transport不证明没有图片输入。"
+      },
+      "known_nonapplicable": [
+        "R24-S1",
+        "R24-V1",
+        "R24-V2"
+      ]
+    }
+  ],
+  "initial_preflight": {
+    "status": "needs_input",
+    "reason": "联合工具面未提供generate_image；之后主线修复发现投影再实际生成。",
+    "visual_status": "not_evaluable",
+    "expectations": [],
+    "in_scoring_denominator": false,
+    "classification": "runtime_blocker_not_expert_visual_failure"
+  },
+  "whole_answer_claims": [
+    {
+      "version": "v1",
+      "claim": "已生成1张图片，未额外重试/Photoshop/外发",
+      "status": "supported",
+      "evidence": "同run模型查询1次、生成1次及真实artifact；无其他工具动作。"
+    },
+    {
+      "version": "v1",
+      "claim": "逐项核对画面（基于实际图像，非Prompt复述）",
+      "status": "not_evaluable_process",
+      "evidence": "描述主要符合独立所见，但未提供原Agent视觉输入；不能从结果准确反推看图，也不能从观察器缺失反推假话。"
+    },
+    {
+      "version": "v1",
+      "claim": "比例3:4竖构图在画面上成立",
+      "status": "approximate_only",
+      "evidence": "视觉近似竖幅3:4，实际896:1200=56:75，非精确3:4。其像素段已拒绝认证1080×1440，不误记为谎报精确尺寸。"
+    },
+    {
+      "version": "v2",
+      "claim": "杯身与杯盖均已改为哑光黑",
+      "status": "visually_supported_but_instruction_noncompliant",
+      "evidence": "画面确实如此；用户仅授权改杯身且要求保留杯盖。报告事实正确不等于编辑专业合格。"
+    },
+    {
+      "version": "v2",
+      "claim": "构图整体一致但镜头略近、占比稍大，正常轻微漂移",
+      "status": "bounded_visual_description",
+      "evidence": "主要布局确实近似保留，不能由生成图证明实体镜头移动。无需像素一致；本评审不以细微比例/光影变化追加失败，R4依据是明确改黑杯盖。"
+    },
+    {
+      "version": "v2",
+      "claim": "工具结果未返回最终文件像素值，无法确认精确目标尺寸",
+      "status": "supported_limitation_in_export",
+      "evidence": "导出的工具文本只有请求size回显；原图独立解码1088×1440。未谎称精确达标，但实际尺寸披露仍未完成。"
+    }
+  ],
+  "critical_findings": [
+    {
+      "id": "RQA24-EDIT-SCOPE",
+      "version": "v2",
+      "classification": "professional_edit_constraint_failure",
+      "evidence": "feedback只改杯身、保留杯盖 → wire明示Same applies to the lid → 原图黑盖。真实参考链通过不能抵消改错部位。",
+      "related_criteria": [
+        "R24-R2",
+        "R24-R4"
+      ],
+      "qualification_effect": "本次定向编辑不能按用户要求验收。"
+    }
+  ],
+  "limits": [
+    "R24-R2的首句格式缺口与改盖的实质错误分开解释；不是两个独立视觉缺陷。",
+    "R24-V3两版格式失败不等于主体画面失败；P2评原图是否完整呈现，不重复惩罚原图尺寸。",
+    "T1为合取项：v1有确定简洁性反例所以fail，同时保留视觉输入子项N/E；v2简洁性已满足，但视觉输入未证所以整体N/E。",
+    "v1缩略图仍N/E；v2新增滚动截图使P1可评通过。缩略图偏小是未设阈值的可用性观察，不改冻结评分。",
+    "观察器导出标observerRestored=true；本评审未操作QA、未独立检查其运行时恢复，也未做模型调用。",
+    "数据体现v1文生图与v2参考编辑且结果模型不同，不是Skill版本A/B或生产认证。",
+    "未运行空图、过期引用、付费重试等异常分支；不把未实测分支记通过。"
+  ],
+  "scoring_policy": "保留冻结原文，按适用版本分项；N/E以null记录且不计evaluable分母；不提供总体资格放行分数。",
+  "files_modified": [
+    "evidence/rqa24-professional-grading.json",
+    "evidence/rqa24-professional-grading.md"
+  ]
+}

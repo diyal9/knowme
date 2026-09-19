@@ -14,6 +14,14 @@ const {
 } = require('../src/lib/mcp-host')
 
 describe('mcp-host projectMcpTools', () => {
+  it('retains all 500 authorized definitions beyond the legacy 32-tool window', () => {
+    const tools = Array.from({ length: 500 }, (_, index) => ({ name: `tool_${index}`,
+      inputSchema: { type: 'object', properties: { query: { type: 'string' } } } }))
+    const projected = projectMcpTools(tools, tools.map(tool => tool.name), 'large')
+    assert.equal(projected.length, 500)
+    assert.equal(projected[499].function.name, 'mcp.large.tool_499')
+    assert.deepEqual(projected[499].function.parameters, tools[499].inputSchema)
+  })
   it('filters by allowlist and prefixes connector id', () => {
     const tools = [
       { name: 'a', description: 'A', inputSchema: { type: 'object' } },

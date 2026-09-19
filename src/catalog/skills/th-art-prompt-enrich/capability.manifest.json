@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 2,
+  "id": "th-art-prompt-enrich",
+  "kind": "skill",
+  "name": "生图 Prompt 增强",
+  "description": "把已确认 Brief 编译为适合盘古生图的完整提示词与负向约束。",
+  "version": "1.1.0"
+}

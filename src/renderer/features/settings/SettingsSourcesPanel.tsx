@@ -27,6 +27,7 @@ type Props = {
   onSync: (id: string) => void
   gitAvailable?: boolean
   busyAction?: string | null
+  onOpenRag?: () => void
 }
 
 export function SettingsSourcesPanel(props: Props) {
@@ -57,6 +58,7 @@ export function SettingsSourcesPanel(props: Props) {
     onSync,
     gitAvailable,
     busyAction,
+    onOpenRag,
   } = props
 
   return (
@@ -98,6 +100,17 @@ export function SettingsSourcesPanel(props: Props) {
               </div>
             ))
           )}
+        </div>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section-head">
+          <div className="settings-section-title">RAG</div>
+          <span className="settings-badge">远程知识检索</span>
+        </div>
+        <p className="settings-intro">配置 RAG 服务地址和 RAG API Key，并选择允许 Agent 查询的知识库。密钥仅加密保存在本机。</p>
+        <div className="settings-actions">
+          <button type="button" className="settings-btn primary" onClick={onOpenRag}>打开 RAG 配置</button>
         </div>
       </div>
 

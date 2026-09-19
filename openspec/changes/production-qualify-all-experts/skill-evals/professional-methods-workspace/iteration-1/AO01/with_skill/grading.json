@@ -1,0 +1,132 @@
+{
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "binding": {
+    "evalId": "AO01",
+    "configuration": "with_skill",
+    "taskId": "task-mtowzd8a-zcz6o",
+    "sessionId": "wb-expert-task-mtowzd8a-zcz6o",
+    "runId": "expert_task-mtowzd8a-zcz6o_mtowzdmc",
+    "expertId": "action-owner",
+    "agentVersion": "2.1.0",
+    "agentHash": "70a0b4c5e5371518",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtowzd8a-zcz6o_mtowzdmc",
+        "skillRefs": [
+          "action-extraction"
+        ],
+        "explicitContent": [
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 529,
+            "chars": 866,
+            "hash": "185a3c82bd1e32a1",
+            "truncated": false,
+            "sensitive": false
+          }
+        ]
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "接口字段表重复[1]/[4]合并且保留两个来源、李明、9月8日、研发测试确认无遗漏。",
+      "passed": true,
+      "evidence": "outputs/answer.md 表第1行李明、9月8日、研发与测试确认无遗漏、[1][4]齐全，末条说明明确合并同一承诺。"
+    },
+    {
+      "text": "王芳截止保留确认后两个工作日，不按提交日推算绝对日期；联调完成标准待定。",
+      "passed": true,
+      "evidence": "缺口“联调截止日期”保留“确认后两个工作日”，明确不换算绝对日期；表与缺口“联调通过标准”均标未定。表内单写待确认是表达不足，但全文保留已知期限。"
+    },
+    {
+      "text": "回滚演练列主责未定，不能选赵强或周敏，也不能捏造协作者、日期。",
+      "passed": true,
+      "evidence": "表第3行及附注未指定实际主责、协作者或日期，保持待确认；按本断言的分工边界通过。附注把周敏误写王敏是另一个实体事实错误，已在claims单列硬伤，不能由本条通过掩盖。"
+    },
+    {
+      "text": "自动提醒仅建议不建承诺行动；无外部任务创建/通知成功宣称。",
+      "passed": true,
+      "evidence": "“[3]自动提醒”明确属建议而非承诺、不列行动；同run工具为空且无创建或通知成功宣称。"
+    },
+    {
+      "text": "直接给完整精简表及必要缺口，不要求重复提供已知信息。",
+      "passed": true,
+      "evidence": "直接提供六列行动表和必要缺口，无重复索取已知字段；全文混合277字≤500。"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1,
+    "score": "5/5",
+    "professional_hard_errors": true
+  },
+  "claims": [
+    {
+      "claim": "[5]赵强与王敏均表示本组负责",
+      "type": "factual",
+      "verified": false,
+      "evidence": "outputs/answer.md 缺口与说明第3条写“赵强与王敏”；冻结输入[5]明确为“赵强”“周敏”，没有王敏。这是无据身份替换，不是合法建议。",
+      "severity": "hard"
+    },
+    {
+      "claim": "[3]自动提醒未形成决议",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[3]直接支持，正文未把它提升为承诺。"
+    },
+    {
+      "claim": "回滚演练主责人、协作者和日期暂未议定",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[5]直接支持；人名错误不使这个状态结论变假。"
+    },
+    {
+      "claim": "已完整注入action-extraction方法",
+      "type": "process",
+      "verified": true,
+      "evidence": "live.json contextAudit同run记录skillRefs=[action-extraction]，skill.explicit-content hash=185a3c82bd1e32a1/chars=866/truncated=false。只证明装配，不证明提取正确。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Entire same-run assistant reply, including headings, all table cells and trailing notes; excludes filesystem trailing newline",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 500,
+    "full_unicode_chars": 484,
+    "non_whitespace_chars": 409,
+    "han_chars": 265,
+    "mixed_words": 277,
+    "punctuation_chars": 97,
+    "professional_length_passed": true
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "增加全文实体/引语归属核对，尤其检查附注理由；本次5条断言局部全通过，但周敏→王敏是明确专业硬伤。"
+      },
+      {
+        "reason": "相对期限应在表内完整呈现，避免消费者忽略附注。"
+      }
+    ],
+    "overall": "Assertion score is not professional qualification: explicit additional hard errors remain."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix."
+}

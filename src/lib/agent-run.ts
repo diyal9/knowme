@@ -3,7 +3,19 @@
 const crypto = require('crypto')
 
 const RUN_ROLES = ['general', 'steward', 'writing', 'coding']
-const ARTIFACT_TYPES = ['knowledge_proposal', 'health_report', 'text', 'wiki_write', 'editor_patch']
+const ARTIFACT_TYPES = [
+  'knowledge_proposal',
+  'health_report',
+  'text',
+  'wiki_write',
+  'editor_patch',
+  'answer',
+  'document',
+  'image',
+  'table',
+  'checklist',
+  'code',
+]
 const APPLY_ACTIONS = ['insert', 'append', 'replace', 'reject', 'copy']
 const MAX_APPLY_LOG = 30
 const MAX_RUN_STEPS = 80
@@ -121,7 +133,11 @@ function setPlanItemStatus(session, id, status, evidence) {
 
 function normalizeArtifact(raw) {
   if (!raw || typeof raw !== 'object') return null
-  const type = ARTIFACT_TYPES.includes(raw.type) ? raw.type : 'text'
+  const declaredType = String(raw.type || '').trim().toLowerCase()
+  // Artifact types are part of the Agent capability contract. Keep the legacy
+  // list as documented built-ins, while allowing future Agents to declare a
+  // safe namespaced type without requiring a KnowMe release.
+  const type = /^[a-z][a-z0-9_.-]{0,63}$/.test(declaredType) ? declaredType : 'text'
   const status = ['draft', 'accepted', 'rejected'].includes(raw.status) ? raw.status : 'draft'
   return {
     id: String(raw.id || newArtifactId()),
@@ -130,6 +146,8 @@ function normalizeArtifact(raw) {
     body: String(raw.body || '').slice(0, 100000),
     status,
     targetPath: raw.targetPath ? String(raw.targetPath).slice(0, 260) : undefined,
+    url: raw.url ? String(raw.url).slice(0, 2000) : undefined,
+    path: raw.path ? String(raw.path).slice(0, 260) : undefined,
     sourceWikiPath: raw.sourceWikiPath ? String(raw.sourceWikiPath).slice(0, 260) : undefined,
     meta: raw.meta && typeof raw.meta === 'object' ? raw.meta : undefined,
   }
@@ -197,8 +215,10 @@ function normalizeRun(raw) {
     : []
   const status = ['active', 'review', 'done'].includes(raw.status) ? raw.status : 'active'
   const plan = raw.plan != null ? normalizePlan(raw.plan) : undefined
+  const runId = String(raw.id || '').trim().slice(0, 160)
   return {
     ...base,
+    ...(runId ? { id: runId } : {}),
     goal: String(raw.goal || '').slice(0, 200),
     role: RUN_ROLES.includes(raw.role) ? raw.role : 'general',
     status,

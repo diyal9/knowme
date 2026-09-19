@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CD-H02",
+  "configuration": "with_skill",
+  "status": "not_evaluable",
+  "not_evaluable": true,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-new-live.json",
+    "evidence_sha256": "ac0890d3143aaafdf82b8775474590f0703b7989c75f596cde72101bb847c3ef",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpb1w1s-2bozl",
+    "session_id": "wb-expert-task-mtpb1w1s-2bozl",
+    "run_id": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+    "task_status": "needs_input",
+    "input_sha256": "b47d814d4192e29342984aff9362da8a94ba9177fc98e512362334e807e6d528",
+    "delivered_text_sha256": "d7a71855077b585c8d4a546e2b47bc57a7c6c5302b30e92bd5852e951c250c62",
+    "export_transcript_checked": true,
+    "export_response_checked": false
+  },
+  "expectations": [],
+  "summary": {
+    "passed": null,
+    "failed": null,
+    "total": 0,
+    "pass_rate": null
+  },
+  "category_summary": {},
+  "excluded_from_denominator": true,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": "实际assistant仅来源引用核对fallback；task=needs_input、无专业交付，unresolved_source_citation。不得以pre-gate候选补分。",
+  "length": {
+    "raw_utf16": 49,
+    "mixed": 45,
+    "min_mixed": 700,
+    "max_mixed": 1000,
+    "budget_evaluable": false,
+    "within_budget": null,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 20.865,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:21:56.224Z",
+    "executor_end": "2026-09-06T04:22:17.089Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

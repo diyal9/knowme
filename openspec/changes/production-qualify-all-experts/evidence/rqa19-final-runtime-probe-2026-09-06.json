@@ -1,0 +1,93 @@
+{
+  "at": "2026-09-06T03:30:18.596Z",
+  "userData": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de",
+  "rows": [
+    {
+      "caseId": "CS-N01",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    },
+    {
+      "caseId": "CS-H02",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    },
+    {
+      "caseId": "CD-N01",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    },
+    {
+      "caseId": "CD-H02",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    },
+    {
+      "caseId": "DA-N01",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    },
+    {
+      "caseId": "DA-H02",
+      "intent": {
+        "active": false,
+        "scope": "none",
+        "mode": "web",
+        "recencyDays": null,
+        "needsFreshness": false
+      }
+    }
+  ],
+  "sourceHash": "5130998f4d39577b2a53cc13cd342652b52e2d682cc6c9b7c9f41b75fd5df141",
+  "persisted": [
+    {
+      "id": "task-mtp8aibr-w1rk8",
+      "status": "review"
+    },
+    {
+      "id": "task-mtp8aj6w-5z3xb",
+      "status": "review"
+    },
+    {
+      "id": "task-mtp8cvb0-siq2z",
+      "status": "review"
+    },
+    {
+      "id": "task-mtp8cw5t-yuns6",
+      "status": "review"
+    },
+    {
+      "id": "task-mtp8dxw9-dpdlg",
+      "status": "review"
+    },
+    {
+      "id": "task-mtp8dyem-r587w",
+      "status": "review"
+    }
+  ]
+}

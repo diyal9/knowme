@@ -1,0 +1,38 @@
+{
+  "source": "actual AgentRunExecutor metrics",
+  "metrics": {
+    "rounds": 1,
+    "toolCalls": 0,
+    "firstTokenMs": 1820,
+    "bufferedDraftsDiscarded": 1,
+    "answerCommitMs": null,
+    "bufferMs": null,
+    "outputDiagnostics": [
+      {
+        "runId": "expert_task-mtp2j3g0-uo0z8_mtp2j3x0",
+        "round": 1,
+        "phase": "MODEL",
+        "code": "buffered_draft_discarded",
+        "reason": "incomplete_model_response",
+        "length": 4762,
+        "count": 1
+      }
+    ],
+    "usage": {
+      "promptTokens": 8501,
+      "completionTokens": 5000,
+      "totalTokens": 13501,
+      "source": "provider"
+    },
+    "modelCompletions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "length"
+      }
+    ]
+  }
+}

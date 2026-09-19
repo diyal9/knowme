@@ -1,0 +1,43 @@
+{
+  "viewport": {
+    "w": 1280,
+    "h": 820
+  },
+  "taskId": "task-mtpoekri-9ket3",
+  "status": "review",
+  "version": 2,
+  "inputCount": 1,
+  "feedbackVisible": true,
+  "approvalControls": 1,
+  "bodyContainsPause": true,
+  "textareaBox": {
+    "x": 155.390625,
+    "y": 704,
+    "width": 770.03125,
+    "height": 60
+  },
+  "revisionClick": {
+    "initialSafetyRejected": true,
+    "reconsideredAfterSourceProof": true,
+    "onlyLocalFocus": true,
+    "statusAfterClick": "review",
+    "singleFocusedInput": true
+  },
+  "feedbackSend": {
+    "actualUI": true,
+    "oneSend": true
+  },
+  "refreshPath": "reload → 工作台 → actual task button",
+  "observerCleanup": {
+    "pid": 40792,
+    "requestRestored": true,
+    "verificationRestored": true
+  },
+  "limitations": [
+    "1280×820 only in RQA27",
+    "No acceptance click",
+    "No actual image generation",
+    "Generic empty task-document card still visible",
+    "No formal team-tester signoff"
+  ]
+}

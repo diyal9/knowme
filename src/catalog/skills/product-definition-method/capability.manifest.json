@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "product-definition-method",
+  "kind": "skill",
+  "name": "产品定义与验收设计",
+  "version": "1.2.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

@@ -35,16 +35,24 @@ function parseRun(raw: unknown): AgentSession['run'] {
       const meta = asRecord(art.meta)
       return {
         id,
+        projectId: String(art.projectId || meta.projectId || '').trim() || undefined,
         type: String(art.type || '').trim() || undefined,
         title: String(art.title || '').trim() || undefined,
-        body: String(art.body || ''),
+        body: String(art.body || art.content || ''),
         status: String(art.status || 'draft').trim() || 'draft',
         targetPath: String(art.targetPath || meta.path || '').trim() || undefined,
+        url: String(art.url || '').trim() || undefined,
+        path: String(art.path || '').trim() || undefined,
         meta: {
           mode: String(meta.mode || '').trim() || undefined,
           noteId: String(meta.noteId || '').trim() || undefined,
           sourceId: String(meta.sourceId || '').trim() || undefined,
           path: String(meta.path || '').trim() || undefined,
+          projectId: String(meta.projectId || art.projectId || '').trim() || undefined,
+          taskId: String(meta.taskId || '').trim() || undefined,
+          runId: String(meta.runId || '').trim() || undefined,
+          automationId: String(meta.automationId || '').trim() || undefined,
+          agentId: String(meta.agentId || '').trim() || undefined,
         },
       }
     }).filter(Boolean) as NonNullable<NonNullable<AgentSession['run']>['artifacts']>
@@ -103,6 +111,7 @@ function isDefaultTabTitle(title: string): boolean {
   const text = String(title || '').trim()
   if (!text) return true
   if (EMPTY_SESSION_TITLES.has(text)) return true
+  if (/^\d+$/.test(text)) return true
   return /^新对话\s*\d*$/.test(text)
 }
 
@@ -174,6 +183,7 @@ export function parseSessionRecord(raw: unknown): AgentSession | null {
   const summary = String(nested.summary || resume.summary || '').trim().slice(0, 180)
   return {
     id,
+    projectId: String(nested.projectId || '').trim() || undefined,
     title: String(displayTitle || nested.title || '对话').trim() || '对话',
     displayTitle: displayTitle || undefined,
     pinned: nested.pinned === true,
@@ -252,14 +262,36 @@ export function chatMessagesFromSession(raw: unknown): ChatMessage[] {
 }
 
 export function extractImageUrls(text: string): string[] {
+  // Provider responses may escape Markdown parentheses or emit HTML image tags.
+  // Normalize only the transport escaping here; the renderer still treats the
+  // resulting URL as untrusted and resolves it through the preview bridge.
   const source = String(text || '')
+    .replace(/\\([()])/g, '$1')
   const found = new Set<string>()
-  const markdown = /!\[[^\]]*\]\(([^)\s]+)\)/g
+  const markdown = /!?\[[^\]]*\]\(([^)\s]+)\)/g
+  const html = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi
   const bare = /https?:\/\/[^\s)]+\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s)]*)?/gi
   let match: RegExpExecArray | null
   while ((match = markdown.exec(source))) found.add(match[1])
+  while ((match = html.exec(source))) found.add(match[1])
   while ((match = bare.exec(source))) found.add(match[0])
-  return [...found]
+  return [...found].filter((url) => /^(?:https?:\/\/|data:image\/|blob:|file:|[A-Za-z]:[\\/]|\.\.?[\\/]|\/)/i.test(url))
+}
+
+/** 图片已由消息层渲染为缩略预览时，从正文中移除对应 Markdown/裸地址，避免重复展示。 */
+export function removeExtractedImageReferences(text: string, imageUrls = extractImageUrls(text)): string {
+  let output = String(text || '')
+  const sources = new Set(imageUrls)
+  output = output.replace(/!?\[[^\]]*\]\(([^)\s]+)\)/g, (match, href: string) => (
+    sources.has(href) ? '' : match
+  ))
+  for (const url of sources) {
+    output = output.split(url).join('')
+  }
+  return output
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }
 
 export { ASSISTANT_QUICK_COMMANDS } from './agent-quick-commands'

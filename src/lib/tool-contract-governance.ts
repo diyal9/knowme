@@ -4,9 +4,9 @@ const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 
-const VALID_SOURCES = new Set(['builtin', 'connector', 'mcp', 'feishu'])
+const VALID_SOURCES = new Set(['builtin', 'connector', 'mcp', 'feishu', 'skill'])
 const VALID_RISKS = new Set(['read', 'write', 'destructive', 'network', 'external'])
-const VALID_SCOPES = new Set(['content-source', 'sandbox', 'external', 'ephemeral'])
+const VALID_SCOPES = new Set(['content-source', 'user-data', 'sandbox', 'external', 'ephemeral'])
 
 const REQUIRED_CONTRACT_FIELDS = ['source', 'capability', 'risk', 'sideEffects', 'requiresApproval', 'scope', 'timeoutMs', 'idempotencySupported', 'rollbackSupported']
 
@@ -186,30 +186,50 @@ function mergeAbortSignals(signals = []) {
 
 function createCombinedAbortSignal(ctx = {}, timeoutMs) {
   const runtimeCtx = ctx.runId ? getRunRuntimeContext(ctx.runId) : null
-  const signals = [ctx.signal, runtimeCtx?.signal].filter(Boolean)
-  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
-    return mergeAbortSignals(signals)
-  }
+  const signals = [...new Set([ctx.signal, runtimeCtx?.signal].filter(Boolean))]
   if (typeof AbortController === 'undefined') {
-    return mergeAbortSignals(signals)
+    return { signal: mergeAbortSignals(signals), cancelTimer() {}, getAbortCode: () => 'cancelled' }
   }
-  const timeoutController = new AbortController()
-  const timer = setTimeout(() => {
-    if (!timeoutController.signal.aborted) timeoutController.abort()
-  }, timeoutMs)
-  if (typeof timer.unref === 'function') timer.unref()
-  const combined = mergeAbortSignals([...signals, timeoutController.signal])
-  return { signal: combined, cancelTimer: () => clearTimeout(timer) }
+  const controller = new AbortController()
+  // Keep the first host-observed source separate from the handler's error text
+  // and from the combined signal's generic aborted flag.
+  let abortCode = null
+  const abort = code => {
+    if (controller.signal.aborted) return
+    abortCode = code
+    controller.abort()
+  }
+  const onParentAbort = () => abort('cancelled')
+  for (const signal of signals) {
+    if (signal.aborted) onParentAbort()
+    else signal.addEventListener?.('abort', onParentAbort, { once: true })
+  }
+  let timer
+  if (Number.isFinite(timeoutMs) && !controller.signal.aborted) {
+    if (timeoutMs <= 0) abort('tool_timeout')
+    else {
+      timer = setTimeout(() => abort('tool_timeout'), timeoutMs)
+      timer.unref?.()
+    }
+  }
+  return {
+    signal: controller.signal,
+    getAbortCode: () => abortCode || 'cancelled',
+    cancelTimer: () => {
+      clearTimeout(timer)
+      for (const signal of signals) signal.removeEventListener?.('abort', onParentAbort)
+    },
+  }
 }
 
 async function invokeHandlerWithGovernance(handler, args, ctx, timeoutMs) {
-  const { signal, cancelTimer } = createCombinedAbortSignal(ctx, timeoutMs)
+  const { signal, cancelTimer, getAbortCode } = createCombinedAbortSignal(ctx, timeoutMs)
+  const abortError = () => Object.assign(new Error(
+    getAbortCode() === 'tool_timeout' ? '工具执行超时' : '工具执行已取消',
+  ), { code: getAbortCode() })
+  let onAbort
   try {
-    if (signal?.aborted) {
-      const err = new Error('cancelled')
-      err.code = 'cancelled'
-      throw err
-    }
+    if (signal?.aborted) throw abortError()
     const handlerCtx = {
       signal,
       timeoutMs,
@@ -217,23 +237,34 @@ async function invokeHandlerWithGovernance(handler, args, ctx, timeoutMs) {
       parentRunId: ctx.parentRunId || '',
       subRunId: ctx.subRunId || '',
       sessionId: ctx.sessionId || '',
+      // Read-only fresh scope check comes exclusively from host execution ctx.
+      // Model args and handler results never supply or replace this callback.
+      validateExecutionApproval: typeof ctx.validateExecutionApproval === 'function' ? ctx.validateExecutionApproval : undefined,
     }
     const result = await Promise.race([
-      Promise.resolve().then(() => handler(args, signal, handlerCtx)),
+      Promise.resolve().then(() => {
+        // Cancellation can arrive after scheduling but before actual entry.
+        if (signal?.aborted) throw abortError()
+        return handler(args, signal, handlerCtx)
+      }),
       new Promise((_, reject) => {
         if (!signal) return
         if (signal.aborted) {
-          reject(Object.assign(new Error('cancelled'), { code: 'cancelled' }))
+          reject(abortError())
           return
         }
         if (typeof signal.addEventListener !== 'function') return
-        signal.addEventListener('abort', () => {
-          reject(Object.assign(new Error('cancelled'), { code: 'cancelled' }))
-        }, { once: true })
+        onAbort = () => reject(abortError())
+        signal.addEventListener('abort', onAbort, { once: true })
       }),
     ])
     return result
+  } catch (err) {
+    // A cooperative handler may reject AbortError first; retain the host cause.
+    if (signal?.aborted) throw abortError()
+    throw err
   } finally {
+    if (onAbort) signal?.removeEventListener?.('abort', onAbort)
     if (typeof cancelTimer === 'function') cancelTimer()
   }
 }
@@ -261,9 +292,11 @@ function wrapEnvelope(result = {}, meta = {}) {
   const auditId = result.auditId || meta.auditId || createAuditId()
   const text = String(result.text || result.message || '')
   const preview = String(result.preview || text.slice(0, 1200))
-  const requiresApproval = Boolean(result.requiresApproval || meta.requiresApproval)
+  const requiresApproval = meta.approvalSatisfied === true ? false : Boolean(result.requiresApproval || meta.requiresApproval)
   return {
     ok: result.ok !== false,
+    // Only the host can attest handler entry; never promote handler self-report.
+    ...(typeof meta.executionStarted === 'boolean' ? { executionStarted: meta.executionStarted } : {}),
     code: result.code || (result.ok === false ? 'tool_error' : 'ok'),
     text,
     preview,
@@ -271,7 +304,7 @@ function wrapEnvelope(result = {}, meta = {}) {
     artifactRefs: Array.isArray(result.artifactRefs) ? result.artifactRefs : [],
     auditId,
     requiresApproval,
-    pendingReview: requiresApproval && result.ok !== false,
+    pendingReview: requiresApproval && (result.ok !== false || result.code === 'approval_required' || result.code === 'pending_review'),
     draftId: result.draftId || result.draft?.id || null,
     draft: result.draft || null,
     meta: result.meta && typeof result.meta === 'object' ? result.meta : null,

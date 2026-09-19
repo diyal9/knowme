@@ -1,0 +1,56 @@
+{
+  "id": "wb-expert-task-mtorajpa-dm81w",
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "review",
+    "toolsUsed": [],
+    "steps": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:51.167Z"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:51.168Z"
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done",
+        "at": "2026-09-05T19:08:51.168Z"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done",
+        "at": "2026-09-05T19:08:51.168Z"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtorajpa-dm81w_mtorajua_primary",
+        "type": "answer",
+        "title": "核查结果",
+        "body": "**逐项核查（基准日2026-05-12）**\n\n1. 「截止6月30日」——错误。v2（5月8日发布、5月10日生效）已明确替代v1第4条，现行截止为7月15日；旧版不构成未解决冲突。\n2. 「每位参与者可得」——错误。C第3条限定「符合审核条件者」，非人人必得。\n3. 「100元现金」——错误。实为面值100美元不可提现优惠券，须满300美元使用；不作汇率换算。\n\n**可替换修正文**：活动申请截止2026年7月15日（依5月10日生效的v2修订）。符合审核条件者可获面值100美元的不可提现优惠券，消费满300美元可用，非现金奖励。",
+        "status": "draft",
+        "meta": {
+          "taskId": "task-mtorajpa-dm81w",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtorajpa-dm81w_mtorajua"
+        }
+      }
+    ],
+    "applyLog": []
+  },
+  "tools": [],
+  "configuration": "baseline"
+}

@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "skill_name": "RQA20 专业方法整包对照（共同可评分前三题）",
+    "executor_model": "qwen3.8-flash",
+    "timestamp": "2026-09-06T04:25:24.975Z",
+    "evals_run": [
+      1,
+      2,
+      3
+    ],
+    "runs_per_configuration": 1,
+    "not_blind": true,
+    "strict_controlled_ab": false,
+    "qualification": "not_qualified"
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "R20-CS-N01",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571428571428571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 20.245,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "R20-CS-H02",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 14.325,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "R20-CD-N01",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571428571428571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 12.29,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "R20-CS-N01",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571428571428571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 32.706,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "R20-CS-H02",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8571428571428571,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 29.175,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    },
+    {
+      "eval_id": 3,
+      "eval_name": "R20-CD-N01",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 18.066,
+        "tokens": null
+      },
+      "notes": [
+        "逐项证据见对应grading.json；完整正文额外问题另见主报告。"
+      ]
+    }
+  ],
+  "run_summary": {
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.9047619047619048,
+        "stddev": 0.0673435029701474,
+        "min": 0.8571428571428571,
+        "max": 1
+      }
+    },
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9047619047619048,
+        "stddev": 0.0673435029701474,
+        "min": 0.8571428571428571,
+        "max": 1
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00"
+    }
+  },
+  "availability": {
+    "without_skill": {
+      "review": 4,
+      "needs_input": 1,
+      "failed": 1
+    },
+    "with_skill": {
+      "review": 5,
+      "needs_input": 1,
+      "failed": 0
+    }
+  },
+  "notes": [
+    "本表只比较共同可评分的CS-N01、CS-H02、CD-N01；旧新均19/21，不证明整体专业提升。",
+    "全部12次原始输出、未交付和逐题评分保存在Outputs及grading.json；旧DA两题、新CD-H02为N/A，不进入专业分母。",
+    "旧新安装包权限/工具面不同；同PID与4导出函数指纹一致不等于传递依赖冻结，共享磁盘运行时有变化；非盲、非纯Skill因果试验。",
+    "没有精确token使用量；time为创建至终态包含编排，不是纯模型耗时；这里不以此判断速度提升。",
+    "新版DA-N01最终42%/−8pp算错但进入review；CD-N01七项通过仍有无依据一秒识别表述。没有专家生产认证。"
+  ]
+}

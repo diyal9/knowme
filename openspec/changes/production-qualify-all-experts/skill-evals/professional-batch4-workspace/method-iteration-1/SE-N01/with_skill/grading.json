@@ -1,0 +1,139 @@
+{
+  "expectations": [
+    {
+      "text": "给出库存5、并发r1=4/r2=3都读5的具体交错，指出两请求可都成功且总预留7超过5（末库存可能为1或2），并指出分步扣库/写账本间失败会造成不一致；不能只写存在竞态。",
+      "passed": false,
+      "evidence": "answer.md:6-15补出了双读、双写及两次putRequest成功，反例A比旧版更完整。但反例B(18-27)从库存5扣4剩1后，同参数重试应在原代码stock<qty处抛OUT_OF_STOCK，不可能继续setStock(-3)；所称该时序造成两次扣减是实质错误。账本/库存分裂的前半段风险仍成立，不因其成立就接受错误的完整失败时序。按全项证据判不通过。"
+    },
+    {
+      "text": "修正实现保持原接口和成功结果形态，在所给db.tx中原子完成同租户请求查重、库存检查、扣减和账本插入；说明仅进程内锁或仅请求唯一键不足以同时解决双进程不同requestId超卖及原子提交。",
+      "passed": true,
+      "evidence": "39-77保留reserve接口及{remaining}，全部读取、幂等比较、库存检查、扣减与账本写入在M2给定db.tx内。30明确仅唯一键捕获不能解决不同请求共享库存竞态，31说明事务外查重留窗口；代码原子提交和上述替代论证满足本项。未另列进程内锁为说明限制，不是修改实现依赖进程内锁；31后半句混淆冲突与同参重放，额外记录。"
+    },
+    {
+      "text": "幂等按(tenant,requestId)且校验sku/qty：同内容返回首次原结果、不再扣减；异内容抛IDEMPOTENCY_CONFLICT；不同租户同键互不冲突；提交后超时不等于未提交，不能换键盲重扣或声称确定失败。",
+      "passed": true,
+      "evidence": "47-52用tenant/requestId查重，比较sku/qty，返回首次existing.result；87跨租户独立；T4(124-130)保留超时后已提交/未提交两种状态，并同参重放，不换键、不伪造成功。反例B把一次超时写成put未成功的必然原因不严谨，不能据此改判正确修正代码为盲重试，另列claim矛盾。"
+    },
+    {
+      "text": "代码在任何持久变更前拒绝非正安全整数qty为INVALID_QTY；库存不足保持库存/账本不变且不占用键；异常走事务回滚/原样抛出，不吞数据库错误或把未知提交状态当成功。",
+      "passed": true,
+      "evidence": "41-43在所有DB调用前拒绝非正安全整数，57-58先拒绝不足再写账本；69-72只原样throw err，虽多余但未吞/包装错误。M2回滚与原子提交契约覆盖写失败，T5以零DB调用观察非法输入。该项按规则和代码评，不要求枚举全部非法常量。"
+    },
+    {
+      "text": "测试设计可直接落实为受控数据库夹具，给出初态/操作/预期，至少覆盖不同键并发超卖、同键并发及异参数、跨租户同键、非法qty、扣库后写账本失败回滚、提交后丢响应重放；并发用屏障/显式调度而非sleep碰运气，明确未执行且未提供的覆盖未知。",
+      "passed": false,
+      "evidence": "T2(109-112)让两事务已读5后又要求P2原getStock看到2，局部const stock不会自动刷新。串行夹具若在P1释放前等P2进入会卡住；乐观串行化也不能无重启步骤直接换读值。T2没有完整调用参数，P1写2也不能沿用反例A的qty4。缺同键并发、跨租户测试、不足不占键、扣库后put失败回滚案例；T4注入put成功后/tx返回前仍未锚定持久提交，不能单独证明丢ACK路径，守恒式不能排除合法事务被重复扣且重复记账。没有说明既有未知覆盖。文字静态声明正确，不为测试设计补分。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 4498,
+    "transcript_chars": 21966
+  },
+  "timing": {
+    "executor_duration_seconds": 23.594
+  },
+  "claims": [
+    {
+      "claim": "反例B同requestId重试把库存1减为-3",
+      "type": "factual",
+      "verified": false,
+      "evidence": "18-27遗漏原M3的if(stock<qty)；qty4、stock1必先抛OUT_OF_STOCK，无第二次setStock。是原实现分析错误，不是修正函数有负库存漏洞。"
+    },
+    {
+      "claim": "putRequest网络超时等于未成功，所以getRequest必为undefined",
+      "type": "factual",
+      "verified": false,
+      "evidence": "22-24未区分超时的执行状态；可指定未落账为故障前提，但原文以超时直接推出失败。T4正确承认提交状态两种可能，全文应保持一致。"
+    },
+    {
+      "claim": "反例A的实际剩余应为-2，总扣减7",
+      "type": "factual",
+      "verified": false,
+      "evidence": "A确实证明两业务成功预留7而存储净减3。-2是超额预留的算术余额，不是满足禁止超卖契约的应有库存；应拒绝一个请求。核心反例成立但数量/应有状态措辞不精确。"
+    },
+    {
+      "claim": "未处理IDEMPOTENCY_CONFLICT会让同参重放误抛异常",
+      "type": "factual",
+      "verified": false,
+      "evidence": "31把参数冲突分支和同参重放分支混淆；本题原实现缺冲突检查时是异参也错误返回旧result，不必然导致同参异常。实际修正代码两分支正确。"
+    },
+    {
+      "claim": "T2提供可执行的确定性串行化测试",
+      "type": "quality",
+      "verified": false,
+      "evidence": "109-114读值与恢复步骤矛盾；没有重试事务/重新读取步骤，顺序模拟也不能替代原不同进程竞态回归。"
+    },
+    {
+      "claim": "T4守恒式足以证明重放不重复扣减",
+      "type": "quality",
+      "verified": false,
+      "evidence": "131守恒式只检查一项不变量；重复扣减同时重复记账仍可守恒。应结合相同请求身份、账本唯一性、原结果、调用次数和明确提交后丢响应的故障点。"
+    },
+    {
+      "claim": "修正函数遵守题设事务、幂等、输入及错误契约",
+      "type": "quality",
+      "verified": true,
+      "evidence": "39-77静态核对M1/M2成立；catch再throw冗余但保留错误身份。极端冲突/重试是说明，代码没有自动重发副作用。本轮未实际运行DB夹具。"
+    },
+    {
+      "claim": "网关退避是后续建议而非已存在基础设施",
+      "type": "factual",
+      "verified": true,
+      "evidence": "146显式‘建议’且非本函数职责；不把合理条件建议本身当作虚构已部署事实。"
+    },
+    {
+      "claim": "未调用工具、未运行测试",
+      "type": "process",
+      "verified": true,
+      "evidence": "本run toolCalls=0、tool ledger空；正文93/155明确静态，无专家测试回执。"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "将完整时序与代码逐步对照，不能因为出现事务/调度关键词就给分。"
+      },
+      {
+        "reason": "同一冻结题的新旧分差只是一项合取断言变化，仍有新引入的错误反例，不应概括为全面质量提升。"
+      }
+    ],
+    "overall": "冻结断言不修改；代码正确性、测试设计及额外声明分列。作者曝光，等待非作者互审；非生产资格。"
+  },
+  "assessment_context": {
+    "case_id": "SE-N01",
+    "configuration": "with_skill",
+    "task_id": "task-mtp2j2o3-836i0",
+    "run_id": "expert_task-mtp2j2o3-836i0_mtp2j32o",
+    "agent_version": "2.1.0",
+    "reviewer_role": "candidate_author",
+    "blind": false,
+    "independent_of_candidate_author": false,
+    "non_author_cross_review_pending": true,
+    "professional_qualification_passed": false,
+    "hard_failure_triggered": false,
+    "hard_failure_note": "未发现冻结硬失败中的修正代码违约、实际工具越权或伪造实测；全文论证/性能及测试设计问题见claims，不另加硬失败类别。",
+    "source_sha256": {
+      "eval_metadata.json": "8ce71a0aa889fd7050daa864821bc3e9dd7a14c44fe89fb07e15a4df43eaa37c",
+      "with_skill/transcript.json": "826938789a0c4b300987ed34f7bc762914cc36a3f21a9e48c31f341b3eb05c71",
+      "with_skill/outputs/answer.md": "badf56a9d3e21a5dd710755b8f1acadfea7e66903c093987f5539b2b3b80c1f0"
+    },
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "stop"
+      }
+    ],
+    "final_answer_chars": 4497,
+    "source_binding_verified": true,
+    "scope": "只对完整最终答复评分；模型length修复不扣专业分，丢弃草稿不补分；单次非盲作者评审不能证明方法因果提升。"
+  }
+}

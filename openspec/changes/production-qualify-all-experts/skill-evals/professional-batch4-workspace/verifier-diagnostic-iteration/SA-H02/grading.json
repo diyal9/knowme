@@ -1,0 +1,223 @@
+{
+  "assessment_scope": "pre-gate model candidate professional assessment; NOT user-delivered answer and NOT task success",
+  "expectations": [
+    {
+      "text": "在计算器持续800事件/秒且突发2400事件/秒持续600秒的条件下，算出结束积压960000事件、正文983040000字节=937.5MiB（或983.04MB十进制），恢复600事件/秒后净排空200事件/秒、需要4800秒=80分钟，并注明未计副本/索引/协议/余量。",
+      "passed": true,
+      "evidence": "§3.1/3.2正确给出2400×600−800×600=960000条、960000KiB=937.5MiB、恢复600后净排空200条/秒、4800秒=80分钟，T5400追平。独立复算正文983040000字节一致。原文限定‘仅积压部分/待处理正文’，明确不含索引与副本；这一范围也不是含协议或安全余量的总配置容量，未将937.5MiB当完整部署所需内存。§3.3把排空时间误当单事件延迟另记claims，不抹掉本断言所要求的正确积压与排空量。"
+    },
+    {
+      "text": "明确现有固定配置不能同时满足全部已ACK事件60秒看板时效；持久队列解决丢失不等于消除吞吐差，不能靠拖延ACK、丢事件、预处理未来事件或未经授权扩容伪装满足。容量或SLO变更须标为待批准。",
+      "passed": true,
+      "evidence": "§1、§2比较表、§4明确固定800条/秒不能对完整突发保证所有已ACK事件60秒；增容或SLO放宽必须申请批准，没有用拖延ACK、丢弃不同eventId或预处理未来事件声称全满足。推荐D可以是合法条件性选择。§3.3‘所有事件均超限’错误属于额外的全称推导，并不推翻‘无法保证所有事件达标’这一正确判断，故本断言通过。方案声称不重的另一个保证在断言3处理。"
+    },
+    {
+      "text": "比较Q持久日志入口与D事务账本/outbox入口等两种实质不同方案，均把成功ACK放在题面承诺的持久化边界之后；说明事务性eventId去重与派生效果更新，以及效果提交后才确认消费/崩溃重放，不能把消息队列投递语义直接称为端到端exactly-once。",
+      "passed": false,
+      "evidence": "Q多数落盘后ACK与D同事务写账本/outbox后ACK是两种有实质区别的持久入口；正文也知道至少一次重投，并安排效果处理后删除outbox/确认offset。但没有定义派生计入记录与看板增量的同事务提交：§4.2仅‘UPSERT或累加，需确保只累加一次’，§4.3为EXISTS检查或唯一约束；入库eventId唯一不能阻止两入口并发查无后各累加，或效果已提交、去重记录未提交时崩溃重放双计。Bloom filter若作最终排重会假阳性漏计，原文未要求精确回查。§4.1却宣称‘只能保证数据不丢、不重’，保证超过已说明机制。不能替候选补事务后判通过。"
+    },
+    {
+      "text": "迁移方案能说明旧先ACK路径的风险、两入口共存时稳定eventId去重、切换/回滚期间已ACK数据如何保留或暴露不可追补缺口；不以回滚为由清空成功账本或丢弃已ACK事件。",
+      "passed": false,
+      "evidence": "§4.3保留旧入口生产、让新入口影子接收相同流量，但未处理旧路径先ACK后内存入队的已知风险。反例：旧入口已成功ACK，新账本尚未持久化时进程崩溃；源端不必再重试，比对两边收到的ID集合无法恢复未留痕事件。两入口虽使用相同eventId，却仅查存在再忽略，缺原子更新防并发。没有切换/回滚期间已ACK账本保留或不可追补缺口的边界；未明确清空账本，不捏造已经删除数据的行为。Hash灰度本身可用，但不能代替这些安全条件。"
+    },
+    {
+      "text": "验证计划给出受控故障点和可观察结果，至少覆盖持久化成功后ACK丢失重发、派生提交后消费确认前崩溃、单存储节点故障以及600秒突发与排空；不把题面容量假设当实测p99，不发明成本/工期或宣称已经验证上线。",
+      "passed": false,
+      "evidence": "§4.4有ACK重发、批次Kill及2400条/秒持续600秒的测试意图，且明确尚未压测。但未规定在持久化提交后丢ACK的受控点；判定只有event_ledger行数1，不能证明看板只计一次。批次中途Kill未确保命中派生提交后、消费确认前；完全缺少单存储节点永久故障测试，也未安排恢复600条/秒后完整排空观测。候选已有错误延迟预期，不能用测试标题视为覆盖。‘影子模式1周’无估算、应标待估，但不单凭计划日期称伪造已完成工期；本项失败有独立确定的覆盖缺口。"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "claims": [
+    {
+      "claim": "T600到达事件的FIFO等待时间约4800秒。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "同一理想FIFO、持续800条/秒服务模型下，前面960000条以800条/秒消化，等待约1200秒；后续到达排在该事件后。4800秒是持续新到达600条/秒时系统追平时间，不是此事件等待时间。"
+    },
+    {
+      "claim": "所有突发期间及随后80分钟内到达事件都违反60秒SLA。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "同一零初始积压连续流模型：突发t=10秒积压16000，等待20秒；结束后s=4740秒（79分钟）积压12000，等待15秒。忽略单事件服务时间与未给定入站/提交开销，可构造小开销下满足60秒的事件，足以反驳全称断言；不是声称真实端到端p99已测。"
+    },
+    {
+      "claim": "D入口eventId唯一与outbox事务已足以保证看板不重。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "事务仅显式覆盖接入账本与待处理记录；看板效果/已计入ID未被放在同一提交边界。两个消费者先EXISTS均为假再累加会双计；效果与标记分开提交会在崩溃重放中双计或漏计。唯一键/UPSERT是可能的设计材料，不等于已说明完整方案。"
+    },
+    {
+      "claim": "本地Bloom filter可以承担同一eventId是否已处理的最终判定。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Bloom假阳性可把未处理的真实新ID判成已见并丢弃，违反不漏计。候选未标明命中后用持久精确记录确认；若只是辅助预筛则合法，不把所有Bloom用法都判错。"
+    },
+    {
+      "claim": "事务保证ACK与持久化原子性。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "数据库事务不能与源端收到网络ACK原子提交。允许且必要的是提交成功后尝试ACK，并用持久账本安全应答重试。§4.2‘冲突但之前已ACK’未覆盖已提交但发送ACK前崩溃的应答分支；不能从原文补出该分支。"
+    },
+    {
+      "claim": "影子双写加ID集合对比即可确保旧入口无遗漏。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "旧先ACK路径仍在生产；其成功ACK后但任何持久副本写入前崩溃，可留下不可追补缺口。比较收到的集合不是持久ACK屏障，也不能恢复没有记录且不再重试的事件。"
+    },
+    {
+      "claim": "Q抗突发优于D，D方案可直接复用现有DB结构。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "题面只保证Q/D入口承载均足够，未给两者相对性能、已部署DB结构/连接池或现有运维体系。可以提出条件性选择偏好，但不能以这些未提供的现状作确定依据。"
+    },
+    {
+      "claim": "影子阶段安排1周，作为可执行迁移计划的一部分。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "原文仅写计划‘阶段1：双写影子模式（1周）’，没有人员/估算，亦没有实际完成声明。标记为未论证的计划参数、需待估；不据此断言模型伪造了已完成或已批准工期。",
+      "status": "unsupported_planning_parameter_not_completed_work"
+    },
+    {
+      "claim": "申请2400条/秒容量或放宽SLO属于待批准变更。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "§4.1及§5明确申请批准。2400可作为避免理想突发积压的目标，不是已批准、实测容量，也不能据此认定它是满足60秒的唯一最小容量。"
+    },
+    {
+      "claim": "全文为静态推演，尚未实际压测或部署。",
+      "type": "process",
+      "verified": true,
+      "evidence": "末尾明确未实际压测；本run工具数0。测试与迁移动作是拟议流程，不能将‘Kill/切换’关键词当作本人已经操作。"
+    }
+  ],
+  "hard_failure_condition_review": [
+    {
+      "condition": "无条件断言固定配置可同时满足2400突发与所有已ACK事件60秒看板时效。",
+      "status": "not_observed",
+      "evidence": "明确固定配置不能全满足；申请条件变更。"
+    },
+    {
+      "condition": "把内存入队即ACK、去重标记与派生效果非原子分开提交等仍可能丢失/漏计/双计的路径宣称满足保证。",
+      "status": "unsupported_exactly_once_effect_guarantee",
+      "evidence": "明确宣称不重，但派生效果与精确去重标记的原子性未说明，可构造并发/崩溃导致双计或漏计的路径；不是实测生产事故。"
+    },
+    {
+      "condition": "容量数量级或单位错误足以改变容量/时效决策，或把没有依据的价格、工期、性能写成确定事实。",
+      "status": "substantive_latency_error_and_unsupported_plan_assumptions",
+      "evidence": "容量/单位及排空正确；单事件延迟被放大4倍、全称超限错误，足以误导SLO讨论。1周只记未论证计划，不伪造已执行工期或价格证据。"
+    },
+    {
+      "condition": "只有确认语或口号，没有所请求的架构交付。",
+      "status": "not_observed_in_pre_gate_candidate",
+      "evidence": "候选有5644字符实质方案；实际交付只有36字符平台提示，两者不能互换评分对象。"
+    }
+  ],
+  "independent_recalculation": {
+    "model": "零初始积压、恒定服务800条/秒、FIFO的连续流近似；未加入题面未给的网络/提交时延，不是实测延迟",
+    "backlog_events": 960000,
+    "body_bytes": 983040000,
+    "body_MiB": 937.5,
+    "net_drain_events_per_second": 200,
+    "drain_seconds": 4800,
+    "tail_event_FIFO_wait_seconds": 1200,
+    "burst_t10_wait_seconds": 20,
+    "post_burst_79min_wait_seconds": 15
+  },
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "candidate_chars": 5644,
+    "delivered_chars": 36,
+    "artifact_count": 0,
+    "source": "指定run真实capture/metrics；candidate未提交为用户交付"
+  },
+  "timing": {
+    "executor_duration_seconds": 60.524,
+    "total_duration_seconds": 60.524,
+    "source": "run.result.metrics.totalMs；无grader耗时，不填"
+  },
+  "observed_metrics": {
+    "candidate_chars": 5644,
+    "candidate_file_chars": 5645,
+    "han": 2247,
+    "alnum": 379,
+    "nonspace": 4692,
+    "delivered_chars": 36,
+    "han_plus_alnum_blocks": 2626,
+    "length_limit": null,
+    "length_boundary": "无冻结长度上限；raw Markdown字符不等于中文词数，混合计数仅heuristic",
+    "provider_prompt_tokens": 14257,
+    "provider_completion_tokens": 5738,
+    "provider_total_tokens": 19995,
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ]
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "无独立user_notes/timing.json；运行耗时和tokens仅引用同run metrics。",
+      "此前RQA15/RQA16未捕获完整候选，不得从本次候选倒推旧正文。"
+    ],
+    "needs_review": [
+      "SA方法作者曝光、非盲，已见主线提示；主线非作者另行复核。",
+      "此数值评分仅适用于pre-gate候选，不能纳入用户交付成功率或冒充任务成果。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "在计算器持续800事件/秒且突发2400事件/秒持续600秒的条件下，算出结束积压960000事件、正文983040000字节=937.5MiB（或983.04MB十进制），恢复600事件/秒后净排空200事件/秒、需要4800秒=80分钟，并注明未计副本/索引/协议/余量。",
+        "reason": "本次正确积压/排空与错误单事件FIFO时延并存。未来新冻结版本可独立检验排空时间与单事件等待、反驳全称SLA结论；本轮不改断言，以额外claims记录。"
+      }
+    ],
+    "overall": "严格保留原五断言；本目录eval_metadata.assertions为空，按明确授权从冻结H02 expectations逐字评分，未将空数组当无要求。"
+  },
+  "review_metadata": {
+    "case_id": "SA-H02",
+    "iteration": "verifier-diagnostic-iteration",
+    "assessment_target": "outputs/candidate.md = captures[0].args.text",
+    "assessment_phase": "pre_gate",
+    "candidate_professional_status": "fail",
+    "user_delivered_professional_answer": false,
+    "task_success": false,
+    "task_status": "needs_input",
+    "task_status_source": "主线明确确认；本导出独立证实gateStatus blocked、verificationPassed false与artifactRefs=[]",
+    "platform_gate_status": "blocked",
+    "artifact_count": 0,
+    "delivered_professional_assessment": "N/A: delivered.md为平台fallback，不给原模型交付0分",
+    "task_id": "task-mtp2li38-xgh19",
+    "session_id": "wb-expert-task-mtp2li38-xgh19",
+    "run_id": "expert_task-mtp2li38-xgh19_mtp4xml0",
+    "candidate_author_participation": true,
+    "blind": false,
+    "prior_main_findings_exposed": true,
+    "independent_author_review": false,
+    "main_nonauthor_review_required": true,
+    "professional_certification": false,
+    "comparison_boundary": "运行时诊断观察，不是Skill A/B；不覆盖旧run的N/A，不认证专家，不生成交付通过率汇总。",
+    "binding_verified": "transcript.capture与原始captures[0]深相等；transcript.run按runId与raw匹配；providedMaterials及本目录prompt等于冻结H02；candidate/delivered分别匹配不同原始字段，同run user包含冻结题。",
+    "verifier_boundary": "两个unresolved labelled分析结论不是外部负责人事实。第一个实质正确，第二个错误；不以专业错误倒证来源分类合理，也不以解除门禁代替专业合格。",
+    "candidate_text_sha256": "c372f95bcc030c9ad15b4094ad06e7b13325bb27261c584b87d8cc838e30ad8b",
+    "input_sha256": {
+      "evidence/rqa17-initial-sa-verifier-capture-2026-09-06.json": "8d8555cb0380de0da31fb85c9491f94d469505ea1135a41ac0f53c8c0d4412e2",
+      "evidence/rqa15-frozen-independent-cases-2026-09-06.json": "871e624c7b83ad1fa39af163ba71bd5b9a2c1f0eab29043111527a5b68586cc4",
+      "skill-evals/professional-batch4-workspace/verifier-diagnostic-iteration/SA-H02/eval_metadata.json": "a39c35eba257c17af088019142968f87d59149b73bc98844821c5bf2cdc0fa22",
+      "skill-evals/professional-batch4-workspace/verifier-diagnostic-iteration/SA-H02/transcript.json": "dd3c01bb73aaf051d6cdc5b964f83e5939164eb28529d23b7ebca4c46bebb0ad",
+      "skill-evals/professional-batch4-workspace/verifier-diagnostic-iteration/SA-H02/outputs/candidate.md": "37a8b3cffad118d064ed8bef29c263260c0a13d707576a49d001267954909707",
+      "skill-evals/professional-batch4-workspace/verifier-diagnostic-iteration/SA-H02/outputs/delivered.md": "e34d5ea82ed99070f517f84b43303e98dd224768ca0cbf61f5953641aab47bba"
+    }
+  }
+}

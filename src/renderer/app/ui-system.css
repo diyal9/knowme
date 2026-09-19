@@ -31,7 +31,7 @@
 :where(.ui-button.primary,.settings-btn.primary,.hub-btn.primary,.wb-run-btn.primary,.wb-empty-action.primary,.personal-primary) {
   border-color:var(--action-primary) !important;
   background:var(--action-primary) !important;
-  color:#fff !important;
+  color:var(--text-inverse) !important;
 }
 :where(.ui-button.primary,.settings-btn.primary,.hub-btn.primary,.wb-run-btn.primary,.wb-empty-action.primary,.personal-primary):hover:not(:disabled) {
   border-color:var(--action-primary-hover) !important;
@@ -70,7 +70,7 @@
 }
 :where(.ui-card[role='button'],.memory-item[role='button'],.hub-card,.wb-task-card,.wb-task-quick-card):hover {
   border-color:var(--border-strong);
-  box-shadow:0 5px 16px rgba(24,31,36,.045);
+  box-shadow:0 5px 16px color-mix(in srgb, var(--state-info) 4.5%, transparent);
 }
 
 :where(.ui-badge,.settings-badge,.hub-badge) {

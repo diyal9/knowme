@@ -4,7 +4,9 @@
 
 `src/lib/context-engine/` 是纯装配基础设施，不直接读取文件、访问网络或执行工具。调用方提供候选 ContextBlock；引擎负责规范化、确定性选择、可选语义选择、冲突检测、预算裁剪、消息装配和 manifest。
 
-上下文权限顺序为 platform → scene → persona → data → user。每个 block 声明 kind、authority、trust、priority、maxTokens、source、locale、cachePolicy 与 critical。稳定可信控制前缀先装配，不可信任务/检索/记忆进入最终 user 数据区，用户原始输入保持在最后。
+上下文权限顺序为 platform → scene → persona → data → user。每个 block 声明 kind、authority、trust、sourceTrust、priority、maxTokens、source、locale、cachePolicy 与 critical。authority 用于冲突排序，role projection 另由 kind + authority + sourceTrust 联合决定：只有平台/内置来源的 core、scene 和 tool contract 可以进入 system。persona、SOP、Skill、任务事实与偏好均进入带边界的 user 协作上下文；不可信检索/记忆进入 JSON 数据区，用户原始输入保持在最后。
+
+请求准备只收集 Context Draft 与语义选择结果，不生成最终消息。工具面完成后根据实际 ToolRecord 推导 capability ID，再把 core、tool contract、研究路由与动态上下文交给 assembler 单次装配。这样提示词声明与运行时工具面同源，也避免后置研究路由产生第二份 system 拼接和重复 manifest。
 
 ## Trust and Critical Budget
 
@@ -42,9 +44,9 @@ Embedding 运行时仅接受 http/https 且禁止 URL 内凭据，限制单项/�
 
 ## Operations and Evaluation
 
-进程内指标聚合 Context 装配 p95、语义 p95、降级率、缓存命中率、熔断次数、token 使用/节省及安全不变量。SLO 快照只含定长枚举和数值；`untrusted_system_projection` 或 `critical_context_truncated` 一旦出现立即标记 degraded。
+进程内指标聚合 Context 装配 p95、语义 p95、降级率、缓存命中率、熔断次数、token 使用/节省及安全不变量，并记录身份漂移、无关自我介绍、无工具执行声明和重试。SLO 快照只含定长枚举、匿名模型哈希和数值；`untrusted_system_projection` 或 `critical_context_truncated` 一旦出现立即标记 degraded。
 
-`tests/fixtures/context-engine-golden.json` 固化专家身份、no-tools、中文/英文/伪标签注入和相关性选择。该黄金集由 `npm test` 执行，是主 Context Engine 的离线硬门禁；真实 Provider canary 作为有凭据环境的发布前门禁。
+`tests/fixtures/context-engine-golden.json` 固化专家身份、no-tools、中文/英文/伪标签注入和相关性选择。该黄金集由 `npm test` 执行，是主 Context Engine 的离线硬门禁。行为评测模块提供专家身份、无关自我介绍、无工具执行声明和检索注入用例；Chat canary 仅在显式提供凭据时调用真实 Provider，输出检查结果和回答哈希而非正文。
 
 ## Expert Collaboration Isolation
 
@@ -54,11 +56,13 @@ Agent Session 使用 `personaExpertId` 表达身份来源，`expertId` 继续表
 
 ## Prompt Registry and Locale
 
-内置提示词位于 `context-engine/prompts/<locale>`，使用稳定 block ID。`knowme-system-prompt.ts` 保留为兼容 facade。locale 缺失时回退 `zh-CN`；用户资料和专家自定义正文保持原语言。
+内置提示词位于 `context-engine/prompts/<locale>`，使用稳定 block ID 和 pack version。`knowme-system-prompt.ts` 保留为兼容 facade。当前提供 `zh-CN` 与 `en-US`；locale 缺失时回退 `zh-CN`，用户资料和专家自定义正文保持原语言。Router 的历史连续性、身份元数据、模式、偏好与 Skill 边界文案同样从 locale pack 读取。
+
+专家资产使用 Prompt Schema 表达 identity、objective、scope、Soul/SOP、输入输出契约与 capability binding。Prompt lint 对权限覆盖、超大正文做阻断，对通用身份冲突、重复 SOP、强制指令密度、未绑定工具和缺失输出契约给出治理结果；运行时只阻断 error，CI 扫描全部内置专家。
 
 ## Budget and Performance
 
-Context Engine 使用模型 token 估算器，先按 block 的 maxTokens 裁剪，再按 authority、priority 和原始顺序分配总预算。全部前导 system 消息作为受保护前缀参与裁剪，动态 block 可按优先级丢弃。
+Context Engine 优先使用 Provider/tokenizer adapter 的真实计数；缺失时使用经历史用量校准的保守估算。装配器先按 block 的 maxTokens 裁剪，再按 authority、priority 和原始顺序分配总预算。全部前导 system 消息作为受保护前缀参与裁剪，动态 block 可按优先级丢弃。历史按完整 turn 从最旧处省略；显式启用时仅把被省略轮次生成有界摘录摘要，且该摘要保持 user role。
 
 manifest 默认只记录 block ID、来源、token、哈希与裁剪原因，不记录完整个人记忆和检索正文。稳定 block 可被 prompt cache 复用；候选语义索引由调用方在后台增量维护。
 

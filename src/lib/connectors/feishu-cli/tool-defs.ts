@@ -39,10 +39,13 @@ const FEISHU_READ_TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'feishu.related_chats',
-      description: 'Deterministic Feishu IM workflow: summarize chats related to the authorized user for recent natural days (default 1 = today). Uses im +messages-search --is-at-me for @mentions, plus im +chat-list --types p2p,group --sort active_time for personal/group chat topics. Returns a readable digest; does not send messages or read docs.',
+      description: 'Deterministic Feishu IM workflow: summarize @mentions for an exact local date or a recent natural-day window. For “昨天” pass date as YYYY-MM-DD; for a rolling window use days (default 1 = today). Uses im +messages-search --is-at-me for @mentions, plus im +chat-list --types p2p,group --sort active_time for a recent conversation list (not filtered to that date). Does not retrieve unread counts or all private/group message bodies. Reports partial results and source failures; do not claim full inbox coverage. Does not send messages or read docs.',
       parameters: {
         type: 'object',
-        properties: { days: { type: 'number', minimum: 1, maximum: 30 } },
+        properties: {
+          date: { type: 'string', description: '查询单个本地日期，格式 YYYY-MM-DD；用户说“昨天”时应传入计算后的日期。' },
+          days: { type: 'number', minimum: 1, maximum: 30, description: '未指定 date 时查询最近的自然日数量。' },
+        },
         additionalProperties: false,
       },
     },
@@ -120,7 +123,7 @@ const FEISHU_READ_TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'feishu.query_bitable',
-      description: 'Query Feishu Base / bitable data (read-only).',
+      description: 'Query Feishu Base / bitable or spreadsheet data (read-only). Return the complete row and field values needed by the assistant; the assistant must present the result as a Markdown table with field names as columns, preserve empty values, and state when the result is truncated or has no rows.',
       parameters: {
         type: 'object',
         properties: {

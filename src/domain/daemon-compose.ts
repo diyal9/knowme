@@ -222,7 +222,10 @@ function daemonTaskSourceTitle(task: Record<string, unknown>): string {
     metadata.document_title ||
     '',
   ).trim().slice(0, 120)
-  if (/^(?:飞书云文档|飞书文档|飞书知识库|飞书链接|知识库|未命名文档|无标题)$/i.test(title)) return ''
+  // Upstream task records may provide a connector/resource kind as the
+  // "title" (for example "Docs"). It is not the document's real title and
+  // must not prevent the renderer from resolving the title from the page.
+  if (/^(?:docs?|document|document title|飞书云文档|飞书文档|飞书知识库|飞书链接|知识库|未命名文档|无标题|相关链接|链接)$/i.test(title)) return ''
   return title
 }
 

@@ -1,9 +1,21 @@
 import type { CapabilityItem } from '../shared/api'
+import { expertRouteLabel } from '../shared/expert-display'
 
 export interface ExpertContractItem {
   id: string
   label: string
   required?: boolean
+  type?: string
+  mergeInto?: string
+}
+
+export interface ExpertWorkbenchRoute {
+  id: string
+  label: string
+  description: string
+  skillId: string
+  connectorId: string
+  keywords: string
 }
 
 export interface ExpertWorkbenchDetail {
@@ -18,6 +30,8 @@ export interface ExpertWorkbenchDetail {
   outputs: ExpertContractItem[]
   skills: string[]
   connectors: string[]
+  sop: string
+  routes: ExpertWorkbenchRoute[]
   requiresMaterials: boolean
 }
 
@@ -37,9 +51,31 @@ function contract(value: unknown, fallback: string): ExpertContractItem[] {
   const parsed: ExpertContractItem[] = rows.flatMap((item, index) => {
     const row = record(item)
     const label = String(row.label || row.title || row.name || (typeof item === 'string' ? item : '')).trim()
-    return label ? [{ id: String(row.id || `item-${index + 1}`), label, required: row.required === true }] : []
+    return label ? [{
+      id: String(row.id || `item-${index + 1}`),
+      label,
+      required: row.required === true,
+      type: String(row.type || '').trim() || undefined,
+      mergeInto: String(row.mergeInto || '').trim() || undefined,
+    }] : []
   })
   return parsed.length ? parsed.slice(0, 12) : [{ id: 'primary', label: fallback, required: true }]
+}
+
+function routes(value: unknown): ExpertWorkbenchRoute[] {
+  return (Array.isArray(value) ? value : []).flatMap((item, index) => {
+    const row = record(item)
+    const id = String(row.id || '').trim()
+    if (!id) return []
+    return [{
+      id,
+      label: expertRouteLabel(row, index),
+      description: String(row.description || '').trim(),
+      skillId: String(row.skillId || '').trim(),
+      connectorId: String(row.connectorId || '').trim(),
+      keywords: String(row.keywords || '').trim(),
+    }]
+  })
 }
 
 /** 将能力中心的宽泛 expert-get 结果投影为工作台只读能力契约。 */
@@ -48,12 +84,16 @@ export function parseExpertWorkbenchDetail(payload: unknown, fallback: Capabilit
   const loaded = record(outer.expert || outer)
   const frontmatter = record(loaded.frontmatter)
   const workbench = record(frontmatter.workbench || loaded.workbench)
+  const manifest = record(loaded.capabilityManifest || outer.capabilityManifest)
+  const metadata = record(manifest.metadata)
+  const execution = record(record(metadata.knowme).execution)
   const name = String(loaded.name || frontmatter.name || fallback.name || fallback.id).trim()
   const description = String(loaded.description || frontmatter.description || fallback.description || '专业 Agent').trim()
   const useCases = strings(workbench.useCases || frontmatter.useCases)
   const inputs = contract(workbench.inputs || frontmatter.inputContract || loaded.inputs, '本次任务目标')
-  const outputs = contract(workbench.outputs || frontmatter.outputContract || loaded.outputs, '任务交付物')
+  const outputs = contract(workbench.outputs || execution.deliverables || frontmatter.outputContract || loaded.outputs, '任务交付物')
   const boundaries = strings(workbench.boundaries || frontmatter.boundaries)
+  const sop = String(workbench.sop || frontmatter.sop || loaded.sop || '').trim()
   return {
     id: String(loaded.id || frontmatter.id || fallback.id),
     name,
@@ -66,6 +106,8 @@ export function parseExpertWorkbenchDetail(payload: unknown, fallback: Capabilit
     outputs,
     skills: strings(loaded.skills || frontmatter.skills, 16),
     connectors: strings(loaded.connectors || frontmatter.connectors, 16),
+    sop,
+    routes: routes(execution.routes),
     requiresMaterials: inputs.some((item) => item.required && item.id !== 'primary'),
   }
 }

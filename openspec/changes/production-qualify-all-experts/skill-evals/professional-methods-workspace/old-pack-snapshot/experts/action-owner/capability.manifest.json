@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 3,
+  "id": "action-owner",
+  "kind": "expert",
+  "name": "行动项管理员",
+  "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "feishu",
+      "kind": "connector",
+      "required": false
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": [
+        "feishu"
+      ]
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": true,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "已确认的会议纪要",
+    "参与者、时间与项目约束"
+  ],
+  "outputs": [
+    "可追踪的行动项清单",
+    "缺失责任信息与阻塞项"
+  ],
+  "risk": {
+    "level": "medium",
+    "reasons": [
+      "可读取已授权的外部工作资料"
+    ]
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/action-owner"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "可追踪的行动项清单",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "缺失责任信息与阻塞项",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

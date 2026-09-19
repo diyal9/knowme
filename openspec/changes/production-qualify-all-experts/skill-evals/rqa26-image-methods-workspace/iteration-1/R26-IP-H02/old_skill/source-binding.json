@@ -1,0 +1,195 @@
+{
+  "name": "old_skill",
+  "file": "rqa26-old-h02-lossless.json",
+  "jsonPath": "data",
+  "sourceSha256": "4ffb08931f0216b7469c06fba50e91754761959e931cbc5232c406d85cf27cf4",
+  "configuration": "old-3.2.0",
+  "taskId": "task-mtpmaqln-tf3ct",
+  "sessionId": "wb-expert-task-mtpmaqln-tf3ct",
+  "status": "review",
+  "agentVersion": "3.2.0",
+  "sop": {
+    "version": "3.2.0",
+    "hash": "dcf7730df6be94b0"
+  },
+  "attention": null,
+  "messages": [
+    {
+      "id": "msg_expert_task-mtpmaqln-tf3ct_mtpmaui5_assistant",
+      "role": "assistant",
+      "text": "编辑版已生成，实际尺寸 896 × 1200 px（PNG），与基图请求尺寸一致，未做裁切或拉伸。\n\n画面核对结果：墨绿色无缝背景（杯后墙面与杯底周围地面）已整体换成干净的暖灰色，无道具、无图案、无文字/Logo/水印；单杯数量、杯盖与黑色接缝环、左侧位置与画面占比、右侧留白均保持原样，杯身与杯盖仍是原来的银色拉丝金属，未被改成黑色或暖灰涂层，柔和棚拍光方向和杯底接触阴影也保留了下来。\n\n尚未核查之处：背景灰度是否完全符合你预期的“暖灰”色温偏向（当前偏中性微暖），以及金属表面高光细节与原图的逐像素一致性——这类参考编辑会有轻微重绘差异，建议放大看杯身边缘和反光带。如需微调（更暖的灰、或减弱背景渐变），告诉我方向即可，但按你的授权本次只出这一张，不会额外付费重试。",
+      "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+      "createdAt": "2026-09-06T09:37:22.709Z",
+      "trace": [
+        {
+          "id": "stage_prepare",
+          "kind": "stage",
+          "title": "上下文准备完成",
+          "status": "done"
+        },
+        {
+          "id": "stage_generate",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done"
+        },
+        {
+          "id": "tool_call_3af555a1630f44ab87b40593",
+          "kind": "tool",
+          "title": "调用工具：generate_image",
+          "status": "done",
+          "summary": "操作已完成",
+          "toolCallId": "call_3af555a1630f44ab87b40593",
+          "toolName": "generate_image",
+          "durationMs": 20194
+        },
+        {
+          "id": "stage_ground",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done"
+        },
+        {
+          "id": "stage_verify_claims",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done"
+        }
+      ],
+      "protocolVersion": 2,
+      "answerHash": "0e5ea4ffc0891bdc"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "image_45d740112bf26255",
+      "type": "image",
+      "title": "生成图片 1",
+      "body": "![生成图片 1](D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpmaqln-tf3ct_mtpmaui5\\generated-01-45d740112bf26255.png)",
+      "status": "draft",
+      "targetPath": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpmaqln-tf3ct_mtpmaui5\\generated-01-45d740112bf26255.png",
+      "meta": {
+        "image": {
+          "protocol": "knowme.image-metadata/v1",
+          "source": "decoded-file",
+          "width": 896,
+          "height": 1200,
+          "frames": 1,
+          "mimeType": "image/png",
+          "byteLength": 1254224,
+          "sha256": "45d740112bf2625537d72a6320719220c1768d144836d277279de13d0b33b720"
+        },
+        "taskId": "task-mtpmaqln-tf3ct",
+        "deliverableId": "generated-image",
+        "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5"
+      }
+    }
+  ],
+  "executionEvidence": [
+    {
+      "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+      "deliverableId": "generated-image",
+      "gateStatus": "verified",
+      "verificationPassed": true,
+      "verificationDiagnostics": {
+        "version": 1,
+        "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+        "taskId": "task-mtpmaqln-tf3ct",
+        "candidateHash": "0e5ea4ffc0891bdc74e04f89c7b41893f924aef3dd0703775b95fbc309627b54",
+        "candidateChars": 336,
+        "materialSnapshotHash": "174bfa6b613fe1b89efd691a8ee788ddd674cdf02c4f365253153402f406395f",
+        "materialCount": 1,
+        "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+        "fieldChecks": [],
+        "fieldCheckCount": 0
+      },
+      "toolCalls": [
+        {
+          "id": "call_3af555a1630f44ab87b40593",
+          "name": "generate_image",
+          "status": "ok",
+          "resultRef": "",
+          "error": "",
+          "durationMs": 20194
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_1788687442707_c17ebb",
+          "status": "ok",
+          "digest": "已生成 1 张图片，预览已附在成果区。 实际图片 image_45d740112bf26255：896 × 1200 px，image/png，1 帧，1254224 字节。 尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。 服务返回说明（未核验，不能覆盖上述文件事实）： 已生成 1 张图片（图生图(ref=1), task_id=307054, model=gpt-image-2, n=1, aspect_ratio=3:4, size=896x1200…",
+          "provenance": {
+            "tool": "generate_image",
+            "callId": "call_3af555a1630f44ab87b40593"
+          }
+        }
+      ],
+      "violations": [],
+      "createdAt": "2026-09-06T09:37:22.819Z"
+    }
+  ],
+  "source": {
+    "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa26-old-h02-lossless.json",
+    "sha256": "4ffb08931f0216b7469c06fba50e91754761959e931cbc5232c406d85cf27cf4",
+    "jsonPath": "data"
+  },
+  "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+  "finalAssistantMessage": {
+    "id": "msg_expert_task-mtpmaqln-tf3ct_mtpmaui5_assistant",
+    "role": "assistant",
+    "text": "编辑版已生成，实际尺寸 896 × 1200 px（PNG），与基图请求尺寸一致，未做裁切或拉伸。\n\n画面核对结果：墨绿色无缝背景（杯后墙面与杯底周围地面）已整体换成干净的暖灰色，无道具、无图案、无文字/Logo/水印；单杯数量、杯盖与黑色接缝环、左侧位置与画面占比、右侧留白均保持原样，杯身与杯盖仍是原来的银色拉丝金属，未被改成黑色或暖灰涂层，柔和棚拍光方向和杯底接触阴影也保留了下来。\n\n尚未核查之处：背景灰度是否完全符合你预期的“暖灰”色温偏向（当前偏中性微暖），以及金属表面高光细节与原图的逐像素一致性——这类参考编辑会有轻微重绘差异，建议放大看杯身边缘和反光带。如需微调（更暖的灰、或减弱背景渐变），告诉我方向即可，但按你的授权本次只出这一张，不会额外付费重试。",
+    "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+    "createdAt": "2026-09-06T09:37:22.709Z",
+    "trace": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done"
+      },
+      {
+        "id": "tool_call_3af555a1630f44ab87b40593",
+        "kind": "tool",
+        "title": "调用工具：generate_image",
+        "status": "done",
+        "summary": "操作已完成",
+        "toolCallId": "call_3af555a1630f44ab87b40593",
+        "toolName": "generate_image",
+        "durationMs": 20194
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done"
+      }
+    ],
+    "protocolVersion": 2,
+    "answerHash": "0e5ea4ffc0891bdc"
+  },
+  "baseReference": {
+    "artifactId": "image_6c8124d9d8735d9b",
+    "taskId": "task-mtphk5gg-jinbr",
+    "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+    "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+    "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+    "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+    "width": 896,
+    "height": 1200,
+    "mimeType": "image/jpeg",
+    "source": "evidence/rqa24-baseline-discovery-v1.json → v1Session.run.artifacts[image_6c8124d9d8735d9b]；冻结时重新计算原图hash一致。"
+  },
+  "textFileSerialization": "Exact assistant.text plus one terminal LF (file convention only)."
+}

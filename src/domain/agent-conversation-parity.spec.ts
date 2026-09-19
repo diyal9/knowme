@@ -33,4 +33,12 @@ describe('agent-feishu-prompt', () => {
     }))
     expect(next).toBe(prompt)
   })
+
+  it('does not treat an omitted userReady status as missing authorization', () => {
+    const next = buildFeishuClarificationPrompt('查询昨天飞书消息并总结', {
+      enabled: true,
+      status: { state: 'ready' },
+    })
+    expect(next).toBeNull()
+  })
 })

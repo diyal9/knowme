@@ -17,9 +17,6 @@ function getApi(getUserData) {
   return _api
 }
 
-/** @deprecated use createConnectorsApi — kept for older requires */
-const CONNECTORS = []
-
 function listConnectors() {
   return getApi().listConnectors()
 }
@@ -30,7 +27,6 @@ function bindUserData(getUserData, options = {}) {
 }
 
 module.exports = {
-  CONNECTORS,
   listConnectors,
   bindUserData,
   getApi,

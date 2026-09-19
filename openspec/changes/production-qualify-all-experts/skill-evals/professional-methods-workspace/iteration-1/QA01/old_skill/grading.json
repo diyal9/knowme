@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "text": "所有新设计用例标未执行/待执行，日志仅材料分析，不能报动态执行通过率或已验收通过。",
+      "passed": false,
+      "evidence": "TC02、TC03的执行状态只写“日志部分佐证”，未与新设计的“未执行/待执行”状态分开。没有声称本人执行或动态通过率；这里判状态标注不满足冻结要求，不判伪造本人执行。"
+    },
+    {
+      "text": "日志只支持两次请求返回同一T及状态done，不证明数据库唯一、文件正确或权限安全。",
+      "passed": true,
+      "evidence": "证据段将同用户同键返回T、最终done列为日志观察，并将数据库计数、权限、并发等列为未证实；未宣称文件内容正确。该结论限这份日志样本，不据此证明完整幂等实现。"
+    },
+    {
+      "text": "覆盖成员/管理员隔离及越权请求，明确前置身份/资源和可观察结果。",
+      "passed": false,
+      "evidence": "TC01只操作普通成员A导出他人记录；管理员B仅出现在前置列，没有管理员实际导出全部记录的操作/观察预期，也缺成员正常自建记录范围验证，身份覆盖不完整。"
+    },
+    {
+      "text": "覆盖并发同键、超时同键重试及24小时边界的可观察去重结果，不新增未定义过期键处理规则。",
+      "passed": false,
+      "evidence": "TC07设计同键并发、TC02/03设计同键重试，但TC08只有“跨时区/夏令时”“在边界时间”“计算准确”，未给24h内/端点的具体输入和任务计数/身份判据；不能据此执行并观察去重边界。"
+    },
+    {
+      "text": "覆盖刷新任务恢复和取消完成竞态，保留已下载文件不追溯删除边界，发布证据不足结论明确。",
+      "passed": false,
+      "evidence": "TC04覆盖刷新；TC05/06仅顺序讨论已完成后取消及取消后下载，没有取消与完成交错的竞态。虽保留已下载文件且建议暂缓通过，整条要求仍未满足。"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  },
+  "professionalScorable": true,
+  "professionalVerdict": "hard_fail",
+  "binding": {
+    "evalId": "QA01",
+    "configuration": "old_skill",
+    "taskId": "task-mtowd8zn-rcehl",
+    "sessionId": "wb-expert-task-mtowd8zn-rcehl",
+    "runId": "expert_task-mtowd8zn-rcehl_mtowd955",
+    "agentVersion": "2.0.0",
+    "taskStatus": "review",
+    "deliverableId": "primary",
+    "inputMatchesFrozen": true,
+    "checkpointRunIdVerified": true,
+    "sourceRoot": "D:/UserCaches/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de"
+  },
+  "contextAudit": [
+    {
+      "runId": "expert_task-mtowd8zn-rcehl_mtowd955",
+      "skillRefs": [],
+      "explicitContent": []
+    }
+  ],
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "output_chars": 1084,
+    "transcript_chars": 3132
+  },
+  "length": {
+    "han": 576,
+    "alnum_blocks": 42,
+    "mixed": 618,
+    "punctuation": 168,
+    "mixed_plus_punctuation": 786,
+    "raw_codepoints": 1084,
+    "limit": 800,
+    "within_limit": true,
+    "method": "Whole answer, including headings/tables/extra prose; Han characters + /[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/ blocks. Punctuation and raw Markdown reported separately, not used as Chinese length failure."
+  },
+  "claims": [
+    {
+      "claim": "TC05：已完成任务取消应“取消失败或仅标记状态”。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "R3只规定取消成功后的下载限制与已下载文件豁免，没有限制已完成任务只能取消失败或仅标记；该硬预期排除了需求允许但尚未定义的实现。"
+    },
+    {
+      "claim": "TC07：同键并发应“无重复计费/资源消耗”。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "R2只保证最多一个任务，未定义计费或任何重复请求都不消耗资源。将更强属性当验收预期属新增要求。"
+    },
+    {
+      "claim": "若无分布式锁，高并发可能突破唯一任务限制。",
+      "type": "factual",
+      "verified": false,
+      "verificationStatus": "unverifiable",
+      "severity": "caution",
+      "evidence": "这是条件风险建议，不是已发生缺陷；但缺某种实现机制不代表缺乏其他原子保证，不能据此强制分布式锁。"
+    },
+    {
+      "claim": "补充集成测试并暂缓发布。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "属于基于现有覆盖缺口的合理建议，不作为虚假事实；不构成实际执行证明。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "No model rerun or application test performed by grader; static designs are not personal execution claims."
+    ],
+    "needs_review": [
+      "All extra expectations must be grounded in requirements or explicit conditional decisions; passing frozen assertions does not override hard-fail claims."
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言之外需逐条检查所有测试预期是否由需求推出；关键词、正确主表或较高断言通过率不能掩盖附加错误。"
+      }
+    ],
+    "overall": "两道已披露回归题、四份整包配置输出；2.1.0 vs 2.0.0不是纯Skill因果，也不是专家生产认证。"
+  }
+}

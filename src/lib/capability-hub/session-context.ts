@@ -5,6 +5,7 @@
 'use strict'
 
 const { buildSkillTools } = require('../agent-skill-tools')
+const { createSkillSessionScope } = require('./skill-session-scope')
 const {
   assembleCapabilityContext,
   getSessionCapabilityBindings,
@@ -30,27 +31,31 @@ function createCapabilitySessionContext(deps) {
     runSkillScriptInSandbox,
     skillRuntime,
     expertRuntime,
+    getUserData,
   } = deps
 
-  function buildSkillToolsForSession(session, sandboxPermissions) {
-    const bindings = getSessionCapabilityBindings(session, expertRuntime())
+  function buildSkillToolsForSession(session, sandboxPermissions, options = {}) {
+    const getScope = createSkillSessionScope({ session, sandboxPermissions, options, deps })
     return buildSkillTools({
+      runtime: skillRuntime(),
       capabilitiesRoot: capabilitiesRoot(),
       knowledgeDir: getKnowledgeDir(),
       getInstallStore: buildInstallStoreMap,
-      allowedSkillIds: bindings.allowedSkillIds,
-      runScript: (ctx) => runSkillScriptInSandbox({
-        ...ctx,
-        permissions: sandboxPermissions || session?.run?.permissions || {},
-      }),
+      getAllowedSkillIds: () => { const scope = getScope(); return scope ? scope.allowedSkillIds : [] },
+      isSkillAllowed: id => getScope()?.isAllowed(id) === true,
+      explicitUserSkillIds: options.explicitUserSkillIds,
+      taskId: options.taskId,
+      runScript: (ctx) => {
+        const scope = getScope()
+        if (!scope?.isAllowed(ctx.skillId)) return { ok: false, code: 'not_allowed', message: 'Skill 会话授权已失效，请重新加载。' }
+        return runSkillScriptInSandbox({ ...ctx, permissions: scope.permissions })
+      },
     })
   }
 
   function filterConnectorsForSession(session, connectors) {
-    const bindings = getSessionCapabilityBindings(session, expertRuntime())
-    if (!Array.isArray(bindings.allowedConnectorIds)) return connectors
-    const allow = new Set(bindings.allowedConnectorIds)
-    return connectors.filter((c) => allow.has(c.id))
+    const bindings = getSessionCapabilityBindings(session, expertRuntime(), { userData: getUserData?.() })
+    return connectors.filter(c => bindings.decision('connectors', c.id).allowed)
   }
 
   function assembleContextForSession(session, prompt, slashRefs, tier, legacySkillContext, options = {}) {
@@ -63,6 +68,8 @@ function createCapabilitySessionContext(deps) {
       skillRuntime: skillRuntime(),
       legacySkillContext,
       taskId: String(options.taskId || '').trim(),
+      userData: getUserData?.(),
+      explicitUserSkillIds: options.explicitUserSkillIds,
     })
   }
 
@@ -90,7 +97,11 @@ function createCapabilitySessionContext(deps) {
       }
     }
     const catalog = getKnowledgeCatalog()
-    const knowledge = projectSessionKnowledge(session, catalog)
+    const bindings = getSessionCapabilityBindings(session, expertRuntime(), { userData: getUserData?.() })
+    const knowledge = projectSessionKnowledge(session, catalog, {
+      allowedKnowledgeIds: bindings.allowedKnowledgeIds,
+      deniedKnowledgeIds: bindings.deniedKnowledgeIds,
+    })
     const taskRef = session?.taskRef?.id ? { id: String(session.taskRef.id) } : null
     return {
       ...session,
@@ -141,9 +152,12 @@ function createCapabilitySessionContext(deps) {
   }
 
   function resolveSessionRetrievalScope(session) {
+    const bindings = getSessionCapabilityBindings(session, expertRuntime(), { userData: getUserData?.() })
     return resolveSessionRetrievalProviders(session, {
       resolveProviderById,
       getActiveProvider,
+      allowedKnowledgeIds: bindings.allowedKnowledgeIds,
+      deniedKnowledgeIds: bindings.deniedKnowledgeIds,
     })
   }
 

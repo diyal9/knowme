@@ -165,7 +165,14 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
     reopenTaskRun: async (task: WorkbenchTask, opts?: { lane?: 'workflow' | 'pipeline' }) => {
       const workflowId = String(task.workflowId || '').trim()
       if (!workflowId) {
-        get().openExpertRoom({ id: task.id, name: task.title || task.id })
+        get().openExpertRoom({
+          id: task.id,
+          taskId: task.id,
+          taskStatus: task.status,
+          expertId: task.expertId,
+          name: task.expertName || task.title || task.id,
+          goal: task.brief?.goal || task.goal,
+        })
         return
       }
       const slug = String(task.execRef?.id || workflowId).trim()
@@ -553,11 +560,11 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
     },
 
-    openExpertRoom: (room: { id: string; taskId?: string; expertId?: string; name: string; goal?: string }) => {
+    openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string }) => {
       const goal = String(room.goal || '').trim()
       const intro = room.taskId || goal
         ? `我已接手这项协作。接下来会沿着已确认的目标推进，并在需要你判断时停下来。`
-        : `我们先把问题说清楚。我会通过少量关键问题确认目标，再给你一份可以直接确认的执行计划。你这次最想解决什么问题？`
+        : '请补充目标或材料，我会据此继续。'
       set({
         route: 'workbench',
         workbenchSurface: 'run',
@@ -565,6 +572,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
         expertRoom: {
           id: room.id,
           taskId: room.taskId,
+          taskStatus: room.taskStatus,
           expertId: room.expertId || (room.taskId ? undefined : room.id),
           name: room.name,
           goal,

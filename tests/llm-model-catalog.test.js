@@ -23,6 +23,13 @@ describe('llm-model-catalog', () => {
     assert.equal(profile.supportsVision, true)
   })
 
+  it('includes the current DashScope Flash default and GLM-5.3 preset', () => {
+    const models = catalog.getModels('dashscope')
+    assert.ok(models.some(model => model.id === 'qwen3.8-flash'))
+    assert.ok(models.some(model => model.id === 'ZHIPU/GLM-5.3'))
+    assert.equal(catalog.resolveProfile({ llmProvider: 'dashscope' }).model, 'qwen3.8-flash')
+  })
+
   it('keeps custom models on conservative defaults', () => {
     const profile = catalog.resolveProfile({
       llmProvider: 'custom',
@@ -43,16 +50,43 @@ describe('llm-model-catalog', () => {
     assert.ok(dashscope && dashscope.models.length > 0)
     assert.equal(dashscope.models[0].id, 'auto')
     assert.equal(listing.current.model, 'qwen3.8-max')
+    assert.equal(listing.groups.some(group => group.id === 'openai'), false)
+    assert.equal(listing.groups.some(group => group.id === 'custom'), false)
   })
 
-  it('puts unknown Model IDs into the custom group', () => {
+  it('only exposes the active provider model namespace', () => {
+    const listing = catalog.listCatalog({
+      llmProvider: 'openai',
+      apiEndpoint: 'https://api.openai.com/v1/chat/completions',
+      model: 'gpt-4o-mini',
+      apiKey: 'sk-test',
+    })
+    assert.deepEqual(listing.groups.map(group => group.id), ['openai'])
+    assert.ok(listing.groups[0].models.some(model => model.id === 'gpt-4o-mini'))
+  })
+
+  it('hides OpenAI without configured credentials and never shows custom group', () => {
+    const openai = catalog.listCatalog({
+      llmProvider: 'openai',
+      apiEndpoint: 'https://api.openai.com/v1/chat/completions',
+      model: 'gpt-4o-mini',
+    })
+    assert.equal(openai.groups.length, 0)
+
+    const custom = catalog.listCatalog({
+      llmProvider: 'custom',
+      apiEndpoint: 'https://gateway.example.com/v1/chat/completions',
+      model: 'my-model',
+    })
+    assert.equal(custom.groups.some(group => group.id === 'custom'), false)
+  })
+
+  it('does not create a custom model group for custom endpoints', () => {
     const listing = catalog.listCatalog({
       llmProvider: 'custom',
       model: 'my-company-model',
     })
-    const custom = listing.groups.find(group => group.id === 'custom')
-    assert.ok(custom)
-    assert.ok(custom.models.some(model => model.id === 'my-company-model'))
+    assert.equal(listing.groups.some(group => group.id === 'custom'), false)
     assert.equal(listing.current.model, 'my-company-model')
   })
 
@@ -76,8 +110,8 @@ describe('llm-model-catalog', () => {
         supportsTools: false,
       },
     })
-    const custom = listing.groups.find(group => group.id === 'custom')
-    const long = custom.models.find(model => model.id === 'qwen-legacy-custom')
+    const active = listing.groups.find(group => group.id === 'dashscope')
+    const long = active.models.find(model => model.id === 'qwen-legacy-custom')
     assert.ok(long)
     assert.equal(long.supportsTools, false)
     assert.equal(long.supported, false)
@@ -92,6 +126,6 @@ describe('llm-model-catalog', () => {
       prompt: '请帮我修复这个报错并给出最小代码改动',
     })
     assert.equal(routed.autoRouted, true)
-    assert.equal(routed.model, 'qwen3.6-flash')
+    assert.equal(routed.model, 'qwen3.8-flash')
   })
 })

@@ -1,0 +1,105 @@
+{
+  "status": "not_evaluable",
+  "expectations": [
+    {
+      "text": "正确区分5人、10次任务与独立完成：A独立完成4/5=80%，B为5/5=100%；不能把所有任务最终完成称为两个版本均100%独立成功，P5协助记录保留而非从全部研究证据删除。",
+      "passed": null,
+      "evidence": "N/A：同run最终仅保留VERIFY_CLAIMS提交的36字来源证据fallback，原模型完整分析不可用；任务层needs_input、deliverables=[]、gateStatus=blocked。不能从这段平台阻断提示判断该专业断言是否由原模型满足或违反。"
+    },
+    {
+      "text": "配对独立时间分析只用P1-P4，A均值86.25秒、B均值78.75秒，B平均少7.5秒；若另报全5人原始均值须明确含协助并非同一独立效率口径，不用混合口径夸大效果。",
+      "passed": null,
+      "evidence": "N/A：同run最终仅保留VERIFY_CLAIMS提交的36字来源证据fallback，原模型完整分析不可用；任务层needs_input、deliverables=[]、gateStatus=blocked。不能从这段平台阻断提示判断该专业断言是否由原模型满足或违反。"
+    },
+    {
+      "text": "按顺序分层：P1/P2先A后B时B平均少25秒，P3/P4先B后A时B平均多10秒；识别熟悉同一任务/顺序与未随机分配等替代解释，不从总体平均或两组小样本直接证明新版因果收益，也不能反向声称已证明只有练习效应。",
+      "passed": null,
+      "evidence": "N/A：同run最终仅保留VERIFY_CLAIMS提交的36字来源证据fallback，原模型完整分析不可用；任务层needs_input、deliverables=[]、gateStatus=blocked。不能从这段平台阻断提示判断该专业断言是否由原模型满足或违反。"
+    },
+    {
+      "text": "结合U3准确归属原话或明确标为转述，保留P3更醒目但更慢的反例和P5独立再现的不确定；反驳无条件已证明降低操作成本/明天全量替换，不发明开发低成本、留存收益、样本代表性或不存在的引语理由。",
+      "passed": null,
+      "evidence": "N/A：同run最终仅保留VERIFY_CLAIMS提交的36字来源证据fallback，原模型完整分析不可用；任务层needs_input、deliverables=[]、gateStatus=blocked。不能从这段平台阻断提示判断该专业断言是否由原模型满足或违反。"
+    },
+    {
+      "text": "下一轮计划满足≤4新参与者、每人≤2任务、总≤8观察，清楚写名额和呈现/任务安排；用不同但匹配材料及合理顺序安排区分版本与练习效应，记录独立成功/协助及时间等，给中性提问和会改变建议的观察结果，不承诺该小样本可证明总体效果。",
+      "passed": null,
+      "evidence": "N/A：同run最终仅保留VERIFY_CLAIMS提交的36字来源证据fallback，原模型完整分析不可用；任务层needs_input、deliverables=[]、gateStatus=blocked。不能从这段平台阻断提示判断该专业断言是否由原模型满足或违反。"
+    }
+  ],
+  "summary": {
+    "passed": null,
+    "failed": null,
+    "total": 5,
+    "evaluated": 0,
+    "pass_rate": null
+  },
+  "claims": [],
+  "user_notes_summary": {
+    "uncertainties": [
+      "原模型完整产出不可用；具体source-check原因由主线另行诊断。"
+    ],
+    "needs_review": [
+      "用户未收到分析；原始完整输入已在同run user message及brief.materials中，不能将fallback文字当成材料本来未提供的证明。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "依主代理明确要求对平台阻断后的不可评原模型记N/A；passed=null及summary计数null为未评分扩展，不得转成false/0或纳入通过率。"
+  },
+  "observed_metrics": {
+    "answer_chars": 36,
+    "answer_file_chars": 37,
+    "han_chars": 33,
+    "alnum_blocks": 0,
+    "han_plus_alnum_blocks": 33,
+    "non_whitespace_including_punctuation_and_markdown": 36,
+    "length_limit": null,
+    "tool_calls": 0,
+    "provider_prompt_tokens": 7953,
+    "provider_completion_tokens": 3935,
+    "provider_total_tokens": 11888
+  },
+  "timing": {
+    "duration_ms": 41889,
+    "total_duration_seconds": 41.889,
+    "total_tokens": 11888,
+    "source": "同run capture.metrics及timing.json；不代表grader耗时"
+  },
+  "review_metadata": {
+    "case_id": "UR-H02",
+    "configuration": "with_skill",
+    "installed_agent_version": "2.1.0",
+    "blind": false,
+    "candidate_author_participation": false,
+    "ur_skill_read_for_grading": false,
+    "task_id": "task-mtp2lix5-e7x7b",
+    "session_id": "wb-expert-task-mtp2lix5-e7x7b",
+    "run_id": "expert_task-mtp2lix5-e7x7b_mtp2ljct",
+    "task_status": "needs_input",
+    "terminal": "DONE",
+    "deliverable_count": 0,
+    "platform_gate_status": "blocked",
+    "professional_status": "not_evaluable",
+    "professional_certification": false,
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "binding_verified": "transcript.task/capture与holdout-new-live按task ID匹配且完全一致；prompt/材料/metadata一致；answer与capture一致，timing.metrics一致。",
+    "interpretation_boundary": "kernel DONE不等于任务review或验收；MODEL length后FINALIZE stop，最终在VERIFY_CLAIMS提交fallback。未拿到被检查的完整正文，不能断言误拦或原模型事实正确。与旧N01实际stop确认语0分不同。",
+    "input_sha256": {
+      "eval_metadata.json": "75f3e47155f14d9c02b3905b21df1590e7653491520b8279bc2db2ad5a69c9b3",
+      "with_skill/transcript.json": "3c23701fccebc80df9ac274a2ff083e61bd30d4df988efd01f470db4f4a1e406",
+      "with_skill/outputs/answer.md": "e34d5ea82ed99070f517f84b43303e98dd224768ca0cbf61f5953641aab47bba",
+      "with_skill/timing.json": "9d807d4f0324e87ad3f4c1bb5bbe719e0369bff335234868f145ee688a0da19e"
+    }
+  }
+}

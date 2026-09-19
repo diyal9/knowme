@@ -1,0 +1,125 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "suite": "RQA73 office collaboration lifecycle completion",
+  "purpose": "Complete the missing edge, retry, revision and reopen coverage for the retained office-partner configuration.",
+  "setup": {
+    "installCapabilities": ["feishu"]
+  },
+  "evals": [
+    {
+      "id": "OP08",
+      "expertId": "office-partner",
+      "title": "冲突会议记录的边界整理",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "prompt": "请把以下冲突会议记录整理成待确认的项目结论，不要发送给任何人：记录A写9月12日上线，记录B写9月19日上线；接口验收状态也分别写成已通过和待补测。请区分已知事实、冲突项和需要谁确认，不要替用户裁决。",
+      "assertions": [
+        "明确列出上线日期和验收状态的冲突，而不是任选一个作为结论",
+        "区分原始记录、待确认事项和建议确认人，不虚构会议决议",
+        "不调用发送或外部写入工具，且明确这是内部草稿",
+        "只交付一份结构清晰的待确认整理结果"
+      ]
+    },
+    {
+      "id": "OP09",
+      "expertId": "office-partner",
+      "title": "取消后重试会议摘要",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "prompt": "请将下面的会议记录整理成行动项清单：张三负责接口联调，截止9月15日；李四负责验收用例，截止9月16日；风险是测试环境尚未稳定。第一次整理被取消后请允许重试，重试必须沿用原始记录，不得把取消轮当成已交付。",
+      "assertions": [
+        "真实经历取消后重试，且重试仍保留原始行动项、负责人、截止时间和风险",
+        "取消轮不产生可被误认为最终交付的成果，重试轮只交付一次完整清单",
+        "不擅自修改截止日期或补充不存在的负责人和状态",
+        "重新打开任务后对话、重试记录和唯一主输入框仍可继续使用"
+      ]
+    },
+    {
+      "id": "OP10",
+      "expertId": "office-partner",
+      "title": "延期邮件的完整修订",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "reviewComment": "请保留延期原因、收件人和草稿属性，只把语气改得更简洁，并把下一步改为‘请于9月12日前确认新的联调窗口’；不要新增已承诺的上线日期。请直接给完整替换稿。",
+      "prompt": "请草拟一封给合作方项目经理的延期说明邮件。原因是第三方接口尚未验收，上线日期待确认；邮件必须标明是待发送草稿，并提出下一步沟通请求。",
+      "assertions": [
+        "修订后是完整可复制的邮件正文，不是局部补丁或新增输入框",
+        "保留第三方接口未验收、上线日期待确认和草稿属性",
+        "按退回意见使用9月12日前确认联调窗口，未新增虚假的上线承诺",
+        "真实经历 review→changes_requested/revising→review"
+      ]
+    },
+    {
+      "id": "OP11",
+      "expertId": "office-partner",
+      "title": "重开后保留会议决议约束",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "reviewComment": "验收后发现行动项中把‘待确认’写成了‘已决定’。请重开任务，只修正该状态表述，保留负责人、日期和风险原文，并交付完整新版。",
+      "prompt": "请根据以下记录输出项目行动项：王芳负责字段表，截止9月8日；是否全量发布尚未决定；风险是接口验收未完成。请交付一份可供团队确认的行动项清单。",
+      "assertions": [
+        "真实经历 review→completed→changes_requested/revising→review",
+        "重开版本把全量发布保持为尚未决定，并保留负责人、日期和风险",
+        "旧版本、重开意见和新版本关系可查看，不覆盖历史证据",
+        "最终仍只交付一份完整行动项清单"
+      ]
+    },
+    {
+      "id": "OP12",
+      "expertId": "office-partner",
+      "title": "读取今日优先级",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "today-priority",
+      "prompt": "请从飞书读取今天的日程和待办，按紧急程度整理今日优先级；如果读取失败，直接说明失败原因，不要凭空补写安排。",
+      "assertions": [
+        "命中 today-priority 路线并要求真实 feishu.today_priority 回执",
+        "没有真实读取结果时不生成今日安排或优先级结论",
+        "结果明确区分来源、时间范围和待确认项"
+      ]
+    },
+    {
+      "id": "OP13",
+      "expertId": "office-partner",
+      "title": "检索飞书会议候选",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "meeting-summary",
+      "prompt": "请从飞书检索本周相关会议并整理候选；先返回候选供我选择，不能把候选标题当成已读取的会议正文。",
+      "assertions": [
+        "命中 meeting-summary 路线并先调用 feishu.meeting_candidates",
+        "候选结果不冒充会议正文，未选择会议时不生成纪要",
+        "工具失败时展示可操作的授权或重试说明"
+      ]
+    },
+    {
+      "id": "OP14",
+      "expertId": "office-partner",
+      "title": "查找飞书文档或知识库",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "doc-kb",
+      "prompt": "请从飞书文档或知识库查找‘发布验收标准’，先给出匹配候选；没有成功读取正文时不要写成已确认的标准。",
+      "assertions": [
+        "命中 doc-kb 路线并要求真实 feishu.doc_kb_suggest 回执",
+        "候选标题不等于正文，不能据此编造验收标准",
+        "没有结果时明确告知用户未找到或需要补充范围"
+      ]
+    },
+    {
+      "id": "OP15",
+      "expertId": "office-partner",
+      "title": "读取相关飞书聊天",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "related-chats",
+      "prompt": "请从飞书读取与我相关的聊天和未读消息，整理与发布验收有关的重点；没有真实消息回执时不要声称已读取聊天。",
+      "assertions": [
+        "命中 related-chats 路线并要求真实 feishu.related_chats 回执",
+        "严格限定用户、消息范围和时间，不扩大读取范围",
+        "读取失败或零结果时不使用模型记忆替代消息内容"
+      ]
+    }
+  ]
+}

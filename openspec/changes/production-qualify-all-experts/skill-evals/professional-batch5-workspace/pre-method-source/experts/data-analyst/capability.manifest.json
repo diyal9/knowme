@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 3,
+  "id": "data-analyst",
+  "kind": "expert",
+  "name": "数据分析师",
+  "description": "围绕业务问题检查数据、设计指标并输出可复核的分析结论",
+  "version": "2.0.0",
+  "dependencies": [],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "明确的业务问题与时间范围",
+    "数据文件、字段说明与已知口径"
+  ],
+  "outputs": [
+    "数据质量检查与分析过程",
+    "带证据、限制和建议的结论"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/data-analyst"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "数据质量检查与分析过程",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "带证据、限制和建议的结论",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

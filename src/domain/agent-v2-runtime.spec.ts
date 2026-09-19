@@ -54,6 +54,21 @@ describe('agent-v2-runtime', () => {
     expect(payload.surface).toBe('workbench')
   })
 
+  it('separates adjacent Feishu links before sending any conversation surface to the runtime', () => {
+    const href = 'https://example.feishu.cn/wiki/BdKrdR019oCv5bxpnFlc4TTnpkh'
+    const payload = buildAgentGeneratePayload({
+      prompt: `${href}这个飞书文档`,
+      displayPrompt: `${href}这个飞书文档`,
+      sessionId: 's1',
+      agentId: 'general',
+      runId: createAgentRunId(),
+      history: [],
+      turn,
+    })
+    expect(payload.prompt).toBe(`${href} 这个飞书文档`)
+    expect(payload.displayPrompt).toBe(`${href}这个飞书文档`)
+  })
+
   it('marks expert discussion as a tool-free collaboration request', () => {
     const payload = buildAgentGeneratePayload({
       prompt: '解释当前成果',

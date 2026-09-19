@@ -1,0 +1,148 @@
+{
+  "phase": "RQA21",
+  "date": "2026-09-06",
+  "fullCheck": {
+    "session": 95959,
+    "command": "npm run check",
+    "exitCode": 0,
+    "backend": {
+      "total": 3270,
+      "passed": 3219,
+      "failed": 0,
+      "skipped": 51
+    },
+    "renderer": {
+      "files": 85,
+      "passed": 597
+    },
+    "lint": "passed",
+    "typecheckRenderer": "passed",
+    "note": "Summary transcribed from returned process output; no full log retained. Shared files changed concurrently; not attributed wholly to this patch."
+  },
+  "precedingChecks": [
+    {
+      "session": 29773,
+      "exitCode": 1,
+      "backend": {
+        "total": 3199,
+        "passed": 3142,
+        "failed": 6,
+        "skipped": 51
+      }
+    },
+    {
+      "session": 96777,
+      "exitCode": 1,
+      "backend": {
+        "total": 3235,
+        "passed": 3181,
+        "failed": 3,
+        "skipped": 51
+      }
+    }
+  ],
+  "targeted": {
+    "passed": 215,
+    "failed": 0,
+    "skipped": 0
+  },
+  "finalReplay": {
+    "hashes": {
+      "agent-source-citations.ts": "72f909d6d8e075bd8d43dfcb68fccbec98d2b5087e39723d785b6e1db8ff3879",
+      "agent-claim-source-check.ts": "b19b2f9da8bf6405fab8761e0ee1f3c47748763fd92676a5bfa1645f8fef9072",
+      "agent-grounding-ledger.ts": "47cfa41709027adcf1652de22b145995e24ccdfda2312d397c4bafa3d24697f1"
+    },
+    "latest": {
+      "passed": true,
+      "claims": [],
+      "violations": [],
+      "metadata": {
+        "evidenceCount": 0,
+        "toolCallCount": 0,
+        "hasSupportingEvidence": false,
+        "fieldChecks": [],
+        "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+      }
+    },
+    "unknown": {
+      "passed": false,
+      "claims": [],
+      "violations": [
+        {
+          "code": "unresolved_source_citation",
+          "message": "回复包含无法对应当前材料的来源引用，需要重新核对引用",
+          "missingSourceIds": [
+            "MISSING_SOURCE"
+          ]
+        }
+      ],
+      "metadata": {
+        "evidenceCount": 0,
+        "toolCallCount": 0,
+        "hasSupportingEvidence": false,
+        "fieldChecks": [],
+        "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+      }
+    },
+    "oldKeys": [
+      "schemaVersion",
+      "suite",
+      "phase",
+      "capturedAt",
+      "inputs",
+      "installed",
+      "installPrechecks",
+      "installResults",
+      "verifierCaptures",
+      "runtimeIdentity",
+      "rows"
+    ]
+  },
+  "originalReplay": {
+    "original": {
+      "passed": true,
+      "claims": [],
+      "violations": [],
+      "metadata": {
+        "evidenceCount": 0,
+        "toolCallCount": 0,
+        "hasSupportingEvidence": false,
+        "fieldChecks": [],
+        "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+      }
+    },
+    "currentSourceHash": "72f909d6d8e075bd8d43dfcb68fccbec98d2b5087e39723d785b6e1db8ff3879"
+  },
+  "scope": {
+    "summary": {
+      "changed_count": 699,
+      "affected_count": 172,
+      "changed_files": 320,
+      "risk_level": "critical"
+    },
+    "keys": [
+      "summary",
+      "changed_symbols",
+      "affected_processes"
+    ]
+  },
+  "ui": {
+    "taskId": "task-mtpb1w1s-2bozl",
+    "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+    "status": "review",
+    "reloadedThenReopened": true,
+    "composerCount": 1,
+    "revisionButtonFocusesExistingComposer": true,
+    "noRevisionSubmitted": true,
+    "noAcceptanceSubmitted": true,
+    "observerRestored": true,
+    "qaDailyProfileUntouched": true
+  },
+  "professional": {
+    "passed": 6,
+    "total": 7,
+    "qualified": false,
+    "mixedLength": 1046,
+    "maxMixed": 1000
+  }
+}

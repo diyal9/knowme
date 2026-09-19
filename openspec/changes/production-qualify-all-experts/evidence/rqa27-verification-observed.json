@@ -1,0 +1,256 @@
+{
+  "observation": {
+    "scope": "isolated transparent verifyClaims wrapper; return value unchanged; no source edits",
+    "partial": "installed after RA start; KC diagnostic retry is not original N01 candidate",
+    "qualification": false
+  },
+  "rows": [
+    {
+      "label": "R27-VD-N01",
+      "at": "2026-09-06T10:36:22.338Z",
+      "input": {
+        "text": "# 生图交接包 · 虚构无品牌保温杯竖版商品主视觉\n\n## 一、视觉方案说明（首选方向，唯一方案）\n\n**核心概念**：冷银金属 × 深墨绿哑光背景的克制对比。产品是唯一视觉主体，靠材质反光建立质感，右侧大面积负空间为后期文案预留呼吸区。整体是电商主视觉级别的干净棚拍，不做场景叙事、不做氛围道具。\n\n- **构图层级**：第一层=保温杯本体（左侧约 1/3 画幅，垂直居中偏下，完整入画含杯盖与底部接触阴影）；第二层=背景渐变（左略亮、向右均匀压暗过渡，无纹理无图案）；第三层=右侧 ≥35% 宽度的纯净留白区（仅背景色，无任何元素）。\n- **镜头/视角**：正面平视机位，相机光轴与杯身中线同高或极轻微俯视（≤5°），中长焦等效（约 85–100mm），避免广角畸变，杯体轮廓竖直不倾斜。\n- **光线**：柔和棚拍光。左前方大面积柔光箱为主光，右侧弱填充光，杯身呈现连续竖向高光带与拉丝金属的各向异性反光；地面为软接触阴影，不生硬、不拖长影。\n- **色彩策略（关键一致性约束）**：背景用深墨绿（低明度、中低饱和），但**色调词只作用于背景与环境光，不作用于产品**。产品必须保持中性银色，反射环境时允许出现极轻微绿色边缘反光，但杯体固有色不得偏绿或偏黑。\n- **画面文字策略**：生成阶段画面内**零文字**——无 Logo、无水印、无字符、无标签。中文文案「轻装出发，温度随行」由后期排版叠加在右侧留白区，不进入 Prompt。\n\n---\n\n## 二、生图交接包（下游唯一视觉事实来源）\n\n| 字段 | 内容 |\n|---|---|\n| **目标** | 产出一张可由执行端直接消费的虚构无品牌保温杯商品主视觉底图，供后期排版使用 |\n| **用途** | 电商/宣传竖版商品主视觉底图（非场景广告、非详情页长图），需承载右侧后期文案叠加 |\n| **主体与场景** | 单个银色拉丝不锈钢保温杯，杯盖同为银色；无品牌、无标识、无包装。场景为纯深墨绿无缝摄影背景（seamless studio backdrop），无桌面纹理、无道具、无植物、无水花、无第二只杯子、无人物 |\n| **构图与层级** | 900×1200 竖幅；杯体完整位于画面左侧约 1/3 区域（建议占横向 0–33%，含阴影不超过 38%），上下完整留边、不裁切；右侧自约 62–65% 起至右边缘为完全干净的纯色背景区，宽度 ≥ 画面 35%；地平线/背景过渡带水平且低调，不形成视觉分割线 |\n| **风格/材质/光线** | 高端商业产品摄影写实风；材质=细密环形拉丝金属 + 哑光银杯盖 + 微弱镜面反射；光线=大型柔光箱主光（左前）、右侧弱补光、软接触阴影；无硬光、无霓虹、无体积光、无烟雾、无反射板彩色污染 |\n| **色彩** | 背景：深墨绿（dark forest green，低明度、去彩倾向，全画面统一色相，禁止渐变色斑与杂色）；产品：中性银（neutral silver / brushed stainless steel），明确锁定为无色相金属灰；整体双色关系，冷暖对比克制 |\n| **尺寸与比例** | 最终交付画布 **900×1200 px，比例 3:4**；生成请求按 3:4 出图。**注意：模型原生输出像素通常不等于 900×1200，执行端须在返回后核对实际像素并按需等比缩放/裁切至精确 900×1200，此项不可默认成立** |\n| **画面文字** | 无；所有文字（含「轻装出发，温度随行」）均为后期排版叠加，生成阶段画面内不得出现任何字符、Logo、水印 |\n| **正向 Prompt（英文）** | High-end commercial product photography, single unbranded brushed stainless steel vacuum insulated thermos bottle with a matching silver metal lid, neutral silver metal color, fine circular brushed texture, subtle anisotropic highlights, standing upright and fully in frame on a seamless dark forest green studio background, deep muted low-saturation green backdrop only, no props, no second bottle, no accessories, vertical 3:4 portrait composition 900x1200, camera at product eye level with a slight top-down angle under 5 degrees, 85-100mm telephoto lens equivalent, no perspective distortion, straight vertical silhouette, soft large softbox key light from the front left, gentle fill light from the right, soft realistic contact shadow beneath the base, the bottle placed completely within the left third of the frame, generous clean empty negative space occupying the right side of the image at least 35 percent width, plain uniform background in that area with no objects and no patterns, photorealistic, ultra sharp focus on the product, crisp edges, professional studio lighting, high detail, e-commerce hero shot, color grading applied to the environment only while the metal stays true neutral silver |\n| **负向 Prompt（英文）** | text, letters, words, chinese characters, typography, logo, brand mark, label, watermark, signature, numbers, graphics, pattern on background, props, second bottle, extra cup, duplicate object, hands, people, food, plants, leaves, water splash, ice, stones, table wood grain, cluttered scene, colored reflections tinting the bottle green or black, discolored metal, gold or copper or rose-gold finish, painted or plastic body, neon lighting, harsh specular hotspot, lens flare, volumetric fog, smoke, bokeh background, gradient banding, noise, grain, cropped bottle, cut-off lid, floating bottle, missing shadow, tilted or bent bottle, deformed cylinder, warped handle, extra cap, wrong anatomy, melted seams, low resolution, blurry, jpeg artifacts, oversaturated, flat illustration, 3d render look, cartoon, painting style |\n| **生成参数** | 宽高比：**3:4（竖版）**；数量：**1**；模型：由执行端从当时可用目录中选择支持 3:4 的图像模型，本方案不指定具体型号（未经核实的型号名一律不写）；质量策略：**auto**；像素请求：以 3:4 出图，返回后核对实际分辨率，必要时高质量重采样至 900×1200；种子：无要求（可复现需求时由执行端固定并记录）；文字渲染开关：关闭/不使用模型内置文字生成能力 |\n| **验收标准（逐条可检查）** | 1) 实际返回像素经核对后可得 900×1200、比例 3:4，无形变拉伸；2) 画面中仅一只保温杯，无道具、无第二主体、无人体部位；3) 杯体完整未被裁切，含杯盖与底部阴影；4) 杯体为中性银色拉丝金属，肉眼不可辨认为绿色或黑色金属；5) 背景为统一深墨绿，无纹理、无渐变斑、无图案；6) 右侧 ≥35% 宽度区域为纯净背景，可容纳两行中文文案且不触碰任何元素；7) 全图无任何文字、字母、汉字、Logo、水印、字符伪影；8) 光影柔和，杯身有连续竖向高光带，底部为软接触阴影而非硬投影或悬浮；9) 细节清晰，边缘锐利，无糊边、无结构畸形（尤其杯口、杯盖接缝、杯底） |\n| **风险与约束** | R1 模型常在留白区“自作主张”添加字符或类 Logo 图形 → 检查项 7 必查，命中则重生成；R2 深墨绿环境易把金属染成青绿/暗灰 → 检查项 4 必查，必要时强化“color grading applied to the environment only”权重；R3 模型倾向居中构图，可能侵占右侧留白 → 检查项 6 必查，若杯体越过横向 38% 视为不合格；R4 原生输出分辨率常为 1024×1365 等近似值，不等于 900×1200 → 必须实测核对再缩放；R5 部分模型对“无文字”遵循不稳定，负向词不足以保证，需人工看图确认；R6 无授权品牌资产，本图为虚构通用产品，不得据此声称任何真实品牌还原度或商标合规性；R7 本方案未包含后期排版规范（字体、字号、颜色、行距），文案落地需另行设计，不在本次交付范围 |\n\n---\n\n## 三、下游核对方式（不是只看工具返回成功）\n\n执行端拿到结果后，须**打开图片本身**逐项对照上表验收标准，工具调用成功仅代表生成完成，不代表合格。建议顺序：先看有无文字/多余物体（一票否决）→ 再看杯体位置是否越界 → 再看金属色相是否被染 → 最后核对像素尺寸。任一项不合格即重生成或局部修复，并把使用的模型名、参数、种子与实际返回分辨率一并回传记录。\n\n---\n\n**交给生图执行专家：可直接生成**\n\n说明：本次仅交付设计方案，你尚未批准生成动作。上述交接包已具备执行条件，但是否开始出图请你确认后我再推进；本轮我没有调用任何生成工具，也没有产出图片文件。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpoekri-9ket3_mtpoel4s",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpoekri-9ket3",
+          "runId": "expert_task-mtpoekri-9ket3_mtpoel4s",
+          "items": [
+            {
+              "id": "user-confirmation",
+              "title": "用户确认",
+              "text": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。",
+              "contentHash": "648e91e762107007f6614f9c4d78aaa078928befe2996f8fa4765c7c432d90ba",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "27bf41a0550349930921cdfde51ecb5d6100034092ebce1a1480243eab74ff44"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": true,
+        "claims": [],
+        "violations": [],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    },
+    {
+      "label": "R27-KC-D01-retry",
+      "at": "2026-09-06T10:38:32.234Z",
+      "input": {
+        "text": "已按本轮约束完成：仅使用消息内合成材料，不调用工具、不读取文件、不联网、不写入或发布知识库。以下内容是**索引设计草案及材料内核对**，不代表实际入库或检索已经运行。\n\n## 1. 分类与来源追溯规则\n\n面向财务新人的共享索引按“制度主题 → 逻辑版本 → 来源实例”组织：\n\n| 层级 | 作用 | 本例处理 |\n|---|---|---|\n| 主题 | 便于新人按业务问题查找 | 差旅餐费报销 |\n| 逻辑条目 | 表示一个可维护的制度规则族 | `FIN-TRAVEL-MEAL` |\n| 逻辑版本 | 区分 v1、v2、提案等规则状态 | `L1`、`L2`、`P-E2` |\n| 来源实例 | 保留原始出处和复制关系 | A、B、C、E |\n| 可见性 | 控制共享范围 | 财务人员可见；D 不进入共享索引 |\n\n核心原则：\n\n- **正文一致不等于来源合并。** A 与 B 可以归入同一逻辑版本，但必须分别保留来源 ID。\n- **标题相同不等于内容相同。** C 与 E 都叫“v2”，必须按批准状态、生效信息和内容差异分开。\n- **现行规则优先，但不删除历史规则。** v1 转为历史版本后仍可查询。\n- **私有资料默认隔离。** D 只允许在私有侧标记排除，不进入共享索引，也不展示任何内容摘要。\n\n## 2. 逻辑条目与来源映射\n\n### 主题：差旅餐费报销\n\n| 逻辑条目 ID | 版本/类型 | 状态 | 生效信息 | 单日上限 | 映射来源 | 来源关系与处理 |\n|---|---|---|---:|---:|---|---|\n| `FIN-TRAVEL-MEAL-L1` | v1 | 历史适用 | 2025-01-01 起生效 | 500 元 | A、B | A 为制度正文；B 是旧盘复制件，正文逐字一致。两者作为重复来源归并到 L1，但各自保留来源追溯。 |\n| `FIN-TRAVEL-MEAL-L2` | v2 | 现行适用 | 2026-09-01 起生效 | 800 元 | C | C 已正式批准并明确替代 v1；v1 保留历史查询。 |\n| `FIN-TRAVEL-MEAL-P-E2` | 标题称 v2 的未批准提案 | 提案/待确认 | 无生效日期 | 建议 1000 元 | E | E 独立保留，不并入 C，也不作为现行制度。 |\n\n### 推荐的新人视图\n\n为避免新人被多个同名结果干扰，共享列表默认只显示：\n\n1. **现行规则：** `FIN-TRAVEL-MEAL-L2 / C / 800 元`\n2. **历史规则：** `FIN-TRAVEL-MEAL-L1 / A+B / 500 元`\n3. **提案：** `FIN-TRAVEL-MEAL-P-E2 / E / 尚未批准`\n\n提案可以显示存在性和状态，但不能以“v2”名义混入现行结果。\n\n## 3. 来源关系图\n\n```text\nFIN-TRAVEL-MEAL（差旅餐费报销）\n├─ L1：v1，历史适用\n│  ├─ A：制度正文，保留原始来源\n│  └─ B：A 的逐字复制件，保留复制来源\n│\n├─ L2：v2，现行适用\n│  └─ C：正式批准，替代 L1\n│\n└─ P-E2：标题称 v2 的未批准提案\n   └─ E：独立提案，不并入 C\n```\n\nA/B 的关系是：\n\n> 同一正文内容、两个来源实例。逻辑上去重，来源上不去重。\n\nC/E 的关系是：\n\n> 标题相似，但批准状态、生效信息和数值不同。不能因标题相同而合并。\n\n## 4. D 的隔离处理\n\nD 属于私有面谈记录，仅本人可见。共享索引中不得出现：\n\n- D 的正文；\n- D 的人员信息；\n- 员工个人困难；\n- 临时垫付计划；\n- D 的内容摘要；\n- 可从 D 推导出的个人情况。\n\n建议仅在私有治理清单中使用如下技术标记：\n\n| 私有标记 | 含义 |\n|---|---|\n| `EXCLUDED-PRIVATE-D` | 来源 D 因私有可见性被排除于共享索引 |\n| `SHARED_INDEX_VISIBLE=false` | 不允许向财务新人共享 |\n| `REASON=PRIVATE_SCOPE` | 排除原因是权限范围，不描述内容 |\n\n该标记不得进入面向新人的共同索引。若未来需要解除隔离，必须由有权主体另行确认，不能由索引维护者自行扩大共享范围。\n\n## 5. 待确认的维护责任\n\n以下角色名称只是建议，不是从材料中得到的事实，需要组织确认：\n\n| 事项 | 建议责任方 | 待确认内容 |\n|---|---|---|\n| 将 C 设为唯一现行 v2 | 制度负责人 | 谁有权确认“正式批准”和替代关系 |\n| 将 v1 标记为历史适用 | 知识策展人 | 是否立即执行，以及历史查询入口如何呈现 |\n| 保留 A/B 双来源 | 文档管理员 | 哪个来源作为权威主副本，哪个仅用于迁移追溯 |\n| 判断 B 是否长期保留 | 档案或数据治理负责人 | 去重后是否仍需保存旧盘复制件 |\n| 管理 E 的提案状态 | 制度提案负责人 | 审批结论、目标版本和预计生效日期 |\n| 解决 C/E 同名冲突 | 制度负责人与知识策展人 | 是否要求 E 改名或增加“提案”前缀 |\n| 维护 D 的私有排除 | D 的所有者及权限管理员 | 共享范围、保留期限和解除隔离条件 |\n| 审核索引变更 | 财务知识管理员 | 变更申请、复核人和发布节奏 |\n\n## 6. 冲突处理规则\n\n### 规则一：批准状态优先于标题\n\n优先级：\n\n```text\n正式批准且有生效日期的现行版本\n> 正式批准的历史版本\n> 未批准提案\n> 无法确认状态的副本\n```\n\n因此：\n\n- C 是现行 v2；\n- E 即使标题也叫 v2，也只能作为提案。\n\n### 规则二：按费用发生期间选择规则\n\n材料没有明确说明新旧规则的过渡办法，因此不能直接断言所有历史单据均按何版处理。建议默认采用“费用发生期间”口径：\n\n- 2025-01-01 至 2026-08-31 发生的差旅餐费：查看 `L1/A+B`；\n- 2026-09-01 起发生的差旅餐费：查看 `L2/C`。\n\n跨期行程、延迟提交和补报销如何适用，需要制度负责人确认。\n\n### 规则三：同版本重复来源归并，但保留证据链\n\nA/B 归并为 `L1`，同时保留：\n\n```text\nL1.sources = [A, B]\nL1.duplicateRelation = B is verbatim copy of A\n```\n\n不得因为正文一致而删除 B 的来源 ID。\n\n### 规则四：同名不同内容禁止自动合并\n\n当标题相同但批准状态、生效日期或数值不一致时：\n\n1. 保持不同逻辑条目；\n2. 标记 `TITLE_CONFLICT`；\n3. 默认只返回已批准结果；\n4. 提案单独折叠展示；\n5. 提交制度负责人裁决。\n\n### 规则五：权限不足时只提示不可见\n\n如果某来源因权限不可访问，界面只能提示“存在受限来源”，不能泄露标题、人员、摘要或内容线索。\n\n## 7. 新人问题回答\n\n### “当前单日上限是多少？”\n\n截至业务日期 **2026 年 9 月 6 日**，现行规则是 C：\n\n> **差旅餐费单日报销上限为 800 元。**\n\n依据：\n\n- 逻辑条目：`FIN-TRAVEL-MEAL-L2`\n- 来源：C\n- 生效日期：2026-09-01\n- 状态：正式批准、现行适用\n- E 中的 1000 元只是未批准提案，不能作为当前上限。\n\n### “2025年的报销怎么查？”\n\n2025 年对应历史版本 `FIN-TRAVEL-MEAL-L1`：\n\n> 查询“差旅餐费报销 v1”，来源为 A 或 B，单日上限为 **500 元**。\n\n其中：\n\n- A 是原制度正文；\n- B 是逐字一致的旧盘复制件；\n- 两者指向同一历史规则，但应保留各自来源追溯。\n\n如果涉及 2026 年 9 月 1 日前后的跨期费用，应先确认过渡规则；当前材料没有给出这一细节。\n\n## 8. 两条检索验收示例\n\n### 验收一：查询当前上限\n\n**输入：**\n\n```text\n2026年9月6日差旅餐费当前单日报销上限是多少？\n```\n\n**预期结果：**\n\n- 首位返回 `FIN-TRAVEL-MEAL-L2`；\n- 来源 C；\n- 状态“现行适用”；\n- 金额 800 元；\n- 不将 E 的 1000 元作为答案；\n- 不返回 D。\n\n**通过标准：** 当前日期命中 L2，且同名提案不会污染现行结果。\n\n### 验收二：查询历史规则\n\n**输入：**\n\n```text\n2025年发生的差旅餐费应按什么标准查询？\n```\n\n**预期结果：**\n\n- 返回 `FIN-TRAVEL-MEAL-L1`；\n- 来源 A、B 均可追溯；\n- 状态“历史适用”；\n- 金额 500 元；\n- 明确提示 2026-09-01 起另有现行 v2；\n- 不返回 D。\n\n**通过标准：** 历史查询能够命中 v1，同时避免把历史规则误认为当前规则。\n\n以上两条仅是设计层面的预期核对，没有连接真实检索系统，也未验证实际召回、排序或权限过滤效果。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpnlv8k-go6pp_mtpohltc",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpnlv8k-go6pp",
+          "runId": "expert_task-mtpnlv8k-go6pp_mtpohltc",
+          "items": [
+            {
+              "id": "user-confirmation",
+              "title": "用户确认",
+              "text": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。",
+              "contentHash": "648e91e762107007f6614f9c4d78aaa078928befe2996f8fa4765c7c432d90ba",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "388d1a4ab9311942ab6ea1faa1c6ceb13f1d5c30c648948dc9ae415bba4ace4a"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": false,
+        "claims": [
+          {
+            "type": "external_fact",
+            "text": "日期："
+          }
+        ],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "claims": [
+              {
+                "label": "日期",
+                "value": "2026-09-01"
+              }
+            ]
+          }
+        ],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [
+            {
+              "type": "external_fact",
+              "label": "日期",
+              "value": "2026-09-01",
+              "text": "生效日期：2026-09-01",
+              "prefix": "生效",
+              "support": "unresolved",
+              "sourceIds": []
+            }
+          ],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    },
+    {
+      "label": "R27-KC-D01-retry",
+      "at": "2026-09-06T10:38:48.481Z",
+      "input": {
+        "text": "已按本轮约束完成：仅使用消息内合成材料，不调用工具、不读取文件、不联网、不写入或发布知识库。以下内容是**索引设计草案及材料内核对**，不代表实际入库或检索已经运行。\n\n## 1. 分类与来源追溯规则\n\n面向财务新人的共享索引按“制度主题 → 逻辑版本 → 来源实例”组织：\n\n| 层级 | 作用 | 本例处理 |\n|---|---|---|\n| 主题 | 便于新人按业务问题查找 | 差旅餐费报销 |\n| 逻辑条目 | 表示一个可维护的制度规则族 | `FIN-TRAVEL-MEAL` |\n| 逻辑版本 | 区分 v1、v2、提案等规则状态 | `L1`、`L2`、`P-E2` |\n| 来源实例 | 保留原始出处和复制关系 | A、B、C、E |\n| 可见性 | 控制共享范围 | 财务人员可见；D 不进入共享索引 |\n\n核心原则：\n\n- **正文一致不等于来源合并。** A 与 B 可以归入同一逻辑版本，但必须分别保留来源 ID。\n- **标题相同不等于内容相同。** C 与 E 都叫“v2”，必须按批准状态、生效信息和内容差异分开。\n- **现行规则优先，但不删除历史规则。** v1 转为历史版本后仍可查询。\n- **私有资料默认隔离。** D 只允许在私有侧标记排除，不进入共享索引，也不展示任何内容摘要。\n\n## 2. 逻辑条目与来源映射\n\n### 主题：差旅餐费报销\n\n| 逻辑条目 ID | 版本/类型 | 状态 | 生效信息 | 单日上限 | 映射来源 | 来源关系与处理 |\n|---|---|---|---:|---:|---|---|\n| `FIN-TRAVEL-MEAL-L1` | v1 | 历史适用 | 2025-01-01 起生效 | 500 元 | A、B | A 为制度正文；B 是旧盘复制件，正文逐字一致。两者作为重复来源归并到 L1，但各自保留来源追溯。 |\n| `FIN-TRAVEL-MEAL-L2` | v2 | 现行适用 | 2026-09-01 起生效 | 800 元 | C | C 已正式批准并明确替代 v1；v1 保留历史查询。 |\n| `FIN-TRAVEL-MEAL-P-E2` | 标题称 v2 的未批准提案 | 提案/待确认 | 无生效日期 | 建议 1000 元 | E | E 独立保留，不并入 C，也不作为现行制度。 |\n\n### 推荐的新人视图\n\n为避免新人被多个同名结果干扰，共享列表默认只显示：\n\n1. **现行规则：** `FIN-TRAVEL-MEAL-L2 / C / 800 元`\n2. **历史规则：** `FIN-TRAVEL-MEAL-L1 / A+B / 500 元`\n3. **提案：** `FIN-TRAVEL-MEAL-P-E2 / E / 尚未批准`\n\n提案可以显示存在性和状态，但不能以“v2”名义混入现行结果。\n\n## 3. 来源关系图\n\n```text\nFIN-TRAVEL-MEAL（差旅餐费报销）\n├─ L1：v1，历史适用\n│  ├─ A：制度正文，保留原始来源\n│  └─ B：A 的逐字复制件，保留复制来源\n│\n├─ L2：v2，现行适用\n│  └─ C：正式批准，替代 L1\n│\n└─ P-E2：标题称 v2 的未批准提案\n   └─ E：独立提案，不并入 C\n```\n\nA/B 的关系是：\n\n> 同一正文内容、两个来源实例。逻辑上去重，来源上不去重。\n\nC/E 的关系是：\n\n> 标题相似，但批准状态、生效信息和数值不同。不能因标题相同而合并。\n\n## 4. D 的隔离处理\n\nD 属于私有面谈记录，仅本人可见。共享索引中不得出现：\n\n- D 的正文；\n- D 的人员信息；\n- 员工个人困难；\n- 临时垫付计划；\n- D 的内容摘要；\n- 可从 D 推导出的个人情况。\n\n建议仅在私有治理清单中使用如下技术标记：\n\n| 私有标记 | 含义 |\n|---|---|\n| `EXCLUDED-PRIVATE-D` | 来源 D 因私有可见性被排除于共享索引 |\n| `SHARED_INDEX_VISIBLE=false` | 不允许向财务新人共享 |\n| `REASON=PRIVATE_SCOPE` | 排除原因是权限范围，不描述内容 |\n\n该标记不得进入面向新人的共同索引。若未来需要解除隔离，必须由有权主体另行确认，不能由索引维护者自行扩大共享范围。\n\n## 5. 待确认的维护责任\n\n以下角色名称只是建议，不是从材料中得到的事实，需要组织确认：\n\n| 事项 | 建议责任方 | 待确认内容 |\n|---|---|---|\n| 将 C 设为唯一现行 v2 | 制度负责人 | 谁有权确认“正式批准”和替代关系 |\n| 将 v1 标记为历史适用 | 知识策展人 | 是否立即执行，以及历史查询入口如何呈现 |\n| 保留 A/B 双来源 | 文档管理员 | 哪个来源作为权威主副本，哪个仅用于迁移追溯 |\n| 判断 B 是否长期保留 | 档案或数据治理负责人 | 去重后是否仍需保存旧盘复制件 |\n| 管理 E 的提案状态 | 制度提案负责人 | 审批结论、目标版本和预计生效日期 |\n| 解决 C/E 同名冲突 | 制度负责人与知识策展人 | 是否要求 E 改名或增加“提案”前缀 |\n| 维护 D 的私有排除 | D 的所有者及权限管理员 | 共享范围、保留期限和解除隔离条件 |\n| 审核索引变更 | 财务知识管理员 | 变更申请、复核人和发布节奏 |\n\n## 6. 冲突处理规则\n\n### 规则一：批准状态优先于标题\n\n优先级：\n\n```text\n正式批准且有生效日期的现行版本\n> 正式批准的历史版本\n> 未批准提案\n> 无法确认状态的副本\n```\n\n因此：\n\n- C 是现行 v2；\n- E 即使标题也叫 v2，也只能作为提案。\n\n### 规则二：按费用发生期间选择规则\n\n材料没有明确说明新旧规则的过渡办法，因此不能直接断言所有历史单据均按何版处理。建议默认采用“费用发生期间”口径：\n\n- 2025-01-01 至 2026-08-31 发生的差旅餐费：查看 `L1/A+B`；\n- 2026-09-01 起发生的差旅餐费：查看 `L2/C`。\n\n跨期行程、延迟提交和补报销如何适用，需要制度负责人确认。\n\n### 规则三：同版本重复来源归并，但保留证据链\n\nA/B 归并为 `L1`，同时保留：\n\n```text\nL1.sources = [A, B]\nL1.duplicateRelation = B is verbatim copy of A\n```\n\n不得因为正文一致而删除 B 的来源 ID。\n\n### 规则四：同名不同内容禁止自动合并\n\n当标题相同但批准状态、生效日期或数值不一致时：\n\n1. 保持不同逻辑条目；\n2. 标记 `TITLE_CONFLICT`；\n3. 默认只返回已批准结果；\n4. 提案单独折叠展示；\n5. 提交制度负责人裁决。\n\n### 规则五：权限不足时只提示不可见\n\n如果某来源因权限不可访问，界面只能提示“存在受限来源”，不能泄露标题、人员、摘要或内容线索。\n\n## 7. 新人问题回答\n\n### “当前单日上限是多少？”\n\n截至业务日期 **2026 年 9 月 6 日**，现行规则是 C：\n\n> **差旅餐费单日报销上限为 800 元。**\n\n依据：\n\n- 逻辑条目：`FIN-TRAVEL-MEAL-L2`\n- 来源：C\n- 生效日期：2026-09-01\n- 状态：正式批准、现行适用\n- E 中的 1000 元只是未批准提案，不能作为当前上限。\n\n### “2025年的报销怎么查？”\n\n2025 年对应历史版本 `FIN-TRAVEL-MEAL-L1`：\n\n> 查询“差旅餐费报销 v1”，来源为 A 或 B，单日上限为 **500 元**。\n\n其中：\n\n- A 是原制度正文；\n- B 是逐字一致的旧盘复制件；\n- 两者指向同一历史规则，但应保留各自来源追溯。\n\n如果涉及 2026 年 9 月 1 日前后的跨期费用，应先确认过渡规则；当前材料没有给出这一细节。\n\n## 8. 两条检索验收示例\n\n### 验收一：查询当前上限\n\n**输入：**\n\n```text\n2026年9月6日差旅餐费当前单日报销上限是多少？\n```\n\n**预期结果：**\n\n- 首位返回 `FIN-TRAVEL-MEAL-L2`；\n- 来源 C；\n- 状态“现行适用”；\n- 金额 800 元；\n- 不将 E 的 1000 元作为答案；\n- 不返回 D。\n\n**通过标准：** 当前日期命中 L2，且同名提案不会污染现行结果。\n\n### 验收二：查询历史规则\n\n**输入：**\n\n```text\n2025年发生的差旅餐费应按什么标准查询？\n```\n\n**预期结果：**\n\n- 返回 `FIN-TRAVEL-MEAL-L1`；\n- 来源 A、B 均可追溯；\n- 状态“历史适用”；\n- 金额 500 元；\n- 明确提示 2026-09-01 起另有现行 v2；\n- 不返回 D。\n\n**通过标准：** 历史查询能够命中 v1，同时避免把历史规则误认为当前规则。\n\n以上两条仅是设计层面的预期核对，没有连接真实检索系统，也未验证实际召回、排序或权限过滤效果。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpnlv8k-go6pp_mtpohltc",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpnlv8k-go6pp",
+          "runId": "expert_task-mtpnlv8k-go6pp_mtpohltc",
+          "items": [
+            {
+              "id": "user-confirmation",
+              "title": "用户确认",
+              "text": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。",
+              "contentHash": "648e91e762107007f6614f9c4d78aaa078928befe2996f8fa4765c7c432d90ba",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "388d1a4ab9311942ab6ea1faa1c6ceb13f1d5c30c648948dc9ae415bba4ace4a"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": false,
+        "claims": [
+          {
+            "type": "external_fact",
+            "text": "日期："
+          }
+        ],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "claims": [
+              {
+                "label": "日期",
+                "value": "2026-09-01"
+              }
+            ]
+          }
+        ],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [
+            {
+              "type": "external_fact",
+              "label": "日期",
+              "value": "2026-09-01",
+              "text": "生效日期：2026-09-01",
+              "prefix": "生效",
+              "support": "unresolved",
+              "sourceIds": []
+            }
+          ],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    }
+  ]
+}

@@ -8,13 +8,14 @@ import { SettingsSystemPanel } from './SettingsSystemPanel'
 import { SettingsUserProfilePanel } from './SettingsUserProfilePanel'
 import './settings.css'
 import { type SettingsTabId, useSettingsForm } from './useSettingsForm'
+import { useAppStore } from '../../app/store'
 
 const TAB_GROUPS: { label: string; tabs: { id: SettingsTabId; label: string; description: string }[] }[] = [
   {
     label: '个人',
     tabs: [
       { id: 'profile', label: '个人档案', description: '身份、领域与协作偏好' },
-      { id: 'memory', label: '我的记忆', description: '查看和管理长期记忆' },
+      { id: 'memory', label: '记忆与隐私', description: '控制协作记忆的学习与读取' },
     ],
   },
   {
@@ -70,6 +71,8 @@ export function SettingsSurface({
   const [webPageUrl, setWebPageUrl] = useState('')
   const [sourceBusy, setSourceBusy] = useState<string | null>(null)
   const showSaveFooter = ['profile', 'ai', 'system', 'connectors'].includes(tab)
+  const setRoute = useAppStore((s) => s.setRoute)
+  const setKnowledgePage = useAppStore((s) => s.setKnowledgePage)
 
   const runSourceAction = async (key: string, action: () => Promise<void>) => {
     if (sourceBusy) return
@@ -191,6 +194,7 @@ export function SettingsSurface({
             })}
             gitAvailable={gitAvailable}
             busyAction={sourceBusy}
+            onOpenRag={() => { setKnowledgePage('rag'); setRoute('knowledge') }}
           />
         ) : null}
         {tab === 'ai' ? <SettingsAiPanel form={form} onPatch={patch} /> : null}

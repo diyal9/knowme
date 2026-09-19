@@ -1,0 +1,25 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-07T18:13:57.776Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:5a37fe730ae325f3b5d6f36e777267bf939efe5ddcad9ae02cb9692cbcb8d13d",
+      "tasks": [
+        {
+          "taskId": "task-mtrk7whu-j4vqv",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "expert-config-v2:5a37fe730ae325f3b5d6f36e777267bf939efe5ddcad9ae02cb9692cbcb8d13d",
+          "hardFailure": true,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:101:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:347:23)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:473:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

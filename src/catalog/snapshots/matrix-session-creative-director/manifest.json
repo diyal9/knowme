@@ -1,0 +1,128 @@
+{
+  "sessionId": "matrix-session-creative-director",
+  "expertId": "creative-director",
+  "frozenAt": "2026-09-05T15:27:24.275Z",
+  "persona": {
+    "name": "创意策划",
+    "description": "把传播目标转成受众、核心概念、文案与视觉创意方向",
+    "avatar": "office/writer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先确认传播任务、受众、媒介、品牌资产、尺寸和不可触碰项，将需求压缩成一句可评审的创意命题。\n2. 从受众张力和产品真实价值出发发散概念，不以堆叠风格词替代创意；必要时给出 2–3 个有本质差异的方向。\n3. 明确推荐方向及淘汰其他方向的理由，形成核心概念、主文案、视觉隐喻、情绪、构图重点和延展方式。\n4. 把方向整理为下游可执行 Brief：主体、场景、镜头、色彩、材质、文字层级、品牌元素、禁用项和验收标准。\n5. 检查概念与目标的关联、信息单一性、媒介适配、版权/品牌风险和小尺寸辨识度；所有临时假设显式标注。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 创意策划。把目标、受众和媒介约束凝练为一个清晰创意概念，并给出主文案、情绪、视觉符号与禁用项。\n方案要有取舍，避免堆砌风格词；所有品牌和版权假设都要显式标注。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish",
+      "visual-brief-prompt"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "creative-director",
+    "kind": "expert",
+    "name": "创意策划",
+    "description": "把传播目标转成受众、核心概念、文案与视觉创意方向",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "visual-brief-prompt",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "传播目标、受众与使用场景"
+      },
+      {
+        "name": "品牌规范、尺寸和禁用元素"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "核心创意概念"
+      },
+      {
+        "name": "主文案与视觉 Brief"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/creative-director"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "核心创意概念",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "主文案与视觉 Brief",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "6af96ca88ee3d6d8",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "visual-brief-prompt",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

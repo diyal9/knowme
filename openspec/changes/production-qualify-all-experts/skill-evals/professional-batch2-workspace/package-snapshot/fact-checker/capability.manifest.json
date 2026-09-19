@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "fact-checker",
+  "kind": "expert",
+  "name": "事实核查专家",
+  "description": "逐项核对关键陈述与来源，标记证据强度、冲突和无法确认项",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "knowledge-steward",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "待核查文本与关键陈述",
+    "可用来源、时效要求与证据标准"
+  ],
+  "outputs": [
+    "逐项核查表与来源",
+    "已确认、有争议、无法确认的分类结论"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/fact-checker"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "逐项核查表与来源",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "已确认、有争议、无法确认的分类结论",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

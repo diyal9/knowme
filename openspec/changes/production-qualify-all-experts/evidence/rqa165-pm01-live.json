@@ -1,0 +1,268 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA62",
+  "purpose": "Determine whether the current product-manager configuration deserves expert status through professional correctness and full task lifecycle evidence.",
+  "generatedAt": "2026-09-09T02:18:57.721Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\qualification\\rqa165-pm01-live",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "PM01"
+  ],
+  "tasks": [
+    {
+      "evalId": "PM01",
+      "expertId": "product-manager",
+      "title": "访客申请与失败恢复 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "直接交付包含背景问题、目标、范围、非目标、角色场景、流程、规则、异常、验收、风险待确认的完整 PRD。",
+        "没有把缺失的转化率或时长基线编造成事实，成功指标明确标记基线或目标值待确认。",
+        "申请、待审批、已批准、已生效或可使用、已使用、已取消、已过期等状态及允许动作前后一致。",
+        "网络超时、重复提交、审批失败、取消冲突与重试恢复说明数据保存、幂等结果和用户下一步。",
+        "验收标准使用可复现的前置状态、动作和可观察结果，覆盖正常、异常与恢复路径。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mttgzct0-ix2cr",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ],
+        "executionRoutes": []
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d4a34ecd350f1e1b33e0307f1c47e0d7bad79efdf1acf77337e6075d34755085",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d4a34ecd350f1e1b33e0307f1c47e0d7bad79efdf1acf77337e6075d34755085",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "999e2562e0e9fc05fdb1422e5cb6333789d50245c1323e36c0caad4ee11fad57"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mttgzct0-ix2cr",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mttgzct0-ix2cr",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mttgzct0-ix2cr"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-09T02:19:00.436Z",
+          "updatedAt": "2026-09-09T02:19:00.436Z",
+          "heartbeatAt": "2026-09-09T02:19:00.436Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-09T02:19:00.436Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-09T02:19:00.371Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-09T02:19:00.431Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-09T02:19:00.437Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-09T02:19:00.371Z",
+        "updatedAt": "2026-09-09T02:19:00.449Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mttgzct0-ix2cr",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:604:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:784:19)",
+      "elapsedMs": 329,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 1,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 1,
+    "environmentBlocked": 1,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

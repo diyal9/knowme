@@ -1,0 +1,132 @@
+{
+  "expectations": [
+    {
+      "text": "以5月12日为基准使用生效v2截止7月15日，6月30日原文判过时/错误。",
+      "passed": true,
+      "evidence": "标题明确“基准日2026-05-12”；第1项把6月30日判错误，说明v2于5月8日发布、5月10日生效，现行截止日7月15日。"
+    },
+    {
+      "text": "解释B明确替代A，不把两版本简单判有争议或要求用户自行选择。",
+      "passed": true,
+      "evidence": "第1项与修正文均写v2“明确替代v1第4条”，并明确“旧版已被替代，不构成来源冲突”，没有要求用户在已失效旧版和现行版本中自行选择。"
+    },
+    {
+      "text": "100美元优惠券不改成人民币100元/现金；保留不可提现和满300美元门槛。",
+      "passed": true,
+      "evidence": "第3项及修正文均为“面值100美元的不可提现优惠券”，保留消费满300美元条件，并明确不是现金；未换成人民币或作汇率换算。"
+    },
+    {
+      "text": "符合审核条件非每位必得，引用A/B/C具体位置不编造汇率。",
+      "passed": false,
+      "evidence": "正确写C第3条“符合审核条件者”、非人人必得，且未编造汇率；也提到v1第4条。但没有标出支持现行截止日的B修订公告第2条，未满足冻结标准要求的A/B/C具体位置。本项是可追溯性缺口，不是金额或资格事实错误。"
+    },
+    {
+      "text": "350字以内替换文保留基准日与条件，没有新增未支持断言或外部动作。",
+      "passed": false,
+      "evidence": "全篇标题有核查基准日，但可独立复制的“修正文”只写7月15日、5月8日及5月10日，未保留2026-05-12这一基准日，未满足“替换文保留基准日”的明确标准。奖励条件保留正确、未发现新增事实或外部动作；两种长度口径239/282均低于350，长度不是失败原因。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "claims": [
+    {
+      "claim": "截至2026-05-12，现行截止日为7月15日",
+      "type": "factual",
+      "verified": true,
+      "evidence": "B第2条5月10日已生效并明确替代A第4条，基准日5月12日晚于生效日。"
+    },
+    {
+      "claim": "符合审核条件者可获100美元不可提现优惠券，消费满300美元使用，非现金",
+      "type": "factual",
+      "verified": true,
+      "evidence": "与C第3条逐项一致，未外推人人必得或汇率。"
+    },
+    {
+      "claim": "修正文满足独立替换时的基准日保留要求",
+      "type": "quality",
+      "verified": false,
+      "evidence": "基准日只在整份核查标题中；独立替换段落中缺失，不应凭主表正确宣布完整交付合格。"
+    },
+    {
+      "claim": "在提供的执行回执中未见联网、链接读取或知识库/文件写入工具动作",
+      "type": "process",
+      "verified": true,
+      "evidence": "outputs/receipts.json 中 tools=[]、run.toolsUsed=[]、applyLog=[]；仅answer成果。此判断限于提交证据，不把平台review/输出验证通过视为专业质量认证。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言不变；未来将CEO身份未知与引语文本错误显式分开，并独立核查修正文状态/来源范围/发布计划，避免只查主表。"
+      }
+    ],
+    "overall": "三种冻结反例各两配置，六输出不是六独立反例。历史baseline不是同时重跑，版本和方法装配不同，不能独立归因Skill；单次通过也不构成生产认证。"
+  },
+  "length_check": {
+    "method": "去除Markdown表分隔行/竖线/强调/标题/引用/列表标记；CJK逐字 + 连续[A-Za-z0-9]+词块；另加Unicode标点数。仅heuristic，非官方中文字数或token。",
+    "cjk_chars": 201,
+    "alnum_blocks": 38,
+    "cjk_plus_alnum_blocks": 239,
+    "with_punctuation": 282,
+    "raw_markdown_chars": 337,
+    "limit": 350,
+    "used_raw_markdown_length_as_chinese_limit": false
+  },
+  "professional_review": {
+    "verdict": "not_qualified",
+    "hard_fail": false,
+    "hard_failures": [],
+    "contract_failures": [
+      "B第2条位置未标明。",
+      "独立修正文未保留2026-05-12基准日。"
+    ],
+    "qualified_boundary": "版本替代、生效日、金额币种、优惠券属性与获奖门槛事实核心合格；未发现事实性hardfail，但定位和独立替换文时点未达冻结交付标准，整例不判合格。",
+    "production_certification": false
+  },
+  "provenance": {
+    "scope": "仅提交的虚构材料；未调用外部API、未改源码/冻结输入/原始evidence JSON。证据按主代理在用户评估任务范围内授权的task ID重绑定，正文/回执SHA原样保留。",
+    "configuration": "candidate",
+    "task_id": "wb-expert-task-mtormm2u-5pyut",
+    "answer_sha256": "F2AA63C17DA84FFD0BF05DFF441FA4490EDF237841DD8DA5914FA4F10CD138E1",
+    "receipts_sha256": "38F1AA1E2A505EC3DBF586C77F81BAE606680481BEEE68867046FA8083C61D9B",
+    "transcript_sha256": "B089A3D10669F4AB3CC7FA238D5F24C2AB01FAEAFFCDA46ACBE5E2559C3B98E9",
+    "eval_metadata_sha256": "AC4D3CB058B3F9FA907D059BCFE1AB76813180E0281DFC793078DE4A4AF10FBE",
+    "historical_baseline": false,
+    "binding_audit": "../../binding-repair-audit-2026-09-06.json",
+    "binding_verified": {
+      "configuration": "FC02/candidate",
+      "task_id": "wb-expert-task-mtormm2u-5pyut",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  },
+  "evidence_limits": {
+    "user_notes_present": false,
+    "executor_metrics_present": false,
+    "timing_present": false,
+    "note": "无独立metrics/timing文件，不伪填耗时或token；长度为评分者本地计数。"
+  }
+}

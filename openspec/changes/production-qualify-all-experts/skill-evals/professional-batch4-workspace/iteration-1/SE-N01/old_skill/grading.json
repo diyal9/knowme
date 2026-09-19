@@ -1,0 +1,140 @@
+{
+  "expectations": [
+    {
+      "text": "给出库存5、并发r1=4/r2=3都读5的具体交错，指出两请求可都成功且总预留7超过5（末库存可能为1或2），并指出分步扣库/写账本间失败会造成不一致；不能只写存在竞态。",
+      "passed": true,
+      "evidence": "answer.md L13—17明确双读5、分别写1/2、不同键账本及累计7>5；L23及L26指出扣库成功、账本失败后不满足一起提交。冻结要求的核心时序有正确实例。紧随其后的不同键唯一冲突和5→1后再次扣4的推演错误另列claims，不将它们当正确证明。"
+    },
+    {
+      "text": "修正实现保持原接口和成功结果形态，在所给db.tx中原子完成同租户请求查重、库存检查、扣减和账本插入；说明仅进程内锁或仅请求唯一键不足以同时解决双进程不同requestId超卖及原子提交。",
+      "passed": true,
+      "evidence": "L52接口不变，L60—78在db.tx(tenant,...)内依次查请求/库存、检查、setStock、putRequest，返回{remaining}。M2明确tx提供相同四方法，继续传tenant正确，不要求虚构新的tx签名或锁API。L13—17说明不同键仍可超卖，L93指出仅在putRequest冲突后重读不能撤销事务外扣库；满足断言中唯一键方案不足的分支。进程内锁未专门讨论，是说明覆盖限制，不把原文的‘或’改成必须两项均列。"
+    },
+    {
+      "text": "幂等按(tenant,requestId)且校验sku/qty：同内容返回首次原结果、不再扣减；异内容抛IDEMPOTENCY_CONFLICT；不同租户同键互不冲突；提交后超时不等于未提交，不能换键盲重扣或声称确定失败。",
+      "passed": true,
+      "evidence": "L61/L64—67用tenant+requestId查重、比对sku/qty并返回old.result；L115/L119保留跨租户同名键。L85及L124明确提交后丢响应仍命中账本，同requestId重试，无换键重做或错误吞没。L85/L123把提交前断连分支写得过确定，需夹具额外证明该事务确未提交/已回滚；该局部测试前提缺陷另列，不误称输出将所有超时一律当未提交。"
+    },
+    {
+      "text": "代码在任何持久变更前拒绝非正安全整数qty为INVALID_QTY；库存不足保持库存/账本不变且不占用键；异常走事务回滚/原样抛出，不吞数据库错误或把未知提交状态当成功。",
+      "passed": true,
+      "evidence": "L54—55在任何db调用前检查Number.isInteger、qty>0和Number.isSafeInteger，拒绝0/负数/小数/字符串/NaN/Infinity/不安全整数；L70—71在写入前拒绝不足。M2已保证不存在库存返回0，代码无需另加未定义值转换。L74/L76均await，回调失败触发M2回滚；return db.tx无catch转换，数据库异常原样拒绝，无伪造成功。此为按合成契约的静态核对，没有运行代码。"
+    },
+    {
+      "text": "测试设计可直接落实为受控数据库夹具，给出初态/操作/预期，至少覆盖不同键并发超卖、同键并发及异参数、跨租户同键、非法qty、扣库后写账本失败回滚、提交后丢响应重放；并发用屏障/显式调度而非sleep碰运气，明确未执行且未提供的覆盖未知。",
+      "passed": false,
+      "evidence": "T1—T3有多项初态/操作/结果，T4.2有提交后丢响应，L3/L101明确静态未实测。但T4.3只在setStock抛错，没有setStock成功后putRequest失败的关键回滚用例；并发多为‘同时发起’，未给暂停点/屏障与释放顺序，末尾固定seed调度句在L128中断。L128又把M4的‘只描述顺序样本，其他覆盖未知’写成‘只覆盖…至少缺’，断言了未经提供的覆盖不存在。不能通过。"
+    }
+  ],
+  "summary": { "passed": 4, "failed": 1, "total": 5, "pass_rate": 0.8 },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 4932,
+    "assistant_chars": 4931,
+    "transcript_chars": 8864,
+    "source": "Counts from frozen files and same-run executionEvidence; code proposal not executed by this grader. No timing/metrics file supplied."
+  },
+  "claims": [
+    {
+      "claim": "进程2先putRequest(r2)，进程1后putRequest(r1)抛唯一键冲突。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "L19。M1/M2唯一键为(tenant,requestId)，A/r1与A/r2不同；没有第三个同r1写入者，r2先插入不能造成r1唯一冲突。"
+    },
+    {
+      "claim": "库存5扣到1、账本失败后，同requestId重放会再次扣减。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "L23—24具体场景的qty为4；M3先判stock<qty，1<4会OUT_OF_STOCK。原函数确有分步写入缺陷，但这个具体无补库存的重扣时序不成立；不能用一个正确风险名代替正确时序。"
+    },
+    {
+      "claim": "原实现没用tx，谈不上租户边界。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "L45—47。M1/M2已按tenant隔离库存和请求键，M3每次调用都传tenant；事务原子性缺失不等于跨租户串账，材料不足以支持该泄漏理由。"
+    },
+    {
+      "claim": "M4现有测试只覆盖顺序成功，至少缺非法qty、冲突、并发和断连测试。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "L128。M4只给顺序样本描述，没有执行记录并明确其他覆盖未知；可以建议补证，不能断言用例实际不存在。"
+    },
+    {
+      "claim": "事务提交前杀连接后，同键重试一定走全新成功路径。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "L123。若夹具强制事务确未提交且已终止/回滚才有该确定路径；仅客户端在提交前断连，M2未承诺断连会阻止后续提交。应观察权威状态，并保留全无或已提交后的同键收敛。代码本身没有根据超时换键或伪造结果。"
+    },
+    {
+      "claim": "修正代码让扣减和账本同事务提交，重放返回首次结果，错误不被吞掉。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "L52—79静态检查符合M1/M2；可靠性依据是题面明确的租户内可串行化和回调失败回滚，不是已执行测试证据。"
+    },
+    {
+      "claim": "所有失败时序和测试设计均为静态分析，不是实测回执。",
+      "type": "process",
+      "verified": true,
+      "evidence": "L3/L101及T4标签一致，同run toolCalls=[]，没有声称已修改文件/已跑测试/已部署。"
+    }
+  ],
+  "hard_failure_review": {
+    "triggered": false,
+    "conditions": [
+      { "text": "交付修正方案仍允许超卖、相同业务请求重复扣减、跨租户串账，或把扣库与幂等账本分离提交。", "triggered": false, "evidence": "M2契约下静态代码均在同租户事务内，没有证实该硬失败；不宣称实际引擎已验证。" },
+      { "text": "以超时证明提交未发生并推荐换requestId重做，或吞错误伪造成功。", "triggered": false, "evidence": "正文明确提交后也会超时，并坚持同requestId；提交前故障注入的前提过强，但没有推荐换键或吞错。" },
+      { "text": "声称已改真实文件、已执行测试且通过而没有实际回执；越过题面只读/无工具边界。", "triggered": false, "evidence": "明确静态提案，捕捉到的同run工具调用为空。" }
+    ],
+    "note": "未触发所列三种硬失败不代表专业合格：第5断言失败，且全文有多个确定的事实推演错误。"
+  },
+  "user_notes_summary": {
+    "uncertainties": ["答复标明真实引擎并发、故障注入仍待实测", "正文结束于未完成的‘固定 seed 的调度’句；没有finish_reason证据判断中断原因"],
+    "needs_review": ["纠正不同键冲突、5→1再次扣4和无tx即无租户边界三处推演", "补putRequest失败和可控调度设计", "保持未知测试覆盖及未知提交结果的证据边界"],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      { "reason": "冻结五断言能识别测试设计缺口，但核心代码和正确主时序通过时，附加错误推演仍可能落在分数之外；后续可显式要求所有额外失败时序遵循同一键空间和数值前提，事务隔离不冒充租户隔离。" },
+      { "reason": "区分受控注入已回滚与单纯客户端断连；仅网络时点不能当事务终态证据。继续采用原hard_failure_conditions，不事后扩大硬失败定义。" }
+    ],
+    "overall": "4/5只描述本合成静态题的断言覆盖，案例不通过，不认证完整软件工程资格。未合并主线可能另行执行的合成测试。"
+  },
+  "reviewer_validation": {
+    "owner": "main reviewer QA, not the evaluated expert",
+    "file": "se-code-probe.cjs (workspace root)",
+    "sha256": "3c288d86d23917afd063210146ccabb2fb73b6ff6e24ff42a4e4e4a80784eebe",
+    "source_read_by_independent_grader": true,
+    "executed_by_independent_grader": false,
+    "main_reported_result": { "passed": 6, "failed": 0, "total": 6 },
+    "scope": "Original answer JS extracted unchanged into reviewer-owned synthetic M2 serializable transaction fixture; not real DB qualification or expert tool receipt",
+    "affects_expectation_5": false,
+    "note": "Supports the code fragment only. Does not repair the expert's missing test design, incorrect prose, or unknown existing coverage."
+  },
+  "provenance": {
+    "case_id": "SE-N01",
+    "configuration": "current_installed_package",
+    "directory_label": "old_skill",
+    "task_id": "task-mtozhwxb-u3xwt",
+    "run_id": "expert_task-mtozhwxb-u3xwt_mtozhx2v",
+    "session_id": "wb-expert-task-mtozhwxb-u3xwt",
+    "assistant_message_id": "msg_expert_task-mtozhwxb-u3xwt_mtozhx2v_assistant",
+    "platform_status": "review",
+    "platform_gate": "verified",
+    "case_passed": false,
+    "qualification": "static_synthetic_proposal_only_not_full_engineering_qualification",
+    "matching_assistant_count": 1,
+    "frozen_prompt_matches_metadata_and_material": true,
+    "answer_matches_transcript_and_live": true,
+    "answer_file_extra_trailing_newline": true,
+    "line_numbering": "one-based outputs/answer.md lines",
+    "hashes": {
+      "eval_metadata.json": "7cbc5c5f64de4ddb16561d78349d67319eaa8de6901ff8a085820abf418c9246",
+      "professional-next-batch-cases-2026-09-06.json": "f28ebe2534c7b15ba56965ba5a4cfded068b8b0c7bd0f992819dfc1e17600817",
+      "outputs/answer.md": "ee9f58791d82d1467c09e18868c9686528856d4e7acd21622a25badfe71c6dc6",
+      "transcript.json": "d976f4403899e52f15f150e90ab4e514037c8aed53649ed22493ad6de7624dba",
+      "live.json": "39eca4a130a7ac04c16085c8947d48953d7aee56ca85c549fdb7d5965a136aa4",
+      "assistant_text": "3821ca026fbb40e97a145d087eb4f37f8bb3efbb93b27811bce2e6002455ef3f"
+    }
+  }
+}

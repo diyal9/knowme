@@ -12,6 +12,33 @@ describe('assistant chat', () => {
   })
   afterEach(() => cleanup())
 
+  it('hides project context while preserving existing session project data', async () => {
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [
+          { id: 'p1', name: '会话项目', workspaceSourceId: 's1', status: 'active' },
+          { id: 'p2', name: '导航项目', workspaceSourceId: 's2', status: 'active' },
+        ],
+        activeProjectId: 'p2',
+      }),
+      sourcesList: async () => ({ sources: [], activeSourceId: null }),
+      agentSessionList: async () => ({
+        sessions: [{ id: 'bound-session', title: '项目对话', projectId: 'p1', messageCount: 1 }],
+        ui: { openSessionIds: ['bound-session'], activeSessionId: 'bound-session' },
+      }),
+      agentSessionGet: async () => ({ id: 'bound-session', title: '项目对话', projectId: 'p1', messages: [{ id: 'm1', role: 'user', text: '继续工作' }] }),
+    })
+    render(<AppShell />)
+
+    await waitFor(() => {
+      expect(useAppStore.getState().activeSessionId).toBe('bound-session')
+    })
+    expect(screen.queryByRole('button', { name: /当前对话项目：|当前对话：全局/ })).not.toBeInTheDocument()
+    expect(useAppStore.getState().activeProjectId).toBe('p2')
+    expect(useAppStore.getState().sessions.find((item) => item.id === 'bound-session')?.projectId).toBe('p1')
+  })
+
   it('allows sending without an open editor file', async () => {
     render(<AppShell />)
     fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
@@ -182,10 +209,11 @@ describe('assistant chat', () => {
     expect(screen.queryByText(/智能推荐可从输入框左下角打开/)).not.toBeInTheDocument()
     expect(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/)).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /^新主题/ })).toBeInTheDocument()
-    expect(screen.queryByLabelText('选择本次对话知识库')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('选择本次对话知识库')).toBeInTheDocument()
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     expect(screen.getByTestId('agent-quick-btn')).toBeInTheDocument()
     expect(screen.getByTestId('agent-model-btn')).toBeInTheDocument()
+    expect(screen.getByTestId('agent-model-btn').querySelector('.agent-model-caret')).toBeInTheDocument()
     expect(screen.getByTestId('agent-model-btn').querySelector('svg')).toBeNull()
     expect(screen.getByTestId('agent-model-btn')).not.toHaveClass('has-usage')
     expect(screen.getByTestId('agent-model-btn').querySelector('.agent-model-usage-ring')).toBeNull()
@@ -201,6 +229,17 @@ describe('assistant chat', () => {
     expect(model).toHaveAttribute('aria-label', '选择模型')
     fireEvent.click(quick)
     expect(screen.getByTestId('agent-quick-menu')).toBeInTheDocument()
+  })
+
+  it('uses the model caret direction to show collapsed and expanded states', async () => {
+    render(<AppShell />)
+    const model = screen.getByTestId('agent-model-btn')
+    const caret = model.querySelector('.agent-model-caret')
+    expect(caret).toBeInTheDocument()
+    expect(model).toHaveAttribute('aria-expanded', 'false')
+    expect(caret).not.toHaveClass('is-open')
+    fireEvent.click(model)
+    expect(model).toHaveAttribute('aria-expanded', 'true')
   })
 
   it('opens quick task menu only via Ctrl+K when conversation has user turns', async () => {
@@ -311,8 +350,111 @@ describe('assistant chat', () => {
       assistantStatus: '',
     })
     await waitFor(() => expect(screen.getByTestId('agent-msg-image')).toBeInTheDocument())
+    expect(screen.queryByText('https://example.test/a.png')).not.toBeInTheDocument()
+    expect(screen.getByTestId('agent-msg-image')).toHaveClass('agent-msg-image')
     fireEvent.click(screen.getByTestId('agent-msg-image'))
     expect(screen.getByTestId('agent-image-viewer')).toBeInTheDocument()
+  })
+
+  it('renders multiple message images as a compact preview strip', async () => {
+    useAppStore.setState({
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [{ id: 'u1', role: 'user', text: '看两张图' }, {
+            id: 'a1', role: 'assistant', text: '候选图：![A](https://example.test/a.png) https://example.test/b.jpg',
+          }],
+        },
+      },
+      isGenerating: false,
+    })
+    render(<AppShell />)
+    expect(await screen.findByText('已查看 2 张图像')).toBeInTheDocument()
+    expect(screen.getAllByTestId('agent-msg-image')).toHaveLength(2)
+    expect(screen.queryByText('https://example.test/a.png')).not.toBeInTheDocument()
+    expect(screen.queryByText('https://example.test/b.jpg')).not.toBeInTheDocument()
+  })
+
+  it('keeps stage-only progress out of ordinary companion replies', async () => {
+    useAppStore.setState({
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: 'hi' },
+            {
+              id: 'a1',
+              role: 'assistant',
+              text: '你好！',
+              trace: [
+                { id: 'prepare', kind: 'stage', title: '上下文准备完成', status: 'done', round: 1 },
+                { id: 'answer', kind: 'stage', title: '回答已完成', status: 'done', round: 2 },
+              ],
+            },
+          ],
+        },
+      },
+      isGenerating: false,
+    })
+    render(<AppShell />)
+    expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument()
+    expect(screen.getByTestId('user-message-content')).toHaveTextContent('hi')
+  })
+
+  it('keeps Chinese prose outside an adjacent Feishu link', () => {
+    const href = 'https://example.feishu.cn/wiki/BdKrdR019oCv5bxpnFlc4TTnpkh'
+    useAppStore.setState({
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [{ id: 'u1', role: 'user', text: `帮我总结下${href}这个飞书文档` }],
+        },
+      },
+    })
+    render(<AppShell />)
+    const link = screen.getByRole('link')
+    expect(link).toHaveAttribute('href', href)
+    expect(screen.getByTestId('user-message-content')).toHaveTextContent('这个飞书文档')
+    fireEvent.click(link)
+    expect(useAppStore.getState().linkPreview?.href).toBe(href)
+  })
+
+  it('shows expandable returned code and message for a failed tool', () => {
+    useAppStore.setState({
+      sessionStates: {
+        s1: {
+          composer: '',
+          attachments: [],
+          messages: [
+            { id: 'u1', role: 'user', text: '读取这个飞书文档' },
+            {
+              id: 'a1',
+              role: 'assistant',
+              text: '未能读取文档。',
+              trace: [{
+                id: 'tool-feishu',
+                kind: 'tool',
+                title: '飞书：read_doc',
+                toolName: 'feishu.read_doc',
+                status: 'error',
+                errorCode: 'invalid_args',
+                errorMessage: '文档链接格式无效',
+              }],
+            },
+          ],
+        },
+      },
+    })
+    render(<AppShell />)
+    expect(screen.queryByText(/工具调用失败/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('飞书：read_doc 未完成'))
+    expect(screen.getByText('错误码')).toBeInTheDocument()
+    expect(screen.getByText('invalid_args')).toBeInTheDocument()
+    expect(screen.getByText('错误信息')).toBeInTheDocument()
+    expect(screen.getByText('文档链接格式无效')).toBeInTheDocument()
   })
 
   it('renders composer attachment chips after file pick', async () => {
@@ -495,12 +637,12 @@ describe('assistant chat', () => {
       },
     })
     await waitFor(() => expect(screen.getByTestId('agent-artifact-card')).toBeInTheDocument())
-    fireEvent.click(screen.getByRole('button', { name: '接受' }))
+    fireEvent.click(screen.getByRole('button', { name: '接受成果' }))
     await waitFor(() => expect(write).toHaveBeenCalled())
     expect(write).toHaveBeenCalledWith(expect.objectContaining({ sourceId: 'src1', path: 'docs/a.md', content: '已写入正文' }))
   })
 
-  it('shows history sessions with mode avatar marks', async () => {
+  it('shows compact history sessions without avatar marks', async () => {
     mockApi({
       agentSessionList: async () => ({
         sessions: [
@@ -519,7 +661,8 @@ describe('assistant chat', () => {
     expect(within(pop).getByText('历史会话')).toBeInTheDocument()
     expect(within(pop).getByText('整理本周会议纪要并提炼行动项')).toBeInTheDocument()
     expect(within(pop).getByText('新主题')).toBeInTheDocument()
-    expect(pop.querySelector('.agent-avatar-photo')).toBeTruthy()
+    expect(within(pop).getByText('清空历史对话')).toBeInTheDocument()
+    expect(pop.querySelector('.agent-avatar-photo')).toBeNull()
   })
 
   it('keeps tab context menu to session actions only', async () => {

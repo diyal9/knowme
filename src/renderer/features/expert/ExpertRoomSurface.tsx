@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { WorkbenchTask } from '../../../shared/api'
 import { useAppStore } from '../../app/store'
-import { expertDeliverableTitle, expertDisplayName, expertTaskEventLabel } from '../../../domain/expert-present'
+import { expertDeliverableDisplayTitle, expertDisplayName, expertTaskEventLabel } from '../../../domain/expert-present'
 
 export function ExpertRoomSurface() {
   const room = useAppStore((s) => s.expertRoom)
@@ -42,7 +42,7 @@ export function ExpertRoomSurface() {
         <h3>{task?.brief?.goal || task?.goal || room.goal}</h3>
         <dl>
           <div><dt>材料</dt><dd>{materials.length ? materials.map((item) => item.title).join('、') : '无额外材料'}</dd></div>
-          <div><dt>预期交付</dt><dd>{requested.length ? requested.map((item) => expertDeliverableTitle(item.title)).join('、') : '任务交付物'}</dd></div>
+          <div><dt>预期交付</dt><dd>{requested.length ? requested.map((item) => expertDeliverableDisplayTitle(item.title)).join('、') : '任务交付物'}</dd></div>
         </dl>
       </section>
       <section className="is-grow wb-expert-audit">

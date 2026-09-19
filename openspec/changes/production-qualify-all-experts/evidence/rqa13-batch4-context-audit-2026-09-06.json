@@ -1,0 +1,74 @@
+{
+  "source": "isolated QA llm-system-prompt log; no prompt bodies or settings",
+  "entries": [
+    {
+      "runId": "expert_task-mtowzdmo-c9tm5_mtozc5xx",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "skillRefs": [
+        "requirement-review"
+      ],
+      "methodContent": [
+        {
+          "id": "skill.explicit-content",
+          "kind": "skill",
+          "authority": "data",
+          "trust": "trusted",
+          "sourceTrust": "user",
+          "projectedRole": "user",
+          "critical": false,
+          "source": {
+            "type": "skill-runtime",
+            "idHash": "3b283e93debf035e"
+          },
+          "cachePolicy": "session",
+          "usedTokens": 623,
+          "chars": 1024,
+          "hash": "7df874bae6857343",
+          "truncated": false,
+          "sensitive": false
+        },
+        {
+          "id": "skill.auto-summary",
+          "kind": "skill",
+          "authority": "data",
+          "trust": "trusted",
+          "sourceTrust": "user",
+          "projectedRole": "user",
+          "critical": false,
+          "source": {
+            "type": "skill-runtime",
+            "idHash": "a410f55f5f7d4421"
+          },
+          "cachePolicy": "session",
+          "usedTokens": 158,
+          "chars": 367,
+          "hash": "834a191030a2eba3",
+          "truncated": false,
+          "sensitive": false
+        }
+      ]
+    },
+    {
+      "runId": "expert_task-mtozhwxb-u3xwt_mtozhx2v",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "skillRefs": [],
+      "methodContent": []
+    },
+    {
+      "runId": "expert_task-mtozhx32-ycfem_mtozhx8j",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "skillRefs": [],
+      "methodContent": []
+    },
+    {
+      "runId": "expert_task-mtozhx8r-07xq1_mtozhxe7",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "skillRefs": [],
+      "methodContent": []
+    }
+  ]
+}

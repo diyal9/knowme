@@ -38,6 +38,8 @@ export interface AgentTraceItemDto {
   title?: string
   status?: string
   summary?: string
+  errorCode?: string
+  errorMessage?: string
   durationMs?: number
   toolName?: string
   round?: number

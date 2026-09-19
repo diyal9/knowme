@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA69",
+  "purpose": "Qualify the current image-producer@4.0.0 configuration through real image-tool, artifact, review and recovery evidence. Package structure and historical RQA26 results are not sufficient.",
+  "generatedAt": "2026-09-09T02:17:13.602Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\qualification\\rqa164-ip01-live",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "block": {
+      "kind": "configuration_required",
+      "action": "enable_secure_storage",
+      "item": "connector:pango-image-mcp secrets",
+      "detail": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。"
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [
+      "pango-image-mcp",
+      "photoshop-mcp"
+    ],
+    "configuredConnectors": [
+      "pango-image-mcp"
+    ],
+    "installed": [
+      {
+        "id": "pango-image-mcp",
+        "version": ""
+      },
+      {
+        "id": "photoshop-mcp",
+        "version": ""
+      }
+    ],
+    "configured": [],
+    "status": "blocked",
+    "error": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。"
+  },
+  "selectedCases": [
+    "IP01"
+  ],
+  "tasks": [
+    {
+      "evalId": "IP01",
+      "expertId": "image-producer",
+      "title": "确认后真实生成并交付图片",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "用户确认后实际调用 generate_image，执行证据包含完整工具回执。",
+        "至少存在一个当前任务的 image artifact，且有 decoded-file 解码事实。",
+        "对话中显示真实图片预览，不能只显示 URL、Prompt 或文件占位卡片。",
+        "交付说明只陈述已核实结果；未做视觉核查的内容明确为未知。",
+        "图片交付与普通对话说明分离，验收入口仍由对话流程控制。"
+      ],
+      "status": "needs_input",
+      "taskId": "",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "enable_secure_storage",
+          "item": "connector:pango-image-mcp secrets",
+          "detail": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。"
+        },
+        "checks": {},
+        "events": []
+      },
+      "configuration": null,
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "enable_secure_storage",
+        "item": "connector:pango-image-mcp secrets",
+        "detail": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": null,
+      "transcript": {
+        "sessionId": "",
+        "messages": [],
+        "text": ""
+      },
+      "error": "suite connector secrets failed for pango-image-mcp: 系统安全存储当前不可用，未保存任何明文密钥 未绕过安全存储，也未保存明文密钥；请在支持系统安全存储的环境中重试。",
+      "elapsedMs": 0,
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 1,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 1,
+    "environmentBlocked": 1,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

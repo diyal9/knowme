@@ -51,6 +51,7 @@ function knowledgeDeps(ctx) {
     findSource: ctx.findSource,
     productKnowledge: ctx.productKnowledge,
     productMemory: ctx.productMemory,
+    brainService: ctx.brainService,
     contextCache: ctx.contextCache,
     knowledgeOs: ctx.knowledgeOs,
     llmwikiService: ctx.llmwikiService,
@@ -90,6 +91,8 @@ function workbenchDeps(ctx) {
     getWorkbenchTaskStore: ctx.getWorkbenchTaskStore,
     getWorkbenchWorkflowPackageStore: ctx.getWorkbenchWorkflowPackageStore,
     getWorkbenchContextStore: ctx.getWorkbenchContextStore,
+    getActiveProjectId: ctx.getActiveProjectId,
+    resolveProjectContext: ctx.resolveProjectContext,
     getWorkbenchLaunchStores: ctx.getWorkbenchLaunchStores,
     buildWorkbenchLaunchFacts: ctx.buildWorkbenchLaunchFacts,
     resolveLaunchPackageItem: ctx.resolveLaunchPackageItem,
@@ -121,6 +124,8 @@ function workbenchDeps(ctx) {
 function agentDeps(ctx) {
   return {
     agentRun: ctx.agentRun,
+    getActiveProjectId: ctx.getActiveProjectId,
+    resolveProjectContext: ctx.resolveProjectContext,
     loadAgentStore: ctx.loadAgentStore,
     saveAgentStore: ctx.saveAgentStore,
     resolveWorkbenchAgentPackage: ctx.resolveWorkbenchAgentPackage,

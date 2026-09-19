@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "office-collaboration-method",
+  "kind": "skill",
+  "name": "办公信息整理与沟通交付",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

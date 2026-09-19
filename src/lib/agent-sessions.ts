@@ -30,7 +30,15 @@ function isPlaceholderTitle(title) {
   const text = String(title || '').trim()
   if (!text) return true
   if (PLACEHOLDER_TITLES.has(text)) return true
+  // 旧版可能把只有数字的首条消息误当成会话标题，例如“8”。
+  if (/^\d+$/.test(text)) return true
   return /^新对话\s*\d*$/.test(text)
+}
+
+function isMeaningfulTopicText(text) {
+  const value = String(text || '').replace(/\s+/g, ' ').trim()
+  if (value.length <= 4 || /^\d+$/.test(value)) return false
+  return !/^(你好|您好|嗨|hello|hi|在吗)[！!。.?？…\s]*$/i.test(value)
 }
 
 const MAX_OPEN_TABS = 24, MAX_HISTORY = 30, MAX_TRACE_EVENTS = 40, MAX_KNOWLEDGE_REFS = 16
@@ -72,6 +80,7 @@ function createSession(agentId = 'personal', index = 1, runOpts = {}) {
     sessionKind: String(runOpts.sessionKind || (runOpts.taskRef ? 'legacy' : 'personal-topic')).trim(),
     profileId: String(runOpts.profileId || (!runOpts.taskRef ? 'my-knowme' : '')).trim(),
     contextId: String(runOpts.contextId || '').trim(),
+    projectId: String(runOpts.projectId || '').trim().slice(0, 100) || null,
     expertId: String(runOpts.expertId || '').trim(),
     personaExpertId: String(runOpts.personaExpertId || '').trim(),
     executionPolicy: String(runOpts.executionPolicy || '').trim(),
@@ -157,7 +166,8 @@ function normalizeMessage(raw, options = {}) {
     ? raw.trace.map(normalizeTraceEvent).filter(Boolean).slice(-MAX_TRACE_EVENTS)
     : []
   const ui = role === 'assistant' ? normalizeStructuredUi(raw.ui) : []
-  if (!text.trim() && !trace.length && !ui.length) return null
+  const artifactRefs = role === 'tool' && Array.isArray(raw.artifactRefs) ? raw.artifactRefs.slice(0, 32) : []
+  if (!text.trim() && !trace.length && !ui.length && !artifactRefs.length) return null
   const identity = withConversationIdentity(raw, {
     sessionId: options.sessionId || 'session',
     index: options.index || 0,
@@ -180,6 +190,9 @@ function normalizeMessage(raw, options = {}) {
     message.toolCallId = String(raw.toolCallId || '').slice(0, 160)
     message.toolName = String(raw.toolName || 'tool').slice(0, 120)
     message.status = raw.status === 'error' ? 'error' : 'done'
+    if (artifactRefs.length) message.artifactRefs = artifactRefs
+    if (raw.receipt && typeof raw.receipt === 'object') message.receipt = raw.receipt
+    if (raw.truncated === true) message.truncated = true
     const duration = Number(raw.durationMs)
     if (Number.isFinite(duration) && duration >= 0) message.durationMs = Math.min(duration, 3_600_000)
   }
@@ -212,6 +225,7 @@ function normalizeSession(raw, fallbackIndex = 1, options = {}) {
     sessionKind: String(raw?.sessionKind || (raw?.taskRef ? 'legacy' : 'legacy')).trim().slice(0, 40),
     profileId: String(raw?.profileId || '').trim().slice(0, 80),
     contextId: String(raw?.contextId || '').trim().slice(0, 80),
+    projectId: String(raw?.projectId || '').trim().slice(0, 100) || null,
     expertId: String(raw?.expertId || '').trim(),
     personaExpertId: String(raw?.personaExpertId || '').trim(),
     executionPolicy: String(raw?.executionPolicy || '').trim().slice(0, 40),
@@ -353,7 +367,9 @@ function sessionDisplayTitle(session) {
   const goal = String(session?.run?.goal || '').trim()
   if (goal) return goal.replace(/\s+/g, ' ').slice(0, 28)
   const firstUser = (session?.messages || []).find(m => m.role === 'user' && String(m.text || '').trim())
-  if (firstUser) return String(firstUser.text).replace(/\s+/g, ' ').trim().slice(0, 28) || DEFAULT_TITLE
+  if (firstUser && isMeaningfulTopicText(firstUser.text)) {
+    return String(firstUser.text).replace(/\s+/g, ' ').trim().slice(0, 28) || DEFAULT_TITLE
+  }
   if (session?.agentId === 'steward') {
     const steward = AGENTS.find(a => a.id === 'steward')
     return steward?.name || '知识管家'
@@ -454,7 +470,9 @@ function migrateStore(raw) {
 
 function forkSession(source, agentId) {
   const summary = buildSummaryText(source)
-  const session = createSession(agentId || source?.agentId || 'general')
+  const session = createSession(agentId || source?.agentId || 'general', 1, {
+    projectId: source?.projectId,
+  })
   session.title = DEFAULT_TITLE
   session.summary = summary.slice(0, 12000)
   session.messages = []

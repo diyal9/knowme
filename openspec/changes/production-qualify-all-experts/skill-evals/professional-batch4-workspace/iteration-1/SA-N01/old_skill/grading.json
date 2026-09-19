@@ -1,0 +1,125 @@
+{
+  "expectations": [
+    {
+      "text": "明确8小时无限离线访问与5分钟撤权硬保证在给定信息下不可同时满足；保留硬保证，明确离线访问最多限有效许可剩余期/过期拒绝，或将放宽硬保证单列为需重新批准，不能采纳10分钟同步或恢复网络才撤权来声称满足现约束。",
+      "passed": false,
+      "evidence": "answer.md §一C1/§三B正确指出冲突、拒绝10分钟同步、许可到期锁定，并写‘最后一次成功授权后的≤5分钟’；但§三取舍结论给销售的话术改为‘断网后仍可继续工作约5分钟’，未限定为许可剩余期，违背冻结note 1。推演反例：许可t=0签发、t=5分到期，t=4分50秒断网只剩10秒，不能再承诺约5分钟。方案C又以新增吊销机制作为长离线的评审方向，却没有要求放宽撤权硬约束或提供断网时的新信息路径。不能仅凭前文正确公式忽略交付给决策人的冲突承诺；也不将C误记为已批准/当前已实施方案。"
+    },
+    {
+      "text": "比较至少两个真正符合硬要求的可行方案并给推荐和代价，例如逐次在线授权的本地检索与有界许可的本地检索；比较断网可用性、延迟依赖、实现/运维与4周约束，不把一个违反硬要求的方案算第二个可行方案，也不凭进程拆分保证P95。",
+      "passed": true,
+      "evidence": "§三A为本地许可+逐次在线鉴权，断网不可用并说明弱网代价；B为≤5分钟许可门控本地缓存，说明有限离线、到期锁定、复用现有能力及门控旁路风险，比较表列两人四周约束并明确推荐B。结合§二/四共用最终出口Gate，A和B构成两种可行授权策略，不需要把有问题的C算作第二种。C6明确不接受独立索引服务即可保证P95<200ms。方案C的技术推断缺陷另记claims，不抹去A/B已完成的比较。"
+    },
+    {
+      "text": "给出权威服务端与本地索引/缓存的职责、按account/workspace隔离的权限与数据键、查询/打开/缓存命中及交付结果的许可检查；撤W1不能借共享缓存越权或无理由使W2永久不可用，明确索引一致性不等于权限有效性。",
+      "passed": true,
+      "evidence": "§三B按(account,workspace)分区；§四服务端签发许可并为正文/版本权威源，本地缓存为副本，Gate为查询结果/打开/缓存命中/预览的唯一出口。§二明确标题/摘要/正文均受限；§三B入口、结果组装及缓存命中检查；§四先封锁Gate再后台删除，§五重建期间仍过Gate，实质区分索引重建/删除与权限有效性。W1撤权不影响仍有许可的W2。选择物理分区是允许的方案；声称合并缓存必然无法隔离是额外过强论断，另记claims。"
+    },
+    {
+      "text": "用具体失效序列处理至少许可过期时正在运行的查询、重启/休眠无法证明有效、旧版本授权响应乱序到达三类情况：交付前拒绝或过滤、保守重新授权/拒绝、不让旧许可覆盖较新撤权，且不靠本地重新计时或无限延长TTL。",
+      "passed": true,
+      "evidence": "§五4给出执行中到期→结果组装二次校验失败→丢弃结果/NeedReauth且不落缓存；§五5给出重启/休眠无法证明计时连续→待验证→联网刷新或断网锁定；§二3及§四/五3保留最高版本、丢弃低版本并刷新，防止乱序回退。无需强制用数字时间戳才算时序。C7把‘从零重新计时’称为‘与A2一致’确有表述错误，但同格纠正为重授权/拒绝，§二/五也明确不靠重启续期；不据此反向捏造当前方案实际允许重启续期。严格大于版本的续期规则仍需实现时澄清，见claims。"
+    },
+    {
+      "text": "迁移和回退均保持权限硬约束，不因恢复旧索引/缓存恢复旧授权；给出包含断网撤权的受控时序验收与性能验证的负载/设备条件/测量边界，明确所有结果未测，原始材料体积不能直接当索引内存或已证明容量。",
+      "passed": false,
+      "evidence": "§六先称回退旧缓存会带回不合规结构，随后允许旧缓存给未迁移用户、‘一键退回旧路径’，未明确所有旧路径先受同一不可回滚权限Gate约束、只回滚索引而不回滚许可/最高权限版本。跨章节的唯一Gate原则不足以给出可审查的迁移不变量；不能据此断言真实泄漏已发生。live/transcript/answer共同止于阶段3‘否则C4’，没有交付断网撤权的受控验收时间线、过期边界oracle、2万文档负载、设备条件、冷热缓存和起止测量边界。开头未测声明及拒绝P95无据保证是正确点，也未把原始体积冒充索引内存，但不满足该复合断言。无法从这些导出材料确认结束原因，不归因为token耗尽。"
+    }
+  ],
+  "summary": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+  "claims": [
+    {
+      "claim": "持续断网时，8小时加密离线授权包可借服务端吊销列表提前失效，作为保留5分钟撤权保证的待批准能力方向。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "§三C称密钥在服务端撤销时可配合吊销列表提前失效，比较表把5分钟保证写成取决于未批准机制。A1/A2允许长断连；客户端在断网中无法获知新增吊销信息，加密不提供撤权消息通道。只批准新组件而不改变信息条件或硬要求不能解决该冲突。C已明确未成立且非推荐当前方案，不记作已部署或已获批。"
+    },
+    {
+      "claim": "断网后仍可继续工作约5分钟。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "§三销售话术与A2及该段之前‘最后一次成功授权后的≤5分钟’不一致。可用时长只能是已有许可剩余期；这是全篇一致性硬缺陷，不是偏好不同。"
+    },
+    {
+      "claim": "只读旧缓存并一键退回旧路径构成保持撤权保证的可逆迁移。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "§六未说明回退前后的共同强制权限门控和许可状态不可回滚，且交付在‘否则C4’结束。安全迁移保证未被说明充分；未执行部署，不声称实际发生了泄漏。"
+    },
+    {
+      "claim": "合并缓存必然无法精确隔离撤销W1，并必然误伤W2。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "C4及§三B把物理分区写成必要条件。冻结note 3明确逻辑隔离也可接受：统一存储仍可按(account,workspace)键隔离并统一门控。推荐物理分区本身不是错误，排除所有逻辑隔离方案的必然性表述才过强。"
+    },
+    {
+      "claim": "建议稿重启后从零计时与A2一致。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "C7的‘与A2一致（保守判过期）’误读从零计时；A2禁止靠重启续期。正文同格及§二/五随后明确重授权/拒绝，故保留为局部矛盾，不把全方案判为重启续期。"
+    },
+    {
+      "claim": "只接受严格更高perm_version即可同时处理重放及所有合法续期。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "§二规定严格更高；A2未明示每次合法续签都必须提升权限版本。若权限未变的合法新许可沿用当前版本，该规则会误拒。需区分权限版本高水位与签发/到期新鲜度；此为待澄清接口边界，不断言题面已保证同版本续签或W2实际永久失效。"
+    },
+    {
+      "claim": "本答复是未联网、未部署、未做基准的静态推演。",
+      "type": "process",
+      "verified": true,
+      "evidence": "开头明确声明；同run transcript仅user/assistant两条消息，live.executionEvidence.toolCalls=[]，无工具或部署/基准回执。本评分限于已导出运行记录，不把建议中的目标/理论推断误判为本人实测。"
+    },
+    {
+      "claim": "推荐方案用独立权限Gate使删除/重建进度不能成为访问授权。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "§四先封锁读取再后台删除，§五重建仍经Gate；这些是静态设计中的合理约束，不是对已实现安全性的认证。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["输出承认未做基准/联网/部署，C能力尚不存在且未批准。", "无独立user_notes.md、metrics.json或timing.json；不填tokens或耗时。"],
+    "needs_review": ["许可剩余期必须贯穿销售话术。", "长离线撤权能力不能仅以加密/吊销列表命名代替信息路径。", "迁移旧读路径的权限不变量及验收设计未完整交付。"],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      { "assertion": "比较至少两个真正符合硬要求的可行方案并给推荐和代价", "reason": "A/B已满足该断言仍不代表额外方案C正确；应继续按全篇claims审查，不把第三方案的无据机制隐藏在未批准标签下。此次未修改冻结断言。" }
+    ],
+    "overall": "五条断言及全部notes已逐项使用；5分总分不能代替全篇安全边界复核。断言1/5失败，额外存在条件化方案的不可实施推断。"
+  },
+  "review_metadata": {
+    "case_id": "SA-N01",
+    "configuration": "current_installed_package",
+    "package_version": "2.0.0",
+    "blind": false,
+    "comparison_available": false,
+    "task_id": "task-mtozhx32-ycfem",
+    "session_id": "wb-expert-task-mtozhx32-ycfem",
+    "run_id": "expert_task-mtozhx32-ycfem_mtozhx8j",
+    "platform_gate_status": "verified",
+    "professional_status": "fail",
+    "professional_certification": false,
+    "binding_verified": "metadata.prompt/expectations/hard_failure_conditions equal frozen SA-N01; live material equals frozen prompt; transcript.messages equal live.session.messages; answer equals assistant text ignoring trailing newline; run IDs agree",
+    "answer_hash_from_export": "bfab7bbe952cc39d",
+    "skill_context_boundary": "assignmentSnapshot.bindings.skills=[code-review]; primary.requiredSkills=[]; exported records contain no contextAudit skillRefs/explicit-content hash, so actual full Skill assembly is not established by this evidence",
+    "tokens_and_timing": "unavailable; omitted, not zero",
+    "output_extent": "all three answer copies end at migration stage 3: 否则 C4; finish reason unavailable"
+  },
+  "observed_metrics": {
+    "source": "read-only counts from exported answer/transcript/live, not executor metrics.json",
+    "exported_tool_calls": 0,
+    "answer_utf16_chars": 4461,
+    "answer_codepoints": 4461,
+    "answer_han_plus_alnum_blocks": 2684,
+    "answer_non_whitespace_codepoints_including_punctuation_and_markdown": 3935,
+    "transcript_utf16_chars": 7682,
+    "length_limit_in_frozen_prompt": null,
+    "length_verdict": "not graded; no frozen word limit"
+  },
+  "hard_failure_condition_review": [
+    { "condition_index": 1, "status": "not_established_as_current_solution", "evidence": "明确选择B且当前不交付8小时；不能说其已声称现方案同时实现二者。C的吊销机制推断及销售话术仍是专业严重缺陷，已计入断言1及claims。" },
+    { "condition_index": 2, "status": "migration_guarantee_unproven_not_observed_breach", "evidence": "正常B路径明确到期拒绝、不靠重启续期及W1/W2隔离；回退保护未说明充分，断言5失败。但没有真实部署证据，也不把保护缺口写成已证实泄漏。" },
+    { "condition_index": 3, "status": "not_observed", "evidence": "未声称基准/部署已验证或C已获批；2人4周可行是欠估算支撑的判断，不冒充新增预算/报价或已批准记录。" }
+  ]
+}

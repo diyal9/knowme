@@ -137,6 +137,15 @@ requiredTools: 123
     assert.equal(merged.skillId, 'a+b')
   })
 
+  it('mergeGroundingContracts preserves generic artifact requirements', () => {
+    const merged = groundingRuntime.mergeGroundingContracts([
+      { requiredArtifacts: [{ type: 'image' }], minArtifacts: 1 },
+      { requiredArtifacts: [{ type: 'image' }, { type: 'document' }], minArtifacts: 2 },
+    ])
+    assert.equal(merged.minArtifacts, 2)
+    assert.deepEqual(merged.requiredArtifacts, [{ type: 'image' }, { type: 'document' }])
+  })
+
   it('parseGroundingBlocksFromRaw handles empty block lists', () => {
     const raw = `requiredTools:\n\nname: x`
     const blocks = parseGroundingBlocksFromRaw(raw)

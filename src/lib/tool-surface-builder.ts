@@ -9,12 +9,14 @@ const agentFileTools = require('./agent-file-tools')
 const agentProcessTools = require('./agent-process-tools')
 const agentArtifactTools = require('./agent-artifact-tools')
 const agentOrchestration = require('./agent-orchestration')
+const { markTrustedPreparationHandler, executionFingerprint } = require('./tool-execution-approval')
+const { listToolExecutionReceipts } = require('./tool-execution-receipts')
+const { createDynamicRegistryToolSurface } = require('./dynamic-registry-tool-surface')
 const {
   createRegistry,
   validateContract,
   isToolSurfaceV1,
   normalizeRunGovernancePolicy,
-  filterDefinitionsForGovernance,
   bindRunRuntimeContext,
   unbindRunRuntimeContext,
 } = require('./tool-contract-registry')
@@ -86,7 +88,11 @@ function registerBundle(registry, bundle, contract) {
   for (const def of bundle.definitions) {
     const name = def?.function?.name
     if (!name) continue
-    const c = def._knowme || contract
+    // Keep the first definition when a built-in group is supplied twice.
+    if (registry.has(name)) continue
+    // Merge per-tool metadata with the group default. This keeps an older or
+    // partially annotated definition from dropping mandatory governance fields.
+    const c = { ...contract, ...(def._knowme || {}) }
     registry.registerTool(def, c, bundle.handlers?.[name])
   }
 }
@@ -131,14 +137,23 @@ function extractOrchestrationPolicy(expertSnapshot, permissions = {}) {
 function buildRunGovernancePolicy(runCtx = {}) {
   const permissions = runCtx.permissions || runCtx.deps?.permissions || runCtx.session?.run?.permissions || {}
   const expertSnapshot = runCtx.expertSnapshot || runCtx.deps?.expertSnapshot || null
-  const tools = permissions.tools && typeof permissions.tools === 'object' ? permissions.tools : {}
+  // Explicit arrays are restrictions, including []. A sparse payload must not
+  // erase an inherited run restriction or the expert's canonical declaration.
+  const declarations = [runCtx.permissions, runCtx.deps?.permissions,
+    runCtx.session?.run?.permissions, expertSnapshot?.capabilityManifest?.permissions,
+    runCtx.orgPolicy, runCtx.parentScope].filter(Boolean)
+  const intersect = lists => {
+    const declared = lists.filter(Array.isArray).map(list => list.map(String))
+    return declared.length ? declared.reduce((a, b) => a.filter(name => b.includes(name))) : null
+  }
   return normalizeRunGovernancePolicy({
-    allowlist: runCtx.toolAllowlist || tools.allowlist || permissions.toolAllowlist || null,
-    denylist: runCtx.toolDenylist || tools.denylist || permissions.toolDenylist || [],
-    allowedConnectorIds: runCtx.allowedConnectorIds
-      || permissions.connectors?.allowedConnectorIds
-      || runCtx.deps?.allowedConnectorIds
-      || null,
+    allowlist: intersect([runCtx.toolAllowlist,
+      ...declarations.flatMap(p => [p.tools?.allowlist, p.toolAllowlist])]),
+    denylist: [...new Set([runCtx.toolDenylist,
+      ...declarations.flatMap(p => [p.tools?.denylist, p.toolDenylist])]
+      .filter(Array.isArray).flat().map(String))],
+    allowedConnectorIds: intersect([runCtx.capabilityScope?.allowedConnectorIds, runCtx.allowedConnectorIds, runCtx.deps?.allowedConnectorIds,
+      ...declarations.map(p => p.connectors?.allowedConnectorIds)]),
     expertToolNames: extractExpertToolNames(expertSnapshot),
     orchestration: extractOrchestrationPolicy(expertSnapshot, permissions),
     budget: runCtx.budget || permissions.budget || null,
@@ -154,7 +169,11 @@ function buildV1Registry(opts = {}) {
     const name = def.function.name
     const isWrite = agentFileTools.WRITE_TOOL_DEFS.some((d) => d.function.name === name)
     const contract = isWrite ? BUILTIN_CONTRACT.write : BUILTIN_CONTRACT.read
-    registry.registerTool(def, contract, fileTools.handlers[name])
+    const handler = fileTools.handlers[name]
+    if (['write_file', 'create_file', 'apply_patch', 'move_path', 'copy_path', 'delete_path'].includes(name)) {
+      markTrustedPreparationHandler(handler)
+    }
+    registry.registerTool(def, contract, handler)
   }
 
   if (opts.processTools) registerBundle(registry, opts.processTools, BUILTIN_CONTRACT.process)
@@ -180,30 +199,31 @@ function buildToolSurfaceFromRegistry(registry, deps = {}) {
     getRemainingTimeoutMs: deps.getRemainingTimeoutMs,
     recordReceipt: deps.recordReceipt,
     signal: deps.signal,
+    validateExecutionApproval: deps.validateExecutionApproval,
+    approvalFileRoot: deps.fileAdapter?.rootPath,
+    executionApprovalRecoveryRunId: deps.executionApprovalRecoveryRunId,
   }
-  const projected = registry.projectToSurface(agentTools.parseToolArguments, ctx)
-  const surface = agentTools.createToolSurface({
-    extraDefinitions: projected.definitions,
-    handlers: projected.handlers,
+  const dynamic = createDynamicRegistryToolSurface(registry, ctx, {
     requiredTools: deps.requiredTools,
     toolBudget: deps.toolBudget,
     deps,
   })
-  const baseValidate = surface.validateToolCall.bind(surface)
-  surface.validateToolCall = (name, rawArgs) => {
-    const entry = registry.get(name)
-    if (entry && !filterDefinitionsForGovernance([entry.definition], governancePolicy).length) {
-      return { ok: false, code: 'scope_denied', message: `工具未授权: ${name}` }
+  const surface = dynamic.surface
+  surface.getExecutionApprovalReceipts = async () => {
+    if (!deps.executionApprovalRecoveryRunId) return []
+    const receipts = listToolExecutionReceipts(deps.userData, deps.sessionId, { runId: deps.executionApprovalRecoveryRunId })
+    for (const receipt of receipts) {
+      const entry = registry.get(receipt.toolName)
+      const current = entry && await deps.validateExecutionApproval?.({ toolName: receipt.toolName,
+        args: {}, contract: { ...entry.contract }, runId: deps.runId, sessionId: deps.sessionId })
+      if (current?.ok !== true || deps.signal?.aborted
+        || (receipt.contractHash && receipt.contractHash !== executionFingerprint(entry.contract))) {
+        throw Object.assign(new Error('当前任务权限不允许读取已批准的执行结果。'), { code: 'scope_denied' })
+      }
     }
-    return baseValidate(name, rawArgs)
+    return receipts
   }
-  const baseAllowed = surface.isAllowedTool.bind(surface)
-  surface.isAllowedTool = (name) => {
-    const entry = registry.get(name)
-    if (entry && !filterDefinitionsForGovernance([entry.definition], governancePolicy).length) return false
-    return baseAllowed(name)
-  }
-  return { surface, governancePolicy, projected }
+  return { surface, governancePolicy, get projected() { return dynamic.projected } }
 }
 
 const LEGACY_WRITE_ORCHESTRATION = new Set([
@@ -263,15 +283,18 @@ async function resolveToolSurfaceForRun(runCtx = {}) {
     parentRunId,
     subRunId,
     permissions,
+    fileAdapter,
     expertSnapshot,
     allowedConnectorIds,
-    governancePolicy,
     requiredTools,
     toolBudget,
     signal,
     getRemainingTimeoutMs,
     recordReceipt,
     ...deps,
+    validateExecutionApproval: runCtx.validateExecutionApproval || deps.validateExecutionApproval,
+    executionApprovalRecoveryRunId: runCtx.executionApprovalRecoveryRunId || deps.executionApprovalRecoveryRunId,
+    governancePolicy,
   }
 
   if (runId) {
@@ -289,7 +312,7 @@ async function resolveToolSurfaceForRun(runCtx = {}) {
     if (runId) unbindRunRuntimeContext(runId)
     const legacyExtra = filterLegacyExtraTools(extraTools)
     const connectorRuntime = typeof connectorBuild === 'function'
-      ? await connectorBuild({ extraTools: legacyExtra, legacy: true })
+      ? await connectorBuild({ extraTools: legacyExtra, legacy: true, governancePolicy })
       : {
         surface: agentTools.createToolSurface({
           extraDefinitions: legacyExtra?.definitions,
@@ -299,7 +322,10 @@ async function resolveToolSurfaceForRun(runCtx = {}) {
         }),
         async close() {},
       }
-    return { ...connectorRuntime, mode: 'legacy', registry: null, governancePolicy: null }
+    // The connector collector owns its handlers and close lifecycle. Rebuild its
+    // surface internally so even collectors unaware of governance cannot leak tools.
+    const surface = connectorRuntime.surface.withGovernancePolicy(governancePolicy)
+    return { ...connectorRuntime, surface, mode: 'legacy', registry: null, governancePolicy }
   }
 
   const registry = buildV1Registry({
@@ -331,10 +357,10 @@ async function resolveToolSurfaceForRun(runCtx = {}) {
 }
 
 function buildFullToolSurface(opts = {}) {
+  const governancePolicy = opts.governancePolicy || buildRunGovernancePolicy(opts)
   if (!isToolSurfaceV1() && !opts.forceV1) {
-    return agentTools.createToolSurface(opts.legacySurface || {})
+    return agentTools.createToolSurface({ ...(opts.legacySurface || {}), governancePolicy })
   }
-  const governancePolicy = opts.governancePolicy || buildRunGovernancePolicy(opts.deps || opts)
   const registry = buildV1Registry({ ...opts, governancePolicy })
   const built = buildToolSurfaceFromRegistry(registry, { ...(opts.deps || {}), governancePolicy })
   return { surface: built.surface, registry, mode: 'v1', governancePolicy: built.governancePolicy }

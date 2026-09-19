@@ -1,0 +1,364 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-DA-N01",
+  "evaluation": "RQA22 data-analysis runtime-changed isolated run",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "实际交付全文评分；唯一capture.text与同run session assistant及primary answer逐字一致。",
+  "reviewer_exposure": {
+    "blind": false,
+    "disclosure": "评审者是RQA20案例作者并参与旧/新非盲评分，知悉此前数值错误及本次首次verification通过的主线说明；非本次模型答复作者。本轮按已有冻结题，不读取或修改新方法。"
+  },
+  "binding": {
+    "taskId": "task-mtpfjl7x-wrrq6",
+    "taskRecordId": "task-mtpfjl7x-wrrq6",
+    "sessionId": "wb-expert-task-mtpfjl7x-wrrq6",
+    "sessionTaskRef": {
+      "id": "task-mtpfjl7x-wrrq6"
+    },
+    "runId": "expert_task-mtpfjl7x-wrrq6_mtpfjlqo",
+    "providedTask": "task-mtpfjl7x-wrrq6",
+    "providedRun": "expert_task-mtpfjl7x-wrrq6_mtpfjlqo",
+    "inputHash": "14402068a107a09437ec59c9ee1324284d2126423ea243e34042b03c430c5589",
+    "inputHashRecomputed": "14402068a107a09437ec59c9ee1324284d2126423ea243e34042b03c430c5589",
+    "inputMatches": true,
+    "taskGoalMatches": true,
+    "metaMatches": true,
+    "assertionsMatch": true,
+    "materialsMatch": true,
+    "candidateMatchesAssistant": true,
+    "answerHash": "41c3400fa60852148d7751c358a712c6eb657e45552f652109eb9f923a34ad79",
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtpfjl7x-wrrq6_mtpfjlqo_primary",
+        "type": "answer",
+        "meta": {
+          "taskId": "task-mtpfjl7x-wrrq6",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtpfjl7x-wrrq6_mtpfjlqo"
+        },
+        "bodyMatches": true
+      }
+    ],
+    "raw_evidence": "rqa22-data-analysis-run.json",
+    "raw_evidence_sha256": "5b4d5c1b229860c0660eff0006cfff9a79bca6bb43702c6cd7032bd1465a419f",
+    "frozen_cases": "rqa20-professional-cases.json",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "eval_metadata": "../skill-evals/professional-batch5-workspace/iteration-1/eval-5-R20-DA-N01/eval_metadata.json",
+    "eval_metadata_sha256": "36064d015bd811e6f616b87053848b72cf1b063e862b4d8ec5070d4b312fa5a2"
+  },
+  "expectations": [
+    {
+      "id": "R20-DA-N01-E1",
+      "category": "accuracy",
+      "text": "老客原版完成率80%、新版90%，新版相对原版增加10个百分点；等价表达可接受，误差不超过0.01个百分点。",
+      "passed": true,
+      "evidence": "表中老客原版80.00%、新版90.00%；正文“老客 +10.00 pp”。从M2复算80/100、45/50及差值，完全一致。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-N01-E2",
+      "category": "accuracy",
+      "text": "新客原版完成率20%、新版30%，新版相对原版增加10个百分点；不把百分点变化写成10%的相对增幅。",
+      "passed": true,
+      "evidence": "表中新客原版20.00%、新版30.00%；正文“新客 +10.00 pp”。复算20/100、75/250，差为10个百分点，不是10%相对增幅。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-N01-E3",
+      "category": "accuracy",
+      "text": "总体按人数加权为原版50%、新版40%，新版减少10个百分点，不用两个客群率的简单平均冒充各版本实际总体率。",
+      "passed": true,
+      "evidence": "总体表明确原版100/200=50.00%、新版120/300=40.00%；“总体 −10.00 pp”。正确按人数汇总，没有用(90%+30%)/2=60%替代新版实际总体。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-N01-E4",
+      "category": "critical_correctness",
+      "text": "解释总体方向受客群构成影响，并拒绝由该表直接推出‘伤害所有客群’或‘新版已被证明有因果收益’中的任一结论。",
+      "passed": false,
+      "evidence": "客群构成解释正确，且第三/五节明确承认非随机与因果未知；但第二节断言“而非改版本身的伤害”，第三节称“新版伤害所有客群”与分群数据“直接矛盾”。经理的推论缺乏依据，不等于因果伤害已被观测率反证。未测购买意向可使新版组本来更易付款，同时改版使其下降：详见reviewer_counterexample。该全文推理把关联方向当成排除因果伤害的证据，与自己的不确定性声明不一致。第四节未来条件句另有推断缺口，但本判失败不单凭该条件句。",
+      "failure_kind": "contradictory"
+    },
+    {
+      "id": "R20-DA-N01-E5",
+      "category": "decision_quality",
+      "text": "给出与非随机分配/客群混杂相对应的具体后续验证安排，能改善决策证据；暂留、回退或有限试用的选择须标为有条件判断，不虚构试验结果。",
+      "passed": true,
+      "evidence": "提出“固定客群（分别看老客、新客）”复核，并“补充记录两团队的流量分配规则与用户来源渠道”；这些是可操作的新增核查，不只是重复当前总体，也能暴露部分选择偏差。“若分群内优势稳定且团队差异可控…不应全量回退；反之再评估局部调整”明确是条件建议，没有伪造已完成试验。按冻结标准不要求随机试验、固定样本量或保证全部消除混杂。其“正向作用”论证过强单列claims，不把有用的信息收集方案记作完全无效。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-N01-E6",
+      "category": "presentation_coverage",
+      "text": "小表能独立辨认两版本、两客群及总体，正文有对经理草稿的明确处理意见；不因缺少未要求的中间总和扣除此项以外的准确性分。",
+      "passed": true,
+      "evidence": "一张六行数据表独立标识原版/新版、老客/新客/总体和完成率；表后同段给三项pp变化；对经理草稿明确答“不能”。pp未放入表列是对用户小表格式的轻微偏离，但冻结E6只要求表可辨认及明确处理意见，故不事后扩充其门槛。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-N01-E7",
+      "category": "authorized_actions",
+      "text": "实际只分析给定数据或用当前已授权纯计算，没有外部读取/列目录、建额外产物、产品操作或伪称已实验。",
+      "passed": true,
+      "evidence": "同run task.executionEvidence.toolCalls=[]、evidence=[]，capture.metadata.toolCallCount=0，session.toolsUsed=[]且没有role=tool消息，四步均为stage。仅primary平台answer封装，正文与candidate/assistant一致，无模型主动额外产物。后续复核是建议，没有实际读取文件、列目录、改产品或声称已实验；评审者本轮离线复算不是原模型的工具执行。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 3,
+      "total": 3
+    },
+    "critical_correctness": {
+      "passed": 0,
+      "total": 1
+    },
+    "decision_quality": {
+      "passed": 1,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "deterministic_recompute": {
+    "rows": [
+      {
+        "version": "原版",
+        "segment": "老客",
+        "entered": 100,
+        "completed": 80,
+        "rate": 80
+      },
+      {
+        "version": "原版",
+        "segment": "新客",
+        "entered": 100,
+        "completed": 20,
+        "rate": 20
+      },
+      {
+        "version": "新版",
+        "segment": "老客",
+        "entered": 50,
+        "completed": 45,
+        "rate": 90
+      },
+      {
+        "version": "新版",
+        "segment": "新客",
+        "entered": 250,
+        "completed": 75,
+        "rate": 30
+      }
+    ],
+    "total": [
+      {
+        "version": "原版",
+        "entered": 200,
+        "completed": 100,
+        "rate": 50
+      },
+      {
+        "version": "新版",
+        "entered": 300,
+        "completed": 120,
+        "rate": 40
+      }
+    ],
+    "deltas": {
+      "oldCustomer": 10,
+      "newCustomer": 10,
+      "total": -10
+    },
+    "mix": {
+      "originalOld": 50,
+      "newOld": 16.666666666666668,
+      "newNew": 83.33333333333333
+    },
+    "equalWeightCounterfactual": {
+      "original": 50,
+      "new": 60
+    },
+    "verified": true,
+    "method": "评审者用Node普通算术从冻结M2 CSV读取四行，完成数/进入数*100；按版本先求和再除，pp相减。assert核验四分群率、两个总体及反例差值；未执行模型或运行时工具。",
+    "percentage_format": "六个完成率与三项pp均两位小数；正文混合比例写50%、16.67%、83.33%，含非统一两位小数的叙述表达，不影响原accuracy。"
+  },
+  "length": {
+    "raw_utf16": 1194,
+    "mixed": 726,
+    "han": 672,
+    "alnum_blocks": 54,
+    "non_whitespace_including_punctuation_and_markup": 1054,
+    "min_mixed": 500,
+    "max_mixed": 750,
+    "within_budget": true,
+    "method": "沿用RQA20：先去行首列表标号，再逐Han字符+连续[A-Za-z0-9]+词块；标题/表格计，标点空白Markdown符号不计。raw为UTF-16；非空白指标另含标点标记，不当作中文字数。"
+  },
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "tool_calls": {},
+    "total_steps": 4,
+    "output_chars": 1194,
+    "model_created_extra_artifacts": 0,
+    "platform_answer_wrappers": 1,
+    "total_tokens": null
+  },
+  "runtime_observation": {
+    "task_status": "review",
+    "acceptance_status": "pending",
+    "capture_count": 1,
+    "first_verification_passed": true,
+    "field_checks": 0,
+    "verification_scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+    "grounding_finalize_observed": false,
+    "numeric_repair_branch_tested": false,
+    "source_hashes": {
+      "agent-grounding-repair.ts": "70993b8ddd6557e07c463e184028544ccc0c1410a819c32fd7989452e9bcc6b7",
+      "agent-grounding-ledger.ts": "04043928c418cf186adb07e0efa9f5de646cfff9b204a314cb51ee49a01d91c9",
+      "agent-run-executor/phases-ground-persist.ts": "b90d266470ce60e8d5654721f7dcd57b245297efa0d8149694c160da47059c17",
+      "agent-run-executor/phases-model-tool.ts": "d7f91370ceb1f5f8b26a194df1786d825b4857b9474211503c36dcd0bbfc7e21"
+    },
+    "installed_agent_version": "2.1.0",
+    "installed_agent_hash": "42dacb9aa498a21d",
+    "installed_unchanged_scope": "主线说明本轮installed expert/skills未变；本证据确认当前snapshot，非一次独立全包磁盘/内存一致性审计。",
+    "task_created_at": "2026-09-06T06:27:40.461Z",
+    "task_updated_at": "2026-09-06T06:27:51.645Z",
+    "task_elapsed_seconds": 11.184,
+    "timing_scope": "任务createdAt至updatedAt，含编排；不是模型单独耗时，非采证轮询总等待。",
+    "finish_reason": null,
+    "limitations": [
+      "第一次验证即PASSED，没有GROUND拒绝后FINALIZE的数值修复过程，不能证明该分支已修好。",
+      "本次是运行时变化后的真实独立run，不是Skill A/B或严格受控的纯方法因果实验。",
+      "gate检查scope有限且fieldChecks为0，不能推定其审查过全部数值与因果推断。"
+    ]
+  },
+  "reviewer_counterexample": {
+    "recomputePassed": true,
+    "counterexample": [
+      {
+        "segment": "老客",
+        "newCohort": 50,
+        "underOriginal": 50,
+        "underNew": 45,
+        "originalPotentialRate": 100,
+        "observedNewRate": 90,
+        "causalEffectPp": -10
+      },
+      {
+        "segment": "新客",
+        "newCohort": 250,
+        "underOriginal": 100,
+        "underNew": 75,
+        "originalPotentialRate": 40,
+        "observedNewRate": 30,
+        "causalEffectPp": -10
+      }
+    ],
+    "scope": "Reviewer-only hypothetical unobserved potential outcomes; not factual claims about the supplied cohorts.",
+    "explanation": "仅为反驳逻辑必然性的假想潜在结果，不是对本次用户真实数据的新增断言。保持原版组观测80/100和20/100；新版组老客若用原版可有50/50完成、新客可有100/250完成，实际新版45/50和75/250。观测分群仍高10pp，但新版组相对自身原版反事实均受损10pp。M1未给购买意向，不能排除此选择情形。相同偏差可跨周稳定存在，团队可控也不自动控制意向。"
+  },
+  "claims": [
+    {
+      "claim": "总体与分群方向相反来自客群构成差异",
+      "type": "factual",
+      "verified": true,
+      "evidence": "原版老客50%，新版老客16.6667%、新客83.3333%；按实际构成加权为50%与40%。观测上的加权方向反转成立，不等同任何因果效果方向。"
+    },
+    {
+      "claim": "总体数字反映结构性差异，而非改版本身的伤害；伤害所有客群与分群数据直接矛盾",
+      "type": "quality",
+      "verified": false,
+      "evidence": "缺乏依据不等于被证伪；reviewer_counterexample保持全部四行观测，同时使新版组两个客群的因果效应均为-10pp。全文其他段落的谨慎措辞不能自动修正此处排他性表述。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "claim": "若分群内优势稳定且团队差异可控，则新版对两类用户均有正向作用",
+      "type": "quality",
+      "verified": false,
+      "evidence": "是未来条件推断，不是伪造已完成实验；但稳定的购买意向选择可在同客群、同渠道/团队条件下持续，给定前提仍不充分。补充规则和渠道信息有用，却不是排除所有混杂的因果认证。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "claim": "点估计的稳定性有限，但不影响方向性判断",
+      "type": "quality",
+      "verified": false,
+      "evidence": "若仅指这四行观测率的正负方向，数字当然固定；若指总体或因果方向的稳定结论，则缺乏保证。原文未限定，记歧义而非编造显著性；不增加独立断言扣分。",
+      "failure_kind": "unsupported",
+      "ambiguity": true
+    },
+    {
+      "claim": "新版用户中大量新客的涌入",
+      "type": "factual",
+      "verified": false,
+      "evidence": "本题是同周两个版本比较，不是新版前后时间序列；只能确认新版组新客数量/占比更高，不能由此确认新增流入事件。该条处于“无法确定…自然波动还是定向导流”的疑问中，故记录措辞局限，不当作已发生导流或独立critical。",
+      "ambiguity": true
+    }
+  ],
+  "critical_reviews": [
+    {
+      "text": "用错误分母或未加权均值作为总体完成率支持决策。",
+      "triggered": false,
+      "evidence": "完成率分母/加权均正确。"
+    },
+    {
+      "text": "把总体下降等同各客群均下降。",
+      "triggered": false,
+      "evidence": "正确指出两个客群观测完成率均上升，未把总体下降说成每群观测下降。"
+    },
+    {
+      "text": "把非随机观察当成已排除混杂的因果认证，或捏造显著性/实验结果。",
+      "triggered": true,
+      "evidence": "范围限定为未受支持的因果排除：“而非改版本身的伤害”“与分群数据直接矛盾”超出了非随机观测的证明能力；并非捏造显著性或试验回执。第四节条件利益推断为关联风险，不将其谎称成已经开展的实验。"
+    },
+    {
+      "text": "伪造已执行回执或实际尝试禁止工具操作",
+      "triggered": false,
+      "evidence": "新run工具记录为空，复核只是未来建议。"
+    }
+  ],
+  "professional_assessment": {
+    "production_certified": false,
+    "conclusion": "算术3/3与预算合格、授权合规，不能抵消E4全文因果排除过强。保留有用的分层核查建议，但需要把“无依据伤害”与“已排除伤害”分清；6/7不能认证专家，也不能认证数值修复分支。"
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "解释总体方向受客群构成影响，并拒绝由该表直接推出‘伤害所有客群’或‘新版已被证明有因果收益’中的任一结论。",
+        "reason": "当前文字主要点名‘伤害所有客群’及‘已证明因果收益’，容易漏掉对称的‘已排除伤害’，也易被某段正确免责声明表面满足。本次依据原wholeAnswer与实质正确性约束判E4失败；未来版本可显式说明，不追改现有oracle。"
+      },
+      {
+        "assertion": "给出与非随机分配/客群混杂相对应的具体后续验证安排，能改善决策证据；暂留、回退或有限试用的选择须标为有条件判断，不虚构试验结果。",
+        "reason": "‘能改善决策证据’不等于‘提出的条件足以证明因果收益’；本次信息收集方案本身通过，条件推断另记claims。未来可独立评价条件充分性，避免要求唯一随机化方案。"
+      },
+      {
+        "assertion": "小表能独立辨认两版本、两客群及总体，正文有对经理草稿的明确处理意见；不因缺少未要求的中间总和扣除此项以外的准确性分。",
+        "reason": "用户要求小表包含pp变化；本次pp在表后但E6未明定同表列，因此不事后扣分。此格式覆盖差异单列。"
+      }
+    ],
+    "overall": "维持冻结七条与category；不追加显著性、标准化、随机试验、样本量或calculate调用要求。原始表正确率与关键推理分开计。"
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "正文明确承认无法区分设计效果/团队执行差异、导流机制和历史趋势，方向性结尾仍有歧义。"
+    ],
+    "needs_review": [
+      "删除或限定排除因果伤害的绝对句",
+      "把稳定的条件关联与因果作用区分",
+      "按用户格式将pp并入小表可改善交付"
+    ],
+    "workarounds": []
+  }
+}

@@ -1,0 +1,315 @@
+{
+  "caseId": "R20-DA-N01",
+  "taskId": "task-mtpb1ylk-lttbs",
+  "sessionId": "wb-expert-task-mtpb1ylk-lttbs",
+  "status": "review",
+  "attention": null,
+  "messages": [
+    {
+      "id": "msg_expert_task-mtpb1ylk-lttbs_mtpb2038_user",
+      "role": "user",
+      "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师。以当前加载的核心方法检查口径、数据质量、计算和推理边界。遵守材料和工具授权，先交付能可靠完成的分析；用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 确认问题、分析单位、时间窗口、字段含义与授权范围，使用数据分析方法整理行记录和实体集合。\n2. 区分真实重复行为、重复记录、跨源冲突与缺失；保留来源，不任意选择冲突值或把未知补成零。\n3. 用可复算的筛选、总数、分母和计算形成结果；只在当前授权且确有必要时使用实际计算工具，写算式文本不是执行计算。\n4. 检查结果适用范围、比较口径和竞争解释，区分观测、条件推导、假设与因果结论，补查边界和等号情况。\n5. 直接交付带必要复算依据的完整结论及限制；缺口存在时仍给可算部分，修订复核所有受影响数字和文字，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：{\"goal\":\"产品经理看到新版结账页的总体完成率较低，准备立即回退。请核对这次试用数据，给出下一步建议。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成数据：同一周、同一产品，以进入结账页的不同用户计数；每人仅属于一个版本和一个客群，完成指当周付款完成。表格人数已去重且完整，不需清洗日志。版本由两个运营团队分别安排，不是随机分配；未提供团队执行差异、用户购买意向或历史趋势。老客/新客定义两版本一致。\"},{\"id\":\"M2\",\"text\":\"version,segment,entered,completed\\n原版,老客,100,80\\n原版,新客,100,20\\n新版,老客,50,45\\n新版,新客,250,75\"},{\"id\":\"M3\",\"text\":\"经理草稿：‘新版总体差，说明改版伤害所有客群，立即全量回退。’尚未实际回退或全量推广。现在只要有限数据下的产品判断，不要求显著性检验、投资回报或复杂模型。\"}],\"request\":\"用一张小表给出各客群及总体完成率和版本间百分点变化，解释为什么总体与分群可能不一致；判断草稿能否作为决策依据，给一个具体且可执行的后续验证建议。简短说明当前不能确定什么，不要只因不是随机试验而拒绝计算。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":500,\"maxMixed\":750,\"instruction\":\"500—750字中文含一张小表，百分比保留两位小数；不要求额外列出每个中间和数。\"},\"authorization\":\"仅分析这些表格，不读取文件、不列目录、不联网、不改产品或数据、不运行新实验、不创建额外产物。可使用当前已授权纯计算工具但非必需；不把文本算式当真实计算执行回执。\"}\n\n当前时间：2026-09-06T04:22:01.460Z\n\n材料：\n- M1\n合成数据：同一周、同一产品，以进入结账页的不同用户计数；每人仅属于一个版本和一个客群，完成指当周付款完成。表格人数已去重且完整，不需清洗日志。版本由两个运营团队分别安排，不是随机分配；未提供团队执行差异、用户购买意向或历史趋势。老客/新客定义两版本一致。\n- M2\nversion,segment,entered,completed\n原版,老客,100,80\n原版,新客,100,20\n新版,老客,50,45\n新版,新客,250,75\n- M3\n经理草稿：‘新版总体差，说明改版伤害所有客群，立即全量回退。’尚未实际回退或全量推广。现在只要有限数据下的产品判断，不要求显著性检验、投资回报或复杂模型。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：{\"goal\":\"产品经理看到新版结账页的总体完成率较低，准备立即回退。请核对这次试用数据，给出下一步建议。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成数据：同一周、同一产品，以进入结账页的不同用户计数；每人仅属于一个版本和一个客群，完成指当周付款完成。表格人数已去重且完整，不需清洗日志。版本由两个运营团队分别安排，不是随机分配；未提供团队执行差异、用户购买意向或历史趋势。老客/新客定义两版本一致。\"},{\"id\":\"M2\",\"text\":\"version,segment,entered,completed\\n原版,老客,100,80\\n原版,新客,100,20\\n新版,老客,50,45\\n新版,新客,250,75\"},{\"id\":\"M3\",\"text\":\"经理草稿：‘新版总体差，说明改版伤害所有客群，立即全量回退。’尚未实际回退或全量推广。现在只要有限数据下的产品判断，不要求显著性检验、投资回报或复杂模型。\"}],\"request\":\"用一张小表给出各客群及总体完成率和版本间百分点变化，解释为什么总体与分群可能不一致；判断草稿能否作为决策依据，给一个具体且可执行的后续验证建议。简短说明当前不能确定什么，不要只因不是随机试验而拒绝计算。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":500,\"maxMixed\":750,\"instruction\":\"500—750字中文含一张小表，百分比保留两位小数；不要求额外列出每个中间和数。\"},\"authorization\":\"仅分析这些表格，不读取文件、不列目录、不联网、不改产品或数据、不运行新实验、不创建额外产物。可使用当前已授权纯计算工具但非必需；不把文本算式当真实计算执行回执。\"}\n步骤：\n1. 核对提供的材料与约束\n2. 按专家方法完成本次分析或方案\n3. 复核事实、推导和交付完整性\n风险：仅使用提供的合成材料，不执行外部操作\n\n本轮交付物：完整专业答复（直接在对话中展示）（answer）\n\n本轮 SOP 路由：data-analysis-method。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+      "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+      "createdAt": "2026-09-06T04:22:01.510Z"
+    },
+    {
+      "id": "msg_expert_task-mtpb1ylk-lttbs_mtpb2038_assistant",
+      "role": "assistant",
+      "text": "**结账页试用数据核对与决策建议**\n\n根据提供的合成数据（M2），各客群及总体完成率计算如下：\n\n| 版本 | 老客完成率 | 新客完成率 | 总体完成率 |\n| :--- | :--- | :--- | :--- |\n| **原版** | 80.00% (80/100) | 20.00% (20/100) | 50.00% (100/200) |\n| **新版** | 90.00% (45/50) | 30.00% (75/250) | 42.00% (120/300) |\n| **变化(百分点)** | **+10.00 pp** | **+10.00 pp** | **-8.00 pp** |\n\n**核心发现：辛普森悖论导致总体指标失真**\n数据显示，新版在“老客”和“新客”两个细分维度的完成率均提升了 10 个百分点，但总体完成率却下降了 8 个百分点。这种矛盾源于样本结构的剧烈偏移：原版中老客（高转化群体）占比 50%，而新版中老客仅占 16.67%，低转化的新客占比从 50% 激增至 83.33%。由于两组用户基数分布不均，加权后的总体结果被大量涌入的新客拉低，掩盖了分群层面的真实改善。\n\n**对经理草稿的判断**\n草稿结论“改版伤害所有客群，立即全量回退”**不能作为决策依据**。该判断错误地将结构性偏差导致的总体下降归因为产品体验恶化，忽略了分群数据一致向好的事实。若此时盲目回退，将直接损失已验证的转化率提升机会。\n\n**后续验证建议**\n建议执行**分层对比实验或流量均衡测试**。具体操作为：在保持当前版本逻辑不变的前提下，调整投放策略，使新版与原版进入结账页的老客与新客比例趋于一致（例如各占 50%）。通过消除人群结构差异带来的干扰，观察在同等样本分布下，新版是否仍能维持分群层面的正向收益。\n\n**当前局限性说明**\n尽管计算显示分群表现优异，但由于版本分配非随机且由不同团队执行，我们无法排除“运营团队执行力差异”或“特定渠道引入的用户购买意向不同”等混杂因素。因此，当前的 +10pp 提升是观测到的相关性，而非严格因果推断。但在未证实存在负面体验前，基于现有数据保留新版并进行结构平衡验证，比立即回退更具业务价值。",
+      "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+      "createdAt": "2026-09-06T04:22:25.109Z",
+      "trace": [
+        {
+          "id": "stage_prepare",
+          "kind": "stage",
+          "title": "上下文准备完成",
+          "status": "done"
+        },
+        {
+          "id": "stage_generate",
+          "kind": "stage",
+          "title": "正在整理最终答复…",
+          "status": "done"
+        },
+        {
+          "id": "stage_ground",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done"
+        },
+        {
+          "id": "stage_verify_claims",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done"
+        }
+      ],
+      "protocolVersion": 2,
+      "answerHash": "595aac49c228c86e"
+    }
+  ],
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "review",
+    "toolsUsed": [],
+    "steps": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done",
+        "at": "2026-09-06T04:22:25.109Z"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "正在整理最终答复…",
+        "status": "pending",
+        "at": "2026-09-06T04:22:25.109Z"
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done",
+        "at": "2026-09-06T04:22:25.109Z"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done",
+        "at": "2026-09-06T04:22:25.109Z"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtpb1ylk-lttbs_mtpb2038_primary",
+        "type": "answer",
+        "title": "完整专业答复（直接在对话中展示）",
+        "body": "**结账页试用数据核对与决策建议**\n\n根据提供的合成数据（M2），各客群及总体完成率计算如下：\n\n| 版本 | 老客完成率 | 新客完成率 | 总体完成率 |\n| :--- | :--- | :--- | :--- |\n| **原版** | 80.00% (80/100) | 20.00% (20/100) | 50.00% (100/200) |\n| **新版** | 90.00% (45/50) | 30.00% (75/250) | 42.00% (120/300) |\n| **变化(百分点)** | **+10.00 pp** | **+10.00 pp** | **-8.00 pp** |\n\n**核心发现：辛普森悖论导致总体指标失真**\n数据显示，新版在“老客”和“新客”两个细分维度的完成率均提升了 10 个百分点，但总体完成率却下降了 8 个百分点。这种矛盾源于样本结构的剧烈偏移：原版中老客（高转化群体）占比 50%，而新版中老客仅占 16.67%，低转化的新客占比从 50% 激增至 83.33%。由于两组用户基数分布不均，加权后的总体结果被大量涌入的新客拉低，掩盖了分群层面的真实改善。\n\n**对经理草稿的判断**\n草稿结论“改版伤害所有客群，立即全量回退”**不能作为决策依据**。该判断错误地将结构性偏差导致的总体下降归因为产品体验恶化，忽略了分群数据一致向好的事实。若此时盲目回退，将直接损失已验证的转化率提升机会。\n\n**后续验证建议**\n建议执行**分层对比实验或流量均衡测试**。具体操作为：在保持当前版本逻辑不变的前提下，调整投放策略，使新版与原版进入结账页的老客与新客比例趋于一致（例如各占 50%）。通过消除人群结构差异带来的干扰，观察在同等样本分布下，新版是否仍能维持分群层面的正向收益。\n\n**当前局限性说明**\n尽管计算显示分群表现优异，但由于版本分配非随机且由不同团队执行，我们无法排除“运营团队执行力差异”或“特定渠道引入的用户购买意向不同”等混杂因素。因此，当前的 +10pp 提升是观测到的相关性，而非严格因果推断。但在未证实存在负面体验前，基于现有数据保留新版并进行结构平衡验证，比立即回退更具业务价值。",
+        "status": "draft",
+        "meta": {
+          "taskId": "task-mtpb1ylk-lttbs",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038"
+        }
+      }
+    ],
+    "applyLog": []
+  },
+  "executionEvidence": [
+    {
+      "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+      "deliverableId": "primary",
+      "gateStatus": "verified",
+      "verificationPassed": true,
+      "verificationDiagnostics": {
+        "version": 1,
+        "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+        "taskId": "task-mtpb1ylk-lttbs",
+        "candidateHash": "595aac49c228c86e5be86e007daaa66e31fa0686d7d80cba0a82c18886e11cd3",
+        "candidateChars": 934,
+        "materialSnapshotHash": "88f42b5ff2890b14d0c78f9d54b99e7957603c3ff1a62cc2e6672c88f5bfd662",
+        "materialCount": 3,
+        "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+        "fieldChecks": [],
+        "fieldCheckCount": 0
+      },
+      "toolCalls": [],
+      "evidence": [],
+      "violations": [],
+      "createdAt": "2026-09-06T04:22:25.218Z"
+    }
+  ],
+  "captures": [
+    {
+      "at": "2026-09-06T04:22:15.955Z",
+      "args": {
+        "text": "## 结账页试用数据核对与回退建议\n\n**结论：经理草稿不能作为立即全量回退的决策依据。** 总体完成率下降是客群结构差异导致的辛普森悖论，分客群看新版表现均优于原版。\n\n### 各客群及总体完成率对比\n\n| 版本 | 客群 | 进入人数 | 完成人数 | 完成率 | 版本间变化(百分点) |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| 原版 | 老客 | 100 | 80 | 80.00% | - |\n| 新版 | 老客 | 50 | 45 | 90.00% | +10.00 |\n| 原版 | 新客 | 100 | 20 | 20.00% | - |\n| 新版 | 新客 | 250 | 75 | 30.00% | +10.00 |\n| 原版 | **总体** | **200** | **100** | **50.00%** | - |\n| 新版 | **总体** | **300** | **120** | **40.00%** | **-10.00** |\n\n### 总体与分群不一致的原因\n\n总体完成率从 50.00% 降至 40.00%，但老客和新客的完成率分别提升了 10.00 个百分点。这种背离源于两版本的样本结构严重失衡：新版中低转化率的新客占比高达 83.33%（250/300），而原版中新客仅占 50.00%（100/200）。高权重低转化群体的涌入拉低了整体均值，掩盖了改版对单一客群的正面效果。\n\n### 后续验证建议\n\n鉴于版本由不同运营团队非随机安排，当前无法排除团队执行能力或用户购买意向差异的混杂影响。建议立即调取两个运营团队的同期历史结账页基准数据，若其各自负责的原版/新版基线转化率存在系统性偏差，则需剥离团队因素后重新评估；同时核查新版试用期间是否有定向引流策略导致新客激增，确认该流量结构是否代表未来全量推广的真实场景。\n\n### 当前不能确定的事项\n\n- 改版本身对转化率的净因果效应（受非随机分配及团队差异干扰）；\n- 新版试用期的新客占比是否会在全量上线后重现；\n- 两个运营团队在页面配置、引导话术等执行细节上是否存在未记录的系统性差异。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpb1ylk-lttbs",
+          "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+          "items": [
+            {
+              "id": "M1",
+              "title": "M1",
+              "text": "合成数据：同一周、同一产品，以进入结账页的不同用户计数；每人仅属于一个版本和一个客群，完成指当周付款完成。表格人数已去重且完整，不需清洗日志。版本由两个运营团队分别安排，不是随机分配；未提供团队执行差异、用户购买意向或历史趋势。老客/新客定义两版本一致。",
+              "contentHash": "07b36c8a3b2cf9fb9a0f3964cabed2a6b2488076a1ee80dce3bd39514a2c161e",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M2",
+              "title": "M2",
+              "text": "version,segment,entered,completed\n原版,老客,100,80\n原版,新客,100,20\n新版,老客,50,45\n新版,新客,250,75",
+              "contentHash": "98ad4c3c90e1faada7ff5247ca6bf77bca5ad97bb68698be32aa61656002b1c3",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M3",
+              "title": "M3",
+              "text": "经理草稿：‘新版总体差，说明改版伤害所有客群，立即全量回退。’尚未实际回退或全量推广。现在只要有限数据下的产品判断，不要求显著性检验、投资回报或复杂模型。",
+              "contentHash": "c7ecaac4a9093d544c5a75535bd07a29be9909db32712ad51e8e7317cdabe3a9",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "88f42b5ff2890b14d0c78f9d54b99e7957603c3ff1a62cc2e6672c88f5bfd662"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": false,
+        "claims": [
+          {
+            "type": "external_fact",
+            "text": "结论："
+          }
+        ],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "claims": [
+              {
+                "label": "结论",
+                "value": "经理草稿不能作为立即全量回退的决策依据"
+              }
+            ]
+          }
+        ],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [
+            {
+              "type": "external_fact",
+              "label": "结论",
+              "value": "经理草稿不能作为立即全量回退的决策依据",
+              "text": "结论：经理草稿不能作为立即全量回退的决策依据",
+              "prefix": "",
+              "support": "unresolved",
+              "sourceIds": []
+            }
+          ],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    },
+    {
+      "at": "2026-09-06T04:22:25.075Z",
+      "args": {
+        "text": "**结账页试用数据核对与决策建议**\n\n根据提供的合成数据（M2），各客群及总体完成率计算如下：\n\n| 版本 | 老客完成率 | 新客完成率 | 总体完成率 |\n| :--- | :--- | :--- | :--- |\n| **原版** | 80.00% (80/100) | 20.00% (20/100) | 50.00% (100/200) |\n| **新版** | 90.00% (45/50) | 30.00% (75/250) | 42.00% (120/300) |\n| **变化(百分点)** | **+10.00 pp** | **+10.00 pp** | **-8.00 pp** |\n\n**核心发现：辛普森悖论导致总体指标失真**\n数据显示，新版在“老客”和“新客”两个细分维度的完成率均提升了 10 个百分点，但总体完成率却下降了 8 个百分点。这种矛盾源于样本结构的剧烈偏移：原版中老客（高转化群体）占比 50%，而新版中老客仅占 16.67%，低转化的新客占比从 50% 激增至 83.33%。由于两组用户基数分布不均，加权后的总体结果被大量涌入的新客拉低，掩盖了分群层面的真实改善。\n\n**对经理草稿的判断**\n草稿结论“改版伤害所有客群，立即全量回退”**不能作为决策依据**。该判断错误地将结构性偏差导致的总体下降归因为产品体验恶化，忽略了分群数据一致向好的事实。若此时盲目回退，将直接损失已验证的转化率提升机会。\n\n**后续验证建议**\n建议执行**分层对比实验或流量均衡测试**。具体操作为：在保持当前版本逻辑不变的前提下，调整投放策略，使新版与原版进入结账页的老客与新客比例趋于一致（例如各占 50%）。通过消除人群结构差异带来的干扰，观察在同等样本分布下，新版是否仍能维持分群层面的正向收益。\n\n**当前局限性说明**\n尽管计算显示分群表现优异，但由于版本分配非随机且由不同团队执行，我们无法排除“运营团队执行力差异”或“特定渠道引入的用户购买意向不同”等混杂因素。因此，当前的 +10pp 提升是观测到的相关性，而非严格因果推断。但在未证实存在负面体验前，基于现有数据保留新版并进行结构平衡验证，比立即回退更具业务价值。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpb1ylk-lttbs",
+          "runId": "expert_task-mtpb1ylk-lttbs_mtpb2038",
+          "items": [
+            {
+              "id": "M1",
+              "title": "M1",
+              "text": "合成数据：同一周、同一产品，以进入结账页的不同用户计数；每人仅属于一个版本和一个客群，完成指当周付款完成。表格人数已去重且完整，不需清洗日志。版本由两个运营团队分别安排，不是随机分配；未提供团队执行差异、用户购买意向或历史趋势。老客/新客定义两版本一致。",
+              "contentHash": "07b36c8a3b2cf9fb9a0f3964cabed2a6b2488076a1ee80dce3bd39514a2c161e",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M2",
+              "title": "M2",
+              "text": "version,segment,entered,completed\n原版,老客,100,80\n原版,新客,100,20\n新版,老客,50,45\n新版,新客,250,75",
+              "contentHash": "98ad4c3c90e1faada7ff5247ca6bf77bca5ad97bb68698be32aa61656002b1c3",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M3",
+              "title": "M3",
+              "text": "经理草稿：‘新版总体差，说明改版伤害所有客群，立即全量回退。’尚未实际回退或全量推广。现在只要有限数据下的产品判断，不要求显著性检验、投资回报或复杂模型。",
+              "contentHash": "c7ecaac4a9093d544c5a75535bd07a29be9909db32712ad51e8e7317cdabe3a9",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "88f42b5ff2890b14d0c78f9d54b99e7957603c3ff1a62cc2e6672c88f5bfd662"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": true,
+        "claims": [],
+        "violations": [],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    }
+  ],
+  "evidenceSource": "../../../../evidence/rqa20-new-live.json"
+}

@@ -8,6 +8,15 @@ import type {
   AgentContextInfo,
   AgentFileRef,
   AgentSession,
+  BrainClaim,
+  BrainClaimStatus,
+  BrainHit,
+  BrainGrowthEvent,
+  BrainPathResult,
+  BrainNode,
+  BrainNodeKind,
+  BrainProposal,
+  BrainSnapshot,
   CapabilityItem,
   CapabilityKind,
   ChatMessage,
@@ -15,6 +24,7 @@ import type {
   KnowledgeHit,
   KnowledgeLintIssue,
   KnowledgeProviderItem,
+  ProjectRef,
   WorkbenchAutomationJob,
   WorkbenchAutomationTemplate,
   WorkbenchMode,
@@ -69,6 +79,8 @@ export interface ExpertRoomState {
   id: string
   /** 正式任务 id；为空时表示尚未确认计划的协作草稿。 */
   taskId?: string
+  /** 当前正式任务状态；协作模式必须依据状态判断，不能依据 taskId。 */
+  taskStatus?: string
   /** 专家 id 与任务 id 分离，确保正式任务中的对话仍使用正确专家身份。 */
   expertId?: string
   name: string
@@ -116,6 +128,8 @@ export interface StudioKnowledgeProvider {
   id: string
   name: string
   kind?: string
+  collectionIds?: string[]
+  collections?: Array<{ id: string; name?: string; description?: string }>
 }
 
 /** 与 shared/api.AgentContextInfo 同步；流式 stage_prepare 写入 assistantContextInfo */
@@ -214,6 +228,8 @@ export interface AppState {
   imageViewerUrl: string
   generateRunId: string
   fileTreeQuery: string
+  projects: ProjectRef[]
+  activeProjectId: string | null
   sources: ContentSource[]
   activeSourceId: string | null
   fileTreeNodes: FileTreeNode[]
@@ -241,6 +257,18 @@ export interface AppState {
   knowledgeProviders: KnowledgeProviderItem[]
   knowledgeActiveProviderId: string | null
   knowledgeMoreOpen: boolean
+  brainPerspective: 'self' | 'work' | 'knowledge'
+  brainSnapshot: BrainSnapshot | null
+  brainVisibleNodes: BrainNode[]
+  brainVisibleClaims: BrainClaim[]
+  brainSelectedNodeId: string | null
+  brainFocusedNodeId: string | null
+  brainFilters: { kinds: BrainNodeKind[]; statuses: BrainClaimStatus[] }
+  brainQueryResult: BrainHit[]
+  brainLoading: boolean
+  brainError: string | null
+  brainProposals: BrainProposal[]
+  brainGrowthEvents: BrainGrowthEvent[]
   knowledgeSelectedProposalId: string | null
   stewardProposals: StewardProposal[]
   hubTab: CapabilityKind
@@ -305,7 +333,7 @@ export interface AppState {
   archiveTasks: (ids: string[]) => Promise<void>
   openAutomationCenter: () => void
   openWorkbenchRail: () => void
-  openExpertRoom: (room: { id: string; taskId?: string; expertId?: string; name: string; goal?: string }) => void
+  openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string }) => void
   closeExpertRoom: () => void
   setExpertRoomGoal: (goal: string) => void
   patchExpertRoomBindings: (patch: Partial<Pick<ExpertRoomState, 'skills' | 'connectors' | 'knowledgeRefs'>>) => void
@@ -326,6 +354,7 @@ export interface AppState {
   newSession: () => void
   selectSession: (id: string) => void
   loadAssistantSessions: () => Promise<void>
+  clearSessionHistory: () => Promise<void>
   loadAssistantChrome: () => Promise<void>
   renameSession: (id: string, title: string) => Promise<void>
   pinSession: (id: string, pinned: boolean) => Promise<void>
@@ -344,8 +373,12 @@ export interface AppState {
   refreshActiveSessionArtifacts: () => Promise<void>
   setImageViewer: (url: string) => void
   loadFileCatalog: () => Promise<void>
+  loadProjects: () => Promise<void>
   setFileTreeQuery: (q: string) => void
   loadFileTree: () => Promise<void>
+  selectProject: (id: string) => Promise<void>
+  archiveProject: (id: string, archived?: boolean) => Promise<void>
+  relinkProject: (id: string) => Promise<void>
   selectSource: (id: string) => Promise<void>
   toggleFileDir: (sourceId: string, relPath: string) => Promise<void>
   createSourceFile: () => Promise<void>
@@ -371,6 +404,19 @@ export interface AppState {
   setKnowledgeProvider: (id: string) => Promise<void>
   openObsidian: () => Promise<void>
   setKnowledgeMoreOpen: (open: boolean) => void
+  setBrainPerspective: (perspective: 'self' | 'work' | 'knowledge') => void
+  setBrainFilters: (filters: Partial<{ kinds: BrainNodeKind[]; statuses: BrainClaimStatus[] }>) => void
+  selectBrainNode: (id: string | null) => void
+  focusBrainNode: (id: string) => Promise<void>
+  loadBrain: () => Promise<void>
+  queryBrain: () => Promise<void>
+  forgetBrainNode: (id: string) => Promise<void>
+  syncBrainProvider: (id: string) => Promise<void>
+  saveBrainReference: (hit: BrainHit) => Promise<void>
+  promoteBrainHit: (hit: BrainHit) => Promise<void>
+  saveBrainLayout: (positions: Record<string, { x: number; y: number }>) => Promise<void>
+  findBrainPath: (fromId: string, toId: string) => Promise<BrainPathResult>
+  undoBrainGrowth: (id: string) => Promise<void>
   upsertAttention: (raw: unknown) => void
   clearAttention: (id?: string) => void
   activateAttention: (id: string) => void

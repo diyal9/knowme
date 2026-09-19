@@ -37,4 +37,17 @@ describe('knowledge-steward-store', () => {
       fs.rmSync(userData, { recursive: true, force: true })
     }
   })
+
+  it('cleans a temporary store file after a successful atomic replace', () => {
+    const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-steward-store-replace-'))
+    try {
+      store.save(userData, { tasks: [], proposals: [] })
+      assert.equal(fs.existsSync(`${store.storePath(userData)}.tmp`), false)
+      store.save(userData, { tasks: [{ id: 'second' }], proposals: [] })
+      assert.equal(fs.existsSync(`${store.storePath(userData)}.tmp`), false)
+      assert.deepEqual(store.load(userData).tasks, [{ id: 'second' }])
+    } finally {
+      fs.rmSync(userData, { recursive: true, force: true })
+    }
+  })
 })

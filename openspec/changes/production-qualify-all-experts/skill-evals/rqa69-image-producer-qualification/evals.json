@@ -1,0 +1,143 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "suite": "RQA69",
+  "purpose": "Qualify the current image-producer@4.0.0 configuration through real image-tool, artifact, review and recovery evidence. Package structure and historical RQA26 results are not sufficient.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": ["pango-image-mcp", "photoshop-mcp"],
+    "configureConnectors": [
+      {
+        "id": "pango-image-mcp",
+        "type": "mcp",
+        "enabled": true,
+        "mcp": {
+          "transport": "streamable-http",
+          "urlFromEnv": "KNOWME_PANGO_MCP_URL",
+          "urlFromCursorServer": "pango-skillsrv"
+        },
+        "secretsFromCursorHeaders": {
+          "PANGO_ACCESS_TOKEN": "Authorization"
+        }
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": "IP01",
+      "expertId": "image-producer",
+      "title": "确认后真实生成并交付图片",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "pango-generate",
+      "prompt": "用户已确认以下 Brief，请直接执行，不再重复确认：生成一张 1:1 的深蓝色扁平机器人头像图标，纯色浅背景，无文字、无 Logo，适合作为应用图标。必须真实调用 generate_image；只有拿到工具成功回执、可解码的本地图片 artifact 和可见图片后，才能交付。请在对话中简要说明实际结果，不要把 Prompt 或 URL 当成图片。",
+      "constraints": [
+        "本题已明确授权调用生图工具，不要改为普通文字方案",
+        "必须真实调用 generate_image，失败时如实进入失败/等待输入闭环",
+        "不得生成文档成果，不得用工具回显、URL 或参数替代 image artifact"
+      ],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": [
+        "用户确认后实际调用 generate_image，执行证据包含完整工具回执。",
+        "至少存在一个当前任务的 image artifact，且有 decoded-file 解码事实。",
+        "对话中显示真实图片预览，不能只显示 URL、Prompt 或文件占位卡片。",
+        "交付说明只陈述已核实结果；未做视觉核查的内容明确为未知。",
+        "图片交付与普通对话说明分离，验收入口仍由对话流程控制。"
+      ]
+    },
+    {
+      "id": "IP02",
+      "expertId": "image-producer",
+      "title": "工具成功但未返回图片",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "needs_input",
+      "expectedAttentionKind": "artifact_missing",
+      "expectedHasDeliverable": false,
+      "prompt": "用户已确认生成一张 1:1 的机器人头像图标。测试故障注入：generate_image 返回成功文本，但不返回任何图片数据或可下载图片。请停止在真实结果边界，不要创建伪造图片成果；在对话中说明未收到图片，并保留任务背景，给出可重试的下一步。",
+      "constraints": [
+        "允许调用 generate_image；本题的故障由测试工具注入",
+        "成功文本、模型参数和预览 URL 都不能替代 image artifact",
+        "无图片时不得进入待验收，不得显示空的成功成果物"
+      ],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": [
+        "工具无图片回执时任务进入 artifact_missing 等待状态，而不是 review 或 completed。",
+        "对话明确告诉用户没有收到真实图片，不查找或伪造文档成果。",
+        "原始 Brief 和任务编号保留，可从当前输入框继续重试。",
+        "失败没有自动额外生成或重复付费调用。",
+        "成果区不出现破图、空白图片卡或虚假的待验收图片。"
+      ]
+    },
+    {
+      "id": "IP03",
+      "expertId": "image-producer",
+      "title": "取消后重试仍沿用原 Brief",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "prompt": "用户已确认以下 Brief：生成一张 4:3 的暖灰背景产品插画，主体为完整的白色桌面灯，光线柔和，无文字。任务第一次执行被用户取消后，请允许重新执行；重试必须沿用这份 Brief，不要要求用户重新填写，也不要把取消前未成功的工具回执当作成功成果。",
+      "constraints": [
+        "允许调用 generate_image，但取消和重试由任务生命周期控制",
+        "重试必须生成新的执行证据，不能复制旧的失败回执或旧 artifact",
+        "只在真实图片 artifact 返回后进入待验收"
+      ],
+      "deliverables": [{ "id": "generated-image", "title": "桌面灯产品插画", "type": "image", "required": true }],
+      "assertions": [
+        "任务记录真实包含 cancelled 与 retried/resumed 事件。",
+        "重试仍携带原始主体、比例、背景和禁用文字约束。",
+        "成功只由重试轮真实工具回执和图片 artifact 支持。",
+        "取消轮没有遗留伪成果，重试轮不会重复消费旧结果。",
+        "重新打开任务后对话、图片和唯一主输入框都可继续使用。"
+      ]
+    },
+    {
+      "id": "IP04",
+      "expertId": "image-producer",
+      "title": "退回修改只改变指定属性",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "reviewComment": "请基于上一版真实图片修改：只把背景改为纯白，并保留机器人主体形状、表情、双眼位置、比例、无文字和无 Logo。请交付完整新版，说明实际核查项；不要用风格参考图替代上一版基图。",
+      "prompt": "用户已确认生成一张 1:1 的深蓝色扁平机器人头像图标，纯色浅背景，无文字、无 Logo。必须真实生成图片并进入待验收；后续修改以本轮生成的图片作为基图。",
+      "constraints": [
+        "修改轮必须使用上一版 image artifact 作为 reference_images 基图",
+        "只允许修改背景颜色；主体、表情、构图、比例、文字和 Logo 约束必须保留",
+        "修改轮必须交付完整新版并链接 previousVersionId，不覆盖旧版"
+      ],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": [
+        "真实经历 review → changes_requested/revising → review，且产生新版本。",
+        "新请求包含上一版图片的 reference_images，而不是只传 Prompt 摘要。",
+        "对话明确区分允许改变项、保留项和未核查项。",
+        "旧版仍可查看，新版不冒充旧版或用参考图替代基图。",
+        "没有实际可见图像时，不得声称主体和保留项已通过验收。"
+      ]
+    },
+    {
+      "id": "IP05",
+      "expertId": "image-producer",
+      "title": "完成后重开并保留图片证据",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "reviewComment": "验收后发现机器人头像的背景仍不是纯色。请重开任务，在保留原主体、比例、无文字和无 Logo 的前提下，仅修正背景为纯色；交付完整新版并保留上一版供比较。",
+      "prompt": "用户已确认生成一张 1:1 的深蓝色扁平机器人头像图标，纯色背景，无文字、无 Logo。真实生成后进入待验收，验收动作由测试流程执行。",
+      "constraints": [
+        "重开必须继承已验收的上一版 artifact 和完整对话上下文",
+        "不得因重开而丢失用户意见、原图或版本链",
+        "新版本必须再次经过真实 generate_image 和图片 artifact 门禁"
+      ],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": [
+        "真实经历 review → completed → changes_requested/revising → review。",
+        "新版带 previousVersionId，旧版和用户意见仍可查看。",
+        "重开轮仍以原图为基准，不把普通风格参考图当成基图。",
+        "新版必须有新的工具回执、解码事实和 image artifact。",
+        "刷新或重新进入任务后，图片预览、版本关系和输入框仍可用。"
+      ]
+    }
+  ]
+}

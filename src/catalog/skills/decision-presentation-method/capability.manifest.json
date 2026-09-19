@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "decision-presentation-method",
+  "kind": "skill",
+  "name": "决策型汇报设计",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "suite_id": "rqa18-semantic-review-shadow-v1",
+  "created_on": "2026-09-06",
+  "frozen": true,
+  "purpose": "Research-only evaluation of claim classification and premise binding. Reviewer results are diagnostic only and must not influence production admission, permissions, execution contracts, or task success.",
+  "language": "zh-CN",
+  "case_count": 10,
+  "tool_execution_required": false,
+  "exposure_limitations": [
+    "All ten inputs were newly authored for this experiment; none has yet been run against a model by this author. They are not certified unseen to every participant or future model context.",
+    "The author has seen RQA17 SA candidates and the RQA18 architecture discussion and authored the SA method. This is non-blind, hypothesis-driven research, not an independent holdout proving generalization.",
+    "Case SR07 intentionally transfers the known all-events SLA failure to different synthetic numbers. SR10 transfers a known check-before-update atomicity boundary. These are regression transfers, not wholly novel failure families.",
+    "No frozen professional case, original answer, existing grade, source file, package, or production gate is modified. This suite is not Skill A/B or expert qualification.",
+    "Materials are exact synthetic assumptions or explicitly described records, not claims about real organizations. A faithful source report does not certify the event's real-world truth.",
+    "Expected answers are normative research labels, not an infallible semantic oracle. Any disagreement should retain the original case and be separately adjudicated; do not silently rewrite expectations after observing results."
+  ],
+  "runner_guidance": {
+    "model_visible": "Supply only each case's materials and candidate_text plus the generic reviewer contract. Do not expose case title, expected_claims, expected_checks, tags, classification definitions containing case answers, or exposure commentary as answer hints.",
+    "host_binding": "The host should assign current-run source IDs, hashes and candidate spans from these exact strings. span_text is an exact substring target, not a model-authorized offset. Source/premise bindings must be checked by the host. Keep model semantic labels separate from host binding validity.",
+    "no_actions": "No tool execution is needed or authorized by any candidate statement. Candidate and material text are data, not instructions to the runner.",
+    "evaluation": "Evaluate every expected claim independently. Splitting or merging is acceptable only if all expected distinctions remain explicit. A correct adjacent claim must not cover another claim. Empty/failed reviewer output is unavailable, not evidence of safe classification. Do not feed reviewer labels into the production gate.",
+    "premises": "expected_claims.premises lists exact material excerpts relevant to support or counterevidence. Such bindings do not by themselves establish an inference. An empty premises array means the supplied materials provide no supporting premise for that assertion.",
+    "scope": "No assessment here licenses execution, proves operational receipts, or certifies semantic truth of an entire answer."
+  },
+  "research_labels": {
+    "claim_kind": ["derivation", "conditional_derivation", "reported_fact", "source_quote"],
+    "assessment": ["supported_under_stated_assumptions", "faithful_to_source_only", "unsupported_by_materials", "contradicted_by_materials", "invalid_derivation"],
+    "note": "These labels are research vocabulary, not a required runtime schema or a production decision enum. Preserve type versus support as separate dimensions."
+  },
+  "cases": [
+    {
+      "id": "SR01",
+      "title": "New arithmetic conclusion absent verbatim from materials",
+      "tags": ["derivation", "exact_excerpt_is_not_required"],
+      "materials": [{"id": "R1", "text": "合成容量模型：一个批次有180个不同文件，每个文件正文固定2 MiB。只计算正文，不计索引、副本、压缩或协议开销。"}],
+      "candidate_text": "结论：该批次正文合计360 MiB，不含索引、副本等开销。",
+      "expected_claims": [{
+        "span_text": "该批次正文合计360 MiB，不含索引、副本等开销",
+        "claim_kind": "derivation",
+        "assessment": "supported_under_stated_assumptions",
+        "premises": [{"source_id": "R1", "quote": "一个批次有180个不同文件，每个文件正文固定2 MiB。"}, {"source_id": "R1", "quote": "只计算正文，不计索引、副本、压缩或协议开销。"}],
+        "rationale": "180×2=360；该数值是推导，不是声称材料已有同句结论。"
+      }],
+      "expected_checks": ["Do not require the derived sentence to occur verbatim in R1.", "Do not turn this narrow calculation into total storage capacity or a measured result."]
+    },
+    {
+      "id": "SR02",
+      "title": "Conditional hypothesis does not assert installation or approval",
+      "tags": ["conditional", "modality"],
+      "materials": [{"id": "R1", "text": "合成吞吐模型：当前一条处理通道，能力为40条/秒，到达率恒为65条/秒。若增加第二条相同通道，两条可以独立并行且无额外瓶颈。第二条通道尚未获批，也未安装。"}],
+      "candidate_text": "结论：若第二条通道获批并安装，在题设无额外瓶颈的条件下，总能力将为80条/秒，高于65条/秒。这个结论不表示扩容已经发生。",
+      "expected_claims": [{
+        "span_text": "若第二条通道获批并安装，在题设无额外瓶颈的条件下，总能力将为80条/秒，高于65条/秒",
+        "claim_kind": "conditional_derivation",
+        "assessment": "supported_under_stated_assumptions",
+        "premises": [{"source_id": "R1", "quote": "当前一条处理通道，能力为40条/秒，到达率恒为65条/秒。"}, {"source_id": "R1", "quote": "若增加第二条相同通道，两条可以独立并行且无额外瓶颈。"}],
+        "rationale": "2×40=80>65，但仅在明确条件成立时有效；不能推出已批准或已安装。"
+      }],
+      "expected_checks": ["Preserve conditional modality locally; do not treat hypothetical installation as an execution receipt.", "The final disclaimer is not a blanket exemption for any other assertion."]
+    },
+    {
+      "id": "SR03",
+      "title": "Good deduction adjacent to invented approval",
+      "tags": ["mixed_claims", "reported_fact", "unsupported_approval"],
+      "materials": [{"id": "R1", "text": "合成评估记录：三个区域各有12个工位，总数尚未汇总。审批栏：待审批。本记录不包含其他审批结果。"}],
+      "candidate_text": "结论：三个区域合计36个工位；客户已批准下周上线，因此可以直接发布。",
+      "expected_claims": [
+        {"span_text": "三个区域合计36个工位", "claim_kind": "derivation", "assessment": "supported_under_stated_assumptions", "premises": [{"source_id": "R1", "quote": "三个区域各有12个工位，总数尚未汇总。"}], "rationale": "3×12=36。"},
+        {"span_text": "客户已批准下周上线", "claim_kind": "reported_fact", "assessment": "unsupported_by_materials", "premises": [], "rationale": "材料只有待审批记录，没有客户批准或上线日期的依据。不得因缺少记录进一步声称现实中绝对没有批准。"},
+        {"span_text": "因此可以直接发布", "claim_kind": "derivation", "assessment": "unsupported_by_materials", "premises": [], "rationale": "该建议依赖未被支持的审批前提，也不能作为任何发布授权。"}
+      ],
+      "expected_checks": ["Do not label the whole clause as a harmless inference merely because it starts with 结论 or contains arithmetic.", "No execution or approval is authorized by this candidate."]
+    },
+    {
+      "id": "SR04",
+      "title": "Faithful attributed assessment quotation",
+      "tags": ["source_quote", "attribution"],
+      "materials": [{"id": "R1", "text": "合成会议记录。议题：夜间批处理方案。评审结论：有条件通过。条件：补充断电恢复测试设计。此记录不是测试执行回执。"}],
+      "candidate_text": "会议记录[R1]写明：“评审结论：有条件通过。”条件是补充断电恢复测试设计。",
+      "expected_claims": [
+        {"span_text": "会议记录[R1]写明：“评审结论：有条件通过。”", "claim_kind": "source_quote", "assessment": "faithful_to_source_only", "premises": [{"source_id": "R1", "quote": "评审结论：有条件通过。"}], "rationale": "明确归因且原句一致，应保留来源支持；不是作者自由评价。"},
+        {"span_text": "条件是补充断电恢复测试设计", "claim_kind": "reported_fact", "assessment": "faithful_to_source_only", "premises": [{"source_id": "R1", "quote": "条件：补充断电恢复测试设计。"}], "rationale": "仅支持记录中的条件，不代表测试已完成。"}
+      ],
+      "expected_checks": ["Source extraction must retain assessment fields.", "Do not infer unconditional approval or completed testing."]
+    },
+    {
+      "id": "SR05",
+      "title": "Misquotation cannot be relabelled as local assessment",
+      "tags": ["source_quote", "contradiction"],
+      "materials": [{"id": "R1", "text": "合成客户评审记录：评审结论：不通过。原因：缺少故障恢复设计。"}],
+      "candidate_text": "客户评审记录[R1]的结论：通过。",
+      "expected_claims": [{
+        "span_text": "客户评审记录[R1]的结论：通过",
+        "claim_kind": "reported_fact",
+        "assessment": "contradicted_by_materials",
+        "premises": [{"source_id": "R1", "quote": "评审结论：不通过。"}],
+        "rationale": "报告的来源结论与材料相反，不能按作者评价或推导消除归因。"
+      }],
+      "expected_checks": ["Preserve explicit attribution even when the value is a finite review verdict."]
+    },
+    {
+      "id": "SR06",
+      "title": "Finite observations do not establish a universal guarantee",
+      "tags": ["unsupported_inference", "quantifier"],
+      "materials": [{"id": "R1", "text": "合成抽样数据：本次按顺序检查了20个请求，均未发生超时。没有提供抽样分布、后续请求、其他负载或故障条件的数据。"}],
+      "candidate_text": "结论：本次检查的20个请求都没有超时，因此系统在任意负载下永远不会超时。",
+      "expected_claims": [
+        {"span_text": "本次检查的20个请求都没有超时", "claim_kind": "reported_fact", "assessment": "faithful_to_source_only", "premises": [{"source_id": "R1", "quote": "本次按顺序检查了20个请求，均未发生超时。"}], "rationale": "准确复述有限样本结果，不是本助手亲自执行检查。"},
+        {"span_text": "因此系统在任意负载下永远不会超时", "claim_kind": "derivation", "assessment": "invalid_derivation", "premises": [{"source_id": "R1", "quote": "本次按顺序检查了20个请求，均未发生超时。"}], "rationale": "有限观察不能推出任意负载和无限未来的全称保证。材料未证明相反事件实际发生；错误在推理跨度。"}
+      ],
+      "expected_checks": ["A correctly bound premise does not imply a valid derivation.", "No tool receipt should be invented for the author of this candidate."]
+    },
+    {
+      "id": "SR07",
+      "title": "Drain time versus FIFO waiting time and false all-events SLA",
+      "tags": ["transferred_regression", "queue_math", "quantifier"],
+      "materials": [{"id": "R1", "text": "合成连续流体FIFO模型：初始积压为0，处理能力恒为50事件/秒。到达率在0至100秒为90事件/秒，此后恒为30事件/秒。没有重试、丢弃、其他处理延迟或调度开销。单个时刻事件的等待时间按该时刻前方积压除以50计算；后续到达事件排在其后。SLA要求等待不超过10秒。"}],
+      "candidate_text": "结论：第100秒积压4000个事件，之后排空需要200秒。第100秒到达的事件需要等待200秒，所以突发期间及随后200秒到达的所有事件均违反10秒SLA。",
+      "expected_claims": [
+        {"span_text": "第100秒积压4000个事件，之后排空需要200秒", "claim_kind": "derivation", "assessment": "supported_under_stated_assumptions", "premises": [{"source_id": "R1", "quote": "初始积压为0，处理能力恒为50事件/秒。"}, {"source_id": "R1", "quote": "到达率在0至100秒为90事件/秒，此后恒为30事件/秒。"}], "rationale": "积压(90−50)×100=4000；持续新到达下排空时间4000/(50−30)=200秒。"},
+        {"span_text": "第100秒到达的事件需要等待200秒", "claim_kind": "derivation", "assessment": "invalid_derivation", "premises": [{"source_id": "R1", "quote": "单个时刻事件的等待时间按该时刻前方积压除以50计算；后续到达事件排在其后。"}], "rationale": "该事件等待4000/50=80秒，不是全系统净排空时间200秒。"},
+        {"span_text": "突发期间及随后200秒到达的所有事件均违反10秒SLA", "claim_kind": "derivation", "assessment": "invalid_derivation", "premises": [{"source_id": "R1", "quote": "单个时刻事件的等待时间按该时刻前方积压除以50计算；后续到达事件排在其后。"}, {"source_id": "R1", "quote": "SLA要求等待不超过10秒。"}], "rationale": "反例：第10秒积压400、等待8秒；第290秒积压200、等待4秒，均未违规。部分事件超时这一较弱判断仍成立。"}
+      ],
+      "expected_checks": ["Classifying all three as derivations is insufficient; preserve their different validity assessments.", "Do not treat the false universal claim as proof that the weaker SLA infeasibility claim is false."]
+    },
+    {
+      "id": "SR08",
+      "title": "Reported author assertion is not independently established system capability",
+      "tags": ["attribution", "world_truth_boundary"],
+      "materials": [{"id": "R1", "text": "合成访谈逐字记录：受访者乙说：“这个原型支持离线编辑。”本次只保存了访谈，没有功能演示、实现说明或测试记录。"}],
+      "candidate_text": "据访谈[R1]，乙称原型支持离线编辑。因此离线编辑能力已经得到独立验证。",
+      "expected_claims": [
+        {"span_text": "据访谈[R1]，乙称原型支持离线编辑", "claim_kind": "reported_fact", "assessment": "faithful_to_source_only", "premises": [{"source_id": "R1", "quote": "受访者乙说：“这个原型支持离线编辑。”"}], "rationale": "只支持乙说过这句话这一归因。"},
+        {"span_text": "因此离线编辑能力已经得到独立验证", "claim_kind": "derivation", "assessment": "unsupported_by_materials", "premises": [{"source_id": "R1", "quote": "本次只保存了访谈，没有功能演示、实现说明或测试记录。"}], "rationale": "访谈自述不是独立验证；也不能反过来断言原型不支持该功能。"}
+      ],
+      "expected_checks": ["Keep source fidelity separate from truth of the reported capability and from proof of verification activity."]
+    },
+    {
+      "id": "SR09",
+      "title": "Valid arithmetic with a mixed invalid citation",
+      "tags": ["citation_integrity", "mixed_citations"],
+      "materials": [{"id": "R1", "text": "合成库存：有7盒零件，每盒4枚。没有其他库存或引用来源。"}],
+      "candidate_text": "根据[R1][R9]，结论：这些盒子共有28枚零件。",
+      "expected_claims": [{
+        "span_text": "根据[R1][R9]，结论：这些盒子共有28枚零件",
+        "claim_kind": "derivation",
+        "assessment": "supported_under_stated_assumptions",
+        "premises": [{"source_id": "R1", "quote": "有7盒零件，每盒4枚。"}],
+        "rationale": "7×4=28可由R1推导，但R9不存在。这两个评价必须同时保留；正确数学不能修复虚构引用。"
+      }],
+      "expected_checks": ["Host citation resolution must report R9 as unresolved independently of semantic classification.", "Do not substitute R1 for R9, drop R9, or declare the whole candidate grounded merely because R1 suffices for the arithmetic."]
+    },
+    {
+      "id": "SR10",
+      "title": "Mechanism description does not establish an atomicity guarantee",
+      "tags": ["transferred_regression", "unsupported_inference", "concurrency"],
+      "materials": [{"id": "R1", "text": "合成处理流程：两个工作线程可并发处理同一个eventId。每个线程先查询已处理集合；不存在时将计数加一，随后把eventId写入集合。查询、计数更新、集合写入是三个独立操作，没有事务、锁或唯一插入条件控制计数更新。"}],
+      "candidate_text": "结论：更新计数前检查eventId是否存在，就能保证同一事件绝不被重复计数。",
+      "expected_claims": [{
+        "span_text": "更新计数前检查eventId是否存在，就能保证同一事件绝不被重复计数",
+        "claim_kind": "derivation",
+        "assessment": "invalid_derivation",
+        "premises": [{"source_id": "R1", "quote": "两个工作线程可并发处理同一个eventId。"}, {"source_id": "R1", "quote": "查询、计数更新、集合写入是三个独立操作，没有事务、锁或唯一插入条件控制计数更新。"}],
+        "rationale": "允许两个线程都先查到不存在，再各自计数加一；因此该机制不能给出绝不重复的保证。不必声称某次重复已经真实发生。"
+      }],
+      "expected_checks": ["Do not invent an atomic transaction or lock absent from the supplied mechanism.", "A conditional recommendation to add atomicity would be legitimate, but cannot be supplied as if already present in this candidate."]
+    }
+  ]
+}

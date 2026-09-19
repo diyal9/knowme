@@ -2,6 +2,8 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
+const fs = require('node:fs')
+const os = require('node:os')
 const path = require('node:path')
 const sandbox = require('../src/lib/agent-sandbox')
 
@@ -178,6 +180,22 @@ describe('agent-sandbox buildSandboxTools', () => {
     assert.deepEqual(definitions.map(d => d.function.name), ['run_python', 'run_shell'])
   })
 
+  it('exposes complete governance contracts for every sandbox tool', () => {
+    const required = [
+      'source', 'capability', 'risk', 'sideEffects', 'requiresApproval',
+      'scope', 'timeoutMs', 'idempotencySupported', 'rollbackSupported',
+    ]
+    const { definitions } = sandbox.buildSandboxTools({ workdir: '/tmp/x' })
+    for (const definition of definitions) {
+      for (const field of required) {
+        assert.notEqual(definition._knowme?.[field], undefined, `${definition.function.name}.${field}`)
+      }
+      assert.equal(definition._knowme.source, 'builtin')
+      assert.equal(definition._knowme.scope, 'sandbox')
+      assert.equal(definition._knowme.timeoutMs, sandbox.DEFAULT_TIMEOUT_MS)
+    }
+  })
+
   it('returns normalized permissions on build', () => {
     const { permissions } = sandbox.buildSandboxTools({
       workdir: '/tmp/x',
@@ -205,6 +223,36 @@ describe('agent-sandbox buildSandboxTools', () => {
     assert.match(deps.written[0].file, /script_.*\.py$/)
     assert.equal(seenArgs.cwd, '/tmp/box')
     assert.deepEqual(seenArgs.args, ['-I', deps.written[0].file])
+  })
+
+  it('runs a package script with ordered argv without shell interpolation', async () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'km-skill-script-'))
+    const script = path.join(workdir, 'run.mjs')
+    fs.writeFileSync(script, 'console.log(process.argv.slice(2))\n', 'utf8')
+    let seen = null
+    const tools = sandbox.buildSandboxTools({
+      workdir,
+      runProcess: (opts) => { seen = opts; return Promise.resolve({ code: 0, stdout: 'ok', stderr: '' }) },
+    })
+
+    const result = await tools.runScriptFile({ scriptAbs: script, argv: ['--out', 'folder with spaces', '&literal'] })
+    assert.equal(result.ok, true)
+    assert.equal(seen.cmd, 'node')
+    assert.deepEqual(seen.args, [script, '--out', 'folder with spaces', '&literal'])
+    assert.equal(seen.cwd, workdir)
+  })
+
+  it('does not run a script outside the configured skill workspace', async () => {
+    const workdir = fs.mkdtempSync(path.join(os.tmpdir(), 'km-skill-script-'))
+    let spawned = false
+    const tools = sandbox.buildSandboxTools({
+      workdir,
+      runProcess: () => { spawned = true; return Promise.resolve({ code: 0 }) },
+    })
+    const result = await tools.runScriptFile({ scriptAbs: path.resolve(workdir, '..', 'outside.mjs') })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'invalid_path')
+    assert.equal(spawned, false)
   })
 
   it('blocks python urllib before spawning', async () => {

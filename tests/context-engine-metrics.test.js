@@ -38,4 +38,25 @@ describe('context-engine metrics', () => {
     assert.equal(snapshot.slo.status, 'degraded')
     assert.deepEqual(snapshot.slo.violations.sort(), ['critical_context_truncated', 'untrusted_system_projection'])
   })
+
+  it('tracks identity drift and unsupported execution claims without retaining model names or text', () => {
+    for (let i = 0; i < 20; i++) {
+      engine.recordContextOutcome({
+        text: i === 0 ? '我是你的通用工作伙伴，已经完成查询。' : '这里是当前问题的直接答复。',
+        identity: '办公协作专家',
+        identityAsked: false,
+        toolCalls: 0,
+        status: 'completed',
+        scene: 'expert-collaboration',
+        promptVersion: 'zh-CN@2',
+        model: 'private-provider/model-secret',
+      })
+    }
+    const snapshot = engine.contextEngineMetricsSnapshot()
+    assert.equal(snapshot.ratios.identityDrift, 0.05)
+    assert.equal(snapshot.ratios.unsupportedExecutionClaim, 0.05)
+    assert.ok(snapshot.slo.violations.includes('identity_drift_rate'))
+    assert.ok(snapshot.slo.violations.includes('unsupported_execution_claim_rate'))
+    assert.doesNotMatch(JSON.stringify(snapshot), /private-provider|model-secret|通用工作伙伴/)
+  })
 })

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "software-engineer",
+  "kind": "expert",
+  "name": "软件开发工程师",
+  "description": "在明确仓库和验收标准后实现代码变更，并提供测试与变更证据",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "仓库、需求、验收标准与技术约束",
+    "可复现信息或相关代码上下文"
+  ],
+  "outputs": [
+    "可审查的代码变更",
+    "测试结果、风险和未完成项"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/software-engineer"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "可审查的代码变更",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "测试结果、风险和未完成项",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

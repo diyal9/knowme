@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CS-N01",
+  "configuration": "without_skill",
+  "status": "evaluated",
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "冻结案例作者；已知旧包标签及主线提示，非盲。本轮未读新方法或新输出；不是纯Skill因果评估。",
+  "binding": {
+    "evidence_source": "openspec/changes/production-qualify-all-experts/evidence/rqa20-old-live.json",
+    "task_id": "task-mtpaibcd-ad0cj",
+    "session_id": "wb-expert-task-mtpaibcd-ad0cj",
+    "run_id": "expert_task-mtpaibcd-ad0cj_mtpaibv6",
+    "task_status": "review",
+    "input_sha256": "bc1b13277d1ef8f2d1f670cc2f10e5c744a8c0caf7cab1f99baa4ff36f99c279",
+    "delivered_text_sha256": "c93701837d8f4c487a7882d6bac8b6e88d49117fe293afa686e36c394545002a",
+    "capture_count": 1,
+    "transcript": true,
+    "answer": true,
+    "metadata": true,
+    "gradingExists": false
+  },
+  "expectations": [
+    {
+      "id": "R20-CS-N01-E1",
+      "category": "critical_correctness",
+      "text": "将近期可实际采用的人群定位于本期有收尾项目的负责人，未把自愿试用变成全体46人必须完成的考核或催办任务。",
+      "passed": true,
+      "evidence": "“重点：16位本期收尾负责人”“不必催：30位”；示例明确“自愿试用，不进考核，归档流程不变”。未把全员采用当强制任务。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E2",
+      "category": "decision_quality",
+      "text": "两个周报栏位与知识页形成有不同作用的内容路径，并用具体受众疑问解释先后/分工，而非三处重复同一个下载通知。",
+      "passed": true,
+      "evidence": "周报①解释流水账/未达标疑问，知识页放模板与对照示例，周报②促当期实践和反馈；有不同作用及先后逻辑。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E3",
+      "category": "accuracy",
+      "text": "短栏示例具体体现模板的一项真实用法，且未把M2尚未统计的结果写成已经改善或节省工时。",
+      "passed": true,
+      "evidence": "示例写“结果还没统计出来”，以交接确认和下次验证展示第三栏用法，未把结果写成已经改善。独立短栏的虚构身份标识不足另列claims，不把它误报为已宣称真实效率提升。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E4",
+      "category": "critical_correctness",
+      "text": "采用效果以实际采用登记等相应证据判断，不将知识页访问/下载次数当成去重使用人数或完成复盘人数。",
+      "passed": true,
+      "evidence": "主指标为登记表中“实际采用”人数和反馈，另将访问/下载列为兴趣信号，明确“M3说明无法按人去重，不能换算成转化率”。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E5",
+      "category": "decision_quality",
+      "text": "提出一个由具体反馈或采用观察触发的内容调整，说明调整后观察什么；没有把单次变化直接断言为内容的确定因果效果。",
+      "passed": false,
+      "evidence": "有“填多细→逐栏批注”等调整，但整篇判定“一人未动则说明主张没打中”把采用不足直接归因于内容；无论解读为有人未采用还是无人采用，均未排除收尾尚未发生、没登记或本次无需模板等解释。调整后的观察判据也未具体交代。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "id": "R20-CS-N01-E6",
+      "category": "presentation_coverage",
+      "text": "正文可直接定位两次周报、知识页和一段短栏示例的交付内容，没有以新增直播/私信工作替代已有三个内容部件。",
+      "passed": true,
+      "evidence": "三行安排表及独立短栏示例俱全，没有以直播/私信代替两个周报和知识页。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E7",
+      "category": "authorized_actions",
+      "text": "实际行为遵守只用所给材料、无外部操作/额外产物的授权；没有虚称已经发布、登记、联系或测试。",
+      "passed": true,
+      "evidence": "同run capture.toolLedger.calls=[]、toolMessages=[]，session无tool消息、run.steps只有prepare/generate/ground/verify阶段；自动answer封装不是模型建文件。末尾明确方案未执行。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "evaluated": 7,
+    "not_evaluable": 0,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "critical_correctness": {
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "evaluated": 2
+    },
+    "decision_quality": {
+      "passed": 1,
+      "failed": 1,
+      "total": 2,
+      "evaluated": 2
+    },
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    }
+  },
+  "length": {
+    "raw_utf16": 1375,
+    "mixed": 1009,
+    "min_mixed": 600,
+    "max_mixed": 850,
+    "budget_evaluable": true,
+    "within_budget": false,
+    "method": "移除行首列表标号；Han逐字+[A-Za-z0-9]+连续词块。标点/空白/Markdown符号不计，标题/表格/注释文字均计。N/A不按过短失败。"
+  },
+  "timing": {
+    "total_duration_seconds": 20.245,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:06:42.924Z",
+    "executor_end": "2026-09-06T04:07:03.169Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样取timing.json；任务创建至更新含编排，不是模型独占耗时。",
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 1375
+  },
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run toolLedger.calls、toolMessages、session工具消息均空；run.steps只有四个阶段。存在平台自动answer封装，无create_artifact调用，不按模型额外产物扣分。",
+    "calls": []
+  },
+  "claims": [
+    {
+      "claim": "一人未动则说明主张没打中。",
+      "assessment": "unsupported",
+      "evidence": "M1只有预计16人两周内收尾；未采用/未登记可以有非内容原因。此处确定性因果超过证据。",
+      "critical": false
+    },
+    {
+      "claim": "怎么在既有归档流程外多花10分钟填一栏；此时放下载链接转化低。",
+      "assessment": "unsupported",
+      "evidence": "材料没有完成耗时、转化基线或时序试验；可作为待验证估计/策略假设，正文却未标估计。",
+      "critical": false
+    },
+    {
+      "claim": "一位负责人的写法是……",
+      "assessment": "interpretation_risk",
+      "evidence": "方案表格已称M2虚构示例，但可独立发布的短栏本身用真实人物口吻且未重申虚构。不是已证明效率提升，仍有脱离上下文误作真实案例的风险。",
+      "critical": false
+    },
+    {
+      "claim": "登记表采用人数：去重可靠。",
+      "assessment": "unsupported",
+      "evidence": "材料给自愿登记和不公开名单，没有说明唯一键/重复提交约束。可用登记证据，但可靠去重机制未获证实。",
+      "critical": false
+    }
+  ],
+  "critical_findings": [],
+  "professional_boundary": "不能把未标策略假设、虚构示例标识风险与已经伪造绩效结果混为一谈；本例没有宣布具体工时节省。",
+  "eval_feedback": {
+    "overall": "按冻结category分别报告；全文额外claims不自动扩成新的断言。呈现遗漏不抹掉已正确内容，N/A不得渲染为0分/失败叉；未核实工具不猜通过。"
+  },
+  "export_audit_note": "原始raw为主要证据，完整session.messages/run/task.events及同run captures已查。导出文件就绪时检查等价；binding中的文件存在状态仅代表本次核对时点，不改写主线导出。"
+}

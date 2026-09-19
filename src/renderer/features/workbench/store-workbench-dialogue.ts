@@ -8,12 +8,14 @@ import { settleExecutionTrace } from '../../../domain/agent-execution-timeline'
 import {
   buildAmbiguousExpertReply,
   isAmbiguousExpertDiscussion,
+  resolveExpertDiscussionMode,
   type ExpertDiscussionMode,
 } from '../../../domain/expert-discussion'
+import { classifyExpertAdaptiveIntent } from '../../../domain/expert-adaptive'
 import {
   resolveKernelRole,
-  workbenchExpertSessionId,
-  workbenchRunSessionId,
+  workbenchExpertDiscussionSessionId,
+  workbenchWorkflowSessionId,
   workbenchTaskRefForSessionId,
 } from '../../../domain/dialogue-lanes'
 import {
@@ -92,6 +94,52 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
         attachmentName: attachment?.name,
       }
 
+      const bridge = api()
+      const activeExpertRoom = expertRoom?.taskId && !attachment ? expertRoom : null
+      const adaptiveIntent = activeExpertRoom
+        ? classifyExpertAdaptiveIntent(text, activeExpertRoom.taskStatus)
+        : null
+      if (adaptiveIntent && activeExpertRoom && activeExpertRoom.taskId && ['accept', 'revise'].includes(adaptiveIntent.kind)) {
+        const activeExpertTaskId = activeExpertRoom.taskId
+        const assistantId = `adaptive-${Date.now()}`
+        const pendingReply: ChatMessage = {
+          id: assistantId,
+          role: 'assistant',
+          text: adaptiveIntent.kind === 'accept' ? '正在确认这份成果…' : '已记录修改意见，正在准备新版本…',
+          createdAt: new Date().toISOString(),
+        }
+        set({
+          workbenchDialogue: { composer: '', attachments: [] },
+          expertRoom: { ...activeExpertRoom, messages: [...activeExpertRoom.messages, user, pendingReply] },
+        })
+        void (async () => {
+          const taskResult = await Promise.resolve(bridge?.expertTaskGet?.(activeExpertTaskId)).catch(() => null)
+          const task = taskResult?.task
+          const candidates = (task?.deliverables || []).filter((item: { acceptanceStatus?: string }) => (
+            adaptiveIntent.kind === 'accept' ? item.acceptanceStatus === 'pending' : true
+          ))
+          const item = candidates.at(-1)
+          const result = item && bridge?.expertTaskReviewDeliverable
+            ? await bridge.expertTaskReviewDeliverable({
+                taskId: activeExpertTaskId,
+                deliverableId: item.deliverableId,
+                action: adaptiveIntent.kind === 'accept' ? 'accept' : 'changes_requested',
+                decision: adaptiveIntent.kind === 'accept' ? 'accept' : 'changes_requested',
+                comment: adaptiveIntent.comment,
+              }).catch(() => null)
+            : { ok: false, error: adaptiveIntent.kind === 'accept' ? '当前没有待验收成果' : '当前没有可修改的成果' }
+          const reply = result?.ok
+            ? adaptiveIntent.kind === 'accept' ? '成果已接受，我会继续处理下一份交付物。' : '修改意见已记录，我会按你的意见生成新版本。'
+            : String(result?.error || '操作未完成，请查看当前成果后重试')
+          set((state) => ({
+            expertRoom: state.expertRoom?.id === activeExpertRoom.id
+              ? { ...state.expertRoom, taskStatus: result?.task?.status || state.expertRoom.taskStatus, messages: state.expertRoom.messages.map((message) => message.id === assistantId ? { ...message, text: reply } : message) }
+              : state.expertRoom,
+          }))
+        })()
+        return
+      }
+
       if (plan.kind !== 'llm') {
         if (!run) return
         const assistant = {
@@ -147,7 +195,6 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
         return
       }
 
-      const bridge = api()
       if (!bridge?.aiGenerate) {
         get().showToast('助手 API 未就绪，请重启应用')
         return
@@ -170,11 +217,14 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
         description: expert?.description,
       })
       const conversationMode: ExpertDiscussionMode | undefined = expertRoom
-        ? (expertRoom.taskId ? 'expert-discussion' : 'expert-planning')
+        ? resolveExpertDiscussionMode(expertRoom.taskStatus, { hasTask: Boolean(expertRoom.taskId) })
         : undefined
       const sessionId = expertRoom
-        ? workbenchExpertSessionId(`${expertRoom.taskId || expertRoom.id}-${expertRoom.taskId ? 'discussion-v2' : 'planning-v2'}`)
-        : workbenchRunSessionId(run?.slug || run?.workflowId || 'run')
+        ? workbenchExpertDiscussionSessionId(
+            expertRoom.taskId || expertRoom.id,
+            conversationMode || 'planning',
+          )
+        : workbenchWorkflowSessionId(run?.slug || run?.workflowId || 'run')
       const assistant = seedStreamingAssistant(assistantId, runId, userCreatedAt)
       const priorHistory = historyTurns(expertRoom?.messages || run?.dialogueMessages || [])
 

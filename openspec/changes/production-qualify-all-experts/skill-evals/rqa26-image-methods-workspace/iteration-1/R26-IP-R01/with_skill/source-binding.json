@@ -1,0 +1,174 @@
+{
+  "source": {
+    "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa26-actual-runs-lossless.json",
+    "sha256": "3d69aa3dc389ccfca8681af7337a5ac21d6b4d17ca3a1cbfafddf28ebed3ac10",
+    "jsonPath": "data.candidateR01"
+  },
+  "taskId": "task-mtpllbgi-sw9ph",
+  "sessionId": "wb-expert-task-mtpllbgi-sw9ph",
+  "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9",
+  "status": "review",
+  "configuration": "candidate-3.4.0",
+  "agentVersion": "3.4.0",
+  "sop": {
+    "version": "3.4.0",
+    "hash": "b0845055f7a7dc03"
+  },
+  "observerLabelWas": "old-R01-D1",
+  "labelCorrection": "Startup syncImageProducerCapabilities upgraded the installed curated package; actual snapshot is authoritative.",
+  "finalAssistantMessage": {
+    "id": "msg_expert_task-mtpllbgi-sw9ph_mtpllfe9_assistant",
+    "role": "assistant",
+    "text": "已用 gpt-image-2 对原图完成一次参考编辑并交付：杯身银色金属外表面改为哑光黑，顶部杯盖保持原来的银色金属外观与反光，未改黑；单杯数量、左侧位置与画面占比、墨绿背景、右侧留白、柔和棚拍光照以及无文字/Logo/水印均与原图一致，构图未重画。实际输出尺寸为 896×1200 px（PNG），与你请求的基图尺寸一致，无裁切或拉伸。\n\n需要说明的一处细节：底部基座环随杯身一并变成了哑光黑（这是它与杯身同属\"杯体金属面\"的自然联动），而接缝结构、形状和位置都保留——如果你希望底部基座也维持银色，请告诉我，我再单独处理。",
+    "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9",
+    "createdAt": "2026-09-06T09:17:41.888Z",
+    "trace": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "成果生成完成，等待验收",
+        "status": "done"
+      },
+      {
+        "id": "tool_call_a9da9dbaefa44358b9d1b0cb",
+        "kind": "tool",
+        "title": "调用工具：list_paint_models",
+        "status": "done",
+        "summary": "操作已完成",
+        "toolCallId": "call_a9da9dbaefa44358b9d1b0cb",
+        "toolName": "list_paint_models",
+        "durationMs": 246
+      },
+      {
+        "id": "tool_call_979a6cc2667a4e08b024dc5f",
+        "kind": "tool",
+        "title": "调用工具：generate_image",
+        "status": "done",
+        "summary": "操作已完成",
+        "toolCallId": "call_979a6cc2667a4e08b024dc5f",
+        "toolName": "generate_image",
+        "durationMs": 24256
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done"
+      }
+    ],
+    "protocolVersion": 2,
+    "answerHash": "ada021c8912e86f0"
+  },
+  "artifacts": [
+    {
+      "id": "image_2d1985d4d81a980f",
+      "type": "image",
+      "title": "生成图片 1",
+      "body": "![生成图片 1](D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpllbgi-sw9ph_mtpllfe9\\generated-01-2d1985d4d81a980f.png)",
+      "status": "draft",
+      "targetPath": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpllbgi-sw9ph_mtpllfe9\\generated-01-2d1985d4d81a980f.png",
+      "meta": {
+        "image": {
+          "protocol": "knowme.image-metadata/v1",
+          "source": "decoded-file",
+          "width": 896,
+          "height": 1200,
+          "frames": 1,
+          "mimeType": "image/png",
+          "byteLength": 1149455,
+          "sha256": "2d1985d4d81a980ff194332d5155e771b1223ae5c758731810f41dd300ccc3cb"
+        },
+        "taskId": "task-mtpllbgi-sw9ph",
+        "deliverableId": "generated-image",
+        "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9"
+      }
+    }
+  ],
+  "executionEvidence": [
+    {
+      "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9",
+      "deliverableId": "generated-image",
+      "gateStatus": "verified",
+      "verificationPassed": true,
+      "verificationDiagnostics": {
+        "version": 1,
+        "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9",
+        "taskId": "task-mtpllbgi-sw9ph",
+        "candidateHash": "ada021c8912e86f02aa598a84e1ab9ac5e0e23ea9720ca13918d267203655f80",
+        "candidateChars": 263,
+        "materialSnapshotHash": "42c399300af81edde499fe39fed4e3b29e8f2bd38fd6b360dec5ebbef20b0b52",
+        "materialCount": 1,
+        "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+        "fieldChecks": [],
+        "fieldCheckCount": 0
+      },
+      "toolCalls": [
+        {
+          "id": "call_a9da9dbaefa44358b9d1b0cb",
+          "name": "list_paint_models",
+          "status": "ok",
+          "resultRef": "",
+          "error": "",
+          "durationMs": 246
+        },
+        {
+          "id": "call_979a6cc2667a4e08b024dc5f",
+          "name": "generate_image",
+          "status": "ok",
+          "resultRef": "",
+          "error": "",
+          "durationMs": 24256
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_1788686261872_377dcc",
+          "status": "ok",
+          "digest": "[ { \"model\": \"gemini-3.1-flash-image\", \"name\": \"Nano Banana 2\", \"protocol\": \"nano_banana_chat\", \"sort\": 8, \"supports_text2img\": true, \"supports_img2img\": true }, { \"model\": \"gpt-image-2\", \"name\": \"GPT-image-2\", \"protocol\": \"openai_image_gen…",
+          "provenance": {
+            "tool": "list_paint_models",
+            "callId": "call_a9da9dbaefa44358b9d1b0cb"
+          }
+        },
+        {
+          "id": "ev_1788686261873_d5684b",
+          "status": "ok",
+          "digest": "已生成 1 张图片，预览已附在成果区。 实际图片 image_2d1985d4d81a980f：896 × 1200 px，image/png，1 帧，1149455 字节。 尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。 服务返回说明（未核验，不能覆盖上述文件事实）： 已生成 1 张图片（图生图(ref=1), task_id=307052, model=gpt-image-2, n=1, aspect_ratio=3:4, size=896x1200…",
+          "provenance": {
+            "tool": "generate_image",
+            "callId": "call_979a6cc2667a4e08b024dc5f"
+          }
+        }
+      ],
+      "violations": [],
+      "createdAt": "2026-09-06T09:17:42.005Z"
+    }
+  ],
+  "attention": null,
+  "textFileSerialization": "Exact assistant.text plus one terminal LF (file convention only).",
+  "baseReference": {
+    "artifactId": "image_6c8124d9d8735d9b",
+    "taskId": "task-mtphk5gg-jinbr",
+    "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+    "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+    "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+    "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+    "width": 896,
+    "height": 1200,
+    "mimeType": "image/jpeg",
+    "source": "evidence/rqa24-baseline-discovery-v1.json → v1Session.run.artifacts[image_6c8124d9d8735d9b]；冻结时重新计算原图hash一致。"
+  },
+  "limitations": "非盲、可见配置标签、非随机顺序运行；每题每配置 n=1。比较旧整包 3.2.0 与候选整包 3.4.0，不是纯 Skill 因果对照。平台 review/verificationPassed 不等于专业合格；无稳定性或生产资格结论。"
+}

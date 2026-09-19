@@ -7,9 +7,24 @@ import type { ConnectorRecord, ConnectorStatus, FeishuPermissionPlan } from '../
 export const DEFAULT_FEISHU_ALLOWLIST = [
   'feishu.search_docs',
   'feishu.read_doc',
+  'feishu.query_bitable',
   'feishu.list_wiki_spaces',
   'feishu.list_wiki_nodes',
   'feishu.get_wiki_node',
+  'feishu.meeting_candidates',
+  'feishu.meeting_read',
+  'feishu.related_chats',
+  'feishu.today_priority',
+  'feishu.doc_kb_suggest',
+  'feishu.draft_write_doc',
+  'feishu.draft_minute_permission',
+  'feishu.draft_send_message',
+  'feishu.draft_create_task',
+  'feishu.draft_update_doc',
+  'feishu.draft_calendar_event',
+  'feishu.draft_drive_upload',
+  'feishu.draft_wiki_node',
+  'feishu.draft_bitable_record',
 ]
 
 const DOC_KB_CATEGORY_IDS = new Set(['drive', 'docs', 'wiki'])
@@ -57,6 +72,11 @@ export function feishuUserReady(payload?: ConnectorStatus | null) {
   const status = unwrapFeishuStatus(payload)
   const state = String(status.state || '').toLowerCase()
   if (state === 'auth_required') return false
+  // lark-cli may report the connector as connected while its user token is
+  // stale. Keep the CLI auth CTA available instead of showing a disabled
+  // "已连接" button.
+  const message = String(status.message || '').toLowerCase()
+  if (/(needs?\s+refresh|refresh.*user|user.*refresh|需要刷新|刷新.*用户|用户.*刷新)/i.test(message)) return false
   if (status.userReady === false) return false
   if (status.connected === true || status.userReady === true) return true
   return state === 'online' || state === 'ready' || state === 'connected'
@@ -116,7 +136,7 @@ export function feishuPermissionPlan(payload?: ConnectorStatus | null): FeishuPe
 
 /**
  * 飞书设置卡片唯一决策入口：组件只渲染，不复制就绪分支。
- * 未就绪主路径统一「一键授权」；全就绪主按钮禁用「已连接」。
+ * 未就绪主路径统一「授权飞书 CLI」；全就绪主按钮禁用「已连接」。
  */
 export function buildFeishuCardModel(
   payload?: ConnectorStatus | null,
@@ -146,7 +166,7 @@ export function buildFeishuCardModel(
   if (opts?.polling) {
     return {
       statusText: `${ready ? '已连接' : (status.message || '未连接')}（等待授权…）`,
-      primaryLabel: '一键授权',
+      primaryLabel: '授权飞书 CLI',
       primaryDisabled: true,
       primaryMode: 'full-auth',
       needsConfirm: false,
@@ -158,7 +178,7 @@ export function buildFeishuCardModel(
   if (!payload) {
     return {
       statusText: '正在读取连接状态…',
-      primaryLabel: '一键授权',
+      primaryLabel: '授权飞书 CLI',
       primaryDisabled: true,
       primaryMode: 'full-auth',
       needsConfirm: false,
@@ -173,7 +193,7 @@ export function buildFeishuCardModel(
       statusText: coreMissing.length
         ? `飞书账号已连接，但文档/知识库仍缺少：${coreMissing.join('、')}。`
         : '飞书账号已连接，但文档/知识库权限仍未完全获得。',
-      primaryLabel: '一键授权',
+      primaryLabel: '授权飞书 CLI',
       primaryDisabled: false,
       primaryMode: 'full-auth',
       needsConfirm: true,
@@ -207,8 +227,8 @@ export function buildFeishuCardModel(
 
   if (enabled && !ready) {
     return {
-      statusText: status.message || '已启用，等待完成账号授权。',
-      primaryLabel: '一键授权',
+      statusText: status.message || '已启用，等待完成飞书 CLI 用户授权。',
+      primaryLabel: '授权飞书 CLI',
       primaryDisabled: false,
       primaryMode: 'full-auth',
       needsConfirm: true,
@@ -219,7 +239,7 @@ export function buildFeishuCardModel(
 
   return {
     statusText: '未连接，点击一次即可完成连接与授权。',
-    primaryLabel: '一键授权',
+    primaryLabel: '授权飞书 CLI',
     primaryDisabled: false,
     primaryMode: 'full-auth',
     needsConfirm: true,

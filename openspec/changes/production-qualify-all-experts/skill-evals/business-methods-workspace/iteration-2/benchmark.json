@@ -1,0 +1,89 @@
+{
+  "metadata": {
+    "skill_name": "business-methods / 必需方法+calculate明确授权",
+    "timestamp": "2026-09-06",
+    "evals_run": [
+      1,
+      4
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 1,
+      "eval_name": "channel-mix",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      }
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "randomized-positive",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      }
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "channel-mix",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 3,
+        "failed": 2,
+        "total": 5,
+        "pass_rate": 0.6
+      }
+    },
+    {
+      "eval_id": 4,
+      "eval_name": "randomized-positive",
+      "configuration": "old_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "pass_rate": 0.8
+      }
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.8,
+        "stddev": 0,
+        "min": 0.8,
+        "max": 0.8
+      }
+    },
+    "old_skill": {
+      "pass_rate": {
+        "mean": 0.7,
+        "stddev": 0.1414213562373095,
+        "min": 0.6,
+        "max": 0.8
+      }
+    },
+    "delta": {
+      "pass_rate": "+10pp"
+    }
+  },
+  "notes": [
+    "全部候选输出仍有专业硬伤，专业资格未通过。断言通过率不是专家资格分。",
+    "两道匹配案例：old_skill复用iteration-1的新方法但calculate未授权的历史输出，不是同期重跑或无Skill；with_skill是2.2.1明确授权后的真实Qwen3.8Flash结果。存在随机差异，不能单独归因方法或工具。",
+    "均为每配置每题单次，标准差描述不同题目间差异，不代表重复运行稳定性。",
+    "独立新留出题unequal-volume-holdout为4/5，有情景预算/注册推算错误；只有候选，无匹配baseline，故不纳入此汇总。原文和评分仍在Outputs中。",
+    "未获得完整可比耗时、tokens或成本，全部省略，不能解释为0。计算回执的表达式和业务假设也须审核。"
+  ]
+}

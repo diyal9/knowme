@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "id": "action-extraction",
+  "kind": "skill",
+  "name": "行动提取与责任核验",
+  "version": "1.2.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

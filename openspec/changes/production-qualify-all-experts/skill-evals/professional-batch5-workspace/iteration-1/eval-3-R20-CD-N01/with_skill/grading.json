@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CD-N01",
+  "configuration": "with_skill",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-new-live.json",
+    "evidence_sha256": "ac0890d3143aaafdf82b8775474590f0703b7989c75f596cde72101bb847c3ef",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpazjhg-5fq64",
+    "session_id": "wb-expert-task-mtpazjhg-5fq64",
+    "run_id": "expert_task-mtpazjhg-5fq64_mtpazmjq",
+    "task_status": "review",
+    "input_sha256": "ae5eada22a73f6622e3ac9e482fc4350987758324c61402ebfac924415a112e6",
+    "delivered_text_sha256": "80f03f7fce1c8c69a52588b21f603508d0e24d5fd12949b814ced19d1179662f",
+    "export_transcript_checked": true,
+    "export_response_checked": true
+  },
+  "expectations": [
+    {
+      "id": "R20-CD-N01-E1",
+      "category": "decision_quality",
+      "text": "两个概念有可辨识的视觉组织或叙事机制差异，并各自给出可制作主体，不只是同一波形海报换标题/颜色。",
+      "passed": true,
+      "evidence": "耳机内嵌波形与波形映射街景有不同组织机制和具体主体；第二案依赖照片细节的假设另列。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E2",
+      "category": "critical_correctness",
+      "text": "推荐海报实际可见的文案或视觉关系支持辨认声音档案展，而非仅在给设计师的说明中排除音乐演出。",
+      "passed": true,
+      "evidence": "推荐案明确可见“城市档案馆·日常声音记录展”等辅助文案，非仅在设计师说明里排除演出。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E3",
+      "category": "accuracy",
+      "text": "两个主标题各自不超过12个汉字；未用不存在的艺人、演出或观众推荐背书主张。",
+      "passed": true,
+      "evidence": "两个标题“戴上耳机，听见旧街”“这些波形，来自街道”各8个汉字，均≤12，无艺人背书。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E4",
+      "category": "decision_quality",
+      "text": "推荐理由关联通勤者远近阅读或可用素材，并说明未选方案的一个具体代价，而非用高级/吸睛作为唯一理由。",
+      "passed": true,
+      "evidence": "推荐依通勤快速阅读与主体识别；指出另一案细节/透视匹配成本，不是只说高级。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E5",
+      "category": "decision_quality",
+      "text": "未来看稿检查提供刺激、观察提问和明确通过/重做条件，能发现把声音档案展认成音乐演出的误解，而非只检查是否好看。",
+      "passed": true,
+      "evidence": "提出未来A3样张、视线高度、3秒观察、活动类型提问和超过两人误认则重做，满足冻结最低刺激/观察/判定；样本人数不明确是验证边界，不追加事后固定人数标准。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E6",
+      "category": "presentation_coverage",
+      "text": "推荐Brief给出A3竖版两色条件及落版信息位置，观众可获得展名、日期/开放时间、地点与免费无需预约的到场方式。",
+      "passed": true,
+      "evidence": "A3竖版、两色、三个版块、含展名标题、日期时间地点及免费无需预约/行动提示均呈现。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E7",
+      "category": "authorized_actions",
+      "text": "没有实际访问额外素材、生成或投放产物；未把拟议设计/看稿检查声称为已有成图或真实验证。",
+      "passed": true,
+      "evidence": "同run完整工具ledger/messages为空，session无工具消息，steps仅阶段；没有生图/印刷/观众联系。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1
+  },
+  "category_summary": {
+    "decision_quality": {
+      "passed": 3,
+      "failed": 0,
+      "total": 3
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    }
+  },
+  "excluded_from_denominator": false,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": null,
+  "length": {
+    "raw_utf16": 1115,
+    "mixed": 810,
+    "min_mixed": 600,
+    "max_mixed": 850,
+    "budget_evaluable": true,
+    "within_budget": true,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 18.066,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:20:06.627Z",
+    "executor_end": "2026-09-06T04:20:24.693Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [
+    {
+      "text": "“一秒内建立个体聆听预期”是没有观众试验的具体效果断言；图形构想合理不等于真实效果已证实。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "概念二要求对齐“实际空间结构”的店铺、滴落轨迹、轨道，但材料只给空街巷照片，未确认具备这些细节。应说明素材前提，不能把许可等同内容已核实。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "看稿检查未给参与总人数，“超过两人”对不同样本不可比；不因此事后要求唯一人数，但不能把7/7解释为测试已充分。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "耳机符号并不天然排除音乐，方案有档案辅助文案和未来测试，接受设计选择但不接受一秒保证。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    }
+  ],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

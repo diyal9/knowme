@@ -3,7 +3,7 @@
   "id": "feishu-meeting-summary",
   "kind": "skill",
   "name": "会议总结",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "dependencies": [{ "id": "feishu", "kind": "connector", "required": true }],
   "permissions": { "tools": ["feishu.meeting_candidates", "feishu.meeting_read"] },
   "metadata": {
@@ -23,7 +23,7 @@
             "connector": "feishu",
             "message": "要做会议总结，我得先连上飞书读取你的会议记录。请到「设置 → 连接器」授权飞书（user 身份）后，再点一次「会议总结」。"
           },
-          "requiredTools": ["feishu.meeting_candidates", "feishu.meeting_read"],
+          "requiredTools": ["feishu.meeting_candidates"],
           "templateVars": { "days": 3 }
         }]
       }

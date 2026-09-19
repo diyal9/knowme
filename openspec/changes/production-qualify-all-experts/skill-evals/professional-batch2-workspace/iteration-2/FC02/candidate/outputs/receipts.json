@@ -1,0 +1,56 @@
+{
+  "id": "wb-expert-task-mtormm2u-5pyut",
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "review",
+    "toolsUsed": [],
+    "steps": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.329Z"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.329Z"
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.329Z"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.329Z"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtormm2u-5pyut_mtormme0_output-1",
+        "type": "answer",
+        "title": "核查结果与修正文",
+        "body": "**核查结果（基准日2026-05-12）**\n\n1. 截止日为6月30日：**错误**。v2（5月8日发布、5月10日生效）明确替代v1第4条，现行截止日为7月15日。旧版已被替代，不构成来源冲突。\n2. 每位参与者可得：**错误**。C第3条限定\"符合审核条件者\"，非人人必得。\n3. 100元现金：**错误**。C第3条为面值100美元不可提现优惠券，须满300美元使用，且明示不是现金奖励；不得换算汇率。\n\n**修正文**：申请截止日为7月15日（据主办方5月8日修订公告v2，自5月10日生效并替代v1第4条）。符合审核条件者可获得面值100美元的不可提现优惠券，须消费满300美元使用；该奖励不是现金。\n\n（注：A/B/C均为虚构材料，结论仅适用于所提供原文。）",
+        "status": "draft",
+        "meta": {
+          "taskId": "task-mtormm2u-5pyut",
+          "deliverableId": "output-1",
+          "runId": "expert_task-mtormm2u-5pyut_mtormme0"
+        }
+      }
+    ],
+    "applyLog": []
+  },
+  "tools": [],
+  "configuration": "candidate"
+}

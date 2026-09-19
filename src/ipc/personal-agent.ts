@@ -11,6 +11,7 @@ function registerPersonalAgentIpc(ipcMain, deps) {
     DATA_DIR,
     MEMORY_DIR,
     productMemory,
+    brainService,
     loadSettings,
     getAgentProfileStore,
     ensureCapabilityHub,
@@ -24,8 +25,10 @@ function registerPersonalAgentIpc(ipcMain, deps) {
       service = createPersonalAgentService({
         profileStore: getAgentProfileStore(),
         productMemory,
+        brainService,
         memoryDir: MEMORY_DIR,
         auditFile: path.join(DATA_DIR, 'personal-agent-growth.json'),
+        userData: DATA_DIR,
         loadSettings,
       })
     }

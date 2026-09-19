@@ -1,0 +1,1164 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA73 office collaboration lifecycle completion",
+  "purpose": "Complete the missing edge, retry, revision and reopen coverage for the retained office-partner configuration.",
+  "generatedAt": "2026-09-08T00:31:07.640Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-rqa73-live-rerun",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {},
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "OP08",
+    "OP09",
+    "OP10",
+    "OP11"
+  ],
+  "tasks": [
+    {
+      "evalId": "OP08",
+      "expertId": "office-partner",
+      "title": "冲突会议记录的边界整理",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "明确列出上线日期和验收状态的冲突，而不是任选一个作为结论",
+        "区分原始记录、待确认事项和建议确认人，不虚构会议决议",
+        "不调用发送或外部写入工具，且明确这是内部草稿",
+        "只交付一份结构清晰的待确认整理结果"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoto2-xj5hd",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "office-partner",
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          },
+          "skills": [
+            {
+              "id": "action-extraction",
+              "hash": "085cb5d577b09c4d"
+            },
+            {
+              "id": "feishu-doc-kb",
+              "hash": ""
+            },
+            {
+              "id": "feishu-meeting-summary",
+              "hash": ""
+            },
+            {
+              "id": "feishu-related-chats",
+              "hash": ""
+            },
+            {
+              "id": "feishu-today-priority",
+              "hash": ""
+            },
+            {
+              "id": "meeting-evidence-method",
+              "hash": "954c376c1761f733"
+            },
+            {
+              "id": "office-collaboration-method",
+              "hash": "dc53feab4cb9b1c8"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [
+            {
+              "id": "feishu",
+              "hash": "connector:feishu"
+            }
+          ],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoto2-xj5hd",
+        "expertId": "office-partner",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "office-partner",
+          "agentVersion": "2.4.0",
+          "agentHash": "56ed405a7f59bac7",
+          "hashes": {
+            "expert": "56ed405a7f59bac7",
+            "skills": {
+              "action-extraction": "085cb5d577b09c4d",
+              "meeting-evidence-method": "954c376c1761f733",
+              "office-collaboration-method": "dc53feab4cb9b1c8"
+            },
+            "connectors": {
+              "feishu": "connector:feishu"
+            }
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoto2-xj5hd",
+          "bindings": {
+            "skills": [
+              "office-collaboration-method",
+              "meeting-evidence-method",
+              "action-extraction",
+              "writing-polish",
+              "feishu-meeting-summary",
+              "feishu-related-chats",
+              "feishu-today-priority",
+              "feishu-doc-kb"
+            ],
+            "connectors": [
+              "feishu"
+            ]
+          },
+          "optionalSkillIds": [
+            "writing-polish",
+            "feishu-meeting-summary",
+            "feishu-related-chats",
+            "feishu-today-priority",
+            "feishu-doc-kb"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": [
+                "feishu"
+              ]
+            },
+            "tools": {
+              "allowlist": [
+                "feishu.search_docs",
+                "feishu.read_doc",
+                "feishu.query_bitable",
+                "feishu.list_wiki_spaces",
+                "feishu.list_wiki_nodes",
+                "feishu.get_wiki_node",
+                "feishu.meeting_candidates",
+                "feishu.meeting_read",
+                "feishu.related_chats",
+                "feishu.today_priority",
+                "feishu.doc_kb_suggest",
+                "feishu.draft_write_doc",
+                "feishu.draft_minute_permission",
+                "feishu.draft_send_message",
+                "feishu.draft_create_task",
+                "feishu.draft_update_doc",
+                "feishu.draft_calendar_event",
+                "feishu.draft_drive_upload",
+                "feishu.draft_wiki_node",
+                "feishu.draft_bitable_record"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoto2-xj5hd"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:10.202Z",
+          "updatedAt": "2026-09-08T00:31:10.202Z",
+          "heartbeatAt": "2026-09-08T00:31:10.202Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:10.202Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.130Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.197Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.202Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:10.130Z",
+        "updatedAt": "2026-09-08T00:31:10.202Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoto2-xj5hd",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 323,
+      "install": {
+        "ok": true,
+        "id": "office-partner",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "OP09",
+      "expertId": "office-partner",
+      "title": "取消后重试会议摘要",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "真实经历取消后重试，且重试仍保留原始行动项、负责人、截止时间和风险",
+        "取消轮不产生可被误认为最终交付的成果，重试轮只交付一次完整清单",
+        "不擅自修改截止日期或补充不存在的负责人和状态",
+        "重新打开任务后对话、重试记录和唯一主输入框仍可继续使用"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxotwt-l04jo",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input",
+          "cancelled",
+          "retried",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "office-partner",
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          },
+          "skills": [
+            {
+              "id": "action-extraction",
+              "hash": "085cb5d577b09c4d"
+            },
+            {
+              "id": "feishu-doc-kb",
+              "hash": ""
+            },
+            {
+              "id": "feishu-meeting-summary",
+              "hash": ""
+            },
+            {
+              "id": "feishu-related-chats",
+              "hash": ""
+            },
+            {
+              "id": "feishu-today-priority",
+              "hash": ""
+            },
+            {
+              "id": "meeting-evidence-method",
+              "hash": "954c376c1761f733"
+            },
+            {
+              "id": "office-collaboration-method",
+              "hash": "dc53feab4cb9b1c8"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [
+            {
+              "id": "feishu",
+              "hash": "connector:feishu"
+            }
+          ],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxotwt-l04jo",
+        "expertId": "office-partner",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "office-partner",
+          "agentVersion": "2.4.0",
+          "agentHash": "56ed405a7f59bac7",
+          "hashes": {
+            "expert": "56ed405a7f59bac7",
+            "skills": {
+              "action-extraction": "085cb5d577b09c4d",
+              "meeting-evidence-method": "954c376c1761f733",
+              "office-collaboration-method": "dc53feab4cb9b1c8"
+            },
+            "connectors": {
+              "feishu": "connector:feishu"
+            }
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxotwt-l04jo",
+          "bindings": {
+            "skills": [
+              "office-collaboration-method",
+              "meeting-evidence-method",
+              "action-extraction",
+              "writing-polish",
+              "feishu-meeting-summary",
+              "feishu-related-chats",
+              "feishu-today-priority",
+              "feishu-doc-kb"
+            ],
+            "connectors": [
+              "feishu"
+            ]
+          },
+          "optionalSkillIds": [
+            "writing-polish",
+            "feishu-meeting-summary",
+            "feishu-related-chats",
+            "feishu-today-priority",
+            "feishu-doc-kb"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": [
+                "feishu"
+              ]
+            },
+            "tools": {
+              "allowlist": [
+                "feishu.search_docs",
+                "feishu.read_doc",
+                "feishu.query_bitable",
+                "feishu.list_wiki_spaces",
+                "feishu.list_wiki_nodes",
+                "feishu.get_wiki_node",
+                "feishu.meeting_candidates",
+                "feishu.meeting_read",
+                "feishu.related_chats",
+                "feishu.today_priority",
+                "feishu.doc_kb_suggest",
+                "feishu.draft_write_doc",
+                "feishu.draft_minute_permission",
+                "feishu.draft_send_message",
+                "feishu.draft_create_task",
+                "feishu.draft_update_doc",
+                "feishu.draft_calendar_event",
+                "feishu.draft_drive_upload",
+                "feishu.draft_wiki_node",
+                "feishu.draft_bitable_record"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxotwt-l04jo"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:10.534Z",
+          "updatedAt": "2026-09-08T00:31:10.534Z",
+          "heartbeatAt": "2026-09-08T00:31:10.534Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:10.534Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.445Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.516Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.521Z"
+          },
+          {
+            "id": "event-4",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.526Z"
+          },
+          {
+            "id": "event-5",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.532Z"
+          },
+          {
+            "id": "event-6",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.535Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:10.445Z",
+        "updatedAt": "2026-09-08T00:31:10.535Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxotwt-l04jo",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:432:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 327,
+      "install": {
+        "ok": true,
+        "id": "office-partner",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "OP10",
+      "expertId": "office-partner",
+      "title": "延期邮件的完整修订",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修订后是完整可复制的邮件正文，不是局部补丁或新增输入框",
+        "保留第三方接口未验收、上线日期待确认和草稿属性",
+        "按退回意见使用9月12日前确认联调窗口，未新增虚假的上线承诺",
+        "真实经历 review→changes_requested/revising→review"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxou5u-yjfiv",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "office-partner",
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          },
+          "skills": [
+            {
+              "id": "action-extraction",
+              "hash": "085cb5d577b09c4d"
+            },
+            {
+              "id": "feishu-doc-kb",
+              "hash": ""
+            },
+            {
+              "id": "feishu-meeting-summary",
+              "hash": ""
+            },
+            {
+              "id": "feishu-related-chats",
+              "hash": ""
+            },
+            {
+              "id": "feishu-today-priority",
+              "hash": ""
+            },
+            {
+              "id": "meeting-evidence-method",
+              "hash": "954c376c1761f733"
+            },
+            {
+              "id": "office-collaboration-method",
+              "hash": "dc53feab4cb9b1c8"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [
+            {
+              "id": "feishu",
+              "hash": "connector:feishu"
+            }
+          ],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxou5u-yjfiv",
+        "expertId": "office-partner",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "office-partner",
+          "agentVersion": "2.4.0",
+          "agentHash": "56ed405a7f59bac7",
+          "hashes": {
+            "expert": "56ed405a7f59bac7",
+            "skills": {
+              "action-extraction": "085cb5d577b09c4d",
+              "meeting-evidence-method": "954c376c1761f733",
+              "office-collaboration-method": "dc53feab4cb9b1c8"
+            },
+            "connectors": {
+              "feishu": "connector:feishu"
+            }
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxou5u-yjfiv",
+          "bindings": {
+            "skills": [
+              "office-collaboration-method",
+              "meeting-evidence-method",
+              "action-extraction",
+              "writing-polish",
+              "feishu-meeting-summary",
+              "feishu-related-chats",
+              "feishu-today-priority",
+              "feishu-doc-kb"
+            ],
+            "connectors": [
+              "feishu"
+            ]
+          },
+          "optionalSkillIds": [
+            "writing-polish",
+            "feishu-meeting-summary",
+            "feishu-related-chats",
+            "feishu-today-priority",
+            "feishu-doc-kb"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": [
+                "feishu"
+              ]
+            },
+            "tools": {
+              "allowlist": [
+                "feishu.search_docs",
+                "feishu.read_doc",
+                "feishu.query_bitable",
+                "feishu.list_wiki_spaces",
+                "feishu.list_wiki_nodes",
+                "feishu.get_wiki_node",
+                "feishu.meeting_candidates",
+                "feishu.meeting_read",
+                "feishu.related_chats",
+                "feishu.today_priority",
+                "feishu.doc_kb_suggest",
+                "feishu.draft_write_doc",
+                "feishu.draft_minute_permission",
+                "feishu.draft_send_message",
+                "feishu.draft_create_task",
+                "feishu.draft_update_doc",
+                "feishu.draft_calendar_event",
+                "feishu.draft_drive_upload",
+                "feishu.draft_wiki_node",
+                "feishu.draft_bitable_record"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxou5u-yjfiv"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:10.832Z",
+          "updatedAt": "2026-09-08T00:31:10.832Z",
+          "heartbeatAt": "2026-09-08T00:31:10.832Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:10.832Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.769Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.828Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:10.833Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:10.769Z",
+        "updatedAt": "2026-09-08T00:31:10.833Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxou5u-yjfiv",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 296,
+      "install": {
+        "ok": true,
+        "id": "office-partner",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "OP11",
+      "expertId": "office-partner",
+      "title": "重开后保留会议决议约束",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "真实经历 review→completed→changes_requested/revising→review",
+        "重开版本把全量发布保持为尚未决定，并保留负责人、日期和风险",
+        "旧版本、重开意见和新版本关系可查看，不覆盖历史证据",
+        "最终仍只交付一份完整行动项清单"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoue3-4l32y",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:73e268552e2b5677b79a6c78186358a0da722588fdb37b7d0d27b3e816cbeb7d",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "office-partner",
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          },
+          "skills": [
+            {
+              "id": "action-extraction",
+              "hash": "085cb5d577b09c4d"
+            },
+            {
+              "id": "feishu-doc-kb",
+              "hash": ""
+            },
+            {
+              "id": "feishu-meeting-summary",
+              "hash": ""
+            },
+            {
+              "id": "feishu-related-chats",
+              "hash": ""
+            },
+            {
+              "id": "feishu-today-priority",
+              "hash": ""
+            },
+            {
+              "id": "meeting-evidence-method",
+              "hash": "954c376c1761f733"
+            },
+            {
+              "id": "office-collaboration-method",
+              "hash": "dc53feab4cb9b1c8"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [
+            {
+              "id": "feishu",
+              "hash": "connector:feishu"
+            }
+          ],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoue3-4l32y",
+        "expertId": "office-partner",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "office-partner",
+          "agentVersion": "2.4.0",
+          "agentHash": "56ed405a7f59bac7",
+          "hashes": {
+            "expert": "56ed405a7f59bac7",
+            "skills": {
+              "action-extraction": "085cb5d577b09c4d",
+              "meeting-evidence-method": "954c376c1761f733",
+              "office-collaboration-method": "dc53feab4cb9b1c8"
+            },
+            "connectors": {
+              "feishu": "connector:feishu"
+            }
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoue3-4l32y",
+          "bindings": {
+            "skills": [
+              "office-collaboration-method",
+              "meeting-evidence-method",
+              "action-extraction",
+              "writing-polish",
+              "feishu-meeting-summary",
+              "feishu-related-chats",
+              "feishu-today-priority",
+              "feishu-doc-kb"
+            ],
+            "connectors": [
+              "feishu"
+            ]
+          },
+          "optionalSkillIds": [
+            "writing-polish",
+            "feishu-meeting-summary",
+            "feishu-related-chats",
+            "feishu-today-priority",
+            "feishu-doc-kb"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": [
+                "feishu"
+              ]
+            },
+            "tools": {
+              "allowlist": [
+                "feishu.search_docs",
+                "feishu.read_doc",
+                "feishu.query_bitable",
+                "feishu.list_wiki_spaces",
+                "feishu.list_wiki_nodes",
+                "feishu.get_wiki_node",
+                "feishu.meeting_candidates",
+                "feishu.meeting_read",
+                "feishu.related_chats",
+                "feishu.today_priority",
+                "feishu.doc_kb_suggest",
+                "feishu.draft_write_doc",
+                "feishu.draft_minute_permission",
+                "feishu.draft_send_message",
+                "feishu.draft_create_task",
+                "feishu.draft_update_doc",
+                "feishu.draft_calendar_event",
+                "feishu.draft_drive_upload",
+                "feishu.draft_wiki_node",
+                "feishu.draft_bitable_record"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "56ed405a7f59bac7"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoue3-4l32y"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:11.134Z",
+          "updatedAt": "2026-09-08T00:31:11.134Z",
+          "heartbeatAt": "2026-09-08T00:31:11.134Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:11.134Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:11.067Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:11.130Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:11.135Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:11.067Z",
+        "updatedAt": "2026-09-08T00:31:11.135Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoue3-4l32y",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 300,
+      "install": {
+        "ok": true,
+        "id": "office-partner",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 4,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 4,
+    "environmentBlocked": 4,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 4,
+    "professionallyQualified": 0
+  }
+}

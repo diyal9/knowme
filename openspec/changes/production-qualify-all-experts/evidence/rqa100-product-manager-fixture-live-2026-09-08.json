@@ -1,0 +1,2192 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA62",
+  "purpose": "Determine whether the current product-manager configuration deserves expert status through professional correctness and full task lifecycle evidence.",
+  "generatedAt": "2026-09-08T07:54:25.144Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-text-product-manager-rqa100-20260908",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "fixture-text-model",
+      "label": "fixture-text-model",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "PM01",
+    "PM02",
+    "PM03",
+    "PM04",
+    "PM05",
+    "PM06"
+  ],
+  "tasks": [
+    {
+      "evalId": "PM01",
+      "expertId": "product-manager",
+      "title": "访客申请与失败恢复 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "直接交付包含背景问题、目标、范围、非目标、角色场景、流程、规则、异常、验收、风险待确认的完整 PRD。",
+        "没有把缺失的转化率或时长基线编造成事实，成功指标明确标记基线或目标值待确认。",
+        "申请、待审批、已批准、已生效或可使用、已使用、已取消、已过期等状态及允许动作前后一致。",
+        "网络超时、重复提交、审批失败、取消冲突与重试恢复说明数据保存、幂等结果和用户下一步。",
+        "验收标准使用可复现的前置状态、动作和可观察结果，覆盖正常、异常与恢复路径。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdiw95-317nm",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdiw95-317nm",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdiw95-317nm",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdiw95-317nm"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:27.455Z",
+          "updatedAt": "2026-09-08T07:54:27.628Z",
+          "heartbeatAt": "2026-09-08T07:54:27.628Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:27.628Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.401Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.450Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.455Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.469Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.469Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.469Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.474Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:27.629Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdiw95-317nm_mtsdiwb2",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:27.628Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:27.401Z",
+        "updatedAt": "2026-09-08T07:54:28.298Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdiw95-317nm",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和到访时间；前台审批后生成仅在到访当天有效的二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；暂时没有转化率或办理时长基线。不要发明技术架构或数据结论。\n\n当前时间：2026-09-08T07:54:27.470Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和到访时间；前台审批后生成仅在到访当天有效的二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；暂时没有转化率或办理时长基线。不要发明技术架构或数据结论。\n\n本轮交付物：访客申请与失败恢复 PRD（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdiw95-317nm_mtsdiwb2",
+            "createdAt": "2026-09-08T07:54:27.476Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和到访时间；前台审批后生成仅在到访当天有效的二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；暂时没有转化率或办理时长基线。不要发明技术架构或数据结论。\n\n当前时间：2026-09-08T07:54:27.470Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和到访时间；前台审批后生成仅在到访当天有效的二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；暂时没有转化率或办理时长基线。不要发明技术架构或数据结论。\n\n本轮交付物：访客申请与失败恢复 PRD（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 1088,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM02",
+      "expertId": "product-manager",
+      "title": "团队席位与成员生命周期 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "清楚区分已知事实、假设和待确认项，不编造活跃率基线、目标值或文档归属决策。",
+        "管理员与成员权限，以及 invited、active、expired、removed 等成员状态和席位占用规则闭环。",
+        "并发邀请、重复邀请、席位满、邀请过期、移除与重新邀请的优先级和恢复行为可判断。",
+        "历史文档保留、原作者显示、访问撤销与待定归属规则互不矛盾，并指出隐私或审计风险。",
+        "WHEN/THEN 验收覆盖正常邀请、并发去重、满额失败保留、过期、移除和重开恢复。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdix35-qgrxp",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdix35-qgrxp",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdix35-qgrxp",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdix35-qgrxp"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:28.523Z",
+          "updatedAt": "2026-09-08T07:54:28.646Z",
+          "heartbeatAt": "2026-09-08T07:54:28.646Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:28.646Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.481Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.520Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.524Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.537Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.537Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.537Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.538Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:28.647Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdix35-qgrxp_mtsdix4p",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:28.646Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:28.481Z",
+        "updatedAt": "2026-09-08T07:54:29.168Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdix35-qgrxp",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知事实：仅团队管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱的并发邀请不能重复占用席位；席位满时邀请失败但已填写内容保留；移除成员后立即失去团队访问权，但其历史文档仍保留并显示原作者；目前没有活跃率基线，也未决定文档后续归属人。不要自行补技术实现。\n\n当前时间：2026-09-08T07:54:28.537Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知事实：仅团队管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱的并发邀请不能重复占用席位；席位满时邀请失败但已填写内容保留；移除成员后立即失去团队访问权，但其历史文档仍保留并显示原作者；目前没有活跃率基线，也未决定文档后续归属人。不要自行补技术实现。\n\n本轮交付物：团队席位与成员生命周期 PRD（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdix35-qgrxp_mtsdix4p",
+            "createdAt": "2026-09-08T07:54:28.540Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知事实：仅团队管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱的并发邀请不能重复占用席位；席位满时邀请失败但已填写内容保留；移除成员后立即失去团队访问权，但其历史文档仍保留并显示原作者；目前没有活跃率基线，也未决定文档后续归属人。不要自行补技术实现。\n\n当前时间：2026-09-08T07:54:28.537Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知事实：仅团队管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱的并发邀请不能重复占用席位；席位满时邀请失败但已填写内容保留；移除成员后立即失去团队访问权，但其历史文档仍保留并显示原作者；目前没有活跃率基线，也未决定文档后续归属人。不要自行补技术实现。\n\n本轮交付物：团队席位与成员生命周期 PRD（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 867,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM03",
+      "expertId": "product-manager",
+      "title": "冲突导出规则的产品决策边界",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "明确指出法务与销售承诺冲突，未擅自选择一方或写成最终规则。",
+        "仍交付不依赖冲突决策的目标、范围、角色、计数口径、隐私约束和可评审流程框架。",
+        "把审批规则列为会改变流程与验收的阻塞决策，并提出一个清楚、可直接回答的问题或决策表。",
+        "免费版每日 10 次与企业版不限的口径包含用户、工作区、时区、成功或尝试计数等必要待确认项，不编造默认值。",
+        "验收仅覆盖已确定规则；依赖冲突决策的验收明确标记待确认，不伪称可开发。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdixta-tr8i5",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdixta-tr8i5",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdixta-tr8i5",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdixta-tr8i5"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:29.468Z",
+          "updatedAt": "2026-09-08T07:54:29.601Z",
+          "heartbeatAt": "2026-09-08T07:54:29.601Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:29.601Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.422Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.465Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.469Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.483Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.483Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.483Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.484Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:29.601Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdixta-tr8i5_mtsdixuz",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:29.601Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:29.422Z",
+        "updatedAt": "2026-09-08T07:54:30.119Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdixta-tr8i5",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理整理数据导出需求，可在对话中交付已确定部分并明确阻塞决策，不生成文件、不调用工具。已知：免费版每天最多导出 10 次；企业版次数不限；法务要求所有导出都必须经理审批；销售承诺企业版导出无需审批；导出内容包含个人邮箱；产品负责人尚未决定冲突规则。不得替负责人选择，也不得把任一口径写成最终规则。\n\n当前时间：2026-09-08T07:54:29.483Z\n\n材料：\n- 冻结认证题\n请作为产品经理整理数据导出需求，可在对话中交付已确定部分并明确阻塞决策，不生成文件、不调用工具。已知：免费版每天最多导出 10 次；企业版次数不限；法务要求所有导出都必须经理审批；销售承诺企业版导出无需审批；导出内容包含个人邮箱；产品负责人尚未决定冲突规则。不得替负责人选择，也不得把任一口径写成最终规则。\n\n本轮交付物：冲突导出规则的产品决策边界（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdixta-tr8i5_mtsdixuz",
+            "createdAt": "2026-09-08T07:54:29.486Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理整理数据导出需求，可在对话中交付已确定部分并明确阻塞决策，不生成文件、不调用工具。已知：免费版每天最多导出 10 次；企业版次数不限；法务要求所有导出都必须经理审批；销售承诺企业版导出无需审批；导出内容包含个人邮箱；产品负责人尚未决定冲突规则。不得替负责人选择，也不得把任一口径写成最终规则。\n\n当前时间：2026-09-08T07:54:29.483Z\n\n材料：\n- 冻结认证题\n请作为产品经理整理数据导出需求，可在对话中交付已确定部分并明确阻塞决策，不生成文件、不调用工具。已知：免费版每天最多导出 10 次；企业版次数不限；法务要求所有导出都必须经理审批；销售承诺企业版导出无需审批；导出内容包含个人邮箱；产品负责人尚未决定冲突规则。不得替负责人选择，也不得把任一口径写成最终规则。\n\n本轮交付物：冲突导出规则的产品决策边界（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 948,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM04",
+      "expertId": "product-manager",
+      "title": "通知排期任务取消后重试",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "重试后仍使用原任务目标和材料，交付完整 PRD，而不是只回复已恢复或要求重新补充。",
+        "草稿、待提交、已排期、发送中、已完成、已取消和未知结果等状态及允许动作一致。",
+        "重复提交与超时未知结果采用可观察的幂等和查询恢复语义，不鼓励盲目重试。",
+        "正文与受众条件的保存、取消边界、发送开始竞态和失败后的用户下一步明确。",
+        "未编造送达率基线；验收覆盖取消、重复提交、超时查询、恢复重试和重开。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdiyhg-4y8ez",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "cancelled": true,
+          "retried": true
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "cancelled",
+          "retried",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdiyhg-4y8ez",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdiyhg-4y8ez",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdiyhg-4y8ez"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:30.466Z",
+          "updatedAt": "2026-09-08T07:54:30.591Z",
+          "heartbeatAt": "2026-09-08T07:54:30.591Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:30.591Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.292Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.336Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.341Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.355Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.355Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.355Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.357Z"
+          },
+          {
+            "id": "event-8",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.452Z"
+          },
+          {
+            "id": "event-9",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.463Z"
+          },
+          {
+            "id": "event-10",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.466Z"
+          },
+          {
+            "id": "event-11",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.481Z"
+          },
+          {
+            "id": "event-12",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.481Z"
+          },
+          {
+            "id": "event-13",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 13,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.481Z"
+          },
+          {
+            "id": "event-14",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 14,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.483Z"
+          },
+          {
+            "id": "event-15",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 15,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:30.592Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdiyhg-4y8ez_mtsdiymq",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:30.591Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:30.292Z",
+        "updatedAt": "2026-09-08T07:54:31.111Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdiyhg-4y8ez",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n当前时间：2026-09-08T07:54:30.356Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n本轮交付物：通知排期任务取消后重试（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdiyhg-4y8ez_mtsdiyj8",
+            "createdAt": "2026-09-08T07:54:30.358Z"
+          },
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n当前时间：2026-09-08T07:54:30.482Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n本轮交付物：通知排期任务取消后重试（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdiyhg-4y8ez_mtsdiymq",
+            "createdAt": "2026-09-08T07:54:30.484Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n当前时间：2026-09-08T07:54:30.356Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n本轮交付物：通知排期任务取消后重试（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。\n\nuser: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n当前时间：2026-09-08T07:54:30.482Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付批量通知排期 PRD，不生成文件、不调用工具。已知：运营可选择受众并预约发送时间；同一排期重复点击提交只能创建一条任务；发送前可取消；发送开始后不可取消；服务超时后用户必须能确认任务究竟创建成功还是失败，再决定重试；通知正文和受众条件都要保留。没有送达率基线。\n\n本轮交付物：通知排期任务取消后重试（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:504:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 991,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM05",
+      "expertId": "product-manager",
+      "title": "修改访客二维码有效期",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修改轮交付完整替换版，并保留网络超时幂等、取消规则和其他未受影响内容。",
+        "所有自然日有效旧规则已替换为到访前 30 分钟至后 2 小时，正文不存在冲突口径。",
+        "一次延长 1 小时仅由前台执行且仅限未核销访客，说明重复延长、临界时刻和并发操作。",
+        "状态、过期计算、取消与核销竞态、异常恢复及验收标准同步更新。",
+        "生命周期真实经历 review、changes_requested/revising、review，v2 保留 previousVersionId 和用户意见。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdiz9n-44hlu",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "changesRequested": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdiz9n-44hlu",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdiz9n-44hlu",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdiz9n-44hlu"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:31.358Z",
+          "updatedAt": "2026-09-08T07:54:31.483Z",
+          "heartbeatAt": "2026-09-08T07:54:31.483Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:31.483Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.307Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.353Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.358Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.373Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.373Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.373Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.374Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:31.484Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdiz9n-44hlu_mtsdizbh",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:31.483Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:31.307Z",
+        "updatedAt": "2026-09-08T07:54:31.997Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdiz9n-44hlu",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。\n\n当前时间：2026-09-08T07:54:31.373Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。\n\n本轮交付物：修改访客二维码有效期（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdiz9n-44hlu_mtsdizbh",
+            "createdAt": "2026-09-08T07:54:31.376Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。\n\n当前时间：2026-09-08T07:54:31.373Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付一份可评审的访客申请功能 PRD，不生成文件、不调用工具。已知事实：员工填写访客姓名和预约到访时间；前台审批后生成到访当天有效二维码；网络超时不得重复创建申请；员工可取消尚未使用的申请；没有办理时长基线。不要发明技术实现。\n\n本轮交付物：修改访客二维码有效期（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 883,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM06",
+      "expertId": "product-manager",
+      "title": "完成后重开席位需求",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开后的完整新版保留并发邀请、席位满保留输入、邀请过期、移除和原作者规则。",
+        "新增 active member 到 guest 的降级状态变化，立即释放席位且不造成重复占用或越权。",
+        "访客只能查看明确分享文档，访问收缩、缓存或在途访问、撤销和重开后的表现可验收。",
+        "待定文档归属仍保持待确认，没有因新增访客角色被静默决定。",
+        "生命周期真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdizxl-ym9mg",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "accepted": false,
+          "reopened": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdizxl-ym9mg",
+        "expertId": "product-manager",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdizxl-ym9mg",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdizxl-ym9mg"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:32.212Z",
+          "updatedAt": "2026-09-08T07:54:32.335Z",
+          "heartbeatAt": "2026-09-08T07:54:32.335Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:32.335Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.169Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.208Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.213Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.227Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.227Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：定义产品问题、范围、规则、异常与可复现验收标准。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.227Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.229Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:32.336Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdizxl-ym9mg_mtsdizz8",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:d56b2cb7f02bf3beb9a3960c1c0e78be209ee5498ed8943a21546b24e755a796",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "product-manager",
+                "version": "2.5.0",
+                "hash": "6752df8e902a4cdf"
+              },
+              "skills": [
+                {
+                  "id": "product-definition-method",
+                  "hash": "f9a6522c96c781c5"
+                },
+                {
+                  "id": "requirement-review",
+                  "hash": "4c726e9160088005"
+                },
+                {
+                  "id": "research-evidence-analysis",
+                  "hash": "9cc475f0aa02c91f"
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:32.335Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:32.169Z",
+        "updatedAt": "2026-09-08T07:54:32.843Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdizxl-ym9mg",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知：仅管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱并发邀请不重复占席位；席位满时保留输入；移除后立即失去团队访问权，但历史文档保留并显示原作者；文档后续归属人待定。不要自行补技术实现。\n\n当前时间：2026-09-08T07:54:32.228Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知：仅管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱并发邀请不重复占席位；席位满时保留输入；移除后立即失去团队访问权，但历史文档保留并显示原作者；文档后续归属人待定。不要自行补技术实现。\n\n本轮交付物：完成后重开席位需求（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdizxl-ym9mg_mtsdizz8",
+            "createdAt": "2026-09-08T07:54:32.231Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理，可按任务意图切换产品定义、用户研究和需求评审模式。只执行当前模式并使用对应专业方法。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n用户明确给定的规则优先于模板与实现便利；不得擅自缩窄规则、发明指标、时区、唯一键、接口字段或技术架构。\n状态表不是必填装饰：只记录题面已有或实现规则所必需且可观察的状态，不得套用“草稿、待提交”等模板状态。范围外或尚未定义的信号只能列为依赖或待确认，不能驱动一个声称已闭环的状态。\n网络超时和重复提交只定义用户可观察的“不重复创建、可查询最终结果”语义；除非材料已确定，不得写死客户端标识、数据库落库或接口重放等实现。\n状态、权限、异常和恢复必须闭环，每条已确定规则及异常都要能追踪到可复现的验收标准。\n每条验收的 THEN 必须是唯一可判定结果；条件不同的“或者”分支拆成独立用例，角色与动作名称必须和流程、状态表保持一致。\n产品需求文档必须是完整正文，不得只回复“是否接受成果”或只给修改说明；缺少信息的章节保留并标记“待确认”。\n\n【必须遵循的 SOP】\n1. 先判断任务属于产品定义、用户研究还是需求评审；只加载该模式的专业方法，不把三个角色同时表演一遍。\n2. 产品定义模式还原目标用户、场景、证据与业务目标，闭合范围、规则、异常和可复现验收标准。\n3. 用户研究模式核对样本、材料和证据身份，区分观察、解释、洞察与待验证假设，保留反例和限制。\n4. 需求评审模式核对事实来源、范围冲突、规则完整性和验收可观察性，不补造 UI、接口或技术机制。\n5. 任何模式都先处理关键缺口；修改轮交付完整替换版，保持术语、数字、状态和结论前后一致。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知：仅管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱并发邀请不重复占席位；席位满时保留输入；移除后立即失去团队访问权，但历史文档保留并显示原作者；文档后续归属人待定。不要自行补技术实现。\n\n当前时间：2026-09-08T07:54:32.228Z\n\n材料：\n- 冻结认证题\n请作为产品经理，直接在对话中交付团队订阅席位管理 PRD，不生成文件、不调用工具。已知：仅管理员可邀请或移除成员；邀请 24 小时过期；同一邮箱并发邀请不重复占席位；席位满时保留输入；移除后立即失去团队访问权，但历史文档保留并显示原作者；文档后续归属人待定。不要自行补技术实现。\n\n本轮交付物：完成后重开席位需求（answer）\n\n文档必须包含以下章节（缺少事实的地方写“待确认”，不要省略章节）：\n- 背景与问题\n- 目标\n- 范围\n- 非目标\n- 用户场景\n- 核心流程\n- 业务规则\n- 异常场景\n- 验收标准\n- 风险与待确认事项\n\n本轮 SOP 路由：product-definition。定义产品问题、范围、规则、异常与可复现验收标准。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 847,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 0,
+    "lifecycleFailed": 6,
+    "runtimeFailed": 6,
+    "runtimeNeedsInput": 0,
+    "environmentBlocked": 0,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 6,
+    "professionallyQualified": 0
+  }
+}

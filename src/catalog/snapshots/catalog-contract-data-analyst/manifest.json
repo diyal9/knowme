@@ -1,0 +1,298 @@
+{
+  "sessionId": "catalog-contract-data-analyst",
+  "expertId": "data-analyst",
+  "frozenAt": "2026-09-19T14:44:03.056Z",
+  "persona": {
+    "name": "数据分析师",
+    "description": "以数据分析、商业洞察和数据报告三种模式交付可复核的分析与决策依据",
+    "avatar": "game/engineer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "data-analysis-method",
+      "business-metrics-analysis",
+      "business-cause-analysis",
+      "business-insight-report",
+      "data-report-method",
+      "writing-polish"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "data-analyst",
+    "kind": "expert",
+    "name": "数据分析师",
+    "description": "以数据分析、商业洞察和数据报告三种模式交付可复核的分析与决策依据",
+    "version": "2.3.0",
+    "dependencies": [
+      {
+        "id": "data-analysis-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-metrics-analysis",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-cause-analysis",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-insight-report",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "data-report-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": [
+          "calculate"
+        ]
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "明确的业务问题与时间范围"
+      },
+      {
+        "name": "数据文件、字段说明与已知口径"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "数据质量检查、分析或报告正文"
+      },
+      {
+        "name": "带证据强度、限制和建议的结论"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/data-analyst"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "qualityReview": {
+            "enabled": true,
+            "criteria": [
+              "逐项复核分析单位、筛选集合、分子、分母、合计、单位、时间窗和舍入；所有新增数字必须能回到材料或明确算式。",
+              "核对全文中的摘要、表格、注释、比较、条件分支和建议使用同一组结果与方向；局部计算正确不能掩盖后文数字或阈值矛盾。",
+              "严格区分缺失、未知、冲突、合法零值和不适用；不得自动补零、任取冲突值，或把子集结果冒充总体结论。",
+              "区分算术分解、相关观察、竞争解释、条件推导和因果结论；建议的确定程度必须与证据强度一致，并保留会改变判断的反例或验证条件。"
+            ]
+          },
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "数据质量检查与分析过程",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "mergeInto": "output-1",
+              "title": "带证据、限制和建议的结论",
+              "type": "answer",
+              "required": true
+            }
+          ],
+          "routes": [
+            {
+              "id": "data-report",
+              "description": "把已验证的分析结果组织为管理摘要、正文、来源、限制和行动项。",
+              "keywords": [
+                "数据报告",
+                "分析报告",
+                "经营报告",
+                "管理摘要",
+                "周度数据",
+                "月度数据",
+                "图文一致",
+                "报告正文"
+              ],
+              "toolAllowlist": [],
+              "requiredSkills": [
+                "data-report-method"
+              ],
+              "qualityReview": {
+                "enabled": true,
+                "criteria": [
+                  "逐项核对管理摘要和正文中的数字、单位、分母、百分点与相对变化、时间范围和样本范围；不得改写或补造未经验证的数据。",
+                  "会改变判断的口径变化、样本偏差、不确定性和数据缺口必须在摘要首次出现相关结论时保留，不能只藏在附录。",
+                  "图、表、标题结论和正文必须引用同一来源与口径；图表不可读取时只说明核对缺口，不臆测趋势、颜色或数据点。",
+                  "复核全文结论、证据、影响、行动和字数前后一致；行动建议不得越过已验证结果或把待执行分析写成已完成。"
+                ]
+              },
+              "label": "分析报告"
+            },
+            {
+              "id": "business-insight",
+              "description": "从经营指标变化识别异常、候选驱动因素和可验证的决策机会。",
+              "keywords": [
+                "商业洞察",
+                "经营分析",
+                "经营复盘",
+                "指标异常",
+                "归因分析",
+                "驱动因素",
+                "增长机会",
+                "业务机会"
+              ],
+              "toolAllowlist": [
+                "calculate"
+              ],
+              "requiredSkills": [
+                "business-metrics-analysis",
+                "business-cause-analysis",
+                "business-insight-report"
+              ],
+              "qualityReview": {
+                "enabled": true,
+                "criteria": [
+                  "逐项复算关键指标的分子、分母、单位、时间窗、去重对象和分群合计；正文数字必须与本轮 calculate 回执或完整手算式一致。",
+                  "区分材料事实、算术分解、相关关系和因果判断；每个关键原因保留竞争性解释、反证与证据强度，不能因组内改善或未见反证就排除损害。",
+                  "建议必须标明适用范围、成本与权限、可逆性、验证指标和停止条件；新增阈值、观察窗口、灰度比例或负责人只能写成有依据的建议。",
+                  "复核全文摘要、表格、情景估算和行动建议的数字与结论一致并服从字数；额外情景不能引入未给预算、利润、流量或容量假设。"
+                ]
+              },
+              "label": "经营洞察"
+            },
+            {
+              "id": "data-analysis-method",
+              "description": "检查数据口径、质量、计算和推理边界，交付可复算分析。",
+              "default": true,
+              "toolAllowlist": [
+                "calculate"
+              ],
+              "requiredSkills": [
+                "data-analysis-method"
+              ],
+              "label": "数据分析"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "729cc3dd38dd04d2",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "data-analysis-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-metrics-analysis",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-cause-analysis",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-insight-report",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "data-report-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false,
+        "status": "ready"
+      }
+    ],
+    "issues": [],
+    "routes": [
+      {
+        "id": "data-report",
+        "label": "分析报告",
+        "state": "ready",
+        "requiredSkills": [
+          "data-report-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "business-insight",
+        "label": "经营洞察",
+        "state": "ready",
+        "requiredSkills": [
+          "business-metrics-analysis",
+          "business-cause-analysis",
+          "business-insight-report"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "data-analysis-method",
+        "label": "数据分析",
+        "state": "ready",
+        "requiredSkills": [
+          "data-analysis-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      }
+    ]
+  }
+}

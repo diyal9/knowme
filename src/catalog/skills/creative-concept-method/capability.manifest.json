@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "creative-concept-method",
+  "kind": "skill",
+  "name": "创意机制与媒介验证",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

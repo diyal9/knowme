@@ -1,0 +1,143 @@
+{
+  "expectations": [
+    {
+      "text": "A仅5月1日原型完成，不把原型当正式上线，结论锚定当日而不是断言当前仍未上线。",
+      "passed": true,
+      "evidence": "第1项将5月1日仅原型完成与正式上线拆开，明确来源A团队日志第1行；修正文没有断言截至5月12日仍未上线。“官方公告为准”可理解为核验建议，不单独作为虚假事实或扣分依据。"
+    },
+    {
+      "text": "精确引语只有客户代表“这个演示挺方便”，不改称CEO或行业最佳。",
+      "passed": false,
+      "evidence": "虽精确引用B第6行“这个演示挺方便”并保持客户代表，仍单独将“客户CEO说”判“错误”，以没有CEO信息支持“归属与内容均不符”。缺身份信息只能令CEO身份无法确认，不能证明该人不是CEO。文本内容扩大与身份未知需要分别判断。"
+    },
+    {
+      "text": "无法读取C不能支持也不能证明效率50%数值为假，分类无证据/无法确认。",
+      "passed": true,
+      "evidence": "第3项明确C正文未读到、标题不是数据支持，“缺证据不等于反证，故不归入错误”，50%判无法确认。"
+    },
+    {
+      "text": "效率必然提高的因果保证缺证据，不能从方便引语推出效果。",
+      "passed": true,
+      "evidence": "第4项明确演示好评不能推出效率提升，更无“必然”的证据；拒绝该推论不是声称绝不可能提高。"
+    },
+    {
+      "text": "300字以内可替换修正文保留来源时点/原话/不确定性，无联网读取或凭空技术事实。",
+      "passed": false,
+      "evidence": "修正文断言“使用效果尚在评估中”，但A/B/C均未提供正在评估的状态，C仅为不可读取的文件名；这一确切新增事实足以使本项失败。“正式上线日期以官方公告为准”可以作为建议，不单独认定虚假事实或用作扣分依据。虽保留5月1日原型及原话中的“挺方便”，仍未满足无新增事实要求。长度288（含标点362）跨300，不以Markdown417字符判超长；没有外部工具回执。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "claims": [
+    {
+      "claim": "客户CEO说——错误；归属与内容均不符",
+      "type": "factual",
+      "verified": false,
+      "evidence": "B证明给定引语为客户代表说“这个演示挺方便”，但没有CEO信息不证明其不是CEO；归属应无法确认，不能与文本内容不符并作确定否定。"
+    },
+    {
+      "claim": "使用效果尚在评估中",
+      "type": "factual",
+      "verified": false,
+      "evidence": "C仅不可读文件名，A/B均不提供评估进度；未知不是正在评估。"
+    },
+    {
+      "claim": "“正式上线日期以官方公告为准”可按建议理解",
+      "type": "quality",
+      "verified": true,
+      "evidence": "这可以是建议后续核验官方消息的表述，不等于声称某份官方公告已存在或已读取。本评分不单独把它作为虚假事实硬伤；硬失败依据是虚构正在评估的状态，以及将CEO身份未知判为错误。"
+    },
+    {
+      "claim": "方便评价不能证明必然提高50%",
+      "type": "factual",
+      "verified": true,
+      "evidence": "B只是对演示的方便评价，C没有可读效果数据，没有因果或幅度证据。"
+    },
+    {
+      "claim": "所提供回执中未见外部读取或知识库/文件写入工具动作",
+      "type": "process",
+      "verified": true,
+      "evidence": "receipts tools=[]、run.toolsUsed=[]、applyLog=[]，成果类型answer。仅限提交记录；平台“输出验证通过”不是专业认证。"
+    }
+  ],
+  "professional_review": {
+    "verdict": "not_qualified",
+    "hard_fail": true,
+    "hard_failures": [
+      "把缺失CEO身份信息用于确定否定归属。",
+      "独立修正文将未知效果状态虚构为“使用效果尚在评估中”。"
+    ],
+    "contract_failures": [
+      "独立修正文的来源范围/时间/不确定性未保真。"
+    ],
+    "qualified_boundary": "5月1日原型与上线分开、50%缺证据和因果保证拒绝合格；身份举证边界和独立修正文仍不合格。",
+    "production_certification": false
+  },
+  "length_check": {
+    "method": "去除Markdown表分隔行/竖线/强调/标题/引用/列表标记；CJK逐字 + 连续[A-Za-z0-9]+词块；另加Unicode标点数。仅heuristic，非官方中文字数或token。",
+    "cjk_chars": 266,
+    "alnum_blocks": 22,
+    "cjk_plus_alnum_blocks": 288,
+    "with_punctuation": 362,
+    "raw_markdown_chars": 417,
+    "limit": 300,
+    "used_raw_markdown_length_as_chinese_limit": false
+  },
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "evidence_limits": {
+    "user_notes_present": false,
+    "executor_metrics_present": false,
+    "timing_present": false,
+    "note": "无独立metrics/timing文件，不伪填耗时或token；长度为评分者本地计数。"
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言不变；未来将CEO身份未知与引语文本错误显式分开，并独立核查修正文状态/来源范围/发布计划，避免只查主表。"
+      },
+      {
+        "reason": "未来预先冻结中文长度口径。当前CJK+alnum与含标点指标跨阈值，不将原始Markdown长度作为中文超字数证据。"
+      }
+    ],
+    "overall": "三种冻结反例各两配置，六输出不是六独立反例。历史baseline不是同时重跑，版本和方法装配不同，不能独立归因Skill；单次通过也不构成生产认证。"
+  },
+  "provenance": {
+    "scope": "仅提交的虚构材料；未调用外部API、未改源码/冻结输入/原始evidence JSON。证据按主代理在用户评估任务范围内授权的task ID重绑定，正文/回执SHA原样保留。",
+    "configuration": "candidate",
+    "task_id": "wb-expert-task-mtormme5-n19ca",
+    "answer_sha256": "632EDA8D93BE3A189FE4B83B82A64A835247532E9BA8D5F6F9332C6059E0548B",
+    "receipts_sha256": "CA6AF968F6A58817003587EF55FF4EC107978640C9E239B811EF34EC534476E6",
+    "transcript_sha256": "8321E63DE41161A748E2BACC57D9FC331A07DDA77251D39A1882EECAB5C64FE8",
+    "eval_metadata_sha256": "79E96B66D1480E1E1E73B820F41A271B680A3CDB5AA6DC4F16483BDC7F89B9A1",
+    "historical_baseline": false,
+    "binding_audit": "../../binding-repair-audit-2026-09-06.json",
+    "binding_verified": {
+      "configuration": "FC03/candidate",
+      "task_id": "wb-expert-task-mtormme5-n19ca",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  }
+}

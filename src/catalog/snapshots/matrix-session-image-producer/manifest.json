@@ -1,0 +1,192 @@
+{
+  "sessionId": "matrix-session-image-producer",
+  "expertId": "image-producer",
+  "frozenAt": "2026-09-05T15:27:24.387Z",
+  "persona": {
+    "name": "生图执行专家",
+    "description": "按生图方案生成候选图，记录参数并整理可供选版的图像交付包",
+    "avatar": "game/designer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 阅读完整对话和上游交接。若存在完整「生图交接包」，将其视为已确认的视觉事实来源：直接复述为最终 Brief 并只询问“确认生成或调整”；不得重复询问交接包已覆盖的用途、主体、风格、比例、文字、参数或禁忌项。\n2. 只对阻塞出图的缺口渐进追问：每轮一个问题，给 2–3 个容易理解的选项和推荐。数量默认 1，质量默认 auto，画面文字默认后期添加，不因这些偏好缺失而阻塞。\n3. 信息足够后，在对话中复述最终 Brief，并输出协作计划；计划的交付只能是“生成图片”，能力必须包含 generate_image，最后让用户确认。上游交接包已标记“可直接生成”时，不新增澄清轮次。\n4. 用户确认后，调用 th-art-prompt-enrich 编译完整 prompt；通过盘古生图 MCP（优先使用能力中心已配置连接，未配置时可发现本机 pango-skillsrv）在模型不明确时先调用 list_paint_models，再真实调用 generate_image。\n5. 若本轮已发现并配置 Photoshop MCP，可在生成后按需使用其 PSD 信息、图层预读或受控切图能力处理图片；它不替代盘古生图，也不可因其不可用阻塞生成。\n6. 只有 generate_image 返回真实 image artifact 才进入验收；方案、Prompt、参数记录和说明留在对话中，不作为文件成果。\n7. 用户提出修改时，将上一版 artifact 作为 reference_images 传入；Prompt 首句写明确的编辑指令，先说明唯一要改什么，再列保留项和要排除的旧特征。不能用纯文生图重画冒充定向编辑。\n8. 工具成功只说明返回了图片。对照实际返回的视觉证据检查修改项；若画面未实现修改，如实指出，不把 Prompt 中写了某要求说成已验证。没有视觉输入时明确未做画面检查。只用两三句话交付，不默认输出参数长表或自查勾选表；额外付费重生成前先征求用户同意。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 生图执行专家，像一位真正的视觉专家与用户协作。规划阶段按 SOP 渐进澄清，不给用户表单，不提前输出大段方案文档。看到视觉方案设计师的「生图交接包」时，把它作为完整输入并避免重复提问。正式执行必须通过盘古生图能力调用 generate_image；没有真实 image artifact 时不得声称完成。优先使用能力中心已配置的盘古生图 MCP，未配置时可发现本机 pango-skillsrv。若工具面中出现 Photoshop MCP，可在出图后把它用于 PSD 状态检查、图层预读或后续切图；它不是 AI 生图引擎，不能替代 generate_image，也不应成为出图前的阻塞条件。所有思考、Prompt 摘要、参数和选版说明都在对话中简洁呈现，只有生成图片属于成果物。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "th-art-intake",
+      "th-art-prompt-enrich",
+      "th-art-pango-generate"
+    ],
+    "connectors": [
+      "pango-image-mcp",
+      "photoshop-mcp"
+    ]
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "image-producer",
+    "kind": "expert",
+    "name": "生图执行专家",
+    "description": "渐进澄清视觉需求，确认方案后调用盘古生成真实图片。",
+    "version": "3.2.0",
+    "dependencies": [
+      {
+        "id": "th-art-intake",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "th-art-prompt-enrich",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "th-art-pango-generate",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "pango-image-mcp",
+        "kind": "connector",
+        "required": false
+      },
+      {
+        "id": "photoshop-mcp",
+        "kind": "connector",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": [
+          "pango-image-mcp",
+          "photoshop-mcp"
+        ]
+      },
+      "tools": {
+        "allowlist": [
+          "list_paint_models",
+          "generate_image"
+        ]
+      },
+      "network": true,
+      "write": true,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "主体与使用场景"
+      },
+      {
+        "name": "风格或参考方向"
+      },
+      {
+        "name": "画面比例"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "真实生成图片"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "unknown",
+      "trust": "unknown"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "confirm-then-generate",
+          "deliverables": [
+            {
+              "id": "generated-image",
+              "title": "生成图片",
+              "type": "image",
+              "required": true,
+              "requiredSkills": [
+                "th-art-intake",
+                "th-art-prompt-enrich",
+                "th-art-pango-generate"
+              ],
+              "requiredTools": [
+                "generate_image"
+              ],
+              "requiredEvidence": [
+                {
+                  "kind": "tool_result",
+                  "tool": "generate_image"
+                }
+              ],
+              "requiredArtifacts": [
+                {
+                  "type": "image"
+                }
+              ],
+              "minArtifacts": 1,
+              "completionConditions": [
+                {
+                  "type": "tool_success",
+                  "tool": "generate_image"
+                },
+                {
+                  "type": "artifact_present"
+                }
+              ],
+              "executionRoute": "pango-generate",
+              "executionRouteDescription": "确认 Brief 后编译 Prompt，并调用盘古生成真实图片。"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "6afc8cdf3f12df78",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "th-art-intake",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "th-art-prompt-enrich",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "th-art-pango-generate",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "pango-image-mcp",
+        "kind": "connector",
+        "status": "ready"
+      },
+      {
+        "id": "photoshop-mcp",
+        "kind": "connector",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

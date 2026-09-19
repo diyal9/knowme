@@ -111,6 +111,7 @@ if (windowsGpuDisableReason) {
 ctx.__bind_materializeWindowsIcon = require('../lib/app-icon'), ctx.materializeWindowsIcon = ctx.__bind_materializeWindowsIcon.materializeWindowsIcon;
 ctx.productKnowledge = require('../lib/product-knowledge');
 ctx.productMemory = require('../lib/product-memory');
+ctx.brainService = require('../lib/brain-service');
 ctx.__bind_loadRendererEntry = require('./load-renderer'), ctx.loadRendererEntry = ctx.__bind_loadRendererEntry.loadRendererEntry;
 ctx.__bind_applyTrayMenu = require('./tray'), ctx.applyTrayMenu = ctx.__bind_applyTrayMenu.applyTrayMenu;
 ctx.settingsSecure = require('../lib/settings-secure');
@@ -266,6 +267,12 @@ ctx.ensureCapabilityPackRuntime = function ensureCapabilityPackRuntime() {
                 });
             },
         });
+        // Every prompt/task adapter must observe the same userData-backed pack
+        // registry. Module-local runtimes otherwise fall back to the process
+        // working directory and can leak stale development packs into chats.
+        ctx.promptRouter.setPackRuntime(ctx.capabilityPackRuntime);
+        ctx.gameStudio.setPackRuntime(ctx.capabilityPackRuntime);
+        ctx.gameRequirement.setPackRuntime(ctx.capabilityPackRuntime);
         try {
             ctx.capabilityPackRuntime.ensureDefaultPacks();
         }
@@ -326,6 +333,7 @@ ctx.ensureCapabilityHub = function ensureCapabilityHub() {
     return ctx.capabilityHub;
 };
 ctx.sourcesLib = require('../lib/sources');
+ctx.projectsLib = require('../lib/projects');
 ctx.__bind_registerCoreIpc = require('../ipc'), ctx.registerCoreIpc = ctx.__bind_registerCoreIpc.registerCoreIpc;
 ctx.workbenchRepo = require('../lib/workbench-repo');
 ctx.workflowSupply = require('../lib/workflow-supply');

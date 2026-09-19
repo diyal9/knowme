@@ -7,6 +7,7 @@ const {
   formatLlmTimeoutError,
   applyProviderCompat,
   FIRST_BYTE_TIMEOUT_MS,
+  requestAgentCompletion,
 } = require('../src/lib/main-llm-bridge')
 
 describe('main-llm-bridge', () => {
@@ -73,6 +74,36 @@ describe('main-llm-bridge', () => {
     const result = await probeLlmConnection({ apiEndpoint: 'not-a-url', apiKey: 'x' })
     assert.equal(result.ok, false)
     assert.match(result.error, /Endpoint 格式错误/)
+  })
+
+  it('retries one first-byte timeout before surfacing an error', async () => {
+    const http = require('http')
+    let requestCount = 0
+    const server = http.createServer((_req, res) => {
+      requestCount += 1
+      if (requestCount === 1) return
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ choices: [{ message: { content: 'recovered' } }] }))
+    })
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const { port } = server.address()
+    try {
+      const result = await requestAgentCompletion({
+        url: new URL(`http://127.0.0.1:${port}/chat/completions`),
+        settings: { apiKey: 'test-key', llmProvider: 'openai' },
+        body: { model: 'test-model', messages: [], stream: false },
+        firstByteMs: 25,
+        firstByteRetries: 1,
+        idleMs: 1000,
+      })
+      assert.equal(requestCount, 2)
+      assert.equal(result.error, undefined)
+      assert.equal(result.snapshot?.content, 'recovered')
+    } finally {
+      await new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()))
+      })
+    }
   })
 
   it('routes once-shot and workbench-dispatch through the same HTTP client', () => {

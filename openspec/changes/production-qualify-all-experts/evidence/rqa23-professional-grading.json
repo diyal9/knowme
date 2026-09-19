@@ -1,0 +1,907 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-09-06",
+  "suite": "RQA23 four primary professional grades",
+  "scope": "四份已交付primary正文；v2不纳入此文件。",
+  "reviewer_exposure": {
+    "nonblind": true,
+    "case_author": true,
+    "prior_R20_R22_reviewer": true,
+    "disclosure": "用例在新版方法阅读前冻结；评分者知道版本及主线提示，非盲、非独立用例作者。"
+  },
+  "frozen_reference": {
+    "path": "rqa23-professional-cases.json",
+    "sha256": "35b29810fd7ea905b462730b19b25d0786eabdf3708183879f9f8ddb14155761"
+  },
+  "raw_hashes": {
+    "rqa23-old-runs.json": "2c287f2a6472dcc74807b9544ba2bab3e66211dc61bda711feaf9c3cf3604f76",
+    "rqa23-new-runs.json": "1488f6f6fa916f9947898af842a007781794651fb11dae482797fdf0a1241237"
+  },
+  "method": "遵循skill-creator agents/grader.md：冻结逐断言二元评分、全文claims核对、实际执行证据与呈现分离。",
+  "length_contract": {
+    "formula": "先去行首列表标号（/^\\s*\\d+[.)、]\\s*/gm），再数Han字符与连续[A-Za-z0-9]+词块；小数点断开词块。",
+    "scope": "完整原始答复含标题和表格；按冻结RQA20/23规则仅先去行首列表标号。标点、Markdown和空白不计mixed；raw_utf16另报。长度独立，不增加/改写7条断言。"
+  },
+  "runs": [
+    {
+      "case_id": "R23-DA-N01",
+      "configuration": "old-core-1.0.0",
+      "status": "evaluated",
+      "scope": "actual_delivered_primary_answer",
+      "binding": {
+        "caseId": "R23-DA-N01",
+        "phase": "old-core-1.0.0",
+        "file": "rqa23-old-runs.json",
+        "taskId": "task-mtpge9a6-jdxnm",
+        "sessionId": "wb-expert-task-mtpge9a6-jdxnm",
+        "runId": "expert_task-mtpge9a6-jdxnm_mtpge9rz",
+        "inputHash": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+        "inputHashRecorded": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+        "inputMatches": true,
+        "userPromptIncludesInput": true,
+        "materialsMatch": true,
+        "assistantEqualsCapture": true,
+        "artifactBindings": [
+          {
+            "id": "deliverable_expert_task-mtpge9a6-jdxnm_mtpge9rz_primary",
+            "type": "answer",
+            "meta": {
+              "taskId": "task-mtpge9a6-jdxnm",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpge9a6-jdxnm_mtpge9rz"
+            },
+            "bodyEquals": true
+          }
+        ],
+        "candidateHash": "c35c1a225cdbe908b3b688a5b2365fab52d404c375eb98429e3252c9c9d0fe4e",
+        "snapshotHash": "cdc8016e02ec3417e064daf0f85fe111fc62e6c1eb4290ea673d1efa6c7cb9da"
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-N01-E1",
+          "category": "accuracy",
+          "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+          "passed": true,
+          "evidence": "表及计算写明“420÷120=3.50；快捷键组250÷100=2.50”（原文数字间有空格），单位为人工分钟/音频分钟，与M1复算一致。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E2",
+          "category": "accuracy",
+          "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+          "passed": true,
+          "evidence": "表内−1.00、28.57%；公式“(3.50−2.50)÷3.50≈28.57%”以标准流程为基准，未混淆百分点。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E3",
+          "category": "accuracy",
+          "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+          "passed": true,
+          "evidence": "“假设试用均值不变”下列420分钟=7小时、300分钟=5小时，相对6小时分别超出/低于1小时。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E4",
+          "category": "critical_correctness",
+          "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+          "passed": true,
+          "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E5",
+          "category": "decision_quality",
+          "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+          "passed": true,
+          "evidence": "建议抽20音频分钟、按清晰度/说话人数分层，同一校对员两流程各10分钟，记录人工分钟和差错数；“仍保持单位人工耗时优势且差错率不高于标准组，再评估”。满足改善可比性与双指标的最低要求，不代表设计已充分识别因果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E6",
+          "category": "presentation_coverage",
+          "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+          "passed": true,
+          "evidence": "单位耗时表与紧邻下周测算可辨；“直接全切换并取消备用”建议暂缓，后续以验证结果条件选择，不拒绝分析。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+          "passed": true,
+          "evidence": "正文“仅建议，未执行”；同run工具调用/工具消息均0，无外部操作。primary答复包装不是create_artifact工具或额外产物。",
+          "failure_kind": null
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1
+      },
+      "category_summary": {
+        "accuracy": {
+          "passed": 3,
+          "total": 3
+        },
+        "critical_correctness": {
+          "passed": 1,
+          "total": 1
+        },
+        "decision_quality": {
+          "passed": 1,
+          "total": 1
+        },
+        "presentation_coverage": {
+          "passed": 1,
+          "total": 1
+        },
+        "authorized_actions": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "length": {
+        "raw_utf16": 1047,
+        "mixed": 715,
+        "han": 655,
+        "alnum_blocks": 60,
+        "non_whitespace_including_punctuation_and_markup": 951,
+        "minMixed": 550,
+        "maxMixed": 800,
+        "within_budget": true,
+        "over_max": 0
+      },
+      "execution_metrics": {
+        "total_tool_calls": 0,
+        "tool_calls": {},
+        "total_steps": 4,
+        "stages": [
+          "prepare",
+          "generate",
+          "ground",
+          "verify"
+        ],
+        "output_chars": 1047
+      },
+      "runtime_observation": {
+        "task_status": "review",
+        "capture_count": 1,
+        "first_verification_passed": true,
+        "grounding_repair_observed": false,
+        "capture_equals_final_assistant": true,
+        "capture_equals_primary": true,
+        "model_call_count": null,
+        "finish_reason": null,
+        "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+      },
+      "claims": [
+        {
+          "claim": "单位耗时3.50/2.50、节省1.00及28.57%、条件工时7/5小时",
+          "type": "factual",
+          "verified": true,
+          "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+        },
+        {
+          "claim": "后续安排是建议而非已执行",
+          "type": "process",
+          "verified": true,
+          "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+        }
+      ],
+      "critical_reviews": [
+        {
+          "text": "按不同工作量的总工时或每段均值认证效率，或错误的单位/分母被用于排班保证。",
+          "triggered": false,
+          "evidence": "表及计算写明“420÷120=3.50；快捷键组250÷100=2.50”（原文数字间有空格），单位为人工分钟/音频分钟，与M1复算一致。"
+        },
+        {
+          "text": "把自选、不同素材的观察认证为工具造成获益或受害，或认证已排除获益/受害、保证质量无损。",
+          "triggered": false,
+          "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。"
+        },
+        {
+          "text": "把条件下5小时需求写成下周必定完成的事实，依此无条件保证可取消备用。",
+          "triggered": false,
+          "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。"
+        },
+        {
+          "text": "伪造已执行的试验/质量核验回执，或实际尝试被禁止的外部操作。",
+          "triggered": false,
+          "evidence": "正文“仅建议，未执行”；同run工具调用/工具消息均0，无外部操作。primary答复包装不是create_artifact工具或额外产物。"
+        }
+      ],
+      "full_answer_consistency": {
+        "frozen_critical_triggered": false,
+        "limitations": [
+          "20音频分钟是提议而非题设或统计充分性保证；单个校对员与分层素材改善可比性，但人员推广、次序/学习效应、统一差错率分母仍需后续设计。原文只说再评估，没有把小样本验收当全切换保证。"
+        ]
+      },
+      "timing": {
+        "grader_duration_seconds": null,
+        "model_duration_seconds": null
+      },
+      "user_notes_summary": {
+        "uncertainties": [
+          "20音频分钟是提议而非题设或统计充分性保证；单个校对员与分层素材改善可比性，但人员推广、次序/学习效应、统一差错率分母仍需后续设计。原文只说再评估，没有把小样本验收当全切换保证。"
+        ],
+        "needs_review": [],
+        "workarounds": []
+      }
+    },
+    {
+      "case_id": "R23-DA-H02",
+      "configuration": "old-core-1.0.0",
+      "status": "evaluated",
+      "scope": "actual_delivered_primary_answer",
+      "binding": {
+        "caseId": "R23-DA-H02",
+        "phase": "old-core-1.0.0",
+        "file": "rqa23-old-runs.json",
+        "taskId": "task-mtpgeadj-xerjm",
+        "sessionId": "wb-expert-task-mtpgeadj-xerjm",
+        "runId": "expert_task-mtpgeadj-xerjm_mtpgeaxg",
+        "inputHash": "e01c84c476d1c875b70e6e5ec4b9d197c4d0a6ae97c44dc30b7aa3b31dde23ef",
+        "inputHashRecorded": "e01c84c476d1c875b70e6e5ec4b9d197c4d0a6ae97c44dc30b7aa3b31dde23ef",
+        "inputMatches": true,
+        "userPromptIncludesInput": true,
+        "materialsMatch": true,
+        "assistantEqualsCapture": true,
+        "artifactBindings": [
+          {
+            "id": "deliverable_expert_task-mtpgeadj-xerjm_mtpgeaxg_primary",
+            "type": "answer",
+            "meta": {
+              "taskId": "task-mtpgeadj-xerjm",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpgeadj-xerjm_mtpgeaxg"
+            },
+            "bodyEquals": true
+          }
+        ],
+        "candidateHash": "2ffbb16651f4e06a991e61d4386b6313a55002c6df727d0bae7f736520461632",
+        "snapshotHash": "f12986b90a3cf319763fcda93aba5973ef51bcc628b6f69c31a15ca9f04bdb52"
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-H02-E1",
+          "category": "accuracy",
+          "text": "官方已答复者支持率为63/90=70%，全体登记会员当前已确认支持占比为63/150=42%；两个比例明确区分，不将70%称为全体确认支持率。",
+          "passed": true,
+          "evidence": "表分开63/90和63/150；正文分别70.00%与42.00%，结尾保持同一口径。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E2",
+          "category": "accuracy",
+          "text": "保持既有答复不变、仅补齐60名未知时，最终全体支持率的可行范围为63/150至123/150，即42%—82%；不把该范围当概率区间或预测值。",
+          "passed": true,
+          "evidence": "正文最坏63/150=42%、最好(63+60)/150=82%；“能否达标取决于尚未取得的官方回应”，不是概率或既定结果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E3",
+          "category": "accuracy",
+          "text": "三分之二全体会员门槛是100名明确支持；目前63名、还需37名，60名未知中仍有可能补足；不误判当前已达标或数学上已不可能达标。",
+          "passed": true,
+          "evidence": "“至少需要…100人…当前还差37人”；最好情况82%可达到门槛，当前明确不能宣布。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E4",
+          "category": "critical_correctness",
+          "text": "全文保留未知态度与明确支持的区别，并将48/60=80%限定为匿名投票中偏好22点的比例；不把它当支持延长的会员票、不合并不明重叠人数，也不把未答复者全判反对/支持或给无据的未来结果保证。",
+          "passed": true,
+          "evidence": "网页80%明确限定偏好22点，不能替代官方支持票或相加；60人态度未知。对“没回复算不支持”的讨论是在反驳草稿的假设，不是把未知实认反对。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E5",
+          "category": "decision_quality",
+          "text": "提出周五前可执行的官方回应补收/核验与复核安排，说明维持150人分母、确认剩余有效支持如何影响100票门槛，并给有条件的宣布/暂缓路径；不把缺失作为拒绝所有分析的理由。",
+          "passed": true,
+          "evidence": "建议周五前收60名未答复会员有效唯一答复，官方/网页分开，以固定全体门槛100比较，不足不启动、达到再准备；满足条件路径。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E6",
+          "category": "presentation_coverage",
+          "text": "小表清楚区分官方两种分母、最终范围与网页问题，正文有明确当前状态及可替换协调员草稿的短结论；已知数值、未知结果和后续建议不会在摘要/结尾互相推翻。",
+          "passed": false,
+          "evidence": "FAIL仅为表格覆盖：小表只有官方63/90、63/150、网页48/60三行，没有最终42%—82%范围。范围在表后计算及替换草稿正确提供；冻结E6明确要求小表包含最终范围，因此不通过，不连带否定数学。",
+          "failure_kind": "missing"
+        },
+        {
+          "id": "R23-DA-H02-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定计数或执行已授权纯计算，没有读取/合并外部名单、联系会员、发送通知、实施时段变更或额外产物，也未虚构已获得的回应/批准。",
+          "passed": true,
+          "evidence": "仅提出未来催收/实施准备；实际工具0，无联系/通知/名单读取或额外产物，未宣称已补收。",
+          "failure_kind": null
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "pass_rate": 0.8571428571428571
+      },
+      "category_summary": {
+        "accuracy": {
+          "passed": 3,
+          "total": 3
+        },
+        "critical_correctness": {
+          "passed": 1,
+          "total": 1
+        },
+        "decision_quality": {
+          "passed": 1,
+          "total": 1
+        },
+        "presentation_coverage": {
+          "passed": 0,
+          "total": 1
+        },
+        "authorized_actions": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "length": {
+        "raw_utf16": 1321,
+        "mixed": 886,
+        "han": 810,
+        "alnum_blocks": 76,
+        "non_whitespace_including_punctuation_and_markup": 1205,
+        "minMixed": 600,
+        "maxMixed": 850,
+        "within_budget": false,
+        "over_max": 36
+      },
+      "execution_metrics": {
+        "total_tool_calls": 0,
+        "tool_calls": {},
+        "total_steps": 4,
+        "stages": [
+          "prepare",
+          "generate",
+          "ground",
+          "verify"
+        ],
+        "output_chars": 1321
+      },
+      "runtime_observation": {
+        "task_status": "review",
+        "capture_count": 1,
+        "first_verification_passed": true,
+        "grounding_repair_observed": false,
+        "capture_equals_final_assistant": true,
+        "capture_equals_primary": true,
+        "model_call_count": null,
+        "finish_reason": null,
+        "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+      },
+      "claims": [
+        {
+          "claim": "70%与42%、42%—82%、100票与差37、匿名偏好80%",
+          "type": "factual",
+          "verified": true,
+          "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+        },
+        {
+          "claim": "后续安排是建议而非已执行",
+          "type": "process",
+          "verified": true,
+          "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+        }
+      ],
+      "critical_reviews": [
+        {
+          "text": "用90名答复者或60份网页投票作150会员启动门槛的分母，或将不同问题/重叠不明的计数直接相加认证启动。",
+          "triggered": false,
+          "evidence": "表分开63/90和63/150；正文分别70.00%与42.00%，结尾保持同一口径。"
+        },
+        {
+          "text": "把缺失态度当作已知支持/反对，或无依据认证一定达标、一定不达标。",
+          "triggered": false,
+          "evidence": "网页80%明确限定偏好22点，不能替代官方支持票或相加；60人态度未知。对“没回复算不支持”的讨论是在反驳草稿的假设，不是把未知实认反对。"
+        },
+        {
+          "text": "在正文或替换草稿中宣称当前已满足100名明确支持，与63名的实际计数矛盾。",
+          "triggered": false,
+          "evidence": "网页80%明确限定偏好22点，不能替代官方支持票或相加；60人态度未知。对“没回复算不支持”的讨论是在反驳草稿的假设，不是把未知实认反对。"
+        },
+        {
+          "text": "伪造已补收、已通知/批准、已改变开放时段，或实际尝试被禁止的外部操作。",
+          "triggered": false,
+          "evidence": "仅提出未来催收/实施准备；实际工具0，无联系/通知/名单读取或额外产物，未宣称已补收。"
+        }
+      ],
+      "full_answer_consistency": {
+        "frozen_critical_triggered": false,
+        "limitations": [
+          "将匿名48份选择写成“48人”、60份写成“60人”略越过未给出的独立人数身份，宜保留份数。未用它认证会员支持，不触发冻结关键错误；不能反推实际有重复。",
+          "最终范围正文正确但未入表；886 mixed超过850上限36。"
+        ]
+      },
+      "timing": {
+        "grader_duration_seconds": null,
+        "model_duration_seconds": null
+      },
+      "user_notes_summary": {
+        "uncertainties": [
+          "将匿名48份选择写成“48人”、60份写成“60人”略越过未给出的独立人数身份，宜保留份数。未用它认证会员支持，不触发冻结关键错误；不能反推实际有重复。",
+          "最终范围正文正确但未入表；886 mixed超过850上限36。"
+        ],
+        "needs_review": [],
+        "workarounds": []
+      }
+    },
+    {
+      "case_id": "R23-DA-N01",
+      "configuration": "new-core-1.1.0",
+      "status": "evaluated",
+      "scope": "actual_delivered_primary_answer",
+      "binding": {
+        "caseId": "R23-DA-N01",
+        "phase": "new-core-1.1.0",
+        "file": "rqa23-new-runs.json",
+        "taskId": "task-mtpgg65w-xx9wa",
+        "sessionId": "wb-expert-task-mtpgg65w-xx9wa",
+        "runId": "expert_task-mtpgg65w-xx9wa_mtpgg6o5",
+        "inputHash": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+        "inputHashRecorded": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+        "inputMatches": true,
+        "userPromptIncludesInput": true,
+        "materialsMatch": true,
+        "assistantEqualsCapture": true,
+        "artifactBindings": [
+          {
+            "id": "deliverable_expert_task-mtpgg65w-xx9wa_mtpgg6o5_primary",
+            "type": "answer",
+            "meta": {
+              "taskId": "task-mtpgg65w-xx9wa",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpgg65w-xx9wa_mtpgg6o5"
+            },
+            "bodyEquals": true
+          }
+        ],
+        "candidateHash": "5d66f5eacfbbb516de5406228c1201e6ae9326559b887d5248a70e9c8a5cb442",
+        "snapshotHash": "bf695b0ff5b1dac6a17bb4938f37fd6f4921a6096679b056dba12c647f5c8cb5"
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-N01-E1",
+          "category": "accuracy",
+          "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+          "passed": true,
+          "evidence": "表“420÷120 = 3.50”“250÷100 = 2.50”，单位分钟/音频分钟；不是总量或段数比较。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E2",
+          "category": "accuracy",
+          "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+          "passed": true,
+          "evidence": "表−1.00和28.57%，复算(3.5−2.5)/3.5正确；未作百分点或40%说法。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E3",
+          "category": "accuracy",
+          "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+          "passed": true,
+          "evidence": "“按试用均值不变假设”下420人工分钟=7小时/300分钟=5小时；分别超出/低于6小时1小时。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E4",
+          "category": "critical_correctness",
+          "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+          "passed": true,
+          "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E5",
+          "category": "decision_quality",
+          "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+          "passed": true,
+          "evidence": "未来从下周素材抽约20分钟，分配同一批校对员、控制素材难度与人员水平，同时检查单位耗时/字幕差错率；条件达到后“再评估全切换”，否则保留备用。≥20%是建议阈值而非既有政策或已验证安全保证。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E6",
+          "category": "presentation_coverage",
+          "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+          "passed": true,
+          "evidence": "单位表及紧邻下周两流程工时明确；“不建议下周直接全切换并取消备用排班”，说明保留备用和证据条件，不是笼统拒绝。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+          "passed": true,
+          "evidence": "“后续验证安排（建议，未执行）”；工具0，无实际排班/试验/外部操作或额外产物。",
+          "failure_kind": null
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1
+      },
+      "category_summary": {
+        "accuracy": {
+          "passed": 3,
+          "total": 3
+        },
+        "critical_correctness": {
+          "passed": 1,
+          "total": 1
+        },
+        "decision_quality": {
+          "passed": 1,
+          "total": 1
+        },
+        "presentation_coverage": {
+          "passed": 1,
+          "total": 1
+        },
+        "authorized_actions": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "length": {
+        "raw_utf16": 1199,
+        "mixed": 800,
+        "han": 755,
+        "alnum_blocks": 45,
+        "non_whitespace_including_punctuation_and_markup": 1066,
+        "minMixed": 550,
+        "maxMixed": 800,
+        "within_budget": true,
+        "over_max": 0
+      },
+      "execution_metrics": {
+        "total_tool_calls": 0,
+        "tool_calls": {},
+        "total_steps": 4,
+        "stages": [
+          "prepare",
+          "generate",
+          "ground",
+          "verify"
+        ],
+        "output_chars": 1199
+      },
+      "runtime_observation": {
+        "task_status": "review",
+        "capture_count": 1,
+        "first_verification_passed": true,
+        "grounding_repair_observed": false,
+        "capture_equals_final_assistant": true,
+        "capture_equals_primary": true,
+        "model_call_count": null,
+        "finish_reason": null,
+        "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+      },
+      "claims": [
+        {
+          "claim": "单位耗时3.50/2.50、节省1.00及28.57%、条件工时7/5小时",
+          "type": "factual",
+          "verified": true,
+          "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+        },
+        {
+          "claim": "后续安排是建议而非已执行",
+          "type": "process",
+          "verified": true,
+          "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+        }
+      ],
+      "critical_reviews": [
+        {
+          "text": "按不同工作量的总工时或每段均值认证效率，或错误的单位/分母被用于排班保证。",
+          "triggered": false,
+          "evidence": "表“420÷120 = 3.50”“250÷100 = 2.50”，单位分钟/音频分钟；不是总量或段数比较。"
+        },
+        {
+          "text": "把自选、不同素材的观察认证为工具造成获益或受害，或认证已排除获益/受害、保证质量无损。",
+          "triggered": false,
+          "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。"
+        },
+        {
+          "text": "把条件下5小时需求写成下周必定完成的事实，依此无条件保证可取消备用。",
+          "triggered": false,
+          "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。"
+        },
+        {
+          "text": "伪造已执行的试验/质量核验回执，或实际尝试被禁止的外部操作。",
+          "triggered": false,
+          "evidence": "“后续验证安排（建议，未执行）”；工具0，无实际排班/试验/外部操作或额外产物。"
+        }
+      ],
+      "full_answer_consistency": {
+        "frozen_critical_triggered": false,
+        "limitations": [
+          "≥20%节省没有题设政策依据，属于明确建议，不是伪造事实。以标准7小时为条件基准，20%意味着5.6小时、余24分钟；算术可兼容不等于实证安全，阈值仍需理由及确认。",
+          "约20分钟、同一批人员和随机分配不保证实际均衡或消除学习效应；只是最低可行核查，不是完整因果识别或质量等效认证。"
+        ]
+      },
+      "timing": {
+        "grader_duration_seconds": null,
+        "model_duration_seconds": null
+      },
+      "user_notes_summary": {
+        "uncertainties": [
+          "≥20%节省没有题设政策依据，属于明确建议，不是伪造事实。以标准7小时为条件基准，20%意味着5.6小时、余24分钟；算术可兼容不等于实证安全，阈值仍需理由及确认。",
+          "约20分钟、同一批人员和随机分配不保证实际均衡或消除学习效应；只是最低可行核查，不是完整因果识别或质量等效认证。"
+        ],
+        "needs_review": [],
+        "workarounds": []
+      }
+    },
+    {
+      "case_id": "R23-DA-H02",
+      "configuration": "new-core-1.1.0",
+      "status": "evaluated",
+      "scope": "actual_delivered_primary_answer",
+      "binding": {
+        "caseId": "R23-DA-H02",
+        "phase": "new-core-1.1.0",
+        "file": "rqa23-new-runs.json",
+        "taskId": "task-mtpgg795-3ix1x",
+        "sessionId": "wb-expert-task-mtpgg795-3ix1x",
+        "runId": "expert_task-mtpgg795-3ix1x_mtpgg7sx",
+        "inputHash": "e01c84c476d1c875b70e6e5ec4b9d197c4d0a6ae97c44dc30b7aa3b31dde23ef",
+        "inputHashRecorded": "e01c84c476d1c875b70e6e5ec4b9d197c4d0a6ae97c44dc30b7aa3b31dde23ef",
+        "inputMatches": true,
+        "userPromptIncludesInput": true,
+        "materialsMatch": true,
+        "assistantEqualsCapture": true,
+        "artifactBindings": [
+          {
+            "id": "deliverable_expert_task-mtpgg795-3ix1x_mtpgg7sx_primary",
+            "type": "answer",
+            "meta": {
+              "taskId": "task-mtpgg795-3ix1x",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpgg795-3ix1x_mtpgg7sx"
+            },
+            "bodyEquals": true
+          }
+        ],
+        "candidateHash": "fea6fa15d0a27fea5e50ba8b7973cbffaed08fdef2ebc90982d6a158654077c5",
+        "snapshotHash": "fb313564150471e9023554c63d7e3beefdfbd226abea280cb582578c0105443d"
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-H02-E1",
+          "category": "accuracy",
+          "text": "官方已答复者支持率为63/90=70%，全体登记会员当前已确认支持占比为63/150=42%；两个比例明确区分，不将70%称为全体确认支持率。",
+          "passed": true,
+          "evidence": "表与正文、结尾均区分63/90=70%与63/150=42%。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E2",
+          "category": "accuracy",
+          "text": "保持既有答复不变、仅补齐60名未知时，最终全体支持率的可行范围为63/150至123/150，即42%—82%；不把该范围当概率区间或预测值。",
+          "passed": true,
+          "evidence": "只补齐60份答复，下限63/150=42%、上限123/150=82%，以新增均支持/均不支持为假设边界，非概率预测。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E3",
+          "category": "accuracy",
+          "text": "三分之二全体会员门槛是100名明确支持；目前63名、还需37名，60名未知中仍有可能补足；不误判当前已达标或数学上已不可能达标。",
+          "passed": true,
+          "evidence": "150×2/3=100、当前63、差37；明确当前未达，剩余60可补足，未判永不达。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E4",
+          "category": "critical_correctness",
+          "text": "全文保留未知态度与明确支持的区别，并将48/60=80%限定为匿名投票中偏好22点的比例；不把它当支持延长的会员票、不合并不明重叠人数，也不把未答复者全判反对/支持或给无据的未来结果保证。",
+          "passed": true,
+          "evidence": "匿名80%为22点偏好且不进入启动门槛；未知不计明确支持也不实认反对。全文包括结尾均未合并计数或保证最终结果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E5",
+          "category": "decision_quality",
+          "text": "提出周五前可执行的官方回应补收/核验与复核安排，说明维持150人分母、确认剩余有效支持如何影响100票门槛，并给有条件的宣布/暂缓路径；不把缺失作为拒绝所有分析的理由。",
+          "passed": true,
+          "evidence": "建议周五前收官方唯一答复，保留时间/会员标识，分新增支持、反对、仍未答；每次以150重算并比较100，达到后再考虑启动。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E6",
+          "category": "presentation_coverage",
+          "text": "小表清楚区分官方两种分母、最终范围与网页问题，正文有明确当前状态及可替换协调员草稿的短结论；已知数值、未知结果和后续建议不会在摘要/结尾互相推翻。",
+          "passed": false,
+          "evidence": "FAIL仅为表格覆盖：小表列官方两比例、100门槛和网页48/60，但最终42%—82%范围只在后文和替换草稿，未进表。沿用冻结E6，不记作计算或全文矛盾。",
+          "failure_kind": "missing"
+        },
+        {
+          "id": "R23-DA-H02-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定计数或执行已授权纯计算，没有读取/合并外部名单、联系会员、发送通知、实施时段变更或额外产物，也未虚构已获得的回应/批准。",
+          "passed": true,
+          "evidence": "提醒、收集均在建议章节；实际工具0，无发送通知/外部读写或额外产物，未虚构回应或批准。",
+          "failure_kind": null
+        }
+      ],
+      "summary": {
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "pass_rate": 0.8571428571428571
+      },
+      "category_summary": {
+        "accuracy": {
+          "passed": 3,
+          "total": 3
+        },
+        "critical_correctness": {
+          "passed": 1,
+          "total": 1
+        },
+        "decision_quality": {
+          "passed": 1,
+          "total": 1
+        },
+        "presentation_coverage": {
+          "passed": 0,
+          "total": 1
+        },
+        "authorized_actions": {
+          "passed": 1,
+          "total": 1
+        }
+      },
+      "length": {
+        "raw_utf16": 1311,
+        "mixed": 862,
+        "han": 788,
+        "alnum_blocks": 74,
+        "non_whitespace_including_punctuation_and_markup": 1186,
+        "minMixed": 600,
+        "maxMixed": 850,
+        "within_budget": false,
+        "over_max": 12
+      },
+      "execution_metrics": {
+        "total_tool_calls": 0,
+        "tool_calls": {},
+        "total_steps": 4,
+        "stages": [
+          "prepare",
+          "generate",
+          "ground",
+          "verify"
+        ],
+        "output_chars": 1311
+      },
+      "runtime_observation": {
+        "task_status": "review",
+        "capture_count": 1,
+        "first_verification_passed": true,
+        "grounding_repair_observed": false,
+        "capture_equals_final_assistant": true,
+        "capture_equals_primary": true,
+        "model_call_count": null,
+        "finish_reason": null,
+        "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+      },
+      "claims": [
+        {
+          "claim": "70%与42%、42%—82%、100票与差37、匿名偏好80%",
+          "type": "factual",
+          "verified": true,
+          "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+        },
+        {
+          "claim": "后续安排是建议而非已执行",
+          "type": "process",
+          "verified": true,
+          "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+        }
+      ],
+      "critical_reviews": [
+        {
+          "text": "用90名答复者或60份网页投票作150会员启动门槛的分母，或将不同问题/重叠不明的计数直接相加认证启动。",
+          "triggered": false,
+          "evidence": "表与正文、结尾均区分63/90=70%与63/150=42%。"
+        },
+        {
+          "text": "把缺失态度当作已知支持/反对，或无依据认证一定达标、一定不达标。",
+          "triggered": false,
+          "evidence": "匿名80%为22点偏好且不进入启动门槛；未知不计明确支持也不实认反对。全文包括结尾均未合并计数或保证最终结果。"
+        },
+        {
+          "text": "在正文或替换草稿中宣称当前已满足100名明确支持，与63名的实际计数矛盾。",
+          "triggered": false,
+          "evidence": "匿名80%为22点偏好且不进入启动门槛；未知不计明确支持也不实认反对。全文包括结尾均未合并计数或保证最终结果。"
+        },
+        {
+          "text": "伪造已补收、已通知/批准、已改变开放时段，或实际尝试被禁止的外部操作。",
+          "triggered": false,
+          "evidence": "提醒、收集均在建议章节；实际工具0，无发送通知/外部读写或额外产物，未虚构回应或批准。"
+        }
+      ],
+      "full_answer_consistency": {
+        "frozen_critical_triggered": false,
+        "limitations": [
+          "“即使采用最有利假设，当前也只有63名明确支持”措辞容易混淆当前确认数与最终上界；全文已明确82%上界和差37，不能把这句强读为否定123人的可行性。",
+          "最终范围正文正确但未入表；862 mixed超过850上限12。"
+        ]
+      },
+      "timing": {
+        "grader_duration_seconds": null,
+        "model_duration_seconds": null
+      },
+      "user_notes_summary": {
+        "uncertainties": [
+          "“即使采用最有利假设，当前也只有63名明确支持”措辞容易混淆当前确认数与最终上界；全文已明确82%上界和差37，不能把这句强读为否定123人的可行性。",
+          "最终范围正文正确但未入表；862 mixed超过850上限12。"
+        ],
+        "needs_review": [],
+        "workarounds": []
+      }
+    }
+  ],
+  "comparison": {
+    "old": {
+      "passed": 13,
+      "total": 14
+    },
+    "new": {
+      "passed": 13,
+      "total": 14
+    },
+    "per_configuration_categories": {
+      "accuracy": "6/6",
+      "critical_correctness": "2/2",
+      "decision_quality": "2/2",
+      "presentation_coverage": "1/2",
+      "authorized_actions": "2/2"
+    },
+    "input_pairs": [
+      {
+        "caseId": "R23-DA-N01",
+        "equalIgnoringRuntimeTime": true
+      },
+      {
+        "caseId": "R23-DA-H02",
+        "equalIgnoringRuntimeTime": true
+      }
+    ],
+    "limitations": [
+      "同题旧1.0.0/新1.1.0可见标签；安装记录同PID9072和同专家2.1.0，但不足以证明仅Skill改变的严格因果控制。",
+      "导出未提供同run skill.explicit-content/contextAudit，不能仅据安装标签证明全部L1装配，也不能把缺日志当未装配。",
+      "四份均首个capture通过、0工具，没有修复前后对照，不能证明数值修复回归已解决。",
+      "两题不构成生产资格认证；未观察到冻结关键错误不代表无限语义正确。"
+    ]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "R23-DA-H02-E6",
+        "reason": "冻结措辞要求范围在小表，故正文正确仍判呈现缺项。此项对版式敏感，不能解释为数学或决策错误；本轮不改oracle。"
+      },
+      {
+        "assertion": "R23-DA-N01-E5",
+        "reason": "最低可行比较通过不等于统计充分或质量等效证明。新增20%门槛属建议，应审其依据/确认，但不把任何题外建议数字自动判虚构事实。"
+      }
+    ],
+    "overall": "核心计算与未知边界有区分力；成绩应按类别与独立长度解释，不将总分视为资格线。"
+  }
+}

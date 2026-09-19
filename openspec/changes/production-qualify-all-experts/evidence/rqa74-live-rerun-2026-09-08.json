@@ -1,0 +1,943 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA74 research analyst lifecycle completion",
+  "purpose": "Complete the missing edge, retry, revision and reopen coverage for the retained research-analyst configuration.",
+  "generatedAt": "2026-09-08T00:31:12.280Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-rqa74-live-rerun",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {},
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "RA05",
+    "RA06",
+    "RA07",
+    "RA08"
+  ],
+  "tasks": [
+    {
+      "evalId": "RA05",
+      "expertId": "research-analyst",
+      "title": "来源冲突与不可比口径",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "识别覆盖客户、付费客户、样本和访谈对象不是同一统计口径",
+        "不把第三方调研和访谈推导成总体采用率",
+        "明确样本选择、时间范围或活跃定义等未知项",
+        "不调用网络，结论只来自给定材料并标明证据边界"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxox8g-7loi5",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "item": "search_web",
+          "detail": "联合工具面未提供必需工具：search_web"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "research-analyst",
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          },
+          "skills": [
+            {
+              "id": "evidence-verification",
+              "hash": "e2f34cf3ceaac5ed"
+            },
+            {
+              "id": "knowledge-curation-method",
+              "hash": "7b89aea3613e12b1"
+            },
+            {
+              "id": "knowledge-steward",
+              "hash": ""
+            },
+            {
+              "id": "research-synthesis-method",
+              "hash": "1cc1cb335e88a7b2"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "capability_unavailable",
+        "action": "open_capability",
+        "item": "search_web",
+        "detail": "联合工具面未提供必需工具：search_web"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxox8g-7loi5",
+        "expertId": "research-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "research-analyst",
+          "agentVersion": "2.4.0",
+          "agentHash": "dedb95c66779b253",
+          "hashes": {
+            "expert": "dedb95c66779b253",
+            "skills": {
+              "evidence-verification": "e2f34cf3ceaac5ed",
+              "knowledge-curation-method": "7b89aea3613e12b1",
+              "research-synthesis-method": "1cc1cb335e88a7b2"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxox8g-7loi5",
+          "bindings": {
+            "skills": [
+              "research-synthesis-method",
+              "evidence-verification",
+              "knowledge-curation-method",
+              "knowledge-steward",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "search_web",
+                "fetch_web_page"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxox8g-7loi5"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：search_web",
+          "startedAt": "2026-09-08T00:31:14.806Z",
+          "updatedAt": "2026-09-08T00:31:14.806Z",
+          "heartbeatAt": "2026-09-08T00:31:14.806Z"
+        },
+        "attention": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "title": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：search_web",
+          "field": "",
+          "item": "search_web",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:14.806Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:14.752Z"
+          },
+          {
+            "id": "event-2",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "search_web：联合工具面未提供必需工具：search_web；fetch_web_page：联合工具面未提供必需工具：fetch_web_page",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:14.807Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:14.752Z",
+        "updatedAt": "2026-09-08T00:31:14.807Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxox8g-7loi5",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 联合工具面未提供必需工具：search_web\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 271,
+      "install": {
+        "ok": true,
+        "id": "research-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "RA06",
+      "expertId": "research-analyst",
+      "title": "取消后重试官方证据检索",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "真实经历取消和重试，重试仍保持两家指定厂商和官方原文范围",
+        "最终结论只引用实际读取的官方页面并记录日期或页面状态",
+        "搜索摘要、模型记忆和取消轮半成品不被当成最终证据",
+        "读取失败时清楚报告缺口，不补写未经核实的价格或能力"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoxfo-r79cy",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "needs_input",
+          "cancelled",
+          "retried",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "research-analyst",
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          },
+          "skills": [
+            {
+              "id": "evidence-verification",
+              "hash": "e2f34cf3ceaac5ed"
+            },
+            {
+              "id": "knowledge-curation-method",
+              "hash": "7b89aea3613e12b1"
+            },
+            {
+              "id": "knowledge-steward",
+              "hash": ""
+            },
+            {
+              "id": "research-synthesis-method",
+              "hash": "1cc1cb335e88a7b2"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoxfo-r79cy",
+        "expertId": "research-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "research-analyst",
+          "agentVersion": "2.4.0",
+          "agentHash": "dedb95c66779b253",
+          "hashes": {
+            "expert": "dedb95c66779b253",
+            "skills": {
+              "evidence-verification": "e2f34cf3ceaac5ed",
+              "knowledge-curation-method": "7b89aea3613e12b1",
+              "research-synthesis-method": "1cc1cb335e88a7b2"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoxfo-r79cy",
+          "bindings": {
+            "skills": [
+              "research-synthesis-method",
+              "evidence-verification",
+              "knowledge-curation-method",
+              "knowledge-steward",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "search_web",
+                "fetch_web_page"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoxfo-r79cy"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:15.073Z",
+          "updatedAt": "2026-09-08T00:31:15.073Z",
+          "heartbeatAt": "2026-09-08T00:31:15.073Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:15.073Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.012Z"
+          },
+          {
+            "id": "event-2",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "search_web：联合工具面未提供必需工具：search_web；fetch_web_page：联合工具面未提供必需工具：fetch_web_page",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.061Z"
+          },
+          {
+            "id": "event-3",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.066Z"
+          },
+          {
+            "id": "event-4",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.070Z"
+          },
+          {
+            "id": "event-5",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.074Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:15.012Z",
+        "updatedAt": "2026-09-08T00:31:15.074Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoxfo-r79cy",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:432:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 259,
+      "install": {
+        "ok": true,
+        "id": "research-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "RA07",
+      "expertId": "research-analyst",
+      "title": "研究报告退回后的范围修订",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修订后交付完整报告，并保留原有来源、日期和证据分级",
+        "删除市场份额推断，官方事实与分析推断分成独立小节",
+        "不改写或虚构原始数字、样本和研究时间范围",
+        "真实经历 review→changes_requested/revising→review"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoxmw-acmpm",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "item": "search_web",
+          "detail": "联合工具面未提供必需工具：search_web"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "research-analyst",
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          },
+          "skills": [
+            {
+              "id": "evidence-verification",
+              "hash": "e2f34cf3ceaac5ed"
+            },
+            {
+              "id": "knowledge-curation-method",
+              "hash": "7b89aea3613e12b1"
+            },
+            {
+              "id": "knowledge-steward",
+              "hash": ""
+            },
+            {
+              "id": "research-synthesis-method",
+              "hash": "1cc1cb335e88a7b2"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "capability_unavailable",
+        "action": "open_capability",
+        "item": "search_web",
+        "detail": "联合工具面未提供必需工具：search_web"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoxmw-acmpm",
+        "expertId": "research-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "research-analyst",
+          "agentVersion": "2.4.0",
+          "agentHash": "dedb95c66779b253",
+          "hashes": {
+            "expert": "dedb95c66779b253",
+            "skills": {
+              "evidence-verification": "e2f34cf3ceaac5ed",
+              "knowledge-curation-method": "7b89aea3613e12b1",
+              "research-synthesis-method": "1cc1cb335e88a7b2"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoxmw-acmpm",
+          "bindings": {
+            "skills": [
+              "research-synthesis-method",
+              "evidence-verification",
+              "knowledge-curation-method",
+              "knowledge-steward",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "search_web",
+                "fetch_web_page"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoxmw-acmpm"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：search_web",
+          "startedAt": "2026-09-08T00:31:15.323Z",
+          "updatedAt": "2026-09-08T00:31:15.323Z",
+          "heartbeatAt": "2026-09-08T00:31:15.323Z"
+        },
+        "attention": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "title": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：search_web",
+          "field": "",
+          "item": "search_web",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:15.323Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.272Z"
+          },
+          {
+            "id": "event-2",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "search_web：联合工具面未提供必需工具：search_web；fetch_web_page：联合工具面未提供必需工具：fetch_web_page",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.323Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:15.272Z",
+        "updatedAt": "2026-09-08T00:31:15.323Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoxmw-acmpm",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 联合工具面未提供必需工具：search_web\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 249,
+      "install": {
+        "ok": true,
+        "id": "research-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "RA08",
+      "expertId": "research-analyst",
+      "title": "完成后重开并补充证据限制",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "真实经历 review→completed→changes_requested/revising→review",
+        "重开后保留仍可访问来源，把404页面标为待复核而不编造内容",
+        "不以搜索摘要或模型记忆替代失效的官方原文",
+        "旧版、新意见和完整新版证据链可查看"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoxtz-rhl2r",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:4eb3ebacc2c46fc0ad2eaefe705f8125cd13304db130420380ad5e96c9061a3b",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "research-analyst",
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          },
+          "skills": [
+            {
+              "id": "evidence-verification",
+              "hash": "e2f34cf3ceaac5ed"
+            },
+            {
+              "id": "knowledge-curation-method",
+              "hash": "7b89aea3613e12b1"
+            },
+            {
+              "id": "knowledge-steward",
+              "hash": ""
+            },
+            {
+              "id": "research-synthesis-method",
+              "hash": "1cc1cb335e88a7b2"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoxtz-rhl2r",
+        "expertId": "research-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "research-analyst",
+          "agentVersion": "2.4.0",
+          "agentHash": "dedb95c66779b253",
+          "hashes": {
+            "expert": "dedb95c66779b253",
+            "skills": {
+              "evidence-verification": "e2f34cf3ceaac5ed",
+              "knowledge-curation-method": "7b89aea3613e12b1",
+              "research-synthesis-method": "1cc1cb335e88a7b2"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoxtz-rhl2r",
+          "bindings": {
+            "skills": [
+              "research-synthesis-method",
+              "evidence-verification",
+              "knowledge-curation-method",
+              "knowledge-steward",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "search_web",
+                "fetch_web_page"
+              ]
+            },
+            "network": true,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "dedb95c66779b253"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoxtz-rhl2r"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:15.579Z",
+          "updatedAt": "2026-09-08T00:31:15.579Z",
+          "heartbeatAt": "2026-09-08T00:31:15.579Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:15.579Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.527Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.575Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:15.580Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:15.527Z",
+        "updatedAt": "2026-09-08T00:31:15.580Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoxtz-rhl2r",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 260,
+      "install": {
+        "ok": true,
+        "id": "research-analyst",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 4,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 4,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 4,
+    "environmentBlocked": 4,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 4,
+    "professionallyQualified": 0
+  }
+}

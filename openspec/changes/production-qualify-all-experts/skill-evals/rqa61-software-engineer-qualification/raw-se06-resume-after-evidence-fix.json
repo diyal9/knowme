@@ -1,0 +1,940 @@
+{
+  "taskId": "task-mtqsvg6a-8dwsc",
+  "before": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtqsvg6a-8dwsc",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "[RQA61 SE06] 有界并发执行器",
+    "expertId": "software-engineer",
+    "expertName": "software-engineer",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+    "brief": {
+      "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+      "plan": null,
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "provided-context",
+          "type": "text",
+          "title": "冻结验收题",
+          "ref": "",
+          "content": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "software-change-verification"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [
+        "不得执行外部写入。",
+        "不得调用工具。",
+        "不得声称已运行测试。"
+      ],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.2.0",
+      "agentHash": "18bcf4d4e7195931",
+      "hashes": {
+        "expert": "18bcf4d4e7195931",
+        "skills": {
+          "code-review": "17d5214576de2834",
+          "software-change-verification": "829c8afc1a1e3a6a"
+        },
+        "connectors": {}
+      },
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtqsvg6a-8dwsc",
+      "bindings": {
+        "skills": [
+          "software-change-verification",
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": null,
+      "sop": {
+        "version": "2.2.0",
+        "hash": "18bcf4d4e7195931"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:34.978Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.619Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.737Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:36.046Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:29:19.711Z"
+      },
+      {
+        "id": "event-9",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "生成失败",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:38.925Z"
+      },
+      {
+        "id": "event-10",
+        "type": "failed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:39.047Z"
+      }
+    ],
+    "attention": {
+      "kind": "retryable_failure",
+      "action": "retry",
+      "title": "本次执行未完成",
+      "detail": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+      "field": "",
+      "item": "专家执行",
+      "question": "",
+      "example": "",
+      "options": [],
+      "defaultValue": "",
+      "required": true,
+      "createdAt": "2026-09-07T05:30:39.023Z"
+    },
+    "progress": {
+      "phase": "failed",
+      "label": "执行失败",
+      "detail": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+      "startedAt": "2026-09-07T05:28:35.713Z",
+      "updatedAt": "2026-09-07T05:30:39.023Z",
+      "heartbeatAt": "2026-09-07T05:30:39.023Z"
+    },
+    "inputQueue": null,
+    "deliverables": [],
+    "executionEvidence": [],
+    "resultSummary": "",
+    "status": "failed",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtqsvg6a-8dwsc"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-07T05:28:34.978Z",
+    "updatedAt": "2026-09-07T05:30:39.047Z"
+  },
+  "retry": {
+    "ok": true,
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtqsvg6a-8dwsc",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "[RQA61 SE06] 有界并发执行器",
+      "expertId": "software-engineer",
+      "expertName": "software-engineer",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+      "brief": {
+        "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+        "plan": null,
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "provided-context",
+            "type": "text",
+            "title": "冻结验收题",
+            "ref": "",
+            "content": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "专业答复",
+            "type": "answer",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [
+              "software-change-verification"
+            ],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [
+          "不得执行外部写入。",
+          "不得调用工具。",
+          "不得声称已运行测试。"
+        ],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "software-engineer",
+        "agentVersion": "2.2.0",
+        "agentHash": "18bcf4d4e7195931",
+        "hashes": {
+          "expert": "18bcf4d4e7195931",
+          "skills": {
+            "code-review": "17d5214576de2834",
+            "software-change-verification": "829c8afc1a1e3a6a"
+          },
+          "connectors": {}
+        },
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtqsvg6a-8dwsc",
+        "bindings": {
+          "skills": [
+            "software-change-verification",
+            "code-review"
+          ],
+          "connectors": []
+        },
+        "permissions": {
+          "connectors": {
+            "allowedConnectorIds": []
+          },
+          "tools": {
+            "allowlist": []
+          },
+          "network": false,
+          "write": false,
+          "externalWrite": false
+        },
+        "plan": null,
+        "sop": {
+          "version": "2.2.0",
+          "hash": "18bcf4d4e7195931"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:34.978Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:35.619Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:35.737Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:35.977Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:35.977Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:35.977Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:28:36.046Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "正在整理最终答复…",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:29:19.711Z"
+        },
+        {
+          "id": "event-9",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "生成失败",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:30:38.925Z"
+        },
+        {
+          "id": "event-10",
+          "type": "failed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 10,
+          "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+          "actorId": "",
+          "createdAt": "2026-09-07T05:30:39.047Z"
+        },
+        {
+          "id": "event-11",
+          "type": "retried",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 11,
+          "summary": "用户重新执行任务",
+          "actorId": "",
+          "createdAt": "2026-09-07T06:07:02.565Z"
+        }
+      ],
+      "attention": null,
+      "progress": {
+        "phase": "preflight",
+        "label": "正在重新检查执行条件",
+        "detail": "",
+        "startedAt": "2026-09-07T06:07:02.541Z",
+        "updatedAt": "2026-09-07T06:07:02.541Z",
+        "heartbeatAt": "2026-09-07T06:07:02.541Z"
+      },
+      "inputQueue": null,
+      "deliverables": [],
+      "executionEvidence": [],
+      "resultSummary": "",
+      "status": "starting",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtqsvg6a-8dwsc"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-07T05:28:34.978Z",
+      "updatedAt": "2026-09-07T06:07:02.565Z"
+    },
+    "started": true
+  },
+  "after": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtqsvg6a-8dwsc",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "[RQA61 SE06] 有界并发执行器",
+    "expertId": "software-engineer",
+    "expertName": "software-engineer",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+    "brief": {
+      "goal": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
+      "plan": null,
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "provided-context",
+          "type": "text",
+          "title": "冻结验收题",
+          "ref": "",
+          "content": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "software-change-verification"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [
+        "不得执行外部写入。",
+        "不得调用工具。",
+        "不得声称已运行测试。"
+      ],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.2.0",
+      "agentHash": "18bcf4d4e7195931",
+      "hashes": {
+        "expert": "18bcf4d4e7195931",
+        "skills": {
+          "code-review": "17d5214576de2834",
+          "software-change-verification": "829c8afc1a1e3a6a"
+        },
+        "connectors": {}
+      },
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtqsvg6a-8dwsc",
+      "bindings": {
+        "skills": [
+          "software-change-verification",
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": null,
+      "sop": {
+        "version": "2.2.0",
+        "hash": "18bcf4d4e7195931"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:34.978Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.619Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.737Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:35.977Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:28:36.046Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:29:19.711Z"
+      },
+      {
+        "id": "event-9",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "生成失败",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:38.925Z"
+      },
+      {
+        "id": "event-10",
+        "type": "failed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:39.047Z"
+      },
+      {
+        "id": "event-11",
+        "type": "retried",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 11,
+        "summary": "用户重新执行任务",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:02.565Z"
+      },
+      {
+        "id": "event-12",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 12,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:02.643Z"
+      },
+      {
+        "id": "event-13",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 13,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:02.924Z"
+      },
+      {
+        "id": "event-14",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 14,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:02.924Z"
+      },
+      {
+        "id": "event-15",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 15,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:02.924Z"
+      },
+      {
+        "id": "event-16",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 16,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:03.001Z"
+      },
+      {
+        "id": "event-17",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 17,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:46.928Z"
+      },
+      {
+        "id": "event-18",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 18,
+        "summary": "回答生成完成",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:59.103Z"
+      },
+      {
+        "id": "event-19",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 19,
+        "summary": "专业答复",
+        "actorId": "",
+        "createdAt": "2026-09-07T06:07:59.396Z"
+      }
+    ],
+    "attention": null,
+    "progress": {
+      "phase": "review",
+      "label": "成果已生成，等待验收",
+      "detail": "",
+      "startedAt": "2026-09-07T06:07:02.621Z",
+      "updatedAt": "2026-09-07T06:07:59.376Z",
+      "heartbeatAt": "2026-09-07T06:07:59.376Z"
+    },
+    "inputQueue": null,
+    "deliverables": [
+      {
+        "deliverableId": "primary",
+        "title": "专业答复",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtqsvg6a-8dwsc#deliverable_expert_task-mtqsvg6a-8dwsc_mtqu8x0n_primary",
+        "artifactRefs": [
+          "wb-expert-task-mtqsvg6a-8dwsc#deliverable_expert_task-mtqsvg6a-8dwsc_mtqu8x0n_primary"
+        ],
+        "executionRef": "agent-run:expert_task-mtqsvg6a-8dwsc_mtqu8x0n",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-07T06:07:59.376Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtqsvg6a-8dwsc_mtqu8x0n",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "verificationDiagnostics": {
+          "version": 1,
+          "runId": "expert_task-mtqsvg6a-8dwsc_mtqu8x0n",
+          "taskId": "task-mtqsvg6a-8dwsc",
+          "candidateHash": "2d52fffa56da3d8f9e0a60a5b09508da7633b52784b7e46b693858b74a280689",
+          "candidateChars": 5156,
+          "materialSnapshotHash": "0f8e9353259e744563f03909dad8a27c6dbf81e9fe8e4bce33a4bb1b3fb42d60",
+          "materialCount": 1,
+          "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+          "fieldChecks": [],
+          "fieldCheckCount": 0
+        },
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.2.0",
+            "hash": "18bcf4d4e7195931"
+          },
+          "skills": [
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": true,
+          "passed": true,
+          "rewritten": false,
+          "initialPassed": true,
+          "finalPassed": false
+        },
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-07T06:07:59.272Z"
+      }
+    ],
+    "resultSummary": "## 交付物：`runPool` 静态实现、复杂度与验证设计\n\n本轮为纯静态方案交付，未调用工具，未执行代码。以下按 `software-change-verification` 组织。\n\n---\n\n### 1. 契约基线与不变量\n\n| 项目 | 契约要求 |\n| :--- | :--- |\n| **输入** | `tasks`: 函数数组；`limit`: 正安全整数 (`Number.isSafeInteger(limit) && limit > 0`) |\n| **拒绝条件** | 参数不满足上述类型时，返回的 Promise 立即以 `Error",
+    "status": "review",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtqsvg6a-8dwsc"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-07T05:28:34.978Z",
+    "updatedAt": "2026-09-07T06:07:59.396Z"
+  },
+  "transcript": {
+    "ok": true,
+    "text": "User:\n你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责功能开发、缺陷诊断、重构和代码方案评审。先理解明确契约与验收标准，以 software-change-verification 组织最小完整方案及验证。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，包括内部计划；诊断不擅自改代码。提供推演与执行证据的明确区分，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。\n\n当前时间：2026-09-07T05:28:36.001Z\n\n材料：\n- 冻结验收题\n请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。\n\n本轮交付物：专业答复（answer）\n\n本轮 SOP 路由：software-change-verification。\n\n约束：\n- 不得执行外部写入。\n- 不得调用工具。\n- 不得声称已运行测试。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。\n\nUser:\n你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责功能开发、缺陷诊断、重构和代码方案评审。先理解明确契约与验收标准，以 software-change-verification 组织最小完整方案及验证。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，包括内部计划；诊断不擅自改代码。提供推演与执行证据的明确区分，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。\n\n当前时间：2026-09-07T06:07:02.951Z\n\n材料：\n- 冻结验收题\n请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。\n\n本轮交付物：专业答复（answer）\n\n本轮 SOP 路由：software-change-verification。\n\n约束：\n- 不得执行外部写入。\n- 不得调用工具。\n- 不得声称已运行测试。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。\n\nAssistant:\n## 交付物：`runPool` 静态实现、复杂度与验证设计\n\n本轮为纯静态方案交付，未调用工具，未执行代码。以下按 `software-change-verification` 组织。\n\n---\n\n### 1. 契约基线与不变量\n\n| 项目 | 契约要求 |\n| :--- | :--- |\n| **输入** | `tasks`: 函数数组；`limit`: 正安全整数 (`Number.isSafeInteger(limit) && limit > 0`) |\n| **拒绝条件** | 参数不满足上述类型时，返回的 Promise 立即以 `Error('INVALID_ARGUMENT')` 拒绝 |\n| **并发约束** | 任意时刻正在执行（已调用且未 settle）的任务数 $\\le$ `limit` |\n| **顺序约束** | 结果数组索引与 `tasks` 输入索引严格对应 |\n| **空集** | `tasks.length === 0` 解析为 `[]` |\n| **失败语义** | 首个失败任务的原因作为最终拒绝原因；尚未启动的任务不再启动；已启动任务自然收尾且不产生未处理拒绝 (Unhandled Rejection) |\n| **幂等性** | 每个任务函数最多被调用一次 |\n\n---\n\n### 2. 完整实现\n\n```javascript\nfunction runPool(tasks, limit) {\n  // 1. 同步校验契约\n  if (\n    !Array.isArray(tasks) ||\n    !tasks.every(t => typeof t === 'function') ||\n    !Number.isSafeInteger(limit) ||\n    limit <= 0\n  ) {\n    return Promise.reject(new Error('INVALID_ARGUMENT'));\n  }\n\n  // 2. 空数组快速路径\n  if (tasks.length === 0) {\n    return Promise.resolve([]);\n  }\n\n  return new Promise((resolve, reject) => {\n    const results = new Array(tasks.length);\n    let nextIndex = 0;\n    let activeCount = 0;\n    let settledCount = 0;\n    let rejected = false;\n    let firstRejectionReason = undefined;\n\n    function trySchedule() {\n      // 核心调度循环：仅在未拒绝且有槽位时启动新任务\n      while (!rejected && activeCount < limit && nextIndex < tasks.length) {\n        const currentIndex = nextIndex++;\n        activeCount++;\n\n        let taskResult;\n        try {\n          // 保证只调用一次\n          taskResult = tasks[currentIndex]();\n        } catch (err) {\n          // 同步抛出视为失败\n          handleFailure(err);\n          continue; // continue 会重新进入 while 判断，此时 rejected=true 将终止循环\n        }\n\n        // 统一转为 Promise 处理异步或同步返回值\n        Promise.resolve(taskResult).then(\n          (value) => {\n            results[currentIndex] = value;\n            activeCount--;\n            settledCount++;\n            checkCompletion();\n            // 成功完成后尝试补位\n            trySchedule();\n          },\n          (reason) => {\n            activeCount--;\n            settledCount++;\n            handleFailure(reason);\n            // 失败后不调用 trySchedule()，依靠 !rejected 阻止后续启动\n          }\n        );\n      }\n    }\n\n    function handleFailure(reason) {\n      if (!rejected) {\n        rejected = true;\n        firstRejectionReason = reason;\n        // 立即拒绝最终 Promise，尚未启动的任务因 rejected=true 不会再进入 while\n        reject(firstRejectionReason);\n      }\n    }\n\n    function checkCompletion() {\n      // 只有所有任务都 settle（包括失败后自然收尾的已启动任务）才 resolve\n      // 注意：如果已经 rejected，这里的 resolve 不会生效，因为 Promise 状态已锁定\n      if (settledCount === tasks.length) {\n        resolve(results);\n      }\n    }\n\n    // 启动初始批次\n    trySchedule();\n  });\n}\n```\n\n---\n\n### 3. 复杂度分析\n\n| 维度 | 复杂度 | 说明 |\n| :--- | :--- | :--- |\n| **时间** | $O(N)$ | $N$ 为 `tasks.length`。每个任务恰好入队、出队一次，调度循环总迭代次数为 $N$。Promise 链式 `.then` 注册也是 $O(N)$。 |\n| **额外空间** | $O(N)$ | `results` 数组长度 $N$；最坏情况下（如 `limit >= N`），微任务队列中同时挂起 $N$ 个 Promise 回调。无递归栈开销。 |\n\n---\n\n### 4. 决定性测试设计（未执行）\n\n以下测试用例覆盖正常、边界和故障时序，需使用可控延迟（如手动 resolve/reject 的 Deferred Promise）保证竞态确定性，不依赖 `setTimeout` 碰运气。\n\n| 编号 | 场景 | 初态 / 受控操作 | 可观察判据（通过标准） |\n| :--- | :--- | :--- | :--- |\n| T1 | **无效参数** | 传入 `null`, `{}`, `limit=0`, `limit=1.5`, `[1,2]` | 同步返回拒绝的 Promise，原因为 `Error('INVALID_ARGUMENT')` |\n| T2 | **空数组** | `runPool([], 5)` | 解析为 `[]` |\n| T3 | **并发上限** | 5 个任务，`limit=2`，任务记录开始/结束时间戳 | 任意时刻重叠执行的任务数 $\\le 2$；结果顺序与输入一致 |\n| T4 | **同步返回** | 任务直接 `return i` | 正确收集结果，不卡死 |\n| T5 | **首个失败阻断** | 任务序列：`[延迟成功, 立即失败, 未启动探针]`，`limit=2` | 最终 Promise 以任务 2 的原因拒绝；任务 3 的探针函数未被调用 |\n| T6 | **已启动任务自然收尾** | 任务 1（长耗时）、任务 2（立即失败），`limit=2` | 最终 Promise 立即拒绝；任务 1 继续执行完毕，控制台无 Unhandled Rejection |\n| T7 | **同步抛出异常** | 任务内部 `throw new Error('sync')` | 等同于异步拒绝，触发失败语义，后续任务不启动 |\n| T8 | **重复调用防护** | 记录每个任务的调用次数 | 无论成功、失败还是并发调度，每个任务函数 `callCount === 1` |\n\n---\n\n### 5. 缺陷诊断：为什么常见的 `Promise.race` 补位实现容易在失败路径继续启动任务？\n\n**常见错误模式还原：**\n许多实现采用“维护一个大小为 `limit` 的执行池，用 `Promise.race` 等待最快完成的任务，然后立即推入下一个任务”的模式：\n\n```javascript\n// 典型有缺陷的伪代码\nconst pool = [];\nfor (const task of tasks) {\n  const p = task().then(res => ({ res, task: p }));\n  pool.push(p);\n  if (pool.length >= limit) {\n    const finished = await Promise.race(pool); // 阻塞等待\n    pool.splice(pool.indexOf(finished.task), 1);\n  }\n}\n```\n\n**故障时序与根因：**\n1. **控制流耦合**：在这种模式下，“启动新任务”的动作与 `await Promise.race(...)` 的恢复强绑定。\n2. **失败即抛出**：当池中某个任务失败时，`Promise.race` 会立即拒绝，导致 `await` 抛出异常。\n3. **补位逻辑失控**：\n   - 如果外层没有精细的 `try/catch` 隔离，异常会向上冒泡，但如果在 `catch` 中为了“保持池子大小”而继续执行循环，或者使用了 `Promise.race` 的变体（如 `reflect` 包装）吞掉了错误，循环体会继续执行 `task()` 调用。\n   - 更隐蔽的是，即使 `Promise.race` 因错误退出了当前等待，如果调度器是基于事件驱动（如 `p.finally(() => scheduleNext())`），`finally` 会在失败时同样触发，若 `scheduleNext` 内部没有全局的 `isFailed` 守卫标志，就会从队列中取出下一个任务并执行。\n4. **本质原因**：`Promise.race` 只是一个**监听工具**，它不具备**取消或暂停生产者的能力**。它将“任务完成（无论成败）”和“释放槽位”混为一谈。在失败路径上，如果不显式引入一个跨作用域的 `rejected` 状态机变量来切断 `while` 循环或 `finally` 回调中的调度逻辑，仅仅依靠 `race` 的返回来决定是否 `push` 新任务，必然会导致在首个错误发生后，由于槽位被释放而继续拉取并启动后续任务。\n\n**本方案的规避方式：**\n放弃 `Promise.race` 补位模型，改用**基于计数器的主动调度（Push-based Scheduling）**。`trySchedule` 是一个同步 `while` 循环，其入口条件是 `!rejected && activeCount < limit`。一旦 `handleFailure` 将 `rejected` 置为 `true`，任何正在执行的 `.then` 回调在结束时调用 `trySchedule()` 都会因为 `!rejected` 为假而直接退出，从根本上切断了失败后继续启动任务的可能性。"
+  }
+}

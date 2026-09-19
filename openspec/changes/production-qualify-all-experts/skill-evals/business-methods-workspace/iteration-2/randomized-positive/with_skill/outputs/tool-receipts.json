@@ -1,0 +1,46 @@
+[
+  {
+    "id": "msg_expert_task-mtopjzkd-05dx3_mtopk062_tool_cd9652a9cecc",
+    "role": "tool",
+    "text": "{\"ok\":false,\"results\":[],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\",\"error\":\"At most 16 calculations per batch; split the request.\"}",
+    "runId": "expert_task-mtopjzkd-05dx3_mtopk062",
+    "createdAt": "2026-09-05T18:20:38.141Z",
+    "toolCallId": "call_ed1876bc1aa04581b0cd7631",
+    "toolName": "calculate",
+    "status": "error",
+    "durationMs": 4
+  },
+  {
+    "id": "msg_expert_task-mtopjzkd-05dx3_mtopk062_tool_7d0099b9027e",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"A注册率%\",\"expression\":\"100*800/10000\",\"ok\":true,\"value\":8},{\"label\":\"B注册率%\",\"expression\":\"100*1200/10000\",\"ok\":true,\"value\":12},{\"label\":\"注册率差_百分点\",\"expression\":\"100*(1200/10000-800/10000)\",\"ok\":true,\"value\":3.9999999999999996},{\"label\":\"注册相对提升%\",\"expression\":\"100*((1200/10000)/(800/10000)-1)\",\"ok\":true,\"value\":50},{\"label\":\"A_D7每访客%\",\"expression\":\"100*400/10000\",\"ok\":true,\"value\":4},{\"label\":\"B_D7每访客%\",\"expression\":\"100*720/10000\",\"ok\":true,\"value\":7.2},{\"label\":\"D7每访客差_百分点\",\"expression\":\"100*(720/10000-400/10000)\",\"ok\":true,\"value\":3.1999999999999993},{\"label\":\"D7每访客相对提升%\",\"expression\":\"100*((720/10000)/(400/10000)-1)\",\"ok\":true,\"value\":79.99999999999999}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopjzkd-05dx3_mtopk062",
+    "createdAt": "2026-09-05T18:20:38.141Z",
+    "toolCallId": "call_eef826c31be946ee84f11de5",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 3
+  },
+  {
+    "id": "msg_expert_task-mtopjzkd-05dx3_mtopk062_tool_56580eed2bbb",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"A注册后D7%\",\"expression\":\"100*400/800\",\"ok\":true,\"value\":50},{\"label\":\"B注册后D7%\",\"expression\":\"100*720/1200\",\"ok\":true,\"value\":60},{\"label\":\"A每注册成本元\",\"expression\":\"20000/800\",\"ok\":true,\"value\":25},{\"label\":\"A每D7成本元\",\"expression\":\"20000/400\",\"ok\":true,\"value\":50},{\"label\":\"B每注册成本元\",\"expression\":\"20000/1200\",\"ok\":true,\"value\":16.666666666666668},{\"label\":\"B每D7成本元\",\"expression\":\"20000/720\",\"ok\":true,\"value\":27.77777777777778},{\"label\":\"合并p_注册\",\"expression\":\"(800+1200)/20000\",\"ok\":true,\"value\":0.1},{\"label\":\"z_注册\",\"expression\":\"(1200-800)/sqrt(((800+1200)/20000)*(1-(800+1200)/20000)*(1/10000+1/10000))\",\"ok\":true,\"value\":94280.90415820632},{\"label\":\"合并p_D7\",\"expression\":\"(400+720)/20000\",\"ok\":true,\"value\":0.056},{\"label\":\"z_D7每访客\",\"expression\":\"(720-400)/sqrt(((400+720)/20000)*(1-(400+720)/20000)*(1/10000+1/10000))\",\"ok\":true,\"value\":98413.56626102458}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopjzkd-05dx3_mtopk062",
+    "createdAt": "2026-09-05T18:20:38.141Z",
+    "toolCallId": "call_18d48dc9e9b9487db16d4cc2",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 3
+  },
+  {
+    "id": "msg_expert_task-mtopjzkd-05dx3_mtopk062_tool_ab54b1bf2dee",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"z_注册_正确\",\"expression\":\"(1200/10000-800/10000)/sqrt(0.1*0.9*(1/10000+1/10000))\",\"ok\":true,\"value\":9.42809041582063},{\"label\":\"z_D7_正确\",\"expression\":\"(720/10000-400/10000)/sqrt(0.056*0.944*(1/10000+1/10000))\",\"ok\":true,\"value\":9.841356626102455}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopjzkd-05dx3_mtopk062",
+    "createdAt": "2026-09-05T18:20:38.141Z",
+    "toolCallId": "call_35218ba6ce274666b2ad5a00",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 3
+  }
+]

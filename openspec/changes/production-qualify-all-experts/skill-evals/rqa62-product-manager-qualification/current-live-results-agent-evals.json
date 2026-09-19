@@ -1,0 +1,25 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-07T14:37:05.211Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:d74bbbe910c6df80fcf0f6ec3ccc29c56d0d01c9c3d9b231b1ff78b8487e7650",
+      "tasks": [
+        {
+          "taskId": "task-mtrch0bg-dsbyu",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "expert-config-v2:d74bbbe910c6df80fcf0f6ec3ccc29c56d0d01c9c3d9b231b1ff78b8487e7650",
+          "hardFailure": true,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: no detail\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:101:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:347:23)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:473:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

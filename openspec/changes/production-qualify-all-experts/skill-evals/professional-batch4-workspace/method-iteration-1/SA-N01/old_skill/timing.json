@@ -1,0 +1,38 @@
+{
+  "source": "actual AgentRunExecutor metrics; no grader timing inferred",
+  "metrics": {
+    "rounds": 1,
+    "toolCalls": 0,
+    "firstTokenMs": 1301,
+    "bufferedDraftsDiscarded": 1,
+    "answerCommitMs": null,
+    "bufferMs": null,
+    "outputDiagnostics": [
+      {
+        "runId": "expert_task-mtp24yox-gr5k1_mtp24yur",
+        "round": 1,
+        "phase": "MODEL",
+        "code": "buffered_draft_discarded",
+        "reason": "incomplete_model_response",
+        "length": 4460,
+        "count": 1
+      }
+    ],
+    "usage": {
+      "promptTokens": 12073,
+      "completionTokens": 5000,
+      "totalTokens": 17073,
+      "source": "provider"
+    },
+    "modelCompletions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "length"
+      }
+    ]
+  }
+}

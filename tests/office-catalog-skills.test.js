@@ -47,7 +47,8 @@ const EXPECTED_TASKS = {
     skillId: 'feishu-meeting-summary',
     title: '会议总结',
     preflightConnector: 'feishu',
-    requiredTools: ['feishu.meeting_candidates', 'feishu.meeting_read'],
+    requiredTools: ['feishu.meeting_candidates'],
+    permittedTools: ['feishu.meeting_candidates', 'feishu.meeting_read'],
     templateDays: 3,
     modes: ['general'],
   },
@@ -113,7 +114,7 @@ describe('office catalog skills (tasks 5.1–5.3)', () => {
 
       assert.equal(sidecar.schemaVersion, 2)
       assert.equal(sidecar.kind, 'skill')
-      assert.equal(sidecar.version, '1.0.0')
+      assert.equal(sidecar.version, id === 'feishu-meeting-summary' ? '1.2.0' : '1.0.0')
       assert.equal(sidecar.id, id)
 
       const normalized = validateAndNormalizeManifest(sidecar)
@@ -139,7 +140,7 @@ describe('office catalog skills (tasks 5.1–5.3)', () => {
       assert.ok(grounding.contract.requiredTools.length >= 1)
     }
     const meeting = parseSkillGroundingFromContent(readOfficeSkill('feishu-meeting-summary').skillMd)
-    assert.deepEqual(meeting.contract.requiredTools.sort(), ['feishu.meeting_candidates', 'feishu.meeting_read'].sort())
+    assert.deepEqual(meeting.contract.requiredTools, ['feishu.meeting_candidates'])
   })
 
   it('writing skills have no requiredTools in sidecar or frontmatter', () => {
@@ -174,7 +175,7 @@ describe('office catalog skills (tasks 5.1–5.3)', () => {
       }
       if (expected.requiredTools) {
         assert.deepEqual(task.requiredTools, expected.requiredTools)
-        assert.deepEqual(sidecar.permissions?.tools?.sort(), expected.requiredTools.sort())
+        assert.deepEqual(sidecar.permissions?.tools?.sort(), (expected.permittedTools || expected.requiredTools).sort())
       }
       if (expected.templateDays != null) {
         assert.equal(task.templateVars.days, expected.templateDays)
@@ -200,12 +201,15 @@ describe('office-partner pack skill references (task 5.4)', () => {
   const gameScenes = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'packs', 'game-studio', 'scenes.json'), 'utf8'))
 
   it('office-partner pack.json lists office/feishu skills with bundled catalogRoot', () => {
-    assert.equal(officePack.skills.length, 10)
+    assert.equal(officePack.skills.length, 13)
     assert.equal(officePack.bundledCapabilities.catalogRoot, '../../catalog')
     for (const id of OFFICE_SKILL_IDS) {
       assert.ok(officePack.skills.includes(id), `missing ${id}`)
     }
     assert.ok(officePack.skills.includes('writing-polish'))
+    assert.ok(officePack.skills.includes('office-collaboration-method'))
+    assert.ok(officePack.skills.includes('meeting-evidence-method'))
+    assert.ok(officePack.skills.includes('action-extraction'))
   })
 
   it('game-studio pack.json lists game skills plus code-review and knowledge-steward', () => {

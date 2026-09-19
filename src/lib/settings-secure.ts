@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const { safeStorage } = require('electron');
+const providerSecret = require('./provider-secret');
 const { resolveUserPrompt } = require('./ai-assistant-context');
 const { normalizeRemoteConfig } = require('./remote-config-merge');
 const { normalizeWorkbenchAuth, DEFAULT_WORKBENCH_AUTH } = require('./workbench-auth');
@@ -132,11 +133,30 @@ const SECRET_KEYS = new Set([
   'apiKey', 'apiKeyEnc', 'gitlabToken', 'gitlabTokenEnc',
   'embeddingApiKey', 'embeddingApiKeyEnc', 'embeddingApiKeyConfigured',
   'workbenchToken', 'workbenchTokenEnc', 'systemPrompt',
+  // Runtime-only diagnostics; never persist credential state metadata.
+  'credentialStatus',
 ]);
+
+function isSecureStorageAvailable() {
+  try {
+    return Boolean(safeStorage && safeStorage.isEncryptionAvailable());
+  } catch {
+    return false;
+  }
+}
+
+function canUseWindowsFallback() {
+  return process.platform === 'win32'
+    && typeof providerSecret?.encryptWithDpapi === 'function'
+    && typeof providerSecret?.decryptWithDpapi === 'function';
+}
 
 function decryptField(encB64) {
   if (!encB64) return '';
-  if (!safeStorage.isEncryptionAvailable()) return '';
+  if (String(encB64).startsWith('dpapi:')) {
+    return canUseWindowsFallback() ? providerSecret.decryptWithDpapi(String(encB64)) : '';
+  }
+  if (!isSecureStorageAvailable()) return '';
   try {
     return safeStorage.decryptString(Buffer.from(encB64, 'base64')).toString('utf8');
   } catch {
@@ -145,8 +165,27 @@ function decryptField(encB64) {
 }
 
 function encryptField(plain) {
-  if (!plain || !safeStorage.isEncryptionAvailable()) return null;
-  return safeStorage.encryptString(plain).toString('base64');
+  if (!plain) return null;
+  if (isSecureStorageAvailable()) {
+    try {
+      return safeStorage.encryptString(plain).toString('base64');
+    } catch {
+      // Fall through to the Windows user-level fallback below.
+    }
+  }
+  // A Windows user-level DPAPI fallback keeps newly entered credentials
+  // recoverable when Electron's safeStorage backend is unavailable.
+  return canUseWindowsFallback() ? providerSecret.encryptWithDpapi(String(plain)) : null;
+}
+
+function credentialState(raw, value, encryptionAvailable) {
+  const configured = Boolean(String(raw || '').trim());
+  if (!configured) return { configured: false, available: false, state: 'missing' };
+  if (String(value || '').trim()) return { configured: true, available: true, state: 'available' };
+  if (!String(raw).startsWith('dpapi:') && !encryptionAvailable) {
+    return { configured: true, available: false, state: 'secure_storage_unavailable' };
+  }
+  return { configured: true, available: false, state: 'decrypt_failed' };
 }
 
 function decryptApiKey(raw) {
@@ -161,6 +200,7 @@ function load(file) {
   } catch {
     raw = {};
   }
+  const encryptionAvailable = isSecureStorageAvailable();
   const apiKey = decryptApiKey(raw);
   const embeddingApiKey = raw.embeddingApiKeyEnc
     ? decryptField(raw.embeddingApiKeyEnc)
@@ -172,6 +212,21 @@ function load(file) {
     ? decryptField(raw.workbenchTokenEnc)
     : (raw.workbenchToken || '');
   const { userPrompt } = resolveUserPrompt(raw);
+  const credentialStatus = {
+    encryptionAvailable,
+    apiKey: credentialState(raw.apiKeyEnc || raw.apiKey, apiKey, encryptionAvailable),
+    embeddingApiKey: credentialState(
+      raw.embeddingApiKeyEnc || raw.embeddingApiKey,
+      embeddingApiKey,
+      encryptionAvailable
+    ),
+    gitlabToken: credentialState(raw.gitlabTokenEnc || raw.gitlabToken, gitlabToken, encryptionAvailable),
+    workbenchToken: credentialState(
+      raw.workbenchTokenEnc || raw.workbenchToken,
+      workbenchToken,
+      encryptionAvailable
+    ),
+  };
   const merged = {
     ...DEFAULT_SETTINGS,
     ...raw,
@@ -205,6 +260,7 @@ function load(file) {
     orgManaged: raw.orgManaged === true,
     workbenchAuth: normalizeWorkbenchAuth(raw.workbenchAuth),
     workbenchInstall: normalizeWorkbenchInstall(raw.workbenchInstall),
+    credentialStatus,
   };
   delete merged.apiKeyEnc;
   delete merged.embeddingApiKeyEnc;
@@ -224,12 +280,25 @@ function publicSettings(settings, { includeSecrets = false } = {}) {
   const out = { ...settings };
   delete out.workbenchToken;
   delete out.workbenchTokenEnc;
-  const hasApiKey = !!(String(settings?.apiKey || '').trim());
+  const status = settings?.credentialStatus || {};
+  const publicCredential = (item) => ({
+    configured: item?.configured === true,
+    available: item?.available === true,
+    state: String(item?.state || 'unknown'),
+  });
+  const hasApiKey = !!(String(settings?.apiKey || '').trim())
+    || status.apiKey?.configured === true;
   const hasEmbeddingApiKey = !!(String(settings?.embeddingApiKey || '').trim());
   const hasGitlabToken = !!(String(settings?.gitlabToken || '').trim());
   out.apiKeyConfigured = hasApiKey;
   out.embeddingApiKeyConfigured = hasEmbeddingApiKey;
   out.gitlabTokenConfigured = hasGitlabToken;
+  out.credentialStatus = {
+    encryptionAvailable: status.encryptionAvailable === true,
+    apiKey: publicCredential(status.apiKey),
+    embeddingApiKey: publicCredential(status.embeddingApiKey),
+    gitlabToken: publicCredential(status.gitlabToken),
+  };
   if (!includeSecrets) {
     out.apiKey = '';
     out.embeddingApiKey = '';
@@ -300,11 +369,14 @@ function save(file, settings) {
 
   let warning = null;
   const key = (settings.apiKey || '').trim();
-  if (key && safeStorage.isEncryptionAvailable()) {
-    out.apiKeyEnc = encryptField(key);
-    delete out.apiKey;
-  } else if (key) {
-    warning = '当前系统无法安全加密 API Key，密钥未保存。请在支持系统加密的正式安装版上重试。';
+  if (key) {
+    const enc = encryptField(key);
+    if (enc) {
+      out.apiKeyEnc = enc;
+      delete out.apiKey;
+    } else {
+      warning = '当前系统无法安全保存 API Key，密钥未保存。请启用系统凭据服务或使用支持系统加密的正式安装版。';
+    }
   } else if (!out.apiKeyEnc && prev.apiKeyEnc) {
     out.apiKeyEnc = prev.apiKeyEnc;
   }
@@ -322,7 +394,7 @@ function save(file, settings) {
       out.embeddingApiKeyEnc = enc;
       delete out.embeddingApiKey;
     } else if (!warning) {
-      warning = '当前系统无法安全加密 Embedding API Key，密钥未保存。';
+      warning = '当前系统无法安全保存 Embedding API Key，密钥未保存。';
     }
   } else if (!out.embeddingApiKeyEnc && prev.embeddingApiKeyEnc) {
     out.embeddingApiKeyEnc = prev.embeddingApiKeyEnc;
@@ -339,7 +411,7 @@ function save(file, settings) {
       out.gitlabTokenEnc = enc;
       delete out.gitlabToken;
     } else if (!warning) {
-      warning = '当前系统无法安全加密 GitLab Token，Token 未保存。';
+      warning = '当前系统无法安全保存 GitLab Token，Token 未保存。';
     }
   } else if (!out.gitlabTokenEnc && prev.gitlabTokenEnc) {
     out.gitlabTokenEnc = prev.gitlabTokenEnc;
@@ -356,7 +428,7 @@ function save(file, settings) {
       out.workbenchTokenEnc = enc;
       delete out.workbenchToken;
     } else if (!warning) {
-      warning = '当前系统无法安全加密 Workbench 授权码，授权未保存。';
+      warning = '当前系统无法安全保存 Workbench 授权码，授权未保存。';
     }
   } else if (!out.workbenchTokenEnc && prev.workbenchTokenEnc) {
     out.workbenchTokenEnc = prev.workbenchTokenEnc;

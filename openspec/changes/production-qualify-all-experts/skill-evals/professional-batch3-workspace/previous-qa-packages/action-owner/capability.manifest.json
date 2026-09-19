@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 3,
+  "id": "action-owner",
+  "kind": "expert",
+  "name": "行动项管理员",
+  "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "feishu",
+      "kind": "connector",
+      "required": true
+    }
+  ],
+  "permissions": {},
+  "inputs": [],
+  "outputs": [],
+  "actions": [],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "C:\\Users\\Administrator\\AppData\\Roaming\\KnowMe\\capabilities\\imports\\staging\\curated-action-owner",
+    "adaptedFrom": "EXPERT.md"
+  },
+  "metadata": {
+    "legacy": true,
+    "knowme": {
+      "experience": {
+        "tasks": []
+      }
+    }
+  }
+}

@@ -11,7 +11,7 @@ const { buildWorkflowSupply } = require('../src/lib/workflow-supply')
 const { workflowDisplayName } = require('../src/lib/workflow-display-name')
 
 describe('official-workflows catalog', () => {
-  it('ships exactly three official multi-agent packages with gates', () => {
+  it('ships exactly three official multi-stage expert packages with gates', () => {
     const packages = listOfficialWorkflowPackages()
     assert.equal(packages.length, 3)
     assert.equal(OFFICIAL_WORKFLOWS.length, 3)
@@ -23,7 +23,8 @@ describe('official-workflows catalog', () => {
       const agentNodes = (pkg.graph.nodes || []).filter(node => node.type === 'agent')
       const gateNodes = (pkg.graph.nodes || []).filter(node => node.type === 'gate')
       const agentIds = new Set(agentNodes.map(node => node.agentPackageId).filter(Boolean))
-      assert.ok(agentIds.size >= 2, `${pkg.id} needs ≥2 agents`)
+      assert.ok(agentIds.size >= 1, `${pkg.id} needs an expert`)
+      assert.ok(agentNodes.length >= 2, `${pkg.id} needs ≥2 expert stages`)
       assert.ok(gateNodes.length >= 1, `${pkg.id} needs ≥1 gate`)
       assert.ok(gateNodes.every(node => node.gateRef), `${pkg.id} gate needs gateRef`)
       assert.ok((pkg.graph.gates || []).length >= 1, `${pkg.id} needs gate defs`)
@@ -35,10 +36,11 @@ describe('official-workflows catalog', () => {
   it('exposes required expert ids covering all agent refs', () => {
     const ids = requiredExpertIds()
     assert.ok(ids.includes('product-manager'))
-    assert.ok(ids.includes('user-researcher'))
-    assert.ok(ids.includes('requirement-reviewer'))
-    assert.ok(ids.includes('meeting-scribe'))
-    assert.ok(ids.includes('creative-director'))
+    assert.equal(ids.includes('user-researcher'), false)
+    assert.equal(ids.includes('requirement-reviewer'), false)
+    assert.equal(ids.includes('meeting-scribe'), false)
+    assert.equal(ids.includes('action-owner'), false)
+    assert.equal(ids.includes('creative-director'), false)
     assert.ok(ids.includes('image-producer'))
     assert.ok(ids.includes('office-partner'))
     for (const pkg of OFFICIAL_WORKFLOWS) {
@@ -46,6 +48,28 @@ describe('official-workflows catalog', () => {
         assert.ok(ids.includes(ref.id), `missing ${ref.id}`)
       }
     }
+  })
+
+  it('runs product discovery as three declared modes of the retained product manager', () => {
+    const product = listOfficialWorkflowPackages().find(item => item.id === 'official-product-requirement')
+    const stages = product.graph.nodes.filter(node => node.type === 'agent')
+    assert.deepEqual(product.agentRefs.map(ref => ref.id), ['product-manager'])
+    assert.deepEqual(stages.map(node => node.agentPackageId), [
+      'product-manager', 'product-manager', 'product-manager',
+    ])
+    assert.match(stages[0].intent, /用户研究模式/)
+    assert.match(stages[2].intent, /需求评审模式/)
+  })
+
+  it('runs daily office as three declared modes of the retained office partner', () => {
+    const office = listOfficialWorkflowPackages().find(item => item.id === 'official-daily-office')
+    const stages = office.graph.nodes.filter(node => node.type === 'agent')
+    assert.deepEqual(office.agentRefs.map(ref => ref.id), ['office-partner'])
+    assert.deepEqual(stages.map(node => node.agentPackageId), [
+      'office-partner', 'office-partner', 'office-partner',
+    ])
+    assert.match(stages[0].intent, /会议纪要模式/)
+    assert.match(stages[1].intent, /行动项模式/)
   })
 
   it('marks legacy demo seed ids without listing them as official packages', () => {
@@ -82,6 +106,27 @@ describe('official-workflows catalog', () => {
       assert.doesNotMatch(pkg.description, /→|->/)
       assert.ok(pkg.description.length <= 36, `${pkg.id} blurb too long`)
     }
+  })
+
+  it('hands a standard visual brief directly from design to image production', () => {
+    const visual = listOfficialWorkflowPackages().find(item => item.id === 'official-art-image-production')
+    const design = visual.graph.nodes.find(node => node.id === 'n-design')
+    const generate = visual.graph.nodes.find(node => node.id === 'n-generate')
+    const handoff = visual.graph.edges.find(edge => edge.from === 'n-design' && edge.to === 'n-generate')
+    assert.match(design.intent, /生图交接包/)
+    assert.match(generate.intent, /不重复澄清已覆盖字段/)
+    assert.match(handoff.label, /可直接生成/)
+  })
+
+  it('runs creative direction, visual design and generation within the retained image expert', () => {
+    const visual = listOfficialWorkflowPackages().find(item => item.id === 'official-art-image-production')
+    const stages = visual.graph.nodes.filter(node => node.type === 'agent')
+    assert.deepEqual(visual.agentRefs.map(ref => ref.id), ['image-producer'])
+    assert.deepEqual(stages.map(node => node.agentPackageId), [
+      'image-producer', 'image-producer', 'image-producer',
+    ])
+    assert.match(stages[0].intent, /创意概念模式/)
+    assert.match(stages[1].intent, /视觉方案模式/)
   })
 
   it('injects official packages onto the shelf when provided as verticals', () => {

@@ -1,1 +1,14 @@
-{"id":"software-engineer","kind":"expert","version":"2.0.0","skills":["code-review"],"connectors":[]}
+{
+  "id": "software-engineer",
+  "kind": "expert",
+  "version": "3.1.0",
+  "skills": [
+    "frontend-design",
+    "imagegen-frontend-web",
+    "software-change-verification",
+    "architecture-decision",
+    "qa-test-design",
+    "code-review"
+  ],
+  "connectors": []
+}

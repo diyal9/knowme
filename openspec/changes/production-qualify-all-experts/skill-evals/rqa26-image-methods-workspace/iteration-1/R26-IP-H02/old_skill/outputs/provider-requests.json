@@ -1,0 +1,46 @@
+{
+  "notice": "从原始导出 wire 按 sourceWireIndex 选取的 tools/call 观察记录；保留完整 prompt 与已记录的参考图字节指纹。不代表完整网络日志或独立服务端回执。observer 的 label 不作为配置/版本依据，实际 task/session/run 与 assignmentSnapshot 为准。",
+  "caseId": "R26-IP-H02",
+  "config": "old_skill",
+  "file": "rqa26-old-h02-lossless.json",
+  "taskId": "task-mtpmaqln-tf3ct",
+  "sessionId": "wb-expert-task-mtpmaqln-tf3ct",
+  "runId": "expert_task-mtpmaqln-tf3ct_mtpmaui5",
+  "calls": [
+    {
+      "sourceWireIndex": 1,
+      "observation": {
+        "label": "old-H02",
+        "transport": "fetch",
+        "startedAt": "2026-09-06T09:36:58.145Z",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "1788687418142-71dbc8",
+          "method": "tools/call",
+          "params": {
+            "name": "generate_image",
+            "arguments": {
+              "prompt": "Precise product-photo background recolor edit of the provided reference image. Keep the exact same composition, camera angle and framing: one single brushed stainless steel vacuum flask / water bottle, positioned on the left side of the frame with the same size and screen occupancy as the original, cap on top with its dark seam ring visible, same rounded shoulder, same bottom band, plain negative space on the right. ONLY change the seamless dark green studio backdrop (both the wall behind the bottle and the floor surface around and under the bottle base) to a clean neutral warm gray seamless sweep, evenly lit, smooth, no props, no patterns, no texture noise, no gradient bands. The entire bottle, including body AND cap, must keep its original silver/steel metal material, color, brightness and shape — do not darken it, do not paint it black or warm gray, do not replace or redesign it. Preserve the original soft studio lighting direction, the vertical highlight down the bottle, the specular sheen on the cap, and the soft contact shadow at the base; only slight environmental reflection tint changes from green to warm gray are acceptable. Absolutely no text, no logo, no watermark, no extra objects, no re-composition, no cropping, no stretching, no added border. Photorealistic e-commerce studio photography quality.",
+              "model": "gpt-image-2",
+              "n": 1,
+              "size": "896x1200",
+              "aspect_ratio": "3:4",
+              "quality": "auto",
+              "include_cos_urls": true,
+              "reference_images": [
+                {
+                  "kind": "image-bytes",
+                  "mimeType": "image/jpeg",
+                  "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+                  "byteLength": 455950
+                }
+              ]
+            }
+          }
+        },
+        "status": 200,
+        "returnedAt": "2026-09-06T09:37:18.047Z"
+      }
+    }
+  ]
+}

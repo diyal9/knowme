@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "code-review",
+  "kind": "skill",
+  "name": "代码审查",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "codeReview",
+          "title": "代码审查",
+          "subtitle": "最小改动、回归风险与可测试性",
+          "icon": "code",
+          "group": "engineering",
+          "modes": ["coding"],
+          "surfaces": ["workflow"],
+          "prompt": "请按最小改动原则审查本次 diff，列出必须修复项、可选优化与验收清单。"
+        }]
+      }
+    }
+  }
+}

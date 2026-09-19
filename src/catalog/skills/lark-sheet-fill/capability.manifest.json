@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 3,
+  "id": "lark-sheet-fill",
+  "kind": "skill",
+  "name": "飞书数据填表",
+  "description": "把结构化分析结果按确认的映射和冲突门禁写入飞书 Sheets 或 Base。",
+  "version": "1.0.0",
+  "dependencies": [{ "id": "feishu", "kind": "connector", "required": false }],
+  "permissions": {
+    "connectors": { "allowedConnectorIds": ["feishu"] },
+    "tools": { "allowlist": ["load_skill", "read_skill_resource", "run_skill_script", "feishu.query_bitable", "feishu.draft_bitable_record"] },
+    "network": true,
+    "write": true,
+    "externalWrite": true
+  },
+  "inputs": ["飞书表格链接或目标标识", "结构化数据与经用户确认的字段映射"],
+  "outputs": ["写入预览", "经确认后的写入回执与失败项"],
+  "risk": { "level": "high", "reasons": ["会写入外部飞书表格", "必须在 preview 后获得用户确认"] },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "skills/lark-sheet-fill" }
+}

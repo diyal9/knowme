@@ -1,0 +1,12 @@
+{
+  "id": "cli-generic",
+  "kind": "connector",
+  "type": "cli",
+  "version": "1.0.0",
+  "title": "通用命令行",
+  "description": "安全调用本机或工作区中的命令行工具，安装后配置命令、参数和工作目录。",
+  "capabilities": ["cli", "shell-command"],
+  "cli": { "command": "", "args": [], "cwd": "", "env": {} },
+  "secretSlots": [],
+  "toolPolicies": [{ "match": "*", "risk": "external", "sideEffects": true, "requiresApproval": true }]
+}

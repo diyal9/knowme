@@ -98,6 +98,12 @@ function createConnectorsApi(deps = {}) {
       return { ok: true, connector: normalize.publicConnectorView(conn, status, configuredKeys) }
     }
 
+    if (['cli', 'http', 'ssh'].includes(conn.type)) {
+      const configuredKeys = secretStore.configuredKeys(conn.id)
+      const readiness = runtimeConfig.configurationState(conn, configuredKeys)
+      return { ok: true, connector: normalize.publicConnectorView(conn, { ok: readiness.ready, ...readiness }, configuredKeys) }
+    }
+
     return {
       ok: true,
       connector: normalize.publicConnectorView(conn, {
@@ -146,7 +152,11 @@ function createConnectorsApi(deps = {}) {
     ensureMigrated()
     const conn = connectorStore.loadConnectors().find((item) => item.id === String(connectorId || '').trim())
     if (!conn) return { ok: false, code: 'not_found', message: '连接器不存在' }
-    if (conn.type !== 'mcp') return { ok: false, code: 'unsupported', message: '该连接器不支持 MCP 工具发现' }
+    if (['cli', 'http', 'ssh'].includes(conn.type)) {
+      const toolName = `connector_${conn.id.replace(/[^a-zA-Z0-9_]/g, '_')}_call`
+      return { ok: true, availableTools: [{ rawName: toolName, projectedName: toolName, description: `${conn.title || conn.id} Agent 调用入口`, selected: true }] }
+    }
+    if (conn.type !== 'mcp') return { ok: false, code: 'unsupported', message: '该连接器不支持工具发现' }
     const configuredKeys = secretStore.configuredKeys(conn.id)
     const readiness = runtimeConfig.configurationState(conn, configuredKeys)
     if (!readiness.ready) return { ok: false, code: readiness.state, message: readiness.message, tools: [] }

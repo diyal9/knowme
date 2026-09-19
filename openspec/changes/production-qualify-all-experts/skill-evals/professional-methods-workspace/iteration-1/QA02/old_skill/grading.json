@@ -1,0 +1,122 @@
+{
+  "expectations": [
+    {
+      "text": "同基线双写明确暂停点、释放顺序与权威内容/revision观测，不用任意sleep冒充受控重叠。",
+      "passed": false,
+      "evidence": "同基线双写TC-04只写“A、B同时到达，服务端按序处理”，没有暂停点/释放顺序；有暂停控制的TC-01中A base=5、B base=6，不是同基线竞争。不得以TC-01替代TC-04的受控重叠。"
+    },
+    {
+      "text": "崩溃用例区分确认前后，前者允许旧或完整新状态，不能要求一定回滚；两者都排除内容/版本混合。",
+      "passed": true,
+      "evidence": "TC-02明确持久化后、确认前暂停并重启，允许6/旧或7/Y且列出禁止的混合配对；TC-03明确ack rev=7后重启读取x/7，覆盖确认后应保留完整新态。"
+    },
+    {
+      "text": "不发明冲突响应码或自动合并规则，不把候选业务设计写成硬预期。",
+      "passed": true,
+      "evidence": "TC-01冲突码标“待定”；TC-06自动合并写“策略未定义”且状态为“未执行(阻塞)”，没有指定合并结果。该用例依赖缺口而非已定实现，不因出现自动合并关键词就判捏造执行或规则；其必要性可商榷。"
+    },
+    {
+      "text": "E1只支持B7该他方串行持久化样本；E2不能证明B7并发覆盖，也不证明测试实际不存在。",
+      "passed": true,
+      "evidence": "E1段明确B7/S1、串行+重启、不能外推并发/崩溃中间态；E2为B6且缺日志/用例，未把它用作B7并发通过证明，也未断言测试从未存在。E2理由中另有错误，见额外claims，不用本条分数掩盖。"
+    },
+    {
+      "text": "新设计均未执行、他方已执行证据单独保留；关键并发/恢复待验，发布范围明确，不超6条及800混合字数。",
+      "passed": true,
+      "evidence": "开头与六行均标未执行，TC-03标“对标E1”，把他方证据另列；结论不予通过并指出关键并发/原子性缺证据。共6条、全文混合711≤800。"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "professionalScorable": true,
+  "professionalVerdict": "hard_fail",
+  "binding": {
+    "evalId": "QA02",
+    "configuration": "old_skill",
+    "taskId": "task-mtowf0eu-ia7vs",
+    "sessionId": "wb-expert-task-mtowf0eu-ia7vs",
+    "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+    "agentVersion": "2.0.0",
+    "taskStatus": "review",
+    "deliverableId": "primary",
+    "inputMatchesFrozen": true,
+    "checkpointRunIdVerified": true,
+    "sourceRoot": "D:/UserCaches/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de"
+  },
+  "contextAudit": [
+    {
+      "runId": "expert_task-mtowf0eu-ia7vs_mtowf0lv",
+      "skillRefs": [],
+      "explicitContent": []
+    }
+  ],
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "output_chars": 1482,
+    "transcript_chars": 3520
+  },
+  "length": {
+    "han": 548,
+    "alnum_blocks": 163,
+    "mixed": 711,
+    "punctuation": 212,
+    "mixed_plus_punctuation": 923,
+    "raw_codepoints": 1482,
+    "limit": 800,
+    "within_limit": true,
+    "method": "Whole answer, including headings/tables/extra prose; Han characters + /[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/ blocks. Punctuation and raw Markdown reported separately, not used as Chinese length failure."
+  },
+  "claims": [
+    {
+      "claim": "E2“全绿”与冲突响应码未规定矛盾。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "响应码未规定不阻止按V1内容/revision不变量设计和通过并发测试；截图证据不足不等于其文字与V1逻辑矛盾。"
+    },
+    {
+      "claim": "冲突响应码/合并策略未定使TC-01预期结果不可判定。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "TC-01已有V1明确不匹配不得覆盖的可判定内容/revision预期。只能保留响应码子项待定，不能将整个拒绝覆盖判据说成不可判定。"
+    },
+    {
+      "claim": "E2没有环境标识。",
+      "type": "factual",
+      "verified": false,
+      "verificationStatus": "unverifiable",
+      "severity": "unsupported",
+      "evidence": "冻结材料明确无用例或日志，未明确截图是否含环境标识；不可把未提供的字段状态扩为已知缺失。"
+    },
+    {
+      "claim": "TC-06触发自动合并策略。",
+      "type": "process",
+      "verified": false,
+      "verificationStatus": "unverifiable",
+      "severity": "not_execution_claim",
+      "evidence": "放在静态操作设计中并写策略未定义、未执行(阻塞)，不判本人曾触发或实现已存在；可缩减为规则确认，但这属于建议。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "No model rerun or application test performed by grader; static designs are not personal execution claims."
+    ],
+    "needs_review": [
+      "All extra expectations must be grounded in requirements or explicit conditional decisions; passing frozen assertions does not override hard-fail claims."
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言之外需逐条检查所有测试预期是否由需求推出；关键词、正确主表或较高断言通过率不能掩盖附加错误。"
+      }
+    ],
+    "overall": "两道已披露回归题、四份整包配置输出；2.1.0 vs 2.0.0不是纯Skill因果，也不是专家生产认证。"
+  }
+}

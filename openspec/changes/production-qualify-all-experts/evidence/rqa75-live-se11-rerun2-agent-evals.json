@@ -1,0 +1,25 @@
+{
+  "suite": "RQA75 software engineer normal coverage completion",
+  "evaluatedAt": "2026-09-07T22:26:22.346Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:ef7f6c88068733a37ff237824e1006634c99043c4987f31d8c26e6b1395e819b",
+      "tasks": [
+        {
+          "taskId": "task-mtrt8dsp-surox",
+          "evalId": "SE11",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "expert-config-v2:ef7f6c88068733a37ff237824e1006634c99043c4987f31d8c26e6b1395e819b",
+          "hardFailure": true,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:408:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:563:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

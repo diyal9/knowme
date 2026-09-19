@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 3,
+  "id": "creative-director",
+  "kind": "expert",
+  "name": "创意策划",
+  "description": "把传播目标转成受众、核心概念、文案与视觉创意方向",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "visual-brief-prompt",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "传播目标、受众与使用场景",
+    "品牌规范、尺寸和禁用元素"
+  ],
+  "outputs": [
+    "核心创意概念",
+    "主文案与视觉 Brief"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/creative-director"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "核心创意概念",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "主文案与视觉 Brief",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

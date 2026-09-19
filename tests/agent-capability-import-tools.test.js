@@ -2,42 +2,18 @@
 
 const { describe, it } = require('node:test')
 const assert = require('node:assert/strict')
-const fs = require('node:fs')
-const os = require('node:os')
 const path = require('node:path')
 const { loadBundledCatalog } = require('../src/lib/capability-catalog')
-const { installCurated } = require('../src/lib/capability-import')
-const { resolvePaths } = require('../src/lib/capability-store')
-const { createExpertRuntime } = require('../src/lib/expert-runtime')
 const {
-  IMPORT_EXPERT_ID,
   buildCapabilityImportTools,
 } = require('../src/lib/agent-capability-import-tools')
 
-describe('external capability importer expert tools', () => {
-  it('is published and installed only as a first-class Expert Agent', () => {
+describe('platform capability import workflow tools', () => {
+  it('keeps import as a platform workflow capability instead of a dedicated expert', () => {
     const bundledRoot = path.resolve(__dirname, '../src/catalog')
     const catalog = loadBundledCatalog(bundledRoot)
-    const published = catalog.entries.filter(item => (
-      item.id === IMPORT_EXPERT_ID || item.id === 'external-capability-import'
-    ))
-    assert.deepEqual(published.map(item => ({ id: item.id, kind: item.kind })), [
-      { id: IMPORT_EXPERT_ID, kind: 'expert' },
-    ])
-
-    const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-import-expert-'))
-    const installed = installCurated(userData, IMPORT_EXPERT_ID, { bundledRoot, riskConfirmed: true })
-    assert.equal(installed.ok, true)
-    assert.equal(installed.entry.kind, 'expert')
-    assert.equal(installed.entry.id, IMPORT_EXPERT_ID)
-    assert.ok(fs.existsSync(path.join(installed.installDir, 'EXPERT.md')))
-    assert.equal(fs.existsSync(path.join(installed.installDir, 'SKILL.md')), false)
-    const expert = createExpertRuntime({ capabilitiesRoot: resolvePaths(userData).root })
-      .loadExpert(IMPORT_EXPERT_ID)
-    assert.equal(expert.ok, true)
-    assert.equal(expert.name, '智能体运维专员')
-    assert.match(expert.systemPrompt, /preview_external_project/)
-    assert.deepEqual(expert.skills, [])
+    assert.equal(catalog.entries.some(item => item.id === 'external-capability-importer'), false)
+    assert.ok(catalog.entries.some(item => item.id === 'capability-import-assurance' && item.kind === 'skill'))
   })
 
   it('previews before write and preserves the opaque snapshot token', async () => {
@@ -54,7 +30,6 @@ describe('external capability importer expert tools', () => {
         },
       },
     })
-    assert.equal(IMPORT_EXPERT_ID, 'external-capability-importer')
     const preview = await tools.handlers.preview_external_project({ path: 'D:/project' })
     assert.equal(preview.ok, true)
     assert.equal(preview.meta.previewToken, 'snapshot-1')

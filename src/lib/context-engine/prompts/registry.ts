@@ -1,9 +1,10 @@
 'use strict'
 
 const zhCN = require('./zh-CN')
+const enUS = require('./en-US')
 
 const FALLBACK_LOCALE = 'zh-CN'
-const packs = new Map([[zhCN.locale, zhCN]])
+const packs = new Map([[zhCN.locale, zhCN], [enUS.locale, enUS]])
 
 function normalizeLocale(value) {
   const raw = String(value || '').trim()
@@ -23,6 +24,11 @@ function getPromptBlock(id, locale) {
   return requested.blocks[id] || zhCN.blocks[id] || null
 }
 
+function getPromptStrings(locale) {
+  const requested = getLocalePack(locale)
+  return requested.strings || zhCN.strings || {}
+}
+
 function listPromptBlocks(ids = [], locale) {
   return [...new Set(Array.isArray(ids) ? ids : [])]
     .map(id => getPromptBlock(id, locale))
@@ -39,5 +45,6 @@ module.exports = {
   normalizeLocale,
   getLocalePack,
   getPromptBlock,
+  getPromptStrings,
   listPromptBlocks,
 }

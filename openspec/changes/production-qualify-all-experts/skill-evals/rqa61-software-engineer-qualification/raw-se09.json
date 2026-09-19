@@ -1,0 +1,1237 @@
+{
+  "suite": "RQA61",
+  "executedAt": "2026-09-07T05:49:09Z",
+  "results": [
+    {
+      "evalId": "SE09",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "create": {
+        "ok": true,
+        "task": {
+          "taskVersion": 2,
+          "activityContractVersion": 1,
+          "id": "task-mtqtjoxl-4lhtw",
+          "projectId": null,
+          "projectSnapshot": null,
+          "kind": "expert",
+          "title": "[RQA61 SE09] 退回修改的精确变更",
+          "expertId": "software-engineer",
+          "expertName": "software-engineer",
+          "workflowId": "",
+          "workflowName": "",
+          "goal": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。",
+          "brief": {
+            "goal": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。",
+            "plan": null,
+            "requiresMaterials": false,
+            "requiredInputs": [],
+            "materials": [
+              {
+                "id": "provided-context",
+                "type": "text",
+                "title": "冻结验收题",
+                "ref": "",
+                "content": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。"
+              }
+            ],
+            "deliverables": [
+              {
+                "id": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "required": true,
+                "acceptanceCriteria": [],
+                "requiredTools": [],
+                "requiredSkills": [
+                  "software-change-verification"
+                ],
+                "requiredConnectorIds": [],
+                "requiredEvidence": [],
+                "requiredArtifacts": [],
+                "minArtifacts": 0,
+                "completionConditions": []
+              }
+            ],
+            "constraints": [
+              "不得执行外部写入。",
+              "不得调用工具。",
+              "不得声称已运行测试。"
+            ],
+            "dueAt": ""
+          },
+          "assignmentSnapshot": {
+            "agentId": "software-engineer",
+            "agentVersion": "2.2.0",
+            "agentHash": "18bcf4d4e7195931",
+            "hashes": {
+              "expert": "18bcf4d4e7195931",
+              "skills": {
+                "code-review": "17d5214576de2834",
+                "software-change-verification": "829c8afc1a1e3a6a"
+              },
+              "connectors": {}
+            },
+            "profileId": "",
+            "profileVersion": "",
+            "profileHash": "",
+            "snapshotRef": "expert-snapshot:wb-expert-task-mtqtjoxl-4lhtw",
+            "bindings": {
+              "skills": [
+                "software-change-verification",
+                "code-review"
+              ],
+              "connectors": []
+            },
+            "permissions": {
+              "connectors": {
+                "allowedConnectorIds": []
+              },
+              "tools": {
+                "allowlist": []
+              },
+              "network": false,
+              "write": false,
+              "externalWrite": false
+            },
+            "plan": null,
+            "sop": {
+              "version": "2.2.0",
+              "hash": "18bcf4d4e7195931"
+            }
+          },
+          "visibility": "private",
+          "participants": [],
+          "events": [
+            {
+              "id": "event-1",
+              "type": "created",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 1,
+              "summary": "已确认委托单并开始预检",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:47:26.073Z"
+            },
+            {
+              "id": "event-2",
+              "type": "preflight_passed",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 2,
+              "summary": "预检通过",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:47:26.722Z"
+            }
+          ],
+          "attention": null,
+          "progress": {
+            "phase": "preflight",
+            "label": "执行条件检查通过",
+            "detail": "",
+            "startedAt": "2026-09-07T05:47:26.698Z",
+            "updatedAt": "2026-09-07T05:47:26.698Z",
+            "heartbeatAt": "2026-09-07T05:47:26.698Z"
+          },
+          "inputQueue": null,
+          "deliverables": [],
+          "executionEvidence": [],
+          "resultSummary": "",
+          "status": "starting",
+          "execRef": {
+            "kind": "session",
+            "id": "wb-expert-task-mtqtjoxl-4lhtw"
+          },
+          "taskRef": null,
+          "knowledgeRefs": [],
+          "pinned": false,
+          "schedule": {
+            "type": "daily",
+            "dailyTime": "09:00",
+            "intervalValue": 24,
+            "intervalUnit": "hour",
+            "onceAt": "",
+            "cronExpr": ""
+          },
+          "scheduleEnabled": false,
+          "scheduleLabel": "",
+          "nextRunAt": "",
+          "lastScheduledAt": "",
+          "scheduleParentId": "",
+          "legacySchedule": {
+            "scheduleEnabled": false,
+            "schedule": {
+              "type": "daily",
+              "dailyTime": "09:00",
+              "intervalValue": 24,
+              "intervalUnit": "hour",
+              "onceAt": "",
+              "cronExpr": ""
+            },
+            "scheduleLabel": ""
+          },
+          "createdAt": "2026-09-07T05:47:26.073Z",
+          "updatedAt": "2026-09-07T05:47:26.722Z"
+        },
+        "started": true,
+        "preflightIssues": []
+      },
+      "steps": [
+        {
+          "action": "first_delivery",
+          "task": {
+            "id": "task-mtqtjoxl-4lhtw",
+            "status": "review",
+            "resultSummary": "## 契约与验收标准\n\n- **输入**：仅接受 `number` 或 `string`，其他类型一律拒绝。\n- **number 路径**：必须是大于 0 的安全整数（`Number.isSafeInteger` 且 `> 0`）。\n- **string 路径**：允许首尾空白；去除后必须完整表示大于 0 的十进制安全整数；禁止部分解析（如 `\"123abc\"` 不合法）。\n- **输出**：返回合法的 `number`。\n- **异常**：任何不符合上述条件的情况抛出 `Error('INVALID_POSITIVE_INT')`。\n\n---\n\n##",
+            "deliverables": [
+              {
+                "deliverableId": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "version": 1,
+                "required": true,
+                "previousVersionId": "",
+                "artifactRef": "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary",
+                "artifactRefs": [
+                  "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary"
+                ],
+                "executionRef": "agent-run:expert_task-mtqtjoxl-4lhtw_mtqtjpqm",
+                "kind": "deliverable",
+                "source": "expert",
+                "sequence": 1,
+                "evidenceStatus": "verified",
+                "acceptanceStatus": "pending",
+                "comments": [],
+                "createdAt": "2026-09-07T05:48:15.079Z"
+              }
+            ],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.073Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.722Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.842Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.165Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:01.380Z"
+              },
+              {
+                "id": "event-9",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "回答生成完成",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:14.834Z"
+              },
+              {
+                "id": "event-10",
+                "type": "deliverable_ready",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "专业答复",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:15.099Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.2.0",
+                "hash": "18bcf4d4e7195931"
+              },
+              "skills": [
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": true,
+              "rewritten": false,
+              "initialPassed": true,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T05:48:15.099Z"
+          }
+        },
+        {
+          "action": "changes_requested",
+          "result": {
+            "ok": true,
+            "task": {
+              "taskVersion": 2,
+              "activityContractVersion": 1,
+              "id": "task-mtqtjoxl-4lhtw",
+              "projectId": null,
+              "projectSnapshot": null,
+              "kind": "expert",
+              "title": "[RQA61 SE09] 退回修改的精确变更",
+              "expertId": "software-engineer",
+              "expertName": "software-engineer",
+              "workflowId": "",
+              "workflowName": "",
+              "goal": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。",
+              "brief": {
+                "goal": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。",
+                "plan": null,
+                "requiresMaterials": false,
+                "requiredInputs": [],
+                "materials": [
+                  {
+                    "id": "provided-context",
+                    "type": "text",
+                    "title": "冻结验收题",
+                    "ref": "",
+                    "content": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。"
+                  }
+                ],
+                "deliverables": [
+                  {
+                    "id": "primary",
+                    "title": "专业答复",
+                    "type": "answer",
+                    "required": true,
+                    "acceptanceCriteria": [],
+                    "requiredTools": [],
+                    "requiredSkills": [
+                      "software-change-verification"
+                    ],
+                    "requiredConnectorIds": [],
+                    "requiredEvidence": [],
+                    "requiredArtifacts": [],
+                    "minArtifacts": 0,
+                    "completionConditions": []
+                  }
+                ],
+                "constraints": [
+                  "不得执行外部写入。",
+                  "不得调用工具。",
+                  "不得声称已运行测试。"
+                ],
+                "dueAt": ""
+              },
+              "assignmentSnapshot": {
+                "agentId": "software-engineer",
+                "agentVersion": "2.2.0",
+                "agentHash": "18bcf4d4e7195931",
+                "hashes": {
+                  "expert": "18bcf4d4e7195931",
+                  "skills": {
+                    "code-review": "17d5214576de2834",
+                    "software-change-verification": "829c8afc1a1e3a6a"
+                  },
+                  "connectors": {}
+                },
+                "profileId": "",
+                "profileVersion": "",
+                "profileHash": "",
+                "snapshotRef": "expert-snapshot:wb-expert-task-mtqtjoxl-4lhtw",
+                "bindings": {
+                  "skills": [
+                    "software-change-verification",
+                    "code-review"
+                  ],
+                  "connectors": []
+                },
+                "permissions": {
+                  "connectors": {
+                    "allowedConnectorIds": []
+                  },
+                  "tools": {
+                    "allowlist": []
+                  },
+                  "network": false,
+                  "write": false,
+                  "externalWrite": false
+                },
+                "plan": null,
+                "sop": {
+                  "version": "2.2.0",
+                  "hash": "18bcf4d4e7195931"
+                }
+              },
+              "visibility": "private",
+              "participants": [],
+              "events": [
+                {
+                  "id": "event-1",
+                  "type": "created",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 1,
+                  "summary": "已确认委托单并开始预检",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:26.073Z"
+                },
+                {
+                  "id": "event-2",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 2,
+                  "summary": "预检通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:26.722Z"
+                },
+                {
+                  "id": "event-3",
+                  "type": "preflight_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 3,
+                  "summary": "正在检查技能、连接器和工具权限",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:26.842Z"
+                },
+                {
+                  "id": "event-4",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 4,
+                  "summary": "执行条件检查通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:27.092Z"
+                },
+                {
+                  "id": "event-5",
+                  "type": "task_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 5,
+                  "summary": "专家已开始执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:27.092Z"
+                },
+                {
+                  "id": "event-6",
+                  "type": "sop_applied",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 6,
+                  "summary": "已加载专家 SOP，按最小必要路径执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:27.092Z"
+                },
+                {
+                  "id": "event-7",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 7,
+                  "summary": "正在准备上下文…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:47:27.165Z"
+                },
+                {
+                  "id": "event-8",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 8,
+                  "summary": "正在整理最终答复…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:48:01.380Z"
+                },
+                {
+                  "id": "event-9",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 9,
+                  "summary": "回答生成完成",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:48:14.834Z"
+                },
+                {
+                  "id": "event-10",
+                  "type": "deliverable_ready",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 10,
+                  "summary": "专业答复",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:48:15.099Z"
+                },
+                {
+                  "id": "review-mtqtks3i",
+                  "type": "changes_requested",
+                  "kind": "review",
+                  "source": "system",
+                  "sequence": 11,
+                  "summary": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+                  "actorId": "user",
+                  "createdAt": "2026-09-07T05:48:16.830Z"
+                }
+              ],
+              "attention": null,
+              "progress": {
+                "phase": "preflight",
+                "label": "正在检查执行条件",
+                "detail": "",
+                "startedAt": "2026-09-07T05:48:16.881Z",
+                "updatedAt": "2026-09-07T05:48:16.881Z",
+                "heartbeatAt": "2026-09-07T05:48:16.881Z"
+              },
+              "inputQueue": null,
+              "deliverables": [
+                {
+                  "deliverableId": "primary",
+                  "title": "专业答复",
+                  "type": "answer",
+                  "version": 1,
+                  "required": true,
+                  "previousVersionId": "",
+                  "artifactRef": "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary",
+                  "artifactRefs": [
+                    "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary"
+                  ],
+                  "executionRef": "agent-run:expert_task-mtqtjoxl-4lhtw_mtqtjpqm",
+                  "kind": "deliverable",
+                  "source": "expert",
+                  "sequence": 1,
+                  "evidenceStatus": "verified",
+                  "acceptanceStatus": "changes_requested",
+                  "comments": [
+                    {
+                      "id": "comment-mtqtks3i",
+                      "body": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+                      "authorId": "user",
+                      "createdAt": "2026-09-07T05:48:16.830Z"
+                    }
+                  ],
+                  "createdAt": "2026-09-07T05:48:15.079Z"
+                }
+              ],
+              "executionEvidence": [
+                {
+                  "runId": "expert_task-mtqtjoxl-4lhtw_mtqtjpqm",
+                  "deliverableId": "primary",
+                  "gateStatus": "verified",
+                  "verificationPassed": true,
+                  "verificationDiagnostics": {
+                    "version": 1,
+                    "runId": "expert_task-mtqtjoxl-4lhtw_mtqtjpqm",
+                    "taskId": "task-mtqtjoxl-4lhtw",
+                    "candidateHash": "ea4602bd6a37ba6ce29a38e70dee23cf4e8dea8e32c0c6da54324013b5c57aba",
+                    "candidateChars": 3364,
+                    "materialSnapshotHash": "419d3f741732e315c3389ee26b5feb8ddd68e95590b4640480f842209c940150",
+                    "materialCount": 1,
+                    "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+                    "fieldChecks": [],
+                    "fieldCheckCount": 0
+                  },
+                  "qualificationContext": {
+                    "contractVersion": 1,
+                    "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+                    "complete": true,
+                    "missing": [],
+                    "agent": {
+                      "id": "software-engineer",
+                      "version": "2.2.0",
+                      "hash": "18bcf4d4e7195931"
+                    },
+                    "skills": [
+                      {
+                        "id": "code-review",
+                        "hash": "17d5214576de2834"
+                      },
+                      {
+                        "id": "software-change-verification",
+                        "hash": "829c8afc1a1e3a6a"
+                      }
+                    ],
+                    "connectors": [],
+                    "model": {
+                      "provider": "dashscope",
+                      "id": "qwen3.8-max",
+                      "requestedId": "qwen3.8-max",
+                      "label": "Qwen 3.8 Max",
+                      "autoRouted": false
+                    }
+                  },
+                  "qualityGuardrail": {
+                    "mode": "same_model_guardrail",
+                    "enabled": true,
+                    "passed": true,
+                    "rewritten": false,
+                    "initialPassed": true,
+                    "finalPassed": false
+                  },
+                  "toolCalls": [],
+                  "evidence": [],
+                  "violations": [],
+                  "createdAt": "2026-09-07T05:48:14.989Z"
+                }
+              ],
+              "resultSummary": "## 契约与验收标准\n\n- **输入**：仅接受 `number` 或 `string`，其他类型一律拒绝。\n- **number 路径**：必须是大于 0 的安全整数（`Number.isSafeInteger` 且 `> 0`）。\n- **string 路径**：允许首尾空白；去除后必须完整表示大于 0 的十进制安全整数；禁止部分解析（如 `\"123abc\"` 不合法）。\n- **输出**：返回合法的 `number`。\n- **异常**：任何不符合上述条件的情况抛出 `Error('INVALID_POSITIVE_INT')`。\n\n---\n\n##",
+              "status": "starting",
+              "execRef": {
+                "kind": "session",
+                "id": "wb-expert-task-mtqtjoxl-4lhtw"
+              },
+              "taskRef": null,
+              "knowledgeRefs": [],
+              "pinned": false,
+              "schedule": {
+                "type": "daily",
+                "dailyTime": "09:00",
+                "intervalValue": 24,
+                "intervalUnit": "hour",
+                "onceAt": "",
+                "cronExpr": ""
+              },
+              "scheduleEnabled": false,
+              "scheduleLabel": "",
+              "nextRunAt": "",
+              "lastScheduledAt": "",
+              "scheduleParentId": "",
+              "legacySchedule": {
+                "scheduleEnabled": false,
+                "schedule": {
+                  "type": "daily",
+                  "dailyTime": "09:00",
+                  "intervalValue": 24,
+                  "intervalUnit": "hour",
+                  "onceAt": "",
+                  "cronExpr": ""
+                },
+                "scheduleLabel": ""
+              },
+              "createdAt": "2026-09-07T05:47:26.073Z",
+              "updatedAt": "2026-09-07T05:48:16.902Z"
+            },
+            "started": true
+          }
+        },
+        {
+          "action": "revised_delivery",
+          "task": {
+            "id": "task-mtqtjoxl-4lhtw",
+            "status": "review",
+            "resultSummary": "## 契约与验收标准\n\n- **输入**：仅接受 `number` 或 `string`，其他类型一律拒绝。\n- **number 路径**：必须是大于 0 的安全整数（`Number.isSafeInteger` 且 `> 0`）。\n- **string 路径**：允许首尾 ASCII 空格（U+0020）；去除后主体必须是规范十进制正整数（首位为 1-9，后续为 0-9，无前导零、无符号位、无小数点）；禁止部分解析；禁止全角数字和其他 Unicode 空白。\n- **输出**：返回合法的 `number`。\n- **异常**：任何不符合上述条件的情况",
+            "deliverables": [
+              {
+                "deliverableId": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "version": 2,
+                "required": true,
+                "previousVersionId": "deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary",
+                "artifactRef": "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtksf0_primary",
+                "artifactRefs": [
+                  "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtksf0_primary"
+                ],
+                "executionRef": "agent-run:expert_task-mtqtjoxl-4lhtw_mtqtksf0",
+                "kind": "deliverable",
+                "source": "expert",
+                "sequence": 1,
+                "evidenceStatus": "verified",
+                "acceptanceStatus": "pending",
+                "comments": [
+                  {
+                    "id": "comment-mtqtks3i",
+                    "body": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+                    "authorId": "user",
+                    "createdAt": "2026-09-07T05:48:16.830Z"
+                  }
+                ],
+                "createdAt": "2026-09-07T05:49:07.533Z"
+              }
+            ],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.073Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.722Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:26.842Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.092Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:47:27.165Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:01.380Z"
+              },
+              {
+                "id": "event-9",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "回答生成完成",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:14.834Z"
+              },
+              {
+                "id": "event-10",
+                "type": "deliverable_ready",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "专业答复",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:15.099Z"
+              },
+              {
+                "id": "review-mtqtks3i",
+                "type": "changes_requested",
+                "kind": "review",
+                "source": "system",
+                "sequence": 11,
+                "summary": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+                "actorId": "user",
+                "createdAt": "2026-09-07T05:48:16.830Z"
+              },
+              {
+                "id": "event-12",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 12,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:16.972Z"
+              },
+              {
+                "id": "event-13",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 13,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:17.218Z"
+              },
+              {
+                "id": "event-14",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 14,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:17.218Z"
+              },
+              {
+                "id": "event-15",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 15,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:17.218Z"
+              },
+              {
+                "id": "event-16",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 16,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:17.286Z"
+              },
+              {
+                "id": "event-17",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 17,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:48:52.164Z"
+              },
+              {
+                "id": "event-18",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 18,
+                "summary": "回答生成完成",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:49:07.277Z"
+              },
+              {
+                "id": "event-19",
+                "type": "revision_ready",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 19,
+                "summary": "专业答复",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:49:07.554Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.2.0",
+                "hash": "18bcf4d4e7195931"
+              },
+              "skills": [
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": true,
+              "rewritten": false,
+              "initialPassed": true,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T05:49:07.554Z"
+          }
+        }
+      ],
+      "final": {
+        "id": "task-mtqtjoxl-4lhtw",
+        "status": "review",
+        "resultSummary": "## 契约与验收标准\n\n- **输入**：仅接受 `number` 或 `string`，其他类型一律拒绝。\n- **number 路径**：必须是大于 0 的安全整数（`Number.isSafeInteger` 且 `> 0`）。\n- **string 路径**：允许首尾 ASCII 空格（U+0020）；去除后主体必须是规范十进制正整数（首位为 1-9，后续为 0-9，无前导零、无符号位、无小数点）；禁止部分解析；禁止全角数字和其他 Unicode 空白。\n- **输出**：返回合法的 `number`。\n- **异常**：任何不符合上述条件的情况",
+        "deliverables": [
+          {
+            "deliverableId": "primary",
+            "title": "专业答复",
+            "type": "answer",
+            "version": 2,
+            "required": true,
+            "previousVersionId": "deliverable_expert_task-mtqtjoxl-4lhtw_mtqtjpqm_primary",
+            "artifactRef": "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtksf0_primary",
+            "artifactRefs": [
+              "wb-expert-task-mtqtjoxl-4lhtw#deliverable_expert_task-mtqtjoxl-4lhtw_mtqtksf0_primary"
+            ],
+            "executionRef": "agent-run:expert_task-mtqtjoxl-4lhtw_mtqtksf0",
+            "kind": "deliverable",
+            "source": "expert",
+            "sequence": 1,
+            "evidenceStatus": "verified",
+            "acceptanceStatus": "pending",
+            "comments": [
+              {
+                "id": "comment-mtqtks3i",
+                "body": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+                "authorId": "user",
+                "createdAt": "2026-09-07T05:48:16.830Z"
+              }
+            ],
+            "createdAt": "2026-09-07T05:49:07.533Z"
+          }
+        ],
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:26.073Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:26.722Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:26.842Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:27.092Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:27.092Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:27.092Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:47:27.165Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:01.380Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "回答生成完成",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:14.834Z"
+          },
+          {
+            "id": "event-10",
+            "type": "deliverable_ready",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "专业答复",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:15.099Z"
+          },
+          {
+            "id": "review-mtqtks3i",
+            "type": "changes_requested",
+            "kind": "review",
+            "source": "system",
+            "sequence": 11,
+            "summary": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
+            "actorId": "user",
+            "createdAt": "2026-09-07T05:48:16.830Z"
+          },
+          {
+            "id": "event-12",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:16.972Z"
+          },
+          {
+            "id": "event-13",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 13,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:17.218Z"
+          },
+          {
+            "id": "event-14",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 14,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:17.218Z"
+          },
+          {
+            "id": "event-15",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 15,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:17.218Z"
+          },
+          {
+            "id": "event-16",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 16,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:17.286Z"
+          },
+          {
+            "id": "event-17",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 17,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:48:52.164Z"
+          },
+          {
+            "id": "event-18",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 18,
+            "summary": "回答生成完成",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:49:07.277Z"
+          },
+          {
+            "id": "event-19",
+            "type": "revision_ready",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 19,
+            "summary": "专业答复",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:49:07.554Z"
+          }
+        ],
+        "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.2.0",
+            "hash": "18bcf4d4e7195931"
+          },
+          "skills": [
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": true,
+          "passed": true,
+          "rewritten": false,
+          "initialPassed": true,
+          "finalPassed": false
+        },
+        "updatedAt": "2026-09-07T05:49:07.554Z"
+      }
+    }
+  ]
+}

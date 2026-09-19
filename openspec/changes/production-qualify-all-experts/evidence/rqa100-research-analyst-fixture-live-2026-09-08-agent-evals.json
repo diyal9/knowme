@@ -1,0 +1,83 @@
+{
+  "suite": "RQA74 research analyst lifecycle completion",
+  "evaluatedAt": "2026-09-08T07:55:32.520Z",
+  "agents": [
+    {
+      "agentId": "research-analyst",
+      "currentConfigurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+      "tasks": [
+        {
+          "taskId": "task-mtsdkccy-5gmxg",
+          "evalId": "RA05",
+          "scenario": "edge",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdkcki-prydi",
+          "evalId": "RA06",
+          "scenario": "retry",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdkcwr-9hpng",
+          "evalId": "RA07",
+          "scenario": "revision",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdkd46-b5r7l",
+          "evalId": "RA08",
+          "scenario": "reopen",
+          "status": "failed",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

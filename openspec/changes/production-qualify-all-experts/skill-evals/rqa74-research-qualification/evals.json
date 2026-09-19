@@ -1,0 +1,109 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "suite": "RQA74 research analyst lifecycle completion",
+  "purpose": "Complete the missing edge, retry, revision and reopen coverage for the retained research-analyst configuration.",
+  "evals": [
+    {
+      "id": "RA05",
+      "expertId": "research-analyst",
+      "title": "来源冲突与不可比口径",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "prompt": "只根据给定材料分析某工具的采用情况：官方公告说覆盖100家客户，但未说明活跃口径；第三方调研说有80家付费客户，样本为120家；访谈只覆盖6家公司且均为现有用户。请输出可比性审查、已知事实和未知项，不要计算统一采用率，不要联网。",
+      "assertions": [
+        "识别覆盖客户、付费客户、样本和访谈对象不是同一统计口径",
+        "不把第三方调研和访谈推导成总体采用率",
+        "明确样本选择、时间范围或活跃定义等未知项",
+        "不调用网络，结论只来自给定材料并标明证据边界"
+      ]
+    },
+    {
+      "id": "RA06",
+      "expertId": "research-analyst",
+      "title": "取消后重试官方证据检索",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "prompt": "研究两家指定厂商的官方产品能力和公开价格，必须读取官方原文并记录页面日期；第一次检索被取消后允许重试，重试要沿用厂商范围和证据标准，不能把搜索摘要或取消前的半成品当结论。",
+      "assertions": [
+        "真实经历取消和重试，重试仍保持两家指定厂商和官方原文范围",
+        "最终结论只引用实际读取的官方页面并记录日期或页面状态",
+        "搜索摘要、模型记忆和取消轮半成品不被当成最终证据",
+        "读取失败时清楚报告缺口，不补写未经核实的价格或能力"
+      ]
+    },
+    {
+      "id": "RA07",
+      "expertId": "research-analyst",
+      "title": "研究报告退回后的范围修订",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "reviewComment": "请保留原有来源、日期和证据分级，只删除关于市场份额的推断，并把官方事实与分析推断分成两个小节。请给出完整修订稿，不要只列改动。",
+      "prompt": "根据已提供的三份研究材料，写一份比较报告，分别列出来源事实、差异、限制和结论；不要联网，不要把样本结果外推成全市场结论。",
+      "assertions": [
+        "修订后交付完整报告，并保留原有来源、日期和证据分级",
+        "删除市场份额推断，官方事实与分析推断分成独立小节",
+        "不改写或虚构原始数字、样本和研究时间范围",
+        "真实经历 review→changes_requested/revising→review"
+      ]
+    },
+    {
+      "id": "RA08",
+      "expertId": "research-analyst",
+      "title": "完成后重开并补充证据限制",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "reviewComment": "验收后发现其中一个官方页面已返回404。请重开任务，保留可访问来源和已确认事实，将该条改为待复核，不得用搜索摘要替代原文。交付完整新版。",
+      "prompt": "根据已读取的官方页面，比较两家厂商的产品能力和价格，并区分已核实事实、推断和待复核项；记录访问日期。",
+      "assertions": [
+        "真实经历 review→completed→changes_requested/revising→review",
+        "重开后保留仍可访问来源，把404页面标为待复核而不编造内容",
+        "不以搜索摘要或模型记忆替代失效的官方原文",
+        "旧版、新意见和完整新版证据链可查看"
+      ]
+    },
+    {
+      "id": "RA09",
+      "expertId": "research-analyst",
+      "title": "联网事实核查",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "public-fact-check",
+      "prompt": "请联网核查以下陈述：某厂商在2026年已公开发布该产品。必须搜索公开来源并读取支持结论的原文，记录来源标题、发布者、日期和链接；没有原文回执时只能标记为待核实。",
+      "assertions": [
+        "命中 public-fact-check 路线并真实调用 search_web 与 fetch_web_page",
+        "每项结论回指实际读取的原文，不使用搜索摘要或模型记忆替代",
+        "区分支持、部分支持、无法确认和错误，并保留来源边界"
+      ]
+    },
+    {
+      "id": "RA10",
+      "expertId": "research-analyst",
+      "title": "公开网络研究",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "public-web-research",
+      "prompt": "请联网搜索两家指定厂商的官方产品能力和当前公开价格，先搜索再读取关键原文，记录访问日期和适用范围；登录限制或读取失败必须如实标注。",
+      "assertions": [
+        "命中 public-web-research 路线并真实完成搜索和原文读取",
+        "搜索候选不能直接作为最终证据，关键结论必须有页面读取回执",
+        "价格和能力按时间、版本、地区等可比口径整理，缺口明确标注"
+      ]
+    },
+    {
+      "id": "RA11",
+      "expertId": "research-analyst",
+      "title": "知识整理路线",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "knowledge-curation",
+      "prompt": "请作为研究分析师制定一份知识整理方案，直接在对话中交付，不联网、不调用工具。材料中有两份内容相同但负责人不同的文档，其中一份已过期，且没有明确权威来源。请设计来源分级、冲突保留、过期标记、归档和后续检索验证规则，不要擅自选择负责人或覆盖冲突。",
+      "assertions": [
+        "进入 knowledge-curation 路线，并保留冲突、负责人差异和过期事实，不静默合并。",
+        "给出可执行的来源分级、版本标记、有效期、归档和待确认责任人规则。",
+        "明确知识条目进入检索前后的验证方式，不声称已经完成导入或检索测试。",
+        "区分材料事实、整理规则和需要业务确认的决策。"
+      ]
+    }
+  ]
+}

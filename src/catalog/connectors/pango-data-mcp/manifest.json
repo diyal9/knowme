@@ -1,0 +1,40 @@
+{
+  "id": "pango-data-mcp",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "盘古数据中心 MCP",
+  "name": "盘古数据中心 MCP",
+  "description": "复用公司盘古 MCP 服务，以只读最小权限查询项目、埋点事件、属性、枚举与需求埋点；服务地址需在能力中心配置。",
+  "capabilities": ["analytics-metadata", "event-schema", "dimension-enum"],
+  "configState": "needs_configuration",
+  "mcp": {
+    "transport": "streamable-http",
+    "url": "",
+    "command": "",
+    "args": [],
+    "cwd": "",
+    "env": {}
+  },
+  "secretSlots": [
+    { "key": "PANGO_ACCESS_TOKEN", "label": "盘古访问令牌", "required": false, "target": "bearer" }
+  ],
+  "allowlist": [
+    "list_user_projects",
+    "list_events",
+    "list_event_properties",
+    "list_dimensions",
+    "get_dimension_info",
+    "get_requirement_buried_point"
+  ],
+  "healthCheck": { "tool": "list_user_projects", "timeoutMs": 30000 },
+  "toolPolicies": [
+    { "match": "*", "risk": "read", "sideEffects": false, "requiresApproval": false, "timeoutMs": 60000 }
+  ],
+  "permissions": {
+    "tools": ["list_user_projects", "list_events", "list_event_properties", "list_dimensions", "get_dimension_info", "get_requirement_buried_point"],
+    "externalSystem": "pango",
+    "network": true,
+    "fileWrite": false
+  }
+}

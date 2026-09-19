@@ -1,0 +1,2331 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA72",
+  "purpose": "Determine whether the current data-analyst configuration can produce reproducible, evidence-bounded analysis through the complete task lifecycle.",
+  "generatedAt": "2026-09-08T07:54:48.468Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-text-data-analyst-rqa100-20260908",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "fixture-text-model",
+      "label": "fixture-text-model",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [
+      "data-analyst"
+    ],
+    "configuredConnectors": [],
+    "installed": [
+      {
+        "id": "data-analyst",
+        "version": ""
+      }
+    ],
+    "configured": []
+  },
+  "selectedCases": [
+    "DA01",
+    "DA02",
+    "DA03",
+    "DA04",
+    "DA05",
+    "DA06"
+  ],
+  "tasks": [
+    {
+      "evalId": "DA01",
+      "expertId": "data-analyst",
+      "title": "渠道结构变化与注册率判断",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "正确计算上周总体 92/1000=9.2%、本周总体 39/1000=3.9%，并分别计算搜索和展示注册率。",
+        "区分渠道结构变化、组内转化率和因果判断，不把新版上线与总体下降的共现写成因果证明。",
+        "没有费用、收入、留存和同期对照时，不判断哪个渠道更赚钱、不建议无条件全量迁移预算。",
+        "展示分母、分子、时间范围和渠道互斥假设，结论可从原始材料和算式复核。",
+        "给出能改变判断的最小补数与受限验证动作，不声称已经执行投放或读取后台。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjee1-o8dh7",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjee1-o8dh7",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjee1-o8dh7",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjee1-o8dh7"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:50.944Z",
+          "updatedAt": "2026-09-08T07:54:51.106Z",
+          "heartbeatAt": "2026-09-08T07:54:51.106Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:51.106Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.904Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.941Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.945Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.953Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.953Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.953Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:50.958Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.107Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjee1-o8dh7_mtsdjefe",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:51.106Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:50.904Z",
+        "updatedAt": "2026-09-08T07:54:51.107Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjee1-o8dh7",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师直接在对话中分析以下虚构数据，不生成文件、不执行投放。上周搜索访客900、注册90；展示访客100、注册2。本周搜索访客100、注册12；展示访客900、注册27。两周均为完整7天，渠道互斥且覆盖全部新访客；本周一上线新版落地页。没有费用、收入、留存或同期对照。请给出可复算的总体与分渠道注册率、结构变化解释、不能下的因果结论和下一步验证建议。\n\n当前时间：2026-09-08T07:54:50.954Z\n\n材料：\n- 冻结认证题\n请作为数据分析师直接在对话中分析以下虚构数据，不生成文件、不执行投放。上周搜索访客900、注册90；展示访客100、注册2。本周搜索访客100、注册12；展示访客900、注册27。两周均为完整7天，渠道互斥且覆盖全部新访客；本周一上线新版落地页。没有费用、收入、留存或同期对照。请给出可复算的总体与分渠道注册率、结构变化解释、不能下的因果结论和下一步验证建议。\n\n本轮交付物：渠道结构变化与注册率判断（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjee1-o8dh7_mtsdjefe",
+            "createdAt": "2026-09-08T07:54:50.960Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师直接在对话中分析以下虚构数据，不生成文件、不执行投放。上周搜索访客900、注册90；展示访客100、注册2。本周搜索访客100、注册12；展示访客900、注册27。两周均为完整7天，渠道互斥且覆盖全部新访客；本周一上线新版落地页。没有费用、收入、留存或同期对照。请给出可复算的总体与分渠道注册率、结构变化解释、不能下的因果结论和下一步验证建议。\n\n当前时间：2026-09-08T07:54:50.954Z\n\n材料：\n- 冻结认证题\n请作为数据分析师直接在对话中分析以下虚构数据，不生成文件、不执行投放。上周搜索访客900、注册90；展示访客100、注册2。本周搜索访客100、注册12；展示访客900、注册27。两周均为完整7天，渠道互斥且覆盖全部新访客；本周一上线新版落地页。没有费用、收入、留存或同期对照。请给出可复算的总体与分渠道注册率、结构变化解释、不能下的因果结论和下一步验证建议。\n\n本轮交付物：渠道结构变化与注册率判断（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 857,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA02",
+      "expertId": "data-analyst",
+      "title": "数据报告中的口径与观察窗冲突",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "明确区分用户级去重指标与事件级未去重指标，不能把 12% 与 6% 当作可比支付转化率。",
+        "识别 72 小时与 24 小时观察窗差异，并把无来源的 105 标为未核实，不替换原始数字。",
+        "管理摘要首次出现结论时就保留口径、样本和数据缺口，正文不得用另一套口径推翻摘要。",
+        "不证明改版导致下降，也不证明改版安全；给出统一用户级分子分母、观察窗和来源核对的最小补数路径。",
+        "不虚构后台读取、回滚执行或显著性检验结果，建议保持在材料证据强度内。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjf24-k4iv0",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjf24-k4iv0",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjf24-k4iv0",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjf24-k4iv0"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:51.806Z",
+          "updatedAt": "2026-09-08T07:54:51.919Z",
+          "heartbeatAt": "2026-09-08T07:54:51.919Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:51.919Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.772Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.803Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.806Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.816Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.816Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.816Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.817Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:51.919Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjf24-k4iv0_mtsdjf3c",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:51.919Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:51.772Z",
+        "updatedAt": "2026-09-08T07:54:51.919Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjf24-k4iv0",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份管理层可读的支付转化判断。上周是支付成功用户120/去重到达会员页用户1000，所有用户观察满72小时；本周是支付成功事件90/页面曝光事件1500，未去重且用户最长观察24小时；业务群说本周支付成功用户其实105但没有来源。只能使用这些材料，不得访问后台或生成文件。请输出摘要、口径核查、当前能下的结论、不能下的结论和最小补数方案。\n\n当前时间：2026-09-08T07:54:51.816Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份管理层可读的支付转化判断。上周是支付成功用户120/去重到达会员页用户1000，所有用户观察满72小时；本周是支付成功事件90/页面曝光事件1500，未去重且用户最长观察24小时；业务群说本周支付成功用户其实105但没有来源。只能使用这些材料，不得访问后台或生成文件。请输出摘要、口径核查、当前能下的结论、不能下的结论和最小补数方案。\n\n本轮交付物：数据报告中的口径与观察窗冲突（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjf24-k4iv0_mtsdjf3c",
+            "createdAt": "2026-09-08T07:54:51.819Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份管理层可读的支付转化判断。上周是支付成功用户120/去重到达会员页用户1000，所有用户观察满72小时；本周是支付成功事件90/页面曝光事件1500，未去重且用户最长观察24小时；业务群说本周支付成功用户其实105但没有来源。只能使用这些材料，不得访问后台或生成文件。请输出摘要、口径核查、当前能下的结论、不能下的结论和最小补数方案。\n\n当前时间：2026-09-08T07:54:51.816Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份管理层可读的支付转化判断。上周是支付成功用户120/去重到达会员页用户1000，所有用户观察满72小时；本周是支付成功事件90/页面曝光事件1500，未去重且用户最长观察24小时；业务群说本周支付成功用户其实105但没有来源。只能使用这些材料，不得访问后台或生成文件。请输出摘要、口径核查、当前能下的结论、不能下的结论和最小补数方案。\n\n本轮交付物：数据报告中的口径与观察窗冲突（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 809,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA03",
+      "expertId": "data-analyst",
+      "title": "冲突指标的边界与反证",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "识别 B 是对 A 的转述而非独立来源，40% 与 45% 不能合并或任意择一。",
+        "保留 A 的 300 家口径与 C 的 8 家访谈范围差异，不能把访谈判断推广为总体比例。",
+        "明确明细表缺少唯一 ID 会阻塞去重和总体计算，不自动补 ID 或把重复行当客户。",
+        "对支持、冲突、未知和待核查项分别给出来源与影响，不制造统一采用率或趋势。",
+        "提出按来源原文、定义、样本、时间和独立性核查的顺序，不能声称已完成核查。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjfo5-uike0",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjfo5-uike0",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjfo5-uike0",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjfo5-uike0"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:52.598Z",
+          "updatedAt": "2026-09-08T07:54:52.709Z",
+          "heartbeatAt": "2026-09-08T07:54:52.709Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:52.709Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.565Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.596Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.599Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.608Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.608Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.608Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.609Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:52.710Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjfo5-uike0_mtsdjfpc",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:52.709Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:52.565Z",
+        "updatedAt": "2026-09-08T07:54:52.710Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjfo5-uike0",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请只根据材料做数据质量和指标定义审查，不联网、不生成文件。报表 A：2025 年活跃客户 300 家，其中采用率 40%；文章 B 转述 A 写成 45%；访谈 C 覆盖 8 家并认为采用率仍低。另有一张明细表缺少客户唯一 ID。请直接交付冲突台账、可保留结论、未知项和后续核查顺序。\n\n当前时间：2026-09-08T07:54:52.608Z\n\n材料：\n- 冻结认证题\n请只根据材料做数据质量和指标定义审查，不联网、不生成文件。报表 A：2025 年活跃客户 300 家，其中采用率 40%；文章 B 转述 A 写成 45%；访谈 C 覆盖 8 家并认为采用率仍低。另有一张明细表缺少客户唯一 ID。请直接交付冲突台账、可保留结论、未知项和后续核查顺序。\n\n本轮交付物：冲突指标的边界与反证（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjfo5-uike0_mtsdjfpc",
+            "createdAt": "2026-09-08T07:54:52.611Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请只根据材料做数据质量和指标定义审查，不联网、不生成文件。报表 A：2025 年活跃客户 300 家，其中采用率 40%；文章 B 转述 A 写成 45%；访谈 C 覆盖 8 家并认为采用率仍低。另有一张明细表缺少客户唯一 ID。请直接交付冲突台账、可保留结论、未知项和后续核查顺序。\n\n当前时间：2026-09-08T07:54:52.608Z\n\n材料：\n- 冻结认证题\n请只根据材料做数据质量和指标定义审查，不联网、不生成文件。报表 A：2025 年活跃客户 300 家，其中采用率 40%；文章 B 转述 A 写成 45%；访谈 C 覆盖 8 家并认为采用率仍低。另有一张明细表缺少客户唯一 ID。请直接交付冲突台账、可保留结论、未知项和后续核查顺序。\n\n本轮交付物：冲突指标的边界与反证（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 802,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA04",
+      "expertId": "data-analyst",
+      "title": "异常分析超时后的恢复",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "正确计算本周失败率 72/1200=6%，并核对原因合计 72；不把上周原因分布补出来。",
+        "说明上周失败率 40/1000=4% 可计算，但原因结构不可比，不能据此归因趋势。",
+        "超时后的重试保留原分析目标和材料，不重复统计、不把未完成计算写成已完成。",
+        "区分已知原因、未知原因和数据缺失，下一步说明如何核对原始订单与分母。",
+        "结论与建议不越过证据范围，明确未执行后台查询或生产修复。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjgaq-4da2y",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "cancelled": true,
+          "retried": true
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "cancelled",
+          "retried",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjgaq-4da2y",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjgaq-4da2y",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjgaq-4da2y"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:53.521Z",
+          "updatedAt": "2026-09-08T07:54:53.632Z",
+          "heartbeatAt": "2026-09-08T07:54:53.632Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:53.632Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.378Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.409Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.412Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.421Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.421Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.421Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.423Z"
+          },
+          {
+            "id": "event-8",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.510Z"
+          },
+          {
+            "id": "event-9",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.519Z"
+          },
+          {
+            "id": "event-10",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.521Z"
+          },
+          {
+            "id": "event-11",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.531Z"
+          },
+          {
+            "id": "event-12",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.531Z"
+          },
+          {
+            "id": "event-13",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 13,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.531Z"
+          },
+          {
+            "id": "event-14",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 14,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.533Z"
+          },
+          {
+            "id": "event-15",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 15,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:53.633Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjgaq-4da2y_mtsdjgf0",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:53.632Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:53.378Z",
+        "updatedAt": "2026-09-08T07:54:53.633Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjgaq-4da2y",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n当前时间：2026-09-08T07:54:53.422Z\n\n材料：\n- 冻结认证题\n请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n本轮交付物：异常分析超时后的恢复（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjgaq-4da2y_mtsdjgby",
+            "createdAt": "2026-09-08T07:54:53.424Z"
+          },
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n当前时间：2026-09-08T07:54:53.532Z\n\n材料：\n- 冻结认证题\n请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n本轮交付物：异常分析超时后的恢复（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjgaq-4da2y_mtsdjgf0",
+            "createdAt": "2026-09-08T07:54:53.534Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n当前时间：2026-09-08T07:54:53.422Z\n\n材料：\n- 冻结认证题\n请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n本轮交付物：异常分析超时后的恢复（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。\n\nuser: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n当前时间：2026-09-08T07:54:53.532Z\n\n材料：\n- 冻结认证题\n请作为数据分析师交付订单异常分析。材料：本周订单 1200 笔、失败 72 笔；失败原因有超时 40、库存 20、未知 12；上周订单 1000 笔、失败 40 笔，但上周失败原因明细缺失。只能根据材料分析，不生成文件。服务曾在计算分母时超时，重试不能重复统计或编造缺失的上周原因；请说明当前失败率、可比性、未知项和恢复后的核查步骤。\n\n本轮交付物：异常分析超时后的恢复（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:504:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 930,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA05",
+      "expertId": "data-analyst",
+      "title": "修订错误数字后的完整报告",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修订后正确使用本周展示 9，本周总体为 21/1000=2.1%，并更新相对上周的比较。",
+        "全文撤回展示改善和总体主要由结构变化造成的确定表述，保留搜索改善和结构变化仍是分析因素。",
+        "摘要、表格、正文、建议和限制中的数字方向一致，不残留 27、3.9% 或旧结论。",
+        "不把展示组内恶化写成新版落地页的因果证明，保留缺少同期对照、成本和收益的限制。",
+        "任务真实经历 review、changes_requested/revising、review，v2 保留上一版引用和用户修改意见。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjh0x-ug2cz",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "changesRequested": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjh0x-ug2cz",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjh0x-ug2cz",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjh0x-ug2cz"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:54.355Z",
+          "updatedAt": "2026-09-08T07:54:54.465Z",
+          "heartbeatAt": "2026-09-08T07:54:54.465Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:54.465Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.321Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.352Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.355Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.364Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.364Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.364Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.366Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:54.465Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjh0x-ug2cz_mtsdjh25",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:54.465Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:54.321Z",
+        "updatedAt": "2026-09-08T07:54:54.465Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjh0x-ug2cz",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师直接交付以下虚构投放复盘，不生成文件、不执行投放。上周搜索 900/90、展示 100/2；本周搜索 100/12、展示 900/27；两期均按去重访客、完整观察窗统计；无费用、收入、留存和同期对照。请给出计算、判断、限制和受限建议。\n\n当前时间：2026-09-08T07:54:54.365Z\n\n材料：\n- 冻结认证题\n请作为数据分析师直接交付以下虚构投放复盘，不生成文件、不执行投放。上周搜索 900/90、展示 100/2；本周搜索 100/12、展示 900/27；两期均按去重访客、完整观察窗统计；无费用、收入、留存和同期对照。请给出计算、判断、限制和受限建议。\n\n本轮交付物：修订错误数字后的完整报告（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjh0x-ug2cz_mtsdjh25",
+            "createdAt": "2026-09-08T07:54:54.367Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师直接交付以下虚构投放复盘，不生成文件、不执行投放。上周搜索 900/90、展示 100/2；本周搜索 100/12、展示 900/27；两期均按去重访客、完整观察窗统计；无费用、收入、留存和同期对照。请给出计算、判断、限制和受限建议。\n\n当前时间：2026-09-08T07:54:54.365Z\n\n材料：\n- 冻结认证题\n请作为数据分析师直接交付以下虚构投放复盘，不生成文件、不执行投放。上周搜索 900/90、展示 100/2；本周搜索 100/12、展示 900/27；两期均按去重访客、完整观察窗统计；无费用、收入、留存和同期对照。请给出计算、判断、限制和受限建议。\n\n本轮交付物：修订错误数字后的完整报告（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 822,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA06",
+      "expertId": "data-analyst",
+      "title": "完成后重开并保持指标口径",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开后的完整新版保留原有分子分母、渠道互斥、观察窗及缺少因果证据的限制。",
+        "新增新老用户分层计划，明确样本单位、指标、观察窗和最小可解释条件，不伪造显著性或样本量结果。",
+        "分层结果可能支持、削弱或无法判断原结论，保留反证与停止条件，不把计划写成已完成分析。",
+        "新增内容与原报告摘要、正文和建议保持同一口径，不能把新用户子集冒充总体。",
+        "任务真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdjhnn-9nuqk",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "accepted": false,
+          "reopened": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdjhnn-9nuqk",
+        "expertId": "data-analyst",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdjhnn-9nuqk",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdjhnn-9nuqk"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:54:55.172Z",
+          "updatedAt": "2026-09-08T07:54:55.283Z",
+          "heartbeatAt": "2026-09-08T07:54:55.283Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:54:55.283Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.139Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.169Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.173Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.182Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.182Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.182Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.183Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:54:55.283Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdjhnn-9nuqk_mtsdjhou",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "data-analyst",
+                "version": "2.3.0",
+                "hash": "729cc3dd38dd04d2"
+              },
+              "skills": [
+                {
+                  "id": "business-cause-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "business-insight-report",
+                  "hash": ""
+                },
+                {
+                  "id": "business-metrics-analysis",
+                  "hash": ""
+                },
+                {
+                  "id": "data-analysis-method",
+                  "hash": "447bc23b8c56af98"
+                },
+                {
+                  "id": "data-report-method",
+                  "hash": ""
+                },
+                {
+                  "id": "writing-polish",
+                  "hash": ""
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:54:55.283Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:54:55.139Z",
+        "updatedAt": "2026-09-08T07:54:55.283Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdjhnn-9nuqk",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n当前时间：2026-09-08T07:54:55.182Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n本轮交付物：完成后重开并保持指标口径（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdjhnn-9nuqk_mtsdjhou",
+            "createdAt": "2026-09-08T07:54:55.185Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。数据报告模式不得借改写之名重算或补造数据。\n4. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法，报告保留来源、口径、样本偏差与不确定性。\n5. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分，修订复核全部受影响数字、图文和结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n当前时间：2026-09-08T07:54:55.182Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n本轮交付物：完成后重开并保持指标口径（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 817,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 0,
+    "lifecycleFailed": 6,
+    "runtimeFailed": 6,
+    "runtimeNeedsInput": 0,
+    "environmentBlocked": 0,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 6,
+    "professionallyQualified": 0
+  }
+}

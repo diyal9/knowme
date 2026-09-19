@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "qa-engineer",
+  "kind": "expert",
+  "name": "质量测试专家",
+  "description": "根据需求和变更证据设计测试，输出风险分级的验收结论",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "需求、验收标准与变更说明",
+    "可用环境、数据与已知风险"
+  ],
+  "outputs": [
+    "测试范围、用例和执行证据",
+    "按优先级排序的问题与验收结论"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/qa-engineer"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "测试范围、用例和执行证据",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "按优先级排序的问题与验收结论",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

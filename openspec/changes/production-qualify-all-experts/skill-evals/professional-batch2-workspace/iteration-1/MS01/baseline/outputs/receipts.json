@@ -1,0 +1,13 @@
+{
+  "id": "wb-expert-task-mtoqv2bt-dglkt",
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "active",
+    "toolsUsed": [],
+    "steps": [],
+    "artifacts": [],
+    "applyLog": []
+  },
+  "tools": []
+}

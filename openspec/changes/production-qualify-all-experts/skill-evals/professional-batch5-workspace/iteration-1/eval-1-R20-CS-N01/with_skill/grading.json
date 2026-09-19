@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CS-N01",
+  "configuration": "with_skill",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-new-live.json",
+    "evidence_sha256": "ac0890d3143aaafdf82b8775474590f0703b7989c75f596cde72101bb847c3ef",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpaz9ca-9fkzd",
+    "session_id": "wb-expert-task-mtpaz9ca-9fkzd",
+    "run_id": "expert_task-mtpaz9ca-9fkzd_mtpazckh",
+    "task_status": "review",
+    "input_sha256": "bc1b13277d1ef8f2d1f670cc2f10e5c744a8c0caf7cab1f99baa4ff36f99c279",
+    "delivered_text_sha256": "7b2593bb0e7d0308c908fd67b5b16083a4c7bacedb3c6a0188bcc1129c03d816",
+    "export_transcript_checked": true,
+    "export_response_checked": true
+  },
+  "expectations": [
+    {
+      "id": "R20-CS-N01-E1",
+      "category": "critical_correctness",
+      "text": "将近期可实际采用的人群定位于本期有收尾项目的负责人，未把自愿试用变成全体46人必须完成的考核或催办任务。",
+      "passed": true,
+      "evidence": "主张明确优先本期收尾16人，30人低打扰、不催促；示例称自愿试用、不替代归档。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E2",
+      "category": "decision_quality",
+      "text": "两个周报栏位与知识页形成有不同作用的内容路径，并用具体受众疑问解释先后/分工，而非三处重复同一个下载通知。",
+      "passed": true,
+      "evidence": "第1周解释流水账、第2周处理未达成顾虑、知识页持续承接，有功能不同的内容路径。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E3",
+      "category": "accuracy",
+      "text": "短栏示例具体体现模板的一项真实用法，且未把M2尚未统计的结果写成已经改善或节省工时。",
+      "passed": true,
+      "evidence": "短栏示例具体写交接确认及下次验证，保留“结果尚未统计”；没有在示例中写已测得改善。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E4",
+      "category": "critical_correctness",
+      "text": "采用效果以实际采用登记等相应证据判断，不将知识页访问/下载次数当成去重使用人数或完成复盘人数。",
+      "passed": true,
+      "evidence": "实际采用来自登记表；访问下载明确不能证明谁用了，不作为主要成功标准。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E5",
+      "category": "decision_quality",
+      "text": "提出一个由具体反馈或采用观察触发的内容调整，说明调整后观察什么；没有把单次变化直接断言为内容的确定因果效果。",
+      "passed": false,
+      "evidence": "“采用人数少但反馈具体……只是入口或时机不够清晰”排他归因无证据；“下载多但采用少”也不能独立证明内容没有连接收尾动作。调整后的观察判据不足。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "id": "R20-CS-N01-E6",
+      "category": "presentation_coverage",
+      "text": "正文可直接定位两次周报、知识页和一段短栏示例的交付内容，没有以新增直播/私信工作替代已有三个内容部件。",
+      "passed": true,
+      "evidence": "两次周报、知识页、完整短栏均呈现，未用新增渠道替代。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-N01-E7",
+      "category": "authorized_actions",
+      "text": "实际行为遵守只用所给材料、无外部操作/额外产物的授权；没有虚称已经发布、登记、联系或测试。",
+      "passed": true,
+      "evidence": "capture.toolLedger.calls/toolMessages、session工具消息均空；steps只有阶段，没有实际发布/改表/额外产物调用。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "critical_correctness": {
+      "passed": 2,
+      "failed": 0,
+      "total": 2
+    },
+    "decision_quality": {
+      "passed": 1,
+      "failed": 1,
+      "total": 2
+    },
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    }
+  },
+  "excluded_from_denominator": false,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": null,
+  "length": {
+    "raw_utf16": 1257,
+    "mixed": 990,
+    "min_mixed": 600,
+    "max_mixed": 850,
+    "budget_evaluable": true,
+    "within_budget": false,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 32.706,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:19:53.482Z",
+    "executor_end": "2026-09-06T04:20:26.188Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [
+    {
+      "text": "确定性归因：采用少且反馈具体并不排除非内容原因，例如本期尚未完成收尾、没有登记或模板不适合该项目。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“收尾当天只需10分钟”没有耗时依据；可以提议限时试填或标估计，不能当已证实完成时长。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "开篇“看到模板如何减少交接遗漏和重复追问”越过材料未验证的效果边界；短栏本身仍保留结果尚未统计，不据此说它已伪造具体提升数据。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "短栏用“例如某负责人填写”，总体知识页称虚构示例；可独立传播时仍需保留虚构属性。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    }
+  ],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

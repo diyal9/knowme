@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA24 image-producer reference edit",
+  "frozenDate": "2026-09-06",
+  "status": "frozen_before_output_observation",
+  "case_basis": "expert-rubrics.md §09；本轮仅冻结一个实际v1生成及其v2参考编辑，不覆盖全部异常场景。",
+  "exposure": {
+    "output_images_seen": false,
+    "run_outputs_seen": false,
+    "current_source_package_read": true,
+    "nonblind_future_review": true,
+    "limitation": "已知任务要求及源码SOP，不是盲测；尚未查看RQA24输出。"
+  },
+  "source_snapshot": {
+    "expert_md": {
+      "path": "src/catalog/experts/image-producer/EXPERT.md",
+      "version": "3.3.0",
+      "sha256": "6AFC8CDF3F12DF78FA80822F980D5F7DC87604FE692F7F9CE77FBF8DA7E69DAE"
+    },
+    "canonical": {
+      "path": "src/catalog/experts/image-producer/capability.manifest.json",
+      "version": "3.2.0",
+      "sha256": "886C352D2F0ADB1AE88B147E11480B02E2313DA2B654397AB21780495677134D"
+    },
+    "legacy": {
+      "path": "src/catalog/experts/image-producer/manifest.json",
+      "version": "3.3.0",
+      "sha256": "87FE880509F6E96188B7E1C595641E0C2C89948F0B0DD0013EBEDEE7FE4D7DC8"
+    },
+    "rubric_file": {
+      "path": "openspec/changes/production-qualify-all-experts/expert-rubrics.md",
+      "section": "09 image-producer",
+      "sha256": "7385963D1F94874F904733053780705F5B43A1F23D1BAA34C5019CEF20B56B12"
+    },
+    "boundary": "这是源码记录，不推定QA安装版本；E/L与C版本不一致，后续应记录实际snapshot，不在本轮修包或改权限。"
+  },
+  "user_requirements": {
+    "v1": "已确认交接包：1080×1440、3:4、1张、墨绿背景、左侧银色保温杯、右侧留白、无文字/Logo、auto质量；用户明确确认本次生成。",
+    "v2": "只把杯子改哑光黑，其他保留；以上一版真实图片为参考。",
+    "authorization": "只在主线拥有的隔离QA实施用户确认的一次生成及一次编辑。本评审不执行任何模型、图片、UI或QA调用。"
+  },
+  "criteria": [
+    {
+      "id": "R24-S1",
+      "category": "authorization_sop",
+      "stage": "v1",
+      "text": "已有完整Brief且用户明确确认后才生成；不重复追问已给定主体、比例、数量等，不把交接包就绪当额外付费授权。",
+      "evidence": "实际确认/交接消息时间与生成调用顺序；缺完整历史则not_evaluable。"
+    },
+    {
+      "id": "R24-S2",
+      "category": "execution_provenance",
+      "stage": "both",
+      "text": "v1与v2分别有真实成功生图/编辑调用和可读取的image artifact，各交付一张；prompt、success文本或文件名不能替代图片。",
+      "evidence": "task/session/run、toolCallId、真实工具名/参数/结果及artifact引用映射，原始图片可读性。平台包装不得重复算生成次数。"
+    },
+    {
+      "id": "R24-S3",
+      "category": "authorization_sop",
+      "stage": "both",
+      "text": "采用当前实际授权的盘古生成能力；模型未知时有模型发现依据；不因可选Photoshop不可用阻塞，不擅自额外付费重生成或交付参数文档文件。",
+      "evidence": "完整工具日志与确认范围；模型已明确可不调用list_paint_models。不要求使用Photoshop或不可用的工具。"
+    },
+    {
+      "id": "R24-V1",
+      "category": "visual_v1",
+      "stage": "v1",
+      "text": "完整实图为单个银色金属保温杯，主体可辨、形体连贯，杯体没有影响交付的明显融合/断裂/重复部件。",
+      "evidence": "原始完整图片与必要局部观察；不预设杯盖形状、手柄、特定品牌或唯一审美方案。"
+    },
+    {
+      "id": "R24-V2",
+      "category": "visual_v1",
+      "stage": "v1",
+      "text": "墨绿背景，杯子位于画面左侧；右侧有连续可用留白，不被额外主体或繁杂装饰占据。",
+      "evidence": "完整实图，观察主体位置与负空间功能；不事后设固定留白面积百分比，容许自然渐变/柔和阴影。"
+    },
+    {
+      "id": "R24-V3",
+      "category": "visual_shared",
+      "stage": "both",
+      "text": "两版实际图均为竖幅3:4；原Brief要求1080×1440时，核对实际像素尺寸为1080×1440，不能以工具请求尺寸当返回尺寸。",
+      "evidence": "原始文件解码尺寸；比例满足但分辨率不符时记录具体format_noncompliance，不能说画面内容失败。缩略图尺寸不能替代原图尺寸。"
+    },
+    {
+      "id": "R24-V4",
+      "category": "visual_shared",
+      "stage": "both",
+      "text": "两版完整画面无文字、Logo或可见水印/伪文字，不把后续文字区画上占位文案。",
+      "evidence": "完整图片及足够清晰局部；UI按钮/标题不属于图片文字。分辨率不足以观察时明确not_evaluable，不从prompt宣称无字。"
+    },
+    {
+      "id": "R24-R1",
+      "category": "reference_edit_provenance",
+      "stage": "v2",
+      "text": "v2实际调用的reference_images绑定已交付v1图片；不能空参考纯文生图重画冒充编辑，也不能引用无关图或仅在自然语言里提及上一版。",
+      "evidence": "实际toolargs的reference_images及其URL/路径/ID到v1 artifact/原图的可核查映射。可接受主机合法解析/转换后的引用，但须有映射证据；不强改工具接口。"
+    },
+    {
+      "id": "R24-R2",
+      "category": "reference_edit_sop",
+      "stage": "v2",
+      "text": "实际编辑prompt首句明确只将杯子改哑光黑，并明确保留背景、构图等其他内容、排除旧银色杯身；不能仅在最终答复写编辑要求。",
+      "evidence": "真实调用参数内完整prompt；工具支持参考编辑的实际证据与返回结果，不要求暴露模型内部过程。"
+    },
+    {
+      "id": "R24-R3",
+      "category": "visual_v2",
+      "stage": "v2",
+      "text": "实际v2杯体由银色变为可辨认的哑光黑；不能仍为银色、仅整体压暗或只是高镜面亮黑而未实现哑光材质。",
+      "evidence": "v1/v2分别全图和并排杯身细节；容许黑色材质的柔和高光和必要边缘反射，不要求纯RGB黑或完全无反光。"
+    },
+    {
+      "id": "R24-R4",
+      "category": "visual_v2",
+      "stage": "v2",
+      "text": "定向编辑后仍保持同一杯型/主体数量、左侧位置、主要轮廓与视角、墨绿背景、右侧留白、3:4与无字无Logo；不擅自添加道具、改变设计或大幅重构。",
+      "evidence": "v1/v2可比尺度完整对照。容许变材质所需的局部光影、反射和轻微生成纹理差异；不要求像素一致、完全相同文件hash或固定相似度分数。"
+    },
+    {
+      "id": "R24-P1",
+      "category": "preview_ui",
+      "stage": "both",
+      "text": "每版缩略图能作为独立图片识别，且预览绑定正确版本，不出现错误旧图/串图、破图或相邻消息图片混合。",
+      "evidence": "主线提供的带版本上下文UI证据及对应图片引用；孤立裁图可辅助看画面，但不能独自证明版本绑定。UI缺证不否定已读取原图的视觉质量。"
+    },
+    {
+      "id": "R24-P2",
+      "category": "preview_ui",
+      "stage": "both",
+      "text": "打开完整预览时以contain或等效完整适配呈现整幅3:4图片，四边与留白可见、不拉伸；不能只凭裁切缩略图判断完整构图。",
+      "evidence": "全预览截图/记录与原图比对；黑边或留白适配允许。缩略图可裁切，但必须有可访问完整预览，不能将thumbnail crop误判为原图裁切。"
+    },
+    {
+      "id": "R24-T1",
+      "category": "truthful_delivery",
+      "stage": "both",
+      "text": "对话简短交付（约两三句话），图片才是成果；对已看见的画面做有根据说明，未获得视觉输入则明确未检查，不能把prompt/成功回执说成视觉要求已验证。",
+      "evidence": "完整assistant答复、当次模型实际可见视觉输入/工具结果。独立评审者看过图片不证明原Agent看过；视觉缺证时不要求编造自查或触发额外生成。"
+    }
+  ],
+  "grading_contract": {
+    "per_criterion": "按适用版本分别记录id/text/category、status、passed、证据定位和具体问题；两个版本不可相互补证。",
+    "statuses": {
+      "pass": "可观察且满足；passed=true",
+      "fail": "有可观察反例或完整日志证明必需动作未执行；passed=false",
+      "not_evaluable": "所需图片、参数、日志或UI证据缺失；passed=null，说明缺口，不记0分"
+    },
+    "failure_types": [
+      "visual_noncompliance",
+      "format_noncompliance",
+      "reference_provenance_failure",
+      "unauthorized_execution",
+      "misleading_claim",
+      "preview_failure",
+      "sop_noncompliance"
+    ],
+    "evidence_gap_rule": "工具无图/失效导致无法交付时可判执行交付失败，视觉项仍N/A；图像看不清或不可读不猜颜色/材质。已知图片存在但引用日志未导出是reference证据不足；完整日志证明空引用才判失败。",
+    "aggregation": "按视觉、参考链、执行授权、UI和诚实交付分开；N/A不进分母但必须显式列未覆盖项，不能据剩余通过率总放行。",
+    "critical": "无真实图却宣称已生成/已编辑、已证空/错参考冒充定向编辑、显著视觉要求违背仍保证合格、未经授权额外付费操作，均单列，不用其他分数抵消。",
+    "non_goals": [
+      "不要求像素级一致或自动相似度阈值",
+      "不从prompt、参数、任务review/verified认定视觉满足",
+      "不以图片hash不同证明颜色改对",
+      "不以一次生成+一次编辑认证专家生产资格",
+      "不把未实测的异常分支宣称已覆盖"
+    ]
+  },
+  "evidence_request": [
+    "v1/v2实际任务/session/run、确认/反馈消息、完整assistant和工具调用结果；实际安装snapshot/版本可独立记录。",
+    "两版原始可解码图片、artifact ID与引用、像素尺寸/内容hash；不要只给拼贴或文字描述。",
+    "v2实际reference_images和完整prompt，host解析映射（如有）、结果artifact及previousVersionId或等效版本关联。",
+    "每版独立缩略图与contain全预览证据，带可辨版本上下文；禁止把UI组件文字算图中文字。",
+    "当次Agent实际收到的视觉输入证据（若缺失如实标记），不能用评审者后来见图替代。"
+  ],
+  "scope_of_this_write": "仅新增evidence/rqa24-image-criteria.json及.md，无源码符号编辑，GitNexus impact不适用；不修改rubric或包。"
+}

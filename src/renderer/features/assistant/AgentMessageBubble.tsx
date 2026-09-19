@@ -10,6 +10,9 @@ import {
   userStatusLabel,
 } from '../../../domain/agent-execution-timeline'
 import { compactUserShortcutBubbleText } from '../../../domain/agent-shortcut-display'
+import { normalizeAssistantDisplay } from '../../../domain/assistant-display'
+import { extractStructuredChoiceFromText } from '../../../domain/agent-message-ui'
+import { splitMessageLinks } from '../../../domain/message-links'
 import { AgentGroundingMeta, AgentStructuredUi } from './AgentMessageExtras'
 import { AgentExecutionTimeline } from './AgentExecutionTimeline'
 import { AgentMessageActions } from './AgentMessageActions'
@@ -56,8 +59,6 @@ function ContentPendingFallback() {
   )
 }
 
-const USER_URL_RE = /https?:\/\/[^\s<>]+/gi
-
 function readableUrlLabel(rawUrl: string) {
   try {
     const url = new URL(rawUrl)
@@ -73,8 +74,8 @@ function UserMessageContent({ text }: { text: string }) {
   const titleCache = useAppStore((state) => state.linkTitleCache)
   const cacheLinkTitle = useAppStore((state) => state.cacheLinkTitle)
   const attemptedTitles = useRef(new Set<string>())
-  const chunks = text.split(USER_URL_RE)
-  const urls = text.match(USER_URL_RE) || []
+  const segments = splitMessageLinks(text)
+  const urls = segments.flatMap((segment) => segment.kind === 'link' ? [segment.href] : [])
   const urlKey = urls.join('\n')
   useEffect(() => {
     let cancelled = false
@@ -91,33 +92,25 @@ function UserMessageContent({ text }: { text: string }) {
   }, [cacheLinkTitle, titleCache, urlKey])
   return (
     <>
-      {chunks.map((chunk, index) => (
-        <span key={`${index}-${chunk.slice(0, 12)}`}>
-          {chunk}
-          {index < urls.length ? (() => {
-            const rawHref = urls[index]
-            const href = rawHref.replace(/[),.;，。；！？]+$/, '')
-            const suffix = rawHref.slice(href.length)
-            const label = titleCache[href] || readableUrlLabel(href)
-            return (
-              <>
-                <a
-                  className="agent-user-link"
-                  href={href}
-                  title={href}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    openLinkPreview(href, label, { resolveTitle: true })
-                  }}
-                >
-                  {label}
-                </a>
-                {suffix}
-              </>
-            )
-          })() : null}
-        </span>
-      ))}
+      {segments.map((segment, index) => {
+        if (segment.kind === 'text') return <span key={`text-${index}`}>{segment.text}</span>
+        const href = segment.href
+        const label = titleCache[href] || readableUrlLabel(href)
+        return (
+          <a
+            key={`link-${index}-${href}`}
+            className="agent-user-link"
+            href={href}
+            title={href}
+            onClick={(event) => {
+              event.preventDefault()
+              openLinkPreview(href, label, { resolveTitle: true })
+            }}
+          >
+            {label}
+          </a>
+        )
+      })}
     </>
   )
 }
@@ -155,6 +148,7 @@ function AgentMessageBubbleImpl({
   thinking,
   error,
   message,
+  interactiveStructuredUi,
   userInput,
   modeId,
   showFollowUps,
@@ -169,6 +163,7 @@ function AgentMessageBubbleImpl({
   thinking?: boolean
   error?: boolean
   message?: import('../../../shared/api').ChatMessage
+  interactiveStructuredUi?: boolean
   userInput?: string
   modeId?: import('../../../domain/assistant-modes').AssistantModeId
   showFollowUps?: boolean
@@ -178,7 +173,16 @@ function AgentMessageBubbleImpl({
 }) {
   const live = role === 'assistant' && Boolean(streaming || thinking)
   const now = useLiveNow(live)
-  const body = String(text || '').trim()
+  const rawBody = String(text || '')
+  const recovered = role === 'assistant' && !streaming
+    ? extractStructuredChoiceFromText(rawBody)
+    : null
+  const body = role === 'assistant'
+    ? normalizeAssistantDisplay(recovered?.text ?? rawBody)
+    : String(text || '').trim()
+  const displayMessage = recovered && message
+    ? { ...message, text: recovered.text, structuredUi: message.structuredUi || recovered.bars }
+    : message
 
   if (role === 'system') {
     return (
@@ -214,12 +218,12 @@ function AgentMessageBubbleImpl({
     error ? 'err' : '',
   ].filter(Boolean).join(' ')
   const rawTimeline = message ? buildExecutionTimelineView(message, now) : null
-  // A lone prepare/model stage is an internal lifecycle detail. Keep simple
-  // chat on one stable thinking surface, but retain the timeline for genuine
-  // tools/sub-runs and multi-step reasoning (the expandable process view).
+  // Stage-only events are internal lifecycle details. Keep ordinary chat on
+  // one stable reply surface; show the expandable process view only for real
+  // tool/sub-run activity or an explicit task plan.
   const hasRealExecution = Boolean(message?.trace?.some((item) => item.kind === 'tool' || item.kind === 'subrun'))
-  const hasMultiStepTrace = (message?.trace?.length || 0) > 1
-  const timeline = rawTimeline && (hasRealExecution || hasMultiStepTrace) ? rawTimeline : null
+  const hasExplicitPlan = Boolean(message?.plan?.items?.length)
+  const timeline = rawTimeline && (hasRealExecution || hasExplicitPlan) ? rawTimeline : null
   const elapsed = Number.isFinite(message?.elapsedMs)
     ? Number(message?.elapsedMs)
     : (live && Number(message?.startedAt) ? now - Number(message?.startedAt) : 0)
@@ -260,11 +264,15 @@ function AgentMessageBubbleImpl({
           {children}
         </div>
       ) : null}
-      {message ? <AgentPlanChecklist message={message} /> : null}
-      {message && onStructuredPick ? (
-        <AgentStructuredUi message={message} onPick={onStructuredPick} />
+      {displayMessage ? <AgentPlanChecklist message={displayMessage} /> : null}
+      {displayMessage && onStructuredPick ? (
+        <AgentStructuredUi
+          message={displayMessage}
+          onPick={onStructuredPick}
+          interactive={interactiveStructuredUi}
+        />
       ) : null}
-      {message ? <AgentGroundingMeta message={message} /> : null}
+      {displayMessage ? <AgentGroundingMeta message={displayMessage} /> : null}
       {/* 底部操作只允许模型通过 structuredUi 明确声明；不再根据关键词猜测。 */}
       {body && !streaming && !error ? <AgentMessageActions text={body} timestamp={message?.startedAt} /> : null}
     </article>

@@ -1,0 +1,102 @@
+{
+  "purpose": "Pre-edit 2.0.0 packages and unchanged writing-polish dependency for main-agent same-configuration baseline; not a model evaluation.",
+  "date": "2026-09-06",
+  "files": [
+    {
+      "source": "src/catalog/experts/action-owner/capability.manifest.json",
+      "snapshot": "experts/action-owner/capability.manifest.json",
+      "sha256": "9d385e3561704d239873b0f5fed5972e2027b3d73917296b8baefb43c9b35eb1"
+    },
+    {
+      "source": "src/catalog/experts/action-owner/EXPERT.md",
+      "snapshot": "experts/action-owner/EXPERT.md",
+      "sha256": "55d19edc3f0e143d16b133a885c2b944646f72ee783b4740bd56ea8df2436d3c"
+    },
+    {
+      "source": "src/catalog/experts/action-owner/manifest.json",
+      "snapshot": "experts/action-owner/manifest.json",
+      "sha256": "72dcc9f309e483e6ae5bcfa61ccb7266869ba5e2cd2af752cf7dd2e35f2d21d2"
+    },
+    {
+      "source": "src/catalog/experts/requirement-reviewer/capability.manifest.json",
+      "snapshot": "experts/requirement-reviewer/capability.manifest.json",
+      "sha256": "f89553d0a68862655e661c8138cf9275a1daa5845d30995ad504433074bbf8bd"
+    },
+    {
+      "source": "src/catalog/experts/requirement-reviewer/EXPERT.md",
+      "snapshot": "experts/requirement-reviewer/EXPERT.md",
+      "sha256": "872370944fad2e6232f1fe9eba81893faebc2f23a6e51ef269c386f5b8a3b1b0"
+    },
+    {
+      "source": "src/catalog/experts/requirement-reviewer/manifest.json",
+      "snapshot": "experts/requirement-reviewer/manifest.json",
+      "sha256": "e492d83899db6b972708a3d203977c7c9204bd1657f242b7414b4c3c226b3152"
+    },
+    {
+      "source": "src/catalog/skills/writing-polish/capability.manifest.json",
+      "snapshot": "skills/writing-polish/capability.manifest.json",
+      "sha256": "17b769e39bdb1bdca5818cb8067b5f0186a7f81f1292052e21d069a45761ab25"
+    },
+    {
+      "source": "src/catalog/skills/writing-polish/SKILL.md",
+      "snapshot": "skills/writing-polish/SKILL.md",
+      "sha256": "1186da38fb069bbb33c9e4256f99063edf004e3f5d02c753eff84c1ec2e034a0"
+    }
+  ],
+  "catalogEntries": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "name": "写作润色",
+      "description": "优化文案结构、语气一致性与可读性，适合邮件、汇报与对外材料。",
+      "version": "1.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": [
+        "内容写作"
+      ],
+      "tags": [
+        "writing",
+        "polish"
+      ],
+      "featured": true,
+      "bundlePath": "skills/writing-polish"
+    },
+    {
+      "id": "action-owner",
+      "kind": "expert",
+      "name": "行动项管理员",
+      "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项。",
+      "version": "2.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": [
+        "日常办公"
+      ],
+      "tags": [
+        "office",
+        "actions"
+      ],
+      "featured": true,
+      "bundlePath": "experts/action-owner"
+    },
+    {
+      "id": "requirement-reviewer",
+      "kind": "expert",
+      "name": "需求评审专家",
+      "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论。",
+      "version": "2.0.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": [
+        "产品与研究"
+      ],
+      "tags": [
+        "product",
+        "review"
+      ],
+      "featured": true,
+      "bundlePath": "experts/requirement-reviewer"
+    }
+  ]
+}

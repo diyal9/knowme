@@ -12,8 +12,6 @@
   const EXEC_AGENT = new Set(['agent'])
   const EXEC_SPECIALTY = new Set(['llm', 'tool', 'knowledge', 'mcp', 'request'])
   const EXEC_CAPABILITY = new Set(['agent', 'llm', 'tool', 'knowledge', 'mcp', 'request'])
-  /** @deprecated use EXEC_AGENT — specialty no longer compiles as agent */
-  const COMPILE_AS_AGENT = EXEC_AGENT
   const MAX_NODES = 24
   const MAX_EDGES = 48
   const MAX_IO_ITEMS = 16
@@ -1168,7 +1166,6 @@
     MAX_EDGES,
     RELATIONS,
     NODE_KINDS,
-    COMPILE_AS_AGENT,
     EXEC_AGENT,
     EXEC_SPECIALTY,
     EXEC_CAPABILITY,

@@ -1,11 +1,9 @@
 'use strict'
 
 /**
- * 智能体运维专员专用工具。
+ * 平台级能力导入工作流工具。
  * 预览只读；提交必须携带用户显式确认，并复用 Capability Hub 的防陈旧快照。
  */
-
-const IMPORT_EXPERT_ID = 'external-capability-importer'
 
 const PREVIEW_EXTERNAL_PROJECT = {
   type: 'function',
@@ -185,7 +183,6 @@ function buildCapabilityImportTools(options = {}) {
 }
 
 module.exports = {
-  IMPORT_EXPERT_ID,
   PREVIEW_EXTERNAL_PROJECT,
   DESIGN_EXTERNAL_WORKFLOW_IMPORT,
   IMPORT_EXTERNAL_PROJECT,

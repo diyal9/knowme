@@ -1,0 +1,1115 @@
+{
+  "before": {
+    "ok": true,
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtpb1w1s-2bozl",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "RQA20-new-R20-CD-H02",
+      "expertId": "creative-director",
+      "expertName": "",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+      "brief": {
+        "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+        "plan": {
+          "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "核对提供的材料与约束",
+            "按专家方法完成本次分析或方案",
+            "复核事实、推导和交付完整性"
+          ],
+          "risks": [
+            "仅使用提供的合成材料，不执行外部操作"
+          ]
+        },
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "M1",
+            "type": "reference",
+            "title": "M1",
+            "ref": "",
+            "content": "合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。"
+          },
+          {
+            "id": "M2",
+            "type": "reference",
+            "title": "M2",
+            "ref": "",
+            "content": "实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。"
+          },
+          {
+            "id": "M3",
+            "type": "reference",
+            "title": "M3",
+            "ref": "",
+            "content": "只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "完整专业答复（直接在对话中展示）",
+            "type": "answer",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [
+              "creative-concept-method"
+            ],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "creative-director",
+        "agentVersion": "2.1.0",
+        "agentHash": "9fdc5f265db352d6",
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtpb1w1s-2bozl",
+        "bindings": {
+          "skills": [
+            "creative-concept-method",
+            "writing-polish",
+            "visual-brief-prompt"
+          ],
+          "connectors": []
+        },
+        "permissions": {
+          "connectors": {
+            "allowedConnectorIds": []
+          },
+          "tools": {
+            "allowlist": []
+          },
+          "network": false,
+          "write": false,
+          "externalWrite": false
+        },
+        "plan": {
+          "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "核对提供的材料与约束",
+            "按专家方法完成本次分析或方案",
+            "复核事实、推导和交付完整性"
+          ],
+          "risks": [
+            "仅使用提供的合成材料，不执行外部操作"
+          ]
+        },
+        "sop": {
+          "version": "2.1.0",
+          "hash": "9fdc5f265db352d6"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:56.224Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.496Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.548Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.972Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "上下文准备完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:59.505Z"
+        },
+        {
+          "id": "event-9",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "回答生成完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:22:16.950Z"
+        },
+        {
+          "id": "event-10",
+          "type": "execution_blocked",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 10,
+          "summary": "回复中的部分来源引用无法对应当前材料，需要重新核对引用",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:22:17.089Z"
+        }
+      ],
+      "attention": {
+        "kind": "evidence_incomplete",
+        "action": "retry",
+        "title": "执行结果需要重新核验",
+        "detail": "回复中的部分来源引用无法对应当前材料，需要重新核对引用",
+        "field": "",
+        "item": "回复中的部分来源引用无法对应当前材料，需要重新核对引用",
+        "question": "",
+        "example": "",
+        "options": [],
+        "defaultValue": "",
+        "required": true,
+        "createdAt": "2026-09-06T04:22:17.079Z"
+      },
+      "progress": {
+        "phase": "blocked",
+        "label": "执行结果需要重新核验",
+        "detail": "回复中的部分来源引用无法对应当前材料，需要重新核对引用",
+        "startedAt": "2026-09-06T04:21:57.538Z",
+        "updatedAt": "2026-09-06T04:22:17.079Z",
+        "heartbeatAt": "2026-09-06T04:22:17.079Z"
+      },
+      "inputQueue": null,
+      "deliverables": [],
+      "executionEvidence": [
+        {
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+          "deliverableId": "primary",
+          "gateStatus": "blocked",
+          "verificationPassed": false,
+          "verificationDiagnostics": {
+            "version": 1,
+            "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+            "taskId": "task-mtpb1w1s-2bozl",
+            "candidateHash": "0278d0b578a2db795144468cf2ca37ec13b2f5d8d155c8c9679df585920fa12c",
+            "candidateChars": 1260,
+            "materialSnapshotHash": "3b788eb729caaebfe30c9252421470cf3799f0e0fb4f02ef68d958943ea45112",
+            "materialCount": 3,
+            "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+            "fieldChecks": [],
+            "fieldCheckCount": 0
+          },
+          "toolCalls": [],
+          "evidence": [],
+          "violations": [
+            {
+              "code": "unresolved_source_citation",
+              "message": "回复包含无法对应当前材料的来源引用，需要重新核对引用",
+              "missingTools": []
+            }
+          ],
+          "createdAt": "2026-09-06T04:22:17.069Z"
+        }
+      ],
+      "resultSummary": "回复中的部分来源引用无法对应当前材料，暂不能确认这些引用。已有需求和材料已保留，需要重新核对引用。",
+      "status": "needs_input",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtpb1w1s-2bozl"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-06T04:21:56.224Z",
+      "updatedAt": "2026-09-06T04:22:17.089Z"
+    }
+  },
+  "after": {
+    "ok": true,
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtpb1w1s-2bozl",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "RQA20-new-R20-CD-H02",
+      "expertId": "creative-director",
+      "expertName": "",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+      "brief": {
+        "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+        "plan": {
+          "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "核对提供的材料与约束",
+            "按专家方法完成本次分析或方案",
+            "复核事实、推导和交付完整性"
+          ],
+          "risks": [
+            "仅使用提供的合成材料，不执行外部操作"
+          ]
+        },
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "M1",
+            "type": "reference",
+            "title": "M1",
+            "ref": "",
+            "content": "合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。"
+          },
+          {
+            "id": "M2",
+            "type": "reference",
+            "title": "M2",
+            "ref": "",
+            "content": "实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。"
+          },
+          {
+            "id": "M3",
+            "type": "reference",
+            "title": "M3",
+            "ref": "",
+            "content": "只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "完整专业答复（直接在对话中展示）",
+            "type": "answer",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [
+              "creative-concept-method"
+            ],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "creative-director",
+        "agentVersion": "2.1.0",
+        "agentHash": "9fdc5f265db352d6",
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtpb1w1s-2bozl",
+        "bindings": {
+          "skills": [
+            "creative-concept-method",
+            "writing-polish",
+            "visual-brief-prompt"
+          ],
+          "connectors": []
+        },
+        "permissions": {
+          "connectors": {
+            "allowedConnectorIds": []
+          },
+          "tools": {
+            "allowlist": []
+          },
+          "network": false,
+          "write": false,
+          "externalWrite": false
+        },
+        "plan": {
+          "goal": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "核对提供的材料与约束",
+            "按专家方法完成本次分析或方案",
+            "复核事实、推导和交付完整性"
+          ],
+          "risks": [
+            "仅使用提供的合成材料，不执行外部操作"
+          ]
+        },
+        "sop": {
+          "version": "2.1.0",
+          "hash": "9fdc5f265db352d6"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:56.224Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.496Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.548Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.941Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:57.972Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "上下文准备完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:21:59.505Z"
+        },
+        {
+          "id": "event-9",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "回答生成完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:22:16.950Z"
+        },
+        {
+          "id": "event-10",
+          "type": "execution_blocked",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 10,
+          "summary": "回复中的部分来源引用无法对应当前材料，需要重新核对引用",
+          "actorId": "",
+          "createdAt": "2026-09-06T04:22:17.089Z"
+        },
+        {
+          "id": "event-11",
+          "type": "retried",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 11,
+          "summary": "用户重新执行任务",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:49.882Z"
+        },
+        {
+          "id": "event-12",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 12,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:49.902Z"
+        },
+        {
+          "id": "event-13",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 13,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:50.052Z"
+        },
+        {
+          "id": "event-14",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 14,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:50.052Z"
+        },
+        {
+          "id": "event-15",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 15,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:50.052Z"
+        },
+        {
+          "id": "event-16",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 16,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:40:50.072Z"
+        },
+        {
+          "id": "event-17",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 17,
+          "summary": "回答生成完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:41:03.687Z"
+        },
+        {
+          "id": "event-18",
+          "type": "deliverable_ready",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 18,
+          "summary": "完整专业答复（直接在对话中展示）",
+          "actorId": "",
+          "createdAt": "2026-09-06T05:41:03.807Z"
+        }
+      ],
+      "attention": null,
+      "progress": {
+        "phase": "review",
+        "label": "成果已生成，等待验收",
+        "detail": "",
+        "startedAt": "2026-09-06T05:40:49.897Z",
+        "updatedAt": "2026-09-06T05:41:03.802Z",
+        "heartbeatAt": "2026-09-06T05:41:03.802Z"
+      },
+      "inputQueue": null,
+      "deliverables": [
+        {
+          "deliverableId": "primary",
+          "title": "完整专业答复（直接在对话中展示）",
+          "type": "answer",
+          "version": 1,
+          "required": true,
+          "previousVersionId": "",
+          "artifactRef": "wb-expert-task-mtpb1w1s-2bozl#deliverable_expert_task-mtpb1w1s-2bozl_mtpdvcp5_primary",
+          "artifactRefs": [
+            "wb-expert-task-mtpb1w1s-2bozl#deliverable_expert_task-mtpb1w1s-2bozl_mtpdvcp5_primary"
+          ],
+          "executionRef": "agent-run:expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "kind": "deliverable",
+          "source": "expert",
+          "sequence": 1,
+          "evidenceStatus": "verified",
+          "acceptanceStatus": "pending",
+          "comments": [],
+          "createdAt": "2026-09-06T05:41:03.802Z"
+        }
+      ],
+      "executionEvidence": [
+        {
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+          "deliverableId": "primary",
+          "gateStatus": "blocked",
+          "verificationPassed": false,
+          "verificationDiagnostics": {
+            "version": 1,
+            "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+            "taskId": "task-mtpb1w1s-2bozl",
+            "candidateHash": "0278d0b578a2db795144468cf2ca37ec13b2f5d8d155c8c9679df585920fa12c",
+            "candidateChars": 1260,
+            "materialSnapshotHash": "3b788eb729caaebfe30c9252421470cf3799f0e0fb4f02ef68d958943ea45112",
+            "materialCount": 3,
+            "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+            "fieldChecks": [],
+            "fieldCheckCount": 0
+          },
+          "toolCalls": [],
+          "evidence": [],
+          "violations": [
+            {
+              "code": "unresolved_source_citation",
+              "message": "回复包含无法对应当前材料的来源引用，需要重新核对引用",
+              "missingTools": []
+            }
+          ],
+          "createdAt": "2026-09-06T04:22:17.069Z"
+        },
+        {
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "deliverableId": "primary",
+          "gateStatus": "verified",
+          "verificationPassed": true,
+          "verificationDiagnostics": {
+            "version": 1,
+            "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+            "taskId": "task-mtpb1w1s-2bozl",
+            "candidateHash": "b972ca9a9a2f4e5c9f69e268159f8a7a6f8656798d0c7bed68ff253b1bf3727d",
+            "candidateChars": 1465,
+            "materialSnapshotHash": "f8496743a61e1eaac3cc2762a6facf341832c4b28983d29265423da610f2cac1",
+            "materialCount": 3,
+            "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+            "fieldChecks": [],
+            "fieldCheckCount": 0
+          },
+          "toolCalls": [],
+          "evidence": [],
+          "violations": [],
+          "createdAt": "2026-09-06T05:41:03.769Z"
+        }
+      ],
+      "resultSummary": "## 创意命题与两方案比较\n\n**核心命题**：让撕票动作本身成为“建筑落成”的隐喻，同时保证两联各自独立承载完整信息。\n\n**方案A｜“蓝图对折”**\n整张票正面印一幅连续的建筑立面线稿（黑金线条），横跨存根与观众联。撕开时，线稿沿撕线断开——存根带走“地基/入口段”，观众联保留“主体/屋顶段”。时间地点等文字在两联上各印一份（字号缩小但完整可读）。记忆点在于：撕开的瞬间像把一张完整图纸拆成两半，各自仍是一栋“可辨认的小建筑”。\n\n**方案B｜“楼层剖面”**\n利用180×80横版比例，将票面纵向分为三层“楼层”网格。存根占左侧60mm，内部用金色折线",
+      "status": "review",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtpb1w1s-2bozl"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-06T04:21:56.224Z",
+      "updatedAt": "2026-09-06T05:41:03.807Z"
+    }
+  },
+  "session": {
+    "ok": true,
+    "session": {
+      "id": "wb-expert-task-mtpb1w1s-2bozl",
+      "agentId": "personal",
+      "sessionKind": "expert-task",
+      "profileId": "",
+      "contextId": "",
+      "projectId": null,
+      "expertId": "creative-director",
+      "personaExpertId": "",
+      "executionPolicy": "tools-allowed",
+      "capabilitySnapshotId": "",
+      "snapshotPath": "",
+      "ephemeral": true,
+      "taskRef": {
+        "id": "task-mtpb1w1s-2bozl"
+      },
+      "knowledgeRefs": [],
+      "title": "新助手",
+      "createdAt": "2026-09-06T04:21:56.261Z",
+      "updatedAt": "2026-09-06T05:41:03.699Z",
+      "summary": "",
+      "messages": [
+        {
+          "id": "msg_expert_task-mtpb1w1s-2bozl_mtpb1xdr_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「creative-director」。\n\n你是 KnowMe 创意策划。用核心创意方法提出有取舍的概念与可执行 Brief。尊重事实、素材、权限和阅读条件；辅助润色或生图交接按用户阶段选用，方案不等于实际制作或投放。\n\n【必须遵循的 SOP】\n1. 确认传播任务、受众、媒介阅读条件与事实边界，使用创意概念方法形成可评审命题，不虚构卖点或参与规则。\n2. 围绕命题比较机制有实质差异的概念，说明视觉或阅读路径怎样传达真实价值，而非仅替换风格词。\n3. 以受众理解、媒介限制和实际素材作推荐与取舍；把假设、需确认的资产或授权单列。\n4. 把推荐方向交接为本阶段需要的文案、构图与信息层级；动态媒介明确时间区间和常驻信息，不提前强制填写生图参数。\n5. 逐项检查关键事实和实现条件，给出可操作的可读性与媒介验收方法；复核全文，修订保留未被否定的要求。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}\n\n当前时间：2026-09-06T04:21:57.951Z\n\n材料：\n- M1\n合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\n- M2\n实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\n- M3\n只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}\n步骤：\n1. 核对提供的材料与约束\n2. 按专家方法完成本次分析或方案\n3. 复核事实、推导和交付完整性\n风险：仅使用提供的合成材料，不执行外部操作\n\n本轮交付物：完整专业答复（直接在对话中展示）（answer）\n\n本轮 SOP 路由：creative-concept-method。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+          "createdAt": "2026-09-06T04:21:58.003Z"
+        },
+        {
+          "id": "msg_expert_task-mtpb1w1s-2bozl_mtpb1xdr_assistant",
+          "role": "assistant",
+          "text": "回复中的部分来源引用无法对应当前材料，暂不能确认这些引用。已有需求和材料已保留，需要重新核对引用。",
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpb1xdr",
+          "createdAt": "2026-09-06T04:22:16.966Z",
+          "trace": [
+            {
+              "id": "stage_prepare",
+              "kind": "stage",
+              "title": "上下文准备完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_generate",
+              "kind": "stage",
+              "title": "回答生成完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_ground",
+              "kind": "stage",
+              "title": "依据核对完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_verify_claims",
+              "kind": "stage",
+              "title": "输出已阻断未验证声明",
+              "status": "error",
+              "summary": "回复中的部分来源引用无法对应当前材料，暂不能确认这些引用。已有需求和材料已保留，需要重新核对引用。"
+            }
+          ],
+          "protocolVersion": 2,
+          "answerHash": "d7a71855077b585c"
+        },
+        {
+          "id": "msg_expert_task-mtpb1w1s-2bozl_mtpdvcp5_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「creative-director」。\n\n你是 KnowMe 创意策划。用核心创意方法提出有取舍的概念与可执行 Brief。尊重事实、素材、权限和阅读条件；辅助润色或生图交接按用户阶段选用，方案不等于实际制作或投放。\n\n【必须遵循的 SOP】\n1. 确认传播任务、受众、媒介阅读条件与事实边界，使用创意概念方法形成可评审命题，不虚构卖点或参与规则。\n2. 围绕命题比较机制有实质差异的概念，说明视觉或阅读路径怎样传达真实价值，而非仅替换风格词。\n3. 以受众理解、媒介限制和实际素材作推荐与取舍；把假设、需确认的资产或授权单列。\n4. 把推荐方向交接为本阶段需要的文案、构图与信息层级；动态媒介明确时间区间和常驻信息，不提前强制填写生图参数。\n5. 逐项检查关键事实和实现条件，给出可操作的可读性与媒介验收方法；复核全文，修订保留未被否定的要求。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}\n\n当前时间：2026-09-06T05:40:50.057Z\n\n材料：\n- M1\n合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\n- M2\n实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\n- M3\n只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。\"},{\"id\":\"M2\",\"text\":\"实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。\"},{\"id\":\"M3\",\"text\":\"只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。\"}],\"request\":\"提出两个不同的创意组织方式，推荐一个并解释取舍。为推荐方案写两联各自的版面与文案安排，说明撕开前后的体验；给一个后续纸样检查办法，能检验两联真的各自可用。无需画图或写印刷工艺教程。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":700,\"maxMixed\":1000,\"instruction\":\"700—1000字中文；可以用两联对照短表，不另生成票券文件。\"},\"authorization\":\"只拟文字设计，不读取其他资产、联网、生图、生成票号/文件、印刷、售票或改变权益。可选用已授权纯计算工具；不可声称已经实测或取得新增授权。\"}\n步骤：\n1. 核对提供的材料与约束\n2. 按专家方法完成本次分析或方案\n3. 复核事实、推导和交付完整性\n风险：仅使用提供的合成材料，不执行外部操作\n\n本轮交付物：完整专业答复（直接在对话中展示）（answer）\n\n本轮 SOP 路由：creative-concept-method。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "createdAt": "2026-09-06T05:40:50.086Z"
+        },
+        {
+          "id": "msg_expert_task-mtpb1w1s-2bozl_mtpdvcp5_assistant",
+          "role": "assistant",
+          "text": "## 创意命题与两方案比较\n\n**核心命题**：让撕票动作本身成为“建筑落成”的隐喻，同时保证两联各自独立承载完整信息。\n\n**方案A｜“蓝图对折”**\n整张票正面印一幅连续的建筑立面线稿（黑金线条），横跨存根与观众联。撕开时，线稿沿撕线断开——存根带走“地基/入口段”，观众联保留“主体/屋顶段”。时间地点等文字在两联上各印一份（字号缩小但完整可读）。记忆点在于：撕开的瞬间像把一张完整图纸拆成两半，各自仍是一栋“可辨认的小建筑”。\n\n**方案B｜“楼层剖面”**\n利用180×80横版比例，将票面纵向分为三层“楼层”网格。存根占左侧60mm，内部用金色折线画出“底层门厅”图标+场次+票号；观众联右侧120mm用同一套网格语言画出“二层工坊”图标+活动名、时间地点、每票一人、票号。两联视觉风格统一（共享网格母题），但内容完全独立，无需拼合即可阅读。记忆点在于：拿到票先看到一栋“纸楼剖面”，撕开后各持一层，暗示“你进入的是这栋楼的某一层”。\n\n**推荐方案B，取舍理由**：\n- 方案A的连续线稿虽美观，但撕开后两联各自只剩半截图形，若文字也做跨联处理则违反M2“独立可读”硬约束；即使文字双份，半截线稿在60mm存根上辨识度低，工作人员核对效率下降。\n- 方案B以共享网格母题保持整体感，同时天然满足“两联各自可用”；60mm存根只需容纳一个图标+两行关键文字，空间充裕；观众联120mm有足够层级放全量信息。\n- 销售草稿中“拼起来才读得到”和“下次免费通行证”均不可采用：前者违反M2，后者虚构了不存在的权益（M1明确无第二次入场）。方案B从结构上杜绝跨联依赖。\n\n## 推荐方案版面与文案安排\n\n| 区域 | 存根（左60mm） | 观众联（右120mm） |\n|---|---|---|\n| 顶部标识 | 金色小字“夜游纸上城” | 黑色主标题“夜游纸上城”+金色副标“纸建筑拼装体验” |\n| 中部图形 | 金色折线画“门厅拱形”简笔图标 | 金色网格+折线画“二层工坊窗格”简笔图标 |\n| 信息区 | 第1行：11.6 19:10<br>第2行：票号 [____] | 第1行：11月6日 19:10 · 旧印刷厂二层工坊<br>第2行：每票一人 · 凭此券入场<br>第3行：票号 [____] |\n| 底部备注 | 无 | 灰色小字“本券为单次体验凭证，不含额外权益” |\n\n**撕开前体验**：观众手持完整票，从左到右读到“门厅→工坊”的空间叙事，建立“即将进入一栋纸建筑”的预期。\n**撕开后体验**：工作人员收走存根，仅凭60mm即可确认场次与票号完成核销；观众保留120mm票，所有后续辨认所需信息（活动名、时间地点、人数限制、票号）均在单联内闭环，遗失物核对无需回溯另一联。\n\n## 纸样检查办法\n\n打印一张180×80mm黑白灰度纸样（模拟最终尺寸），沿预设撕线裁开，执行以下三步：\n1. **遮挡测试**：遮住任意一联，检查另一联是否能在正常阅读距离（约30cm）下读出全部必需字段（存根：场次+票号；观众联：活动名+时间+地点+每票一人+票号）。任一字段缺失即判定不合格。\n2. **缩略识别**：将两联分别拍照缩小至手机屏幕宽度约40%，确认图标轮廓与文字块仍可区分主次层级。\n3. **误读排查**：请一位未参与设计的人只看观众联，口头复述“这张票能做什么、不能做什么”，验证不会出现“可再次入场”或“含赠品”等错误理解。\n\n以上为文字概念阶段交付，不涉及实际印刷工艺参数或生图指令。",
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "createdAt": "2026-09-06T05:41:03.699Z",
+          "trace": [
+            {
+              "id": "stage_prepare",
+              "kind": "stage",
+              "title": "上下文准备完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_generate",
+              "kind": "stage",
+              "title": "回答生成完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_ground",
+              "kind": "stage",
+              "title": "依据核对完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_verify_claims",
+              "kind": "stage",
+              "title": "输出验证通过",
+              "status": "done"
+            }
+          ],
+          "protocolVersion": 2,
+          "answerHash": "b972ca9a9a2f4e5c"
+        }
+      ],
+      "pinned": false,
+      "run": {
+        "goal": "当前工作",
+        "role": "general",
+        "status": "review",
+        "toolsUsed": [],
+        "steps": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done",
+            "at": "2026-09-06T05:41:03.699Z"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "回答生成完成",
+            "status": "done",
+            "at": "2026-09-06T05:41:03.699Z"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done",
+            "at": "2026-09-06T05:41:03.699Z"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done",
+            "at": "2026-09-06T05:41:03.699Z",
+            "summary": "回复中的部分来源引用无法对应当前材料，暂不能确认这些引用。已有需求和材料已保留，需要重新核对引用。"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "deliverable_expert_task-mtpb1w1s-2bozl_mtpdvcp5_primary",
+            "type": "answer",
+            "title": "完整专业答复（直接在对话中展示）",
+            "body": "## 创意命题与两方案比较\n\n**核心命题**：让撕票动作本身成为“建筑落成”的隐喻，同时保证两联各自独立承载完整信息。\n\n**方案A｜“蓝图对折”**\n整张票正面印一幅连续的建筑立面线稿（黑金线条），横跨存根与观众联。撕开时，线稿沿撕线断开——存根带走“地基/入口段”，观众联保留“主体/屋顶段”。时间地点等文字在两联上各印一份（字号缩小但完整可读）。记忆点在于：撕开的瞬间像把一张完整图纸拆成两半，各自仍是一栋“可辨认的小建筑”。\n\n**方案B｜“楼层剖面”**\n利用180×80横版比例，将票面纵向分为三层“楼层”网格。存根占左侧60mm，内部用金色折线画出“底层门厅”图标+场次+票号；观众联右侧120mm用同一套网格语言画出“二层工坊”图标+活动名、时间地点、每票一人、票号。两联视觉风格统一（共享网格母题），但内容完全独立，无需拼合即可阅读。记忆点在于：拿到票先看到一栋“纸楼剖面”，撕开后各持一层，暗示“你进入的是这栋楼的某一层”。\n\n**推荐方案B，取舍理由**：\n- 方案A的连续线稿虽美观，但撕开后两联各自只剩半截图形，若文字也做跨联处理则违反M2“独立可读”硬约束；即使文字双份，半截线稿在60mm存根上辨识度低，工作人员核对效率下降。\n- 方案B以共享网格母题保持整体感，同时天然满足“两联各自可用”；60mm存根只需容纳一个图标+两行关键文字，空间充裕；观众联120mm有足够层级放全量信息。\n- 销售草稿中“拼起来才读得到”和“下次免费通行证”均不可采用：前者违反M2，后者虚构了不存在的权益（M1明确无第二次入场）。方案B从结构上杜绝跨联依赖。\n\n## 推荐方案版面与文案安排\n\n| 区域 | 存根（左60mm） | 观众联（右120mm） |\n|---|---|---|\n| 顶部标识 | 金色小字“夜游纸上城” | 黑色主标题“夜游纸上城”+金色副标“纸建筑拼装体验” |\n| 中部图形 | 金色折线画“门厅拱形”简笔图标 | 金色网格+折线画“二层工坊窗格”简笔图标 |\n| 信息区 | 第1行：11.6 19:10<br>第2行：票号 [____] | 第1行：11月6日 19:10 · 旧印刷厂二层工坊<br>第2行：每票一人 · 凭此券入场<br>第3行：票号 [____] |\n| 底部备注 | 无 | 灰色小字“本券为单次体验凭证，不含额外权益” |\n\n**撕开前体验**：观众手持完整票，从左到右读到“门厅→工坊”的空间叙事，建立“即将进入一栋纸建筑”的预期。\n**撕开后体验**：工作人员收走存根，仅凭60mm即可确认场次与票号完成核销；观众保留120mm票，所有后续辨认所需信息（活动名、时间地点、人数限制、票号）均在单联内闭环，遗失物核对无需回溯另一联。\n\n## 纸样检查办法\n\n打印一张180×80mm黑白灰度纸样（模拟最终尺寸），沿预设撕线裁开，执行以下三步：\n1. **遮挡测试**：遮住任意一联，检查另一联是否能在正常阅读距离（约30cm）下读出全部必需字段（存根：场次+票号；观众联：活动名+时间+地点+每票一人+票号）。任一字段缺失即判定不合格。\n2. **缩略识别**：将两联分别拍照缩小至手机屏幕宽度约40%，确认图标轮廓与文字块仍可区分主次层级。\n3. **误读排查**：请一位未参与设计的人只看观众联，口头复述“这张票能做什么、不能做什么”，验证不会出现“可再次入场”或“含赠品”等错误理解。\n\n以上为文字概念阶段交付，不涉及实际印刷工艺参数或生图指令。",
+            "status": "draft",
+            "meta": {
+              "taskId": "task-mtpb1w1s-2bozl",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5"
+            }
+          }
+        ],
+        "applyLog": []
+      },
+      "displayTitle": "{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票",
+      "labels": [
+        "工作"
+      ],
+      "grounding": "目标：{\"goal\":\"请设计‘夜游纸上城’纸建筑体验活动的票券概念。票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\n材料：用户尚未提供\n约束：票会在入口撕开，既要有记忆点，也不能让工作人员或观众失去之后要用的信息。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加\n期望结果：用户尚未明确提供",
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "expertTaskDiagnostics": {
+        "available": 0,
+        "loaded": 0,
+        "loadedNames": [],
+        "omitted": null,
+        "usedTokens": 5976,
+        "schemaTokens": 0,
+        "inputBudget": 64000,
+        "expansion": 0,
+        "reason": "当前执行策略未启用工具"
+      },
+      "expertName": "创意策划",
+      "expert": {
+        "id": "creative-director",
+        "name": "创意策划",
+        "description": "把传播目标转成受众、核心概念、文案与视觉创意方向",
+        "avatar": "office/writer",
+        "soul": "",
+        "sop": "1. 确认传播任务、受众、媒介阅读条件与事实边界，使用创意概念方法形成可评审命题，不虚构卖点或参与规则。\n2. 围绕命题比较机制有实质差异的概念，说明视觉或阅读路径怎样传达真实价值，而非仅替换风格词。\n3. 以受众理解、媒介限制和实际素材作推荐与取舍；把假设、需确认的资产或授权单列。\n4. 把推荐方向交接为本阶段需要的文案、构图与信息层级；动态媒介明确时间区间和常驻信息，不提前强制填写生图参数。\n5. 逐项检查关键事实和实现条件，给出可操作的可读性与媒介验收方法；复核全文，修订保留未被否定的要求。",
+        "agenticType": "react",
+        "agenticConfig": {
+          "agenticType": "react",
+          "enableReflection": true,
+          "enableTools": true
+        },
+        "bindings": {
+          "skills": [
+            "creative-concept-method",
+            "writing-polish",
+            "visual-brief-prompt"
+          ],
+          "connectors": []
+        },
+        "readiness": {
+          "state": "ready",
+          "items": [
+            {
+              "id": "creative-concept-method",
+              "kind": "skill",
+              "status": "ready"
+            },
+            {
+              "id": "writing-polish",
+              "kind": "skill",
+              "status": "ready"
+            },
+            {
+              "id": "visual-brief-prompt",
+              "kind": "skill",
+              "status": "ready"
+            }
+          ],
+          "issues": []
+        },
+        "source": "snapshot"
+      },
+      "knowledge": {
+        "mode": "default",
+        "activeProviderId": "local-default",
+        "selected": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local",
+            "status": "default"
+          }
+        ],
+        "available": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local"
+          }
+        ],
+        "degraded": false,
+        "message": ""
+      }
+    }
+  },
+  "captures": [
+    {
+      "at": "2026-09-06T05:41:03.695Z",
+      "args": {
+        "text": "## 创意命题与两方案比较\n\n**核心命题**：让撕票动作本身成为“建筑落成”的隐喻，同时保证两联各自独立承载完整信息。\n\n**方案A｜“蓝图对折”**\n整张票正面印一幅连续的建筑立面线稿（黑金线条），横跨存根与观众联。撕开时，线稿沿撕线断开——存根带走“地基/入口段”，观众联保留“主体/屋顶段”。时间地点等文字在两联上各印一份（字号缩小但完整可读）。记忆点在于：撕开的瞬间像把一张完整图纸拆成两半，各自仍是一栋“可辨认的小建筑”。\n\n**方案B｜“楼层剖面”**\n利用180×80横版比例，将票面纵向分为三层“楼层”网格。存根占左侧60mm，内部用金色折线画出“底层门厅”图标+场次+票号；观众联右侧120mm用同一套网格语言画出“二层工坊”图标+活动名、时间地点、每票一人、票号。两联视觉风格统一（共享网格母题），但内容完全独立，无需拼合即可阅读。记忆点在于：拿到票先看到一栋“纸楼剖面”，撕开后各持一层，暗示“你进入的是这栋楼的某一层”。\n\n**推荐方案B，取舍理由**：\n- 方案A的连续线稿虽美观，但撕开后两联各自只剩半截图形，若文字也做跨联处理则违反M2“独立可读”硬约束；即使文字双份，半截线稿在60mm存根上辨识度低，工作人员核对效率下降。\n- 方案B以共享网格母题保持整体感，同时天然满足“两联各自可用”；60mm存根只需容纳一个图标+两行关键文字，空间充裕；观众联120mm有足够层级放全量信息。\n- 销售草稿中“拼起来才读得到”和“下次免费通行证”均不可采用：前者违反M2，后者虚构了不存在的权益（M1明确无第二次入场）。方案B从结构上杜绝跨联依赖。\n\n## 推荐方案版面与文案安排\n\n| 区域 | 存根（左60mm） | 观众联（右120mm） |\n|---|---|---|\n| 顶部标识 | 金色小字“夜游纸上城” | 黑色主标题“夜游纸上城”+金色副标“纸建筑拼装体验” |\n| 中部图形 | 金色折线画“门厅拱形”简笔图标 | 金色网格+折线画“二层工坊窗格”简笔图标 |\n| 信息区 | 第1行：11.6 19:10<br>第2行：票号 [____] | 第1行：11月6日 19:10 · 旧印刷厂二层工坊<br>第2行：每票一人 · 凭此券入场<br>第3行：票号 [____] |\n| 底部备注 | 无 | 灰色小字“本券为单次体验凭证，不含额外权益” |\n\n**撕开前体验**：观众手持完整票，从左到右读到“门厅→工坊”的空间叙事，建立“即将进入一栋纸建筑”的预期。\n**撕开后体验**：工作人员收走存根，仅凭60mm即可确认场次与票号完成核销；观众保留120mm票，所有后续辨认所需信息（活动名、时间地点、人数限制、票号）均在单联内闭环，遗失物核对无需回溯另一联。\n\n## 纸样检查办法\n\n打印一张180×80mm黑白灰度纸样（模拟最终尺寸），沿预设撕线裁开，执行以下三步：\n1. **遮挡测试**：遮住任意一联，检查另一联是否能在正常阅读距离（约30cm）下读出全部必需字段（存根：场次+票号；观众联：活动名+时间+地点+每票一人+票号）。任一字段缺失即判定不合格。\n2. **缩略识别**：将两联分别拍照缩小至手机屏幕宽度约40%，确认图标轮廓与文字块仍可区分主次层级。\n3. **误读排查**：请一位未参与设计的人只看观众联，口头复述“这张票能做什么、不能做什么”，验证不会出现“可再次入场”或“含赠品”等错误理解。\n\n以上为文字概念阶段交付，不涉及实际印刷工艺参数或生图指令。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtpb1w1s-2bozl",
+          "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+          "items": [
+            {
+              "id": "M1",
+              "title": "M1",
+              "text": "合成活动：11月6日19:10，旧印刷厂二层工坊，单次纸建筑拼装体验，凭已购买票券入场，每票一人。购票系统已经存在，本次不设计销售流程。参加者带走其拼装作品，但没有额外赠品、抽奖或第二次入场权益。",
+              "contentHash": "02f2fc7e53fda09bd713a5a8cf0e52a0338ecaf4fbc1775de9f1efb6a7a80675",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M2",
+              "title": "M2",
+              "text": "实体票180×80毫米、横版、仅正面印刷，背面留白。左侧60毫米是工作人员收走的存根，右侧120毫米由观众保留；撕线固定，不能改变。存根必须独立看出活动场次和票号占位；观众联必须独立保留活动名、时间地点、每票一人及票号占位，方便入场后辨认活动和遗失物核对。实际票号由后续系统填充，不在此生成。",
+              "contentHash": "8dfb052764f477a45c3de756ce6b8555df666125f5a018dda9d15251355e0999",
+              "origin": "user_material",
+              "completeness": "unknown"
+            },
+            {
+              "id": "M3",
+              "title": "M3",
+              "text": "只能黑色加金色平面印刷，不做烫金、模切或电子屏。可用原创建筑线条、折线/网格和文字，未提供照片或任何角色授权。销售同事草稿想让两联拼起来才读得到时间地点，并把观众联叫‘下次免费通行证’。目前仅做文字概念，不印刷，不修改已售票权益。",
+              "contentHash": "7903ea129b9e61e79bb4a48219751732f206aa473df2f1b411b1fc59863e17b8",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "f8496743a61e1eaac3cc2762a6facf341832c4b28983d29265423da610f2cac1"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": true,
+        "claims": [],
+        "violations": [],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    }
+  ],
+  "probe": {
+    "pid": 34544,
+    "userData": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de",
+    "candidateHash": "0278d0b578a2db795144468cf2ca37ec13b2f5d8d155c8c9679df585920fa12c",
+    "verification": {
+      "passed": true,
+      "claims": [],
+      "violations": [],
+      "metadata": {
+        "evidenceCount": 0,
+        "toolCallCount": 0,
+        "hasSupportingEvidence": false,
+        "fieldChecks": [],
+        "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+      }
+    },
+    "sourceHashes": {
+      "agent-source-citations.ts": "f241d44bd1d85be6bbf10a999545212f5a83a949af5c24f5f68192b490f137e1",
+      "agent-claim-source-check.ts": "de67c5c999ba44fe510b8bc4047b1ae8623f39d0ae6589bddcd695cac7885683",
+      "agent-grounding-ledger.ts": "47cfa41709027adcf1652de22b145995e24ccdfda2312d397c4bafa3d24697f1"
+    }
+  },
+  "retryStartedAt": "2026-09-06T05:40:49.854Z"
+}

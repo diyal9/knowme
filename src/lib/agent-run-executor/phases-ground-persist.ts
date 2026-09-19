@@ -6,6 +6,9 @@ const { resolveGroundingRuntimeMode } = require('../agent-run-ports')
 const groundingRuntime = require('../agent-grounding-runtime')
 const feishuGroundingAdapter = require('../agent-grounding-feishu-adapter')
 const { EventType } = require('../agent-output-protocol')
+const { validateProvidedMaterials } = require('../provided-materials')
+const { buildVerificationDiagnostics } = require('../agent-verification-diagnostics')
+const { getViolationClaimLabels } = require('../agent-grounding-labels')
 const { mergeArtifactRefs } = require('./hints')
 const {
   resolveTurnIdentity,
@@ -15,6 +18,7 @@ const {
 const {
   mergeExecutionContracts,
   validateExecutionCompletion,
+  hasRules,
 } = require('../agent-execution-contract')
 
 /**
@@ -61,16 +65,34 @@ async function runGroundAndPersist(deps) {
   let evidenceLedger = initialEvidenceLedger
   let toolLedger = initialToolLedger
   let verification = null
+  let verificationDiagnostics = null
   let outputGateStatus = 'not_required'
   const groundingMode = resolveGroundingRuntimeMode()
   const collaborationOnly = input.conversationMode === 'expert-planning'
     || input.conversationMode === 'expert-discussion'
+  const effectiveContract = mergeExecutionContracts([
+    initialReferenceState?.taskFrame, ctxBundle.taskFrame, input.executionContract,
+  ])
 
   if (ports.hooks?.postProcess) {
     fullText = await ports.hooks.postProcess({ fullText, toolMessages, session, input }) || fullText
   }
 
-  if (groundingMode === 'runtime' && !collaborationOnly) {
+  if (input.conversationMode === 'expert-planning') {
+    fullText = require('../context-engine/collaboration').enforcePlanningNoExecutionClaims(fullText, {
+      userText: input.displayPrompt || input.prompt,
+      history: input.history,
+      expertId: input.expertId,
+    })
+  }
+
+  if ((groundingMode === 'runtime' || hasRules(effectiveContract)) && !collaborationOnly) {
+    // Use the context's current-run snapshot, never reconstruct evidence from
+    // the mixed prompt, prior assistant messages or an earlier artifact.
+    const providedMaterials = validateProvidedMaterials(ctxBundle.providedMaterials, {
+      taskId: input.taskRef?.id || input.workbenchTaskId,
+      runId: input.runId,
+    })
     enterPhase(RunPhase.GROUND)
     stage('stage_ground', '正在核对依据…', 'pending', { runPhase: RunPhase.GROUND })
     const merged = groundingRuntime.mergeToolResultsIntoLedgers({
@@ -99,12 +121,8 @@ async function runGroundAndPersist(deps) {
 
     enterPhase(RunPhase.VERIFY_CLAIMS)
     stage('stage_verify_claims', '正在验证输出依据…', 'pending', { runPhase: RunPhase.VERIFY_CLAIMS })
-    const taskFrame = mergeExecutionContracts([
-      referenceState.taskFrame,
-      ctxBundle.taskFrame,
-      input.executionContract,
-    ])
-    if (taskFrame?.requiredTools?.length || taskFrame?.requiredEvidence?.length || taskFrame?.completionConditions?.length) {
+    const taskFrame = effectiveContract
+    if (hasRules(taskFrame)) {
       referenceState = groundingRuntime.setTaskFrame(referenceState, taskFrame)
     }
     verification = groundingRuntime.verifyClaims({
@@ -113,6 +131,8 @@ async function runGroundAndPersist(deps) {
       toolLedger,
       referenceState,
       taskFrame,
+      providedMaterials,
+      toolMessages,
     })
     const contractAssessment = validateExecutionCompletion(taskFrame, {
       executionEvidence: {
@@ -139,7 +159,20 @@ async function runGroundAndPersist(deps) {
     }
     let gate = groundingRuntime.applyOutputGate({ text: fullText, verification, taskFrame, regenUsed: false })
     if (!gate.allowed && gate.regenSuggested && loopState.finalizationUsed !== true) {
-      const regen = await finalizeResponse('grounding')
+      const regen = await finalizeResponse('grounding', { text: fullText, verification, providedMaterials,
+        evidenceLedger, toolMessages })
+      if (regen?.cancelled) return regen
+      if (/budget_exceeded$/.test(regen?.code || '')) {
+        const errorInfo = { code: regen.code, message: regen.error, details: regen.details || null }
+        enterPhase(RunPhase.ERROR)
+        setTerminal(RunPhase.ERROR)
+        emitTerminal(EventType.RUN_FAILED, { title: '必要上下文超出预算', ...errorInfo }, RunPhase.ERROR)
+        return buildResult({ error: regen.error, code: regen.code, errorInfo, terminal: RunPhase.ERROR,
+          runPhases, metrics, planEval, session, toolCallCount, runStartedAt, ports })
+      }
+      if (regen?.code === 'model_response_incomplete') {
+        throw Object.assign(new Error(regen.error), { code: regen.code })
+      }
       if (regen?.snapshot?.content) fullText = regen.snapshot.content
       verification = groundingRuntime.verifyClaims({
         text: fullText,
@@ -147,9 +180,26 @@ async function runGroundAndPersist(deps) {
         toolLedger,
         referenceState,
         taskFrame,
+        providedMaterials,
+        toolMessages,
       })
+      // Rephrasing the answer cannot create missing artifacts or tool receipts.
+      // Keep the execution contract gate in force after the repair pass.
+      if (!contractAssessment.ok) {
+        verification = {
+          ...verification,
+          passed: false,
+          violations: [...(verification?.violations || []), ...contractAssessment.violations],
+        }
+      }
       gate = groundingRuntime.applyOutputGate({ text: fullText, verification, taskFrame, regenUsed: true })
     }
+    // Capture the last checked candidate, before replacing it with a refusal.
+    // This bounded debug envelope must never feed back into gate decisions.
+    verificationDiagnostics = buildVerificationDiagnostics({
+      text: fullText, verification, providedMaterials, runId: input.runId,
+      taskId: input.taskRef?.id || input.workbenchTaskId,
+    })
     if (!gate.allowed) fullText = gate.refusal || gate.text
     outputGateStatus = gate.allowed ? 'verified' : 'blocked'
     const groundingStatus = groundingRuntime.buildGroundingStatus(verification, { evidenceLedger, toolLedger })
@@ -233,22 +283,25 @@ async function runGroundAndPersist(deps) {
       : [],
   })
 
-  enterPhase(RunPhase.DONE)
-  setTerminal(RunPhase.DONE)
-  if (!runPhases.includes(RunPhase.DONE)) runPhases.push(RunPhase.DONE)
+  const finalPhase = hasRules(effectiveContract)
+    && (outputGateStatus === 'blocked' || verification?.passed === false)
+    ? RunPhase.ERROR : RunPhase.DONE
+  enterPhase(finalPhase)
+  setTerminal(finalPhase)
+  if (!runPhases.includes(finalPhase)) runPhases.push(finalPhase)
 
   metrics.totalMs = (ports.clock?.now?.() || Date.now()) - runStartedAt
-  emitTerminal(EventType.RUN_COMPLETED, {
-    title: '执行完成',
+  emitTerminal(finalPhase === RunPhase.DONE ? EventType.RUN_COMPLETED : EventType.RUN_FAILED, {
+    title: finalPhase === RunPhase.DONE ? '执行完成' : '执行校验未通过',
     toolCalls: toolCallCount,
     metrics,
     answerHash: committed.hash,
-  }, RunPhase.DONE)
+  }, finalPhase)
 
   return buildResult({
     text: fullText,
     streamed,
-    terminal: RunPhase.DONE,
+    terminal: finalPhase,
     runPhases,
     metrics,
     planEval,
@@ -263,10 +316,12 @@ async function runGroundAndPersist(deps) {
     executionEvidence: {
       gateStatus: outputGateStatus,
       verificationPassed: verification ? verification.passed === true : true,
+      ...(verificationDiagnostics ? { verificationDiagnostics } : {}),
       violations: (verification?.violations || []).slice(0, 16).map(item => ({
         code: String(item.code || ''),
         message: String(item.message || '').slice(0, 500),
         missingTools: Array.isArray(item.missingTools) ? item.missingTools.slice(0, 32).map(String) : [],
+        ...(getViolationClaimLabels(item).length ? { claimLabels: getViolationClaimLabels(item) } : {}),
       })),
       toolCalls: (toolLedger?.calls || []).slice(-64).map(item => ({
         id: String(item.id || ''),

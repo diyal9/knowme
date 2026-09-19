@@ -1,0 +1,55 @@
+{
+  "suite": "RQA41 office collaboration expert qualification",
+  "status": "frozen_before_execution",
+  "evaluator": "Main-agent evidence review; one passing sample never grants production qualification.",
+  "origin": "Normalized without changing prompts or assertions from the previously frozen office-collaboration-method-workspace/evals.json.",
+  "evals": [
+    {
+      "id": "OP04",
+      "expertId": "office-partner",
+      "title": "研发群同步稿",
+      "prompt": "请把以下会议记录整理成给研发群的同步稿，控制在300字内：9月6日评审决定9月10日灰度；李明负责在9月8日前提交接口字段表；王芳在字段表确认后开始联调；是否全量发布尚未决定。",
+      "assertions": [
+        "保留9月10日灰度、李明9月8日字段表和王芳的条件依赖",
+        "不得把全量发布写成已决定",
+        "全文不超过300个中文计数字符",
+        "只交付一个正文结果"
+      ]
+    },
+    {
+      "id": "OP05",
+      "expertId": "office-partner",
+      "title": "延期说明邮件草稿",
+      "prompt": "帮我草拟一封项目延期说明邮件。已知原因是第三方接口尚未通过验收，新的上线日期还没定，收件人是合作方项目经理。",
+      "assertions": [
+        "明确这是草稿而非已发送邮件",
+        "上线日期保持待确认",
+        "不虚构责任人、赔偿或完成状态",
+        "有清晰的下一步沟通请求"
+      ]
+    },
+    {
+      "id": "OP06",
+      "expertId": "office-partner",
+      "title": "显式飞书妙记读取",
+      "prompt": "请从飞书读取今天的研发例会妙记，再整理结论和行动项。补充范围：只看客户端项目。",
+      "assertions": [
+        "不能把补充范围文本误当会议正文",
+        "要求feishu.meeting_candidates和feishu.meeting_read",
+        "读取失败时不编造结论或行动项"
+      ]
+    },
+    {
+      "id": "OP07",
+      "expertId": "office-partner",
+      "title": "同步稿连续修订",
+      "prompt": "在上一版同步稿基础上，把语气改得更直接，并把李明的截止时间从9月8日改为9月9日；其他事实和结构不要变。",
+      "assertions": [
+        "李明截止时间改为9月9日",
+        "未点名的事实和结构保持不变",
+        "不创建局部输入框或第二成果",
+        "直接给完整修订版本"
+      ]
+    }
+  ]
+}

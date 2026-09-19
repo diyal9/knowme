@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { AppShell } from '../../app/AppShell'
 import { useAppStore } from '../../app/store'
@@ -15,8 +15,14 @@ describe('workspace file tree', () => {
     mockApi({ sourcesList: async () => ({ sources: [], activeSourceId: null }) })
     render(<AppShell />)
     await waitFor(() => {
-      expect(screen.getByText('前往设置添加本地文件夹或 GitLab 项目。')).toBeInTheDocument()
+      expect(screen.getByText('前往设置添加本地文件夹或 Git 仓库。')).toBeInTheDocument()
     })
+    expect(screen.getByRole('toolbar', { name: '文件中心操作' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '添加内容源' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '管理内容源' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '刷新文件中心' })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('搜索文件…')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '新建或打开项目' })).not.toBeInTheDocument()
   })
 
   it('renders file tree from active source', async () => {
@@ -84,7 +90,7 @@ describe('workspace file tree', () => {
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('readme.md')).toBeInTheDocument())
-    fireEvent.change(screen.getByLabelText('切换内容源'), { target: { value: 's2' } })
+    fireEvent.change(screen.getByLabelText('切换内容源'), { target: { value: 'legacy-project:s2' } })
     await waitFor(() => expect(screen.getByText('main.ts')).toBeInTheDocument())
   })
 
@@ -149,8 +155,95 @@ describe('workspace file tree', () => {
     fireEvent.click(screen.getByText('a.md'))
     await waitFor(() => expect(screen.getByTestId('files-preview-panel')).toHaveTextContent('main-a'))
     fireEvent.click(screen.getByLabelText('文件操作'))
+    expect(screen.getByRole('menu', { name: '文件操作菜单' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: '打开源目录' })).toBeInTheDocument()
+    expect(screen.queryByRole('menuitem', { name: '归档项目（保留文件）' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('menuitem', { name: '分屏预览' }))
     fireEvent.click(screen.getByText('b.md'))
     await waitFor(() => expect(screen.getByTestId('files-preview-split')).toHaveTextContent('split-b'))
+  })
+
+  it('uses project identity while deriving the physical source tree', async () => {
+    let activeProjectId = 'p1'
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [
+          { id: 'p1', name: '产品项目', workspaceSourceId: 's1', status: 'active' },
+          { id: 'p2', name: '研发项目', workspaceSourceId: 's2', status: 'active' },
+        ],
+        activeProjectId,
+      }),
+      projectsSetActive: async (id) => {
+        activeProjectId = id
+        return { ok: true, activeProjectId, projects: [] }
+      },
+      sourcesList: async () => ({
+        sources: [
+          { id: 's1', type: 'local', displayName: 'Folder A' },
+          { id: 's2', type: 'local', displayName: 'Folder B' },
+        ],
+        activeSourceId: activeProjectId === 'p2' ? 's2' : 's1',
+      }),
+      sourcesTree: async (id) => ({
+        ok: true,
+        nodes: [{ type: 'file', name: id === 's2' ? 'project-b.md' : 'project-a.md', path: id === 's2' ? 'project-b.md' : 'project-a.md', depth: 0 }],
+      }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByText('project-a.md')).toBeInTheDocument())
+    const sourceSwitcher = screen.getByLabelText('切换内容源')
+    expect(within(sourceSwitcher).getByRole('option', { name: 'Folder A' })).toHaveValue('p1')
+    expect(within(sourceSwitcher).getByRole('option', { name: 'Folder B' })).toHaveValue('p2')
+    fireEvent.change(sourceSwitcher, { target: { value: 'p2' } })
+    await waitFor(() => expect(screen.getByText('project-b.md')).toBeInTheDocument())
+    expect(useAppStore.getState().activeProjectId).toBe('p2')
+    expect(useAppStore.getState().activeSourceId).toBe('s2')
+  })
+
+  it('offers relinking when a project workspace is missing', async () => {
+    let relinked = false
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [{ id: 'p1', name: '离线项目', workspaceSourceId: 's1', status: relinked ? 'active' : 'missing' }],
+        activeProjectId: 'p1',
+      }),
+      projectsRelink: async () => {
+        relinked = true
+        return { ok: true, projects: [], activeProjectId: 'p1' }
+      },
+      sourcesList: async () => ({ sources: [{ id: 's1', type: 'local', displayName: 'Folder' }], activeSourceId: 's1' }),
+      sourcesTree: async () => ({ ok: false, nodes: [] }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByText('文件目录不可用。')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: '重新定位' }))
+    await waitFor(() => expect(relinked).toBe(true))
+  })
+
+  it('projects recent Agent artifacts into the bound project without duplicating files', async () => {
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [{ id: 'p1', name: 'KnowMe', workspaceSourceId: 's1', status: 'active' }],
+        activeProjectId: 'p1',
+      }),
+      sourcesList: async () => ({ sources: [{ id: 's1', type: 'local', displayName: 'KnowMe' }], activeSourceId: 's1' }),
+      sourcesTree: async () => ({ ok: true, nodes: [] }),
+      agentSessionList: async () => ({
+        sessions: [{
+          id: 'session-output', title: '产出报告', projectId: 'p1',
+          run: { artifacts: [{ id: 'artifact-1', projectId: 'p1', type: 'markdown', title: '项目方案', body: '# Project plan' }] },
+        }],
+        ui: { openSessionIds: ['session-output'], activeSessionId: 'session-output' },
+      }),
+    })
+    render(<AppShell />)
+
+    const recent = await screen.findByTestId('project-recent-artifacts')
+    expect(within(recent).getByText('项目方案')).toBeInTheDocument()
+    fireEvent.click(within(recent).getByText('项目方案'))
+    expect(await screen.findByTestId('files-preview-panel')).toHaveTextContent('Project plan')
   })
 })

@@ -1,7 +1,25 @@
 import { expertArtifactBody } from './expert-artifact'
 import type { AgentRunArtifact, WorkbenchTask } from '../shared/api'
 
-export type ExpertDiscussionMode = 'expert-planning' | 'expert-discussion'
+export type ExpertDiscussionMode = 'expert-planning' | 'expert-execution' | 'expert-discussion'
+
+const PLANNING_STATUSES = new Set(['', 'draft', 'clarifying', 'awaiting_confirmation'])
+
+/**
+ * 专家会话模式必须由任务生命周期决定，不能用 taskId 是否存在来推断。
+ * 草稿任务在澄清阶段也可能已经持久化并拥有 taskId。
+ */
+export function resolveExpertDiscussionMode(
+  status: unknown,
+  options: { hasTask?: boolean } = {},
+): ExpertDiscussionMode {
+  const normalized = String(status || '').trim().toLowerCase()
+  if (PLANNING_STATUSES.has(normalized) && (normalized || options.hasTask !== true)) {
+    return 'expert-planning'
+  }
+  if (['starting', 'running', 'revising'].includes(normalized)) return 'expert-execution'
+  return options.hasTask === false ? 'expert-planning' : 'expert-discussion'
+}
 
 export interface ExpertDiscussionContext {
   taskId: string
@@ -103,7 +121,7 @@ export function buildExpertDiscussionPrompt(input: {
   planning: boolean
 }): string {
   if (input.planning) {
-    return `[专家协作·规划阶段]\n你是${input.expertName}。当前只做需求澄清和计划，不开始正式执行，也不调用工具。采用苏格拉底式提问：先复述理解，每次只问一个最关键问题，尽量给出 2-4 个结构化选项和推荐项。信息不足时继续提问，不要提前给计划。信息足够时必须按以下短格式输出，步骤应针对本次任务动态规划为 3-6 步，不要使用“专业处理、自验证、质量复盘”等通用步骤占位：\n【协作计划】\n目标：一句话\n交付：具体成果\n验收：可判断的标准\n执行步骤：\n1. 任务相关步骤\n2. 任务相关步骤\n3. 任务相关步骤\n风险：必要时填写\n最后请用户确认计划。\n\n用户补充：${input.userText}`
+    return `[专家协作·规划阶段]\n你是${input.expertName}。当前只做需求澄清和计划，不开始正式执行，也不调用工具。先复述已确认内容，再判断剩余信息是否会实质改变交付结果；不会改变结果的细节直接采用专业默认值，不要反复追问。确实缺少关键决策时，每轮只问一个问题，并严格使用：\n还缺：字段名称\n问题：一个用户可以直接回答的问题\n选项：2-4 个互斥选项，并标记“推荐”\n回答示例：一句可直接复制的回答\n用户只回复“确认、继续、好的”等泛化内容时，不得假定该字段已补齐，应指出回答仍不充分并重复上述问题。信息足够时必须按以下短格式输出，步骤应针对本次任务动态规划为 3-6 步，不要使用“专业处理、自验证、质量复盘”等通用步骤占位：\n【协作计划】\n目标：一句话\n交付：具体成果\n验收：可判断的标准\n能力：正式执行时将使用的技能、连接器或知识范围\n执行步骤：\n1. 任务相关步骤\n2. 任务相关步骤\n3. 任务相关步骤\n风险：必要时填写\n默认值：本次采用了哪些不影响目标的专业默认值\n最后请用户确认计划。\n\n用户补充：${input.userText}`
   }
   return `[专家协作·成果讨论]\n你是${input.expertName}。以下“当前任务事实”来自已保存的正式任务与成果，是本轮回答的唯一事实依据。你只负责解释成果、回答问题、收集补充和整理修改意见；不要调用工具，不要重新执行任务，不要声称完成了新的操作。若事实不足，直接说明缺少哪一项，不要编造。回答应简短、专业、结论优先；需要用户选择时最多给 4 项。\n\n当前任务事实：\n${formatExpertDiscussionContext(input.context)}\n\n用户消息：${input.userText}`
 }

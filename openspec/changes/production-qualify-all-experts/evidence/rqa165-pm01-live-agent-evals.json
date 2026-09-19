@@ -1,0 +1,31 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-09T02:18:57.721Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:d4a34ecd350f1e1b33e0307f1c47e0d7bad79efdf1acf77337e6075d34755085",
+      "tasks": [
+        {
+          "taskId": "task-mttgzct0-ix2cr",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:d4a34ecd350f1e1b33e0307f1c47e0d7bad79efdf1acf77337e6075d34755085",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

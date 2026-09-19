@@ -1,0 +1,139 @@
+{
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "binding": {
+    "evalId": "RR02",
+    "configuration": "with_skill",
+    "taskId": "task-mtox1mo8-ahzy0",
+    "sessionId": "wb-expert-task-mtox1mo8-ahzy0",
+    "runId": "expert_task-mtox1mo8-ahzy0_mtox1n04",
+    "expertId": "requirement-reviewer",
+    "agentVersion": "2.1.0",
+    "agentHash": "897788be36345c6d",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtox1mo8-ahzy0_mtox1n04",
+        "skillRefs": [
+          "requirement-review"
+        ],
+        "explicitContent": [
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 623,
+            "chars": 1024,
+            "hash": "7df874bae6857343",
+            "truncated": false,
+            "sensitive": false
+          }
+        ]
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "指出A1不能排除课程遗漏/重复以及周三教师冲突，不误称已执行系统缺陷。",
+      "passed": true,
+      "evidence": "开头判阻塞；A1 vs R1明确“遗漏课与重复课可抵消总数（反例1）”“周三冲突不在抽样范围（反例2）”，未声称真实执行发现漏洞。"
+    },
+    {
+      "text": "课程判据检查指定全周课程身份与各自次数，不以总数或抽样替代。",
+      "passed": true,
+      "evidence": "建议全量对账，WHEN方案生成完毕THEN每门必修课次数=1，按本题指定周方案逐课程而非总量抽样核对。末注对其适用性追加无据前提的问题在第5条及claims单列。"
+    },
+    {
+      "text": "教师判据覆盖全周同一教师时段重叠，不能只检查单日。",
+      "passed": true,
+      "evidence": "判据同教师并发数≤1，明确“覆盖全周冲突，非仅周一”，不是只查单日。"
+    },
+    {
+      "text": "允许时段保持待定；性能写清规模、计时起止及阈值待定，不凭空制定SLA/周末排课。",
+      "passed": false,
+      "evidence": "R2保留时段/阈值待定且未造SLA，但全文没有定义性能评估规模和计时起止；仅写阈值待确认前不纳入性能验收，未满足复合断言。"
+    },
+    {
+      "text": "候选条件贯穿建议与验收，结论不形式通过，无动态执行宣称，全文不超360混合字数。",
+      "passed": false,
+      "evidence": "全文混合219字≤360且不形式通过/不宣称动态执行；但末注“以上仅在R2时段批准后生效”给已定R1课程唯一性和教师互斥判据新增了输入未规定的生效条件，与前文直接按R1排除反例的建议不一致，故本复合断言失败。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6,
+    "score": "3/5",
+    "professional_hard_errors": true
+  },
+  "claims": [
+    {
+      "claim": "A1不能排除所给两类反例",
+      "type": "factual",
+      "verified": true,
+      "evidence": "总数不能区分遗漏/重复，周一抽样不能覆盖周三冲突；均是输入给定反例，不是输出编造动态失败。"
+    },
+    {
+      "claim": "用全量对账和全周并发数约束替代抽样",
+      "type": "quality",
+      "verified": true,
+      "evidence": "这是满足已有R1的可回填验收建议，不是新增排课功能；不能因“建议”二字就判事实错误。"
+    },
+    {
+      "claim": "以上课程唯一性/教师互斥判据仅在R2时段批准后生效",
+      "type": "quality",
+      "verified": false,
+      "evidence": "末注新增依赖；R1的这两条不变量已明确，并不依赖允许时段获批才能对给定方案核对。即使R2未定，给定遗漏/重复和教师冲突仍违反R1。该无据条件不能以建议身份免检。",
+      "severity": "hard"
+    },
+    {
+      "claim": "性能评审覆盖形成可复现验收所需信息（交付完整性的隐含质量声明）",
+      "type": "quality",
+      "verified": false,
+      "evidence": "输出只保留阈值待定，未给规模及计时起止，无法据此形成可复现性能判据。",
+      "severity": "hard"
+    },
+    {
+      "claim": "requirement-review方法进入本run",
+      "type": "process",
+      "verified": true,
+      "evidence": "live.json contextAudit同run skillRefs=[requirement-review]，skill.explicit-content hash=7df874bae6857343/chars=1024/truncated=false；这不是通用claim gate已修复的证据。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Entire same-run assistant reply, including headings, all table cells and trailing notes; excludes filesystem trailing newline",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 360,
+    "full_unicode_chars": 377,
+    "non_whitespace_chars": 328,
+    "han_chars": 200,
+    "mixed_words": 219,
+    "punctuation_chars": 80,
+    "professional_length_passed": true
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "专门检查全文末注是否把已定不变量降为新的待批准条件；标题/表格正确不足以证明最后附加条件正确。"
+      },
+      {
+        "reason": "性能断言应同时检查规模、计时起止与待定阈值，不能仅因出现“阈值待定”就判通过。"
+      }
+    ],
+    "overall": "Assertion score is not professional qualification: explicit additional hard errors remain."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix."
+}

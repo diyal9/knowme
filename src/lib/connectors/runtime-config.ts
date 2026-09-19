@@ -7,13 +7,21 @@ function requiredSecretKeys(connector) {
 function configurationState(connector, configuredKeys = []) {
   if (!connector) return { ready: false, state: 'missing', message: '连接器未安装' }
   if (connector.enabled !== true) return { ready: false, state: 'disabled', message: '连接器未启用' }
+  const type = connector.type || 'mcp'
   const mcp = connector.mcp || {}
-  const transport = mcp.transport || (mcp.url ? 'streamable-http' : 'stdio')
-  if (transport === 'stdio' && !String(mcp.command || '').trim()) {
-    return { ready: false, state: 'needs_configuration', message: '请配置 MCP 启动命令' }
-  }
-  if (transport !== 'stdio' && !String(mcp.url || '').trim()) {
-    return { ready: false, state: 'needs_configuration', message: '请配置 MCP 服务 URL' }
+  if (type === 'feishu') {
+    // Feishu is a built-in lark-cli adapter. Its readiness is determined by
+    // the lark-cli status probe, not by an MCP command or URL in the manifest.
+  } else if (type === 'mcp') {
+    const transport = mcp.transport || (mcp.url ? 'streamable-http' : 'stdio')
+    if (transport === 'stdio' && !String(mcp.command || '').trim()) return { ready: false, state: 'needs_configuration', message: '请配置 MCP 启动命令' }
+    if (transport !== 'stdio' && !String(mcp.url || '').trim()) return { ready: false, state: 'needs_configuration', message: '请配置 MCP 服务 URL' }
+  } else if (type === 'cli' && !String(connector.cli?.command || '').trim()) {
+    return { ready: false, state: 'needs_configuration', message: '请配置命令行入口' }
+  } else if (type === 'http' && !String(connector.http?.baseUrl || '').trim()) {
+    return { ready: false, state: 'needs_configuration', message: '请配置 HTTP 默认 URL' }
+  } else if (type === 'ssh' && (!String(connector.ssh?.host || '').trim() || !String(connector.ssh?.username || '').trim())) {
+    return { ready: false, state: 'needs_configuration', message: '请配置 SSH 主机和用户名' }
   }
   const present = new Set(configuredKeys || [])
   const missingSecrets = requiredSecretKeys(connector).filter((key) => !present.has(key))

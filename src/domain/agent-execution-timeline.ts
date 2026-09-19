@@ -8,6 +8,8 @@ export type AgentTraceItem = {
   title: string
   status: AgentTraceStatus
   summary?: string
+  errorCode?: string
+  errorMessage?: string
   durationMs?: number
   toolName?: string
   round?: number
@@ -28,6 +30,8 @@ export type ExecutionTimelineRow = {
   status: AgentTraceStatus
   title: string
   hint?: string
+  errorCode?: string
+  errorMessage?: string
   durationLabel?: string
   expandable?: boolean
 }
@@ -50,6 +54,8 @@ function asRecord(raw: unknown): Record<string, unknown> {
 export function userStatusLabel(title: string, status = ''): string {
   const original = String(title || '').trim()
   const text = original.toLowerCase()
+  if (status === 'error' || status === 'failed') return '处理未完成'
+  if (status === 'cancelled' || status === 'canceled') return '处理已取消'
   if (/检索|查找|知识/.test(text)) return status === 'done' ? '资料查找完成' : '正在查找相关资料'
   if (/上下文|准备/.test(text)) return status === 'done' ? '内容整理完成' : '正在整理相关内容'
   if (/模型|生成|回答|完善/.test(text)) return status === 'done' ? '回答已完成' : '正在组织回答'
@@ -142,6 +148,8 @@ export function parseTraceItems(raw: unknown): AgentTraceItem[] {
       title: String(rec.timelineTitle || rec.title || rec.toolName || '').trim() || '正在处理',
       status,
       summary: String(rec.summary || '').trim() || undefined,
+      errorCode: String(rec.errorCode || '').trim() || undefined,
+      errorMessage: String(rec.errorMessage || '').trim() || undefined,
       durationMs: Number(rec.durationMs) || undefined,
       toolName: String(rec.toolName || '').trim() || undefined,
       round: Number.isFinite(Number(rec.round)) ? Number(rec.round) : undefined,
@@ -172,6 +180,8 @@ export function applyAssistantStreamEvent(message: ChatMessage, event: Record<st
     title: String(flat.timelineTitle || flat.title || flat.toolName || '正在处理').trim(),
     status: normalizeStatus(type, flat.status),
     summary: String(flat.summary || '').trim() || undefined,
+    errorCode: String(flat.errorCode || '').trim() || undefined,
+    errorMessage: String(flat.errorMessage || '').trim() || undefined,
     durationMs: Number(flat.durationMs) || undefined,
     toolName: String(flat.toolName || '').trim() || undefined,
     round: Number.isFinite(Number(flat.round)) ? Number(flat.round) : undefined,
@@ -207,27 +217,36 @@ export function buildExecutionTimelineView(
     ? formatElapsed(elapsedMs)
     : `${trace.length} 步${rounds.size > 1 ? ` / ${rounds.size} 轮` : ''}${toolCount ? ` / ${toolCount} 项操作` : ''}${errorCount ? ` / ${errorCount} 项未完成` : ''}`
   const currentTitle = userStatusLabel(current?.title || '正在处理', current?.status)
+  const rows = trace.map((item) => {
+    const status = item.status
+    const operationTitle = String(item.title || item.toolName || '相关操作')
+      .replace(/^调用工具[:：]\s*/u, '')
+      .trim()
+    const title = item.kind === 'tool' || item.kind === 'subrun'
+      ? (status === 'error' ? `${operationTitle || '相关操作'} 未完成` : operationTitle)
+      : userStatusLabel(item.title, status)
+    const summary = String(item.summary || '').trim()
+    const errorCode = String(item.errorCode || '').trim()
+    const errorMessage = String(item.errorMessage || '').trim()
+    const hint = summary && summary !== title && summary !== errorMessage ? summary.slice(0, 220) : undefined
+    return {
+      id: item.id,
+      kind: item.kind,
+      status,
+      title,
+      hint,
+      errorCode: errorCode || undefined,
+      errorMessage: errorMessage || undefined,
+      durationLabel: formatElapsed(Number(item.durationMs) || 0),
+      expandable: item.kind === 'tool' && Boolean(hint || errorCode || errorMessage),
+    }
+  })
 
   return {
     running,
-    compact: trace.length <= 1,
+    compact: trace.length <= 1 && !rows[0]?.expandable,
     summaryTitle: running || trace.length === 1 ? currentTitle : '思考执行过程',
     summaryMeta,
-    rows: trace.map((item) => {
-      const status = item.status
-      const title = item.kind === 'tool' || item.kind === 'subrun'
-        ? (item.title || item.toolName || '相关操作')
-        : userStatusLabel(item.title, status)
-      const hint = String(item.summary || '').trim()
-      return {
-        id: item.id,
-        kind: item.kind,
-        status,
-        title,
-        hint: hint && hint !== title ? hint.slice(0, 220) : undefined,
-        durationLabel: formatElapsed(Number(item.durationMs) || 0),
-        expandable: item.kind === 'tool' && Boolean(hint),
-      }
-    }),
+    rows,
   }
 }

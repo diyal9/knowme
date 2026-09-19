@@ -1,0 +1,561 @@
+{
+  "taskId": "task-mtqsy54y-dvnoe",
+  "task": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtqsy54y-dvnoe",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "[RQA61 SE07] TTL 单飞缓存竞态",
+    "expertId": "software-engineer",
+    "expertName": "software-engineer",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。",
+    "brief": {
+      "goal": "请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。",
+      "plan": null,
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "provided-context",
+          "type": "text",
+          "title": "冻结验收题",
+          "ref": "",
+          "content": "请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "software-change-verification"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [
+        "不得执行外部写入。",
+        "不得调用工具。",
+        "不得声称已运行测试。"
+      ],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.2.0",
+      "agentHash": "18bcf4d4e7195931",
+      "hashes": {
+        "expert": "18bcf4d4e7195931",
+        "skills": {
+          "code-review": "17d5214576de2834",
+          "software-change-verification": "829c8afc1a1e3a6a"
+        },
+        "connectors": {}
+      },
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtqsy54y-dvnoe",
+      "bindings": {
+        "skills": [
+          "software-change-verification",
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": null,
+      "sop": {
+        "version": "2.2.0",
+        "hash": "18bcf4d4e7195931"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:40.642Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.282Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.405Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.640Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.640Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.641Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:30:41.713Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:31:40.254Z"
+      },
+      {
+        "id": "event-9",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "完整答复已重新生成，正在核对",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:33:42.298Z"
+      },
+      {
+        "id": "event-10",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "专业答复",
+        "actorId": "",
+        "createdAt": "2026-09-07T05:33:42.568Z"
+      }
+    ],
+    "attention": null,
+    "progress": {
+      "phase": "review",
+      "label": "成果已生成，等待验收",
+      "detail": "",
+      "startedAt": "2026-09-07T05:30:41.385Z",
+      "updatedAt": "2026-09-07T05:33:42.548Z",
+      "heartbeatAt": "2026-09-07T05:33:42.548Z"
+    },
+    "inputQueue": null,
+    "deliverables": [
+      {
+        "deliverableId": "primary",
+        "title": "专业答复",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtqsy54y-dvnoe#deliverable_expert_task-mtqsy54y-dvnoe_mtqsy5xd_primary",
+        "artifactRefs": [
+          "wb-expert-task-mtqsy54y-dvnoe#deliverable_expert_task-mtqsy54y-dvnoe_mtqsy5xd_primary"
+        ],
+        "executionRef": "agent-run:expert_task-mtqsy54y-dvnoe_mtqsy5xd",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-07T05:33:42.547Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "verificationDiagnostics": {
+          "version": 1,
+          "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd",
+          "taskId": "task-mtqsy54y-dvnoe",
+          "candidateHash": "f1256420361f009d5ba9a738f5261e0eb1385aec875c269c5e5c7c4019d2de6d",
+          "candidateChars": 5118,
+          "materialSnapshotHash": "5082a5aa77882a2d0fbfb5851f4af89597bc4cb7e43e93fe637ef0444ffefc5c",
+          "materialCount": 1,
+          "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+          "fieldChecks": [],
+          "fieldCheckCount": 0
+        },
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.2.0",
+            "hash": "18bcf4d4e7195931"
+          },
+          "skills": [
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": true,
+          "passed": true,
+          "rewritten": true,
+          "initialPassed": false,
+          "finalPassed": true
+        },
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-07T05:33:42.459Z"
+      }
+    ],
+    "resultSummary": "## 交付物：异步 TTL 单飞缓存 `createLoader` 静态实现与验证设计\n\n本轮为纯静态推演，未调用任何工具，未执行测试。所有代码、不变量与测试均为可审查方案，非已落地结果。\n\n### 1. 完整 JavaScript 实现\n\n```javascript\nfunction createLoader({ ttlMs, now }) {\n  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0) {\n    throw new TypeError('ttlMs must be a positive saf",
+    "status": "review",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtqsy54y-dvnoe"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-07T05:30:40.642Z",
+    "updatedAt": "2026-09-07T05:33:42.568Z"
+  },
+  "artifacts": {
+    "wb-expert-task-mtqsy54y-dvnoe#deliverable_expert_task-mtqsy54y-dvnoe_mtqsy5xd_primary": {
+      "id": "deliverable_expert_task-mtqsy54y-dvnoe_mtqsy5xd_primary",
+      "type": "answer",
+      "title": "专业答复",
+      "body": "## 交付物：异步 TTL 单飞缓存 `createLoader` 静态实现与验证设计\n\n本轮为纯静态推演，未调用任何工具，未执行测试。所有代码、不变量与测试均为可审查方案，非已落地结果。\n\n### 1. 完整 JavaScript 实现\n\n```javascript\nfunction createLoader({ ttlMs, now }) {\n  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0) {\n    throw new TypeError('ttlMs must be a positive safe integer');\n  }\n  if (typeof now !== 'function') {\n    throw new TypeError('now must be a function returning monotonic ms');\n  }\n\n  // 内部状态被闭包严格隔离，外部无法通过返回对象访问或修改这两个 Map\n  const cache = new Map();\n  const inflight = new Map();\n  let version = 0;\n\n  async function load(key, fetcher) {\n    // 1. 缓存命中检查（使用 has 而非 truthy，支持 undefined）\n    if (cache.has(key)) {\n      const entry = cache.get(key);\n      if (now() - entry.ts < ttlMs) {\n        return entry.value;\n      }\n      // 已过期，剔除后继续走 fetch 流程\n      cache.delete(key);\n    }\n\n    // 2. 单飞共享检查\n    const flight = inflight.get(key);\n    if (flight) {\n      return flight.promise;\n    }\n\n    // 3. 记录当前版本快照并建立 in-flight\n    const currentVersion = version;\n    let settle;\n    const promise = new Promise((resolve, reject) => {\n      settle = { resolve, reject };\n    });\n    inflight.set(key, { promise, version: currentVersion });\n\n    try {\n      const value = await fetcher(key);\n\n      // 4. 写入条件：全局未被 invalidate 且同 key 的 in-flight 仍是自己\n      const currentFlight = inflight.get(key);\n      if (currentVersion === version && currentFlight && currentFlight.version === currentVersion) {\n        cache.set(key, { value, ts: now() });\n      }\n      settle.resolve(value);\n    } catch (err) {\n      settle.reject(err);\n    } finally {\n      // 5. 安全清理：仅当自己的版本仍匹配时才删除，防止旧请求删新 in-flight\n      const currentFlight = inflight.get(key);\n      if (currentFlight && currentFlight.version === currentVersion) {\n        inflight.delete(key);\n      }\n    }\n\n    return promise;\n  }\n\n  function invalidate(key) {\n    cache.delete(key);\n    version++;\n  }\n\n  // Object.freeze 防止外部篡改 load/invalidate 引用；\n  // 防泄漏的根本机制是闭包作用域，freeze 仅保护接口形状。\n  return Object.freeze({ load, invalidate });\n}\n```\n\n#### 控制流与时序重放说明\n\n采用显式 `new Promise` + `settle` + `return promise` 是为了满足“同一 key 并发必须共享一次 fetcher 调用”的契约。若直接在 `async` 函数内 `return value` / `throw err`，每次调用会生成独立的 Promise 对象，后续到达的同 key 请求无法拿到同一个 Promise 引用。\n\n逐步重放：\n1. **调用者 A** 进入，cache miss，inflight miss。创建 `promise` 并通过 `inflight.set` 注册，记录 `currentVersion`，执行 `await fetcher(key)` 挂起。\n2. **调用者 B**（同 key）进入，cache miss，inflight hit。直接 `return flight.promise`，即 A 创建的同一个 Promise。B 不触发 fetcher。\n3. **A 的 fetcher 成功**：恢复执行，检查 `currentVersion === version` 且 `inflight.get(key).version === currentVersion`。若成立则 `cache.set`，随后 `settle.resolve(value)`。\n4. **A 进入 finally**：再次检查版本匹配，执行 `inflight.delete(key)`。\n5. **A 和 B** 均收到 `promise` 的 resolve 值。\n6. 若期间发生 **invalidate**：`version` 递增。A 恢复后版本检查失败，不写 cache，但仍 `settle.resolve(value)` 让 A/B 拿到数据。finally 中版本不匹配，不删 inflight（此时可能已有新请求 R2 占用了该 key 的 inflight）。\n\n### 2. 状态不变量\n\n| 编号 | 不变量描述 | 对应契约 |\n|---|---|---|\n| I1 | 读取时若 `cache.has(key)` 为 true，必须校验 `now() - entry.ts < ttlMs`，不成立则立即 `delete` 且不返回。 | 到期值绝不返回 |\n| I2 | 缓存命中判定仅依赖 `cache.has(key)`，禁止使用 `if (entry)` 等 truthy 判断。 | undefined 是合法缓存值 |\n| I3 | `inflight` 中同一 `key` 最多存在一个记录；不同 `key` 的记录互不干扰。 | 单飞共享、不同 key 隔离 |\n| I4 | `finally` 块仅当 `inflight.get(key).version === currentVersion` 时才执行 `delete`。 | 旧请求的 finally 不能删除同 key 的新 in-flight |\n| I5 | `invalidate` 后 `version` 严格递增，旧请求的 `currentVersion < version`，禁止写入 `cache`。 | 失效后旧请求即使晚到也不得重新写入 |\n| I6 | `fetcher` 同步抛错或异步拒绝均进入 `catch`，仅执行 `settle.reject(err)`，不执行 `cache.set`。 | 同步抛错和异步拒绝都不缓存 |\n| I7 | 内部 `cache` 和 `inflight` Map 仅在闭包内；返回对象被 `Object.freeze` 保护接口引用不被篡改。 | 不得泄漏内部可变 Map |\n\n### 3. 定向测试设计（未执行）\n\n以下用例按“初态 → 受控操作/故障点 → 可观察判据”组织，需配合虚拟时钟（Mock `now`）和可控 Promise 调度执行。\n\n| 编号 | 场景 | 初态 | 受控操作 | 可观察判据（通过条件） |\n|---|---|---|---|---|\n| T1 | 同 key 单飞共享 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('A', f2)` | `f1` 执行 1 次，`f2` 不被调用；两调用返回相同成功值。 |\n| T2 | 不同 key 隔离 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('B', f2)` | `f1` 和 `f2` 各执行 1 次，互不阻塞，各自返回正确值。 |\n| T3 | TTL 到期不返回 | `now=0` 写入 A | `now=ttlMs` 时再次 `load('A', f2)` | 命中检查发现 `now() - ts < ttlMs` 不成立，触发 `f2` 重新拉取。 |\n| T4 | undefined 合法值 | 空缓存 | `load('A', () => undefined)` 成功后再调 `load('A', f2)` | `f2` 不被调用，直接返回 `undefined`。 |\n| T5a | 同步抛错不缓存 | 空缓存 | `load('A', () => { throw new Error() })` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T5b | 异步拒绝不缓存 | 空缓存 | `load('A', () => Promise.reject(new Error()))` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T6 | 旧 finally 不删新 in-flight | 空缓存 | 请求 R1 挂起；R1 期间调 `invalidate('A')`；立即发 R2（新 in-flight）；R1 完成进入 finally | R1 的 finally 不删除 R2 的 in-flight 记录；R2 正常完成后 `cache.has('A')` 为 true 且值为 R2 的结果。 |\n| T7 | Invalidate 阻断旧写入 | 空缓存 | R1 挂起；调 `invalidate('A')`；R1 的 fetcher resolve | R1 返回值给调用方，但 `cache.has('A')` 为 false（未写入）。 |\n| T8 | 接口防泄漏与防篡改 | 创建 loader | 尝试 `loader.load = null` 或遍历 loader 属性 | `Object.isFrozen(loader)` 为 true，无法篡改方法引用；内部 Map 不可达（由闭包保证）。 |\n\n### 4. 风险与未完成项\n\n- **资源预算**：单次 `load` 核心路径时间复杂度 O(1)（Map 读写），额外空间 O(N)（N 为并发去重键数 + 缓存键数）。无规模约束冲突。\n- **时钟回拨风险**：契约规定 `now` 返回单调毫秒数。若外部传入非单调函数会导致 TTL 计算异常，属于调用方违约，本实现不作防御性兜底。\n- **执行状态**：上述测试均为静态设计，**未实际运行**。如需落地，需在具备执行环境的授权下编写测试脚本执行，并以真实退出结果作为验收依据。",
+      "status": "draft",
+      "targetPath": null,
+      "sourceWikiPath": null,
+      "meta": {
+        "taskId": "task-mtqsy54y-dvnoe",
+        "deliverableId": "primary",
+        "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd"
+      }
+    }
+  },
+  "sessions": {
+    "wb-expert-task-mtqsy54y-dvnoe": {
+      "id": "wb-expert-task-mtqsy54y-dvnoe",
+      "agentId": "personal",
+      "sessionKind": "expert-task",
+      "profileId": "",
+      "contextId": "",
+      "projectId": null,
+      "expertId": "software-engineer",
+      "personaExpertId": "",
+      "executionPolicy": "tools-allowed",
+      "capabilitySnapshotId": "",
+      "snapshotPath": "",
+      "ephemeral": true,
+      "taskRef": {
+        "id": "task-mtqsy54y-dvnoe"
+      },
+      "knowledgeRefs": [],
+      "title": "新助手",
+      "createdAt": "2026-09-07T05:30:40.703Z",
+      "updatedAt": "2026-09-07T05:33:42.339Z",
+      "summary": "",
+      "messages": [
+        {
+          "id": "msg_expert_task-mtqsy54y-dvnoe_mtqsy5xd_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责功能开发、缺陷诊断、重构和代码方案评审。先理解明确契约与验收标准，以 software-change-verification 组织最小完整方案及验证。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，包括内部计划；诊断不擅自改代码。提供推演与执行证据的明确区分，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n当前时间：2026-09-07T05:30:41.665Z\n\n材料：\n- 冻结验收题\n请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n本轮交付物：专业答复（answer）\n\n本轮 SOP 路由：software-change-verification。\n\n约束：\n- 不得执行外部写入。\n- 不得调用工具。\n- 不得声称已运行测试。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd",
+          "createdAt": "2026-09-07T05:30:41.754Z"
+        },
+        {
+          "id": "msg_expert_task-mtqsy54y-dvnoe_mtqsy5xd_assistant",
+          "role": "assistant",
+          "text": "## 交付物：异步 TTL 单飞缓存 `createLoader` 静态实现与验证设计\n\n本轮为纯静态推演，未调用任何工具，未执行测试。所有代码、不变量与测试均为可审查方案，非已落地结果。\n\n### 1. 完整 JavaScript 实现\n\n```javascript\nfunction createLoader({ ttlMs, now }) {\n  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0) {\n    throw new TypeError('ttlMs must be a positive safe integer');\n  }\n  if (typeof now !== 'function') {\n    throw new TypeError('now must be a function returning monotonic ms');\n  }\n\n  // 内部状态被闭包严格隔离，外部无法通过返回对象访问或修改这两个 Map\n  const cache = new Map();\n  const inflight = new Map();\n  let version = 0;\n\n  async function load(key, fetcher) {\n    // 1. 缓存命中检查（使用 has 而非 truthy，支持 undefined）\n    if (cache.has(key)) {\n      const entry = cache.get(key);\n      if (now() - entry.ts < ttlMs) {\n        return entry.value;\n      }\n      // 已过期，剔除后继续走 fetch 流程\n      cache.delete(key);\n    }\n\n    // 2. 单飞共享检查\n    const flight = inflight.get(key);\n    if (flight) {\n      return flight.promise;\n    }\n\n    // 3. 记录当前版本快照并建立 in-flight\n    const currentVersion = version;\n    let settle;\n    const promise = new Promise((resolve, reject) => {\n      settle = { resolve, reject };\n    });\n    inflight.set(key, { promise, version: currentVersion });\n\n    try {\n      const value = await fetcher(key);\n\n      // 4. 写入条件：全局未被 invalidate 且同 key 的 in-flight 仍是自己\n      const currentFlight = inflight.get(key);\n      if (currentVersion === version && currentFlight && currentFlight.version === currentVersion) {\n        cache.set(key, { value, ts: now() });\n      }\n      settle.resolve(value);\n    } catch (err) {\n      settle.reject(err);\n    } finally {\n      // 5. 安全清理：仅当自己的版本仍匹配时才删除，防止旧请求删新 in-flight\n      const currentFlight = inflight.get(key);\n      if (currentFlight && currentFlight.version === currentVersion) {\n        inflight.delete(key);\n      }\n    }\n\n    return promise;\n  }\n\n  function invalidate(key) {\n    cache.delete(key);\n    version++;\n  }\n\n  // Object.freeze 防止外部篡改 load/invalidate 引用；\n  // 防泄漏的根本机制是闭包作用域，freeze 仅保护接口形状。\n  return Object.freeze({ load, invalidate });\n}\n```\n\n#### 控制流与时序重放说明\n\n采用显式 `new Promise` + `settle` + `return promise` 是为了满足“同一 key 并发必须共享一次 fetcher 调用”的契约。若直接在 `async` 函数内 `return value` / `throw err`，每次调用会生成独立的 Promise 对象，后续到达的同 key 请求无法拿到同一个 Promise 引用。\n\n逐步重放：\n1. **调用者 A** 进入，cache miss，inflight miss。创建 `promise` 并通过 `inflight.set` 注册，记录 `currentVersion`，执行 `await fetcher(key)` 挂起。\n2. **调用者 B**（同 key）进入，cache miss，inflight hit。直接 `return flight.promise`，即 A 创建的同一个 Promise。B 不触发 fetcher。\n3. **A 的 fetcher 成功**：恢复执行，检查 `currentVersion === version` 且 `inflight.get(key).version === currentVersion`。若成立则 `cache.set`，随后 `settle.resolve(value)`。\n4. **A 进入 finally**：再次检查版本匹配，执行 `inflight.delete(key)`。\n5. **A 和 B** 均收到 `promise` 的 resolve 值。\n6. 若期间发生 **invalidate**：`version` 递增。A 恢复后版本检查失败，不写 cache，但仍 `settle.resolve(value)` 让 A/B 拿到数据。finally 中版本不匹配，不删 inflight（此时可能已有新请求 R2 占用了该 key 的 inflight）。\n\n### 2. 状态不变量\n\n| 编号 | 不变量描述 | 对应契约 |\n|---|---|---|\n| I1 | 读取时若 `cache.has(key)` 为 true，必须校验 `now() - entry.ts < ttlMs`，不成立则立即 `delete` 且不返回。 | 到期值绝不返回 |\n| I2 | 缓存命中判定仅依赖 `cache.has(key)`，禁止使用 `if (entry)` 等 truthy 判断。 | undefined 是合法缓存值 |\n| I3 | `inflight` 中同一 `key` 最多存在一个记录；不同 `key` 的记录互不干扰。 | 单飞共享、不同 key 隔离 |\n| I4 | `finally` 块仅当 `inflight.get(key).version === currentVersion` 时才执行 `delete`。 | 旧请求的 finally 不能删除同 key 的新 in-flight |\n| I5 | `invalidate` 后 `version` 严格递增，旧请求的 `currentVersion < version`，禁止写入 `cache`。 | 失效后旧请求即使晚到也不得重新写入 |\n| I6 | `fetcher` 同步抛错或异步拒绝均进入 `catch`，仅执行 `settle.reject(err)`，不执行 `cache.set`。 | 同步抛错和异步拒绝都不缓存 |\n| I7 | 内部 `cache` 和 `inflight` Map 仅在闭包内；返回对象被 `Object.freeze` 保护接口引用不被篡改。 | 不得泄漏内部可变 Map |\n\n### 3. 定向测试设计（未执行）\n\n以下用例按“初态 → 受控操作/故障点 → 可观察判据”组织，需配合虚拟时钟（Mock `now`）和可控 Promise 调度执行。\n\n| 编号 | 场景 | 初态 | 受控操作 | 可观察判据（通过条件） |\n|---|---|---|---|---|\n| T1 | 同 key 单飞共享 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('A', f2)` | `f1` 执行 1 次，`f2` 不被调用；两调用返回相同成功值。 |\n| T2 | 不同 key 隔离 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('B', f2)` | `f1` 和 `f2` 各执行 1 次，互不阻塞，各自返回正确值。 |\n| T3 | TTL 到期不返回 | `now=0` 写入 A | `now=ttlMs` 时再次 `load('A', f2)` | 命中检查发现 `now() - ts < ttlMs` 不成立，触发 `f2` 重新拉取。 |\n| T4 | undefined 合法值 | 空缓存 | `load('A', () => undefined)` 成功后再调 `load('A', f2)` | `f2` 不被调用，直接返回 `undefined`。 |\n| T5a | 同步抛错不缓存 | 空缓存 | `load('A', () => { throw new Error() })` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T5b | 异步拒绝不缓存 | 空缓存 | `load('A', () => Promise.reject(new Error()))` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T6 | 旧 finally 不删新 in-flight | 空缓存 | 请求 R1 挂起；R1 期间调 `invalidate('A')`；立即发 R2（新 in-flight）；R1 完成进入 finally | R1 的 finally 不删除 R2 的 in-flight 记录；R2 正常完成后 `cache.has('A')` 为 true 且值为 R2 的结果。 |\n| T7 | Invalidate 阻断旧写入 | 空缓存 | R1 挂起；调 `invalidate('A')`；R1 的 fetcher resolve | R1 返回值给调用方，但 `cache.has('A')` 为 false（未写入）。 |\n| T8 | 接口防泄漏与防篡改 | 创建 loader | 尝试 `loader.load = null` 或遍历 loader 属性 | `Object.isFrozen(loader)` 为 true，无法篡改方法引用；内部 Map 不可达（由闭包保证）。 |\n\n### 4. 风险与未完成项\n\n- **资源预算**：单次 `load` 核心路径时间复杂度 O(1)（Map 读写），额外空间 O(N)（N 为并发去重键数 + 缓存键数）。无规模约束冲突。\n- **时钟回拨风险**：契约规定 `now` 返回单调毫秒数。若外部传入非单调函数会导致 TTL 计算异常，属于调用方违约，本实现不作防御性兜底。\n- **执行状态**：上述测试均为静态设计，**未实际运行**。如需落地，需在具备执行环境的授权下编写测试脚本执行，并以真实退出结果作为验收依据。",
+          "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd",
+          "createdAt": "2026-09-07T05:33:42.338Z",
+          "trace": [
+            {
+              "id": "stage_prepare",
+              "kind": "stage",
+              "title": "上下文准备完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_generate",
+              "kind": "stage",
+              "title": "完整答复已重新生成，正在核对",
+              "status": "done"
+            },
+            {
+              "id": "stage_ground",
+              "kind": "stage",
+              "title": "依据核对完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_verify_claims",
+              "kind": "stage",
+              "title": "输出验证通过",
+              "status": "done"
+            }
+          ],
+          "protocolVersion": 2,
+          "answerHash": "f1256420361f009d"
+        }
+      ],
+      "pinned": false,
+      "run": {
+        "goal": "当前工作",
+        "role": "general",
+        "status": "review",
+        "toolsUsed": [],
+        "steps": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done",
+            "at": "2026-09-07T05:33:42.338Z"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "完整答复已重新生成，正在核对",
+            "status": "done",
+            "at": "2026-09-07T05:33:42.338Z"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done",
+            "at": "2026-09-07T05:33:42.338Z"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done",
+            "at": "2026-09-07T05:33:42.338Z"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "deliverable_expert_task-mtqsy54y-dvnoe_mtqsy5xd_primary",
+            "type": "answer",
+            "title": "专业答复",
+            "body": "## 交付物：异步 TTL 单飞缓存 `createLoader` 静态实现与验证设计\n\n本轮为纯静态推演，未调用任何工具，未执行测试。所有代码、不变量与测试均为可审查方案，非已落地结果。\n\n### 1. 完整 JavaScript 实现\n\n```javascript\nfunction createLoader({ ttlMs, now }) {\n  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0) {\n    throw new TypeError('ttlMs must be a positive safe integer');\n  }\n  if (typeof now !== 'function') {\n    throw new TypeError('now must be a function returning monotonic ms');\n  }\n\n  // 内部状态被闭包严格隔离，外部无法通过返回对象访问或修改这两个 Map\n  const cache = new Map();\n  const inflight = new Map();\n  let version = 0;\n\n  async function load(key, fetcher) {\n    // 1. 缓存命中检查（使用 has 而非 truthy，支持 undefined）\n    if (cache.has(key)) {\n      const entry = cache.get(key);\n      if (now() - entry.ts < ttlMs) {\n        return entry.value;\n      }\n      // 已过期，剔除后继续走 fetch 流程\n      cache.delete(key);\n    }\n\n    // 2. 单飞共享检查\n    const flight = inflight.get(key);\n    if (flight) {\n      return flight.promise;\n    }\n\n    // 3. 记录当前版本快照并建立 in-flight\n    const currentVersion = version;\n    let settle;\n    const promise = new Promise((resolve, reject) => {\n      settle = { resolve, reject };\n    });\n    inflight.set(key, { promise, version: currentVersion });\n\n    try {\n      const value = await fetcher(key);\n\n      // 4. 写入条件：全局未被 invalidate 且同 key 的 in-flight 仍是自己\n      const currentFlight = inflight.get(key);\n      if (currentVersion === version && currentFlight && currentFlight.version === currentVersion) {\n        cache.set(key, { value, ts: now() });\n      }\n      settle.resolve(value);\n    } catch (err) {\n      settle.reject(err);\n    } finally {\n      // 5. 安全清理：仅当自己的版本仍匹配时才删除，防止旧请求删新 in-flight\n      const currentFlight = inflight.get(key);\n      if (currentFlight && currentFlight.version === currentVersion) {\n        inflight.delete(key);\n      }\n    }\n\n    return promise;\n  }\n\n  function invalidate(key) {\n    cache.delete(key);\n    version++;\n  }\n\n  // Object.freeze 防止外部篡改 load/invalidate 引用；\n  // 防泄漏的根本机制是闭包作用域，freeze 仅保护接口形状。\n  return Object.freeze({ load, invalidate });\n}\n```\n\n#### 控制流与时序重放说明\n\n采用显式 `new Promise` + `settle` + `return promise` 是为了满足“同一 key 并发必须共享一次 fetcher 调用”的契约。若直接在 `async` 函数内 `return value` / `throw err`，每次调用会生成独立的 Promise 对象，后续到达的同 key 请求无法拿到同一个 Promise 引用。\n\n逐步重放：\n1. **调用者 A** 进入，cache miss，inflight miss。创建 `promise` 并通过 `inflight.set` 注册，记录 `currentVersion`，执行 `await fetcher(key)` 挂起。\n2. **调用者 B**（同 key）进入，cache miss，inflight hit。直接 `return flight.promise`，即 A 创建的同一个 Promise。B 不触发 fetcher。\n3. **A 的 fetcher 成功**：恢复执行，检查 `currentVersion === version` 且 `inflight.get(key).version === currentVersion`。若成立则 `cache.set`，随后 `settle.resolve(value)`。\n4. **A 进入 finally**：再次检查版本匹配，执行 `inflight.delete(key)`。\n5. **A 和 B** 均收到 `promise` 的 resolve 值。\n6. 若期间发生 **invalidate**：`version` 递增。A 恢复后版本检查失败，不写 cache，但仍 `settle.resolve(value)` 让 A/B 拿到数据。finally 中版本不匹配，不删 inflight（此时可能已有新请求 R2 占用了该 key 的 inflight）。\n\n### 2. 状态不变量\n\n| 编号 | 不变量描述 | 对应契约 |\n|---|---|---|\n| I1 | 读取时若 `cache.has(key)` 为 true，必须校验 `now() - entry.ts < ttlMs`，不成立则立即 `delete` 且不返回。 | 到期值绝不返回 |\n| I2 | 缓存命中判定仅依赖 `cache.has(key)`，禁止使用 `if (entry)` 等 truthy 判断。 | undefined 是合法缓存值 |\n| I3 | `inflight` 中同一 `key` 最多存在一个记录；不同 `key` 的记录互不干扰。 | 单飞共享、不同 key 隔离 |\n| I4 | `finally` 块仅当 `inflight.get(key).version === currentVersion` 时才执行 `delete`。 | 旧请求的 finally 不能删除同 key 的新 in-flight |\n| I5 | `invalidate` 后 `version` 严格递增，旧请求的 `currentVersion < version`，禁止写入 `cache`。 | 失效后旧请求即使晚到也不得重新写入 |\n| I6 | `fetcher` 同步抛错或异步拒绝均进入 `catch`，仅执行 `settle.reject(err)`，不执行 `cache.set`。 | 同步抛错和异步拒绝都不缓存 |\n| I7 | 内部 `cache` 和 `inflight` Map 仅在闭包内；返回对象被 `Object.freeze` 保护接口引用不被篡改。 | 不得泄漏内部可变 Map |\n\n### 3. 定向测试设计（未执行）\n\n以下用例按“初态 → 受控操作/故障点 → 可观察判据”组织，需配合虚拟时钟（Mock `now`）和可控 Promise 调度执行。\n\n| 编号 | 场景 | 初态 | 受控操作 | 可观察判据（通过条件） |\n|---|---|---|---|---|\n| T1 | 同 key 单飞共享 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('A', f2)` | `f1` 执行 1 次，`f2` 不被调用；两调用返回相同成功值。 |\n| T2 | 不同 key 隔离 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('B', f2)` | `f1` 和 `f2` 各执行 1 次，互不阻塞，各自返回正确值。 |\n| T3 | TTL 到期不返回 | `now=0` 写入 A | `now=ttlMs` 时再次 `load('A', f2)` | 命中检查发现 `now() - ts < ttlMs` 不成立，触发 `f2` 重新拉取。 |\n| T4 | undefined 合法值 | 空缓存 | `load('A', () => undefined)` 成功后再调 `load('A', f2)` | `f2` 不被调用，直接返回 `undefined`。 |\n| T5a | 同步抛错不缓存 | 空缓存 | `load('A', () => { throw new Error() })` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T5b | 异步拒绝不缓存 | 空缓存 | `load('A', () => Promise.reject(new Error()))` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T6 | 旧 finally 不删新 in-flight | 空缓存 | 请求 R1 挂起；R1 期间调 `invalidate('A')`；立即发 R2（新 in-flight）；R1 完成进入 finally | R1 的 finally 不删除 R2 的 in-flight 记录；R2 正常完成后 `cache.has('A')` 为 true 且值为 R2 的结果。 |\n| T7 | Invalidate 阻断旧写入 | 空缓存 | R1 挂起；调 `invalidate('A')`；R1 的 fetcher resolve | R1 返回值给调用方，但 `cache.has('A')` 为 false（未写入）。 |\n| T8 | 接口防泄漏与防篡改 | 创建 loader | 尝试 `loader.load = null` 或遍历 loader 属性 | `Object.isFrozen(loader)` 为 true，无法篡改方法引用；内部 Map 不可达（由闭包保证）。 |\n\n### 4. 风险与未完成项\n\n- **资源预算**：单次 `load` 核心路径时间复杂度 O(1)（Map 读写），额外空间 O(N)（N 为并发去重键数 + 缓存键数）。无规模约束冲突。\n- **时钟回拨风险**：契约规定 `now` 返回单调毫秒数。若外部传入非单调函数会导致 TTL 计算异常，属于调用方违约，本实现不作防御性兜底。\n- **执行状态**：上述测试均为静态设计，**未实际运行**。如需落地，需在具备执行环境的授权下编写测试脚本执行，并以真实退出结果作为验收依据。",
+            "status": "draft",
+            "targetPath": null,
+            "sourceWikiPath": null,
+            "meta": {
+              "taskId": "task-mtqsy54y-dvnoe",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtqsy54y-dvnoe_mtqsy5xd"
+            }
+          }
+        ],
+        "applyLog": []
+      },
+      "displayTitle": "改写与润色内容",
+      "labels": [
+        "写作",
+        "代码"
+      ],
+      "grounding": "目标：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。\n材料：用户提到的材料（正文未提供）\n约束：用户尚未提供\n期望结果：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttl",
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "expertTaskDiagnostics": {
+        "available": 0,
+        "loaded": 0,
+        "loadedNames": [],
+        "omitted": null,
+        "usedTokens": 6332,
+        "schemaTokens": 0,
+        "inputBudget": 64000,
+        "expansion": 0,
+        "reason": "当前执行策略未启用工具"
+      },
+      "expertName": "软件开发工程师",
+      "expert": {
+        "id": "software-engineer",
+        "name": "软件开发工程师",
+        "description": "按授权实现代码、诊断缺陷或评审静态方案，以接口契约、故障反例和验证证据交付",
+        "avatar": "game/engineer",
+        "soul": "",
+        "sop": "1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。",
+        "agenticType": "react",
+        "agenticConfig": {
+          "agenticType": "react",
+          "enableReflection": true,
+          "enableTools": true
+        },
+        "bindings": {
+          "skills": [
+            "software-change-verification",
+            "code-review"
+          ],
+          "connectors": []
+        },
+        "readiness": {
+          "state": "ready",
+          "items": [
+            {
+              "id": "software-change-verification",
+              "kind": "skill",
+              "status": "ready"
+            },
+            {
+              "id": "code-review",
+              "kind": "skill",
+              "status": "ready"
+            }
+          ],
+          "issues": []
+        },
+        "source": "snapshot"
+      },
+      "knowledge": {
+        "mode": "default",
+        "activeProviderId": "local-default",
+        "selected": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local",
+            "status": "default"
+          }
+        ],
+        "available": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local"
+          }
+        ],
+        "degraded": false,
+        "message": ""
+      }
+    }
+  },
+  "transcript": {
+    "ok": true,
+    "text": "User:\n你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责功能开发、缺陷诊断、重构和代码方案评审。先理解明确契约与验收标准，以 software-change-verification 组织最小完整方案及验证。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，包括内部计划；诊断不擅自改代码。提供推演与执行证据的明确区分，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n当前时间：2026-09-07T05:30:41.665Z\n\n材料：\n- 冻结验收题\n请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n本轮交付物：专业答复（answer）\n\n本轮 SOP 路由：software-change-verification。\n\n约束：\n- 不得执行外部写入。\n- 不得调用工具。\n- 不得声称已运行测试。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。\n\nAssistant:\n## 交付物：异步 TTL 单飞缓存 `createLoader` 静态实现与验证设计\n\n本轮为纯静态推演，未调用任何工具，未执行测试。所有代码、不变量与测试均为可审查方案，非已落地结果。\n\n### 1. 完整 JavaScript 实现\n\n```javascript\nfunction createLoader({ ttlMs, now }) {\n  if (!Number.isSafeInteger(ttlMs) || ttlMs <= 0) {\n    throw new TypeError('ttlMs must be a positive safe integer');\n  }\n  if (typeof now !== 'function') {\n    throw new TypeError('now must be a function returning monotonic ms');\n  }\n\n  // 内部状态被闭包严格隔离，外部无法通过返回对象访问或修改这两个 Map\n  const cache = new Map();\n  const inflight = new Map();\n  let version = 0;\n\n  async function load(key, fetcher) {\n    // 1. 缓存命中检查（使用 has 而非 truthy，支持 undefined）\n    if (cache.has(key)) {\n      const entry = cache.get(key);\n      if (now() - entry.ts < ttlMs) {\n        return entry.value;\n      }\n      // 已过期，剔除后继续走 fetch 流程\n      cache.delete(key);\n    }\n\n    // 2. 单飞共享检查\n    const flight = inflight.get(key);\n    if (flight) {\n      return flight.promise;\n    }\n\n    // 3. 记录当前版本快照并建立 in-flight\n    const currentVersion = version;\n    let settle;\n    const promise = new Promise((resolve, reject) => {\n      settle = { resolve, reject };\n    });\n    inflight.set(key, { promise, version: currentVersion });\n\n    try {\n      const value = await fetcher(key);\n\n      // 4. 写入条件：全局未被 invalidate 且同 key 的 in-flight 仍是自己\n      const currentFlight = inflight.get(key);\n      if (currentVersion === version && currentFlight && currentFlight.version === currentVersion) {\n        cache.set(key, { value, ts: now() });\n      }\n      settle.resolve(value);\n    } catch (err) {\n      settle.reject(err);\n    } finally {\n      // 5. 安全清理：仅当自己的版本仍匹配时才删除，防止旧请求删新 in-flight\n      const currentFlight = inflight.get(key);\n      if (currentFlight && currentFlight.version === currentVersion) {\n        inflight.delete(key);\n      }\n    }\n\n    return promise;\n  }\n\n  function invalidate(key) {\n    cache.delete(key);\n    version++;\n  }\n\n  // Object.freeze 防止外部篡改 load/invalidate 引用；\n  // 防泄漏的根本机制是闭包作用域，freeze 仅保护接口形状。\n  return Object.freeze({ load, invalidate });\n}\n```\n\n#### 控制流与时序重放说明\n\n采用显式 `new Promise` + `settle` + `return promise` 是为了满足“同一 key 并发必须共享一次 fetcher 调用”的契约。若直接在 `async` 函数内 `return value` / `throw err`，每次调用会生成独立的 Promise 对象，后续到达的同 key 请求无法拿到同一个 Promise 引用。\n\n逐步重放：\n1. **调用者 A** 进入，cache miss，inflight miss。创建 `promise` 并通过 `inflight.set` 注册，记录 `currentVersion`，执行 `await fetcher(key)` 挂起。\n2. **调用者 B**（同 key）进入，cache miss，inflight hit。直接 `return flight.promise`，即 A 创建的同一个 Promise。B 不触发 fetcher。\n3. **A 的 fetcher 成功**：恢复执行，检查 `currentVersion === version` 且 `inflight.get(key).version === currentVersion`。若成立则 `cache.set`，随后 `settle.resolve(value)`。\n4. **A 进入 finally**：再次检查版本匹配，执行 `inflight.delete(key)`。\n5. **A 和 B** 均收到 `promise` 的 resolve 值。\n6. 若期间发生 **invalidate**：`version` 递增。A 恢复后版本检查失败，不写 cache，但仍 `settle.resolve(value)` 让 A/B 拿到数据。finally 中版本不匹配，不删 inflight（此时可能已有新请求 R2 占用了该 key 的 inflight）。\n\n### 2. 状态不变量\n\n| 编号 | 不变量描述 | 对应契约 |\n|---|---|---|\n| I1 | 读取时若 `cache.has(key)` 为 true，必须校验 `now() - entry.ts < ttlMs`，不成立则立即 `delete` 且不返回。 | 到期值绝不返回 |\n| I2 | 缓存命中判定仅依赖 `cache.has(key)`，禁止使用 `if (entry)` 等 truthy 判断。 | undefined 是合法缓存值 |\n| I3 | `inflight` 中同一 `key` 最多存在一个记录；不同 `key` 的记录互不干扰。 | 单飞共享、不同 key 隔离 |\n| I4 | `finally` 块仅当 `inflight.get(key).version === currentVersion` 时才执行 `delete`。 | 旧请求的 finally 不能删除同 key 的新 in-flight |\n| I5 | `invalidate` 后 `version` 严格递增，旧请求的 `currentVersion < version`，禁止写入 `cache`。 | 失效后旧请求即使晚到也不得重新写入 |\n| I6 | `fetcher` 同步抛错或异步拒绝均进入 `catch`，仅执行 `settle.reject(err)`，不执行 `cache.set`。 | 同步抛错和异步拒绝都不缓存 |\n| I7 | 内部 `cache` 和 `inflight` Map 仅在闭包内；返回对象被 `Object.freeze` 保护接口引用不被篡改。 | 不得泄漏内部可变 Map |\n\n### 3. 定向测试设计（未执行）\n\n以下用例按“初态 → 受控操作/故障点 → 可观察判据”组织，需配合虚拟时钟（Mock `now`）和可控 Promise 调度执行。\n\n| 编号 | 场景 | 初态 | 受控操作 | 可观察判据（通过条件） |\n|---|---|---|---|---|\n| T1 | 同 key 单飞共享 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('A', f2)` | `f1` 执行 1 次，`f2` 不被调用；两调用返回相同成功值。 |\n| T2 | 不同 key 隔离 | 空缓存 | 并发调用 `load('A', f1)` 和 `load('B', f2)` | `f1` 和 `f2` 各执行 1 次，互不阻塞，各自返回正确值。 |\n| T3 | TTL 到期不返回 | `now=0` 写入 A | `now=ttlMs` 时再次 `load('A', f2)` | 命中检查发现 `now() - ts < ttlMs` 不成立，触发 `f2` 重新拉取。 |\n| T4 | undefined 合法值 | 空缓存 | `load('A', () => undefined)` 成功后再调 `load('A', f2)` | `f2` 不被调用，直接返回 `undefined`。 |\n| T5a | 同步抛错不缓存 | 空缓存 | `load('A', () => { throw new Error() })` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T5b | 异步拒绝不缓存 | 空缓存 | `load('A', () => Promise.reject(new Error()))` 失败后调 `load('A', f2)` | 首次调用 reject；`f2` 被执行（错误未缓存）。 |\n| T6 | 旧 finally 不删新 in-flight | 空缓存 | 请求 R1 挂起；R1 期间调 `invalidate('A')`；立即发 R2（新 in-flight）；R1 完成进入 finally | R1 的 finally 不删除 R2 的 in-flight 记录；R2 正常完成后 `cache.has('A')` 为 true 且值为 R2 的结果。 |\n| T7 | Invalidate 阻断旧写入 | 空缓存 | R1 挂起；调 `invalidate('A')`；R1 的 fetcher resolve | R1 返回值给调用方，但 `cache.has('A')` 为 false（未写入）。 |\n| T8 | 接口防泄漏与防篡改 | 创建 loader | 尝试 `loader.load = null` 或遍历 loader 属性 | `Object.isFrozen(loader)` 为 true，无法篡改方法引用；内部 Map 不可达（由闭包保证）。 |\n\n### 4. 风险与未完成项\n\n- **资源预算**：单次 `load` 核心路径时间复杂度 O(1)（Map 读写），额外空间 O(N)（N 为并发去重键数 + 缓存键数）。无规模约束冲突。\n- **时钟回拨风险**：契约规定 `now` 返回单调毫秒数。若外部传入非单调函数会导致 TTL 计算异常，属于调用方违约，本实现不作防御性兜底。\n- **执行状态**：上述测试均为静态设计，**未实际运行**。如需落地，需在具备执行环境的授权下编写测试脚本执行，并以真实退出结果作为验收依据。"
+  }
+}

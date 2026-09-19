@@ -17,6 +17,7 @@ import { HubAgenticFields } from './HubAgenticFields'
 import { HubCatalogSummary } from './HubCatalogSummary'
 import { HubExpertAvatarRow } from './HubExpertAvatarRow'
 import { HubPickerDialog } from './HubPickerDialog'
+import { buildKnowledgeSelectionOptions } from '../../../shared/knowledge-selection'
 
 const identityAvatarKey = (AgentIdentity as any).identityAvatarKey
 const normalizeAgenticType = (AgenticProfile as any).normalizeAgenticType
@@ -50,7 +51,7 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
   const [skills, setSkills] = useState<string[]>(() => catalogRefIds(item?.skills))
   const [connectors, setConnectors] = useState<string[]>(() => catalogRefIds(item?.connectors))
   const [knowledgeRefs, setKnowledgeRefs] = useState<string[]>([])
-  const [knowledgeItems, setKnowledgeItems] = useState<Array<{ id: string; name?: string }>>([])
+  const [knowledgeItems, setKnowledgeItems] = useState<Array<{ id: string; name?: string; category?: string }>>([])
   const [skillItems, setSkillItems] = useState<CapabilityItem[]>(() => hubItems.filter((entry) => entry.kind === 'skill'))
   const [connectorItems, setConnectorItems] = useState<CapabilityItem[]>(() => hubItems.filter((entry) => entry.kind === 'connector'))
   const [picker, setPicker] = useState<HubCatalogFieldSpec | null>(null)
@@ -62,12 +63,22 @@ export function HubExpertDialog({ onClose, onSaved, mode = 'create', item = null
   useEffect(() => {
     void (async () => {
       try {
-        const res = await window.api?.sourcesList?.()
-        const sources = (res?.sources || []).map((entry) => ({
+        const res = await window.api?.knowledgeProviderList?.()
+        const options = buildKnowledgeSelectionOptions(res?.providers || [])
+        if (options.length) {
+          setKnowledgeItems(options.map((entry) => ({
+          id: entry.id,
+          name: entry.name,
+          category: entry.category,
+          })))
+          return
+        }
+        const fallback = await window.api?.sourcesList?.()
+        setKnowledgeItems((fallback?.sources || []).map((entry) => ({
           id: String(entry.id || ''),
           name: String(entry.displayName || entry.id || ''),
-        })).filter((entry) => entry.id)
-        setKnowledgeItems(sources)
+          category: '外挂知识库',
+        })).filter((entry) => entry.id))
       } catch {
         setKnowledgeItems([])
       }

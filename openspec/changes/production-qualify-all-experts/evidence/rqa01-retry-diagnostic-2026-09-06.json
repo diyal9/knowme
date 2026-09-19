@@ -1,0 +1,75 @@
+{
+  "kind": "current-defect-diagnostic",
+  "realExternalEffects": 0,
+  "rows": [
+    {
+      "mode": "network_after_effect",
+      "declaredContract": {
+        "source": "connector",
+        "capability": "job",
+        "risk": "write",
+        "sideEffects": true,
+        "requiresApproval": false,
+        "scope": "external",
+        "timeoutMs": 240000,
+        "idempotencySupported": false,
+        "rollbackSupported": false
+      },
+      "syntheticEffects": 3,
+      "handlerSignalsAborted": [
+        false,
+        false,
+        false
+      ],
+      "passedTimeouts": [
+        45000,
+        45000,
+        45000
+      ],
+      "timerDelays": [
+        400,
+        800
+      ],
+      "pendingHandlersAtHostReturn": 0,
+      "retries": 2,
+      "terminal": "DONE",
+      "text": "Operation status cannot be confirmed."
+    },
+    {
+      "mode": "outer_timeout",
+      "declaredContract": {
+        "source": "connector",
+        "capability": "job",
+        "risk": "write",
+        "sideEffects": true,
+        "requiresApproval": false,
+        "scope": "external",
+        "timeoutMs": 240000,
+        "idempotencySupported": false,
+        "rollbackSupported": false
+      },
+      "syntheticEffects": 3,
+      "handlerSignalsAborted": [
+        false,
+        false,
+        false
+      ],
+      "passedTimeouts": [
+        45000,
+        45000,
+        45000
+      ],
+      "timerDelays": [
+        45000,
+        2000,
+        45000,
+        4000,
+        45000
+      ],
+      "pendingHandlersAtHostReturn": 3,
+      "retries": 2,
+      "terminal": "DONE",
+      "text": "Operation status cannot be confirmed."
+    }
+  ]
+}

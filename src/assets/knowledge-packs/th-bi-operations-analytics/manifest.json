@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "th-bi-operations-analytics",
+  "title": "th-BI 运营分析知识包",
+  "version": "1.0.0",
+  "source": "D:/aiworkspace/th-BI",
+  "includes": ["kb/okf/**/*.md", "kb/ARCHITECTURE.md", "kb/SCHEMA.md", "info/conventions/*.md"],
+  "target": "knowledge-os/wiki/raw/packs/th-bi-operations-analytics",
+  "conflictPolicy": "preserve-user-edits"
+}

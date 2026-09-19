@@ -1,0 +1,23 @@
+{
+  "date": "2026-09-06",
+  "command": "npm run check",
+  "sessionId": 94032,
+  "exitCode": 0,
+  "backend": {
+    "passed": true,
+    "count": null,
+    "note": "Backend output was truncated in collected tool output; no count inferred."
+  },
+  "renderer": {
+    "files": 85,
+    "tests": 597,
+    "passed": true
+  },
+  "lint": true,
+  "typecheckRenderer": true,
+  "focused": {
+    "newContract": 39,
+    "related": 69
+  },
+  "scope": "Shared worktree full gate, not a certification of every changed file or expert"
+}

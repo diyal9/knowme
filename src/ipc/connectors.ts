@@ -1,5 +1,9 @@
 'use strict'
 
+const { approveCapabilityAccessDraft } = require('../lib/agent-capability-access')
+const { loadTaskCapabilityGrants, revokeTaskCapabilityGrant } = require('../lib/agent-task-capability-grants')
+const { resolveToolExecutionApprovalCheckpoint } = require('../lib/tool-execution-approval-checkpoint')
+
 /**
  * Connectors + unified tool-draft approval IPC.
  *
@@ -43,10 +47,23 @@ function registerConnectorsIpc(ipcMain, deps) {
     ok: true,
     drafts: toolDraftsStore.listPendingDrafts(app.getPath('userData')),
   }))
+  ipcMain.handle('task-capability-grants-list', (_e, sessionId) => {
+    const session = deps.loadAgentSessions?.().find(row => row.id === sessionId)
+    return session ? { ok: true, grants: loadTaskCapabilityGrants(app.getPath('userData'), session) }
+      : { ok: false, code: 'not_found', grants: [] }
+  })
+  ipcMain.handle('task-capability-grant-revoke', (_e, payload = {}) => {
+    const session = deps.loadAgentSessions?.().find(row => row.id === payload.sessionId)
+    return session ? revokeTaskCapabilityGrant(app.getPath('userData'), session, payload.grantId)
+      : { ok: false, code: 'not_found' }
+  })
   ipcMain.handle('tool-approve-draft', async (_e, payload = {}) => {
     const userData = app.getPath('userData')
     const { clean, seam } = resolveTestSeamOpts(payload)
     const draft = connectorToolRuntime.getDraft(userData, clean.draftId)
+    if (draft?.kind === 'capability-access') {
+      return approveCapabilityAccessDraft(userData, clean.draftId, deps, clean)
+    }
     let fileAdapter = null
     if (draft?.kind === 'file') {
       const root = getActiveSourceRoot()
@@ -54,7 +71,7 @@ function registerConnectorsIpc(ipcMain, deps) {
         fileAdapter = fileBackup.buildFileWriteAdapter(root, sourcesLib, { runId: draft.runId || 'unknown' })
       }
     }
-    return connectorToolRuntime.approveToolDraft(userData, clean.draftId, {
+    const result = await connectorToolRuntime.approveToolDraft(userData, clean.draftId, {
       reject: Boolean(clean.reject),
       runId: draft?.runId || clean.runId || '',
       sessionId: clean.sessionId || '',
@@ -62,6 +79,7 @@ function registerConnectorsIpc(ipcMain, deps) {
       fileAdapter,
       ...seam,
     })
+    return resolveToolExecutionApprovalCheckpoint(userData, draft, result, deps)
   })
   ipcMain.handle('tool-rollback-draft', async (_e, payload = {}) => {
     const root = getActiveSourceRoot()

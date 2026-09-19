@@ -1,0 +1,7 @@
+{
+  "id": "crawl4ai-expert",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["crawl4ai"],
+  "connectors": []
+}

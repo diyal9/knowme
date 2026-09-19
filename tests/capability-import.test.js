@@ -172,9 +172,19 @@ version: 1.0.0
     assert.equal(result.entry.kind, 'expert')
     assert.deepEqual(
       result.manifest.dependencies.map(dep => [dep.id, dep.kind]),
-      [['writing-polish', 'skill'], ['feishu', 'connector']],
+      [
+        ['office-collaboration-method', 'skill'],
+        ['meeting-evidence-method', 'skill'],
+        ['action-extraction', 'skill'],
+        ['writing-polish', 'skill'],
+        ['feishu-meeting-summary', 'skill'],
+        ['feishu-related-chats', 'skill'],
+        ['feishu-today-priority', 'skill'],
+        ['feishu-doc-kb', 'skill'],
+        ['feishu', 'connector'],
+      ],
     )
-    assert.equal(result.warnings.length, 2)
+    assert.equal(result.warnings.length, 9)
   })
 
   it('extracts stored zip and installs through external adapter hook', () => {

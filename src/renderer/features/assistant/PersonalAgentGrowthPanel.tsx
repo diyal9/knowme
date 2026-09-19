@@ -8,7 +8,7 @@ import type {
   PersonalAgentProposal,
   WorkbenchTask,
 } from '../../../shared/api'
-import type { MemoryOverview, MemoryPattern } from '../../../shared/api-extended'
+import type { GlobalMemoryItem, MemoryOverview, MemoryPattern } from '../../../shared/api-extended'
 import { buildPersonalGrowthSnapshot } from '../../../domain/personal-growth'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
@@ -66,6 +66,7 @@ export function PersonalAgentGrowthPanel({
   const [selfDriveRules, setSelfDriveRules] = useState('')
   const [memoryPatterns, setMemoryPatterns] = useState<MemoryPattern[]>([])
   const [memoryOverview, setMemoryOverview] = useState<MemoryOverview | null>(null)
+  const [memoryFilter, setMemoryFilter] = useState<'all' | GlobalMemoryItem['type']>('all')
   const [growthTasks, setGrowthTasks] = useState<WorkbenchTask[]>([])
   const [growthKnowledge, setGrowthKnowledge] = useState<KnowledgeEntry[]>([])
   const [growthCapabilities, setGrowthCapabilities] = useState<CapabilityItem[]>([])
@@ -189,6 +190,12 @@ export function PersonalAgentGrowthPanel({
     const result = await window.api?.memoryReviewPattern?.({ id, action })
     setNotice(result?.ok === false ? (result.error || '处理失败') : (action === 'accepted' ? '已记住这项协作偏好' : '不会记住这项推测'))
     void load()
+  }
+
+  async function removeGlobalMemory(id: string) {
+    const result = await window.api?.memoryGlobalRemove?.(id)
+    setNotice(result?.ok ? '已删除这条记忆' : (result?.error || '删除失败'))
+    if (result?.ok) void load()
   }
 
   function openGrowthAction(action: 'assistant' | 'workbench' | 'knowledge' | 'skill' | 'connector') {
@@ -346,7 +353,7 @@ export function PersonalAgentGrowthPanel({
 
           <div className="personal-growth-content">
             <nav className="personal-tabs" aria-label="伙伴设置分类">
-              {([['core', '伙伴内核'], ['drive', '主动边界'], ['memory', '记忆与变更'], ['growth', '成长']] as const).map(([id, label]) => (
+              {([['core', '伙伴内核'], ['drive', '主动边界'], ['memory', '协作记忆'], ['growth', '成长']] as const).map(([id, label]) => (
                 <button key={id} type="button" className={activeTab === id ? 'active' : ''} onClick={() => setActiveTab(id)}>{label}</button>
               ))}
             </nav>
@@ -381,22 +388,18 @@ export function PersonalAgentGrowthPanel({
               </div>
             </section>
 
-            <section className={`personal-section personal-teach-section${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
-              <div className="personal-section-head"><div><span>记忆与变更</span><h2>决定它长期记住什么</h2><p>规则可直接提交；推测和变更需要确认。</p></div></div>
-              <label className="personal-composer-label" htmlFor="personal-teaching">新增长期规则</label>
+            <section className={`personal-section personal-teach-section personal-memory-main${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
+              <div className="personal-section-head"><div><span>协作记忆</span><h2>让每次协作接得上</h2><p>记住背景、偏好和任务进度，之后的回复会更贴合你。</p></div><strong className="personal-memory-count">{memoryOverview?.globalMemories?.length || 0}<small>条已确认记忆</small></strong></div>
+              <label className="personal-composer-label" htmlFor="personal-teaching">添加一条记忆</label>
               <div className="personal-teach-composer">
-                <textarea id="personal-teaching" value={teaching} onChange={(event) => setTeaching(event.target.value)} placeholder="例如：所有方案先写结论，再补充依据。" />
-                <div><span>保存到“我的记忆”，可随时撤销。</span><button type="button" disabled={!teaching.trim()} onClick={() => void teach()}>记住</button></div>
+                <textarea id="personal-teaching" value={teaching} onChange={(event) => setTeaching(event.target.value)} placeholder="例如：以后写代码时先告诉我影响范围。" />
+                <div><span>会立即保存为私人记忆。</span><button type="button" disabled={!teaching.trim()} onClick={() => void teach()}>记住</button></div>
               </div>
+              <div className="personal-memory-library"><div className="personal-memory-library-head"><div><strong>已确认的协作记忆</strong><span>帮助伙伴更快理解你。</span></div><div className="personal-memory-filters">{(['all', 'preference', 'fact', 'goal', 'decision', 'relationship'] as const).map((item) => <button type="button" key={item} className={memoryFilter === item ? 'active' : ''} onClick={() => setMemoryFilter(item)}>{item === 'all' ? '全部' : ({ preference: '偏好', fact: '背景', goal: '目标', decision: '项目', relationship: '人物' }[item])}</button>)}</div></div>{(() => { const items = (memoryOverview?.globalMemories || []).filter((item) => memoryFilter === 'all' || item.type === memoryFilter); return items.length ? <div className="personal-memory-grid">{items.map((item) => <article key={item.id} className="personal-memory-card"><div><span>{({ preference: '偏好', fact: '背景', goal: '目标', decision: '项目', relationship: '人物' }[item.type])}</span><small>{item.source?.label || '由你添加'}</small></div><p>{item.text}</p><footer><small>最近确认 {item.lastVerifiedAt ? new Date(item.lastVerifiedAt).toLocaleDateString('zh-CN') : '最近'}</small><button type="button" onClick={() => void removeGlobalMemory(item.id)}>删除</button></footer></article>)}</div> : <div className="personal-memory-empty"><strong>还没有已确认记忆</strong><span>从上方添加一条记忆。</span></div> })()}</div>
             </section>
 
             <section className={`personal-section personal-attention-section${attentionCount ? ' has-items' : ''}${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
-              <div className="personal-section-head compact"><div><span>变更控制</span><h2>等待确认</h2><p>只有你确认后，记忆、能力或权限才会改变。</p></div><b>{attentionCount}</b></div>
-              <div className="personal-memory-policy" data-testid="personal-memory-policy">
-                <strong>保护规则</strong>
-                <span>同一协作习惯至少出现 3 次，才会请你确认。</span>
-                <span>任务记录不会自动改变记忆、能力或权限。</span>
-              </div>
+              <div className="personal-section-head compact"><div><span>记忆审核</span><h2>待确认</h2><p>候选记忆会先放这里，确认后才会长期生效。</p></div><b>{attentionCount}</b></div>
               {!attentionCount ? <div className="personal-quiet-state"><Icon name="check" /><span>目前没有待确认内容</span></div> : null}
               {pending.length ? <div className="personal-review-group-label">能力、知识与权限变更</div> : null}
               {pending.map((item) => (
@@ -416,14 +419,14 @@ export function PersonalAgentGrowthPanel({
 
             <section className={`personal-section personal-log-section${activeTab !== 'memory' ? ' personal-tab-inactive' : ''}`}>
               <details>
-                <summary><span><small>历史记录</small><strong>最近的记忆与变更</strong></span><span>{events.length} 条 <Icon name="chevronRight" /></span></summary>
+                <summary><span><small>审核记录</small><strong>最近确认过的记忆与变更</strong></span><span>{events.length} 条 <Icon name="chevronRight" /></span></summary>
                 <div className="personal-log-list">
                   {events.length ? events.map((item) => (
                     <div className="personal-log-row" key={item.id}>
                       <div><strong>{item.summary || GROWTH_LABELS[item.type] || '记录'}</strong><span>{GROWTH_LABELS[item.type] || item.type}</span></div>
                       {item.reversible && item.status !== 'reverted' ? <button type="button" onClick={() => void undo(item.id)}>撤销</button> : null}
                     </div>
-                  )) : <div className="personal-quiet-state"><span>产生记忆或变更后，这里会保留记录。</span></div>}
+                  )) : <div className="personal-quiet-state"><span>产生记录后会显示在这里。</span></div>}
                 </div>
               </details>
             </section>

@@ -166,7 +166,7 @@ export function ContentView({
         if (block.type === 'list') {
           const Tag = block.ordered ? 'ol' : 'ul'
           return (
-            <Tag key={key}>
+            <Tag key={key} {...(block.ordered && block.start && block.start > 1 ? { start: block.start } : {})}>
               {block.items.map((item, i) => (
                 <li key={`${key}-${i}`}><ContentInlines nodes={item} />{index === last && i === block.items.length - 1 ? end : null}</li>
               ))}

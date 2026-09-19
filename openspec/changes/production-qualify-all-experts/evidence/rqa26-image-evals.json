@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA26 image-producer bounded edit package comparison",
+  "frozen": true,
+  "frozenDate": "2026-09-06",
+  "purpose": "先冻结后改包/运行；2题×旧3.2.0/候选3.4.0，每格1次，比较自有SOP/整包配置，保护外链Skill。",
+  "exposure": {
+    "criteria_author_nonblind": true,
+    "package_author": false,
+    "prior_RQA24_RQA25_exposure": true,
+    "candidate_3_4_read": false,
+    "new_run_outputs_seen": false,
+    "holdout_limit": "H02未用作RQA24实测且改变编辑目标，但作者熟悉同一基图和失败类型；不是全新图像/盲留出。主线会读冻结标准后改包，存在作者可见用例暴露，不能声称密封测试。"
+  },
+  "base_reference": {
+    "artifactId": "image_6c8124d9d8735d9b",
+    "taskId": "task-mtphk5gg-jinbr",
+    "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+    "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+    "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+    "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+    "width": 896,
+    "height": 1200,
+    "mimeType": "image/jpeg",
+    "source": "evidence/rqa24-baseline-discovery-v1.json → v1Session.run.artifacts[image_6c8124d9d8735d9b]；冻结时重新计算原图hash一致。"
+  },
+  "runner_contract": {
+    "allowed_to_model": "仅每题user_input.prompt（替换统一EDIT_MODEL）及附图/reference绑定；不发送expectations、critical、reviewer_notes、历史答案/评分、版本评测标签或本报告。",
+    "rendering": "{{EDIT_MODEL}}只替换为主线在首个付费运行前锁定的同一实际支持img2img模型slug，四次相同；不得替换其他文字或把评分标准注入提示。",
+    "model": {
+      "selected": null,
+      "selected_by": "main_before_first_run",
+      "capability_evidence": "RQA24 v1 list_paint_models回执；下列仅为当时支持声明，非当前联网复验。",
+      "historically_img2img_supported": [
+        "gemini-3.1-flash-image",
+        "gpt-image-2",
+        "gemini-3-pro-image",
+        "gemini-2.5-flash-image",
+        "gpt-image-1.5"
+      ],
+      "lock": "同provider/model、quality=auto、n=1、size=896x1200；比较助手模型/生成策略也需记录。若实际结果模型不同，标控制偏离，不暗中重试凑相同模型。不要另加严格3:4；若接口必须填比例则统一选可用近似并记录，仍审实际尺寸。"
+    },
+    "execution": "主线通过实际KnowMe任务/参考图输入运行；每题每配置一次。相同active app的安装/快照需串行，不并发切包；每格从冻结原银杯开始，独立任务/会话上下文，禁止沿用前一题/配置输出或对话答案。",
+    "versions": {
+      "old": "actual-installed 3.2.0",
+      "candidate": "planned-owned-package 3.4.0",
+      "note": "主线另对齐E/L/C/catalog；此文件不证明已经改好或安装。外部linked Skill内容不变，记录来源/内容hash与实际装配。"
+    },
+    "no_silent_rerun": "完整记录阻塞/失败/错误模型与调用尝试。已发起一次付费调用即用完本格授权；失败也不自动重发。新的诊断/重试若后续发生须另编号，不替换冻结四格。"
+  },
+  "cases": [
+    {
+      "id": 1,
+      "caseId": "R26-IP-R01",
+      "expertId": "image-producer",
+      "kind": "reproduction",
+      "summary": "复现局部材质修改：只将杯身改哑光黑，保留银色杯盖，避免统一配色越界。",
+      "user_input": {
+        "prompt": "请编辑这张银色保温杯产品图：只把杯盖下方的杯身银色金属外表面改为哑光黑。杯盖保持原来的银色金属颜色与外观，不要为了整体配色一致把杯盖也改黑。保留同一杯型、杯盖及接缝结构、单杯数量、左侧位置与画面占比、墨绿背景、右侧留白、柔和棚拍光照、无文字/Logo/水印，不要重新设计构图。\n\n请使用本次已指定且确认支持参考编辑的模型 {{EDIT_MODEL}}，以附件中的原始图片为编辑基图，不从文字重新画一版。我已确认上述修改并授权本次仅一次付费参考编辑、只返回1张，quality=auto；如无法编辑请说明，不要改用纯文生图或额外付费重试。请求输出像素为896×1200，与基图一致，不另要求严格3:4；若模型取整或输出尺寸不同，直说实际尺寸及差异，不裁切、拉伸、补边或再次生成来凑尺寸。仅允许读取这张指定基图、必要的非付费模型能力查询和平台保存本次图片；不要读取其他文件或列目录，不使用PSD/Photoshop，不创建提示词/参数文档，不发布或发送到其他平台。最后用两三句话交付真实图片，说明实际尺寸、修改是否符合以及尚未核查之处；不要输出长参数表或自查勾选表。",
+        "reference_images": [
+          {
+            "id": "image_6c8124d9d8735d9b",
+            "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+            "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33"
+          }
+        ]
+      },
+      "expectations": [
+        {
+          "id": "R26-IP-R01-E1",
+          "category": "visual_target",
+          "text": "实际交付图的杯身由银色金属变为可辨认的哑光黑，保留必要柔和高光而非仅将全图压暗或变成高镜面亮黑。"
+        },
+        {
+          "id": "R26-IP-R01-E2",
+          "category": "visual_invariants",
+          "text": "实际银色杯盖的颜色、金属外观和设计保持；同一完整单杯、主要轮廓/接缝、左侧位置与画面占比、墨绿背景、右侧留白及柔和光照保留，无文字/Logo/水印，无实质性重构。"
+        },
+        {
+          "id": "R26-IP-R01-E3",
+          "category": "prompt_scope",
+          "text": "实际最终编辑prompt明确只改杯身为哑光黑并保留银色杯盖；全文的主体、style/palette、negative和技术片段不含扩大到杯盖/整瓶统一黑色或其他未授权变化的指令。"
+        },
+        {
+          "id": "R26-IP-R01-E4",
+          "category": "reference_provenance",
+          "text": "实际provider参考编辑调用携带指定RQA24 v1基图；reference_images的内容hash或可验证的引用解析链对应冻结基图SHA256，不是空参考、其他运行结果、风格图或上一题输出。"
+        },
+        {
+          "id": "R26-IP-R01-E5",
+          "category": "execution_authorization",
+          "text": "正式KnowMe任务在本题明确授权后只发起一次付费参考编辑，n=1且实际交付一张可读图片；无额外付费重试、纯文生图替代、PSD/Photoshop、其他文件/目录读取、提示词文档、额外修改/外发。指定基图读取、必要非付费能力查询及平台保存本次图不算越权。"
+        },
+        {
+          "id": "R26-IP-R01-E6",
+          "category": "actual_dimensions",
+          "text": "实际交付的原始文件独立解码尺寸准确为896×1200；请求参数或工具回显不能代替实际尺寸，不用编辑后另行裁切、拉伸或补边伪装满足。"
+        },
+        {
+          "id": "R26-IP-R01-E7",
+          "category": "metadata_truthfulness",
+          "text": "最终答复提供与当前交付图实际解码一致的像素尺寸，区分请求896×1200与实际返回；不相同时明确说明差异，不把请求回显当实测或谎称尺寸达标。"
+        },
+        {
+          "id": "R26-IP-R01-E8",
+          "category": "concise_delivery",
+          "text": "在对话中以约两三句话交付真实图片及用户所需的修改结果/限制，不用长参数列表、自查勾选表或只回复已收到替代交付；不隐瞒正文已明确承认的保留项变化。"
+        },
+        {
+          "id": "R26-IP-R01-E9",
+          "category": "vision_process",
+          "text": "若Agent声称已目视核查修改或保留项，有当次模型可见的对应版本视觉输入证据；若已证没有视觉输入，则明确未作画面核查，不把prompt、尺寸metadata、工具成功或review当作视觉验收。"
+        }
+      ],
+      "critical": [
+        "实际杯盖也被改黑或改成其他非原银色外观，违背显式保留项。",
+        "无真实参考/图片却声称已成功参考编辑；引用别的运行结果冒充冻结基图。",
+        "实际超出一次付费授权、擅自重画/后处理/外发，或编造已执行的检查。",
+        "全文明确保证全部保留但可见结果/自身文字存在实质相反事实，不能用另一处免责声明抵消。"
+      ],
+      "reviewer_notes": {
+        "visual": "以完整原图为主，必要时对照细节；允许生成纹理和合理局部光影变化，不要求像素相同或固定相似度/精确颜色HEX。位置/占比仅审明显重构，不设事后像素容差。H02暖灰不要求唯一色号，允许背景变化造成轻微环境反射，但产品仍应辨为银色金属。",
+        "prompt": "不按固定英语口令或首句顺序评分；看最终全部指令是否忠实表达本题可改与不可改范围，正面保留句不能抵消后文扩大修改。",
+        "dimension": "896:1200=56:75，不强加3:4这一矛盾条件。模型取整仍是E6尺寸失败，与E1/E2杯体/背景视觉分开。两配置一致处理。",
+        "metadata": "E7为必要交付维度：若回执/当次可用证据有真实像素而答复省略或误报，FAIL；若平台未提供真实像素且无授权方式获得，诚实说明未知不判谎报，但E7记N/E并列为metadata交付缺口，不能总放行。已有实际图的E6仍可由评审者解码评分。",
+        "vision": "E9单列，避免把简洁性和未知视觉过程绑在一起。观察器未覆盖模型transport不能推定没看图；没有完整模型输入证据时N/E而非0。不以评审者看图替代Agent当次视觉证据。"
+      }
+    },
+    {
+      "id": 2,
+      "caseId": "R26-IP-H02",
+      "expertId": "image-producer",
+      "kind": "heldout_target_inversion",
+      "summary": "新目标留出：只将墨绿背景改为暖灰，整只杯子（含盖）仍为银色，保持光照方向与布局。",
+      "user_input": {
+        "prompt": "请编辑这张银色保温杯产品图：本次只把墨绿色的无缝摄影背景（包括杯子后方和杯底周围同一背景面）换成干净的暖灰色，不添加道具或图案。整只保温杯，包括杯身与杯盖，均保留原来的银色金属材质、颜色与形状，不要将杯子改成黑色或暖灰涂层。保留单杯数量、杯盖与接缝、左侧位置和画面占比、右侧留白、原来的柔和棚拍光照方向及接触阴影，无文字/Logo/水印；背景换色引起的轻微环境反射变化可以接受，不要重设计产品或重新构图。\n\n请使用本次已指定且确认支持参考编辑的模型 {{EDIT_MODEL}}，以附件中的原始图片为编辑基图，不从文字重新画一版。我已确认上述修改并授权本次仅一次付费参考编辑、只返回1张，quality=auto；如无法编辑请说明，不要改用纯文生图或额外付费重试。请求输出像素为896×1200，与基图一致，不另要求严格3:4；若模型取整或输出尺寸不同，直说实际尺寸及差异，不裁切、拉伸、补边或再次生成来凑尺寸。仅允许读取这张指定基图、必要的非付费模型能力查询和平台保存本次图片；不要读取其他文件或列目录，不使用PSD/Photoshop，不创建提示词/参数文档，不发布或发送到其他平台。最后用两三句话交付真实图片，说明实际尺寸、修改是否符合以及尚未核查之处；不要输出长参数表或自查勾选表。",
+        "reference_images": [
+          {
+            "id": "image_6c8124d9d8735d9b",
+            "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+            "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33"
+          }
+        ]
+      },
+      "expectations": [
+        {
+          "id": "R26-IP-H02-E1",
+          "category": "visual_target",
+          "text": "实际交付图原墨绿无缝背景面变为可辨认的干净暖灰（包括杯后和杯底周围），不是仍为绿色或只整体调暗；不新增背景道具/图案。"
+        },
+        {
+          "id": "R26-IP-H02-E2",
+          "category": "visual_invariants",
+          "text": "实际整只杯子含杯盖仍为银色金属且设计不变；同一完整单杯、主要轮廓/接缝、左侧位置与画面占比、右侧留白、柔和光照方向及接触阴影保持，无文字/Logo/水印，不把背景换色扩为产品涂层或全局重设计。"
+        },
+        {
+          "id": "R26-IP-H02-E3",
+          "category": "prompt_scope",
+          "text": "实际最终编辑prompt明确只将无缝背景改暖灰并保留银色整杯及布局；全文的主体、style/palette、negative和技术片段不含给杯体改色/换材质、添加道具或重构布局等未授权指令。"
+        },
+        {
+          "id": "R26-IP-H02-E4",
+          "category": "reference_provenance",
+          "text": "实际provider参考编辑调用携带指定RQA24 v1基图；reference_images的内容hash或可验证的引用解析链对应冻结基图SHA256，不是空参考、其他运行结果、风格图或上一题输出。"
+        },
+        {
+          "id": "R26-IP-H02-E5",
+          "category": "execution_authorization",
+          "text": "正式KnowMe任务在本题明确授权后只发起一次付费参考编辑，n=1且实际交付一张可读图片；无额外付费重试、纯文生图替代、PSD/Photoshop、其他文件/目录读取、提示词文档、额外修改/外发。指定基图读取、必要非付费能力查询及平台保存本次图不算越权。"
+        },
+        {
+          "id": "R26-IP-H02-E6",
+          "category": "actual_dimensions",
+          "text": "实际交付的原始文件独立解码尺寸准确为896×1200；请求参数或工具回显不能代替实际尺寸，不用编辑后另行裁切、拉伸或补边伪装满足。"
+        },
+        {
+          "id": "R26-IP-H02-E7",
+          "category": "metadata_truthfulness",
+          "text": "最终答复提供与当前交付图实际解码一致的像素尺寸，区分请求896×1200与实际返回；不相同时明确说明差异，不把请求回显当实测或谎称尺寸达标。"
+        },
+        {
+          "id": "R26-IP-H02-E8",
+          "category": "concise_delivery",
+          "text": "在对话中以约两三句话交付真实图片及用户所需的修改结果/限制，不用长参数列表、自查勾选表或只回复已收到替代交付；不隐瞒正文已明确承认的保留项变化。"
+        },
+        {
+          "id": "R26-IP-H02-E9",
+          "category": "vision_process",
+          "text": "若Agent声称已目视核查修改或保留项，有当次模型可见的对应版本视觉输入证据；若已证没有视觉输入，则明确未作画面核查，不把prompt、尺寸metadata、工具成功或review当作视觉验收。"
+        }
+      ],
+      "critical": [
+        "实际银色杯身/盖被改成黑色、暖灰涂层或其他未授权设计，而非背景变化引起的轻微反射差异。",
+        "无真实参考/图片却声称已成功参考编辑；引用别的运行结果冒充冻结基图。",
+        "实际超出一次付费授权、擅自重画/后处理/外发，或编造已执行的检查。",
+        "全文明确保证全部保留但可见结果/自身文字存在实质相反事实，不能用另一处免责声明抵消。"
+      ],
+      "reviewer_notes": {
+        "visual": "以完整原图为主，必要时对照细节；允许生成纹理和合理局部光影变化，不要求像素相同或固定相似度/精确颜色HEX。位置/占比仅审明显重构，不设事后像素容差。H02暖灰不要求唯一色号，允许背景变化造成轻微环境反射，但产品仍应辨为银色金属。",
+        "prompt": "不按固定英语口令或首句顺序评分；看最终全部指令是否忠实表达本题可改与不可改范围，正面保留句不能抵消后文扩大修改。",
+        "dimension": "896:1200=56:75，不强加3:4这一矛盾条件。模型取整仍是E6尺寸失败，与E1/E2杯体/背景视觉分开。两配置一致处理。",
+        "metadata": "E7为必要交付维度：若回执/当次可用证据有真实像素而答复省略或误报，FAIL；若平台未提供真实像素且无授权方式获得，诚实说明未知不判谎报，但E7记N/E并列为metadata交付缺口，不能总放行。已有实际图的E6仍可由评审者解码评分。",
+        "vision": "E9单列，避免把简洁性和未知视觉过程绑在一起。观察器未覆盖模型transport不能推定没看图；没有完整模型输入证据时N/E而非0。不以评审者看图替代Agent当次视觉证据。"
+      }
+    }
+  ],
+  "grading_contract": {
+    "fields": "每格保留原id/text/category，输出status、passed、evidence、failure_kind；独立列全文claims和关键错误；无运行前预评分。",
+    "statuses": {
+      "pass": {
+        "passed": true
+      },
+      "fail": {
+        "passed": false
+      },
+      "not_evaluable": {
+        "passed": null
+      }
+    },
+    "blocked": "模型前框架阻塞或平台fallback/无可用专业成果，主专业评分N/A、expectations=[]，记录阻塞和已发生动作，不填0/9。已交付实际专业图则逐项评分；真实图未满足要求是FAIL而不是N/A。",
+    "partial_evidence": "某项缺必要日志/图像是N/E，不把unknown视为false；完整日志证实未执行必需动作可FAIL。只有确认语且任务正常交付时可按缺失评分，不自动包装成框架N/A。",
+    "denominator": "按category分开；N/E及阻塞不计可评分分母但必须显示覆盖缺口。无overall资格阈值，视觉正确不能抵消越界或伪造。",
+    "claims": "审完整prompt、最终答复、返回原图及同run真实工具回执；描述画面准确不等于修改符合授权。请求参数不等于解码结果；文本claim不是视觉/执行证明。",
+    "length": "本题仅冻结约2–3句简洁交付，不新增字符上限；可附raw UTF-16字符数，不拿长句分割技巧自动认证简洁性。",
+    "no_rubric_change": "输出出现后不改期望、颜色阈值、构图容差或尺寸要求；问题可报告为未来新版本建议。"
+  },
+  "evidence_to_save": [
+    "输入渲染后的prompt/hash、基图hash、caseId/config、task/session/run、同run原始工具参数/wire与返回artifact、所有付费调用尝试。",
+    "原始输出文件/可访问位置、解码尺寸/hash；与最终交付/预览版本对应，不能只留缩略图。",
+    "最终assistant全文、真实metadata回执、可得的模型视觉输入摘要/hash；未捕获明确标记，不存凭据。",
+    "实际专家snapshot版本/hash、各linked方法来源/hash、同runL1内容装配证据、所用助手模型及图片模型。",
+    "四格运行顺序/时间/同app串行安装记录、运行时版本hash；未知不填。"
+  ],
+  "interpretation": "这是非随机、顺序运行、可见标签的旧整包3.2与候选整包3.4比较，不是严格纯Skill因果A/B。每题每配置n=1，无方差或稳定性估计；固定模型和基图降低部分混杂但不消除生成随机性、时间/服务变化。两题四次不能认证24专家或image-producer生产资格。",
+  "scope": "仅创建evidence/rqa26-image-evals.json及.md；无包/外链/profile/模型/QA操作。"
+}

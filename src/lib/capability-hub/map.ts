@@ -7,6 +7,7 @@
 const fs = require('fs')
 const path = require('path')
 const { resolvePaths } = require('../capability-store')
+const { resolveKnowledgeProviderScope } = require('./knowledge-scope')
 
 function fail(code, message) {
   return { ok: false, code, error: message }
@@ -16,11 +17,27 @@ function ok(payload = {}) {
   return { ok: true, ...payload }
 }
 
-function projectSessionKnowledge(session, catalog = {}) {
+function projectSessionKnowledge(session, catalog = {}, options = {}) {
   const providers = Array.isArray(catalog.providers) ? catalog.providers : []
   const activeProviderId = String(catalog.activeProviderId || 'local-default')
   const byId = new Map(providers.map(p => [p.id, p]))
   const refs = Array.isArray(session?.knowledgeRefs) ? session.knowledgeRefs : []
+  if (Array.isArray(options.allowedKnowledgeIds) || options.deniedKnowledgeIds?.length) {
+    const scoped = resolveKnowledgeProviderScope(session, {
+      resolveProviderById: id => byId.get(id),
+      getActiveProvider: () => byId.get(activeProviderId),
+      allowedKnowledgeIds: options.allowedKnowledgeIds,
+      deniedKnowledgeIds: options.deniedKnowledgeIds,
+    })
+    return {
+      mode: scoped.mode,
+      activeProviderId,
+      selected: scoped.providers.map(p => ({ id: p.id, displayName: p.displayName, kind: p.kind, status: 'ready' })),
+      available: scoped.providers.map(p => ({ id: p.id, displayName: p.displayName, kind: p.kind })),
+      degraded: scoped.degraded,
+      message: scoped.message,
+    }
+  }
   const explicit = refs.length > 0
   const available = providers.map(p => ({
     id: p.id,
@@ -70,51 +87,7 @@ function projectSessionKnowledge(session, catalog = {}) {
 }
 
 function resolveSessionRetrievalProviders(session, deps = {}) {
-  const resolveProviderById = typeof deps.resolveProviderById === 'function'
-    ? deps.resolveProviderById
-    : () => null
-  const getActiveProvider = typeof deps.getActiveProvider === 'function'
-    ? deps.getActiveProvider
-    : () => null
-  const refs = Array.isArray(session?.knowledgeRefs) ? session.knowledgeRefs : []
-
-  if (!refs.length) {
-    const active = getActiveProvider()
-    return active
-      ? { mode: 'default', providers: [active], degraded: false, message: '' }
-      : {
-        mode: 'default',
-        providers: [],
-        degraded: true,
-        message: '默认知识库不可用',
-      }
-  }
-
-  const providers = []
-  const missingIds = []
-  for (const ref of refs) {
-    const provider = resolveProviderById(ref.id)
-    if (provider) providers.push(provider)
-    else missingIds.push(ref.id)
-  }
-
-  if (!providers.length) {
-    return {
-      mode: 'selected',
-      providers: [],
-      degraded: true,
-      message: '所选知识库均不可用，本轮不会检索其他知识库。',
-      missingIds,
-    }
-  }
-
-  return {
-    mode: 'selected',
-    providers,
-    degraded: false,
-    message: missingIds.length ? '部分所选知识库不可用，检索将仅使用仍可用的来源。' : '',
-    missingIds,
-  }
+  return resolveKnowledgeProviderScope(session, deps)
 }
 
 function validateSessionContextPatch(patch = {}) {
@@ -263,6 +236,8 @@ function mapCatalogItemToHub(entry) {
     : (entry.installStatus || 'available')
   const experienceTasks = entry.manifest?.metadata?.knowme?.experience?.tasks
   const icon = entry.icon || (Array.isArray(experienceTasks) ? experienceTasks[0]?.icon : '')
+  const qualification = entry.qualification || entry.manifest?.metadata?.knowme?.qualification
+  const readiness = entry.readiness && typeof entry.readiness === 'object' ? entry.readiness : null
   return {
     id: entry.id,
     kind: entry.kind,
@@ -286,11 +261,57 @@ function mapCatalogItemToHub(entry) {
     repositoryId: entry.repositoryId || '',
     legacy: entry.source === 'legacy-okf',
     dependencies: entry.dependencies || entry.manifest?.dependencies || [],
+    skills: entry.skills || (entry.dependencies || entry.manifest?.dependencies || []).filter(dep => dep.kind === 'skill').map(dep => dep.id),
+    connectors: entry.connectors || (entry.dependencies || entry.manifest?.dependencies || []).filter(dep => dep.kind === 'connector').map(dep => dep.id),
     permissions: entry.permissions || entry.manifest?.permissions || {},
     inputs: entry.inputs || entry.manifest?.inputs || [],
     outputs: entry.outputs || entry.manifest?.outputs || [],
     risk: entry.risk || entry.manifest?.risk || { level: 'low', reasons: [] },
     provenance: entry.provenance || entry.manifest?.provenance || {},
+    lifecycle: entry.lifecycle || { state: 'active', newTasks: true, successors: [] },
+    ...(qualification && typeof qualification === 'object' ? {
+      qualification: {
+        state: qualification.state === 'limited' ? 'limited' : 'ready',
+        issues: Array.isArray(qualification.issues) ? qualification.issues.map(String) : [],
+        limitedSkills: Array.isArray(qualification.limitedSkills) ? qualification.limitedSkills.map(String) : [],
+        assessedAtImport: qualification.assessedAtImport === true,
+      },
+    } : {}),
+    ...(readiness ? {
+      readiness: {
+        state: readiness.state === 'limited' ? 'limited' : 'ready',
+        items: Array.isArray(readiness.items) ? readiness.items.map((item) => ({
+          id: String(item?.id || ''),
+          kind: String(item?.kind || ''),
+          required: item?.required !== false,
+          status: String(item?.status || ''),
+          ...(item?.reason ? { reason: String(item.reason) } : {}),
+        })).filter((item) => item.id && item.kind) : [],
+        issues: Array.isArray(readiness.issues) ? readiness.issues.map((issue) => ({
+          code: issue?.code ? String(issue.code) : undefined,
+          dependency: issue?.dependency ? {
+            id: issue.dependency.id ? String(issue.dependency.id) : undefined,
+            kind: issue.dependency.kind ? String(issue.dependency.kind) : undefined,
+          } : undefined,
+          message: issue?.message ? String(issue.message) : undefined,
+        })) : [],
+        routes: Array.isArray(readiness.routes) ? readiness.routes.map((route) => ({
+          id: String(route?.id || ''),
+          label: route?.label ? String(route.label) : undefined,
+          state: route?.state === 'limited' ? 'limited' : 'ready',
+          requiredSkills: Array.isArray(route?.requiredSkills) ? route.requiredSkills.map(String) : [],
+          requiredConnectorIds: Array.isArray(route?.requiredConnectorIds) ? route.requiredConnectorIds.map(String) : [],
+          issues: Array.isArray(route?.issues) ? route.issues.map((issue) => ({
+            code: issue?.code ? String(issue.code) : undefined,
+            dependency: issue?.dependency ? {
+              id: issue.dependency.id ? String(issue.dependency.id) : undefined,
+              kind: issue.dependency.kind ? String(issue.dependency.kind) : undefined,
+            } : undefined,
+            message: issue?.message ? String(issue.message) : undefined,
+          })) : [],
+        })).filter((route) => route.id) : [],
+      },
+    } : {}),
   }
 }
 

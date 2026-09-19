@@ -1,0 +1,96 @@
+{
+  "suite": "RQA72",
+  "evaluatedAt": "2026-09-08T08:02:54.321Z",
+  "agents": [
+    {
+      "agentId": "data-analyst",
+      "currentConfigurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+      "tasks": [
+        {
+          "taskId": "task-mtsdttf9-5squn",
+          "evalId": "DA01",
+          "scenario": "normal",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        },
+        {
+          "taskId": "task-mtsdtugp-rap5m",
+          "evalId": "DA02",
+          "scenario": "normal",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        },
+        {
+          "taskId": "task-mtsdtv3y-t78og",
+          "evalId": "DA03",
+          "scenario": "edge",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        },
+        {
+          "taskId": "task-mtsdtvql-1zdjq",
+          "evalId": "DA04",
+          "scenario": "retry",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        },
+        {
+          "taskId": "task-mtsdtwh5-9qe2a",
+          "evalId": "DA05",
+          "scenario": "revision",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        },
+        {
+          "taskId": "task-mtsdtxmq-08sk4",
+          "evalId": "DA06",
+          "scenario": "reopen",
+          "status": "review",
+          "configurationId": "expert-config-v2:c01cc4617bf38bb68ae6284e31a36ba8c3071dc4f95c072e34677bb0775f5371",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

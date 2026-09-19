@@ -3,9 +3,12 @@
   "id": "office-partner",
   "name": "智能办公能力包",
   "description": "日常办公场景：文档写作、飞书协作、今日优先级，绑定办公 Expert 与飞书连接器。",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "expert": "office-partner",
   "skills": [
+    "office-collaboration-method",
+    "meeting-evidence-method",
+    "action-extraction",
     "writing-polish",
     "feishu-related-chats",
     "feishu-meeting-summary",

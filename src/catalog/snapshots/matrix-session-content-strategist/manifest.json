@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-content-strategist",
+  "expertId": "content-strategist",
+  "frozenAt": "2026-09-05T15:27:24.254Z",
+  "persona": {
+    "name": "内容策划专家",
+    "description": "把传播目标、受众和素材转成可执行的内容策略与选题计划",
+    "avatar": "office/collaborator",
+    "role": "",
+    "soul": "",
+    "sop": "1. 明确传播目标、受众当前认知、希望发生的行为、渠道和时间窗口；目标含糊时只追问最影响策略的一项。\n2. 盘点可用事实、案例、品牌资产和禁用项，区分已有证据与需要验证的受众假设。\n3. 提炼一个核心叙事和 3–5 个内容支柱，为每个支柱说明受众问题、承诺价值、证据和适合渠道。\n4. 将策略转成有优先级的选题、内容形态、发布节奏和复用关系，避免只有标题而没有信息价值与行动目标。\n5. 用覆盖度、一致性、可执行性和风险做交付自检，并给出可观测指标；不虚构预计阅读量或转化效果。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 内容策划专家。先明确传播目标、受众任务和渠道约束，再输出核心叙事、内容支柱、选题与节奏。区分已知事实和策略假设，不虚构市场数据。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "content-strategist",
+    "kind": "expert",
+    "name": "内容策划专家",
+    "description": "把传播目标、受众和素材转成可执行的内容策略与选题计划",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "传播目标、目标受众与渠道"
+      },
+      {
+        "name": "可用素材、时间范围与禁用项"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "内容策略与核心叙事"
+      },
+      {
+        "name": "带优先级的选题计划和验收点"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/content-strategist"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "内容策略与核心叙事",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "带优先级的选题计划和验收点",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "40b2897ce0562013",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "binding": {
+    "evalId": "AO02",
+    "configuration": "old_skill",
+    "taskId": "task-mtowf01r-x9e5e",
+    "sessionId": "wb-expert-task-mtowf01r-x9e5e",
+    "runId": "expert_task-mtowf01r-x9e5e_mtowf07s",
+    "expertId": "action-owner",
+    "agentVersion": "2.0.0",
+    "agentHash": "55d19edc3f0e143d",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtowf01r-x9e5e_mtowf07s",
+        "skillRefs": [],
+        "explicitContent": []
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "保留陈青承诺1—40行且不扩成全片；余桐不是已承诺行动负责人。",
+      "passed": true,
+      "evidence": "表第1行仅核对字幕1-40行，未扩到41行以后；余桐行明确“排除（属提议，非待办）”，不是已承诺负责人。"
+    },
+    {
+      "text": "1—20回执只作部分证据，不能宣告全部完成，也不能断言其余行实际上没做。",
+      "passed": false,
+      "evidence": "表第1行将“仅回执1-20，21-40缺证据”结论化为“未完成”。输入[3]仅描述可得证据，不能证明21-40实际没做，故失败。"
+    },
+    {
+      "text": "周牧期限保留收到完成确认后24小时，未触发且不臆造绝对日期。",
+      "passed": true,
+      "evidence": "周牧行保留陈青审校完成确认+24h，标未触发、非延期；缺口第2条说明收到确认才启动计时，未造绝对日期。"
+    },
+    {
+      "text": "未明确完成标准、主责裁决或补证安排不变成已约定义务；建议性质清楚。",
+      "passed": false,
+      "evidence": "必要缺口第1条写“陈青需补交21-40行核对结果及整体…确认信号”，未标为可选补证建议。输入承诺核对，不含逐段补交回执的已约定交付义务；输出将证据缺口直接指派为必须补交，失败。"
+    },
+    {
+      "text": "表格和附加结论一致、内容精简，全文不超280混合字数，无外部成功宣称。",
+      "passed": true,
+      "evidence": "全文混合142字≤280，表和附注都保持未闭环/待触发叙述，无外部成功宣称。状态推断及补交义务错误分别在第2/4条判，不把一致性误当事实正确。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6,
+    "score": "3/5",
+    "professional_hard_errors": true
+  },
+  "claims": [
+    {
+      "claim": "陈青的1—40行核对工作未完成",
+      "type": "factual",
+      "verified": false,
+      "evidence": "表第1行“未完成”；[3]只证明已有1—20回执、无全量确认，不能证明剩余实际未完成。",
+      "severity": "hard"
+    },
+    {
+      "claim": "陈青需补交21—40行核对结果",
+      "type": "quality",
+      "verified": false,
+      "evidence": "必要缺口第1条用“需补交”把一个可提出的补证建议写成明确义务；输入[1]只承诺核对，未约定此补交安排。不是禁止合法建议，而是要求标清其建议性质。",
+      "severity": "hard"
+    },
+    {
+      "claim": "周牧的期限触发条件尚未满足",
+      "type": "factual",
+      "verified": true,
+      "evidence": "[2]依赖收到确认，[3]无完成确认；可据此标约定流程未触发，不能据此声称已逾期。"
+    },
+    {
+      "claim": "余桐已被排除出承诺追踪",
+      "type": "factual",
+      "verified": true,
+      "evidence": "正文明确排除，与[4]未承诺交付相符。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Entire same-run assistant reply, including headings, all table cells and trailing notes; excludes filesystem trailing newline",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 280,
+    "full_unicode_chars": 286,
+    "non_whitespace_chars": 234,
+    "han_chars": 131,
+    "mixed_words": 142,
+    "punctuation_chars": 58,
+    "professional_length_passed": true
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "第2条应连表头状态词与括号理由一起核对，避免用“缺证据”包装“未完成”的越界判断。"
+      },
+      {
+        "reason": "第4条应区分请求补证建议与无建议标记的新增义务，不能把所有补证建议都判错。"
+      }
+    ],
+    "overall": "Assertion score is not professional qualification: explicit additional hard errors remain."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix."
+}

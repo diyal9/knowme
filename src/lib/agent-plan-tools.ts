@@ -7,6 +7,18 @@
 
 const agentRun = require('./agent-run')
 
+const PLAN_TOOL_CONTRACT = Object.freeze({
+  source: 'builtin',
+  capability: 'planning',
+  risk: 'write',
+  sideEffects: true,
+  requiresApproval: false,
+  scope: 'ephemeral',
+  timeoutMs: 30000,
+  idempotencySupported: false,
+  rollbackSupported: false,
+})
+
 const UPDATE_PLAN_TOOL = {
   type: 'function',
   function: {
@@ -61,7 +73,7 @@ const UPDATE_PLAN_TOOL = {
       additionalProperties: false,
     },
   },
-  _knowme: { source: 'plan', requiresApproval: false },
+  _knowme: { ...PLAN_TOOL_CONTRACT },
 }
 
 /**

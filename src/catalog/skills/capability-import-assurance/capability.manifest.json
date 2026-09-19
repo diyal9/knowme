@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "capability-import-assurance",
+  "kind": "skill",
+  "name": "外部能力导入与就绪验证",
+  "version": "1.1.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

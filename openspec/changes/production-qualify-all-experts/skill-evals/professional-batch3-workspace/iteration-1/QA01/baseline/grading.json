@@ -1,0 +1,83 @@
+{
+  "eval_id": "QA01",
+  "task_id": "task-mtotfx67-mplj8",
+  "configuration": "baseline",
+  "graded_at": "2026-09-06",
+  "grading_status": "not_gradable_platform_blocked",
+  "include_in_professional_aggregate": false,
+  "scope": "仅评冻结真实运行；未重跑API，未修改输入/输出或方法包。断言通过率不是专业生产认证。",
+  "evidence_binding": {
+    "task_id_verified": true,
+    "receipt_equals_live_session": true,
+    "frozen_input_and_expectations_equal_metadata": true,
+    "assistant_and_artifact_equal_answer": false,
+    "source_sha256": {
+      "evidence/professional-batch3-inputs.json": "0e523b3a791f735600c6c1c95af06402ed771bd3aaa709de57b3198e58f7bf9f",
+      "evidence/professional-batch3-live.json": "828364a9cf7cd5d74e1436ea3bc35df2b47f3f30d40701104a605d96c37c0b52",
+      "evidence/professional-batch3-task-events.json": "5094ffab0eafde1bb1d6dcbb7ffe6ec959e28d73d53a6f8298a1a3d22ff16549",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/eval_metadata.json": "7fe6fbef034bd5fad9682705d505a09a40f7fc6048b779a2bba90894f4ac9ad7",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/baseline/transcript.md": "4c00806fa4f5940a1a67ab2ee0605bbaa7045cd07bda49a9e95b8e988e41391f",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/baseline/outputs/answer.md": "9001d2d9a58a26d0cff67142dea1718caa993628890d7b5f44e59652e6577852",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/baseline/outputs/receipts.json": "38ff4e5c831fcc07a9a4163f8eca03ac1cc49443594c6b77117347b02f0aa801"
+    }
+  },
+  "expectations": [],
+  "summary": {
+    "passed": 0,
+    "failed": 0,
+    "total": 0,
+    "pass_rate": null,
+    "not_graded": 5
+  },
+  "professional_verdict": "not_gradable",
+  "ungraded_expectations": [
+    {
+      "text": "所有新设计用例标未执行/待执行，日志仅材料分析，不能报动态执行通过率或已验收通过。",
+      "status": "not_graded",
+      "evidence": "绑定task-mtotfx67-mplj8：live/receipts仅user消息，无assistant正文、无artifact；task-events终态failed。outputs/answer.md是采证占位，不能作为模型回答评分。"
+    },
+    {
+      "text": "日志只支持两次请求返回同一T及状态done，不证明数据库唯一、文件正确或权限安全。",
+      "status": "not_graded",
+      "evidence": "绑定task-mtotfx67-mplj8：live/receipts仅user消息，无assistant正文、无artifact；task-events终态failed。outputs/answer.md是采证占位，不能作为模型回答评分。"
+    },
+    {
+      "text": "覆盖成员/管理员隔离及越权请求，明确前置身份/资源和可观察结果。",
+      "status": "not_graded",
+      "evidence": "绑定task-mtotfx67-mplj8：live/receipts仅user消息，无assistant正文、无artifact；task-events终态failed。outputs/answer.md是采证占位，不能作为模型回答评分。"
+    },
+    {
+      "text": "覆盖并发同键、超时同键重试及24小时边界的可观察去重结果，不新增未定义过期键处理规则。",
+      "status": "not_graded",
+      "evidence": "绑定task-mtotfx67-mplj8：live/receipts仅user消息，无assistant正文、无artifact；task-events终态failed。outputs/answer.md是采证占位，不能作为模型回答评分。"
+    },
+    {
+      "text": "覆盖刷新任务恢复和取消完成竞态，保留已下载文件不追溯删除边界，发布证据不足结论明确。",
+      "status": "not_graded",
+      "evidence": "绑定task-mtotfx67-mplj8：live/receipts仅user消息，无assistant正文、无artifact；task-events终态failed。outputs/answer.md是采证占位，不能作为模型回答评分。"
+    }
+  ],
+  "platform_outcome": {
+    "status": "failed",
+    "assistant_count": 0,
+    "artifact_count": 0,
+    "attention_kind": "retryable_failure",
+    "failure": "当前 Agent 未获授权读取该知识库：local-pkg:okf",
+    "event_tool_sequence": [
+      "knowledge_search",
+      "kb_get",
+      "fabric_search",
+      "kb_query"
+    ],
+    "evidence": "professional-batch3-task-events.json按id绑定，event-8至event-16；run.steps只含前三工具且run.status仍active，不能覆盖任务终态failed。executionEvidence=[]不能被解释为零工具调用。"
+  },
+  "aggregation_note": "有意扩展标准grading：expectations仅含已评分布尔断言，此例为空；5项保存在ungraded_expectations。pass_rate=null而非0；任何聚合必须先过滤include_in_professional_aggregate=false，不能将null转0或将空断言视为通过。未运行会误合并该样本的通用聚合脚本。",
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "治理恢复后另开新iteration取得正文，保持本次失败证据与占位冻结，再评分五项专业断言；不通过放开知识库权限完成本题。"
+      }
+    ],
+    "overall": "本次只能判工程阻塞，不能推断专业通过或专业0分。"
+  }
+}

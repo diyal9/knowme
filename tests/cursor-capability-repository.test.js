@@ -339,4 +339,67 @@ Work carefully.
     assert.equal(runtime.listSkillsL0().some((item) => item.id === skillId), false)
     assert.equal(runtime.loadSkillL1(skillId).code, 'not_found')
   })
+
+  it('marks unportable execution paths and broken local references as limited', () => {
+    createRepo(root, { skillOnly: true })
+    write(path.join(root, '.cursor', 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: Build a real artifact with the repository script.
+---
+# Alpha
+
+Read [the required contract](../../knowledge/missing-contract.md), then execute:
+
+\`\`\`bash
+node scripts/build.mjs --out outputs/result.json
+\`\`\`
+`)
+    write(path.join(root, 'scripts', 'build.mjs'), 'export {}\n')
+
+    const scanned = repository.scanCursorRepository(root)
+    assert.equal(scanned.ok, true)
+    assert.equal(scanned.skills[0].contractStatus, 'limited')
+    assert.ok(scanned.skills[0].contractIssues.includes('missing_local_reference'))
+    assert.ok(scanned.skills[0].contractIssues.includes('unportable_execution_path'))
+    assert.equal(scanned.experts[0].contractStatus, 'limited')
+    assert.ok(scanned.warnings.some(item => item.code === 'missing_capability_reference'))
+    assert.ok(scanned.warnings.some(item => item.code === 'unportable_execution_path'))
+    assert.ok(scanned.warnings.some(item => item.code === 'expert_contract_limited'))
+
+    const publicDto = repository.publicPreview(scanned, 'token')
+    assert.equal(publicDto.preview.compatibility.status, 'limited')
+    assert.equal(publicDto.skills[0].contractStatus, 'limited')
+    assert.equal(publicDto.experts[0].contractStatus, 'limited')
+
+    const registered = repository.registerCursorRepository(scanned, deps())
+    assert.equal(registered.ok, true)
+    const installed = storeLib.loadInstallStore(userData).entries
+    assert.equal(installed[registered.idMaps.skills.alpha].manifest.metadata.knowme.qualification.state, 'limited')
+    assert.equal(installed[registered.idMaps.experts[scanned.experts[0].sourceId]].manifest.metadata.knowme.qualification.state, 'limited')
+  })
+
+  it('treats package-local scripts as portable through the generic skill runtime', () => {
+    createRepo(root, { skillOnly: true })
+    write(path.join(root, '.cursor', 'skills', 'alpha', 'SKILL.md'), `---
+name: alpha
+description: Build with a package-local script.
+---
+# Alpha
+
+Implementation notes: the package-local engine lives at \`pylib/helper.py\`.
+
+\`\`\`bash
+node scripts/build.mjs --out outputs/result.json
+\`\`\`
+`)
+    write(path.join(root, '.cursor', 'skills', 'alpha', 'scripts', 'build.mjs'), 'export {}\n')
+    write(path.join(root, '.cursor', 'skills', 'alpha', 'pylib', 'helper.py'), 'print("helper")\n')
+
+    const scanned = repository.scanCursorRepository(root)
+    assert.equal(scanned.ok, true)
+    assert.equal(scanned.skills[0].contractStatus, 'ready')
+    assert.deepEqual(scanned.skills[0].contractIssues, [])
+    assert.equal(scanned.skills[0].hasScripts, true)
+    assert.ok(!scanned.warnings.some(item => item.code === 'unportable_execution_path'))
+  })
 })

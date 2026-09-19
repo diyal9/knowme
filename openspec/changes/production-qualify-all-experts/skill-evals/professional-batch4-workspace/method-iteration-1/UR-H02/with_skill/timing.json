@@ -1,0 +1,50 @@
+{
+  "source": "actual AgentRunExecutor metrics",
+  "metrics": {
+    "rounds": 1,
+    "toolCalls": 0,
+    "firstTokenMs": 911,
+    "bufferedDraftsDiscarded": 1,
+    "answerCommitMs": 41859,
+    "bufferMs": 40948,
+    "outputDiagnostics": [
+      {
+        "runId": "expert_task-mtp2lix5-e7x7b_mtp2ljct",
+        "round": 1,
+        "phase": "MODEL",
+        "code": "buffered_draft_discarded",
+        "reason": "incomplete_model_response",
+        "length": 4273,
+        "count": 1
+      },
+      {
+        "runId": "expert_task-mtp2lix5-e7x7b_mtp2ljct",
+        "round": 1,
+        "phase": "VERIFY_CLAIMS",
+        "code": "answer_committed",
+        "hash": "768f3d3bbe4240a2",
+        "length": 36,
+        "timingMs": 41859,
+        "count": 1
+      }
+    ],
+    "usage": {
+      "promptTokens": 7953,
+      "completionTokens": 3935,
+      "totalTokens": 11888,
+      "source": "provider"
+    },
+    "modelCompletions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "contextTokens": 7953,
+    "totalMs": 41889
+  }
+}

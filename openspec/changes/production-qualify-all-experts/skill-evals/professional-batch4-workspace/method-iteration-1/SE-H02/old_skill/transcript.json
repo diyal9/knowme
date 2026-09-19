@@ -1,0 +1,162 @@
+{
+  "prompt": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。",
+  "task": {
+    "id": "task-mtp2gfw1-60boy",
+    "expertId": "software-engineer",
+    "status": "failed",
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.0.0",
+      "agentHash": "b47062b9ed246bc0",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtp2gfw1-60boy",
+      "bindings": {
+        "skills": [
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {},
+      "plan": {
+        "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "b47062b9ed246bc0"
+      }
+    },
+    "brief": {
+      "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+      "plan": {
+        "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "SE-H02",
+          "type": "reference",
+          "title": "冻结合成材料与委托",
+          "ref": "",
+          "content": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业分析答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtp2gfw1-60boy"
+    },
+    "deliverables": [],
+    "executionEvidence": [],
+    "attention": {
+      "kind": "retryable_failure",
+      "action": "retry",
+      "title": "本次执行未完成",
+      "detail": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+      "field": "",
+      "item": "专家执行",
+      "question": "",
+      "example": "",
+      "options": [],
+      "defaultValue": "",
+      "required": true,
+      "createdAt": "2026-09-06T00:22:12.025Z"
+    },
+    "messages": [
+      {
+        "id": "msg_expert_task-mtp2gfw1-60boy_mtp2gg2i_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师。先理解仓库规则、现有实现和验收标准，再以最小完整变更实现。必须验证变更，不伪造测试结果，不在未授权情况执行高风险操作。\n\n【必须遵循的 SOP】\n你是 KnowMe 软件开发工程师。先理解仓库规则、现有实现和验收标准，再以最小完整变更实现。必须验证变更，不伪造测试结果，不在未授权情况执行高风险操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n当前时间：2026-09-06T00:21:18.810Z\n\n材料：\n- 冻结合成材料与委托\n请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n步骤：\n1. 核对所给材料与契约\n2. 按专业方法完成分析\n3. 复核交付及边界\n风险：只进行静态分析，不执行外部操作\n\n本轮交付物：专业分析答复（answer）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtp2gfw1-60boy_mtp2gg2i",
+        "createdAt": "2026-09-06T00:21:18.824Z"
+      }
+    ]
+  },
+  "capture": {
+    "taskId": "task-mtp2gfw1-60boy",
+    "runId": "expert_task-mtp2gfw1-60boy_mtp2gg2i",
+    "terminal": "ERROR",
+    "metrics": {
+      "rounds": 2,
+      "toolCalls": 1,
+      "firstTokenMs": 11421,
+      "bufferedDraftsDiscarded": 1,
+      "answerCommitMs": null,
+      "bufferMs": null,
+      "outputDiagnostics": [
+        {
+          "runId": "expert_task-mtp2gfw1-60boy_mtp2gg2i",
+          "round": 2,
+          "phase": "MODEL",
+          "code": "buffered_draft_discarded",
+          "reason": "incomplete_model_response",
+          "length": 5009,
+          "count": 1
+        }
+      ],
+      "usage": {
+        "promptTokens": 23524,
+        "completionTokens": 5992,
+        "totalTokens": 29516,
+        "source": "provider"
+      },
+      "modelCompletions": [
+        {
+          "phase": "MODEL",
+          "finishReason": "tool_calls"
+        },
+        {
+          "phase": "MODEL",
+          "finishReason": "length"
+        },
+        {
+          "phase": "FINALIZE",
+          "finishReason": "length"
+        }
+      ]
+    },
+    "error": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。"
+  }
+}

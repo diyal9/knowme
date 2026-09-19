@@ -23,6 +23,7 @@ describe('assistant-prompt-router', () => {
 
   it('routes casual turns to the assistant scene', () => {
     assert.equal(resolveScene({ mode: 'general', tier: 'chat' }), 'assistant')
+    assert.equal(resolveScene({ industry: 'game', mode: 'general', tier: 'chat', prompt: 'hi' }), 'assistant')
     assert.match(buildScenePrompt({ scene: 'assistant' }), /自然对话/)
   })
 
@@ -51,9 +52,13 @@ describe('assistant-prompt-router', () => {
     assert.match(buildScenePrompt({ scene: 'writing', mode: 'writing' }), /结构化成稿/)
   })
 
-  it('routes game industry to studio scenes', () => {
-    assert.equal(resolveScene({ industry: 'game', mode: 'writing', tier: 'chat' }), 'game-design')
-    assert.equal(resolveScene({ industry: 'game', mode: 'coding', tier: 'chat' }), 'game-dev')
+  it('routes game scenes by concrete intent or explicit binding only', () => {
+    assert.equal(resolveScene({ industry: 'game', mode: 'writing', tier: 'chat' }), 'writing')
+    assert.equal(resolveScene({ industry: 'game', mode: 'coding', tier: 'chat' }), 'coding')
+    assert.equal(resolveScene({ industry: 'game', mode: 'general', tier: 'assist', prompt: '整理版本里程碑与风险' }), 'game-production')
+    assert.equal(resolveScene({ industry: 'game', mode: 'general', tier: 'assist', prompt: '帮我写一封邮件' }), 'work')
+    assert.equal(resolveScene({ industry: 'software', mode: 'general', tier: 'assist', prompt: '整理版本里程碑与风险' }), 'work')
+    assert.equal(resolveScene({ industry: 'software', explicitScene: 'game-design' }), 'game-design')
     assert.match(buildScenePrompt({ scene: 'game-design' }), /策划需求/)
   })
 
@@ -113,6 +118,27 @@ describe('assistant-prompt-router', () => {
     assert.match(prompt, /产品经理/)
     assert.match(prompt, /回答简洁/)
     assert.doesNotMatch(prompt, /九仔|长期工作伙伴|通用办公|通用伙伴风格|长期搭档/)
+  })
+
+  it('keeps casual partner personality but drops work-domain operating context', () => {
+    const prompt = buildUserPrompt({
+      userProfile: '游戏制作人',
+      industry: 'game',
+      occupationId: 'game-designer',
+      agentSoul: '可靠、克制的长期伙伴',
+      agentDomainCapabilities: '版本推进与排期',
+      agentCollaboration: '所有回答都先查询项目知识库',
+      agentSelfDriveRules: '主动拆解任务',
+      userPrompt: '每次都输出验收清单',
+      assistantModeConfig: { soul: '语气自然', general: '给出三个下一步' },
+    }, 'general', {
+      includeUserPrompt: false,
+      includeWorkProfile: false,
+      agentPersonaScope: 'style',
+    })
+    assert.match(prompt, /可靠、克制的长期伙伴/)
+    assert.match(prompt, /语气自然/)
+    assert.doesNotMatch(prompt, /游戏制作人|游戏设计|版本推进|项目知识库|主动拆解|验收清单|三个下一步/)
   })
 
   it('lets a single turn opt out of the collaboration preference', () => {

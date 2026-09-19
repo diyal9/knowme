@@ -382,6 +382,20 @@ function permissionUpgradeLabel(need) {
   return labels[need] || need
 }
 
+// 沙箱工具会通过 registerBundle 进入统一 Registry。这里必须携带完整契约，
+// 因为单个工具的 _knowme 会优先于分组默认契约，不能只写 source/requiresApproval。
+const SANDBOX_TOOL_CONTRACT = Object.freeze({
+  source: 'builtin',
+  capability: 'process',
+  risk: 'network',
+  sideEffects: true,
+  requiresApproval: false,
+  scope: 'sandbox',
+  timeoutMs: DEFAULT_TIMEOUT_MS,
+  idempotencySupported: false,
+  rollbackSupported: false,
+})
+
 const SANDBOX_TOOL_DEFS = [
   {
     type: 'function',
@@ -398,7 +412,7 @@ const SANDBOX_TOOL_DEFS = [
         additionalProperties: false,
       },
     },
-    _knowme: { source: 'sandbox', requiresApproval: false },
+    _knowme: { ...SANDBOX_TOOL_CONTRACT },
   },
   {
     type: 'function',
@@ -415,7 +429,7 @@ const SANDBOX_TOOL_DEFS = [
         additionalProperties: false,
       },
     },
-    _knowme: { source: 'sandbox', requiresApproval: false },
+    _knowme: { ...SANDBOX_TOOL_CONTRACT },
   },
 ]
 
@@ -540,6 +554,61 @@ function buildSandboxTools(options = {}) {
 
   const screenOpts = { permissions, allowNetwork, workspaceRoot: workdir }
 
+  async function runScriptFile(args = {}) {
+    const scriptAbs = path.resolve(String(args.scriptAbs || ''))
+    if (!String(args.scriptAbs || '').trim() || !isPathInsideWorkspace(scriptAbs, workdir)) {
+      return { ok: false, code: 'invalid_path', text: '技能脚本必须位于沙箱工作区内。' }
+    }
+    if (!fs.existsSync(scriptAbs) || !fs.statSync(scriptAbs).isFile()) {
+      return { ok: false, code: 'not_found', text: '技能脚本不存在或不可读。' }
+    }
+    const argv = Array.isArray(args.argv) ? args.argv.map(value => String(value)) : []
+    if (argv.length > 128 || argv.some(value => value.length > 8192)) {
+      return { ok: false, code: 'invalid_args', text: '技能脚本参数超过安全限制。' }
+    }
+
+    const ext = path.extname(scriptAbs).toLowerCase()
+    let cmd = ''
+    let processArgs = []
+    let screenSource = ''
+    let screenMode = 'shell'
+    if (ext === '.py') {
+      cmd = pythonCmd
+      processArgs = ['-I', scriptAbs, ...argv]
+      screenSource = fs.readFileSync(scriptAbs, 'utf8')
+      screenMode = 'python'
+    } else if (['.js', '.mjs', '.cjs'].includes(ext)) {
+      cmd = 'node'
+      processArgs = [scriptAbs, ...argv]
+      screenSource = `node ${JSON.stringify(scriptAbs)}`
+    } else if (['.sh', '.bash'].includes(ext)) {
+      cmd = 'bash'
+      processArgs = [scriptAbs, ...argv]
+      screenSource = fs.readFileSync(scriptAbs, 'utf8')
+    } else if (ext === '.ps1') {
+      cmd = isWin ? 'powershell' : 'pwsh'
+      processArgs = isWin
+        ? ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptAbs, ...argv]
+        : ['-NoProfile', '-NonInteractive', '-File', scriptAbs, ...argv]
+      screenSource = fs.readFileSync(scriptAbs, 'utf8')
+    } else {
+      return { ok: false, code: 'unsupported_script', text: `不支持的脚本类型: ${ext || '(无扩展名)'}` }
+    }
+
+    const screen = screenCommand(screenSource, { ...screenOpts, mode: screenMode })
+    if (!screen.allowed) return blockedResult('技能脚本未执行：', screen)
+    try {
+      ensureDir(workdir)
+      const run = await runProcess({ cmd, args: processArgs, cwd: workdir, timeoutMs })
+      if (run.code === -1 && /enoent|not found|无法找到|不是内部/i.test(String(run.stderr || ''))) {
+        return { ok: false, code: 'runtime_unavailable', text: `技能脚本未执行：未检测到 ${cmd} 运行时。` }
+      }
+      return formatRunResult('技能脚本结果：', run)
+    } catch (err) {
+      return { ok: false, code: 'sandbox_error', text: `技能脚本失败：${String(err?.message || err).slice(0, 300)}` }
+    }
+  }
+
   const handlers = {
     run_python: async (args = {}) => {
       const code = String(args.code || '')
@@ -573,7 +642,7 @@ function buildSandboxTools(options = {}) {
     },
   }
 
-  return { definitions: SANDBOX_TOOL_DEFS, handlers, permissions }
+  return { definitions: SANDBOX_TOOL_DEFS, handlers, permissions, runScriptFile }
 }
 
 module.exports = {

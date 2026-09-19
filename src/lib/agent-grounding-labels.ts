@@ -14,6 +14,12 @@ const TOOL_USER_LABELS = {
   'feishu.get_wiki_node': '飞书知识库读取',
   'feishu.search_docs': '飞书文档搜索',
   'feishu.draft_minute_permission': '飞书妙记权限申请',
+  'feishu.today_priority': '飞书今日安排与待办读取',
+  'feishu.related_chats': '飞书相关聊天读取',
+  'feishu.doc_kb_suggest': '飞书文档/知识库检索',
+  'today priority': '飞书今日安排与待办读取',
+  'related chats': '飞书相关聊天读取',
+  'doc kb': '飞书文档/知识库检索',
   'preview_external_project': '扫描外部项目',
   'design_external_workflow_import': '生成导入方案',
   'import_external_project': '执行项目导入',
@@ -41,6 +47,13 @@ function stripRawToolIdsFromText(text = '') {
   return String(text || '').replace(RAW_TOOL_ID_RE, (id) => formatToolLabelForUser(id))
 }
 
+function getViolationClaimLabels(violation) {
+  const labels = Array.isArray(violation?.claimLabels) ? violation.claimLabels
+    : (Array.isArray(violation?.claims) ? violation.claims.slice(0, 32).map(claim => claim?.label) : [])
+  return [...new Set(labels.slice(0, 32).filter(label => typeof label === 'string'
+    && /^[\p{L}\p{N} -]{1,24}$/u.test(label)))].slice(0, 8)
+}
+
 function formatViolationForUser(violation) {
   if (!violation || typeof violation !== 'object') return ''
   const code = String(violation.code || '')
@@ -66,10 +79,16 @@ function formatViolationForUser(violation) {
     return '工具返回的内容不足，无法完成验收。通常不需要补充背景，请确认任务输入后点击“重新执行”。'
   }
   if (code === 'false_execution_claim') {
-    return '当前还没有成功的读取结果，不能声称已完成读取'
+    return '回复中的操作完成声明缺少对应的成功执行凭据，暂不能确认这些操作已完成'
   }
   if (code === 'ungrounded_external_fact') {
-    return '还没有可验证的正文证据，不能输出具体议题或责任人'
+    const labels = getViolationClaimLabels(violation)
+    return labels.length
+      ? `回复中的「${labels.join('、')}」尚未与来源对应，需要重新核对依据`
+      : '回复中的部分字段尚未与来源对应，需要重新核对依据'
+  }
+  if (code === 'unresolved_source_citation') {
+    return '回复中的部分来源引用无法对应当前材料，需要重新核对引用'
   }
   if (code === 'completion_unmet') {
     return '任务完成条件尚未满足'
@@ -94,6 +113,7 @@ if (typeof module !== 'undefined' && module.exports) {
     formatToolLabelForUser,
     formatToolLabelsForUser,
     stripRawToolIdsFromText,
+    getViolationClaimLabels,
     formatViolationForUser,
     formatViolationsForUser,
   }

@@ -11,6 +11,27 @@ describe('shell-rail', () => {
   })
   afterEach(() => cleanup())
 
+  it('shows 文件 and toggles the file sidebar without changing the active route', () => {
+    useAppStore.setState({ filesOpen: false })
+    render(<AppShell />)
+    const route = useAppStore.getState().route
+    const filesButton = screen.getByRole('button', { name: '收起或展开左侧文件栏' })
+    expect(filesButton).toHaveTextContent('文件')
+    expect(filesButton).toHaveAttribute('title', '展开文件列表')
+    expect(filesButton).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('button', { name: '收起或展开左侧项目栏' })).not.toBeInTheDocument()
+
+    fireEvent.click(filesButton)
+    expect(filesButton).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('complementary', { name: '文件中心' })).toBeVisible()
+    expect(useAppStore.getState().route).toBe(route)
+
+    fireEvent.click(filesButton)
+    expect(filesButton).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.queryByRole('complementary', { name: '文件中心' })).not.toBeInTheDocument()
+    expect(useAppStore.getState().route).toBe(route)
+  })
+
   it('presses 工作台 exclusively when clicked', () => {
     render(<AppShell />)
     fireEvent.click(screen.getByRole('button', { name: '工作台' }))

@@ -1,0 +1,88 @@
+{
+  "expectations": [
+    {
+      "text": "正确区分5人、10次任务与独立完成：A独立完成4/5=80%，B为5/5=100%；不能把所有任务最终完成称为两个版本均100%独立成功，P5协助记录保留而非从全部研究证据删除。",
+      "passed": true,
+      "evidence": "outputs/delivered.md L2、9–10明确5人/10次、A=4/5=80%、B=5/5=100%；L22–24保留P5在A获协助、B本次独立完成，不从全部研究证据删除。L40另错误否定‘所有人都完成了’，列入全文claims；本条明示的人数/任务数/独立率及保留记录要求有实质证据，不以另一命题错误抹去已满足项。"
+    },
+    {
+      "text": "配对独立时间分析只用P1-P4，A均值86.25秒、B均值78.75秒，B平均少7.5秒；若另报全5人原始均值须明确含协助并非同一独立效率口径，不用混合口径夸大效果。",
+      "passed": true,
+      "evidence": "L12–20仅用P1–P4，逐行100/70、80/60、90/100、75/85及差值-30/-20/+10/+10全对；A=345/4=86.25，B=315/4=78.75，B−A=-7.5。未另报混合五人均值。L24‘不可纳入时间均值’表述过宽，但本次实际配对计算未混入口径。"
+    },
+    {
+      "text": "按顺序分层：P1/P2先A后B时B平均少25秒，P3/P4先B后A时B平均多10秒；识别熟悉同一任务/顺序与未随机分配等替代解释，不从总体平均或两组小样本直接证明新版因果收益，也不能反向声称已证明只有练习效应。",
+      "passed": false,
+      "evidence": "L29–30虽正确列出两组方向，但未给要求的独立配对分层-25/+10秒，先A组还列入协助记录P5而未区分独立时间口径。L32称第二次‘更长或持平（除P1/P2外）’，原表五人的第二次减第一次实际为-30/-20/-10/-10/-30。L35又称P3‘A反而更慢’，与自己L17及U2 A90<B100矛盾。L4无随机分配及L34无法分离效应正确，仍不能抵消关键行为事实错误。"
+    },
+    {
+      "text": "结合U3准确归属原话或明确标为转述，保留P3更醒目但更慢的反例和P5独立再现的不确定；反驳无条件已证明降低操作成本/明天全量替换，不发明开发低成本、留存收益、样本代表性或不存在的引语理由。",
+      "passed": false,
+      "evidence": "L29、30、36的P2/P3短引基本忠实，L39/47暂缓全量及无业务收益证据合理。但未保留P5‘不确定下次自己能不能找到’，用本次B独立完成替代复现不确定性；L35凭错误时间方向把P3解释成言行背离，破坏反例；L36把‘颜色更醒目’主观评价称为个人归因，没有原话支持其提出速度因果。L47‘在活跃用户中，B版可发现性优于A版’超出一次受顺序混淆的观察范围。没有发现新增逐字引语或虚构开发成本。"
+    },
+    {
+      "text": "下一轮计划满足≤4新参与者、每人≤2任务、总≤8观察，清楚写名额和呈现/任务安排；用不同但匹配材料及合理顺序安排区分版本与练习效应，记录独立成功/协助及时间等，给中性提问和会改变建议的观察结果，不承诺该小样本可证明总体效果。",
+      "passed": false,
+      "evidence": "L52–53合读为4位新参与者首轮4次、第二轮4次，每人A/B各一次，2AB/2BA、不同匹配材料，预算符合；‘新用户’是允许的招募建议，不是原样本身份事实。L55中性问题与L59不宣称显著性也合格。但L54仅记录找按钮耗时、协助与错误点击，未记录是否最终独立提交成功；无协助不等于完成，且按钮定位时间不能替代端到端任务效率。L56对≥3人更快/无协助给出改变建议方向，但未定义协助率按人还是按8次、针对A/B哪个版本，及何种观测算‘控制顺序/顺序效应消失’，无法稳定执行该判据。按合取原断言不通过，不按资源超限或‘阈值未经批准’扣分。"
+    }
+  ],
+  "summary": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 1893,
+    "source": "rqa17-initial-verifier-captures-2026-09-06.json UR run.result.metrics; not grader tool usage or a newly measured benchmark",
+    "model_rounds": 1,
+    "provider_usage": { "promptTokens": 10589, "completionTokens": 3806, "totalTokens": 14395, "source": "provider" }
+  },
+  "timing": { "executor_duration_seconds": 36.945, "source": "run.result.metrics.totalMs / 1000; recorded whole run, no new measurement" },
+  "claims": [
+    { "claim": "5人10次任务，A独立80%、B独立100%，独立配对均值86.25/78.75、差-7.5秒", "type": "factual", "verified": true, "evidence": "U2逐行复核与L2、9–20一致；评分员只读算术复核，不是专家calculate回执。" },
+    { "claim": "第二个版本耗时均更长或持平（除P1/P2外）", "type": "factual", "verified": false, "evidence": "L32；P3第二次A90<第一次B100，P4 A75<B85，P5 B90<A120，三人也都更快。" },
+    { "claim": "P3在B→A顺序下A反而更慢，主观感受与行为背离", "type": "factual", "verified": false, "evidence": "L35；U2及L17 A90/B100，方向相反。P3报告B找按钮慢，与B总耗时更长不矛盾；总耗时也没有单独证明按钮定位用时。" },
+    { "claim": "P2自述证实熟悉度影响速度", "type": "factual", "verified": false, "evidence": "L34；原话‘也许一样快’支持练习效应假设，U1说明第二次熟悉材料，但未识别熟悉度对速度的独立因果贡献。不能从主观解释升级为已证实因果。" },
+    { "claim": "‘新版颜色醒目’是P3个人归因", "type": "factual", "verified": false, "evidence": "L36；U3是更醒目但找按钮更慢的主观评价，并未声称颜色造成速度差异。不可因缺眼动证据否定其感受，也无需把眼动当因果证明的充分条件。" },
+    { "claim": "P5并非独立完成，因此‘所有人都完成了’表述不准确", "type": "factual", "verified": false, "evidence": "L40；U2明确五人都完成两次任务，只是P5在A获协助。全完成不等于全独立，产品结论错误不使此前的完成事实变假。" },
+    { "claim": "在活跃用户中B版可发现性优于A版", "type": "quality", "verified": false, "evidence": "L47；最多支持本样本本次B独立完成比例较高以及P5差异线索，未控制熟悉/顺序，无按钮定位时长记录，P3还是反例，不能给该人群已成立的优势结论。" },
+    { "claim": "下一轮4名新用户、首轮4次加其余4次用于平衡顺序符合U4", "type": "quality", "verified": true, "evidence": "L52–53合读2人AB+2人BA，共4人每人2次、8次观察，无额外免费名额。新用户招募是建议，不是声称原P5是新用户。" },
+    { "claim": "记录指标及条件足以支持替换/否决/修复决策", "type": "quality", "verified": false, "evidence": "L54–56缺最终任务完成；协助率分母和版本、控制顺序的操作判据未定义。首次按钮快不是完整提交任务成本低；阈值是建议，不作为伪造事实处理。" },
+    { "claim": "本轮为静态分析交付，无专家工具执行", "type": "process", "verified": true, "evidence": "run.metrics.toolCalls=0、toolCallCount=0、capture.args.toolLedger.calls=[]、本run task.executionEvidence.toolCalls=[]；未声称实测研究/基准完成。" }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["答复声明无随机分配、无转化数据、不能回答留存/付费等；这些限制声明不抵消正文反向事实和泛化。"],
+    "needs_review": ["第五项资源安排通过，但记录终点和判据不完整；本合取判定可据原文复核，不新增评分门槛。"],
+    "workarounds": ["MODEL length后FINALIZE stop形成最终1893字符正文；不评分未保存的4568字符草稿。"]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      { "reason": "冻结五项未直接覆盖全文对‘最终完成’事实的反向否定；仅查独立率正确会漏过L40。建议未来题另核对全篇核心事实一致性，不改本次五项。" },
+      { "assertion": "下一轮计划满足≤4新参与者、每人≤2任务、总≤8观察，清楚写名额和呈现/任务安排；用不同但匹配材料及合理顺序安排区分版本与练习效应，记录独立成功/协助及时间等，给中性提问和会改变建议的观察结果，不承诺该小样本可证明总体效果。", "reason": "该合取项有实质区分度；未来可拆出资源合规与判据可执行性，并明确指标分母/版本/最终完成终点，避免只满足人数和中性问句就获得计划通过。当前仍按原项二元评分。" },
+      { "reason": "五项未直接检查题面禁工具；本次0工具符合，建议未来仍保留独立过程审计，不能凭专业分数推断授权遵守。" }
+    ],
+    "overall": "五项以正确分析和可执行计划为主，非表面存在性检查。保持冻结原文；当前本地eval_metadata.assertions为空，评分从指定frozen cases中逐字恢复至expectations，不修改metadata。"
+  },
+  "review_context": {
+    "case_id": "UR-H02",
+    "task_id": "task-mtp2lix5-e7x7b",
+    "run_id": "expert_task-mtp2lix5-e7x7b_mtp4zvq8",
+    "session_id": "wb-expert-task-mtp2lix5-e7x7b",
+    "agent_version": "2.1.0",
+    "agent_hash": "5fd4c7a2cd49dee8",
+    "scope": "unchanged-skill retry diagnostic; UR non-author grader, already exposed to this case and RQA15 reports; not blind, not unseen holdout, not old-new A/B",
+    "previous_candidate": "RQA15 run expert_task-mtp2lix5-e7x7b_mtp2ljct remains blocked and professionally N/A; not overwritten",
+    "platform_result": "review, one answer v1 artifactRef, pending acceptance; verificationPassed true does not imply semantic or professional correctness",
+    "verification_scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+    "capture_field_checks": [],
+    "binding_verified": "capture.args.text == run.result.text == same-run unique assistant == outputs/candidate.md and outputs/delivered.md excluding terminal newline; task brief material and capture provided material equal frozen prompt",
+    "length_notes": { "raw_chars": 1893, "han_chars": 971, "alnum_word_blocks": 124, "han_plus_alnum_heuristic": 1095, "non_whitespace_including_markup": 1655, "graded_by_length": false },
+    "source_sha256": {
+      "rqa17-initial-verifier-captures-2026-09-06.json": "e4d63a879a0687314a259e039adf8ac85aa87a097e75fb1d160667c7d277d580",
+      "rqa15-frozen-independent-cases-2026-09-06.json": "871e624c7b83ad1fa39af163ba71bd5b9a2c1f0eab29043111527a5b68586cc4",
+      "eval_metadata.json": "9a4f11ceb48cdcdbefc3b23248c13a4d9d95c634cb90ecea3dc49042617ca566",
+      "transcript.json": "42b5feee4d9de62a623f6d1dce9820319d4c2ba2d9a468a08b51bb9174c210fe",
+      "outputs/candidate.md": "0704217071fa8bf78dfb9ff610c1b155a1014f2109540efc60d639bf8c3536f8",
+      "outputs/delivered.md": "0704217071fa8bf78dfb9ff610c1b155a1014f2109540efc60d639bf8c3536f8",
+      "answer_text": "3a5755b0f0028f6810274fd6fe099a7bb3a90a27a917fc411900e60ba625d931"
+    }
+  }
+}

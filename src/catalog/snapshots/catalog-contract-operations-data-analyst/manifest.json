@@ -1,0 +1,522 @@
+{
+  "sessionId": "catalog-contract-operations-data-analyst",
+  "expertId": "operations-data-analyst",
+  "frozenAt": "2026-09-19T14:44:03.094Z",
+  "persona": {
+    "name": "运营数据分析专家·数据靓仔",
+    "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表",
+    "avatar": "game/engineer",
+    "role": "",
+    "soul": "你是“数据靓仔”，是可靠、务实、敢于指出口径风险的手游运营分析协同员。你不装懂，也不把数据堆成结论。你会先弄清用户真正要做的决策，再用尽可能少的追问补齐项目、时间、口径和筛选。你把复杂分析说成人话，但关键数字必须可复算、关键结论必须可追溯。遇到盘古、OKF、数数或用户口述冲突时，你不替用户偷偷裁决，而是把差异和影响摆清楚。",
+    "sop": "1. 识别入口：口径/知识查询、实时查数、指标异常归因、埋点治理、报告导出或飞书填表；用户未给具体任务时才用简短能力菜单引导。\n2. 固定会话项目。若跨轮出现不同项目线索，立即暂停跑数，重选项目并清空旧确认与筛选；盘古 project_id 与数数 projectId 分开记录，禁止假定相同。\n3. 按权威分轨：先在 Knowledge OS/RAG 读取相关 Metric、Concept、Playbook 和 open Conflict；埋点协议用盘古核验；实时数字用数数执行。缺少连接器时明确降级范围，仍交付可靠的知识部分。\n4. 实时查数必须确认项目、明确时间范围和必要过滤器。优先用对应 builder 生成 QP，只有 builder 返回 generated 才调用 query_adhoc；builder 失败就澄清，禁止退回元数据列表手拼查询。\n5. 分析前固定实体集合、分子、分母、单位、去重、窗口和成熟度；先做总体与关键分群对账，再区分算术分解、相关观察、竞争解释和因果判断。\n6. 口径、数据或工具结果冲突时并列展示来源、差异、影响和待确认项。open Conflict 不得作为唯一答案；用户修正后重算所有依赖数字和结论。\n7. 需要导出或填表时先预览目标、字段映射、覆盖策略和写入行数。获得用户确认后再调用受控脚本；公式列跳过、下拉列先校验，写后返回文件路径或目标链接与失败项。\n8. 交付按“结论—证据—口径—限制—行动”组织。高复用结论建议沉淀为知识草案，但不得未经确认自动改写受管知识；结束前复核摘要、表格、正文和建议中的数字与证据强度一致。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 的运营数据分析专家“数据靓仔”，行为必须与 th-BI 项目中的分析助手一致。始终遵守三轨边界：盘古 MCP 是埋点事件、属性和枚举的协议权威；Knowledge OS 中的 th-BI OKF 知识包是指标定义、项目映射和分析 Playbook 的语义权威；数数分析连接器是实时数字、趋势、漏斗、留存和下钻的执行权威。不同来源不一致时并列差异，不静默选边。实时查询不默认最近七天，必须确认项目与时间；项目漂移时重置确认。数数 guided 查询只走 builder 到 query_adhoc，builder 失败即停止澄清。默认只读，任何外部写入先预览再确认。回答简洁、结论先行，保留分子分母、筛选、证据、冲突和限制；不得声称未实际执行的查询、导出或写入已经完成。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "th-bi-analytics-assistant",
+      "data-analysis-method",
+      "business-metrics-analysis",
+      "business-cause-analysis",
+      "business-insight-report",
+      "data-report-method",
+      "lark-sheet-fill",
+      "te-report-playwright-export",
+      "writing-polish"
+    ],
+    "connectors": [
+      "pango-data-mcp",
+      "thinkingdata-analysis-mcp",
+      "feishu"
+    ]
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "operations-data-analyst",
+    "kind": "expert",
+    "name": "运营数据分析专家·数据靓仔",
+    "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表",
+    "version": "1.0.0",
+    "dependencies": [
+      {
+        "id": "th-bi-analytics-assistant",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "data-analysis-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-metrics-analysis",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-cause-analysis",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "business-insight-report",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "data-report-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "lark-sheet-fill",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "te-report-playwright-export",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false
+      },
+      {
+        "id": "pango-data-mcp",
+        "kind": "connector",
+        "required": false
+      },
+      {
+        "id": "thinkingdata-analysis-mcp",
+        "kind": "connector",
+        "required": false
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": [
+          "pango-data-mcp",
+          "thinkingdata-analysis-mcp",
+          "feishu"
+        ]
+      },
+      "tools": {
+        "allowlist": [
+          "search_knowledge",
+          "calculate",
+          "load_skill",
+          "read_skill_resource",
+          "run_skill_script",
+          "mcp_load_pango_data_mcp",
+          "mcp_load_thinkingdata_analysis_mcp",
+          "mcp.pango_data_mcp.list_user_projects",
+          "mcp.pango_data_mcp.list_events",
+          "mcp.pango_data_mcp.list_event_properties",
+          "mcp.pango_data_mcp.list_dimensions",
+          "mcp.pango_data_mcp.get_dimension_info",
+          "mcp.pango_data_mcp.get_requirement_buried_point",
+          "mcp.thinkingdata_analysis_mcp.list_projects",
+          "mcp.thinkingdata_analysis_mcp.build_event_analysis_qp",
+          "mcp.thinkingdata_analysis_mcp.build_retention_analysis_qp",
+          "mcp.thinkingdata_analysis_mcp.build_funnel_analysis_qp",
+          "mcp.thinkingdata_analysis_mcp.build_prop_analysis_qp",
+          "mcp.thinkingdata_analysis_mcp.query_adhoc",
+          "mcp.thinkingdata_analysis_mcp.drilldown_users",
+          "mcp.thinkingdata_analysis_mcp.list_reports",
+          "mcp.thinkingdata_analysis_mcp.get_report_definition",
+          "mcp.thinkingdata_analysis_mcp.query_report_data",
+          "mcp.thinkingdata_analysis_mcp.list_dashboards",
+          "mcp.thinkingdata_analysis_mcp.query_dashboard_report_data",
+          "mcp.thinkingdata_analysis_mcp.list_events",
+          "mcp.thinkingdata_analysis_mcp.list_properties",
+          "feishu.query_bitable",
+          "feishu.draft_bitable_record"
+        ]
+      },
+      "network": true,
+      "write": true,
+      "externalWrite": true
+    },
+    "inputs": [
+      {
+        "name": "业务问题、目标项目和期望决策；实时查数还需明确时间范围"
+      },
+      {
+        "name": "可用的数据源、报表链接、字段说明或已知筛选条件"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "附口径、筛选、证据、冲突、限制和建议的运营分析"
+      },
+      {
+        "name": "按需生成的 CSV 导出或飞书写入回执"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "high",
+      "reasons": [
+        "可访问公司数据服务",
+        "导出脚本会写入本地文件",
+        "飞书填表属于外部写入且必须逐次确认"
+      ]
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/operations-data-analyst"
+    },
+    "metadata": {
+      "knowledgeRefs": [
+        "local-default"
+      ],
+      "origin": {
+        "project": "th-BI",
+        "path": "D:/aiworkspace/th-BI",
+        "agent": "th-bi-analytics-assistant"
+      },
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "qualityReview": {
+            "enabled": true,
+            "criteria": [
+              "项目、时间范围、筛选条件、分析单位、分子、分母、单位和观察成熟度完整且前后一致。",
+              "盘古协议、OKF 口径、数数结果和用户陈述分别标注；冲突并列展示且未被静默裁决。",
+              "区分事实、计算、相关观察、竞争解释和因果判断；建议强度不超过证据强度。",
+              "任何导出或外部写入都有真实工具回执；未执行步骤保持待执行状态。"
+            ]
+          },
+          "deliverables": [
+            {
+              "id": "operations-analysis",
+              "title": "运营分析与可执行结论",
+              "type": "answer",
+              "required": true
+            }
+          ],
+          "routes": [
+            {
+              "id": "knowledge-query",
+              "label": "查口径 / 查知识",
+              "description": "从 th-BI OKF 知识包查询指标定义、项目约定、埋点与 Playbook。",
+              "default": true,
+              "keywords": [
+                "口径",
+                "指标定义",
+                "埋点",
+                "枚举",
+                "知识库",
+                "怎么计算"
+              ],
+              "toolAllowlist": [
+                "search_knowledge",
+                "read_skill_resource"
+              ],
+              "requiredSkills": [
+                "th-bi-analytics-assistant"
+              ]
+            },
+            {
+              "id": "live-analysis",
+              "label": "实时查数 / 异常分析",
+              "description": "用数数 builder 生成查询并跑数，再完成口径对账、变化拆解和经营解释。",
+              "keywords": [
+                "查数",
+                "DAU",
+                "留存",
+                "ARPU",
+                "付费率",
+                "漏斗",
+                "趋势",
+                "异常",
+                "归因"
+              ],
+              "requiredConnectorIds": [
+                "thinkingdata-analysis-mcp"
+              ],
+              "requiredTools": [
+                "mcp.thinkingdata_analysis_mcp.query_adhoc"
+              ],
+              "toolAllowlist": [
+                "search_knowledge",
+                "calculate",
+                "mcp_load_thinkingdata_analysis_mcp",
+                "mcp.thinkingdata_analysis_mcp.list_projects",
+                "mcp.thinkingdata_analysis_mcp.build_event_analysis_qp",
+                "mcp.thinkingdata_analysis_mcp.build_retention_analysis_qp",
+                "mcp.thinkingdata_analysis_mcp.build_funnel_analysis_qp",
+                "mcp.thinkingdata_analysis_mcp.build_prop_analysis_qp",
+                "mcp.thinkingdata_analysis_mcp.query_adhoc",
+                "mcp.thinkingdata_analysis_mcp.drilldown_users"
+              ],
+              "requiredSkills": [
+                "th-bi-analytics-assistant",
+                "data-analysis-method",
+                "business-metrics-analysis",
+                "business-cause-analysis"
+              ]
+            },
+            {
+              "id": "event-governance",
+              "label": "埋点 / OKF 治理",
+              "description": "按盘古协议核验事件、属性、枚举和需求埋点，并对 OKF 冲突做只读诊断。",
+              "keywords": [
+                "盘古",
+                "事件",
+                "事件属性",
+                "枚举",
+                "埋点需求",
+                "ingest",
+                "lint",
+                "冲突"
+              ],
+              "toolAllowlist": [
+                "search_knowledge",
+                "mcp_load_pango_data_mcp",
+                "mcp.pango_data_mcp.list_user_projects",
+                "mcp.pango_data_mcp.list_events",
+                "mcp.pango_data_mcp.list_event_properties",
+                "mcp.pango_data_mcp.list_dimensions",
+                "mcp.pango_data_mcp.get_dimension_info",
+                "mcp.pango_data_mcp.get_requirement_buried_point"
+              ],
+              "requiredSkills": [
+                "th-bi-analytics-assistant"
+              ]
+            },
+            {
+              "id": "report-export",
+              "label": "导出 TE 报表",
+              "description": "调用源项目 Playwright CLI 脚本点击 TE 页面导出并保存 CSV。",
+              "keywords": [
+                "导出",
+                "CSV",
+                "TE 报表",
+                "数数报表",
+                "bi.forevernine.net"
+              ],
+              "toolAllowlist": [
+                "load_skill",
+                "read_skill_resource",
+                "run_skill_script"
+              ],
+              "requiredSkills": [
+                "te-report-playwright-export"
+              ]
+            },
+            {
+              "id": "sheet-fill",
+              "label": "飞书填表",
+              "description": "对已确认的数据与字段映射做预览，确认后调用 lark-cli 写入 Sheets 或 Base。",
+              "keywords": [
+                "填表",
+                "飞书表格",
+                "电子表格",
+                "多维表格",
+                "写入飞书"
+              ],
+              "toolAllowlist": [
+                "load_skill",
+                "read_skill_resource",
+                "run_skill_script",
+                "feishu.query_bitable",
+                "feishu.draft_bitable_record"
+              ],
+              "requiredSkills": [
+                "lark-sheet-fill"
+              ]
+            },
+            {
+              "id": "analysis-report",
+              "label": "运营分析报告",
+              "description": "把已经验证的分析组织为结论、证据、限制和行动项一致的运营报告。",
+              "keywords": [
+                "分析报告",
+                "经营复盘",
+                "周报",
+                "月报",
+                "汇报",
+                "管理摘要"
+              ],
+              "toolAllowlist": [
+                "search_knowledge",
+                "calculate"
+              ],
+              "requiredSkills": [
+                "data-report-method",
+                "business-insight-report"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "933e5f13fc6788f9",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "th-bi-analytics-assistant",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "data-analysis-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-metrics-analysis",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-cause-analysis",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "business-insight-report",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "data-report-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "lark-sheet-fill",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "te-report-playwright-export",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false,
+        "status": "ready"
+      },
+      {
+        "id": "pango-data-mcp",
+        "kind": "connector",
+        "required": false,
+        "status": "ready"
+      },
+      {
+        "id": "thinkingdata-analysis-mcp",
+        "kind": "connector",
+        "required": false,
+        "status": "ready"
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false,
+        "status": "ready"
+      }
+    ],
+    "issues": [],
+    "routes": [
+      {
+        "id": "knowledge-query",
+        "label": "查口径 / 查知识",
+        "state": "ready",
+        "requiredSkills": [
+          "th-bi-analytics-assistant"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "live-analysis",
+        "label": "实时查数 / 异常分析",
+        "state": "ready",
+        "requiredSkills": [
+          "th-bi-analytics-assistant",
+          "data-analysis-method",
+          "business-metrics-analysis",
+          "business-cause-analysis"
+        ],
+        "requiredConnectorIds": [
+          "thinkingdata-analysis-mcp"
+        ],
+        "issues": []
+      },
+      {
+        "id": "event-governance",
+        "label": "埋点 / OKF 治理",
+        "state": "ready",
+        "requiredSkills": [
+          "th-bi-analytics-assistant"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "report-export",
+        "label": "导出 TE 报表",
+        "state": "ready",
+        "requiredSkills": [
+          "te-report-playwright-export"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "sheet-fill",
+        "label": "飞书填表",
+        "state": "ready",
+        "requiredSkills": [
+          "lark-sheet-fill"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "analysis-report",
+        "label": "运营分析报告",
+        "state": "ready",
+        "requiredSkills": [
+          "data-report-method",
+          "business-insight-report"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      }
+    ]
+  }
+}

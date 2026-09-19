@@ -6,6 +6,7 @@
 
 const { createOperationKey } = require('../agent-run-store')
 const { BUS_VERSION } = require('../agent-message-bus')
+const { redactSensitiveFields } = require('../tool-contract-registry')
 const { VALID_TRANSITIONS, ACTIVE_STATUSES, TERMINAL_STATUSES, cloneRun } = require('./constants')
 
 /** 校验并应用 Run 状态转换。 */
@@ -66,12 +67,15 @@ function persistRun(mgr, run, eventType, payload = {}) {
     type: eventType,
     parentRunId: run.parentRunId,
     rootRunId: run.rootRunId,
-    payload: { ...payload, status: run.status, phase: run.phase },
+    payload: redactSensitiveFields({ ...payload, status: run.status, phase: run.phase }),
   })
   if (append.ok) {
     run.seq = append.seq
   }
-  const stateWrite = mgr.runStore.writeState(run.runId, run)
+  // Terminal reports contain token-related metrics and may contain tool data.
+  // Redact before strict storage validation, otherwise a completed in-memory
+  // run can remain persisted as running merely because it has firstTokenMs.
+  const stateWrite = mgr.runStore.writeState(run.runId, redactSensitiveFields(run))
   if (stateWrite.ok && append.ok) {
     mgr.runStore.updateTreeIndex(run.rootRunId, {
       runId: run.runId,
@@ -81,7 +85,7 @@ function persistRun(mgr, run, eventType, payload = {}) {
       terminal: run.terminal,
     })
   }
-  return append.ok ? append : stateWrite
+  return !append.ok ? append : (!stateWrite.ok ? stateWrite : append)
 }
 
 function broadcast(mgr, event) {

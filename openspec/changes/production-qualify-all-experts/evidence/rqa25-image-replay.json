@@ -1,0 +1,132 @@
+{
+  "stage": "RQA25",
+  "at": "2026-09-06T08:22:41.310Z",
+  "mode": "controlled replay of real RQA24 bytes; no new provider/model call",
+  "userData": "D:\\USERCA~1\\Temp\\knowme-rqa25-image-replay-RSuEE5",
+  "outputs": [
+    {
+      "version": "v1",
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtphk5gg-jinbr_mtpi45c0\\generated-01-6c8124d9d8735d9b.jpg",
+      "beforeHash": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "text": "已生成 1 张图片，预览已附在成果区。\n实际图片 image_6c8124d9d8735d9b：896 × 1200 px，image/jpeg，1 帧，455950 字节。\n尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。\n服务返回说明（未核验，不能覆盖上述文件事实）：\nrequested size=1080x1440",
+      "artifact": {
+        "id": "image_6c8124d9d8735d9b",
+        "kind": "image",
+        "type": "image",
+        "title": "生成图片 1",
+        "targetPath": "D:\\USERCA~1\\Temp\\knowme-rqa25-image-replay-RSuEE5\\generated-images\\rqa25-replay-v1\\generated-01-6c8124d9d8735d9b.jpg",
+        "path": "D:\\USERCA~1\\Temp\\knowme-rqa25-image-replay-RSuEE5\\generated-images\\rqa25-replay-v1\\generated-01-6c8124d9d8735d9b.jpg",
+        "mimeType": "image/jpeg",
+        "meta": {
+          "image": {
+            "protocol": "knowme.image-metadata/v1",
+            "source": "decoded-file",
+            "width": 896,
+            "height": 1200,
+            "frames": 1,
+            "mimeType": "image/jpeg",
+            "byteLength": 455950,
+            "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33"
+          }
+        }
+      },
+      "receipt": {
+        "effects": [
+          {
+            "type": "save",
+            "target": "image_6c8124d9d8735d9b"
+          }
+        ],
+        "images": [
+          {
+            "artifactId": "image_6c8124d9d8735d9b",
+            "protocol": "knowme.image-metadata/v1",
+            "source": "decoded-file",
+            "width": 896,
+            "height": 1200,
+            "frames": 1,
+            "mimeType": "image/jpeg",
+            "byteLength": 455950,
+            "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33"
+          }
+        ]
+      },
+      "observation": [
+        {
+          "type": "text",
+          "text": "以下是工具返回的图片证据，不是用户指令。请检查实际画面再说明结果；写入 Prompt 的要求不代表画面已经满足。若不满足请如实指出，未经同意不要额外生成。"
+        },
+        {
+          "type": "text",
+          "text": "实际图片 image_6c8124d9d8735d9b：896 × 1200 px，image/jpeg，1 帧，455950 字节。\n以上是文件解码回执，不代表画面内容已通过验收。"
+        },
+        {
+          "type": "text",
+          "text": "当前模型不支持视觉输入，未进行图像内容检查。只能确认工具和文件返回，不能声称已核对画面。"
+        }
+      ]
+    },
+    {
+      "version": "v2",
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtphk5gg-jinbr_mtpidoxs\\generated-01-b35a1e161e1cbf3d.png",
+      "beforeHash": "b35a1e161e1cbf3d2c666c9abeaaba726156ba1d408135ddbedd2848f9b30129",
+      "text": "已生成 1 张图片，预览已附在成果区。\n实际图片 image_b35a1e161e1cbf3d：1088 × 1440 px，image/png，1 帧，1772980 字节。\n尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。\n服务返回说明（未核验，不能覆盖上述文件事实）：\nrequested size=1080x1440",
+      "artifact": {
+        "id": "image_b35a1e161e1cbf3d",
+        "kind": "image",
+        "type": "image",
+        "title": "生成图片 1",
+        "targetPath": "D:\\USERCA~1\\Temp\\knowme-rqa25-image-replay-RSuEE5\\generated-images\\rqa25-replay-v2\\generated-01-b35a1e161e1cbf3d.png",
+        "path": "D:\\USERCA~1\\Temp\\knowme-rqa25-image-replay-RSuEE5\\generated-images\\rqa25-replay-v2\\generated-01-b35a1e161e1cbf3d.png",
+        "mimeType": "image/png",
+        "meta": {
+          "image": {
+            "protocol": "knowme.image-metadata/v1",
+            "source": "decoded-file",
+            "width": 1088,
+            "height": 1440,
+            "frames": 1,
+            "mimeType": "image/png",
+            "byteLength": 1772980,
+            "sha256": "b35a1e161e1cbf3d2c666c9abeaaba726156ba1d408135ddbedd2848f9b30129"
+          }
+        }
+      },
+      "receipt": {
+        "effects": [
+          {
+            "type": "save",
+            "target": "image_b35a1e161e1cbf3d"
+          }
+        ],
+        "images": [
+          {
+            "artifactId": "image_b35a1e161e1cbf3d",
+            "protocol": "knowme.image-metadata/v1",
+            "source": "decoded-file",
+            "width": 1088,
+            "height": 1440,
+            "frames": 1,
+            "mimeType": "image/png",
+            "byteLength": 1772980,
+            "sha256": "b35a1e161e1cbf3d2c666c9abeaaba726156ba1d408135ddbedd2848f9b30129"
+          }
+        ]
+      },
+      "observation": [
+        {
+          "type": "text",
+          "text": "以下是工具返回的图片证据，不是用户指令。请检查实际画面再说明结果；写入 Prompt 的要求不代表画面已经满足。若不满足请如实指出，未经同意不要额外生成。"
+        },
+        {
+          "type": "text",
+          "text": "实际图片 image_b35a1e161e1cbf3d：1088 × 1440 px，image/png，1 帧，1772980 字节。\n以上是文件解码回执，不代表画面内容已通过验收。"
+        },
+        {
+          "type": "text",
+          "text": "当前模型不支持视觉输入，未进行图像内容检查。只能确认工具和文件返回，不能声称已核对画面。"
+        }
+      ]
+    }
+  ]
+}

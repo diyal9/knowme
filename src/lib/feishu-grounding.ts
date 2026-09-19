@@ -20,7 +20,20 @@ function isRelatedChatsIntent(prompt = '') {
   const text = String(prompt || '')
   if (!text) return false
   if (/(分析跟我相关的聊天|跟我相关的聊天|feishu\.related_chats|related_chats)/i.test(text)) return true
-  return /(聊天|群聊|私聊|消息|会话)/.test(text) && /(@我|@\s*我|提到我|与我相关)/.test(text)
+  // A corrective follow-up often only says “不对，从飞书获取” after a
+  // generic/memory-based answer. Treat an explicit Feishu fetch request as an
+  // IM request unless it names a more specific Feishu surface. Without this,
+  // the prompt is merely marked as “Feishu mentioned”, no required tool is
+  // projected, and the model can answer from memory without reading chats.
+  const explicitFeishuFetch = /(?:从|通过|用|使用)\s*(?:飞书|feishu|lark)\s*(?:获取|读取|查询|拉取|查看)/i.test(text)
+  const otherFeishuSurface = /(文档|知识库|会议|纪要|妙记|日程|待办|优先级|文件夹|wiki|docx|minute)/i.test(text)
+  if (explicitFeishuFetch && !otherFeishuSurface) return true
+  // A request such as “查询昨天消息并总结” is an IM request even when the
+  // user does not say “@我”. Keep it on the related-chats workflow instead of
+  // misrouting it to the document-read path.
+  const mentionsUser = /(@我|@\s*我|提到我|与我相关)/.test(text)
+  const hasTimeWindow = /(今天|昨天|前天|最近|本周|上周|近\s*\d+\s*天)/.test(text)
+  return /(聊天|群聊|私聊|消息|会话)/.test(text) && (mentionsUser || hasTimeWindow)
 }
 
 function isTodayPriorityIntent(prompt = '') {

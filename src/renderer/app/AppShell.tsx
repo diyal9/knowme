@@ -5,6 +5,7 @@
  */
 import { Suspense, useEffect, useRef } from 'react'
 import { studioReturnLabel } from '../../domain/rail'
+import type { KnowledgePage } from '../../domain/knowledge-surface'
 import { resolveWorkbenchTaskKind } from '../../domain/workbench-task-room'
 import { bindAttentionEvents } from './store-attention'
 import { BrandMark } from './BrandMark'
@@ -82,9 +83,18 @@ export function AppShell() {
   useKnowMeIcons(route + surfaceId + String(filesOpen) + String(!!linkPreview) + String(linkFullscreen), shellRef)
 
   useEffect(() => bindAttentionEvents(useAppStore.getState), [])
+  useEffect(() => {
+    void useAppStore.getState().loadProjects?.()
+  }, [])
   useEffect(() => window.api?.onWorkspaceOpenSettings?.((tab) => {
     openSettingsSurface(tab)
   }), [openSettingsSurface])
+  useEffect(() => window.api?.onWorkspaceOpenRoute?.((payload) => {
+    if (payload.route === 'knowledge') {
+      useAppStore.getState().setRoute('knowledge')
+      useAppStore.getState().setKnowledgePage((payload.page || 'status') as KnowledgePage)
+    }
+  }), [])
 
   useEffect(() => {
     if (!filesOpen) return

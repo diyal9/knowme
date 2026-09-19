@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { AgentRunArtifact, WorkbenchTask } from '../../../shared/api'
-import { expertDeliverableTitle } from '../../../domain/expert-present'
+import { expertDeliverableDisplayTitle } from '../../../domain/expert-present'
 import { expertArtifactKindLabel } from '../../../domain/expert-artifact'
 import { Icon } from '../../app/Icon'
 import { ExpertDeliverableArtifact } from './ExpertDeliverableArtifact'
@@ -28,20 +28,22 @@ export function ExpertArtifactPreviewDialog({
     return () => window.removeEventListener('keydown', closeOnEscape)
   }, [onClose])
 
-  const title = expertDeliverableTitle(item.title)
+  const title = expertDeliverableDisplayTitle(item.title)
   const artifactType = artifact?.type || item.type || 'document'
 
   return (
     <div className="wb-expert-artifact-mask" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
       <section className="wb-expert-artifact-dialog" role="dialog" aria-modal="true" aria-labelledby="expertArtifactDialogTitle">
         <header>
-          <h2 id="expertArtifactDialogTitle">{title}</h2>
-          <div className="wb-expert-artifact-dialog-actions">
+          <div className="wb-expert-artifact-dialog-title">
+            <h2 id="expertArtifactDialogTitle">{title}</h2>
             <span>{expertArtifactKindLabel(artifactType)} · 第 {item.version || 1} 版</span>
-            <button type="button" aria-label="关闭成果物预览" onClick={onClose}><Icon name="close" /></button>
+            <span className="wb-expert-artifact-dialog-submeta">只读预览</span>
           </div>
+          <span className="wb-expert-artifact-dialog-mode" aria-label="预览模式">阅读模式</span>
+          <button type="button" className="wb-expert-artifact-dialog-close" aria-label="关闭文档预览" onClick={onClose}><Icon name="close" /></button>
         </header>
-        <div className="wb-expert-artifact-dialog-body">
+        <div className="wb-expert-artifact-dialog-body" role="document" aria-label={`${title}正文`}>
           <ExpertDeliverableArtifact
             artifact={artifact}
             fallback={fallback}

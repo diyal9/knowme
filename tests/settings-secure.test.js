@@ -22,11 +22,24 @@ function mockSafeStorage(available) {
   };
 }
 
+function mockProviderSecret() {
+  return {
+    encryptWithDpapi: value => `dpapi:mock:${Buffer.from(String(value), 'utf8').toString('base64')}`,
+    decryptWithDpapi: value => {
+      const encoded = String(value || '').replace(/^dpapi:mock:/, '')
+      return Buffer.from(encoded, 'base64').toString('utf8')
+    },
+  }
+}
+
 function loadSettingsSecure(available) {
   delete require.cache[MOD_PATH];
   Module._load = function (request, parent, isMain) {
     if (request === 'electron') {
       return { safeStorage: mockSafeStorage(available) };
+    }
+    if (request === './provider-secret') {
+      return mockProviderSecret();
     }
     return originalLoad(request, parent, isMain);
   };
@@ -69,19 +82,43 @@ describe('settings-secure', () => {
     restoreLoad();
   });
 
-  it('does not persist plaintext API Key when safeStorage unavailable', () => {
-    const { save } = loadSettingsSecure(false);
+  it('uses a Windows user-scoped fallback when safeStorage is unavailable', () => {
+    const { save, load } = loadSettingsSecure(false);
     const result = save(settingsFile, {
       apiEndpoint: 'https://api.example.com',
       apiKey: 'sk-secret',
       model: 'gpt-4o-mini',
       userPrompt: 'hi',
     });
-    assert.equal(result.ok, false);
-    assert.ok(result.warning);
     const raw = JSON.parse(fs.readFileSync(settingsFile, 'utf8'));
     assert.equal(raw.apiKey, undefined);
-    assert.equal(raw.apiKeyEnc, undefined);
+    if (process.platform === 'win32') {
+      assert.equal(result.ok, true);
+      assert.match(raw.apiKeyEnc, /^dpapi:/);
+      assert.equal(load(settingsFile).apiKey, 'sk-secret');
+    } else {
+      assert.equal(result.ok, false);
+      assert.ok(result.warning);
+      assert.equal(raw.apiKeyEnc, undefined);
+    }
+    restoreLoad();
+  });
+
+  it('reports an encrypted key as locked instead of pretending it is unconfigured', () => {
+    fs.writeFileSync(settingsFile, JSON.stringify({
+      apiEndpoint: 'https://api.example.com',
+      apiKeyEnc: 'encrypted-value',
+      model: 'gpt-4o-mini',
+    }), 'utf8');
+    const { load, publicSettings } = loadSettingsSecure(false);
+    const settings = load(settingsFile);
+    assert.deepEqual(settings.credentialStatus.apiKey, {
+      configured: true,
+      available: false,
+      state: 'secure_storage_unavailable',
+    });
+    assert.equal(publicSettings(settings).apiKeyConfigured, true);
+    assert.equal(publicSettings(settings).credentialStatus.apiKey.available, false);
     restoreLoad();
   });
 

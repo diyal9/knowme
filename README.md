@@ -44,6 +44,15 @@ npm run lint
 npm run build:win
 ```
 
+完整开发检查：`npm run check`。其中图片布局回归使用真实 Chromium（不仅是 jsdom），首次运行前需安装测试浏览器：
+
+```bash
+npx playwright install chromium
+npm run check
+```
+
+Linux CI 若缺浏览器系统依赖，可使用 `npx playwright install --with-deps chromium`。测试不会自动下载浏览器或静默跳过布局断言；这些依赖仅用于开发测试，不影响应用安装包。
+
 ## 许可证
 
 MIT

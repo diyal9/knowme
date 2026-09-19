@@ -118,6 +118,10 @@ function buildArtifactTools(opts = {}) {
     ? (key, entry) => backing.set(key, entry)
     : (key, entry) => map.set(key, entry)
   const runId = opts.runId || 'default'
+  const projectId = String(opts.projectId || '').trim().slice(0, 100) || null
+  const sourceId = String(opts.sourceId || '').trim().slice(0, 160) || null
+  const taskId = String(opts.taskId || '').trim().slice(0, 100) || null
+  const origin = { projectId, sourceId, taskId, runId }
   const exportPdf = typeof opts.exportPdf === 'function' ? opts.exportPdf : null
 
   const handlers = {
@@ -132,6 +136,10 @@ function buildArtifactTools(opts = {}) {
         title: String(args.title || '未命名').slice(0, 200),
         content,
         runId,
+        projectId,
+        sourceId,
+        taskId,
+        meta: origin,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
@@ -168,6 +176,10 @@ function buildArtifactTools(opts = {}) {
         title: String(args.title || 'export').slice(0, 200),
         content: csv,
         runId,
+        projectId,
+        sourceId,
+        taskId,
+        meta: origin,
         createdAt: new Date().toISOString(),
       }
       setEntry(id, artifact)
@@ -191,6 +203,10 @@ function buildArtifactTools(opts = {}) {
           title: String(args.title || 'export').slice(0, 200),
           content: html,
           runId,
+          projectId,
+          sourceId,
+          taskId,
+          meta: origin,
           pendingPdf: true,
           createdAt: new Date().toISOString(),
         }

@@ -1,0 +1,31 @@
+{
+  "skill_name": "product-definition-method,research-synthesis-method",
+  "status": "frozen_not_executed",
+  "evidence_boundary": "Prompts and objective assertions are frozen before model evaluation. Package, route and L1 assembly tests do not qualify either expert.",
+  "evals": [
+    {
+      "id": "product-normal-state-and-recovery",
+      "expert": "product-manager",
+      "prompt": "写一份访客申请功能PRD：员工提交访客姓名和到访时间，前台审批后生成当天有效二维码；网络超时不能重复创建；员工可取消未使用申请。没有转化率基线。",
+      "assertions": ["直接交付完整PRD", "成功指标缺少基线时标待确认", "覆盖申请审批生效使用取消状态", "覆盖超时幂等和重试恢复", "验收标准包含可观察WHEN/THEN"]
+    },
+    {
+      "id": "product-unclear-goal",
+      "expert": "product-manager",
+      "prompt": "帮我做一个会员功能，目标用户、业务目标、权益和付费规则都还没定。",
+      "assertions": ["不得把默认会员模板当已确认目标", "提出会改变范围的关键问题", "可先给事实假设待确认框架", "不得宣称需求已澄清或可直接开发"]
+    },
+    {
+      "id": "research-local-conflicting-materials",
+      "expert": "research-analyst",
+      "prompt": "只根据以下材料比较结论：A报告称2025年样本300家、采用率40%；B文章转述A但写成45%；C访谈覆盖8家并认为采用率仍低。不要联网。",
+      "assertions": ["不调用网络工具", "识别B不是独立来源且数值冲突", "保留A和C样本口径差异", "不得计算无依据的统一采用率", "输出反证与未知项"]
+    },
+    {
+      "id": "research-current-public-evidence",
+      "expert": "research-analyst",
+      "prompt": "联网研究当前两家指定厂商的官方产品能力和公开价格，给出来源日期与差异；搜索摘要不能作为最终依据。",
+      "assertions": ["实际调用search_web", "实际调用fetch_web_page读取原文", "优先厂商官方页面并记录日期链接", "区分事实来源主张与推断", "读取失败时不以模型记忆补成已核实"]
+    }
+  ]
+}

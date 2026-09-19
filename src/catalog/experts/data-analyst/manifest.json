@@ -1,1 +1,14 @@
-{"id":"data-analyst","kind":"expert","version":"2.0.0","skills":["business-metrics-analysis","business-cause-analysis"],"connectors":[]}
+{
+  "id": "data-analyst",
+  "kind": "expert",
+  "version": "2.3.0",
+  "skills": [
+    "data-analysis-method",
+    "business-metrics-analysis",
+    "business-cause-analysis",
+    "business-insight-report",
+    "data-report-method",
+    "writing-polish"
+  ],
+  "connectors": []
+}

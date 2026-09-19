@@ -15,6 +15,7 @@ import {
   AgentQuickMenu,
   AgentSlashMenu,
 } from './AgentComposerMenus'
+import { buildKnowledgeSelectionOptions } from '../../../shared/knowledge-selection'
 
 export function AgentComposer({
   extraClass = '',
@@ -22,6 +23,8 @@ export function AgentComposer({
   launchEmpty = false,
   placeholder: placeholderOverride,
   onSubmit,
+  allowSubmitWhileGenerating = false,
+  allowEmptySubmit = false,
 }: {
   extraClass?: string
   /** 助理主列 vs 工作台 task-room 对话；后者不挂载 Ctrl+K 快捷任务 */
@@ -32,6 +35,10 @@ export function AgentComposer({
   placeholder?: string
   /** 任务房需要把同一输入框接到人类确认 API 时，可接管默认发送。 */
   onSubmit?: (text: string) => void | Promise<void>
+  /** 专家任务执行中允许继续提交补充；普通对话仍保留“发送即停止”的原有行为。 */
+  allowSubmitWhileGenerating?: boolean
+  /** 某些任务流需要把空提交交给业务层做即时校验（例如成果修改意见）。 */
+  allowEmptySubmit?: boolean
 }) {
   const composer = useAppStore(surface === 'workbench'
     ? (s) => s.workbenchDialogue.composer
@@ -71,14 +78,11 @@ export function AgentComposer({
   })
   const setAssistantModel = useAppStore((s) => s.setAssistantModel)
   const skills = useAppStore((s) => s.assistantSkills)
-  const knowledgeWiki = useAppStore((s) => s.knowledgeWiki)
-  const knowledgeOkf = useAppStore((s) => s.knowledgeOkf)
   const knowledgeProviders = useAppStore((s) => s.knowledgeProviders)
   const loadKnowledge = useAppStore((s) => s.loadKnowledge)
   const sessions = useAppStore((s) => s.sessions)
   const activeSessionId = useAppStore((s) => s.activeSessionId)
   const toggleSessionKnowledge = useAppStore((s) => s.toggleSessionKnowledge)
-  const clearSessionKnowledge = useAppStore((s) => s.clearSessionKnowledge)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const [atActive, setAtActive] = useState(0)
@@ -92,15 +96,24 @@ export function AgentComposer({
     const messages = getSessionSlice(s.sessionStates, s.activeSessionId).messages
     return messages.slice(-4).map((item) => `${item.role === 'assistant' ? '助手' : '用户'}：${String(item.text || '')}`).join('\n').slice(-8000)
   })
-  const showKnowledgeToolbar = Boolean(active?.expertId)
+  // 空白新对话也需要能先选知识库；知识库列表在点击入口时按需刷新。
+  const showKnowledgeToolbar = surface === 'assistant' && Boolean(active)
   const assistantPlaceholder = 'Ctrl + k智能推荐, / 调用技能'
   const placeholder = placeholderOverride || (surface === 'workbench'
     ? '补充任务要求或材料… @ 选文件'
     : launchEmpty ? assistantPlaceholder : assistantPlaceholder)
 
-  const knowledge = [...knowledgeWiki, ...knowledgeOkf]
+  const knowledgeProviderOptions = useMemo(
+    () => buildKnowledgeSelectionOptions(knowledgeProviders),
+    [knowledgeProviders],
+  )
   const refs = active?.knowledgeRefs || []
-  const knowledgeLabel = refs.length ? `${refs.length} 个知识库` : '默认知识库'
+  const selectedKnowledgeNames = knowledgeProviderOptions
+    .filter((item) => refs.includes(item.id))
+    .map((item) => item.name)
+  const knowledgeTitle = selectedKnowledgeNames.length
+    ? `已选知识库：${selectedKnowledgeNames.join('、')}`
+    : '选择本次对话知识库'
 
   const atContext = useMemo(() => {
     const caret = textareaRef.current?.selectionStart ?? composer.length
@@ -210,7 +223,7 @@ export function AgentComposer({
 
   function sendAndRefocus() {
     if (onSubmit) {
-      if (!composer.trim() && !attachments.length) return
+      if (!allowEmptySubmit && !composer.trim() && !attachments.length) return
       void onSubmit(composer.trim())
     } else {
       sendMessage()
@@ -267,7 +280,11 @@ export function AgentComposer({
       className={`agent-composer conversation-composer${hasImageAttachment ? ' has-image-attachment' : ''}${extraClass ? ` ${extraClass}` : ''}`}
       id="agentComposer"
       onClick={(e) => e.stopPropagation()}
-      onSubmit={(e) => { e.preventDefault(); if (isGenerating) stopGenerate(); else sendAndRefocus() }}
+      onSubmit={(e) => {
+        e.preventDefault()
+        if (isGenerating && !allowSubmitWhileGenerating) stopGenerate()
+        else sendAndRefocus()
+      }}
     >
       <div className="agent-input-wrap">
         {atContext ? (
@@ -400,7 +417,7 @@ export function AgentComposer({
           >
             {contextUsage.compacted ? '已压缩' : ''}
           </span>
-          <span className="agent-model-caret">▾</span>
+          <span className="agent-model-caret" aria-hidden="true" />
         </button>
         </div>
         {showKnowledgeToolbar ? (
@@ -408,8 +425,8 @@ export function AgentComposer({
             type="button"
             className="agent-knowledge-btn"
             id="agentSessionKnowledgeBtn"
-            title="选择本次对话知识库"
-            aria-label="选择本次对话知识库"
+            title={knowledgeTitle}
+            aria-label={refs.length ? `已选 ${refs.length} 个知识库，点击调整` : '选择本次对话知识库'}
             aria-expanded={menu === 'knowledge'}
             aria-controls="agentSessionKnowledgeMenu"
             onClick={() => {
@@ -419,8 +436,7 @@ export function AgentComposer({
             }}
           >
             <Icon name="bookOpen" />
-            <span id="agentSessionKnowledgeLabel">{knowledgeLabel}</span>
-            <span className="agent-model-caret">▾</span>
+            {refs.length ? <span className="agent-knowledge-count" aria-hidden="true">{refs.length}</span> : null}
           </button>
         ) : null}
         <div style={{ flex: 1 }} />
@@ -435,10 +451,10 @@ export function AgentComposer({
         </button>
         <button
           type="submit"
-          className={`agent-go agent-send${isGenerating ? ' is-running' : ''}${composer.trim() || attachments.length ? ' is-ready' : ''}`}
-          aria-label={isGenerating ? '停止生成' : '发送'}
+          className={`agent-go agent-send${isGenerating && !allowSubmitWhileGenerating ? ' is-running' : ''}${composer.trim() || attachments.length ? ' is-ready' : ''}`}
+          aria-label={isGenerating && !allowSubmitWhileGenerating ? '停止生成' : '发送'}
         >
-          <Icon name={isGenerating ? 'stop' : 'send'} />
+          <Icon name={isGenerating && !allowSubmitWhileGenerating ? 'stop' : 'send'} />
         </button>
       </div>
       {attachments.length ? (
@@ -474,11 +490,11 @@ export function AgentComposer({
       ) : null}
       {showKnowledgeToolbar && menu === 'knowledge' ? (
         <AgentKnowledgeMenu
-          knowledge={knowledge}
-          providers={knowledgeProviders}
+          knowledge={[]}
+          providers={knowledgeProviderOptions}
+          options={knowledgeProviderOptions}
           refs={refs}
           onToggle={(path) => void toggleSessionKnowledge(path)}
-          onClear={() => void clearSessionKnowledge()}
         />
       ) : null}
     </form>

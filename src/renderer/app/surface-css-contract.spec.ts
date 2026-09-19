@@ -34,6 +34,7 @@ describe('surface CSS contract', () => {
   })
 
   it('publishes semantic surface, action, layout and control tokens', () => {
+    const colors = read('app/brand-tokens.css')
     const tokens = read('app/tokens.css')
     for (const token of [
       '--surface-page:',
@@ -41,6 +42,15 @@ describe('surface CSS contract', () => {
       '--text-primary:',
       '--border-default:',
       '--action-primary:',
+      '--brand-signal:',
+      '--state-success:',
+      '--state-warning:',
+      '--state-danger:',
+      '--state-info:',
+    ]) {
+      expect(colors, token).toContain(token)
+    }
+    for (const token of [
       '--page-max:',
       '--control-md:',
       '--radius-md:',
@@ -50,14 +60,15 @@ describe('surface CSS contract', () => {
     ]) {
       expect(tokens, token).toContain(token)
     }
-    expect(tokens).toMatch(/--surface-page:\s*var\(--bg-card\)/)
+    expect(tokens).toMatch(/@import '\.\/brand-tokens\.css'/)
+    expect(colors.match(/--(?:brand|action|surface|text|border|state)-[\w-]+\s*:/g)).toHaveLength(36)
     expect(read('app/ui-system.css')).toMatch(/\.ui-button/)
   })
 
   it('keeps the application rail compact and visually quiet', () => {
     const tokens = read('app/tokens.css')
     const chrome = read('styles/workspace-chrome.css')
-    expect(tokens).toMatch(/--rail-width:\s*108px/)
+    expect(tokens).toMatch(/--rail-width:\s*132px/)
     expect(chrome).toMatch(/\.rail-top\s*\{[^}]*gap:4px/s)
     expect(chrome).toMatch(/\.rail-btn\s*\{[^}]*height:40px[^}]*font:400 var\(--font-sm\)/s)
     expect(chrome).toMatch(/\.rail-btn \.ico\s*\{[^}]*width:17px; height:17px/s)
@@ -154,9 +165,9 @@ describe('surface CSS contract', () => {
 
   it('workflow detail uses the shared neutral canvas and inset surface tokens', () => {
     const css = read('features/shelf/shelf.css')
-    expect(css).toMatch(/\.wb-workflow-detail\s*\{[^}]*background:var\(--bg-card, #fff\)/s)
-    expect(css).toMatch(/\.wb-workflow-contract-flow\s*\{[^}]*background:var\(--bg-app, #f7f8f9\)/s)
-    expect(css).not.toMatch(/\.wb-workflow-detail\s*\{[^}]*background:#f6f7f7/s)
+    expect(css).toMatch(/\.wb-workflow-detail\s*\{[^}]*background:var\(--bg-card, var\(--surface-page\)\)/s)
+    expect(css).toMatch(/\.wb-workflow-contract-flow\s*\{[^}]*background:var\(--bg-app, var\(--surface-panel\)\)/s)
+    expect(css).not.toMatch(/\.wb-workflow-detail\s*\{[^}]*background:\s*#/s)
   })
 
   it('lets long workflow summaries scroll from the true top instead of clipping centered content', () => {

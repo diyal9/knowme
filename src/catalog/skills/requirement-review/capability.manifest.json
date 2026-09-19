@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "id": "requirement-review",
+  "kind": "skill",
+  "name": "需求一致性与验收评审",
+  "version": "1.2.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

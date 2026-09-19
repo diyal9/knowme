@@ -1,0 +1,34 @@
+{
+  "id": "pango-image-mcp",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "盘古生图 MCP",
+  "name": "盘古生图 MCP",
+  "description": "连接盘古创意作画 MCP，用于真实文生图、图生图与模型查询。可在能力中心配置服务 URL；也会兼容发现本机已启用的 pango-skillsrv。",
+  "capabilities": ["image-generation", "text-to-image", "image-to-image"],
+  "mcp": {
+    "transport": "streamable-http",
+    "url": "",
+    "command": "",
+    "args": [],
+    "cwd": "",
+    "env": {}
+  },
+  "secretSlots": [
+    { "key": "PANGO_ACCESS_TOKEN", "label": "盘古访问令牌", "required": false, "target": "bearer" }
+  ],
+  "allowlist": ["list_paint_models", "generate_image"],
+  "healthCheck": { "tool": "list_paint_models", "timeoutMs": 30000 },
+  "toolPolicies": [
+    { "match": "list_paint_models", "risk": "read", "sideEffects": false, "requiresApproval": false },
+    { "match": "generate_image", "risk": "network", "sideEffects": true, "requiresApproval": false, "timeoutMs": 240000 },
+    { "match": "*", "risk": "network", "sideEffects": true, "requiresApproval": true }
+  ],
+  "permissions": {
+    "tools": ["list_paint_models", "generate_image"],
+    "externalSystem": "pango",
+    "network": true,
+    "fileWrite": true
+  }
+}

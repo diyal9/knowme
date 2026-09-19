@@ -137,6 +137,8 @@ function mergeGroundingContracts(contracts = []) {
     requiredTools: [],
     requiredEvidence: [],
     completionConditions: [],
+    requiredArtifacts: [],
+    minArtifacts: 0,
   }
 
   for (const c of list) {
@@ -171,6 +173,17 @@ function mergeGroundingContracts(contracts = []) {
     }
   }
   merged.completionConditions = [...condMap.values()]
+
+  const artifactMap = new Map()
+  for (const c of list) {
+    merged.minArtifacts = Math.max(merged.minArtifacts, Number(c.minArtifacts) || 0)
+    for (const rule of c.requiredArtifacts || []) {
+      if (!rule || typeof rule !== 'object') continue
+      const key = `${rule.type || ''}|${rule.kind || ''}|${rule.mimeType || ''}`
+      if (!artifactMap.has(key)) artifactMap.set(key, { ...rule })
+    }
+  }
+  merged.requiredArtifacts = [...artifactMap.values()]
 
   return merged
 }

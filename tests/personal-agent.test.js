@@ -11,14 +11,16 @@ const {
   createPersonalAgentService,
 } = require('../src/lib/personal-agent')
 
-function createFixture(settings = {}) {
+function createFixture(settings = {}, options = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-personal-'))
   const profileStore = profileStoreModule.createStore({ file: path.join(root, 'agent-profiles.json') })
   const service = createPersonalAgentService({
     profileStore,
     productMemory,
+    brainService: options.brainService,
     memoryDir: path.join(root, 'memory'),
     auditFile: path.join(root, 'growth.json'),
+    userData: root,
     loadSettings: () => settings,
   })
   return { root, profileStore, service }
@@ -77,7 +79,7 @@ describe('personal-agent', () => {
   })
 
   it('applies explicit memory immediately and can undo it', () => {
-    const { service } = createFixture()
+    const { root, service } = createFixture()
     const taught = service.teach({ text: '记住我喜欢先看结论', kind: 'remember' })
     assert.equal(taught.ok, true)
     assert.equal(taught.applied, true)
@@ -87,6 +89,22 @@ describe('personal-agent', () => {
     const undone = service.teach({ undoEventId: taught.undoEventId })
     assert.equal(undone.ok, true)
     assert.equal(service.growthList().events[0].type, 'memory_reverted')
+    const ledger = JSON.parse(fs.readFileSync(path.join(root, 'knowledge-os', 'growth-ledger.json'), 'utf8'))
+    assert.equal(ledger.events.find(item => item.id === taught.undoEventId).status, 'reverted')
+  })
+
+  it('routes explicit teaching to Brain confirmation when the cognition loop is available', () => {
+    const observeConversation = (userData, input) => ({
+      ok: true,
+      proposals: [{ id: 'observation:teach', status: 'pending', summary: input.text.replace(/^请记住：?/, '') }],
+    })
+    const { root, service } = createFixture({}, { brainService: { observeConversation } })
+    const taught = service.teach({ text: '记住我喜欢先看结论', kind: 'remember' })
+    assert.equal(taught.ok, true)
+    assert.equal(taught.applied, false)
+    assert.equal(taught.requiresConfirmation, true)
+    assert.equal(taught.proposal.id, 'observation:teach')
+    assert.equal(productMemory.loadGlobalMemories(path.join(root, 'memory')).length, 0)
   })
 
   it('requires confirmation for skills, knowledge and permissions', () => {
@@ -97,6 +115,7 @@ describe('personal-agent', () => {
     })
     assert.equal(proposed.ok, true)
     assert.equal(proposed.requiresConfirmation, true)
+    assert.equal(proposed.proposal.targetType, 'partner_profile')
     assert.equal(service.get().profile.skillRefs.length, 0)
     const applied = service.applyProposal({ proposalId: proposed.proposal.id, confirmedRisk: true })
     assert.equal(applied.ok, true)

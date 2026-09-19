@@ -33,6 +33,14 @@ openspec/changes/**/evidence/screenshots/*.jpg
 test-results/
 playwright-report/
 scripts/tmp-shelf-debug*
+/.tmp*/
+/.tmp-*
+/.playwright-mcp/
+/_cap_check.txt
+/await
+/qa/
+/qualification/
+/minutes/
 
 # Local lint/test dumps (never commit)
 /lint-output.txt

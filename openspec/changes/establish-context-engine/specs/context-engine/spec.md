@@ -114,7 +114,7 @@
 
 ### Requirement: Message fitting protects selected system blocks and raw user input
 
-场景协议与可信任务事实 MUST 作为前导 system/context 消息；用户原始输入 MUST 保持 user role，MUST NOT 被 Renderer 拼成自由文本 system prompt。
+平台核心、场景协议与实际工具契约 MUST 作为前导 system 控制消息；persona、SOP、Skill、任务事实、用户偏好与外部资料 MUST 保持受限 user context。用户原始输入 MUST 保持 user role，MUST NOT 被 Renderer 拼成自由文本 system prompt。
 
 #### Scenario: Conversation exceeds model input budget
 
@@ -123,6 +123,54 @@
 - **THEN** MUST 保护全部已选前导 system block，并按各自预算裁剪
 - **AND** MUST 从最旧完整对话轮次开始省略历史
 - **AND** MUST 保留最新用户输入
+
+### Requirement: System projection requires trusted control provenance
+
+系统 MUST 将 authority、kind 与 sourceTrust 分开建模。只有 `platform|scene` authority、`core_instruction|scene_instruction|tool_contract` kind 且 `platform|bundled` 来源的 block MAY 投影到 system role。
+
+#### Scenario: Bundled expert persona contains imperative text
+
+- **GIVEN** 内置专家 persona、SOP 或 Skill 正文包含指令性文字
+- **WHEN** Context Engine 装配请求
+- **THEN** 正文 MUST 进入带权限边界的 user context
+- **AND** MUST NOT 因为资产是内置来源而提升为 system role
+
+### Requirement: Final prompt follows the actual tool surface
+
+运行时 MUST 在最终工具表解析后推导 capability ID，并对 core、scene、tool contract、研究路由和动态上下文执行一次最终装配。
+
+#### Scenario: Web tool is absent from the final surface
+
+- **GIVEN** 请求意图可能需要网页能力，但最终 ToolRecord 不含 Web 工具
+- **WHEN** 最终请求被装配
+- **THEN** MUST NOT 加载 Web tool contract
+- **AND** ContextManifest MUST 与实际发送的消息和工具面一致
+
+### Requirement: Expert prompts are schema-governed
+
+内置与用户专家提示词 MUST 可规范化为 identity、objective、scope、method、contracts 与 capabilities；系统 MUST 阻止试图覆盖平台、权限或安全规则的专家提示词。
+
+#### Scenario: Expert prompt requests authority override
+
+- **GIVEN** 专家提示词要求忽略系统规则或绕过权限确认
+- **WHEN** 专家包被保存、加载或 CI 扫描
+- **THEN** prompt lint MUST 返回 error
+- **AND** 专家包 MUST NOT 被标记为有效
+
+### Requirement: History and token fitting are provider-adaptable
+
+系统 SHOULD 使用 Provider tokenizer；缺失时 MUST 使用有界校准估算。历史压缩 MUST 保留完整 turn、最新用户输入和 tool-call/result 配对，摘要 MUST 是有界的低权限摘录。
+
+#### Scenario: Calibrated estimator reports one character over budget
+
+- **GIVEN** 自定义 tokenizer 判定任一字符已超过剩余预算
+- **WHEN** 文本裁剪执行
+- **THEN** 裁剪结果 MUST 为空而不是超预算字符
+- **AND** 总估算 MUST NOT 超过声明预算
+
+### Requirement: Agent planning depth follows task complexity
+
+工作流 ReAct MUST 根据任务复杂度选择计划深度：简单任务 1–2 步、一般任务 2–4 步、复杂任务 3–6 步；MUST NOT 为达到固定数量生成无关占位步骤。
 
 ### Requirement: Context assembly is observable without logging sensitive content
 

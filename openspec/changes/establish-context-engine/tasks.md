@@ -22,7 +22,7 @@
 - [x] Context Engine 单元测试与提示词预算测试
 - [x] 专家规划/讨论身份、原始消息和 Slash Skill 权限回归
 - [x] 普通助手、正式专家执行、知识检索和工具面回归
-- [x] `npm run check` — Node、lint、Renderer 与 TypeScript 全量硬门禁通过
+- [x] `npm run check` — Node 1845 pass / 51 skip、Renderer 417 pass、lint/Prompt lint/TypeScript 全通过
 - [x] 制作人验收、测试 QA 与反模式审查
 
 ## Remote Embedding Selection
@@ -46,3 +46,19 @@
 - [x] 增加 OpenAI/DashScope 契约、429/503/超时/畸形响应故障注入和真实 canary 脚本
 - [x] 修复 Renderer typography/CSS 契约漂移
 - [ ] 使用发布环境的 OpenAI 与 DashScope 用户凭据执行真实 canary（当前环境无凭据）
+
+## Context Engine V2
+
+- [x] 增加 `sourceTrust` 与 control-plane role projection，persona/SOP/Skill/偏好/任务事实降为受限 user 上下文
+- [x] 将 persona、Soul、SOP、属性、会话事实、自动 Skill 摘要和显式 Skill 正文拆成独立 block
+- [x] 在最终 ToolRecord 解析后推导 capability，并把 core/tool/research/dynamic context 单次装配
+- [x] 让预览 IPC 与正式运行时共用 Context Engine 权限投影和 ContextManifest
+- [x] 增加专家 Prompt Schema、运行时校验与 CI prompt lint，并清零内置专家提示词问题
+- [x] 提供 `zh-CN` / `en-US` 完整 locale pack 与 router 文案国际化
+- [x] 增加 provider tokenizer 适配、校准估算、严格预算与可选历史摘录压缩
+- [x] 将工作流 ReAct 步骤数改为按复杂度自适应，禁止固定步数与填充步骤
+- [x] 增加身份漂移、无工具执行声明、无关自我介绍和重试的匿名 Outcome/SLO 指标
+- [x] 增加最终工具面、权限投影、Prompt lint、token/history、i18n 与行为评测回归
+- [x] 增加 OpenAI-compatible Chat 行为 canary，缺少凭据时可显式 skip 且不泄露回答正文
+- [ ] 使用发布环境 Chat API 凭据执行真实模型行为 canary（当前环境无凭据）
+- [x] 修复 `personal-agent.css` typography contract 并重跑仓库总门禁

@@ -43,10 +43,10 @@ describe('knowledge-tree', () => {
 })
 
 describe('knowledge-surface', () => {
-  it('aliases browse to 我的知识', () => {
+  it('maps legacy and auxiliary pages to the Brain primary tab', () => {
     expect(normalizeKnowledgePage('browse')).toBe('status')
     expect(primaryKnowledgeTab('health')).toBe('status')
-    expect(primaryKnowledgeTab('review')).toBe('review')
+    expect(primaryKnowledgeTab('review')).toBe('status')
   })
 })
 

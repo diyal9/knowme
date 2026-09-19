@@ -43,7 +43,7 @@ describe('workbench-taskhome-surface', () => {
     expect(within(card).queryByText('查看进度')).not.toBeInTheDocument()
     expect(within(card).getByText('办公协作专家')).toBeInTheDocument()
     expect(within(card).getByText('刚刚')).toBeInTheDocument()
-    expect(within(card).getByText('待处理')).toHaveClass('wb-task-card-status')
+    expect(within(card).getByText('待开始')).toHaveClass('wb-task-card-status')
     expect(within(card).queryByText('继续处理')).not.toBeInTheDocument()
     expect(within(card).queryByText('草稿')).not.toBeInTheDocument()
     expect(screen.getByRole('tab', { name: /^当前/ })).toHaveAttribute('aria-selected', 'true')
@@ -51,6 +51,31 @@ describe('workbench-taskhome-surface', () => {
     expect(screen.getByText('专家')).toBeInTheDocument()
     expect(screen.getByText('更新')).toBeInTheDocument()
     expect(screen.getByText('状态')).toBeInTheDocument()
+  })
+
+  it('filters tasks by the active project without changing their stored ownership', async () => {
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [
+          { id: 'p1', name: '产品项目', workspaceSourceId: 'src-1', status: 'active' },
+          { id: 'p2', name: '研发项目', workspaceSourceId: 'src-2', status: 'active' },
+        ],
+        activeProjectId: 'p1',
+      }),
+      sourcesList: async () => ({ sources: [], activeSourceId: null }),
+      workbenchTaskList: async () => ({ items: [
+        { id: 'task-p1', projectId: 'p1', title: '产品任务', status: 'open' },
+        { id: 'task-p2', projectId: 'p2', title: '研发任务', status: 'open' },
+      ] }),
+    })
+    render(<AppShell />)
+
+    await waitFor(() => expect(screen.getByText('产品任务')).toBeInTheDocument())
+    expect(screen.queryByText('研发任务')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '全部项目' }))
+    expect(await screen.findByText('研发任务')).toBeInTheDocument()
+    expect(useAppStore.getState().tasks.find((task) => task.id === 'task-p2')?.projectId).toBe('p2')
   })
 
   it('keeps the first expert and workflow headings on the same typography metrics', async () => {
@@ -133,7 +158,7 @@ describe('workbench-taskhome-surface', () => {
     render(<AppShell />)
     const card = await screen.findByTestId('task-open-revising-1')
     expect(screen.getByRole('tab', { name: /^待我处理/ })).toBeInTheDocument()
-    expect(within(card).getByText('修改中')).toHaveClass('wb-task-card-status')
+    expect(within(card).getByText('执行中')).toHaveClass('wb-task-card-status')
     expect(card.querySelector('.wb-task-card-top')).toBeNull()
     expect(within(card).getByText('补齐风险说明并更新结论')).toBeInTheDocument()
     expect(within(card).queryByText('当前进度')).not.toBeInTheDocument()
@@ -156,7 +181,7 @@ describe('workbench-taskhome-surface', () => {
     expect(container.querySelector('.wb-task-card-progress')).toBeNull()
     expect(container.querySelector('.wb-task-card-avatar.has-photo img')).toBeTruthy()
     expect(screen.getByText('办公协作专家')).toBeInTheDocument()
-    expect(screen.getByText('专家执行中')).toBeInTheDocument()
+    expect(screen.getByText('执行中')).toBeInTheDocument()
   })
 
   it('uses the same waiting-for-input status wording as the task detail', async () => {
@@ -170,7 +195,7 @@ describe('workbench-taskhome-surface', () => {
     render(<AppShell />)
 
     const card = await screen.findByTestId('task-open-needs-input-1')
-    const status = within(card).getByText('等待补充')
+    const status = within(card).getByText('等待中')
     expect(status).toHaveClass('wb-task-card-status', 'is-attention')
     expect(status).toHaveClass('wb-task-inbox-state')
     expect(card.querySelector('.wb-task-card-heading-icon')).toBeNull()
@@ -277,9 +302,8 @@ describe('workbench-taskhome-surface', () => {
     expect(screen.getByTestId('expert-room')).toBeInTheDocument()
     expect(screen.queryByTestId('task-composer-modal')).not.toBeInTheDocument()
     expect(screen.queryByTestId('expert-detail')).not.toBeInTheDocument()
-    expect(await screen.findByLabelText('协作阶段：澄清')).toBeInTheDocument()
-    expect(await screen.findByText(/你这次最想解决什么问题/)).toBeInTheDocument()
-    expect(await screen.findByRole('textbox')).toHaveAttribute('placeholder', expect.stringContaining('回答专家的问题'))
+    expect(screen.queryByRole('status', { name: '当前协作状态：待开始' })).not.toBeInTheDocument()
+    expect(await screen.findByRole('textbox')).toHaveAttribute('placeholder', expect.stringContaining('补充目标和材料'))
     expect(screen.queryByTestId('studio-surface')).not.toBeInTheDocument()
   })
 

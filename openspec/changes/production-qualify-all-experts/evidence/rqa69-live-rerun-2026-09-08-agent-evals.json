@@ -1,0 +1,107 @@
+{
+  "suite": "RQA69",
+  "evaluatedAt": "2026-09-08T00:30:56.669Z",
+  "agents": [
+    {
+      "agentId": "image-producer",
+      "currentConfigurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+      "tasks": [
+        {
+          "taskId": "task-mtrxols4-68xey",
+          "evalId": "IP01",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "generate_image",
+            "detail": "联合工具面未提供必需工具：generate_image"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxom3p-pttuj",
+          "evalId": "IP02",
+          "scenario": "edge",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "generate_image",
+            "detail": "联合工具面未提供必需工具：generate_image"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxomf5-qvmrn",
+          "evalId": "IP03",
+          "scenario": "retry",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxomrr-ph5pl",
+          "evalId": "IP04",
+          "scenario": "revision",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "generate_image",
+            "detail": "联合工具面未提供必需工具：generate_image"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxon3i-fzt7k",
+          "evalId": "IP05",
+          "scenario": "reopen",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "generate_image",
+            "detail": "联合工具面未提供必需工具：generate_image"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

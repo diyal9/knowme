@@ -17,7 +17,7 @@ import { useAppStore } from '../../app/store'
 
 export type AutomationFormState = {
   name: string
-  workspaceId: string
+  projectId: string
   prompt: string
   workflowId: string
   domain: string
@@ -50,7 +50,7 @@ function initialForm(job: WorkbenchAutomationJob | null): AutomationFormState {
   const push = normalizePushTargets(job?.pushTargets)
   return {
     name: job?.name || '',
-    workspaceId: job?.workspaceId || '',
+    projectId: job?.projectId || '',
     prompt: job?.prompt || '',
     workflowId: job?.workflowId || '',
     domain: job?.domain || '',
@@ -75,6 +75,8 @@ function initialForm(job: WorkbenchAutomationJob | null): AutomationFormState {
 export function ManageAutomationForm({ job, onSave, onClose }: Props) {
   const deleteAutomation = useAppStore((s) => s.deleteAutomation)
   const showToast = useAppStore((s) => s.showToast)
+  const projects = useAppStore((s) => s.projects)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
   const creating = !job?.id
   const initialPush = normalizePushTargets(job?.pushTargets)
   const [form, setForm] = useState<AutomationFormState>(() => initialForm(job))
@@ -88,6 +90,12 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
   useEffect(() => {
     setForm(initialForm(job))
   }, [job])
+
+  useEffect(() => {
+    if (!job?.id && !form.projectId && activeProjectId) {
+      setForm((current) => ({ ...current, projectId: activeProjectId }))
+    }
+  }, [activeProjectId, form.projectId, job?.id])
 
   useEffect(() => {
     void (async () => {
@@ -181,7 +189,8 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
     }
     const ok = await onSave({
       name: form.name,
-      workspaceId: form.workspaceId,
+      projectId: form.projectId,
+      workspaceId: job?.workspaceId || '',
       prompt: form.prompt,
       workflowId: form.workflowId,
       domain: form.domain,
@@ -210,8 +219,14 @@ export function ManageAutomationForm({ job, onSave, onClose }: Props) {
           <input id="wbAutoName" className="wb-auto-input" aria-label="名称" maxLength={60} value={form.name} onChange={(e) => patchForm({ name: e.target.value })} placeholder="例如：每日 AI 新闻推送" />
         </div>
         <div className="wb-auto-field full">
-          <label htmlFor="wbAutoWorkspace">工作空间（可选）</label>
-          <input id="wbAutoWorkspace" className="wb-auto-input" maxLength={80} value={form.workspaceId} onChange={(e) => patchForm({ workspaceId: e.target.value })} placeholder="例如：my-project / team-space" />
+          <label htmlFor="wbAutoProject">目标项目</label>
+          <select id="wbAutoProject" className="wb-auto-select" aria-label="目标项目" value={form.projectId} onChange={(e) => patchForm({ projectId: e.target.value })}>
+            <option value="">不绑定项目（仅执行全局动作）</option>
+            {projects.filter((project) => project.status !== 'archived').map((project) => (
+              <option key={project.id} value={project.id}>{project.name}</option>
+            ))}
+          </select>
+          <small>需要读取或生成项目文件时必须选择；运行始终使用这里绑定的项目。</small>
         </div>
         <div className="wb-auto-field full">
           <label htmlFor="wbAutoPrompt">提示词</label>

@@ -1,0 +1,133 @@
+{
+  "sessionId": "matrix-session-action-owner",
+  "expertId": "action-owner",
+  "frozenAt": "2026-09-05T15:27:24.213Z",
+  "persona": {
+    "name": "行动项管理员",
+    "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项",
+    "avatar": "office/collaborator",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先从纪要中逐条提取已形成的决议、承诺和后续动作，保留对应原文；提议、讨论和猜测不得直接转成待办。\n2. 将每项动作规范为“要完成什么、负责人、截止时间、依赖、完成标准”；缺失字段明确标记待确认，不自行补写人名或日期。\n3. 检查重复、冲突、前后依赖和时间可行性；同一结果由多人参与时只指定一个主责，并列出协作者。\n4. 按紧急度和阻塞关系排序，区分立即处理、按期推进和等待输入；给出最少必要的追问清单。\n5. 交付前逐项检查动作是否可执行、可验收、可追踪；外部创建任务或通知人员前再次请求用户确认。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 待办编排专家。每条待办必须包含：事项、负责人、截止时间、依赖。\n缺信息时明确列出待补项，不得用模糊表述蒙混。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish"
+    ],
+    "connectors": [
+      "feishu"
+    ]
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "action-owner",
+    "kind": "expert",
+    "name": "行动项管理员",
+    "description": "将会议结论转为包含负责人、截止日、依赖和完成标准的行动项",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": [
+          "feishu"
+        ]
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": true,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "已确认的会议纪要"
+      },
+      {
+        "name": "参与者、时间与项目约束"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "可追踪的行动项清单"
+      },
+      {
+        "name": "缺失责任信息与阻塞项"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "medium",
+      "reasons": [
+        "可读取已授权的外部工作资料"
+      ]
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/action-owner"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "可追踪的行动项清单",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "缺失责任信息与阻塞项",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "55d19edc3f0e143d",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

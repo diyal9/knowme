@@ -31,6 +31,21 @@ describe('capability-catalog', () => {
     assert.ok(bundled.entries.some((item) => item.id === 'mcp-generic' && item.kind === 'connector'))
   })
 
+  it('publishes only active focused experts while defaulting custom entries to active', () => {
+    const bundled = catalog.loadBundledCatalog(BUNDLED_ROOT)
+    const removed = bundled.entries.find((item) => item.id === 'requirement-reviewer')
+    const active = bundled.entries.find((item) => item.id === 'product-manager')
+    assert.equal(removed, undefined)
+    assert.deepEqual(active.lifecycle, { state: 'active', newTasks: true, successors: [] })
+
+    catalog.upsertOverlayEntry(userData, {
+      id: 'custom-expert', kind: 'expert', name: '自定义专家', source: 'custom',
+    })
+    const custom = catalog.listCatalog(userData, { bundledRoot: BUNDLED_ROOT })
+      .entries.find((item) => item.id === 'custom-expert')
+    assert.deepEqual(custom.lifecycle, { state: 'active', newTasks: true, successors: [] })
+  })
+
   it('merges user overlay and reflects install store state', () => {
     catalog.upsertOverlayEntry(userData, {
       id: 'custom-local',
@@ -60,6 +75,31 @@ describe('capability-catalog', () => {
     assert.equal(curated.enabled, true)
     assert.equal(curated.installStatus, 'enabled')
     assert.equal(overlay.catalogLayer, 'user')
+  })
+
+  it('keeps the current bundled manifest ahead of a stale curated install manifest', () => {
+    const bundled = catalog.loadBundledCatalog(BUNDLED_ROOT)
+    const current = bundled.entries.find((item) => item.id === 'image-producer' && item.kind === 'expert')
+    const stale = JSON.parse(JSON.stringify(current.manifest))
+    delete stale.metadata.knowme.execution.deliverables[0].requiredConnectorIds
+
+    store.upsertEntry(userData, {
+      id: 'image-producer',
+      kind: 'expert',
+      source: 'curated',
+      status: 'enabled',
+      enabled: true,
+      version: current.version,
+      contentHash: 'sha256:stale',
+      manifest: stale,
+    })
+
+    const entry = catalog.listCatalog(userData, { bundledRoot: BUNDLED_ROOT })
+      .entries.find((item) => item.id === 'image-producer')
+    assert.deepEqual(
+      entry.manifest.metadata.knowme.execution.deliverables[0].requiredConnectorIds,
+      ['pango-image-mcp'],
+    )
   })
 
   it('filters by kind query and featured', () => {

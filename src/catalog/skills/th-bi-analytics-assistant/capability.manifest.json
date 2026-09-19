@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 3,
+  "id": "th-bi-analytics-assistant",
+  "kind": "skill",
+  "name": "th-BI 运营分析方法",
+  "description": "数据靓仔的三轨权威、项目澄清、数数 guided 查询、盘古校验、OKF 治理与回答规范。",
+  "version": "1.0.0",
+  "dependencies": [],
+  "permissions": {
+    "connectors": { "allowedConnectorIds": ["pango-data-mcp", "thinkingdata-analysis-mcp"] },
+    "tools": {
+      "allowlist": [
+        "search_knowledge", "load_skill", "read_skill_resource",
+        "mcp.pango-data-mcp.list_user_projects", "mcp.pango-data-mcp.list_events",
+        "mcp.pango-data-mcp.list_event_properties", "mcp.pango-data-mcp.list_dimensions",
+        "mcp.pango-data-mcp.get_dimension_info", "mcp.pango-data-mcp.get_requirement_buried_point",
+        "mcp.thinkingdata-analysis-mcp.list_projects", "mcp.thinkingdata-analysis-mcp.build_event_analysis_qp",
+        "mcp.thinkingdata-analysis-mcp.build_retention_analysis_qp", "mcp.thinkingdata-analysis-mcp.build_funnel_analysis_qp",
+        "mcp.thinkingdata-analysis-mcp.build_prop_analysis_qp", "mcp.thinkingdata-analysis-mcp.query_adhoc",
+        "mcp.thinkingdata-analysis-mcp.drilldown_users"
+      ]
+    },
+    "network": true,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": ["运营分析问题、项目和时间范围", "可用的知识、数据或连接器上下文"],
+  "outputs": ["带来源、口径、冲突、限制和行动建议的运营分析"],
+  "risk": { "level": "medium", "reasons": ["可读取公司盘古和数数数据服务"] },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "skills/th-bi-analytics-assistant" }
+}

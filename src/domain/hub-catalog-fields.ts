@@ -83,7 +83,7 @@ export function hubCatalogSelectedChips(items: HubCatalogItem[], selected: strin
 export function buildExpertCatalogFields(input: {
   skills: CapabilityItem[]
   connectors: CapabilityItem[]
-  knowledgeRefs: Array<{ id: string; name?: string }>
+  knowledgeRefs: Array<{ id: string; name?: string; category?: string }>
   selectedSkills: string[]
   selectedConnectors: string[]
   selectedKnowledge: string[]
@@ -123,7 +123,7 @@ export function buildExpertCatalogFields(input: {
       items: input.knowledgeRefs.map((item) => ({
         id: item.id,
         name: String(item.name || item.id),
-        category: '知识源',
+        category: item.category || '知识源',
       })),
       selected: input.selectedKnowledge,
       unit: '知识源',

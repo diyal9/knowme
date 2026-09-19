@@ -1,0 +1,25 @@
+{
+  "suite": "RQA75 software engineer normal coverage completion",
+  "evaluatedAt": "2026-09-07T22:18:09.652Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "",
+      "tasks": [
+        {
+          "taskId": "task-mtrsxtnu-gkire",
+          "evalId": "SE11",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "",
+          "hardFailure": true,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:408:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:563:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+/*
+ * KnowMe color system — the only renderer stylesheet allowed to own raw colors.
+ *
+ * Roles stay deliberately small: brand identity, primary action, neutral surfaces,
+ * readable text, structural borders, and four feedback states. Feature styles must
+ * consume these semantic roles instead of creating private palettes.
+ */
+:root {
+  /* Brand identity */
+  --brand-ink: #172535;
+  --brand-paper: #f4efe7;
+  --brand-signal: #f05d4e;
+  --brand-signal-soft: #fde8e3;
+
+  /* Primary action */
+  --action-primary: #27786a;
+  --action-primary-hover: #21695d;
+  --action-primary-pressed: #18574d;
+  --action-primary-soft: #e7f2ee;
+  --action-primary-subtle: #f3f8f6;
+
+  /* Surfaces */
+  --surface-app: #f5f6f7;
+  --surface-page: #ffffff;
+  --surface-panel: #fbfcfb;
+  --surface-subtle: #f7f8f9;
+  --surface-muted: #f1f3f2;
+  --surface-hover: #edf1ef;
+  --surface-selected: #e3ece8;
+
+  /* Text */
+  --text-primary: #292824;
+  --text-secondary: #55524c;
+  --text-muted: #77736c;
+  --text-faint: #9a958e;
+  --text-inverse: #ffffff;
+
+  /* Borders */
+  --border-subtle: #ececea;
+  --border-default: #deddd7;
+  --border-strong: #c9cec9;
+
+  /* Feedback states */
+  --state-success: #2d7a63;
+  --state-success-soft: #e7f2ee;
+  --state-success-border: #b8d9cd;
+  --state-warning: #8a641f;
+  --state-warning-soft: #faf7ee;
+  --state-warning-border: #ded4bd;
+  --state-danger: #a85d50;
+  --state-danger-soft: #faece8;
+  --state-danger-border: #e5b9af;
+  --state-info: #4a6d86;
+  --state-info-soft: #eaf1f5;
+  --state-info-border: #bfd0db;
+}

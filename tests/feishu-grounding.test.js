@@ -26,6 +26,14 @@ describe('feishu-grounding', () => {
     assert.equal(intent.asksMinutes, true)
   })
 
+  it('routes yesterday message summaries to the IM workflow', () => {
+    const intent = detectFeishuIntent('请查询昨天飞书消息并总结')
+    assert.equal(intent.asksRelatedChats, true)
+    assert.equal(intent.needsSearch, false)
+    assert.equal(intent.needsContentRead, false)
+    assert.deepEqual(require('../src/lib/feishu-grounding').requiredFeishuToolsForIntent(intent), ['feishu.related_chats'])
+  })
+
   it('treats the built-in 会议总结 shortcut as the Feishu meeting workflow', () => {
     const intent = detectFeishuIntent('会议总结')
     assert.equal(intent.mentioned, true)
@@ -42,6 +50,27 @@ describe('feishu-grounding', () => {
     assert.equal(intent.needsSearch, false)
     assert.equal(intent.asksMinutes, false)
     assert.deepEqual(require('../src/lib/feishu-grounding').requiredFeishuToolsForIntent(intent), ['feishu.read_doc'])
+  })
+
+  it('routes yesterday message requests to related chats instead of documents', () => {
+    const intent = detectFeishuIntent('帮我总结下昨天的飞书聊天消息')
+    assert.equal(intent.asksRelatedChats, true)
+    assert.equal(intent.needsSearch, false)
+    assert.equal(intent.needsContentRead, false)
+  })
+
+  it('routes a corrective “from Feishu” follow-up to related chats', () => {
+    const intent = detectFeishuIntent('不对，从飞书获取')
+    assert.equal(intent.asksRelatedChats, true)
+    assert.equal(intent.needsSearch, false)
+    assert.equal(intent.needsContentRead, false)
+    assert.deepEqual(require('../src/lib/feishu-grounding').requiredFeishuToolsForIntent(intent), ['feishu.related_chats'])
+  })
+
+  it('keeps explicit document fetches out of the related-chats route', () => {
+    const intent = detectFeishuIntent('从飞书读取这份文档')
+    assert.equal(intent.asksRelatedChats, false)
+    assert.equal(intent.directDocRead, false)
   })
 
   it('requires tool evidence before claiming feishu result', () => {

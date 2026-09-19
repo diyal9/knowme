@@ -6,6 +6,7 @@ const path = require('path')
 function mergeCatalog(bundled, overlay, installStore) {
   const hidden = new Set(overlay.hiddenIds || [])
   const map = new Map()
+  const bundledById = new Map((bundled.entries || []).map(entry => [entry.id, entry]))
 
   for (const entry of bundled.entries) {
     if (hidden.has(entry.id)) continue
@@ -48,14 +49,30 @@ function mergeCatalog(bundled, overlay, installStore) {
       permissions: installed.permissions || {},
       inputs: installed.inputs || [],
       outputs: installed.outputs || [],
+      skills: installed.skills || [],
+      connectors: installed.connectors || [],
+      knowledgeRefs: installed.knowledgeRefs || [],
+      sop: installed.sop || '',
+      useCases: installed.useCases || [],
+      boundaries: installed.boundaries || [],
       risk: installed.risk || { level: 'low', reasons: [] },
       provenance: installed.provenance || {},
+      lifecycle: installed.lifecycle || { state: 'active', newTasks: true, successors: [] },
       catalogLayer: 'installed',
     })
   }
   const merged = []
   for (const entry of map.values()) {
     const installed = installEntries[entry.id]
+    // Curated packages are shipped with a current, trusted manifest. An old
+    // install record may still contain the previous manifest (for example
+    // after a same-version package contract fix), so it must not eclipse the
+    // bundled contract. User-owned and linked capabilities retain their own
+    // persisted manifest.
+    const bundledEntry = bundledById.get(entry.id)
+    const currentManifest = installed?.source === 'curated' && bundledEntry?.manifest
+      ? bundledEntry.manifest
+      : installed?.manifest || entry.manifest || null
     const sourceAvailable = !installed?.linked || (
       installed.originRoot
       && installed.originPath
@@ -66,13 +83,20 @@ function mergeCatalog(bundled, overlay, installStore) {
       name: installed?.name || entry.name,
       originName: installed?.originName || entry.originName || '',
       nameSource: installed?.nameSource || entry.nameSource || '',
-      manifest: installed?.manifest || entry.manifest || null,
-      dependencies: installed?.manifest?.dependencies || installed?.dependencies || entry.manifest?.dependencies || entry.dependencies || [],
-      permissions: installed?.manifest?.permissions || installed?.permissions || entry.manifest?.permissions || entry.permissions || {},
-      inputs: installed?.manifest?.inputs || installed?.inputs || entry.manifest?.inputs || entry.inputs || [],
-      outputs: installed?.manifest?.outputs || installed?.outputs || entry.manifest?.outputs || entry.outputs || [],
-      risk: installed?.manifest?.risk || installed?.risk || entry.manifest?.risk || entry.risk || { level: 'low', reasons: [] },
-      provenance: installed?.manifest?.provenance || installed?.provenance || entry.manifest?.provenance || entry.provenance || {},
+      manifest: currentManifest,
+      dependencies: currentManifest?.dependencies || installed?.dependencies || entry.dependencies || [],
+      permissions: currentManifest?.permissions || installed?.permissions || entry.permissions || {},
+      inputs: currentManifest?.inputs || installed?.inputs || entry.inputs || [],
+      outputs: currentManifest?.outputs || installed?.outputs || entry.outputs || [],
+      skills: installed?.skills || entry.skills || [],
+      connectors: installed?.connectors || entry.connectors || [],
+      knowledgeRefs: currentManifest?.knowledgeRefs || installed?.knowledgeRefs || entry.knowledgeRefs || [],
+      sop: currentManifest?.sop || installed?.sop || entry.sop || '',
+      useCases: currentManifest?.useCases || installed?.useCases || entry.useCases || [],
+      boundaries: currentManifest?.boundaries || installed?.boundaries || entry.boundaries || [],
+      risk: currentManifest?.risk || installed?.risk || entry.risk || { level: 'low', reasons: [] },
+      provenance: currentManifest?.provenance || installed?.provenance || entry.provenance || {},
+      lifecycle: entry.lifecycle || { state: 'active', newTasks: true, successors: [] },
       installed: Boolean(installed),
       enabled: installed ? installed.enabled !== false : false,
       installStatus: installed?.status || 'available',

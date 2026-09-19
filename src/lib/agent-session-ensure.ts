@@ -20,6 +20,7 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
   const nextUi = ui && typeof ui === 'object' ? { ...ui } : {}
   const collaborationOnly = opts.conversationMode === 'expert-planning'
     || opts.conversationMode === 'expert-discussion'
+  const requestedProjectId = String(opts.projectId || '').trim().slice(0, 100)
   if (found) {
     if (collaborationOnly) {
       const personaExpertId = String(
@@ -32,6 +33,7 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
         personaExpertId,
         executionPolicy: 'no-tools',
         taskRef: opts.taskRef || found.taskRef,
+        projectId: found.projectId || requestedProjectId || null,
         referenceState: undefined,
       }
       const index = list.findIndex(item => item.id === found.id)
@@ -45,10 +47,17 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
         sessionKind: 'personal-topic',
         profileId: 'my-knowme',
         contextId: String(opts.contextId || found.contextId || '').trim(),
+        projectId: found.projectId || requestedProjectId || null,
       }
       const index = list.findIndex(item => item.id === found.id)
       list[index] = upgraded
       return { session: upgraded, sessions: list, ui: nextUi, created: true, upgraded: true }
+    }
+    if (requestedProjectId && !found.projectId) {
+      const upgraded = { ...found, projectId: requestedProjectId }
+      const index = list.findIndex(item => item.id === found.id)
+      list[index] = upgraded
+      return { session: upgraded, sessions: list, ui: nextUi, created: false, upgraded: true }
     }
     return { session: found, sessions: list, ui: nextUi, created: false }
   }
@@ -70,6 +79,7 @@ function ensureSessionInStore(sessions, ui, sessionId, opts = {}) {
       : 'personal-topic',
     profileId: workbench ? String(opts.profileId || '') : 'my-knowme',
     contextId: opts.contextId,
+    projectId: requestedProjectId || null,
   })
   if (laneId) session.id = laneId
   list.unshift(session)

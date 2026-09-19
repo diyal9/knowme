@@ -1,7 +1,6 @@
 'use strict'
 
 const crypto = require('crypto')
-const { createCapabilityPackRuntime } = require('./capability-pack-runtime')
 
 const DEFAULT_SECTIONS = [
   { key: 'background', title: '背景', required: true },
@@ -16,14 +15,16 @@ const DEFAULT_SECTIONS = [
 
 const DEFAULT_HEADING_PATTERN = '^(背景|目标|玩法|规则|数值\\/资源|数值|资源|埋点|验收标准|风险)'
 
-let packRuntime = createCapabilityPackRuntime()
+let packRuntime = null
 
-function setPackRuntimeForTests(next) {
-  packRuntime = next || createCapabilityPackRuntime()
+function setPackRuntime(next) {
+  packRuntime = next || null
 }
 
+const setPackRuntimeForTests = setPackRuntime
+
 function loadSchema(packId = 'game-studio') {
-  const schema = packRuntime.getRequirementSchema(packId)
+  const schema = packRuntime?.getRequirementSchema(packId)
   if (!schema?.sections?.length) {
     return {
       sections: DEFAULT_SECTIONS,
@@ -183,11 +184,10 @@ function approve(doc) {
   }
 }
 
-packRuntime.ensureDefaultPacks()
-
 module.exports = {
   SECTIONS: DEFAULT_SECTIONS,
   getSections,
+  setPackRuntime,
   setPackRuntimeForTests,
   emptyDoc,
   parseFromMarkdown,

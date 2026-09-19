@@ -1,0 +1,237 @@
+{
+  "prompt": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。",
+  "task": {
+    "id": "task-mtp2lh9n-n8ya7",
+    "expertId": "software-engineer",
+    "status": "review",
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.1.0",
+      "agentHash": "d462213cce58a01b",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtp2lh9n-n8ya7",
+      "bindings": {
+        "skills": [
+          "software-change-verification",
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "sop": {
+        "version": "2.1.0",
+        "hash": "d462213cce58a01b"
+      }
+    },
+    "brief": {
+      "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+      "plan": {
+        "goal": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "SE-H02",
+          "type": "reference",
+          "title": "冻结合成材料与委托",
+          "ref": "",
+          "content": "请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业分析答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "software-change-verification"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtp2lh9n-n8ya7"
+    },
+    "deliverables": [
+      {
+        "deliverableId": "primary",
+        "title": "专业分析答复",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtp2lh9n-n8ya7#deliverable_expert_task-mtp2lh9n-n8ya7_mtp2lhpo_primary",
+        "artifactRefs": [
+          "wb-expert-task-mtp2lh9n-n8ya7#deliverable_expert_task-mtp2lh9n-n8ya7_mtp2lhpo_primary"
+        ],
+        "executionRef": "agent-run:expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-06T00:25:55.935Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-06T00:25:55.912Z"
+      }
+    ],
+    "attention": null,
+    "messages": [
+      {
+        "id": "msg_expert_task-mtp2lh9n-n8ya7_mtp2lhpo_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责功能开发、缺陷诊断、重构和代码方案评审。先理解明确契约与验收标准，以 software-change-verification 组织最小完整方案及验证。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，包括内部计划；诊断不擅自改代码。提供推演与执行证据的明确区分，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 确认实现、只读诊断或静态方案的授权范围、验收标准和不可触碰区域；允许读取时再读仓库规则、架构与实现。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 按 software-change-verification 核对已知接口契约、调用关系、数据流和回归面，用完整故障时序及不变量建立基线，区分材料推演和实际复现；选择最小完整方案。\n3. 授权实现时按现有工程约定修改，诊断只给原因与建议，静态方案只给可审查代码；保持接口兼容、错误可诊断和状态可恢复，不通过专家身份硬编码解决平台能力问题。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称的单元、集成、类型、静态和交互验证，明确初态、受控操作和可观察判据；只有获准且具备工具时才执行，覆盖正常、边界和失败路径，失败不得省略或美化。\n5. 分别交付代码变更或方案、测试证据或未执行设计，列关键位置、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作测试回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n当前时间：2026-09-06T00:25:14.220Z\n\n材料：\n- 冻结合成材料与委托\n请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n\n[M1 接口与业务契约]\nnormalizeRanges(ranges) 接受普通 JavaScript 值。合法输入必须是数组；其每项必须是长度恰好为2的数组 [start,end]，两端均为非负安全整数且 start<end。空外层数组合法；不合法时统一抛 Error('INVALID_RANGE')，不做字符串/布尔值数字转换。无需支持 Proxy、访问器、并发修改等元编程输入。\n区间为 [start,end)，仅当两个区间有正长度重叠时才归并；只在端点接触的两段要保留为两段，因为接触处是业务交接边界。重复区间应去重；重叠关系可传递。返回按 start 数值升序排列、彼此没有正长度重叠的区间数组。\n不得改变输入外层数组或任何输入子数组；无论成功还是抛错都如此。返回外层及每个子数组都是新对象，不与输入共享数组引用。无需保留输入行顺序。输入最多100000段，选择适合该规模的算法并说明时间/额外空间量级；无需逐个枚举时间点。\n\n[M2 当前实现]\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) {\n      last[1] = r[1];\n    } else {\n      result.push(r);\n    }\n  }\n  return result;\n}\n\n[M3 测试起点，均未执行]\n夹具X：[[10,14],[2,7],[6,9],[9,10]]。\n夹具Y：[[1,8],[2,3],[7,10],[10,12]]。\n夹具Z：[[2,5],[5,8],[4,6]]。\n已有测试资料只写了“单段输入应返回该区间”，没有执行回执；其它覆盖情况未知。\n\n请按给定契约交付完整代码，并解释为什么仅改成数值排序仍不够。给出上述夹具的预期结果；另设计能观察到校验、输入不变及返回引用隔离的测试。代码、预期、复杂度分析必须互相一致，把静态推演和真实执行分开。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请作为软件工程师审查下面的纯 JavaScript 函数，给出可直接审查的完整修正代码、决定性反例和定向测试设计。全部材料为合成夹具，没有真实仓库。只在答复里分析与给代码；不要访问文件、联网、调用工具、安装或部署，不要声称已修改文件或已运行测试。接口与业务规则以下文为准，不需要向我补问，也不要仅回复确认。\n步骤：\n1. 核对所给材料与契约\n2. 按专业方法完成分析\n3. 复核交付及边界\n风险：只进行静态分析，不执行外部操作\n\n本轮交付物：专业分析答复（answer）\n\n本轮 SOP 路由：software-change-verification。\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+        "createdAt": "2026-09-06T00:25:14.239Z"
+      },
+      {
+        "id": "msg_expert_task-mtp2lh9n-n8ya7_mtp2lhpo_assistant",
+        "role": "assistant",
+        "text": "## 1. 契约核对与缺陷诊断\n\n**授权范围**：纯静态分析与代码交付，无工具调用、无文件读写、无测试执行。\n**验收标准**：严格遵循 M1 接口契约（输入校验、不可变性、引用隔离、端点接触不合并）；提供完整修正代码、决定性反例及定向测试设计；区分静态推演与实际执行状态。\n\n### 当前实现 (M2) 的致命缺陷\n1. **违反输入不变性**：`ranges.sort()` 原地修改了传入数组，直接违反“不得改变输入外层数组”的契约。\n2. **排序语义错误**：默认 `sort()` 按字符串字典序比较。对于数值区间（如 `[2,7]` vs `[10,14]`），字典序判定 `\"10\" < \"2\"`，导致排序结果完全错误，后续归并逻辑必然失效。\n3. **合并条件违背业务规则**：`r[0] <= last[1]` 会将端点接触的区间（如 `[6,9]` 和 `[9,10]`）错误合并为 `[6,10]`。契约明确要求“只在端点接触的两段要保留为两段”，正确条件应为严格小于 `r[0] < last[1]`。\n4. **缺失输入校验**：未对非数组、子项长度、非负安全整数及 `start<end` 进行校验，也未抛出规定的 `Error('INVALID_RANGE')`。\n5. **返回引用共享**：`result.push(r)` 将原数组中的子数组引用直接放入返回值，违反了“不与输入共享数组引用”的隔离要求。\n\n### 为什么仅改成数值排序仍不够？\n即便修复了排序函数（如使用 `(a,b)=>a[0]-b[0]`），以下三个核心契约依然被破坏：\n- **副作用未消除**：`sort()` 依然会污染原始输入数组。\n- **边界语义未修正**：`<=` 依然会错误吞掉“业务交接边界”。\n- **内存隔离未建立**：返回的子数组依然是原对象的引用，外部修改返回值会反向篡改输入数据。\n\n---\n\n## 2. 完整修正代码\n\n```javascript\n/**\n * 归一化区间数组\n * @param {any} ranges - 待处理的区间集合\n * @returns {Array<[number, number]>} 归一化后的新数组\n */\nfunction normalizeRanges(ranges) {\n    // 1. 严格输入校验\n    if (!Array.isArray(ranges)) throw new Error('INVALID_RANGE');\n    \n    for (const r of ranges) {\n        if (!Array.isArray(r) || r.length !== 2) throw new Error('INVALID_RANGE');\n        const [start, end] = r;\n        // Number.isSafeInteger 同时排除了 NaN, Infinity, 小数和非数字类型\n        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) throw new Error('INVALID_RANGE');\n        if (start < 0 || end < 0 || start >= end) throw new Error('INVALID_RANGE');\n    }\n\n    // 2. 创建浅拷贝副本，保护原始输入不被 sort 修改\n    const sorted = [...ranges].sort((a, b) => a[0] - b[0]);\n    \n    const result = [];\n    for (const r of sorted) {\n        const last = result[result.length - 1];\n        \n        // 3. 正确的合并条件：严格小于才合并，等于(端点接触)保留为两段\n        if (last && r[0] < last[1]) {\n            // 取最大右端点，处理包含关系（如 [1,8] 包含 [2,3]）\n            last[1] = Math.max(last[1], r[1]);\n        } else {\n            // 4. 引用隔离：push 新数组对象，而非原引用\n            result.push([r[0], r[1]]);\n        }\n    }\n    \n    return result;\n}\n```\n\n**复杂度分析**：\n- **时间**：$O(N \\log N)$，瓶颈在于排序。遍历归并为 $O(N)$。适合 100,000 段规模。\n- **空间**：$O(N)$，用于存储排序副本和结果数组。满足额外空间线性约束。\n\n---\n\n## 3. 夹具预期结果（静态推演）\n\n> **声明**：以下结果为基于修正代码逻辑的静态推导，**非实际运行输出**。\n\n| 夹具 | 输入 | 排序后中间态 | 最终预期输出 | 关键验证点 |\n| :--- | :--- | :--- | :--- | :--- |\n| **X** | `[[10,14],[2,7],[6,9],[9,10]]` | `[[2,7],[6,9],[9,10],[10,14]]` | `[[2,9],[9,10],[10,14]]` | `[6,9]`与`[2,7]`重叠合并；`[9,10]`与`[10,14]`端点接触**不合并** |\n| **Y** | `[[1,8],[2,3],[7,10],[10,12]]` | `[[1,8],[2,3],[7,10],[10,12]]` | `[[1,10],[10,12]]` | `[2,3]`被包含；`[7,10]`扩展右界至10；`[10,12]`端点接触**不合并** |\n| **Z** | `[[2,5],[5,8],[4,6]]` | `[[2,5],[4,6],[5,8]]` | `[[2,8]]` | `[4,6]`与`[2,5]`重叠合并为`[2,6]`；`[5,8]`与新`[2,6]`重叠合并为`[2,8]` |\n\n---\n\n## 4. 定向测试设计\n\n以下测试用例旨在覆盖校验、不变性及引用隔离。**均未执行**。\n\n### A. 输入校验与异常路径\n| ID | 输入 | 预期行为 | 判据 |\n|:---|:---|:---|:---|\n| V1 | `null`, `\"str\"`, `{}` | Throw `INVALID_RANGE` | 非数组拒绝 |\n| V2 | `[[1,2], [3]]` | Throw `INVALID_RANGE` | 子项长度≠2 |\n| V3 | `[[-1, 2]]` | Throw `INVALID_RANGE` | 负数拒绝 |\n| V4 | `[[1.5, 2]]` | Throw `INVALID_RANGE` | 非安全整数拒绝 |\n| V5 | `[[5, 5]]` | Throw `INVALID_RANGE` | start≥end 拒绝 |\n| V6 | `[]` | Return `[]` | 空数组合法 |\n\n### B. 输入不变性与引用隔离\n| ID | 操作序列 | 预期断言 | 目的 |\n|:---|:---|:---|:---|\n| I1 | `const input=[[2,3],[1,5]];`<br>`const out=normalizeRanges(input);`<br>`assert.deepStrictEqual(input, [[2,3],[1,5]])` | 输入数组顺序与内容未被修改 | 验证浅拷贝保护 |\n| I2 | `const input=[[1,5]];<br>const out=normalizeRanges(input);<br>out[0][1]=99;`<br>`assert.strictEqual(input[0][1], 5)` | 修改返回值不影响输入 | 验证子数组引用隔离 |\n| I3 | `const input=[[1,5]];<br>const out=normalizeRanges(input);<br>assert.notStrictEqual(out[0], input[0])` | 返回的子数组不是同一个对象 | 验证新对象分配 |\n\n### C. 业务边界回归\n| ID | 输入 | 预期输出 | 目的 |\n|:---|:---|:---|:---|\n| B1 | `[[1,2],[2,3]]` | `[[1,2],[2,3]]` | 端点接触绝对不合并 |\n| B2 | `[[1,10],[2,3]]` | `[[1,10]]` | 包含关系取最大右界 |\n| B3 | `[[1,3],[2,5],[4,6]]` | `[[1,6]]` | 传递性重叠合并 |\n\n---\n\n## 5. 交付总结与风险声明\n\n1.  **交付物**：已提供符合 M1 契约的完整 JavaScript 实现、静态推演的夹具预期及结构化测试设计。\n2.  **执行状态**：**所有分析与代码均为静态产物**。本轮未调用任何工具，未访问文件系统，未执行上述测试用例。不存在真实的测试通过回执。\n3.  **剩余风险**：\n    -   若运行环境存在极端的原型链污染或自定义 `Symbol.iterator` 干扰，当前浅拷贝 `[...ranges]` 可能不足以防御（但契约已排除 Proxy/元编程输入，此风险在约定范围内可忽略）。\n    -   性能方面，$O(N \\log N)$ 在 100k 量级下通常 <50ms，但若 JS 引擎对 `Math.max` 内联优化不佳，可考虑手动比较 `if (r[1] > last[1]) last[1] = r[1]` 作为微优化备选。",
+        "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+        "createdAt": "2026-09-06T00:25:55.876Z",
+        "trace": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "完整答复已重新生成，正在核对",
+            "status": "done"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done"
+          }
+        ],
+        "protocolVersion": 2,
+        "answerHash": "4c3134b131752701"
+      }
+    ]
+  },
+  "capture": {
+    "taskId": "task-mtp2lh9n-n8ya7",
+    "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+    "terminal": "DONE",
+    "metrics": {
+      "rounds": 1,
+      "toolCalls": 0,
+      "firstTokenMs": 2181,
+      "bufferedDraftsDiscarded": 1,
+      "answerCommitMs": 41183,
+      "bufferMs": 39002,
+      "outputDiagnostics": [
+        {
+          "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+          "round": 1,
+          "phase": "MODEL",
+          "code": "buffered_draft_discarded",
+          "reason": "incomplete_model_response",
+          "length": 5369,
+          "count": 1
+        },
+        {
+          "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+          "round": 1,
+          "phase": "VERIFY_CLAIMS",
+          "code": "answer_committed",
+          "hash": "4c3134b131752701",
+          "length": 4262,
+          "timingMs": 41183,
+          "count": 1
+        }
+      ],
+      "usage": {
+        "promptTokens": 8945,
+        "completionTokens": 4774,
+        "totalTokens": 13719,
+        "source": "provider"
+      },
+      "modelCompletions": [
+        {
+          "phase": "MODEL",
+          "finishReason": "length"
+        },
+        {
+          "phase": "FINALIZE",
+          "finishReason": "stop"
+        }
+      ],
+      "contextTokens": 8945,
+      "totalMs": 41211
+    },
+    "text": "## 1. 契约核对与缺陷诊断\n\n**授权范围**：纯静态分析与代码交付，无工具调用、无文件读写、无测试执行。\n**验收标准**：严格遵循 M1 接口契约（输入校验、不可变性、引用隔离、端点接触不合并）；提供完整修正代码、决定性反例及定向测试设计；区分静态推演与实际执行状态。\n\n### 当前实现 (M2) 的致命缺陷\n1. **违反输入不变性**：`ranges.sort()` 原地修改了传入数组，直接违反“不得改变输入外层数组”的契约。\n2. **排序语义错误**：默认 `sort()` 按字符串字典序比较。对于数值区间（如 `[2,7]` vs `[10,14]`），字典序判定 `\"10\" < \"2\"`，导致排序结果完全错误，后续归并逻辑必然失效。\n3. **合并条件违背业务规则**：`r[0] <= last[1]` 会将端点接触的区间（如 `[6,9]` 和 `[9,10]`）错误合并为 `[6,10]`。契约明确要求“只在端点接触的两段要保留为两段”，正确条件应为严格小于 `r[0] < last[1]`。\n4. **缺失输入校验**：未对非数组、子项长度、非负安全整数及 `start<end` 进行校验，也未抛出规定的 `Error('INVALID_RANGE')`。\n5. **返回引用共享**：`result.push(r)` 将原数组中的子数组引用直接放入返回值，违反了“不与输入共享数组引用”的隔离要求。\n\n### 为什么仅改成数值排序仍不够？\n即便修复了排序函数（如使用 `(a,b)=>a[0]-b[0]`），以下三个核心契约依然被破坏：\n- **副作用未消除**：`sort()` 依然会污染原始输入数组。\n- **边界语义未修正**：`<=` 依然会错误吞掉“业务交接边界”。\n- **内存隔离未建立**：返回的子数组依然是原对象的引用，外部修改返回值会反向篡改输入数据。\n\n---\n\n## 2. 完整修正代码\n\n```javascript\n/**\n * 归一化区间数组\n * @param {any} ranges - 待处理的区间集合\n * @returns {Array<[number, number]>} 归一化后的新数组\n */\nfunction normalizeRanges(ranges) {\n    // 1. 严格输入校验\n    if (!Array.isArray(ranges)) throw new Error('INVALID_RANGE');\n    \n    for (const r of ranges) {\n        if (!Array.isArray(r) || r.length !== 2) throw new Error('INVALID_RANGE');\n        const [start, end] = r;\n        // Number.isSafeInteger 同时排除了 NaN, Infinity, 小数和非数字类型\n        if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end)) throw new Error('INVALID_RANGE');\n        if (start < 0 || end < 0 || start >= end) throw new Error('INVALID_RANGE');\n    }\n\n    // 2. 创建浅拷贝副本，保护原始输入不被 sort 修改\n    const sorted = [...ranges].sort((a, b) => a[0] - b[0]);\n    \n    const result = [];\n    for (const r of sorted) {\n        const last = result[result.length - 1];\n        \n        // 3. 正确的合并条件：严格小于才合并，等于(端点接触)保留为两段\n        if (last && r[0] < last[1]) {\n            // 取最大右端点，处理包含关系（如 [1,8] 包含 [2,3]）\n            last[1] = Math.max(last[1], r[1]);\n        } else {\n            // 4. 引用隔离：push 新数组对象，而非原引用\n            result.push([r[0], r[1]]);\n        }\n    }\n    \n    return result;\n}\n```\n\n**复杂度分析**：\n- **时间**：$O(N \\log N)$，瓶颈在于排序。遍历归并为 $O(N)$。适合 100,000 段规模。\n- **空间**：$O(N)$，用于存储排序副本和结果数组。满足额外空间线性约束。\n\n---\n\n## 3. 夹具预期结果（静态推演）\n\n> **声明**：以下结果为基于修正代码逻辑的静态推导，**非实际运行输出**。\n\n| 夹具 | 输入 | 排序后中间态 | 最终预期输出 | 关键验证点 |\n| :--- | :--- | :--- | :--- | :--- |\n| **X** | `[[10,14],[2,7],[6,9],[9,10]]` | `[[2,7],[6,9],[9,10],[10,14]]` | `[[2,9],[9,10],[10,14]]` | `[6,9]`与`[2,7]`重叠合并；`[9,10]`与`[10,14]`端点接触**不合并** |\n| **Y** | `[[1,8],[2,3],[7,10],[10,12]]` | `[[1,8],[2,3],[7,10],[10,12]]` | `[[1,10],[10,12]]` | `[2,3]`被包含；`[7,10]`扩展右界至10；`[10,12]`端点接触**不合并** |\n| **Z** | `[[2,5],[5,8],[4,6]]` | `[[2,5],[4,6],[5,8]]` | `[[2,8]]` | `[4,6]`与`[2,5]`重叠合并为`[2,6]`；`[5,8]`与新`[2,6]`重叠合并为`[2,8]` |\n\n---\n\n## 4. 定向测试设计\n\n以下测试用例旨在覆盖校验、不变性及引用隔离。**均未执行**。\n\n### A. 输入校验与异常路径\n| ID | 输入 | 预期行为 | 判据 |\n|:---|:---|:---|:---|\n| V1 | `null`, `\"str\"`, `{}` | Throw `INVALID_RANGE` | 非数组拒绝 |\n| V2 | `[[1,2], [3]]` | Throw `INVALID_RANGE` | 子项长度≠2 |\n| V3 | `[[-1, 2]]` | Throw `INVALID_RANGE` | 负数拒绝 |\n| V4 | `[[1.5, 2]]` | Throw `INVALID_RANGE` | 非安全整数拒绝 |\n| V5 | `[[5, 5]]` | Throw `INVALID_RANGE` | start≥end 拒绝 |\n| V6 | `[]` | Return `[]` | 空数组合法 |\n\n### B. 输入不变性与引用隔离\n| ID | 操作序列 | 预期断言 | 目的 |\n|:---|:---|:---|:---|\n| I1 | `const input=[[2,3],[1,5]];`<br>`const out=normalizeRanges(input);`<br>`assert.deepStrictEqual(input, [[2,3],[1,5]])` | 输入数组顺序与内容未被修改 | 验证浅拷贝保护 |\n| I2 | `const input=[[1,5]];<br>const out=normalizeRanges(input);<br>out[0][1]=99;`<br>`assert.strictEqual(input[0][1], 5)` | 修改返回值不影响输入 | 验证子数组引用隔离 |\n| I3 | `const input=[[1,5]];<br>const out=normalizeRanges(input);<br>assert.notStrictEqual(out[0], input[0])` | 返回的子数组不是同一个对象 | 验证新对象分配 |\n\n### C. 业务边界回归\n| ID | 输入 | 预期输出 | 目的 |\n|:---|:---|:---|:---|\n| B1 | `[[1,2],[2,3]]` | `[[1,2],[2,3]]` | 端点接触绝对不合并 |\n| B2 | `[[1,10],[2,3]]` | `[[1,10]]` | 包含关系取最大右界 |\n| B3 | `[[1,3],[2,5],[4,6]]` | `[[1,6]]` | 传递性重叠合并 |\n\n---\n\n## 5. 交付总结与风险声明\n\n1.  **交付物**：已提供符合 M1 契约的完整 JavaScript 实现、静态推演的夹具预期及结构化测试设计。\n2.  **执行状态**：**所有分析与代码均为静态产物**。本轮未调用任何工具，未访问文件系统，未执行上述测试用例。不存在真实的测试通过回执。\n3.  **剩余风险**：\n    -   若运行环境存在极端的原型链污染或自定义 `Symbol.iterator` 干扰，当前浅拷贝 `[...ranges]` 可能不足以防御（但契约已排除 Proxy/元编程输入，此风险在约定范围内可忽略）。\n    -   性能方面，$O(N \\log N)$ 在 100k 量级下通常 <50ms，但若 JS 引擎对 `Math.max` 内联优化不佳，可考虑手动比较 `if (r[1] > last[1]) last[1] = r[1]` 作为微优化备选。"
+  }
+}

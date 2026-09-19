@@ -1,0 +1,129 @@
+{
+  "expectations": [
+    {
+      "text": "明确8小时无限离线访问与5分钟撤权硬保证在给定信息下不可同时满足；保留硬保证，明确离线访问最多限有效许可剩余期/过期拒绝，或将放宽硬保证单列为需重新批准，不能采纳10分钟同步或恢复网络才撤权来声称满足现约束。",
+      "passed": true,
+      "evidence": "answer.md §一C1明确互斥，改变标题/摘要的保护范围也须重新审批；§三放弃8小时离线，§六1明确‘最坏暴露窗口 = 剩余租期 ≤5min’，§六5各分片到期全部拒绝新访问。销售话术‘断网时最多5分钟内’应结合剩余租期理解为上界，不等于承诺每次断网后另得完整5分钟；未出现重置租期的指令，故不单凭此措辞判失败。建议在对外话术中直接写剩余期，但这不是新增冻结要求。"
+    },
+    {
+      "text": "比较至少两个真正符合硬要求的可行方案并给推荐和代价，例如逐次在线授权的本地检索与有界许可的本地检索；比较断网可用性、延迟依赖、实现/运维与4周约束，不把一个违反硬要求的方案算第二个可行方案，也不凭进程拆分保证P95。",
+      "passed": true,
+      "evidence": "§二甲逐次在线授权、不能离线，说明网络往返及服务端QPS代价；乙在线签发有界许可、本地门控，说明密钥/重建复杂度并推荐乙。结合§四唯一网关及§六交付前检查，这两种授权策略本身可满足诚实客户端的硬要求，不需要依靠加密替代过期门控；§三及§八讨论2人4周约束且不承诺P95。乙‘甲乙离线没有区别’及密码学兜底的论断有实质错误，另列claims，不能据此把比较或全文当作合格认证；本项仅认可已提出的两种安全授权机制及其实际代价。"
+    },
+    {
+      "text": "给出权威服务端与本地索引/缓存的职责、按account/workspace隔离的权限与数据键、查询/打开/缓存命中及交付结果的许可检查；撤W1不能借共享缓存越权或无理由使W2永久不可用，明确索引一致性不等于权限有效性。",
+      "passed": false,
+      "evidence": "§四/五许可请求带(account,workspace)，网关入口/出口检查并过滤预览，§六明确W1任意字段拒绝与重建仍经门控，这些是正确点。但数据键只给ws/<id>/index.db及工作区密钥，gateway.search(q)与版本元数据未声明如何绑定当前account或按(account,workspace)校验缓存命中；最高版本又写为‘每账号’，未说明工作区作用域。未交付冻结断言明确要求的权限与数据键联合隔离契约。共享物理缓存并非必然泄漏，缺少声明也不等于已观察到跨账号泄漏；此项是设计证据不足，不要求物理双库或新增多设备能力。"
+    },
+    {
+      "text": "用具体失效序列处理至少许可过期时正在运行的查询、重启/休眠无法证明有效、旧版本授权响应乱序到达三类情况：交付前拒绝或过滤、保守重新授权/拒绝、不让旧许可覆盖较新撤权，且不靠本地重新计时或无限延长TTL。",
+      "passed": true,
+      "evidence": "§六2明确查询开始有效、生成结果已过期→出口作废；§六3旧版本到达→比对最高版本→回退丢弃；§六4重启/休眠不能信任计时→锁定→联网逐个重授权；§六5长断网到期拒绝，C3明确否决重启从零续期。已给三类可执行的先后关系，不强制数字时间戳或密码库。版本作用域未清楚是断言3中的接口缺口，不抹去本项已明确的拒绝回退/过期规则。"
+    },
+    {
+      "text": "迁移和回退均保持权限硬约束，不因恢复旧索引/缓存恢复旧授权；给出包含断网撤权的受控时序验收与性能验证的负载/设备条件/测量边界，明确所有结果未测，原始材料体积不能直接当索引内存或已证明容量。",
+      "passed": false,
+      "evidence": "§七回退被定义为‘读旧只读缓存，但旧缓存同样先做过吊销清理’，不能证明清理之后的新撤权/到期仍受不可回退的网关与最新许可状态限制；阶段2才灰度切换到网关，也未保证所有旧读路径始终过网关。反例：清理时W1仍有效，之后撤权且租期已过，再回退，历史清理不构成当前授权。§八AC1只有剩余期边界，没有明确保持断网、签发/撤权/到期与断言的受控组合；AC4确有跨过期查询用例。AC5提供2万×40KiB及泛称低端机，但没有基准硬件/待定参数、冷热缓存、查询负载及计时起止；性能结果均标未测、20–40%明确是假设，不算伪造实测，但不足以满足冻结note 5。AC1还把密钥轮换误当离线旧密文失效的验收依据。"
+    }
+  ],
+  "summary": { "passed": 3, "failed": 2, "total": 5, "pass_rate": 0.6 },
+  "claims": [
+    {
+      "claim": "即使客户端漏检许可，密钥轮换后旧分片也解不开，构成撤销的密码学兜底。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "§二乙优点、§六1及AC1。确定性反例：客户端断网前持有旧密钥K与旧分片密文C；服务端轮换到K2不会改变离线设备上的K和C，原来的解密关系仍成立。题面未提供独立可信的到期密钥销毁机制；如依靠诚实客户端按期拒绝/删除，保证仍来自门控，不是轮换自动撤销旧副本。仅跳过入口而出口仍检查的测试，即使拒绝也不能证明是密钥轮换生效。这是推荐理由及验收oracle的专业硬伤，不是‘建议’标签可以豁免的技术事实；不等于已经实测发生泄漏。"
+    },
+    {
+      "claim": "混合缓存无法按工作区精确失效，只能整体删或整体留。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "C4。冻结note 3允许逻辑隔离；同一物理库可按(account,workspace)键和统一读门控隔离。推荐物理分片可以成立，但断言其为唯一实现方式过强，也会扭曲2人4周的复杂度比较。"
+    },
+    {
+      "claim": "甲乙离线能力没有区别，在线体验也相同。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "§二甲明确每次联网、完全不承诺离线；乙在许可剩余期可本地放行且避免逐次往返。二者都不能持续离线8小时不等于离线能力相同；在线输出功能相同也不意味着网络延迟依赖相同。比较中的其他段落已写出差异，故是全篇矛盾而非根本没有两种方案。"
+    },
+    {
+      "claim": "旧缓存只读且先做过吊销清理即可确保任何时候回滚都不恢复受限访问。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "§七阶段2/3。一次清理不能覆盖之后的权限变化；必须明确回退只换索引数据而不撤掉当前许可门控、回退许可/版本高水位。§四唯一网关是合理原则，但迁移的灰度旧路径描述没有保持这一不变量，不能以结尾保证句取代机制。"
+    },
+    {
+      "claim": "方案甲逐次在线授权使撤销即时生效。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "对撤权后新发起且服务端已可见撤权的授权请求可成立；对撤权前已授权、之后才交付的请求，题面允许跨时段执行，正文共用门控至多保证剩余租期/已知版本。未证明所有在途操作都能在撤权瞬间停止。此处即时保证过强，但不据此否定甲满足≤5分钟界限的可能性。"
+    },
+    {
+      "claim": "索引约占原文20–40%、服务端负载在现有容量内、2人4周大致匹配。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "AC5/6与资源匹配明确标为假设、未压测、未做工作量拆解验证。材料没有依据验证这些估计，故不得当作容量/工期证据；也不把有条件估计判成捏造基准或预算。原始2万×40KiB为819200000字节，约819.2MB/781.25MiB；‘约800MB’是粗略量级，不作为本例硬伤。"
+    },
+    {
+      "claim": "本次为未调用工具、未部署、未做基准的静态建议。",
+      "type": "process",
+      "verified": true,
+      "evidence": "正文开头声明，同run executionEvidence.toolCalls=[]、capture.metrics.toolCalls=0、rounds=1。验收列表是未来要测的设计，不是作者本人已执行。验证范围限于所给导出。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["无独立user_notes.md；正文承认认证通道、设备密钥、多设备语义和工作量未明确。", "未提供本run contextAudit/skill.explicit-content，不能据包名确认方法正文装配。"],
+    "needs_review": ["去掉不成立的离线密钥轮换保证及对应验收归因。", "补齐账号/工作区作用域、旧读路径不可回退的授权门控与可测边界。"],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      { "reason": "两种基本授权策略可通过断言2，仍可能用错误的密码学额外保证作为推荐依据；必须保留全篇claims复核，不能把3/5或表格完整当作专业合格。本次不修改冻结题和断言。" }
+    ],
+    "overall": "已使用五条冻结断言、全部assertion_notes和三条hard_failure_conditions。断言3/5不通过，另有确定的密码学撤权推断错误；平台verified不代表专业合格。"
+  },
+  "timing": { "total_tokens": 11434, "duration_ms": 28384, "total_duration_seconds": 28.384, "source": "Actual isolated executor/provider metrics; not subagent timing" },
+  "observed_metrics": {
+    "source": "answer.md只读计数；运行用量来自同run capture.metrics",
+    "answer_utf16_chars": 4316,
+    "answer_codepoints": 4316,
+    "answer_han_chars": 2639,
+    "answer_alnum_blocks": 164,
+    "answer_han_plus_alnum_blocks": 2803,
+    "answer_non_whitespace_codepoints_including_punctuation_and_markdown": 3927,
+    "length_limit_in_frozen_prompt": null,
+    "length_verdict": "未设长度门槛；混合计数仅heuristic，不能把Markdown长度当中文超字数",
+    "exported_tool_calls": 0,
+    "provider_prompt_tokens": 8851,
+    "provider_completion_tokens": 2583,
+    "provider_total_tokens": 11434
+  },
+  "review_metadata": {
+    "case_id": "SA-N01",
+    "configuration": "current_installed_package",
+    "evaluation_kind": "same installed baseline repeated after runtime fix; not Skill A/B",
+    "blind": false,
+    "independent_contemporaneous_control": false,
+    "professional_status": "fail",
+    "professional_certification": false,
+    "task_id": "task-mtp0nv3k-2kfue",
+    "session_id": "wb-expert-task-mtp0nv3k-2kfue",
+    "run_id": "expert_task-mtp0nv3k-2kfue_mtp0nv96",
+    "platform_gate_status": "verified",
+    "terminal": "DONE",
+    "model_finish_reason": "stop",
+    "binding_verified": "metadata.prompt与transcript.prompt逐字等于冻结SA-N01；五断言逐字一致；task.execRef、executionEvidence、currentRunMessages及capture任务/run一致；answer.md等于capture.text加一个文件末尾换行",
+    "context_boundary": "本次导出未含contextAudit，不能推断真实Skill装配；不把旧run上下文审计借给本run",
+    "historical_boundary": "仅本run明确MODEL stop；旧文未知finishReason不推断。现有安装基线未变且无同期对照，不作Skill或runtime单独因果归因。",
+    "input_sha256": {
+      "eval_metadata.json": "60a5b28ea66fd2bc19203d4b629a767e6e39df7b468fa1a1375c7d3f09b48b36",
+      "old_skill/transcript.json": "f687a96e7b512f28546491a2dd50316e9220e161eaca7a8ef36bcd6a21e0edbc",
+      "old_skill/outputs/answer.md": "849a870c11fd97bc14f4777c90d05cf528ef2649759648253070e8091b224657"
+    }
+  },
+  "hard_failure_condition_review": [
+    { "condition_index": 1, "status": "not_observed", "evidence": "明确放弃8小时访问；允许缩小保证范围须重新审批，没有声称现方案同时满足二者。错误的密钥兜底仍单独判为专业硬伤。" },
+    { "condition_index": 2, "status": "rollback_and_binding_guarantee_unproven_not_observed_breach", "evidence": "正常路径明确过期/重启拒绝，未直接指令允许过期读；但旧路径回退授权不变量及账号绑定未充分交付。判断言3/5失败，不把静态缺口说成已观测越权。" },
+    { "condition_index": 3, "status": "not_observed", "evidence": "未声称部署、基准、安全测试已执行；数字和工作量均标未验证，合同与范围变更也标需确认。错误的技术保证不是捏造已完成测试的同义词。" }
+  ]
+}

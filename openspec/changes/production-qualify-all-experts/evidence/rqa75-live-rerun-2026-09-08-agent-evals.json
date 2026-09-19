@@ -1,0 +1,31 @@
+{
+  "suite": "RQA75 software engineer normal coverage completion",
+  "evaluatedAt": "2026-09-08T00:31:16.714Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:ef7f6c88068733a37ff237824e1006634c99043c4987f31d8c26e6b1395e819b",
+      "tasks": [
+        {
+          "taskId": "task-mtrxp0n8-ud9yg",
+          "evalId": "SE11",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:ef7f6c88068733a37ff237824e1006634c99043c4987f31d8c26e6b1395e819b",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

@@ -87,6 +87,7 @@ function normalizeJob(item = {}) {
   return {
     id: String(item.id || '').trim(),
     name: String(item.name || '').trim() || '未命名自动化',
+    projectId: String(item.projectId || '').trim().slice(0, 100),
     workspaceId: String(item.workspaceId || '').trim(),
     prompt: String(item.prompt || '').trim(),
     connectorId: String(item.connectorId || '').trim(),
@@ -178,6 +179,7 @@ function makeId() {
 
 function createStore(file, options = {}) {
   const resolveLaunch = typeof options.resolveLaunch === 'function' ? options.resolveLaunch : null
+  const resolveProject = typeof options.resolveProject === 'function' ? options.resolveProject : null
 
   function load() {
     const raw = readJson(file)
@@ -210,6 +212,7 @@ function createStore(file, options = {}) {
     const job = normalizeJob({
       id: makeId(),
       name,
+      projectId: payload.projectId,
       workspaceId: payload.workspaceId,
       prompt,
       connectorId: payload.connectorId,
@@ -272,6 +275,26 @@ function createStore(file, options = {}) {
     const index = state.jobs.findIndex(item => item.id === id)
     if (index < 0) return { ok: false, error: '自动化不存在' }
     const job = state.jobs[index]
+    if (job.projectId && resolveProject) {
+      const context = resolveProject(job.projectId)
+      const projectStatus = context?.project?.status
+      if (!context?.ok || !context.workspace?.available || ['archived', 'missing'].includes(projectStatus)) {
+        return {
+          ok: false,
+          code: 'project_unavailable',
+          error: '目标项目当前不可用，请重新定位或恢复项目后再运行',
+          needsAttention: { kind: 'project_unavailable', projectId: job.projectId },
+        }
+      }
+      if (!context.workspace?.writable) {
+        return {
+          ok: false,
+          code: 'project_readonly',
+          error: '目标项目为只读，不能运行可能产生文件的自动化',
+          needsAttention: { kind: 'project_readonly', projectId: job.projectId },
+        }
+      }
+    }
     if (!job.workflowId || !job.domain || !job.backend) {
       return {
         ok: false,

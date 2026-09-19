@@ -1,0 +1,6 @@
+{
+  "total_tokens": null,
+  "duration_ms": 5554,
+  "total_duration_seconds": 5.554,
+  "notes": "任务创建至终态，包含编排时间；非纯模型耗时。token 未取得。"
+}

@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 2,
+  "id": "th-art-intake",
+  "kind": "skill",
+  "name": "生图需求澄清",
+  "description": "渐进澄清用途、主体、风格、比例、数量和参考图，形成可确认的生图 Brief。",
+  "version": "1.1.0"
+}

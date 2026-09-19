@@ -2,7 +2,18 @@
 
 const { normalizeLocale: normalizePromptLocale } = require('./prompts/registry')
 
-const COLLABORATION_MODES = new Set(['expert-planning', 'expert-discussion'])
+const NO_TOOL_COLLABORATION_MODES = new Set(['expert-planning', 'expert-discussion'])
+const COLLABORATION_MODES = new Set([...NO_TOOL_COLLABORATION_MODES, 'expert-execution'])
+const PROMPT_SURFACES = new Set([
+  'partner-chat',
+  'partner-work',
+  'assistant-chat',
+  'assistant-work',
+  'expert-planning',
+  'expert-discussion',
+  'expert-execution',
+  'workflow',
+])
 
 function normalizeTier(value) {
   const tier = String(value || '').trim().toLowerCase()
@@ -14,8 +25,62 @@ function normalizeLocale(value) {
 }
 
 function resolveExecutionPolicy({ conversationMode = '', toolsEnabled = false } = {}) {
-  if (COLLABORATION_MODES.has(String(conversationMode || ''))) return 'no-tools'
+  if (NO_TOOL_COLLABORATION_MODES.has(String(conversationMode || ''))) return 'no-tools'
   return toolsEnabled ? 'tools-allowed' : 'no-tools'
+}
+
+function resolvePromptSurface({
+  conversationMode = '',
+  workflowConversation = false,
+  personalSession = false,
+  tier = 'chat',
+} = {}) {
+  const mode = String(conversationMode || '').trim()
+  if (COLLABORATION_MODES.has(mode)) return mode
+  if (workflowConversation) return 'workflow'
+  const light = normalizeTier(tier) === 'chat'
+  if (personalSession) return light ? 'partner-chat' : 'partner-work'
+  return light ? 'assistant-chat' : 'assistant-work'
+}
+
+/**
+ * Keep prompt layers aligned with the active product surface. Generic partner
+ * operating rules must not leak into experts or workflows, while a casual
+ * partner turn only needs personality/style rather than work-domain context.
+ */
+function resolvePromptLayerPolicy(input = {}) {
+  const resolved = resolvePromptSurface(input)
+  const surface = PROMPT_SURFACES.has(resolved) ? resolved : 'assistant-chat'
+  if (surface === 'partner-chat') {
+    return {
+      surface,
+      includeUserPrompt: false,
+      includeWorkProfile: false,
+      agentPersonaScope: 'style',
+    }
+  }
+  if (surface === 'partner-work') {
+    return {
+      surface,
+      includeUserPrompt: true,
+      includeWorkProfile: true,
+      agentPersonaScope: 'full',
+    }
+  }
+  if (surface.startsWith('expert-') || surface === 'workflow') {
+    return {
+      surface,
+      includeUserPrompt: true,
+      includeWorkProfile: true,
+      agentPersonaScope: 'none',
+    }
+  }
+  return {
+    surface,
+    includeUserPrompt: surface === 'assistant-work',
+    includeWorkProfile: surface === 'assistant-work',
+    agentPersonaScope: 'none',
+  }
 }
 
 function isToolExecutionAllowed(executionPolicy) {
@@ -34,7 +99,9 @@ function resolveContextPolicy(input = {}) {
     || resolveExecutionPolicy({ conversationMode, toolsEnabled: input.toolsEnabled === true })
   const phase = conversationMode === 'expert-planning'
     ? 'planning'
-    : conversationMode === 'expert-discussion' ? 'discussion' : String(input.phase || '').trim()
+    : conversationMode === 'expert-execution'
+      ? 'execution'
+      : conversationMode === 'expert-discussion' ? 'discussion' : String(input.phase || '').trim()
   const scene = COLLABORATION_MODES.has(conversationMode)
     ? 'expert-collaboration'
     : String(input.scene || '').trim() || (tier === 'retrieval' ? 'knowledge' : tier === 'assist' ? 'work' : 'assistant')
@@ -77,9 +144,13 @@ function isBlockApplicable(block, policy) {
 
 module.exports = {
   COLLABORATION_MODES,
+  NO_TOOL_COLLABORATION_MODES,
+  PROMPT_SURFACES,
   normalizeTier,
   normalizeLocale,
   resolveExecutionPolicy,
+  resolvePromptSurface,
+  resolvePromptLayerPolicy,
   isToolExecutionAllowed,
   shouldProjectToolSurface,
   resolveContextPolicy,

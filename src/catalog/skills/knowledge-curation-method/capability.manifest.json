@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "knowledge-curation-method",
+  "kind": "skill",
+  "name": "知识策展与检索治理",
+  "version": "1.1.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

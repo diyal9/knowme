@@ -5,22 +5,22 @@
  * Legacy exports preserved for IPC and tests; domain data lives in src/packs/game-studio/.
  */
 
-const { createCapabilityPackRuntime } = require('./capability-pack-runtime')
-
 const PACK_ID = 'game-studio'
-let runtime = createCapabilityPackRuntime()
+let runtime = null
 
-function setPackRuntimeForTests(next) {
-  runtime = next || createCapabilityPackRuntime()
+function setPackRuntime(next) {
+  runtime = next || null
 }
 
-  function ensurePack() {
-    /* pack state comes from store; no implicit install */
-  }
+const setPackRuntimeForTests = setPackRuntime
+
+function ensurePack() {
+  /* pack state comes from the main-process runtime; no implicit install */
+}
 
 function packRecord() {
   ensurePack()
-  if (!runtime.isPackEnabled(PACK_ID)) return null
+  if (!runtime?.isPackEnabled(PACK_ID)) return null
   return runtime.loadPackRecord(PACK_ID)
 }
 
@@ -78,18 +78,16 @@ function resolveGameScene({
   explicitScene = '',
 } = {}) {
   ensurePack()
+  if (!runtime?.isPackEnabled(PACK_ID)) return null
+  const explicit = String(explicitScene || '').trim()
+  if (explicit) {
+    return runtime.resolveScene({ packId: PACK_ID, explicitScene: explicit })?.sceneId || null
+  }
   if (normalizeIndustry(industry) !== 'game') return null
-  if (!runtime.isPackEnabled(PACK_ID)) return null
-
-  const resolved = runtime.resolveScene({
-    packId: PACK_ID,
-    mode,
-    prompt,
-    tier,
-    hasTask,
-    explicitScene,
-  })
-  return resolved?.sceneId || null
+  // Industry makes the pack eligible; it does not choose a scene. Selection
+  // still requires a concrete user intent. Legacy mode mappings remain only
+  // for migration/UI compatibility and never become ambient chat prompts.
+  return classifySceneFromText(prompt)
 }
 
 function getScene(sceneId) {
@@ -112,7 +110,7 @@ function sceneSkillRefs(sceneId) {
 
 function buildScenePrompt(sceneId) {
   ensurePack()
-  const resolved = runtime.resolveScene({ packId: PACK_ID, explicitScene: sceneId })
+  const resolved = runtime?.resolveScene({ packId: PACK_ID, explicitScene: sceneId })
   if (resolved) return runtime.buildScenePrompt(resolved)
   const record = packRecord()
   const promptBody = record?.scenePrompts?.[sceneId] || ''
@@ -122,7 +120,7 @@ function buildScenePrompt(sceneId) {
 
 function listScenesForUi() {
   ensurePack()
-  return runtime.listScenesForUi(PACK_ID).map(s => ({
+  return (runtime?.listScenesForUi(PACK_ID) || []).map(s => ({
     id: s.id,
     label: s.label,
     description: s.description,
@@ -133,7 +131,7 @@ function listScenesForUi() {
 
 function legacyModeDisplayName(mode) {
   ensurePack()
-  return runtime.legacyModeDisplayName(mode, PACK_ID) || '通用办公'
+  return runtime?.legacyModeDisplayName(mode, PACK_ID) || '通用办公'
 }
 
 ensurePack()
@@ -143,6 +141,7 @@ module.exports = {
   get SCENE_IDS() { return getSceneIds() },
   get SCENES() { return getScenesMap() },
   get LEGACY_MODE_TO_SCENE() { return getLegacyModeMap() },
+  setPackRuntime,
   setPackRuntimeForTests,
   getSceneIds,
   getScenesMap,

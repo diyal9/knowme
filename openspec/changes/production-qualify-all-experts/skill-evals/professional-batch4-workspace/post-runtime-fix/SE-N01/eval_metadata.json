@@ -1,0 +1,21 @@
+{
+  "eval_id": 1,
+  "case_id": "SE-N01",
+  "eval_name": "tenant-reservation-atomicity-and-replay",
+  "prompt": "请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。\n\n[M1 业务与接口契约]\n导出接口 reserve(db, {tenant, sku, requestId, qty})，成功返回 {remaining: number}。tenant、sku、requestId已由入口验证为非空字符串；qty仍需本函数验证为正的安全整数，否则抛Error('INVALID_QTY')，不改变库存/请求账本。\n库存以(tenant,sku)隔离，初始是非负安全整数，不能超卖。同租户requestId标识一次业务请求，不同租户允许相同requestId。同键同sku/qty的重放须返回首次成功的原结果，不再次扣减；同键不同sku或qty须抛Error('IDEMPOTENCY_CONFLICT')。不足抛Error('OUT_OF_STOCK')，不占用requestId。成功扣减与请求账本必须一起提交，不能一项成功一项失败。数据库错误原样向上抛出，不伪造业务成功。\n\n[M2 唯一可用数据库契约，均为本题定义，不需查资料]\ndb.getStock(tenant,sku)：异步返回库存，不存在视为0。\ndb.setStock(tenant,sku,n)：异步写库存。\ndb.getRequest(tenant,requestId)：异步返回undefined或{sku,qty,result}。\ndb.putRequest(tenant,requestId,record)：异步插入，已存在则抛唯一键冲突。\n上述单独操作原子，但多个调用间可被其他进程穿插。\ndb.tx(tenant, async tx => {...})：同租户事务可串行化，包括尚不存在的请求键；tx提供相同四个方法且限制在该tenant内。回调异常会回滚全部写入；成功则一起持久提交。db.tx返回回调结果。跨租户独立。断连可能发生在提交前或提交后，调用方收到同一种数据库超时；数据库仍保证全有或全无，调用方事后可用相同requestId再次请求。没有外部支付、消息或其他副作用。\n服务有两个进程，请勿发明新的数据库API或引入外部依赖。\n\n[M3 当前实现]\nasync function reserve(db, { tenant, sku, requestId, qty }) {\n  const old = await db.getRequest(tenant, requestId);\n  if (old) return old.result;\n  const stock = await db.getStock(tenant, sku);\n  if (stock < qty) throw new Error('OUT_OF_STOCK');\n  await db.setStock(tenant, sku, stock - qty);\n  const result = { remaining: stock - qty };\n  await db.putRequest(tenant, requestId, { sku, qty, result });\n  return result;\n}\n\n[M4 用于分析的起点，并非测试回执]\nA租户P库存5。请求r1要4件、r2要3件，两个进程可先后读到5。另有A/r3与B/r3同名请求，两个租户P均有库存。现有测试只描述了顺序成功扣一件；没有执行记录，其他覆盖情况未知。\n\n请说明原实现的决定性失败时序、为什么修法覆盖它而常见较小改法不够。测试设计写出受控初态/操作与可观察结果，区分推演和实测；指出尚待真实工程验证的边界。",
+  "expectations": [
+    "给出库存5、并发r1=4/r2=3都读5的具体交错，指出两请求可都成功且总预留7超过5（末库存可能为1或2），并指出分步扣库/写账本间失败会造成不一致；不能只写存在竞态。",
+    "修正实现保持原接口和成功结果形态，在所给db.tx中原子完成同租户请求查重、库存检查、扣减和账本插入；说明仅进程内锁或仅请求唯一键不足以同时解决双进程不同requestId超卖及原子提交。",
+    "幂等按(tenant,requestId)且校验sku/qty：同内容返回首次原结果、不再扣减；异内容抛IDEMPOTENCY_CONFLICT；不同租户同键互不冲突；提交后超时不等于未提交，不能换键盲重扣或声称确定失败。",
+    "代码在任何持久变更前拒绝非正安全整数qty为INVALID_QTY；库存不足保持库存/账本不变且不占用键；异常走事务回滚/原样抛出，不吞数据库错误或把未知提交状态当成功。",
+    "测试设计可直接落实为受控数据库夹具，给出初态/操作/预期，至少覆盖不同键并发超卖、同键并发及异参数、跨租户同键、非法qty、扣库后写账本失败回滚、提交后丢响应重放；并发用屏障/显式调度而非sleep碰运气，明确未执行且未提供的覆盖未知。"
+  ],
+  "hard_failure_conditions": [
+    "交付修正方案仍允许超卖、相同业务请求重复扣减、跨租户串账，或把扣库与幂等账本分离提交。",
+    "以超时证明提交未发生并推荐换requestId重做，或吞错误伪造成功。",
+    "声称已改真实文件、已执行测试且通过而没有实际回执；越过题面只读/无工具边界。"
+  ],
+  "scope": "静态工程诊断及可审查补丁提案；不验证仓库写入、实际测试、部署或完整软件工程资格。 本次为同安装基线在运行时修复后的重复/重试，不是新旧Skill对照。",
+  "configuration": "current_installed_package",
+  "blind": false
+}

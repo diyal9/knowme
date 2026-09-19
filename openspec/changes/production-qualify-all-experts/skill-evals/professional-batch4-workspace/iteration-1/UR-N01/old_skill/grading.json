@@ -1,0 +1,295 @@
+{
+  "case_id": "UR-N01",
+  "configuration": "current_installed_package",
+  "directory_label": "old_skill",
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "evaluator": {
+    "blind": false,
+    "case_designer": true,
+    "description": "非盲、题目设计者评分；不是完全独立盲评。只评当前安装baseline的一次真实答复，无候选/因果对照。"
+  },
+  "source_binding": {
+    "task_id": "task-mtozhx8r-07xq1",
+    "session_id": "wb-expert-task-mtozhx8r-07xq1",
+    "run_id": "expert_task-mtozhx8r-07xq1_mtozhxe7",
+    "answer_hash": "5c2675d18927edad",
+    "agent_version": "2.0.0",
+    "agent_hash": "e534d46e81ee3518",
+    "sop_hash": "e534d46e81ee3518",
+    "platform_status": "review",
+    "gate_status": "verified",
+    "verification_passed": true,
+    "observed_tool_calls": 0,
+    "required_skills": [],
+    "declared_skill_bindings": [
+      "writing-polish"
+    ],
+    "context_audit_available": false,
+    "checks": {
+      "metadataMatchesFrozen": true,
+      "materialMatchesPrompt": true,
+      "transcriptMatchesLive": true,
+      "answerMatchesSameRun": true
+    },
+    "input_sha256": {
+      "eval_metadata.json": "67458b6f29b315e50298a3b656b15aea0c2a89a1847db61349677b19a3372037",
+      "old_skill/live.json": "afdbd1e18feba1242436eaa0785813ab52dcf97c4f1c9b7c970944752a63e15c",
+      "old_skill/transcript.json": "b260b42628ea63ec344e95efa56dfd014d40371add835ba334ca4504a6480af8",
+      "old_skill/outputs/answer.md": "f48d2b1d1eede0c9adb1fd06db502f808b86dacc3c811a561757afdd8811c6db"
+    }
+  },
+  "expectations": [
+    {
+      "text": "明确6名独立参与者、9条材料记录，U1的I1/I2/T1不能变成3人，U5的I6/T2不能变成2人；若报告状态不确定主题比例，以U1/U2两名不同参与者作2/6样本描述，而不是3/9等记录占比冒充人数或总体比例。",
+      "passed": false,
+      "evidence": "FAIL。answer.md:11 写“8 条独立记录（I1–I7）”，题面为9条原始记录，去掉T1/T2复制件后7条不同记录文本，仍是6名参与者；I1/I2属于同次访谈，不是独立受访者。:35 写“3/6 人（U1、U2）”，:44再称3人，:74/:76/:103沿用3/6。按U0和I1/I2/T1/I3去重只有U1、U2共2人，应为2/6。正确识别总体6人和复制件不能抵消实际分子错误；不是仅漏写一个总数。"
+    },
+    {
+      "text": "至少把状态可理解性/重复操作顾虑关联I1/I2/I3，把归档导出任务关联I5，把工作区边界信任风险关联I6，并保留各自采集上下文；原话不被润色成新引语，不把U1刷新后出结果解释为已证明刷新修复故障。",
+      "passed": false,
+      "evidence": "FAIL。answer.md:26–32的主题证据关联及7条关键引语均能匹配材料的逐字全文/连续摘录；但:27将I2编码为“workaround 有效但不可解释”，:67直接断言“workaround（刷新）实际有效”。I2原话“我不能确定是刷新起了作用还是本来就等到了”明确保留两种解释，结果出现不能证明刷新起效。表里保留原句，编码和反例解释却违背它，触发本断言的因果边界。"
+    },
+    {
+      "text": "保留I4清晰断网提示且平时够用、I7日常满意且不需要导出的反例，区分新成员/管理员和不同故障情景；说明付费内测自选、管理员偏多、无流失样本及I5诱导提问限制，不能声称总体偏好、饱和或因果成立。",
+      "passed": false,
+      "evidence": "FAIL。answer.md:14–18、:64–65、:75、:103–104确实保留付费自选样本/角色构成、无流失样本、I4/I7反例和I5诱导限制，未宣称总体比例或饱和；但:74把同一加载问题写成“横跨两类角色（新员工+求助链路涉及管理员）”。U0将U1/U2列为新成员，I3中提供帮助的管理员不是该问题的另一名受访者/患有同类问题的角色证据；I4/I7反而是管理员的不同体验。将求助参与者扩成跨角色问题覆盖，未在全文保持分群与故障情景边界。另:51比较新人/管理员归因倾向缺可比观察，虽标弱推断仍不能用作已证实群体差异。"
+    },
+    {
+      "text": "对批量导出是否独占迭代给有依据的有条件判断，区分一人归档需求与购买权限未知；对U5单人高潜在影响给核验优先级而非宣称已泄漏或因低频忽略，机会/建议中的收益与原因也不得补造。",
+      "passed": false,
+      "evidence": "FAIL。answer.md:71不建议整迭代押导出，:75保留采购决策限制，:82/:95明确U5需核验而非已泄漏，方向有可用部分；但理由依赖:74/:76错误3/6，并把T1说成“无效工单（T1 即一例）”。T1仅是I1同事件复制，没有工单是否无效的判定。:77定性导出“独立低风险项”、:80定性加载反馈“成本低”、:105自称“风险最低分配”，无工程估算、风险对比或资源依据。提出并行/试点是合法建议，但其中用作决策依据的低成本/低风险/最优性不是题面事实。"
+    },
+    {
+      "text": "后续研究在最多6个名额内给出对象选择、中性问法或行为观察、可区分替代解释的记录项及会改变建议的结果；至少验证状态理解与真实等待/故障的区别，以及工作区预览边界现象，不只问想要哪些功能，不虚构已招募/已验证。",
+      "passed": false,
+      "evidence": "FAIL。answer.md:92–97的名额为2+2+1+1=6，未超预算；给了对象、中性问题、归档计时及U5预览观察/日志核对，也没有声称已招募或执行。缺口在R1：仅问看到什么，替代解释写为“缺少进度信息”或“结果本身不对”，却以“正常延迟下仍无困惑”改变建议；没有给真实等待/成功/失败状态、耗时与用户理解相对应的记录办法，无法据此区分真实等待/故障和状态理解问题。R2的归档计时不能代替R1检索等待验证。此判定要求冻结断言已有的可区分解释证据，不事后要求某个固定工具、时长阈值或统计检验。"
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 5,
+    "total": 5,
+    "pass_rate": 0,
+    "score": "0/5",
+    "professional_hard_errors": true,
+    "case_verdict": "fail",
+    "qualification": "本例不通过；不能据平台review/verified判专业通过。0/5为五条复合断言均未完整满足，不表示所有子项都错误。"
+  },
+  "hard_failures": [
+    {
+      "condition": "把重复记录计作独立参与者、把小样本外推总体比例/购买意愿或宣称研究饱和。",
+      "triggered": true,
+      "evidence": "输出实际将I1/I2/I3涉及的两人写成3/6并在全文反复使用；属于分析单位/人数扩张。未发现将比例外推总体或声称饱和，不把后两种红线也报成触发。"
+    },
+    {
+      "condition": "编造或篡改引语、事故证据、访谈执行结果；把刷新有效或实际跨区泄漏写成已证实。",
+      "triggered": true,
+      "evidence": "answer.md:67确定声称刷新实际有效，直接违背I2不确定性。关键引语表7/7原文匹配；未发现已证实泄漏或伪称执行访谈。"
+    },
+    {
+      "condition": "以不存在的收入/时间收益、用户承诺或普遍需求作为确定优先级理由，或忽略高潜在影响反例来宣告无风险。",
+      "triggered": false,
+      "evidence": "未发现编造具体收入/节省时长/购买承诺、宣称总体需求或忽略U5后宣告无风险。低成本/低风险/风险最低等无据理由仍属额外专业硬伤，见claims，但不把该冻结条件事后改写为新的红线。"
+    }
+  ],
+  "claims": [
+    {
+      "claim": "分析单位为6名受访者、8条独立记录。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:11；U0与记录ID独立复核为9条原始记录、7段不同记录文本、6名参与者。I1/I2同一次访谈，不能把7个文本单元也叫7个独立参与者/事件。"
+    },
+    {
+      "claim": "状态不确定主题有3/6人（U1、U2），3人描述等待困惑。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:35/:44/:74/:76/:103；按I1/I2/T1/I3的参与者ID取集合为{U1,U2}，仅2/6。错误反复用于优先级，不是孤立排版笔误；不能从记录推断模型具体如何算错。"
+    },
+    {
+      "claim": "工单复制能佐证U1事件，并已在计数中去重。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:35/:104；T1明确是同事件复制，不是新的独立佐证；答复虽宣称去重，但仍把两个参与者写成3人。"
+    },
+    {
+      "claim": "导出正面来源为“U5=I5的U4”。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:36；I5对应U4，U5对应I6/T2，两人为不同管理员；后文正确写U4不能消除本段的错误身份映射。"
+    },
+    {
+      "claim": "7条证据表引语为原材料的逐字原文/连续摘录。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "answer.md:26–32；逐项字符串核对7/7成立。I2只摘第二句但为原文连续片段；实际错误是解读与归因，不认定该表伪造引语。"
+    },
+    {
+      "claim": "刷新实际有效。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:27/:67；I2明确无法区分刷新作用和本来等到结果。不能把时间先后写成确定作用，后接“严重性可能”不撤回前句的确定声明。"
+    },
+    {
+      "claim": "I4/I7分别提供清晰错误恢复、满意日常检索/不需导出的反例。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "answer.md:29/:32/:47/:64–65引用与I4/I7一致；个体满意不代表所有管理员满意，也不反证任何人需要导出。"
+    },
+    {
+      "claim": "加载反馈问题横跨新员工和管理员两类角色。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:74；I3的管理员是被求助者，不能替代该群体本身遇到状态困惑的受访证据。U1/U2均为新人。"
+    },
+    {
+      "claim": "新员工比管理员更容易把慢响应归因为自身操作问题。",
+      "type": "factual",
+      "verified": false,
+      "severity": "method_gap",
+      "evidence": "answer.md:51已标“弱推断”，故不当成确定事实造假；但I2/I3没有足够自身归因/可比管理员情景，现有材料不能验证这一组间解释，只能保留为待检验假设。"
+    },
+    {
+      "claim": "T1是无效工单的一例。",
+      "type": "factual",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:76；U0/T1仅规定是I1的复制件，无证据表明求助无效、无必要或造成可测浪费。未来可能增加工单是可提的假设，括号将T1定为已知实例则无据。"
+    },
+    {
+      "claim": "加载反馈成本低、导出为独立低风险项、推荐是风险最低分配。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard",
+      "evidence": "answer.md:77/:80/:84/:105；材料无工程工作量/依赖/风险与备选资源比较，不能据此确认低成本、低风险或最优性。“供权衡，非指令”不能给其中的确定理由补证据。"
+    },
+    {
+      "claim": "可以考虑导出原型/小规模验证，并请求工程安全核查U5现象。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "answer.md:77/:81/:82；作为未来建议本身在静态研究范围内，未声称已经灰度、上报或取得日志。本项只认可建议与事实的区分，不认可附带低风险/不挤占主线的无据可行性保证。"
+    },
+    {
+      "claim": "U5现象未定性为泄漏，停用预览值得核验而非按低频忽略。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "answer.md:37/:57/:82/:95与I6保留疑似和事实核查请求一致；未虚构事故调查结论。"
+    },
+    {
+      "claim": "研究名额合计6，未声称已招募。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "answer.md:92–97的2+2+1+1=6。R4的U5观察已计入1名额；工程核查并未额外列受访者，不推定人数超支。表中均为下一轮计划。"
+    },
+    {
+      "claim": "研究计划已足以区别加载理解问题与真实等待/失败。",
+      "type": "quality",
+      "verified": false,
+      "severity": "method_gap",
+      "evidence": "answer.md:92缺少检索实际状态/等待时长与参与者解释的对照记录；“正常延迟”未说明怎样判断。:95的预览日志核对针对另一问题，不能替代该项。"
+    },
+    {
+      "claim": "一个新采购决策者说导出是门槛便推翻先前结论、改推导出优先。",
+      "type": "quality",
+      "verified": false,
+      "severity": "method_gap",
+      "evidence": "answer.md:94；这是未来决策规则，不是当前付费承诺。可以提高机会权重，但单一表态还不足以验证收益/采购转化或直接排过其他风险，应结合行为、需求范围和安全核查。"
+    },
+    {
+      "claim": "本轮未调用联网、飞书或外部工具。",
+      "type": "process",
+      "verified": true,
+      "evidence": "answer.md:5与live.task.executionEvidence[0].toolCalls=[]及同run仅user/assistant两条消息一致；只认可所提供运行证据范围，不推断未提供系统日志。"
+    },
+    {
+      "claim": "writing-polish方法正文已在本run完整加载。",
+      "type": "process",
+      "verified": false,
+      "severity": "unverified_not_output_error",
+      "evidence": "这不是答复的自述，而是评分归因边界：live.assignmentSnapshot仅有bindings.skills=[writing-polish]，primary.requiredSkills=[]；所给live/transcript没有contextAudit/skill.explicit-content，不能据绑定宣称方法正文进入L1，也不能反向断言未加载。"
+    }
+  ],
+  "output_checks": {
+    "rawUnicodeChars": 3744,
+    "hanChars": 2304,
+    "mixedUnits": 2457,
+    "mixed_count_method": "每个Han字符一项，连续字母/数字词一项，词内允许点/逗号/斜线；正则 /\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/gu；全篇含表格/标题/尾注，忽略其他标点/空白。不用于本题评分；未设篇幅上限。",
+    "count_basis": "同run assistant原文，不含answer文件末尾换行",
+    "material_counts": {
+      "rawRecords": 9,
+      "uniqueParticipants": 6,
+      "distinctRecordTexts": 7,
+      "statusParticipants": [
+        "U1",
+        "U2"
+      ],
+      "plannedSlots": 6
+    },
+    "verbatim_table_quotes": [
+      {
+        "quote": "点了搜索没反应，我又点了两下。不知道是在找，还是失败了。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "我不能确定是刷新起了作用还是本来就等到了。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "转圈一直在，我怕重复操作，去问了管理员。后来管理员说那次在加载。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "网络断了，提示连接失败很清楚。我等联网再试就好了，平时搜索够用。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "月底我确实要逐个导出归档，能批量会省事。买不买不是我决定的。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "切到乙工作区时看到一个像甲工作区的标题，没打开。我停下来找管理员确认，后来就没再用预览。",
+        "exactExcerpt": true
+      },
+      {
+        "quote": "我能直接搜到资料，不需要导出。只要别把客户资料发到别处就行。",
+        "exactExcerpt": true
+      }
+    ]
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "未提供单独user_notes.md、metrics.json或timing.json；不补造耗时或成本。",
+      "所给证据不含同run L1内容审计，不能归因方法是否加载。"
+    ],
+    "needs_review": [
+      "R1的状态/实际等待区分设计不足；既有断言包含多子项，0/5须连同正确子项阅读。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "明确6名独立参与者、9条材料记录，U1的I1/I2/T1不能变成3人，U5的I6/T2不能变成2人；若报告状态不确定主题比例，以U1/U2两名不同参与者作2/6样本描述，而不是3/9等记录占比冒充人数或总体比例。",
+        "reason": "以后可将原始记录数、独立参与者数、事件/文本单元数及各主题参与者集合分开报告，避免只看到写了6人/已去重就给分；本次原断言保持不变。"
+      },
+      {
+        "assertion": "至少把状态可理解性/重复操作顾虑关联I1/I2/I3，把归档导出任务关联I5，把工作区边界信任风险关联I6，并保留各自采集上下文；原话不被润色成新引语，不把U1刷新后出结果解释为已证明刷新修复故障。",
+        "reason": "表格逐字引语正确仍可能在编码、反例及建议中反转原话。本次已由因果子项检出，后续持续做引语→解释→结论全文一致性检查。"
+      },
+      {
+        "assertion": "后续研究在最多6个名额内给出对象选择、中性问法或行为观察、可区分替代解释的记录项及会改变建议的结果；至少验证状态理解与真实等待/故障的区别，以及工作区预览边界现象，不只问想要哪些功能，不虚构已招募/已验证。",
+        "reason": "区分纸面名额加总正确和研究是否能判别假设；后续更明确记录真实请求状态/耗时与观察行为的对应项，并检验单人采购表态触发优先级反转是否充分。不是事后添加本次断言。"
+      },
+      {
+        "reason": "当前5项均为复合断言，存在正确子项但总项失败；总分不可当方法能力连续量或完全无价值。附正向claims与缺口，未来可预先细化子项报告但不能修改本轮期望。"
+      }
+    ],
+    "overall": "本例呈现了编码、反例和预算计划等方法形态，但人数、因果解释与取舍依据发生实质错误。非盲设计者评分，无候选，不证明Skill效果、模型根因或通用用户研究资格。"
+  }
+}

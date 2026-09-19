@@ -1,0 +1,396 @@
+{
+  "observation": {
+    "scope": "isolated QA actual task and session; not pre-gate candidate",
+    "qualification": false
+  },
+  "data": {
+    "caseId": "R27-RA-N01",
+    "id": "task-mtpobz00-npnqc",
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtpobz00-npnqc",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "RQA27 小样本研究与宣传冲突",
+      "expertId": "research-analyst",
+      "expertName": "",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。",
+      "brief": {
+        "goal": "请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。",
+        "plan": {
+          "goal": "请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "user-confirmation",
+            "type": "user_confirmation",
+            "title": "用户确认",
+            "ref": "",
+            "content": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "任务成果",
+            "type": "document",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "research-analyst",
+        "agentVersion": "2.0.0",
+        "agentHash": "170c5c91f40d6193",
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtpobz00-npnqc",
+        "bindings": {
+          "skills": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "permissions": {},
+        "plan": {
+          "goal": "请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "sop": {
+          "version": "2.0.0",
+          "hash": "170c5c91f40d6193"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:41.616Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:41.950Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:42.039Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:42.119Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:42.119Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:42.119Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:33:42.172Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "回答生成完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:34:22.068Z"
+        },
+        {
+          "id": "event-9",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "生成失败",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:34:38.609Z"
+        },
+        {
+          "id": "event-10",
+          "type": "failed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 10,
+          "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:34:38.704Z"
+        }
+      ],
+      "attention": {
+        "kind": "retryable_failure",
+        "action": "retry",
+        "title": "本次执行未完成",
+        "detail": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+        "field": "",
+        "item": "专家执行",
+        "question": "",
+        "example": "",
+        "options": [],
+        "defaultValue": "",
+        "required": true,
+        "createdAt": "2026-09-06T10:34:38.682Z"
+      },
+      "progress": {
+        "phase": "failed",
+        "label": "执行失败",
+        "detail": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+        "startedAt": "2026-09-06T10:33:42.022Z",
+        "updatedAt": "2026-09-06T10:34:38.682Z",
+        "heartbeatAt": "2026-09-06T10:34:38.682Z"
+      },
+      "inputQueue": null,
+      "deliverables": [],
+      "executionEvidence": [],
+      "resultSummary": "",
+      "status": "failed",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtpobz00-npnqc"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-06T10:33:41.616Z",
+      "updatedAt": "2026-09-06T10:34:38.704Z"
+    },
+    "session": {
+      "id": "wb-expert-task-mtpobz00-npnqc",
+      "agentId": "personal",
+      "sessionKind": "expert-task",
+      "profileId": "",
+      "contextId": "",
+      "projectId": null,
+      "expertId": "research-analyst",
+      "personaExpertId": "",
+      "executionPolicy": "tools-allowed",
+      "capabilitySnapshotId": "",
+      "snapshotPath": "",
+      "ephemeral": true,
+      "taskRef": {
+        "id": "task-mtpobz00-npnqc"
+      },
+      "knowledgeRefs": [],
+      "title": "新助手",
+      "createdAt": "2026-09-06T10:33:41.662Z",
+      "updatedAt": "2026-09-06T10:33:42.409Z",
+      "summary": "",
+      "messages": [
+        {
+          "id": "msg_expert_task-mtpobz00-npnqc_mtpobzej_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「research-analyst」。\n\n你是 KnowMe 研究分析师。先拆解研究问题和证据标准，再对来源做时效、相关性和可信度评估。所有关键结论附可追溯来源，无来源时进入等待输入。\n\n【必须遵循的 SOP】\n你是 KnowMe 研究分析师。先拆解研究问题和证据标准，再对来源做时效、相关性和可信度评估。所有关键结论附可追溯来源，无来源时进入等待输入。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。\n\n当前时间：2026-09-06T10:33:42.139Z\n\n材料：\n- 用户确认\n已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请用以下完整合成材料回答产品负责人的问题：“这些证据足以支持下季度全员推广并宣传提效10倍吗？”直接给研究结论、简短证据矩阵与下一步研究建议，不用去检索外部资料。\nS1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人的成功配对任务统计，中位耗时旧90秒、新45秒，没有原始时长列表或差异分布。另2人新工具PDF任务失败，未进入上述耗时中位数；失败原因未知。\nS2（市场宣传草案，2026-09-01）：写“全员效率提高10倍”，未提供测量方法、样本或新数据；草案作者引用的底层材料就是S1。\nS3（部门周报，2026-09-02）：转载S2的10倍说法，没有独立研究，也未新增受试者。\nS4（访谈摘录）：成功参与者说入口更清楚；一位失败参与者说PDF结果找不到。两者是S1参与者的补充表述，不能增算独立样本。\n请计算在这个受限统计口径下能确认的变化，解释为什么不等于全体用户或因果提效，也不要从中位数反推出每个人提升或总体总耗时。保留失败样本，不用多篇转载凑“多源验证”。给出支持/不支持推广与宣传的分开判断、尚缺证据，以及可以区分练习/顺序效应和工具效果的实际研究设计建议。只需建议，不宣称已随机实验或已收集新数据。\n仅引用S1—S4，不联网、不读其他文件、不调用工具、不创建文档或发送消息。\n步骤：\n1. 仅依据已给材料完成专业分析及对话交付\n风险：未核实内容不得编造成事实；无外部操作授权\n\n本轮交付物：任务成果（document）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtpobz00-npnqc_mtpobzej",
+          "createdAt": "2026-09-06T10:33:42.202Z"
+        }
+      ],
+      "pinned": false,
+      "run": {
+        "goal": "当前工作",
+        "role": "general",
+        "status": "active",
+        "toolsUsed": [],
+        "steps": [],
+        "artifacts": [],
+        "applyLog": []
+      },
+      "displayTitle": "用以下完整合成材料回答产品负责人的问题：“这些证据足以支",
+      "labels": [
+        "资料"
+      ],
+      "grounding": "目标：S1（内部试验记录，2026-08-30）：12位自愿报名同事，同一批人先用旧工具、再用新工具完成相似任务，顺序未随机，无对照组。10人两次都成功；只对这10人\n材料：用户提到的材料（正文未提供）\n约束：用户尚未提供\n期望结果：用户尚未明确提供",
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "expertTaskDiagnostics": {
+        "available": 30,
+        "loaded": null,
+        "loadedNames": [],
+        "omitted": null,
+        "usedTokens": "[redacted]",
+        "schemaTokens": "[redacted]",
+        "inputBudget": null,
+        "expansion": null,
+        "reason": "按任务需求、已发现工具与执行契约选择"
+      },
+      "expertName": "研究分析师",
+      "expert": {
+        "id": "research-analyst",
+        "name": "研究分析师",
+        "description": "围绕研究问题组织证据、比较观点，产出带来源与不确定性的结论",
+        "avatar": "office/collaborator",
+        "soul": "",
+        "sop": "你是 KnowMe 研究分析师。先拆解研究问题和证据标准，再对来源做时效、相关性和可信度评估。所有关键结论附可追溯来源，无来源时进入等待输入。",
+        "agenticType": "react",
+        "agenticConfig": {
+          "agenticType": "react",
+          "enableReflection": true,
+          "enableTools": true
+        },
+        "bindings": {
+          "skills": [
+            "knowledge-steward",
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "readiness": {
+          "state": "ready",
+          "items": [
+            {
+              "id": "knowledge-steward",
+              "kind": "skill",
+              "status": "ready"
+            },
+            {
+              "id": "writing-polish",
+              "kind": "skill",
+              "status": "ready"
+            }
+          ],
+          "issues": []
+        },
+        "source": "snapshot"
+      },
+      "knowledge": {
+        "mode": "default",
+        "activeProviderId": "local-default",
+        "selected": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local",
+            "status": "default"
+          }
+        ],
+        "available": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local"
+          }
+        ],
+        "degraded": false,
+        "message": ""
+      }
+    }
+  }
+}

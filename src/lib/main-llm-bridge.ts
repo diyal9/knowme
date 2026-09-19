@@ -51,6 +51,7 @@ function createIpv4FirstLookup() {
 
 /** Qwen3 兼容模式默认开思考，可能长时间不吐首包；未显式打开时关掉。 */
 const FIRST_BYTE_TIMEOUT_MS = 15000
+const FIRST_BYTE_RETRY_LIMIT = 1
 const STREAM_IDLE_TIMEOUT_MS = 120000
 const PROBE_TIMEOUT_MS = 8000
 
@@ -158,9 +159,13 @@ function requestAgentCompletion({
   onSnapshot,
   signal,
   firstByteMs = FIRST_BYTE_TIMEOUT_MS,
+  firstByteRetries = FIRST_BYTE_RETRY_LIMIT,
   idleMs = STREAM_IDLE_TIMEOUT_MS,
 }) {
-  return new Promise(resolve => {
+  const retryLimit = Math.max(0, Math.min(2, Number.isFinite(Number(firstByteRetries))
+    ? Math.floor(Number(firstByteRetries))
+    : FIRST_BYTE_RETRY_LIMIT))
+  const runAttempt = attempt => new Promise(resolve => {
     const lib = url.protocol === 'https:' ? https : http
     const port = url.port || (url.protocol === 'https:' ? 443 : 80)
     const compatBody = applyProviderCompat(url, body, settings)
@@ -169,7 +174,11 @@ function requestAgentCompletion({
     const started = Date.now()
     const bytes = Buffer.byteLength(payload)
     try {
-      logger.llm('llm-request', 'LLM 请求发出', llmCallMeta(url, compatBody, { bytes }))
+      logger.llm('llm-request', 'LLM 请求发出', llmCallMeta(url, compatBody, {
+        bytes,
+        attempt: attempt + 1,
+        attemptLimit: retryLimit + 1,
+      }))
     } catch { /* 日志失败不影响请求 */ }
     let req
     let timeouts
@@ -290,6 +299,25 @@ function requestAgentCompletion({
     req.write(payload)
     req.end()
   })
+  return (async () => {
+    let result
+    for (let attempt = 0; attempt <= retryLimit; attempt += 1) {
+      result = await runAttempt(attempt)
+      const retryable = result?.timedOut === true
+        && result?.phase === 'first-byte'
+        && !signal?.aborted
+        && attempt < retryLimit
+      if (!retryable) return result
+      try {
+        logger.llm('llm-retry', '首包超时，自动重试', llmCallMeta(url, body, {
+          attempt: attempt + 2,
+          attemptLimit: retryLimit + 1,
+          retryReason: 'first-byte-timeout',
+        }), { level: 'warn' })
+      } catch { /* 日志失败不影响重试 */ }
+    }
+    return result
+  })()
 }
 
 function cleanSuggestedTitle(raw) {
@@ -335,12 +363,16 @@ function chatCompletionOnce(s, messages, maxTokens = 80, options = {}) {
     ? Number(options.firstByteMs)
     : FIRST_BYTE_TIMEOUT_MS
   const idleMs = Number.isFinite(Number(options.idleMs)) ? Number(options.idleMs) : 20000
+  const firstByteRetries = Number.isFinite(Number(options.firstByteRetries))
+    ? Number(options.firstByteRetries)
+    : FIRST_BYTE_RETRY_LIMIT
 
   return requestAgentCompletion({
     url,
     settings: s,
     body,
     firstByteMs,
+    firstByteRetries,
     idleMs,
   }).then((result) => {
     if (result.error) {
@@ -384,6 +416,7 @@ async function probeLlmConnection(s) {
     model,
     temperature: 0,
     firstByteMs: PROBE_TIMEOUT_MS,
+    firstByteRetries: 0,
     idleMs: PROBE_TIMEOUT_MS,
   })
   return {
@@ -397,6 +430,7 @@ async function probeLlmConnection(s) {
 
 module.exports = {
   FIRST_BYTE_TIMEOUT_MS,
+  FIRST_BYTE_RETRY_LIMIT,
   STREAM_IDLE_TIMEOUT_MS,
   PROBE_TIMEOUT_MS,
   formatLlmTimeoutError,

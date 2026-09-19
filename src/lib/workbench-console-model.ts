@@ -98,8 +98,12 @@ function buildAutomationLaunchRequest(job = {}, facts = {}) {
       resourceId: workflowId,
       goal: text(job.prompt),
       backend: launchBackend,
+      projectId: text(job.projectId) || undefined,
       inputRefs: [],
-      returnState: { automationJobId: text(job.id) },
+      returnState: {
+        automationJobId: text(job.id),
+        projectId: text(job.projectId) || undefined,
+      },
     },
   }
 }

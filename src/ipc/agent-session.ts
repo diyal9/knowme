@@ -76,6 +76,7 @@ function registerAgentSessionIpc(ipcMain, deps) {
       sessionKind: opts.sessionKind || (expertId ? 'expert-task' : 'personal-topic'),
       profileId: opts.profileId || (expertId ? '' : 'my-knowme'),
       contextId: opts.contextId,
+      projectId: opts.projectId,
     })
     if (expertId) {
       const hub = ensureCapabilityHub()

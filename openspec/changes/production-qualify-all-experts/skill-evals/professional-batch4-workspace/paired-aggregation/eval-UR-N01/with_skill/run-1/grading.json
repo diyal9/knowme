@@ -1,0 +1,164 @@
+{
+  "expectations": [
+    {
+      "text": "明确6名独立参与者、9条材料记录，U1的I1/I2/T1不能变成3人，U5的I6/T2不能变成2人；若报告状态不确定主题比例，以U1/U2两名不同参与者作2/6样本描述，而不是3/9等记录占比冒充人数或总体比例。",
+      "passed": false,
+      "evidence": "§1及§5将原始材料写为8条（6访谈记录+2工单）。独立核算为I1至I7七条访谈片段加T1/T2共9条；六人接受访谈不等于六条访谈记录。去掉两条逐字复制后保留7个不同片段；若按同一事件合并I1/I2需另说明，不能以‘6条独立证据’吞掉I2补充的不确定性。六名参与者、2/6及T1/T2不增人数是正确点，但明确记录数要求失败。"
+    },
+    {
+      "text": "至少把状态可理解性/重复操作顾虑关联I1/I2/I3，把归档导出任务关联I5，把工作区边界信任风险关联I6，并保留各自采集上下文；原话不被润色成新引语，不把U1刷新后出结果解释为已证明刷新修复故障。",
+      "passed": true,
+      "evidence": "§2主题A关联I1/I2/I3，主题C关联I5及诱导提问，主题B关联I6/T2及停止预览；原话为真实原句或未改变意义的连续摘录。I2明确‘无法归因’，没有写成刷新已证明修复故障。首次使用、管理员归档与疑似边界线索的上下文得到保留。§3过强因果与价值排序另在断言3/4及claims计，不将正确主题映射抹掉。"
+    },
+    {
+      "text": "保留I4清晰断网提示且平时够用、I7日常满意且不需要导出的反例，区分新成员/管理员和不同故障情景；说明付费内测自选、管理员偏多、无流失样本及I5诱导提问限制，不能声称总体偏好、饱和或因果成立。",
+      "passed": false,
+      "evidence": "虽在§1及§2保留角色差异、自选内测、管理员偏多、缺失人群、I5诱导提问和I4/I7反例，§4却规定‘若≥2/2仍出现无反馈焦虑→主题A具普遍性’，以及两人无抱怨即可判定原内测自选择放大问题。§3还称反馈缺失为首程‘最大摩擦点，直接导致’成本。末尾小样本免责声明不能消除正文/研究判据中的普遍性与原因升级。未来条件式推断也需有效，不将它误报为已经完成了新研究。"
+    },
+    {
+      "text": "对批量导出是否独占迭代给有依据的有条件判断，区分一人归档需求与购买权限未知；对U5单人高潜在影响给核验优先级而非宣称已泄漏或因低频忽略，机会/建议中的收益与原因也不得补造。",
+      "passed": false,
+      "evidence": "§3‘不建议独占迭代’和要求验证导出频次/耗时具有依据，U4非购买决策者、U5单人高影响待核查也被识别。但机会表将现象写为‘最大摩擦点，直接导致…成本’、弃用预览‘表明信任脆弱性高于效率诉求’，没有比较或因果证据。§4若一次不可复现且担忧怕看错便按边缘case降级，会把核验覆盖不足变成风险低的依据。失败不在暂缓导出这一合理主观选择，而在理由和后续取舍越过证据。"
+    },
+    {
+      "text": "后续研究在最多6个名额内给出对象选择、中性问法或行为观察、可区分替代解释的记录项及会改变建议的结果；至少验证状态理解与真实等待/故障的区别，以及工作区预览边界现象，不只问想要哪些功能，不虚构已招募/已验证。",
+      "passed": false,
+      "evidence": "名额2+2+1+1≤6，且有任务、对象及中性问题；但新成员只记录点击/求助/总时长/困惑，没有实际请求状态、等待/错误事件与行为时间的对照，不能区分真实等待/故障与状态理解。2/2普遍性、0/2归因偏差、一次不可复现降级都是不充分的判据。测试环境未明确合成工作区内容；仅演示旧导出流程的耗时也不能直接测出批量导出月均节省量，却以<2小时‘彻底排除’独占迭代。建议阈值可提出，但需要待决策口径及能实际观测的比较，而非把任意阈值当证明。"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  },
+  "claims": [
+    {
+      "claim": "9条材料被写成8条，六次访谈被当成六条访谈记录。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "I1-I7加T1/T2=9；§1与§5重复8→6。六名独立参与者正确，但人/访谈场次/片段/事件的单位不等价。"
+    },
+    {
+      "claim": "问题不在等待本身，而在等待时无状态区分；这是新用户最大摩擦点并直接导致求助成本。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "I1/I2/I3支持状态理解困难的线索，不能排除真实延迟或技术故障；I4为不同断网情境的单人反例，不能充当状态设计的因果对照，也无所有摩擦点排名依据。"
+    },
+    {
+      "claim": "U6对导出持否定态度，安全诉求高于导出便利；U5行为证明信任高于效率。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "I7说自身不需要导出并在意资料外传，不是反对其他人的导出需求；I6未与效率作比较。可提出研究者解释，但原文观察事实/洞察栏未保留这一条件。"
+    },
+    {
+      "claim": "诱导提问意味着U4所述归档任务本身只是条件式愿望。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "I5中‘月底我确实要逐个导出归档’是任务自述；诱导提问主要限制所假设方案的价值和购买意愿推断，不足以否定所有任务证据。将证据强度评低是主观判断，不单独扣分；将真实任务和假设付费回应混为一谈才是边界问题。"
+    },
+    {
+      "claim": "两名新成员均出现问题即可说明普遍性；均没抱怨即可判原样本自选择放大。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "条件中的观察即便发生也只能增加这两次情境的证据，不能证明总体普遍性或原样本的偏差原因。§5免责声明与该操作判据冲突。"
+    },
+    {
+      "claim": "一次测试不可复现且担心看错，就足以将跨工作区线索降级为边缘case。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "未覆盖触发版本、数据、权限与状态组合；不可复现不证明原事件低风险。没有说本次已证实泄漏，也不能说已证明无泄漏。"
+    },
+    {
+      "claim": "演示已有导出流程可得到批量导出月均节省工时，从而按2小时阈值彻底排除整迭代。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "只有当前流程数据，没有新方案对照、周期频次或决策价值口径；阈值未标为待协商的候选标准。不能用研究者设定的决策规则冒充可直接测得的净收益。"
+    },
+    {
+      "claim": "未执行调查、联系受访者或用工具验证技术根因。",
+      "type": "process",
+      "verified": true,
+      "evidence": "本run工具数0；研究表明确安排下一轮，没有已招募/已测试回执。静态建议中的目标不是本人已执行。"
+    }
+  ],
+  "hard_failure_condition_review": [
+    {
+      "condition_index": 1,
+      "status": "invalid_generalization_in_proposed_rule",
+      "evidence": "人数未重复膨胀，原始记录数有误；§4把未来2/2观察推成普遍性，构成确定的推断规则硬伤，但不记作新研究已经发生。"
+    },
+    {
+      "condition_index": 2,
+      "status": "not_observed_as_fabricated_quotes_or_incident",
+      "evidence": "引语为真实原句或连续摘录；未声称刷新修复已证实、已确认泄漏或实际执行调查。额外存在原因/价值排序升级，见claims。"
+    },
+    {
+      "condition_index": 3,
+      "status": "unsupported_decision_reasons",
+      "evidence": "最大摩擦、直接原因与信任高于效率无比较支持；未来不复现降级缺覆盖边界。未声称已有确定收入或当前安全无风险。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "无独立user_notes；导出没有本run contextAudit的explicit-content hash/chars，不能仅凭requiredSkills推定方法装配。"
+    ],
+    "needs_review": [
+      "计数单位、全篇推断强度和后续研究判据需要纠正。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "五冻结断言及全部notes用于全文而非只看主表；真实连续摘录不要求逐句全引，主观优先级选择不等于事实错误。"
+  },
+  "timing": {},
+  "observed_metrics": {
+    "answer_chars": 3344,
+    "answer_file_chars": 3345,
+    "han_chars": 2252,
+    "alnum_blocks": 121,
+    "han_plus_alnum_blocks": 2373,
+    "non_whitespace_including_punctuation_and_markdown": 3071,
+    "provider_prompt_tokens": 8138,
+    "provider_completion_tokens": 4073,
+    "provider_total_tokens": 12211,
+    "tool_calls": 0,
+    "length_limit": null,
+    "length_verdict": "无冻结字数限制；混合计数仅heuristic，不按raw Markdown长度扣分"
+  },
+  "review_metadata": {
+    "case_id": "UR-N01",
+    "configuration": "with_skill",
+    "installed_agent_version": "2.1.0",
+    "blind": false,
+    "candidate_author_participation": false,
+    "ur_skill_read_for_grading": false,
+    "task_id": "task-mtp2j4aq-g00u3",
+    "session_id": "wb-expert-task-mtp2j4aq-g00u3",
+    "run_id": "expert_task-mtp2j4aq-g00u3_mtp2j4qq",
+    "professional_status": "fail",
+    "professional_certification": false,
+    "platform_gate_status": "verified",
+    "terminal": "DONE",
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "stop"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "attribution_boundary": "评分对象是FINALIZE后最终交付，不断言错误首次出现在MODEL还是FINALIZE；整包2.0/2.1非盲单次比较，不作纯Skill因果归因。",
+    "binding_verified": "raw new-live task/capture按task ID匹配transcript；metadata/材料/冻结prompt与expectations一致；answer等于capture与assistant text加换行；timing匹配。",
+    "skill_context_boundary": "primary.requiredSkills含research-evidence-analysis，未读取其Skill正文；声明不等于同run完整装配证明。",
+    "input_sha256": {
+      "eval_metadata.json": "c1ca690b457878a06a4fcdc364cf43a0ba69f6b8e34baf04c4b68b11ed124a99",
+      "with_skill/transcript.json": "370e8e0349bf80da99e25139672807ddfe371f8f9c7e25fda2c98080977943c1",
+      "with_skill/outputs/answer.md": "de739c56c05e581d2dde1488ff5da056589e99ed7f473ea1b7fd1c7417c1dc26",
+      "with_skill/timing.json": "708fdb0335db595cb6ad1f8912045fbf701751bbc7479960dd126e9d8518d963"
+    }
+  }
+}

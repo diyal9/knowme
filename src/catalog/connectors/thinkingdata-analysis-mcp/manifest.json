@@ -1,0 +1,54 @@
+{
+  "id": "thinkingdata-analysis-mcp",
+  "kind": "connector",
+  "type": "mcp",
+  "version": "1.0.0",
+  "title": "数数分析 MCP",
+  "name": "数数分析 MCP",
+  "description": "连接 ThinkingData/数数分析服务，支持 guided QP、实时跑数、留存漏斗、报表和下钻；服务地址需在能力中心配置。",
+  "capabilities": ["analytics-query", "retention", "funnel", "report-query"],
+  "configState": "needs_configuration",
+  "mcp": {
+    "transport": "streamable-http",
+    "url": "",
+    "command": "",
+    "args": [],
+    "cwd": "",
+    "env": {}
+  },
+  "secretSlots": [
+    { "key": "THINKINGDATA_ACCESS_TOKEN", "label": "数数分析访问令牌", "required": false, "target": "header", "name": "mcp-token" }
+  ],
+  "allowlist": [
+    "list_projects",
+    "build_event_analysis_qp",
+    "build_retention_analysis_qp",
+    "build_funnel_analysis_qp",
+    "build_prop_analysis_qp",
+    "query_adhoc",
+    "drilldown_users",
+    "list_reports",
+    "get_report_definition",
+    "query_report_data",
+    "list_dashboards",
+    "query_dashboard_report_data",
+    "get_analysis_query_schema",
+    "list_events",
+    "list_properties",
+    "create_report",
+    "create_tag",
+    "create_cluster",
+    "get_resource_url"
+  ],
+  "healthCheck": { "tool": "list_projects", "timeoutMs": 30000 },
+  "toolPolicies": [
+    { "match": "create_*", "risk": "write", "sideEffects": true, "requiresApproval": true, "timeoutMs": 120000 },
+    { "match": "*", "risk": "read", "sideEffects": false, "requiresApproval": false, "timeoutMs": 120000 }
+  ],
+  "permissions": {
+    "tools": ["list_projects", "build_event_analysis_qp", "build_retention_analysis_qp", "build_funnel_analysis_qp", "build_prop_analysis_qp", "query_adhoc", "drilldown_users", "list_reports", "get_report_definition", "query_report_data", "list_dashboards", "query_dashboard_report_data", "get_analysis_query_schema", "list_events", "list_properties", "create_report", "create_tag", "create_cluster", "get_resource_url"],
+    "externalSystem": "thinkingdata",
+    "network": true,
+    "fileWrite": false
+  }
+}

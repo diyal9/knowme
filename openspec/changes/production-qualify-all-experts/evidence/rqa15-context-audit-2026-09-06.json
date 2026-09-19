@@ -1,0 +1,4586 @@
+{
+  "userData": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de",
+  "records": [
+    {
+      "runId": "expert_task-mtp24yar-rbgbx_mtp24yhe",
+      "ts": "2026-09-06T00:12:23.053Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***bx",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "软件开发工程师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1703,
+        "candidateEstimatedTokens": 1703,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "012f104e2ab5b16d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "e8d34666abe6b96d"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "bca5cbce137027d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 57,
+            "chars": 96,
+            "hash": "2d0e45ab1a48cc84",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 68,
+            "hash": "524214403af2ff39",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "19433d6e116025f7",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 131,
+            "chars": 204,
+            "hash": "086fad99252178da",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1267,
+            "lexicalScore": 0.0127,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp24yox-gr5k1_mtp24yur",
+      "ts": "2026-09-06T00:12:23.455Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***k1",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "解决方案架构师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1721,
+        "candidateEstimatedTokens": 1721,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "7623265bf7dc28f9",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "5232ba84fd7bbae7"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "4ba7f1ea431dd267",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 56,
+            "chars": 95,
+            "hash": "0ba35caebb802e2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 67,
+            "hash": "5d4ba69557cc8f2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "7a5263560509f3f0",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 150,
+            "chars": 236,
+            "hash": "6c040e132ecb1be0",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1261,
+            "lexicalScore": 0.0113,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp24yzq-x736d_mtp24z58",
+      "ts": "2026-09-06T00:12:23.837Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***6d",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "用户研究员",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1660,
+        "candidateEstimatedTokens": 1660,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 147,
+            "chars": 231,
+            "hash": "6b5e47696472affe",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "824f948dbf224882"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 32,
+            "chars": 50,
+            "hash": "7234f7aab857c832",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 55,
+            "chars": 94,
+            "hash": "188cab14c9efa4d0",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 34,
+            "chars": 65,
+            "hash": "f403db69ff2e5753",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "8870e5d3f3cc7142",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 94,
+            "chars": 152,
+            "hash": "ec7d545d4bb53146",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.127,
+            "lexicalScore": 0.0133,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2gfw1-60boy_mtp2gg2i",
+      "ts": "2026-09-06T00:21:19.000Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***oy",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "软件开发工程师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1699,
+        "candidateEstimatedTokens": 1699,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "012f104e2ab5b16d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "e8d34666abe6b96d"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "bca5cbce137027d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 57,
+            "chars": 96,
+            "hash": "2d0e45ab1a48cc84",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 68,
+            "hash": "524214403af2ff39",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "8404ca41df3d49fd",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 127,
+            "chars": 207,
+            "hash": "01cb77c9303f996b",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1251,
+            "lexicalScore": 0.009,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2gg85-1vkiq_mtp2ggea",
+      "ts": "2026-09-06T00:21:19.434Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***iq",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "解决方案架构师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1667,
+        "candidateEstimatedTokens": 1667,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "7623265bf7dc28f9",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "5232ba84fd7bbae7"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "4ba7f1ea431dd267",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 56,
+            "chars": 95,
+            "hash": "0ba35caebb802e2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 67,
+            "hash": "5d4ba69557cc8f2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "4a10c000b0a26f82",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 96,
+            "chars": 152,
+            "hash": "0ae1b3934e5f253a",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1256,
+            "lexicalScore": 0.0102,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2ggk1-uld13_mtp2ggqc",
+      "ts": "2026-09-06T00:21:19.864Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***13",
+      "skillRefs": [],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "用户研究员",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 1635,
+        "candidateEstimatedTokens": 1635,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 147,
+            "chars": 231,
+            "hash": "6b5e47696472affe",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "824f948dbf224882"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 32,
+            "chars": 50,
+            "hash": "7234f7aab857c832",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.web",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "703e2e0d927187a6",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 119,
+            "chars": 247,
+            "hash": "d2b86a6f8b157493",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "tool.feishu",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bde358de6314be1f",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 73,
+            "chars": 151,
+            "hash": "dfaa08f46ad3f31f",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "ui.suggestion",
+            "kind": "tool_contract",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "bd300aa7369d0fb4",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 108,
+            "chars": 206,
+            "hash": "2e5b8cd96d9ca5af",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 55,
+            "chars": 94,
+            "hash": "188cab14c9efa4d0",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 34,
+            "chars": 65,
+            "hash": "f403db69ff2e5753",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "3854c892c9d8f2c7",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 69,
+            "chars": 112,
+            "hash": "ab03033b47126066",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1257,
+            "lexicalScore": 0.0104,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 1,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2j2o3-836i0_mtp2j32o",
+      "ts": "2026-09-06T00:23:22.403Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***i0",
+      "skillRefs": [
+        "sof***on"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "软件开发工程师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2669,
+        "candidateEstimatedTokens": 2669,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "012f104e2ab5b16d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "e8d34666abe6b96d"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "bca5cbce137027d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 279,
+            "chars": 471,
+            "hash": "49990f63bb23ceca",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 42,
+            "chars": 77,
+            "hash": "a3f80a4cfdc5cc34",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "b110a0f261ac2bba",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 131,
+            "chars": 204,
+            "hash": "086fad99252178da",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 896,
+            "chars": 1441,
+            "hash": "d5e386d4b1a7749d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 142,
+            "chars": 318,
+            "hash": "7583dd715228e169",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1254,
+            "lexicalScore": 0.0097,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.1016,
+            "lexicalScore": 0.0524,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2j3g0-uo0z8_mtp2j3x0",
+      "ts": "2026-09-06T00:23:23.509Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***z8",
+      "skillRefs": [
+        "architecture-decision"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "解决方案架构师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2580,
+        "candidateEstimatedTokens": 2580,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "7623265bf7dc28f9",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "5232ba84fd7bbae7"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "4ba7f1ea431dd267",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 201,
+            "chars": 348,
+            "hash": "616e7238719e3f53",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 67,
+            "hash": "5d4ba69557cc8f2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "e9b95863315fe21a",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 150,
+            "chars": 236,
+            "hash": "6c040e132ecb1be0",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 884,
+            "chars": 1414,
+            "hash": "5511787dd7f20557",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 130,
+            "chars": 287,
+            "hash": "e6dd48a61ac9c7f1",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1253,
+            "lexicalScore": 0.0097,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.0997,
+            "lexicalScore": 0.0483,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2j4aq-g00u3_mtp2j4qq",
+      "ts": "2026-09-06T00:23:24.574Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***u3",
+      "skillRefs": [
+        "res***is"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "用户研究员",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2286,
+        "candidateEstimatedTokens": 2286,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 147,
+            "chars": 231,
+            "hash": "6b5e47696472affe",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "824f948dbf224882"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 32,
+            "chars": 50,
+            "hash": "7234f7aab857c832",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 199,
+            "chars": 322,
+            "hash": "e67c0aa9f17f06b5",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 34,
+            "chars": 65,
+            "hash": "f403db69ff2e5753",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "1cad745879c8e949",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 94,
+            "chars": 152,
+            "hash": "ec7d545d4bb53146",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 641,
+            "chars": 1027,
+            "hash": "0d1e6a723fd176d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 141,
+            "chars": 313,
+            "hash": "1730dcef37130a6d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1265,
+            "lexicalScore": 0.0123,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.0978,
+            "lexicalScore": 0.044,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+      "ts": "2026-09-06T00:25:14.692Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***a7",
+      "skillRefs": [
+        "sof***on"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "软件开发工程师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2665,
+        "candidateEstimatedTokens": 2665,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "012f104e2ab5b16d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "e8d34666abe6b96d"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "bca5cbce137027d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 279,
+            "chars": 471,
+            "hash": "49990f63bb23ceca",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "f529d508a973a400"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 42,
+            "chars": 77,
+            "hash": "a3f80a4cfdc5cc34",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "95f59b5b2531a8f9",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 127,
+            "chars": 207,
+            "hash": "01cb77c9303f996b",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 896,
+            "chars": 1441,
+            "hash": "d5e386d4b1a7749d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 142,
+            "chars": 318,
+            "hash": "7583dd715228e169",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1244,
+            "lexicalScore": 0.0076,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.1044,
+            "lexicalScore": 0.0587,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2li38-xgh19_mtp2like",
+      "ts": "2026-09-06T00:25:15.774Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***19",
+      "skillRefs": [
+        "architecture-decision"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "解决方案架构师",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2526,
+        "candidateEstimatedTokens": 2526,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 148,
+            "chars": 233,
+            "hash": "7623265bf7dc28f9",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "5232ba84fd7bbae7"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 33,
+            "chars": 52,
+            "hash": "4ba7f1ea431dd267",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 201,
+            "chars": 348,
+            "hash": "616e7238719e3f53",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "70045b98afe01795"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 36,
+            "chars": 67,
+            "hash": "5d4ba69557cc8f2d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "e5d461601df8a89d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 96,
+            "chars": 152,
+            "hash": "0ae1b3934e5f253a",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 884,
+            "chars": 1414,
+            "hash": "5511787dd7f20557",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 130,
+            "chars": 287,
+            "hash": "e6dd48a61ac9c7f1",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1249,
+            "lexicalScore": 0.0086,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.099,
+            "lexicalScore": 0.0467,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    },
+    {
+      "runId": "expert_task-mtp2lix5-e7x7b_mtp2ljct",
+      "ts": "2026-09-06T00:25:16.869Z",
+      "event": "llm-system-prompt",
+      "model": "qwen3.8-flash",
+      "agentId": "personal",
+      "sessionId": "wb-***7b",
+      "skillRefs": [
+        "res***is"
+      ],
+      "contextManifest": {
+        "version": 1,
+        "scene": "expert-collaboration",
+        "phase": "execution",
+        "identity": "用户研究员",
+        "executionPolicy": "tools-allowed",
+        "locale": "zh-CN",
+        "promptPackVersion": "zh-CN@2",
+        "estimatedTokens": 2261,
+        "candidateEstimatedTokens": 2261,
+        "savedEstimatedTokens": 0,
+        "included": [
+          {
+            "id": "core.runtime",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "86bc7ca30d6e2c75",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 88,
+            "chars": 145,
+            "hash": "b836c6cd2b3bf5f6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.integrity",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "4a48c753df369080",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 296,
+            "chars": 475,
+            "hash": "84750be53e8ee845",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.conversation",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "de56ecb7f5f31b65",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 100,
+            "chars": 175,
+            "hash": "5f1cedc6de6dd6ec",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "core.output",
+            "kind": "core_instruction",
+            "authority": "platform",
+            "trust": "trusted",
+            "sourceTrust": "platform",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "prompt-registry",
+              "idHash": "fb3dedfef7682ab1",
+              "version": "2"
+            },
+            "cachePolicy": "stable",
+            "usedTokens": 80,
+            "chars": 137,
+            "hash": "23b07856eb03bc06",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.role",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "4b168d88dc872a77",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 25,
+            "chars": 39,
+            "hash": "fdc13953b19b93b6",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.expert-execution",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "context-engine",
+              "idHash": "eafcc07cc525c9c7",
+              "version": "1"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 147,
+            "chars": 231,
+            "hash": "6b5e47696472affe",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "scene.active-identity",
+            "kind": "scene_instruction",
+            "authority": "scene",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "system",
+            "critical": true,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "824f948dbf224882"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 32,
+            "chars": 50,
+            "hash": "7234f7aab857c832",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "per***ld",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 64,
+            "chars": 131,
+            "hash": "9c4e9cd37b672d21",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.sop",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 199,
+            "chars": 322,
+            "hash": "e67c0aa9f17f06b5",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "persona.attributes",
+            "kind": "persona",
+            "authority": "persona",
+            "trust": "trusted",
+            "sourceTrust": "bundled",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "expert-runtime",
+              "idHash": "1ed2b3bd5416ff05"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 34,
+            "chars": 65,
+            "hash": "f403db69ff2e5753",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "dat***or",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "e296ee3bab1edfa0",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 63,
+            "chars": 145,
+            "hash": "b56e902c217e62e4",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "data.dynamic.grounding",
+            "kind": "task_fact",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "a77e39d1098de82a",
+              "version": "2"
+            },
+            "cachePolicy": "turn",
+            "usedTokens": 69,
+            "chars": 112,
+            "hash": "ab03033b47126066",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 641,
+            "chars": 1027,
+            "hash": "0d1e6a723fd176d3",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "skill.auto-summary",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "a410f55f5f7d4421"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 141,
+            "chars": 313,
+            "hash": "1730dcef37130a6d",
+            "truncated": false,
+            "sensitive": false
+          },
+          {
+            "id": "preference.user",
+            "kind": "user_preference",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "settings",
+              "idHash": "d9bb268d29ca18a2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 155,
+            "chars": 258,
+            "hash": "7c8f89fb2b78b354",
+            "truncated": false,
+            "sensitive": true
+          },
+          {
+            "id": "data.dynamic.memory",
+            "kind": "memory",
+            "authority": "data",
+            "trust": "untrusted",
+            "sourceTrust": "external",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "context-orchestrator",
+              "idHash": "c064fbca9d9de8dd",
+              "version": "2"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 127,
+            "chars": 327,
+            "hash": "f0b9e54c8d0ae1f2",
+            "truncated": false,
+            "sensitive": true
+          }
+        ],
+        "omitted": [],
+        "conflicts": [],
+        "rankings": [
+          {
+            "id": "data.dynamic.memory",
+            "score": 0.1258,
+            "lexicalScore": 0.0106,
+            "vectorScore": 0,
+            "confidenceScore": 0.6,
+            "freshnessScore": 0
+          },
+          {
+            "id": "skill.auto-summary",
+            "score": 0.0943,
+            "lexicalScore": 0.0362,
+            "vectorScore": 0,
+            "confidenceScore": 0,
+            "freshnessScore": 0
+          }
+        ],
+        "semanticSelection": {
+          "version": 1,
+          "mode": "off",
+          "status": "skipped",
+          "reason": "disabled",
+          "providerHash": "",
+          "latencyMs": 0,
+          "candidateCount": 2,
+          "eligibleCount": 0,
+          "cacheHits": 0,
+          "requested": 0,
+          "sensitiveExcluded": 0,
+          "wouldChange": false,
+          "limited": false
+        }
+      }
+    }
+  ],
+  "observerRestored": true,
+  "installs": [
+    {
+      "id": "software-change-verification",
+      "precheckOk": true,
+      "installedOk": true
+    },
+    {
+      "id": "architecture-decision",
+      "precheckOk": true,
+      "installedOk": true
+    },
+    {
+      "id": "research-evidence-analysis",
+      "precheckOk": true,
+      "installedOk": true
+    },
+    {
+      "id": "software-engineer",
+      "precheckOk": true,
+      "installedOk": true
+    },
+    {
+      "id": "solution-architect",
+      "precheckOk": true,
+      "installedOk": true
+    },
+    {
+      "id": "user-researcher",
+      "precheckOk": true,
+      "installedOk": true
+    }
+  ]
+}

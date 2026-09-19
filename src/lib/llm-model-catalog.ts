@@ -2,11 +2,11 @@
 
 const MODEL_CATALOG = [
   {
-    id: 'qwen3.6-flash',
+    id: 'qwen3.8-flash',
     provider: 'dashscope',
-    label: 'Qwen 3.6 Flash',
+    label: 'Qwen 3.8 Flash',
     contextWindow: 1000000,
-    maxOutput: 64000,
+    maxOutput: 131072,
     supportsTools: true,
     supportsVision: true,
     parameter: 'max_tokens',
@@ -19,6 +19,16 @@ const MODEL_CATALOG = [
     maxOutput: 64000,
     supportsTools: true,
     supportsVision: true,
+    parameter: 'max_tokens',
+  },
+  {
+    id: 'ZHIPU/GLM-5.3',
+    provider: 'dashscope',
+    label: 'GLM-5.3',
+    contextWindow: 1048576,
+    maxOutput: 131072,
+    supportsTools: true,
+    supportsVision: false,
     parameter: 'max_tokens',
   },
   {
@@ -158,7 +168,7 @@ function pickAutoModel(settings = {}, routeInput = {}) {
   if (provider === 'dashscope') {
     const vision = candidates.find(item => item.supportsVision)
     const heavy = findById('qwen3.8-max') || vision || candidates[0]
-    const fast = findById('qwen3.6-flash') || heavy
+    const fast = findById('qwen3.8-flash') || heavy
     if (needsVision && vision) {
       return { provider, model: vision.id, label: vision.label, reason: 'dashscope_vision' }
     }
@@ -179,7 +189,7 @@ function getPreset(provider, model) {
 
 function resolveProfile(settings = {}) {
   const provider = String(settings.llmProvider || inferProvider(settings.apiEndpoint)).trim() || 'custom'
-  const model = String(settings.model || (provider === 'dashscope' ? 'qwen3.6-flash' : 'gpt-4o-mini')).trim()
+  const model = String(settings.model || (provider === 'dashscope' ? 'qwen3.8-flash' : 'gpt-4o-mini')).trim()
   const preset = getPreset(provider, model)
   const explicit = settings.llmProfile && typeof settings.llmProfile === 'object'
     ? settings.llmProfile
@@ -216,7 +226,19 @@ function publicProfile(settings = {}) {
 function listCatalog(settings = {}) {
   const current = resolveProfile(settings)
   const includeUnsupported = settings.includeUnsupportedModels === true
-  const groups = PROVIDERS.map(provider => ({
+  const hasOpenAiCredentials = Boolean(String(settings.apiKey || '').trim() || settings.apiKeyConfigured === true)
+  const openAiConfigured = current.provider === 'openai'
+    && hasOpenAiCredentials
+    && Boolean(String(current.model || '').trim())
+  // The catalog contains reference presets for multiple providers, but the
+  // model picker must not present inactive-provider models as usable choices.
+  // Availability still depends on the configured endpoint/account; this
+  // filter only removes unrelated provider namespaces from the active menu.
+  const groups = PROVIDERS.filter(provider => (
+    provider.id === current.provider
+    && provider.id !== 'custom'
+    && (provider.id !== 'openai' || openAiConfigured)
+  )).map(provider => ({
     id: provider.id,
     label: provider.label,
     models: [
@@ -236,9 +258,9 @@ function listCatalog(settings = {}) {
   }))
   const knownIds = new Set([AUTO_MODEL_ID, ...MODEL_CATALOG.map(model => model.id)])
   if (current.model && !knownIds.has(current.model)) {
-    const customGroup = groups.find(group => group.id === 'custom') || groups[groups.length - 1]
-    if (customGroup && !customGroup.models.some(model => model.id === current.model)) {
-      customGroup.models.push({
+    const activeGroup = groups.find(group => group.id === current.provider)
+    if (activeGroup && !activeGroup.models.some(model => model.id === current.model)) {
+      activeGroup.models.push({
         id: current.model,
         label: current.label || current.model,
         contextWindow: current.contextWindow,

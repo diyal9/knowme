@@ -1,0 +1,109 @@
+{
+  "eval_id": "AO01",
+  "task_id": "task-mtotfwwc-jfxne",
+  "configuration": "baseline",
+  "graded_at": "2026-09-06",
+  "grading_status": "graded",
+  "include_in_professional_aggregate": true,
+  "scope": "仅评冻结真实运行；未重跑API，未修改输入/输出或方法包。断言通过率不是专业生产认证。",
+  "evidence_binding": {
+    "task_id_verified": true,
+    "receipt_equals_live_session": true,
+    "frozen_input_and_expectations_equal_metadata": true,
+    "assistant_and_artifact_equal_answer": true,
+    "source_sha256": {
+      "evidence/professional-batch3-inputs.json": "0e523b3a791f735600c6c1c95af06402ed771bd3aaa709de57b3198e58f7bf9f",
+      "evidence/professional-batch3-live.json": "828364a9cf7cd5d74e1436ea3bc35df2b47f3f30d40701104a605d96c37c0b52",
+      "evidence/professional-batch3-task-events.json": "5094ffab0eafde1bb1d6dcbb7ffe6ec959e28d73d53a6f8298a1a3d22ff16549",
+      "skill-evals/professional-batch3-workspace/iteration-1/AO01/eval_metadata.json": "46e5abadafc35bbbd2aeff58f80cbb65831e0b0c83c87e6c900f503926056127",
+      "skill-evals/professional-batch3-workspace/iteration-1/AO01/baseline/transcript.md": "c30457dff709806a87cc1c612dc57585f265299b9d41b8ce822a70126f5b3841",
+      "skill-evals/professional-batch3-workspace/iteration-1/AO01/baseline/outputs/answer.md": "c21b7237c00cc99278a4002c49de3b224ddbe7595510c2be02f225875090a707",
+      "skill-evals/professional-batch3-workspace/iteration-1/AO01/baseline/outputs/receipts.json": "996726319542d502b7807018b101ae2e90c549d7ec641d2d8d0759c357c1b8b4"
+    }
+  },
+  "expectations": [
+    {
+      "text": "接口字段表重复[1]/[4]合并且保留两个来源、李明、9月8日、研发测试确认无遗漏。",
+      "passed": true,
+      "evidence": "outputs/answer.md:5 合并为事项1，保留李明、9月8日、研发和测试确认无遗漏字段及[1][4]。"
+    },
+    {
+      "text": "王芳截止保留确认后两个工作日，不按提交日推算绝对日期；联调完成标准待定。",
+      "passed": true,
+      "evidence": "answer.md:6、13、15 保留字段表确认后+2个工作日、实际确认日未知及工作日历缺失；没有用9月8日推算；通过标准标待确认。"
+    },
+    {
+      "text": "回滚演练列主责未定，不能选赵强或周敏，也不能捏造协作者、日期。",
+      "passed": true,
+      "evidence": "answer.md:7、14 主责未议定，保留两组声称负责，不选择执行主责/协作者或虚构日期。另指定主持裁决是新增决策责任问题，见claims，不混同本断言的执行主责。"
+    },
+    {
+      "text": "自动提醒仅建议不建承诺行动；无外部任务创建/通知成功宣称。",
+      "passed": true,
+      "evidence": "answer.md:9 将[3]列非承诺项；无创建/通知成功声明；task-events中该task的executionEvidence[0].toolCalls=[]，live无工具步骤。"
+    },
+    {
+      "text": "直接给完整精简表及必要缺口，不要求重复提供已知信息。",
+      "passed": true,
+      "evidence": "answer.md:3-15 提供完整六类字段及标准、确认日、日历、分工等缺口；未索要已有材料。正文317混合计数单位（汉字293），未超过500。此断言未单独约束附加排序的依据，不能借此扩大为全篇无推断认证。"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1
+  },
+  "professional_verdict": "needs_revision_despite_frozen_assertions_pass",
+  "output_measurements": {
+    "han": 293,
+    "mixed_units": 317,
+    "raw_chars_trimmed": 564,
+    "limit": 500,
+    "within_limit": true,
+    "method": "全文（含标题/表格/缺口/排序）匹配 /\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/gu；标点及Markdown不计。不用raw字符数判超限。"
+  },
+  "claims": [
+    {
+      "claim": "需主持下次会议裁决",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:14；输入[5]只由主持说明主责、协作者、日期下次确认，未授予主持裁决权。该措辞更准确地属于未标明的处置建议/责任越界，不能认定模型声称某次裁决已经发生。"
+    },
+    {
+      "claim": "事项3阻塞面最大",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:17虽标排序建议，但括号中的比较理由没有支持：输入没有回滚影响范围、下游依赖或紧急度，不能据此断言其大于字段表→联调链。可建议优先澄清，不能伪装排序依据。"
+    },
+    {
+      "claim": "事项1依赖为无",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:5；[1]/[4]未说明前置依赖，不等于已确认没有依赖；忠实提取应标未说明。未将该表述等同实质业务依赖已被证伪。"
+    },
+    {
+      "claim": "事项2依赖事项1验收，确认后两个工作日",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[1]/[2]/[4]明确字段表确认触发联调相对期限，answer.md:6与13正确保留。"
+    },
+    {
+      "claim": "排序本身被当作原文承诺",
+      "type": "factual",
+      "verified": false,
+      "evidence": "反向核验：answer.md:17明确标排序建议，故不能指控整个排序是伪造承诺；仅评价其理由支持范围。"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结5条未直接检查附加排序的比较依据、决策责任和未说明≠无；新留出题应独立断言全篇新增事实/建议理由是否有据，不回改本题断言或分数。"
+      },
+      {
+        "reason": "用原文只有主持发言但无授权、互不关联事项且无影响规模的未见材料，检查是否仍擅定裁决人或最大阻塞；允许明确标注且不越权的澄清建议。"
+      }
+    ],
+    "overall": "核心提取5/5不等于整篇专业合格；保留冻结评分，另列越出断言覆盖的专业问题。"
+  }
+}

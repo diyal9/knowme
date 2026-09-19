@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 28px;
-  background:rgba(24, 31, 36, .34);
+  background:color-mix(in srgb, var(--state-info) 34%, transparent);
 }
 .wb-ws-modal {
   width: min(88vw, 1440px);
@@ -114,12 +114,12 @@
   white-space: nowrap;
   color:var(--text-primary);
 }
-.wb-ws-node.added { color: #27786a; }
-.wb-ws-node.modified { color: #8a6a2f; }
-.wb-ws-node.deleted { color: #9a4a3a; text-decoration: line-through; }
-.wb-ws-node.renamed { color: #3d5a8a; }
+.wb-ws-node.added { color: var(--action-primary); }
+.wb-ws-node.modified { color: var(--state-warning); }
+.wb-ws-node.deleted { color: var(--state-danger); text-decoration: line-through; }
+.wb-ws-node.renamed { color: var(--state-info); }
 .wb-ws-blob pre, .wb-ws-blob code { font: 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-word; }
-.wb-ws-blob .kw { color: #2f5c4e; font-weight: 600; }
+.wb-ws-blob .kw { color: var(--action-primary-hover); font-weight: 600; }
 .wb-ws-node.active { background:var(--action-primary-soft); color:var(--action-primary); font-weight:600; }
 .wb-ws-node:hover { background:var(--surface-hover); }
 .wb-ws-node:focus-visible { outline:2px solid var(--focus-ring); outline-offset:1px; }

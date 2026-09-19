@@ -1,0 +1,24 @@
+[
+  {
+    "id": "msg_expert_task-mtopjyz4-mlmm8_mtopjzk6_tool_854d84546af5",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"总体率_上周\",\"expression\":\"100*(92/1000)\",\"ok\":true,\"value\":9.2},{\"label\":\"总体率_本周\",\"expression\":\"100*(39/1000)\",\"ok\":true,\"value\":3.9},{\"label\":\"搜索率_上周\",\"expression\":\"100*90/900\",\"ok\":true,\"value\":10},{\"label\":\"搜索率_本周\",\"expression\":\"100*12/100\",\"ok\":true,\"value\":12},{\"label\":\"展示率_上周\",\"expression\":\"100*2/100\",\"ok\":true,\"value\":2},{\"label\":\"展示率_本周\",\"expression\":\"100*27/900\",\"ok\":true,\"value\":3},{\"label\":\"结构效应M_pp\",\"expression\":\"100*((0.9-0.1)*(2/100)+(0.1-0.9)*(90/900))\",\"ok\":true,\"value\":-6.400000000000001},{\"label\":\"组内效应W_pp\",\"expression\":\"100*(0.9*(27/900-2/100)+0.1*(12/100-90/900))\",\"ok\":true,\"value\":1.0999999999999999},{\"label\":\"验算M+W\",\"expression\":\"100*((0.9-0.1)*(2/100)+(0.1-0.9)*(90/900))+100*(0.9*(27/900-2/100)+0.1*(12/100-90/900))\",\"ok\":true,\"value\":-5.300000000000002},{\"label\":\"总变化_pp\",\"expression\":\"100*(39/1000)-100*(92/1000)\",\"ok\":true,\"value\":-5.299999999999999},{\"label\":\"注册数差分解_人数\",\"expression\":\"(1000-1000)*(92/1000)+1000*((39/1000)-(92/1000))\",\"ok\":true,\"value\":-53},{\"label\":\"z_展示两期\",\"expression\":\"(27/900-2/100)/sqrt((29/1000)*(1-29/1000)*(1/900+1/100))\",\"ok\":true,\"value\":0.5653438092372194},{\"label\":\"z_搜索两期\",\"expression\":\"(12/100-90/900)/sqrt((102/1000)*(1-102/1000)*(1/100+1/900))\",\"ok\":true,\"value\":0.6269212576793645}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopjyz4-mlmm8_mtopjzk6",
+    "createdAt": "2026-09-05T18:20:51.471Z",
+    "toolCallId": "call_b18a8ceee85b427681a2ed5f",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 4
+  },
+  {
+    "id": "msg_expert_task-mtopjyz4-mlmm8_mtopjzk6_tool_41ade6c5fb53",
+    "role": "tool",
+    "text": "{\"ok\":true,\"results\":[{\"label\":\"z_本周搜索vs展示\",\"expression\":\"(27/900-12/100)/sqrt((39/1000)*(1-39/1000)*(1/900+1/100))\",\"ok\":true,\"value\":-4.4103165985901605},{\"label\":\"展示注册量贡献_按上周率\",\"expression\":\"900*(2/100)\",\"ok\":true,\"value\":18},{\"label\":\"搜索若维持上周量的注册_按本周率\",\"expression\":\"900*(12/100)\",\"ok\":true,\"value\":108}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+    "runId": "expert_task-mtopjyz4-mlmm8_mtopjzk6",
+    "createdAt": "2026-09-05T18:20:51.471Z",
+    "toolCallId": "call_7792ad615f7940069cc8e907",
+    "toolName": "calculate",
+    "status": "done",
+    "durationMs": 2
+  }
+]

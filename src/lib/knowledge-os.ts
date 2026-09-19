@@ -631,7 +631,7 @@ function saveRaw(userData, payload = {}, ctx = {}) {
 function formatQueryContext(hits) {
   if (!hits?.length) return ''
   const lines = hits.map(
-    (h, i) => `[${i + 1}] ${h.title} (${h.path})\n${h.snippet || ''}`
+    (h, i) => `[${i + 1}] ${h.title} (${h.path || h.ref || '本地 Brain'})\n${h.snippet || ''}`
   )
   return `[知识库检索结果]\n${lines.join('\n\n')}\n[检索结束：回答须引用上述来源路径，无命中勿编造]`
 }

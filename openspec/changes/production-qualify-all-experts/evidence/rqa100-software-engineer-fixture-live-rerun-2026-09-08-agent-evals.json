@@ -1,0 +1,26 @@
+{
+  "suite": "RQA75 software engineer normal coverage completion",
+  "evaluatedAt": "2026-09-08T08:05:08.449Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+      "tasks": [
+        {
+          "taskId": "task-mtsdwonw-rua55",
+          "evalId": "SE11",
+          "scenario": "normal",
+          "status": "review",
+          "configurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

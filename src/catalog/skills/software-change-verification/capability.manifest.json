@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "id": "software-change-verification",
+  "kind": "skill",
+  "name": "软件变更与验证",
+  "version": "1.1.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

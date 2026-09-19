@@ -1,0 +1,59 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-07T14:00:00+08:00",
+  "suite": "RQA39",
+  "purpose": "Domain-shifted candidate holdouts for deciding whether upgraded Agents deserve expert status. Package and prompt checks cannot satisfy this gate.",
+  "evaluatorIndependence": "The main agent authors and grades these holdouts because no independent evaluator surface is available. Every score must cite exact output evidence; passing one case is necessary but not sufficient for production qualification.",
+  "qualificationRule": {
+    "minimumPerCase": "All hard assertions pass; no material hallucination; requested length and execution boundaries pass.",
+    "productionRule": "A single passing candidate sample does not qualify an expert. Repeated domain-shifted normal, correction, retry, revision and reopen evidence is required."
+  },
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "knowledgeOrConnectorWritesAllowed": false,
+    "maxWaitSeconds": 150
+  },
+  "evals": [
+    {
+      "id": "AO04",
+      "expertId": "action-owner",
+      "title": "触发前草稿、责任更正与回执边界",
+      "prompt": "请把下面记录整理成一张可直接跟进的行动表。不要调用工具、创建任务或猜绝对日期，全文不超过 520 字。\n\n08:50 记录：法务批准后 6 小时内，由李乔发布合作方通知，赵乔复核附件。\n09:05 更正：姓名记反了，发布人应为赵乔，李乔只复核附件；其他条件不变。\n09:20 赵乔已提交通知草稿和 2 个附件，完整包应有 5 个附件；法务尚未批准。\n09:30 林溪说“也许可以提前提醒经销商”，没有人承诺执行。\n09:40 系统回执显示“通知草稿已接收”，没有发布回执。\n\n必须区分有效责任、被替代记录、建议、行动状态和证据状态。",
+      "assertions": [
+        "赵乔 is the only active publisher and 李乔 is only the reviewer; the earlier reversed assignment is explicitly superseded.",
+        "The publication obligation is waiting for legal approval, not in progress, even though a draft exists.",
+        "The deadline remains approval plus six hours and no absolute time is invented.",
+        "Two of five attachments and draft receipt are partial evidence, not publication or completion.",
+        "The dealer reminder remains an uncommitted suggestion; the whole answer is one followable table within 520 Chinese characters and performs no external action."
+      ]
+    },
+    {
+      "id": "RR04",
+      "expertId": "requirement-reviewer",
+      "title": "发票规则、字段权限与批处理验收评审",
+      "prompt": "仅按下面题面做需求评审，不调用工具，不补充 UI、接口路由、HTTP 状态码、缓存、工具名、完成时限或数值阈值。全文不超过 800 字。\n\nP1：每个已支付订单必须且只能存在一张有效发票。\nP2：原发票作废后，财务经理可重开；客服不能重开。\nP3：客服可以查看发票状态和脱敏税号，即使客服同时是订单协作者，也不能查看完整税号。\nP4：发票归档年限待定，候选 5 年或 10 年。\nP5：同一开票 requestId 重试不得产生第二张有效发票。\nP6：批量核对预计覆盖 10 万至 80 万订单，需求只写“应快速完成”。\n\n请判断真正冲突与待决项，说明哪些规则不应被 P4 阻塞，并为唯一性/重开、字段权限、幂等和性能给出可测试验收口径。",
+      "assertions": [
+        "P1 and P2 are reconciled through valid-versus-void state rather than reported as a superficial conflict.",
+        "P4 remains a retention decision and does not block invoice uniqueness, reissue authorization, field masking or idempotency invariants.",
+        "The authorization oracle checks role, invoice state and exact visible fields, not only record counts.",
+        "Idempotency uses the same requestId and verifies authoritative invoice identity plus the count of valid invoices or issuance side effects.",
+        "Performance keeps scale, timing boundaries, statistic and threshold as measurable requirements while leaving the missing threshold undecided; no forbidden implementation detail is invented and the answer stays within 800 characters."
+      ]
+    },
+    {
+      "id": "QA04",
+      "expertId": "qa-engineer",
+      "title": "权益领取原子性、恢复与撤销竞态测试",
+      "prompt": "为下面机制设计精简的高风险测试。不要执行测试、调用工具或假设接口状态码。\n\n权益钱包保存 version 与 remaining。claim(walletId, amount, expectedVersion, operationKey) 仅在 expectedVersion 等于当前 version 且余额足够时，原子扣减 remaining 并将 version 加一；同一 operationKey 重试不得重复扣减。服务可能在持久化前、持久化后但响应前、响应后崩溃。revoke(operationKey) 可能与 claim 完成并发。\n\n必须覆盖：同一预读基线的并发领取、原子操作前同步屏障、过期请求、三个崩溃窗口、撤销/完成两种先后；每项给出权威观察和允许/禁止状态。所有用例标为“设计完成、未执行”。",
+      "assertions": [
+        "Both claimers first capture the same expected version, synchronize immediately before the indivisible compare-and-update, and at most one advances the wallet.",
+        "The test does not split the atomic compare from its write or require both operations to observe the old version inside the atomic section.",
+        "A stale expectedVersion cannot decrement remaining or advance version.",
+        "The three crash windows preserve complete old or complete new state as permitted, and retry after persisted-before-response causes no second deduction.",
+        "Revoke-first and claim-first orderings have authoritative wallet, operation and effect evidence; every case is explicitly designed but unexecuted and no status code is invented."
+      ]
+    }
+  ]
+}

@@ -49,6 +49,17 @@ assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管�
     assert.equal(sessionDisplayTitle(session), '通用')
   })
 
+  it('does not promote numeric first messages to session titles', () => {
+    const session = normalizeSession({
+      id: 's2',
+      agentId: 'general',
+      title: '8',
+      messages: [{ role: 'user', text: '8' }],
+    })
+    assert.equal(session.title, DEFAULT_TITLE)
+    assert.equal(sessionDisplayTitle(session), '通用')
+  })
+
   it('compacts old messages while retaining recent context', () => {
     const session = createSession('general', 1)
     session.summary = ''
@@ -352,5 +363,38 @@ assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管�
     assert.equal(result.session.executionPolicy, 'no-tools')
     assert.equal(result.session.referenceState, undefined)
     assert.deepEqual(result.session.taskRef, { id: 'task-1', kind: 'expert-discussion' })
+  })
+
+  it('preserves stable project ownership across normalization, compaction and forks', () => {
+    const session = createSession('general', 1, { projectId: 'project-a' })
+    session.messages = Array.from({ length: 60 }, (_, index) => ({
+      id: `m-${index}`,
+      role: index % 2 ? 'assistant' : 'user',
+      text: `project context ${index}`,
+    }))
+    const compacted = compactSession(session).session
+    const migrated = normalizeSession({ ...compacted, projectId: '  project-a  ' })
+    const forked = forkSession(migrated)
+
+    assert.equal(compacted.projectId, 'project-a')
+    assert.equal(migrated.projectId, 'project-a')
+    assert.equal(forked.projectId, 'project-a')
+  })
+
+  it('fills a missing workbench project binding without retargeting an existing one', () => {
+    const { ensureSessionInStore } = require('../src/lib/agent-session-ensure')
+    const unbound = createSession('general', 1)
+    unbound.id = 'wb-expert-task-project'
+    const bound = ensureSessionInStore([unbound], {}, unbound.id, {
+      surface: 'workbench',
+      projectId: 'project-a',
+    })
+    assert.equal(bound.session.projectId, 'project-a')
+
+    const unchanged = ensureSessionInStore(bound.sessions, {}, unbound.id, {
+      surface: 'workbench',
+      projectId: 'project-b',
+    })
+    assert.equal(unchanged.session.projectId, 'project-a')
   })
 })

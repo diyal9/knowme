@@ -3,7 +3,7 @@
   "id": "business-cause-analysis",
   "kind": "skill",
   "name": "业务异常归因",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "metadata": {
     "knowme": {
       "experience": {

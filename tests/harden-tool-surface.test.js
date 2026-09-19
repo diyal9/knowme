@@ -35,6 +35,23 @@ describe('harden-tool-surface', () => {
       else process.env.KNOWME_TOOL_SURFACE = prev
     })
 
+    it('does not register dedicated file tools twice when assembling v1 extras', async () => {
+      const prev = process.env.KNOWME_TOOL_SURFACE
+      process.env.KNOWME_TOOL_SURFACE = 'v1'
+      const fileTools = agentFileTools.buildFileTools({})
+      const resolved = await builder.resolveToolSurfaceForRun({
+        userData: os.tmpdir(),
+        runId: 'r-dedup',
+        fileAdapter: {},
+        extraTools: fileTools,
+      })
+      assert.deepEqual(resolved.registry.getRegistrationIssues(), [])
+      assert.equal(resolved.registry.has('read_file'), true)
+      await resolved.close()
+      if (prev == null) delete process.env.KNOWME_TOOL_SURFACE
+      else process.env.KNOWME_TOOL_SURFACE = prev
+    })
+
     it('legacy mode excludes write/orchestration tools', async () => {
       const prev = process.env.KNOWME_TOOL_SURFACE
       process.env.KNOWME_TOOL_SURFACE = 'legacy'

@@ -1,0 +1,50 @@
+{
+  "source": "actual AgentRunExecutor metrics; no grader timing inferred",
+  "metrics": {
+    "rounds": 1,
+    "toolCalls": 0,
+    "firstTokenMs": 1429,
+    "bufferedDraftsDiscarded": 1,
+    "answerCommitMs": 53957,
+    "bufferMs": 52528,
+    "outputDiagnostics": [
+      {
+        "runId": "expert_task-mtp24yar-rbgbx_mtp24yhe",
+        "round": 1,
+        "phase": "MODEL",
+        "code": "buffered_draft_discarded",
+        "reason": "incomplete_model_response",
+        "length": 6359,
+        "count": 1
+      },
+      {
+        "runId": "expert_task-mtp24yar-rbgbx_mtp24yhe",
+        "round": 1,
+        "phase": "VERIFY_CLAIMS",
+        "code": "answer_committed",
+        "hash": "94f24b6b50fa171f",
+        "length": 4732,
+        "timingMs": 53957,
+        "count": 1
+      }
+    ],
+    "usage": {
+      "promptTokens": 12441,
+      "completionTokens": 4911,
+      "totalTokens": 17352,
+      "source": "provider"
+    },
+    "modelCompletions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "contextTokens": 12441,
+    "totalMs": 53982
+  }
+}

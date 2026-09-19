@@ -1,0 +1,93 @@
+{
+  "suite": "RQA61",
+  "evaluatedAt": "2026-09-07T15:00:00+08:00",
+  "agentId": "software-engineer",
+  "currentConfigurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+  "configurationSummary": "software-engineer 2.2.0 + software-change-verification 1.1.0 + code-review + no connectors + dashscope/qwen3.8-max",
+  "qualification": "failed",
+  "reason": "The current configuration has reproducible semantic, syntax, retry and reopen failures. A same-model review passing an answer is not qualification evidence.",
+  "tasks": [
+    {
+      "taskId": "task-mtqs5xl6-hv6y8",
+      "evalId": "SE05",
+      "scenario": "normal",
+      "status": "review",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardAssertionsPassed": true,
+      "assertionsPassed": 5,
+      "assertionsTotal": 5,
+      "summary": "Strict range normalization answer passed all frozen assertions."
+    },
+    {
+      "taskId": "task-mtqsvg6a-8dwsc",
+      "evalId": "SE06-initial",
+      "scenario": "normal",
+      "status": "failed",
+      "configurationId": "",
+      "hardFailure": true,
+      "hardAssertionsPassed": false,
+      "assertionsPassed": 0,
+      "assertionsTotal": 5,
+      "unscopedReason": "The initial attempt failed before failed-run configuration evidence was persisted. It is retained as observed availability evidence but is not assigned to a model configuration."
+    },
+    {
+      "taskId": "task-mtqsvg6a-8dwsc",
+      "evalId": "SE06",
+      "scenario": "normal",
+      "status": "review",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardAssertionsPassed": true,
+      "assertionsPassed": 5,
+      "assertionsTotal": 5,
+      "summary": "The recovered runPool implementation passed executable validation, concurrency, ordering, fail-stop, late-rejection and invoke-once checks."
+    },
+    {
+      "taskId": "task-mtqsy54y-dvnoe",
+      "evalId": "SE07",
+      "scenario": "edge",
+      "status": "review",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardFailure": true,
+      "hardAssertionsPassed": false,
+      "assertionsPassed": 1,
+      "assertionsTotal": 5,
+      "failureSummary": "Executable race replay failed all decisive checks: post-invalidation reads reused the old flight, invalidating A prevented unrelated B from being cached, and the answer falsely claimed async callers receive the same Promise reference."
+    },
+    {
+      "taskId": "task-mtqtyl1p-2r0in",
+      "evalId": "SE08",
+      "scenario": "retry",
+      "status": "failed",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardFailure": true,
+      "hardAssertionsPassed": false,
+      "assertionsPassed": 0,
+      "assertionsTotal": 5,
+      "failureSummary": "Cancel and retry lifecycle events were preserved, but the retried execution failed without a deliverable. The persisted failure evidence is bound to the current configuration."
+    },
+    {
+      "taskId": "task-mtqtjoxl-4lhtw",
+      "evalId": "SE09",
+      "scenario": "revision",
+      "status": "review",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardFailure": true,
+      "hardAssertionsPassed": false,
+      "assertionsPassed": 4,
+      "assertionsTotal": 5,
+      "failureSummary": "The revised logic and lifecycle were directionally correct, but a literal newline inside a line comment leaves the next line beginning with a comma. vm.Script rejects the delivered JavaScript with SyntaxError, so the promised complete replacement is not executable."
+    },
+    {
+      "taskId": "task-mtqto4ck-hu345",
+      "evalId": "SE10",
+      "scenario": "reopen",
+      "status": "failed",
+      "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "hardFailure": true,
+      "hardAssertionsPassed": false,
+      "assertionsPassed": 0,
+      "assertionsTotal": 5,
+      "failureSummary": "The original version was accepted and reopened correctly, but two revision attempts failed without producing the requested cursor-cycle implementation. The latest failure evidence is configuration-scoped."
+    }
+  ]
+}

@@ -6,7 +6,11 @@
  */
 
 const L = require('./agent-generate-libs')
+const { persistSessionRunIdentity } = require('./agent-session-run-identity')
+const { providedMaterialsFromInput } = require('./provided-materials')
+const { resolveFeishuExecutionIntent } = require('./agent-execution-intent')
 const { resolvePersonalAgentSettings } = require('./personal-agent-runtime-profile')
+const { parseKnowledgeCollectionRef } = require('../shared/knowledge-selection')
 const { commonExpertIds, projectCommonExperts, buildCommonExpertContext } = require('./personal-expert-roster')
 const {
   reconcileConversationLog,
@@ -25,6 +29,61 @@ const DYNAMIC_BLOCK_CONFIG = Object.freeze({
   retrieval: { kind: 'retrieval', authority: 'data', trust: 'untrusted', optional: true, sensitive: true },
   memory: { kind: 'memory', authority: 'data', trust: 'untrusted', optional: true, sensitive: true },
 })
+
+function resolveAgentKnowledgePolicy(session = {}, getAgentProfileStore, providers = []) {
+  const sessionPolicy = session.knowledgePolicy && typeof session.knowledgePolicy === 'object' ? session.knowledgePolicy : null
+  let profilePolicy = null
+  const profileId = String(session.profileId || (session.agentId === 'personal' || session.sessionKind === 'personal-topic' ? 'my-knowme' : '')).trim()
+  if (profileId && typeof getAgentProfileStore === 'function') {
+    try {
+      const loaded = getAgentProfileStore().get(profileId)
+      if (loaded?.ok) profilePolicy = loaded.profile?.knowledgePolicy || null
+    } catch { /* fail closed below */ }
+  }
+  const source = sessionPolicy || profilePolicy || {}
+  const personal = session.agentId === 'personal' || session.sessionKind === 'personal-topic' || profileId === 'my-knowme'
+  const brainScopes = Array.isArray(source.brainScopes)
+    ? source.brainScopes
+    : personal
+      ? ['global', 'project']
+      : source.includeWorkMemory === false
+        ? []
+        : ['project']
+  const availableProviders = Array.isArray(providers) ? providers : []
+  const configuredProviders = Array.isArray(source.providers) ? source.providers : null
+  const providerPolicies = availableProviders.flatMap((provider) => {
+    const providerId = String(provider?.id || '').trim()
+    if (!providerId) return []
+    const configured = configuredProviders?.find(item => String(item?.providerId || '') === providerId)
+    if (configuredProviders && !configured) return []
+    const availableCollections = Array.isArray(provider.collectionIds)
+      ? provider.collectionIds.map(String)
+      : [provider.collectionId || provider.collection].filter(Boolean).map(String)
+    const requestedCollections = Array.isArray(configured?.collectionIds)
+      ? configured.collectionIds.map(String)
+      : availableCollections
+    const normalizedRequestedCollections = requestedCollections.map((collectionId) => {
+      const scoped = parseKnowledgeCollectionRef(collectionId)
+      if (scoped && scoped.providerId === providerId) return scoped.collectionId
+      const legacyPrefix = `${providerId}:`
+      return String(collectionId).startsWith(legacyPrefix)
+        ? String(collectionId).slice(legacyPrefix.length)
+        : collectionId
+    })
+    const collectionIds = availableCollections.length
+      ? normalizedRequestedCollections.filter(collectionId => availableCollections.includes(collectionId))
+      : normalizedRequestedCollections
+    return [{ providerId, collectionIds }]
+  })
+  return {
+    brainScopes,
+    providers: providerPolicies,
+    allowPersonalMemory: typeof source.allowPersonalMemory === 'boolean' ? source.allowPersonalMemory : personal,
+    allowRemoteQuery: typeof source.allowRemoteQuery === 'boolean' ? source.allowRemoteQuery : providerPolicies.length > 0,
+    allowPromotionProposal: source.allowPromotionProposal !== false,
+    allowDirectWrite: false,
+  }
+}
 
 /** 将旧 orchestrator 的动态段投影为可独立裁剪、审计的 ContextBlock。 */
 function projectDynamicContextBlocks(pack = {}) {
@@ -50,10 +109,11 @@ function projectDynamicContextBlocks(pack = {}) {
 
 /** 成功返回 prepared；失败返回 `{ early }`（已走 env.fail）。 */
 async function prepareAgentGenerate(env) {
-  const { app, path, promptRouter, buildChatMessages, contextEngine, buildCoreContextBlocks, productKnowledge, productMemory, conversationGrounding, agentSessions, agentRun, groundingRuntime, feishuGrounding, feishuGroundingAdapter, researchRouting, llmRuntime, llmModelCatalog, llmUsage, knowledgeOs, fabricRetrieval, chatIntent, contextCache, contextOrchestrator, contextPacketLib, writingWorkflow, buildTemporalAnchorContext, logger, resolveGroundingRuntimeMode } = L
-  const { loadSettings, ensureAgentSession, loadAgentSessions, saveAgentSessions, buildFabricCtx, ensureFabricSeeded, ensureCapabilityHub, getAgentProfileStore, getWorkbenchModeStore, readNote, buildEmbedFn, normalizeChatEndpoint, resolveActiveProvider, KNOWLEDGE_DIR, MEMORY_DIR, loadSourcesStore, activeAgentRuns } = env.deps
+  const { app, path, promptRouter, contextEngine, productKnowledge, productMemory, conversationGrounding, agentSessions, agentRun, groundingRuntime, feishuGrounding, feishuGroundingAdapter, researchRouting, llmRuntime, llmModelCatalog, llmUsage, knowledgeOs, fabricRetrieval, chatIntent, contextCache, contextOrchestrator, contextPacketLib, writingWorkflow, buildTemporalAnchorContext, resolveGroundingRuntimeMode } = L
+  const { loadSettings, ensureAgentSession, loadAgentSessions, saveAgentSessions, buildFabricCtx, ensureFabricSeeded, ensureCapabilityHub, getAgentProfileStore, getWorkbenchModeStore, readNote, buildEmbedFn, normalizeChatEndpoint, resolveActiveProvider, MEMORY_DIR, loadSourcesStore, activeAgentRuns, knowledgeProvider } = env.deps
   const workflowReact = require('./workflow-react-prompt')
   const { payload, runId, stage, emit, metrics, signal } = env
+  const providedMaterials = providedMaterialsFromInput(payload, runId)
   const fail = (error) => ({ early: env.fail(error) })
   const cancelled = () => fail('请求已取消')
   const {
@@ -63,6 +123,7 @@ async function prepareAgentGenerate(env) {
   } = payload
   const collaborationOnly = conversationMode === 'expert-planning'
     || conversationMode === 'expert-discussion'
+  const expertExecution = conversationMode === 'expert-execution'
 
   stage('stage_prepare', '正在准备上下文…'); await new Promise((resolve) => setImmediate(resolve))
   const s = loadSettings()
@@ -130,8 +191,12 @@ async function prepareAgentGenerate(env) {
       : [...latestSessions, session]
     saveAgentSessions(next)
   }
+  const runIdentity = persistSessionRunIdentity(session, runId, { loadAgentSessions, saveAgentSessions })
+  if (!runIdentity.ok) return fail(runIdentity.error || '无法建立本轮运行身份')
   const personalizationSettings = resolvePersonalAgentSettings(s, session, getAgentProfileStore)
-  if (workflowReact.shouldForceWorkflowReact(session)) {
+  const personalSession = session?.agentId === 'personal' || session?.sessionKind === 'personal-topic'
+  const workflowConversation = workflowReact.shouldForceWorkflowReact(session)
+  if (workflowConversation) {
     session = workflowReact.ensureWorkflowPlanSeed(session, agentRun)
   }
   const prepared = agentSessions.compactSession(session)
@@ -201,55 +266,66 @@ async function prepareAgentGenerate(env) {
   // short user-facing label and therefore do not contain “飞书”. Route them
   // through the connector/tool tier before chat classification, otherwise the
   // normal chat surface omits meeting_candidates and the run can only refuse.
-  const feishuIntent = feishuGrounding.detectFeishuIntent(prompt)
-  const needsFeishuWorkflow = feishuIntent.mentioned
-    && (feishuIntent.needsSearch || feishuIntent.needsContentRead || feishuIntent.asksMinutes)
-  const tier = collaborationOnly
+  const feishuIntent = resolveFeishuExecutionIntent({
+    conversationMode,
+    executionContract: payload.executionContract,
+    prompt,
+  })
+  const needsFeishuWorkflow = requiresFeishuToolSurface(feishuIntent)
+  let tier = collaborationOnly
     ? 'chat'
+    : expertExecution
+      ? 'assist'
     : declaredToolExecution
     ? 'assist'
     : needsFeishuWorkflow ? 'retrieval'
     : (forceFullCtx || (ctxRole === 'writing' && !!writingTask)) ? 'retrieval' : chatIntent.classifyIntent({
     prompt,
     hasNoteContext: !!String(context || '').trim(),
+    hasImage: hasImage === true,
+    hasPendingWork: agentRun.countPlanRemaining(session?.run?.plan) > 0,
     slashRefs,
     role: ctxRole,
   })
-  const todayPriorityFactsOnly = /(今日优先级|今天优先级|今日优先|优先级助手|feishu\.today_priority)/i.test(String(prompt || ''))
-  const heavyCtx = tier !== 'chat' && !todayPriorityFactsOnly
+  const todayPriorityFactsOnly = feishuIntent.asksTodayPriority
   const retrievalScope = ensureCapabilityHub().resolveSessionRetrievalScope(session)
-  const localKnowledgeEnabled = !retrievalScope.degraded
-    && retrievalScope.providers.some(provider => ['local', 'qmd-local'].includes(String(provider?.kind || '')))
-  const kbSnippet = heavyCtx && localKnowledgeEnabled
-    ? contextCache.cached(
-        `kb:${KNOWLEDGE_DIR}`,
-        contextCache.statMtimeMs(path.join(KNOWLEDGE_DIR, 'index.md')),
-        () => productKnowledge.getContextSnippet(KNOWLEDGE_DIR)
-      )
-    : ''
-  const skillCtx = heavyCtx && localKnowledgeEnabled
-    ? contextCache.cached(
-        `skill:${KNOWLEDGE_DIR}:${theme}:${slashRefs.join(',')}`,
-        contextCache.statMtimeMs(KNOWLEDGE_DIR),
-        () => productKnowledge.getSkillContext(KNOWLEDGE_DIR, { category: theme, slashRefs })
-      )
-    : ''
-  const baseMemCtx = heavyCtx
+  // A session-level knowledge selection is an explicit retrieval request. Do
+  // not leave it to the model to remember calling a search tool: otherwise
+  // ordinary work phrasing (for example, "send me the DailySign fields") is
+  // classified as assist and reaches the grounding gate without evidence.
+  const selectedKnowledgeRetrieval = !collaborationOnly && retrievalScope.mode === 'selected'
+    && retrievalScope.degraded !== true
+    && retrievalScope.providers.length > 0
+    && String(prompt || '').trim().length > 0
+  if (selectedKnowledgeRetrieval) tier = 'retrieval'
+  const heavyCtx = tier !== 'chat' && !todayPriorityFactsOnly
+  const agentKnowledgePolicy = resolveAgentKnowledgePolicy(session, getAgentProfileStore, retrievalScope.providers || [])
+  // A mounted local source does not authorize the global knowledge directory.
+  // Query scoped providers below; Skill bodies belong to the activation path,
+  // not the legacy theme-based, truncated getSkillContext fallback.
+  const baseMemCtx = heavyCtx && agentKnowledgePolicy.allowPersonalMemory
     ? contextCache.cached(
         `mem:${MEMORY_DIR}:${theme}:${slashRefs.join(',')}`,
         contextCache.statMtimeMs(path.join(MEMORY_DIR, 'working', 'recent.jsonl')) ||
           contextCache.statMtimeMs(MEMORY_DIR),
-        () => productMemory.getContextForAI(MEMORY_DIR, [kbSnippet, skillCtx].filter(Boolean).join('\n\n'))
+        () => productMemory.getContextForAI(MEMORY_DIR, '')
       )
     : ''
   const embedFn = buildEmbedFn(s)
 
   const { queryKnowledge, kbQueryTool, kbGetTool } = L.createKnowledgeTools({
-    app, fabricRetrieval, retrievalScope, embedFn, ensureFabricSeeded, buildFabricCtx,
+    app, fabricRetrieval, knowledgeProvider, retrievalScope, knowledgePolicy: agentKnowledgePolicy, embedFn, ensureFabricSeeded, buildFabricCtx,
+    projectId: session.projectId || null,
+    getCurrentScope: () => {
+      const currentSession = loadAgentSessions().find(item => item.id === session.id)
+      if (!currentSession) return null
+      const scope = ensureCapabilityHub().resolveSessionRetrievalScope(currentSession)
+      return { retrievalScope: scope, knowledgePolicy: resolveAgentKnowledgePolicy(currentSession, getAgentProfileStore, scope.providers || []), projectId: currentSession.projectId || null }
+    },
   })
 
   let wikiCtx = ''
-  if (tier === 'retrieval' && !todayPriorityFactsOnly && String(prompt || '').trim()) {
+  if (!collaborationOnly && tier === 'retrieval' && !todayPriorityFactsOnly && String(prompt || '').trim()) {
     const startedAt = Date.now()
     stage('stage_retrieval', '正在检索知识库…')
     try {
@@ -332,8 +408,10 @@ async function prepareAgentGenerate(env) {
     mode: 'light',
     maxItems: 4,
   })
+  const scopedWorkMemory = require('./agent-memory-scope').selectScopedWorkMemories(contextItems, agentKnowledgePolicy, session)
+  metrics.memoryScope = { selected: scopedWorkMemory.items.length, omitted: scopedWorkMemory.omitted }
   const workPacket = contextPacketLib.buildContextPacket({
-    items: contextItems.filter(item => item.type === 'work_memory'),
+    items: scopedWorkMemory.items,
     mode: 'work',
     maxItems: 8,
   })
@@ -411,7 +489,7 @@ async function prepareAgentGenerate(env) {
     prompt,
     slashRefs,
     tier,
-    skillCtx,
+    '',
     { taskId: requestedTaskId },
   )
   const declaredExecutionContract = payload.executionContract && typeof payload.executionContract === 'object'
@@ -424,17 +502,27 @@ async function prepareAgentGenerate(env) {
   // An explicit Feishu Docx/Wiki URL is already an authoritative locator. In
   // runtime mode make the read contract deterministic so the model cannot
   // replace it with a broad meeting search (or answer from title metadata).
-  const directDocGrounding = feishuIntent.directDocRead && !capAssemblyGrounding?.requiredTools?.length
+  const directDocGrounding = !expertExecution && feishuIntent.directDocRead && !capAssemblyGrounding?.requiredTools?.length
     ? {
         requiredTools: ['feishu.read_doc'],
         requiredEvidence: [{ kind: 'tool_result', tool: 'feishu.read_doc', minChars: 40, forbidTruncated: true }],
       }
     : null
-  const effectiveGrounding = collaborationOnly
+  // A follow-up such as “不对，从飞书获取” is an explicit correction of a
+  // prior generic answer. Make the IM read deterministic so the model cannot
+  // remain on the memory path or claim a result without calling Feishu.
+  const relatedChatsGrounding = !expertExecution && feishuIntent.asksRelatedChats && !capAssemblyGrounding?.requiredTools?.length
+    ? {
+        requiredTools: ['feishu.related_chats'],
+        completionConditions: [{ type: 'tool_success', tool: 'feishu.related_chats' }],
+      }
+    : null
+  let effectiveGrounding = collaborationOnly
     ? null
     : groundingRuntime.mergeGroundingContracts([
         capAssemblyGrounding,
         directDocGrounding,
+        relatedChatsGrounding,
       ].filter(Boolean))
   let effectivePrompt = String(prompt || '')
   const researchPrompt = researchRouting.selectResearchPrompt({ prompt, displayPrompt })
@@ -442,6 +530,18 @@ async function prepareAgentGenerate(env) {
   if (resolveGroundingRuntimeMode() === 'runtime' && !collaborationOnly) {
     let refState = groundingRuntime.deserializeReferenceState(session.referenceState || {})
     refState.taskFrame = researchRouting.reconcileResearchTaskFrame(refState.taskFrame, researchPrompt)
+    // A formal run owns its current obligations, including an empty contract.
+    // Keep references and selection anchors, but do not inherit an old task.
+    if (expertExecution) refState = { ...refState, taskFrame: null }
+    // A completed Feishu task must not constrain the next unrelated turn. In
+    // particular, "盘点昨天完成什么" may be answered from local KnowMe
+    // memory/knowledge unless the user explicitly asks for chats or Feishu.
+    // Keeping the old required tool here makes the grounding gate report a
+    // fake authorization requirement before any Feishu call is attempted.
+    const staleFeishuTask = Array.isArray(refState.taskFrame?.requiredTools)
+      && refState.taskFrame.requiredTools.some((tool) => String(tool).startsWith('feishu.'))
+      && !feishuIntent.mentioned
+    if (staleFeishuTask) refState = { ...refState, taskFrame: null }
     // Recover a lost candidate binding from the last rendered assistant card.
     // This is intentionally deterministic: a numeric reply must never fall
     // back to free-form model interpretation when the card already contains
@@ -461,7 +561,8 @@ async function prepareAgentGenerate(env) {
         }
       } catch { /* recovery is best-effort; normal clarification remains fail-closed */ }
     }
-    if (effectiveGrounding?.requiredTools?.length) {
+    if (expertExecution || effectiveGrounding?.requiredTools?.length
+      || effectiveGrounding?.requiredEvidence?.length || effectiveGrounding?.completionConditions?.length) {
       refState = groundingRuntime.setTaskFrame(refState, effectiveGrounding)
       groundingTaskFrame = effectiveGrounding
     }
@@ -485,13 +586,43 @@ async function prepareAgentGenerate(env) {
       })
       emit({ type: 'done', title: '需要澄清' })
       activeAgentRuns.delete(runId)
-      return { early: { text: resolved.clarification, runId, sessionId: session.id, toolCalls: 0 } }
+      return {
+        early: {
+          text: resolved.clarification,
+          runId,
+          sessionId: session.id,
+          toolCalls: 0,
+          attention: {
+            kind: 'missing_information',
+            action: 'provide_input',
+            title: '需要确认具体对象',
+            item: '待处理对象',
+            question: resolved.clarification,
+            required: true,
+          },
+        },
+      }
     }
     if (resolved.prompt) effectivePrompt = resolved.prompt
-    groundingTaskFrame = refState.taskFrame || groundingTaskFrame
+    // A UI/reference selection is a trusted, deterministic binding produced by
+    // the platform rather than free-form model inference. Project the bound
+    // tool into this turn's formal contract so every staged workflow can keep
+    // discovery and action as separate turns without weakening verification.
+    if (expertExecution && resolved.intent?.tool) {
+      const boundTool = String(resolved.intent.tool).trim()
+      effectiveGrounding = groundingRuntime.mergeGroundingContracts([
+        effectiveGrounding,
+        {
+          requiredTools: [boundTool],
+          requiredEvidence: [{ kind: 'tool_result', tool: boundTool, forbidTruncated: true }],
+          completionConditions: [{ type: 'tool_success', tool: boundTool }],
+        },
+      ].filter(Boolean))
+      refState = groundingRuntime.setTaskFrame(refState, effectiveGrounding)
+    }
+    groundingTaskFrame = expertExecution ? effectiveGrounding : (refState.taskFrame || groundingTaskFrame)
   }
   let commonExpertContext = ''
-  const personalSession = session?.agentId === 'personal' || session?.sessionKind === 'personal-topic'
   if (personalSession && typeof getWorkbenchModeStore === 'function') {
     try {
       const modeState = getWorkbenchModeStore().load()
@@ -502,18 +633,24 @@ async function prepareAgentGenerate(env) {
       }
     } catch { /* roster is optional context; never block conversation */ }
   }
-  const sceneId = promptRouter.resolveScene({
-    mode: ctxRole,
+  const promptLayerPolicy = contextEngine.resolvePromptLayerPolicy({
+    conversationMode,
+    workflowConversation,
+    personalSession,
     tier,
-    role: ctxRole,
-    hasNoteContext: !!String(context || '').trim(),
-    industry: personalizationSettings.industry,
-    prompt,
   })
+  const sceneId = workflowConversation
+    ? 'work'
+    : promptRouter.resolveScene({
+        mode: ctxRole,
+        tier,
+        role: ctxRole,
+        hasNoteContext: !!String(context || '').trim(),
+        hasTask: Boolean(taskRef?.id || taskRef?.kind),
+        industry: personalizationSettings.industry,
+        prompt,
+      })
   const toolsEnabled = !collaborationOnly && tier !== 'chat' && modelProfile.supportsTools !== false
-  const capabilityIds = toolsEnabled
-    ? ['web', 'suggestion', ...(feishuIntent.mentioned ? ['feishu'] : [])]
-    : []
   const executionPolicy = contextEngine.resolveExecutionPolicy({ conversationMode, toolsEnabled })
   session.executionPolicy = executionPolicy
   const contextPolicy = contextEngine.resolveContextPolicy({
@@ -523,15 +660,17 @@ async function prepareAgentGenerate(env) {
     locale: s.locale || 'zh-CN',
     toolsEnabled,
     executionPolicy,
-    capabilityIds,
+    capabilityIds: [],
     identity: capAssembly.personaName,
     inputBudget: policy.inputBudget,
   })
-  const sceneBlocks = collaborationOnly
+  const sceneBlocks = contextPolicy.scene === 'expert-collaboration'
     ? contextEngine.buildExpertCollaborationBlocks({
-        mode: conversationMode,
-        expertName: capAssembly.personaName || expertId || '当前专家',
-        discussionContext: expertDiscussionContext,
+      mode: conversationMode,
+      expertName: capAssembly.personaName || expertId || '当前专家',
+      userText: prompt,
+      discussionContext: expertDiscussionContext,
+      planningCapabilities: capAssembly.planningCapabilities,
       })
     : [{
         id: `scene.${sceneId}`,
@@ -545,18 +684,14 @@ async function prepareAgentGenerate(env) {
         source: { type: 'assistant-prompt-router', id: sceneId, version: '1' },
       }]
   const userPreferencePrompt = promptRouter.buildUserPrompt(personalizationSettings, ctxRole, {
-    includeUserPrompt: memoryToggles?.collaborationPrefs !== false,
-    includeAgentPersona: !collaborationOnly,
-    includeIdentityName: /你叫什么|你的名字|你是谁|自我介绍|怎么称呼|称呼你/i.test(String(prompt || '')),
+    includeUserPrompt: memoryToggles?.collaborationPrefs !== false && promptLayerPolicy.includeUserPrompt,
+    includeWorkProfile: promptLayerPolicy.includeWorkProfile,
+    agentPersonaScope: promptLayerPolicy.agentPersonaScope,
+    includeIdentityName: /你叫什么|你的名字|你是谁|自我介绍|怎么称呼|称呼你|what(?:'s| is) your name|who are you|introduce yourself/i.test(String(prompt || '')),
+    locale: contextPolicy.locale,
   })
-  const skillPrompt = promptRouter.buildSkillPrompt(slashRefs)
+  const skillPrompt = promptRouter.buildSkillPrompt(slashRefs, { locale: contextPolicy.locale })
   const contextBlocks = [
-    ...buildCoreContextBlocks({
-      tier,
-      toolsEnabled,
-      capabilityIds,
-      locale: contextPolicy.locale,
-    }),
     ...sceneBlocks,
     ...(workflowReact.shouldForceWorkflowReact(session) ? [{
       id: 'scene.workflow-react',
@@ -564,8 +699,8 @@ async function prepareAgentGenerate(env) {
       priority: 94,
       maxTokens: 520,
       cachePolicy: 'session',
-      content: workflowReact.REACT_INSTRUCTIONS,
-      source: { type: 'workflow-runtime', id: 'react-v1' },
+      content: workflowReact.resolveWorkflowReactInstructions(session, prompt),
+      source: { type: 'workflow-runtime', id: 'react-v2' },
     }] : []),
     ...(userPreferencePrompt ? [{
       id: 'preference.user',
@@ -575,7 +710,7 @@ async function prepareAgentGenerate(env) {
       sensitive: true,
       source: { type: 'settings', id: 'user-prompt' },
     }] : []),
-    ...(skillPrompt ? [{
+    ...(skillPrompt && !capAssembly.skillL1Block ? [{
       id: 'skill.explicit',
       kind: 'skill',
       optional: true,
@@ -594,16 +729,7 @@ async function prepareAgentGenerate(env) {
       meta: { claims: { identity: capAssembly.personaName }, suppressOnConflict: false },
       source: { type: 'expert-runtime', id: session.personaExpertId || session.expertId },
     }] : []),
-    ...(capAssembly.dynamicCapabilityContext ? [{
-      id: 'persona.active-expert',
-      kind: 'persona',
-      content: capAssembly.dynamicCapabilityContext,
-      maxTokens: 5200,
-      source: { type: 'expert-runtime', id: session.personaExpertId || session.expertId },
-      meta: capAssembly.personaName
-        ? { claims: { identity: capAssembly.personaName }, suppressOnConflict: false }
-        : {},
-    }] : []),
+    ...(Array.isArray(capAssembly.contextBlocks) ? capAssembly.contextBlocks : []),
     ...(writingPromptContext ? [{
       id: 'skill.writing-context',
       kind: 'skill',
@@ -642,57 +768,8 @@ async function prepareAgentGenerate(env) {
     contextEngine.semanticRuntimeStats(),
   )
   if (signal?.aborted) return cancelled()
-  const contextAssemblyStartedAt = Date.now()
-  let contextAssembly
-  try {
-    contextAssembly = contextEngine.assembleContext({
-      policy: contextPolicy,
-      blocks: contextBlocks,
-      query: prompt,
-      optionalTopK,
-      budget: Math.min(16000, Math.max(1800, Math.floor(policy.inputBudget * 0.55))),
-      vectorScores: semanticSelection.vectorScores,
-      semanticSelection: semanticSelection.telemetry,
-    })
-  } catch (error) {
-    if (error?.code === 'critical_context_budget_exceeded') {
-      contextEngine.recordCriticalBudgetFailure()
-      return fail(error.message)
-    }
-    throw error
-  }
-  contextEngine.recordContextAssembly(contextAssembly.manifest, Date.now() - contextAssemblyStartedAt)
-  const rawMessages = buildChatMessages({
-    systemMessages: contextAssembly.messages.filter(message => message.role === 'system'),
-    dataMessages: contextAssembly.messages.filter(message => message.role === 'user'),
-    history: conversationHistory,
-    prompt: effectivePrompt,
-    noteContext: context,
-    imageAttachments: Array.isArray(payload.attachments) ? payload.attachments : [],
-  })
-  let fittedConversation
-  try {
-    fittedConversation = llmRuntime.fitConversation(rawMessages, policy.inputBudget)
-  } catch (error) {
-    if (error?.code === 'critical_context_budget_exceeded') return fail(error.message)
-    throw error
-  }
-  const apiMessages = fittedConversation.messages
-  try {
-    logger.systemPrompt('llm-system-prompt', '构建系统提示词', {
-      model: modelProfile.model,
-      agentId: session?.agentId || agentId || 'general',
-      sessionId: session?.id || sessionId || '',
-      skillRefs: slashRefs,
-      contextManifest: contextAssembly.manifest,
-    }, { runId, scope: 'ai-generate' })
-  } catch { /* ignore */ }
-  const contextInfo = {
-    usedTokens: fittedConversation.usedTokens,
-    contextWindow: modelProfile.contextWindow,
-    inputBudget: policy.inputBudget,
-    omittedTurns: fittedConversation.omittedTurns,
-    omittedMessages: fittedConversation.omittedMessages,
+  const contextInfoBase = {
+    provider: routedModel.provider,
     model: modelProfile.model,
     label: modelProfile.label,
     requestedModel: routedModel.requestedModel,
@@ -714,8 +791,6 @@ async function prepareAgentGenerate(env) {
       )],
       omitted: lightPacket.omitted + workPacket.omitted,
     },
-    contextManifest: contextAssembly.manifest,
-    contextEngineMetrics: contextEngine.contextEngineMetricsSnapshot(contextEngine.semanticRuntimeStats()),
   }
   upsertCurrentUser()
   if (grounding.active) {
@@ -725,14 +800,57 @@ async function prepareAgentGenerate(env) {
   }
   session.updatedAt = new Date().toISOString()
   persistSession()
-  stage('stage_prepare', '上下文准备完成', 'done', { contextInfo })
+  const contextDraft = {
+    version: 2,
+    tier,
+    executionPolicy,
+    policyInput: {
+      tier,
+      scene: contextPolicy.scene,
+      phase: contextPolicy.phase,
+      conversationMode,
+      locale: contextPolicy.locale,
+      identity: capAssembly.personaName,
+      inputBudget: policy.inputBudget,
+    },
+    blocks: contextBlocks,
+    query: prompt,
+    optionalTopK,
+    contextBudget: Math.min(16000, Math.max(1800, Math.floor(policy.inputBudget * 0.55))),
+    vectorScores: semanticSelection.vectorScores,
+    semanticSelection: semanticSelection.telemetry,
+    staticCapabilityIds: ['suggestion'],
+    inputBudget: policy.inputBudget,
+    tokenCalibrationFactor: tokenCalBefore.factor,
+    history: conversationHistory,
+    prompt: effectivePrompt,
+    noteContext: context,
+    imageAttachments: Array.isArray(payload.attachments) ? payload.attachments : [],
+    infoBase: contextInfoBase,
+  }
 
   return {
     session, s, url, slashRefs, ctxRole, grounding, writingTask, tier, embedFn, queryKnowledge,
     kbQueryTool, kbGetTool, effectivePersonalization, tokenCalKey, tokenCalBefore, routedModel,
-    modelProfile, policy, promptCachePolicy, groundingTaskFrame, apiMessages, contextInfo, prompt, researchPrompt,
+    modelProfile, policy, promptCachePolicy, groundingTaskFrame, apiMessages: [], contextInfo: contextInfoBase, contextDraft, prompt, researchPrompt,
     executionPolicy,
+    providedMaterials,
   }
 }
 
-module.exports = { prepareAgentGenerate }
+function requiresFeishuToolSurface(intent = {}) {
+  return Boolean(intent.mentioned && (
+    intent.needsSearch
+    || intent.needsContentRead
+    || intent.asksMinutes
+    // These workflows return grounded Feishu facts without reading a
+    // document body. They still require the connector tool surface; if we
+    // leave them out, the model falls back to chat and can only ask for
+    // permission instead of executing the requested tool.
+    || intent.asksRelatedChats
+    || intent.asksTodayPriority
+    || intent.asksDocKbSuggest
+  ))
+}
+
+module.exports = { prepareAgentGenerate, resolveAgentKnowledgePolicy, requiresFeishuToolSurface }

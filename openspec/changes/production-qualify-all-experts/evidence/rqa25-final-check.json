@@ -1,0 +1,109 @@
+{
+  "stage": "RQA25",
+  "check": {
+    "sessionId": 81257,
+    "command": "npm run check",
+    "exitCode": 0,
+    "backend": {
+      "total": 3357,
+      "passed": 3306,
+      "skipped": 51,
+      "failed": 0
+    },
+    "renderer": {
+      "files": 86,
+      "passed": 606
+    },
+    "lint": "passed",
+    "typecheckRenderer": "passed"
+  },
+  "independentRelated": {
+    "passed": 75,
+    "failed": 0
+  },
+  "gitScope": {
+    "sharedWholeTree": true,
+    "changedFiles": 322,
+    "changedSymbols": 703,
+    "affected": 172,
+    "risk": "critical",
+    "notAllAuthoredOrReviewedThisStage": true
+  },
+  "ui": {
+    "taskId": "task-mtphk5gg-jinbr",
+    "imageNatural": [
+      1088,
+      1440
+    ],
+    "thumbnail": [
+      317.328125,
+      420
+    ],
+    "imageFit": "contain",
+    "thumbnailCornerRadii": [
+      "10px",
+      "10px",
+      "10px",
+      "10px"
+    ],
+    "inputCount": 1,
+    "feedbackSurvivesReopen": true,
+    "revisionFocusesSameInput": true,
+    "dialogBox": {
+      "x": 231,
+      "y": 151.796875,
+      "width": 818,
+      "height": 573.390625
+    },
+    "viewport": [
+      1280,
+      820
+    ],
+    "coldMainPid": 6788,
+    "qaProfile": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de"
+  },
+  "limits": [
+    "No new real provider or model generation in RQA25",
+    "RQA24 bytes replay only; original task artifacts are not backfilled",
+    "Image expert SOP/package update remains pending; professional qualification not granted",
+    "Default renderer geometry tests require preinstalled Chromium; release CI not upgraded"
+  ],
+  "hashes": [
+    {
+      "Path": "D:\\aispace\\knowme\\src\\lib\\agent-image-tools.ts",
+      "Hash": "D235EE44B6F33C6AE8F4F8C03474947E4C37607CBF57C52D76D3FC53F5B1A59E"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\lib\\image-validation.ts",
+      "Hash": "94E9CD2741AC62B877214EA5132D8F080D6A9424148F2AE6C17C334CE1F916EA"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\lib\\agent-media-resources.ts",
+      "Hash": "0FB96C4F7287B147A6F6E45EB2AB983B59D36CB8DA6381CE058082F6D7E1BE7A"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\lib\\image-artifact-metadata.ts",
+      "Hash": "D1192D5BBB55E1CE02C368B39CA9A6D5F8F51203298F675A76AF0E5744285E0D"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\tests\\image-artifact-metadata.test.js",
+      "Hash": "1F216325BFA4716955B4A9296288E9C2FE14189B05E49E2A87AC49978FC132D9"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\tests\\expert-task-runtime.test.js",
+      "Hash": "2D9C696B3825D7169579B44A07B76CA8E3D37F5AD49ED9CE62AFD47004A6550D"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\renderer\\features\\artifact\\artifact-preview.css",
+      "Hash": "58D9ACA6B407D21E632B2A0C1922149A5495693F2AA425073A84F7A270DFF31E"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\renderer\\features\\artifact\\artifact-thumbnail-layout.spec.tsx",
+      "Hash": "80556C6E148DCDDB1CCCD58D3DABC930B0AFA68F95B4D7D2DD4EDA16940935D1"
+    },
+    {
+      "Path": "D:\\aispace\\knowme\\src\\renderer\\features\\expert\\expert-workbench.css",
+      "Hash": "48A4D9464CC1318CFFB4BBDE3BDCFB655A969E56DDAC3465D718C744C868D7D3"
+    }
+  ]
+}

@@ -137,11 +137,13 @@ describe('agent-team-runtime-governance-ui', () => {
         getRemainingTimeoutMs: () => 0,
       })
       assert.equal(budgetTimeout.ok, false)
-      assert.equal(budgetTimeout.code, 'timeout')
+      assert.equal(budgetTimeout.code, 'tool_timeout')
+      assert.equal(budgetTimeout.executionStarted, false)
 
       const slow = await reg.execute('slow_tool', {}, { runId: 'run_parent', userData: os.tmpdir() })
       assert.equal(slow.ok, false)
-      assert.ok(['timeout', 'cancelled'].includes(slow.code), `slow tool must abort, got ${slow.code}`)
+      assert.equal(slow.code, 'tool_timeout')
+      assert.equal(slow.executionStarted, true)
     })
 
     it('aborts in-flight tool when AbortSignal fires', async () => {
@@ -192,7 +194,7 @@ describe('agent-team-runtime-governance-ui', () => {
       assert.equal(calls, 2)
     })
 
-    it('wraps approval-required writes with pending_review envelope fields', async () => {
+    it('blocks approval-required writes before execution with pending_review envelope fields', async () => {
       const result = await reg.execute('file.write', { idempotencyKey: 'draft-1' }, {
         runId: 'run_parent',
         parentRunId: 'run_parent',
@@ -200,7 +202,9 @@ describe('agent-team-runtime-governance-ui', () => {
         userData: os.tmpdir(),
         governancePolicy: { allowlist: ['file.write'] },
       })
-      assert.equal(result.ok, true)
+      assert.equal(result.ok, false)
+      assert.equal(result.code, 'approval_required')
+      assert.equal(result.executionStarted, false)
       assert.equal(result.requiresApproval, true)
       assert.equal(result.pendingReview, true)
       assert.ok(result.draftId)

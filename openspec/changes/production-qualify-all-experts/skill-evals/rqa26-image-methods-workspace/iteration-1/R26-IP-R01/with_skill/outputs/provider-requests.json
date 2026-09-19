@@ -1,0 +1,65 @@
+{
+  "notice": "从原始导出 wire 按 sourceWireIndex 选取的 tools/call 观察记录；保留完整 prompt 与已记录的参考图字节指纹。不代表完整网络日志或独立服务端回执。observer 的 label 不作为配置/版本依据，实际 task/session/run 与 assignmentSnapshot 为准。",
+  "caseId": "R26-IP-R01",
+  "config": "with_skill",
+  "file": "rqa26-actual-runs-lossless.json",
+  "taskId": "task-mtpllbgi-sw9ph",
+  "sessionId": "wb-expert-task-mtpllbgi-sw9ph",
+  "runId": "expert_task-mtpllbgi-sw9ph_mtpllfe9",
+  "calls": [
+    {
+      "sourceWireIndex": 1,
+      "observation": {
+        "label": "old-R01-D1",
+        "transport": "fetch",
+        "startedAt": "2026-09-06T09:17:07.867Z",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "1788686227867-527b13",
+          "method": "tools/call",
+          "params": {
+            "name": "list_paint_models",
+            "arguments": {}
+          }
+        },
+        "status": 200,
+        "returnedAt": "2026-09-06T09:17:07.938Z"
+      }
+    },
+    {
+      "sourceWireIndex": 3,
+      "observation": {
+        "label": "old-R01-D1",
+        "transport": "fetch",
+        "startedAt": "2026-09-06T09:17:13.771Z",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "1788686233768-305638",
+          "method": "tools/call",
+          "params": {
+            "name": "generate_image",
+            "arguments": {
+              "prompt": "Edit the provided reference product photograph. Change ONLY the cylindrical body of the insulated bottle below the lid — its brushed silver metal outer surface — to a matte black finish (non-glossy, soft low-sheen matte coating with subtle realistic studio highlights consistent with matte paint). \n\nThe screw-on lid at the top MUST remain exactly as in the original: same polished/brushed silver metal color, same reflective appearance, same shape and position. Do not darken, recolor or restyle the lid. Keep the thin dark seam ring between lid and body unchanged. Keep the bottom base band's original shape and structure; only its surface color follows the body's matte black change.\n\nPreserve everything else from the reference image exactly: identical bottle silhouette and proportions, identical single-bottle count (one bottle only), identical placement on the left side of the frame with the same scale and crop, identical deep dark-green seamless studio background, identical empty negative space on the right, identical soft diffused studio lighting and shadow direction, identical camera angle and framing. No text, no logo, no watermark, no props, no reflection changes elsewhere. Do not redesign or recompose the shot. Output size should match the original 896x1200 pixels.",
+              "model": "gpt-image-2",
+              "n": 1,
+              "quality": "auto",
+              "size": "896x1200",
+              "aspect_ratio": "3:4",
+              "reference_images": [
+                {
+                  "kind": "image-bytes",
+                  "mimeType": "image/jpeg",
+                  "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+                  "byteLength": 455950
+                }
+              ],
+              "include_cos_urls": true
+            }
+          }
+        },
+        "status": 200,
+        "returnedAt": "2026-09-06T09:17:37.601Z"
+      }
+    }
+  ]
+}

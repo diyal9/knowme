@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 3,
+  "id": "te-report-playwright-export",
+  "kind": "skill",
+  "name": "数数报表真实 CSV 导出",
+  "description": "运行 th-BI 的 Playwright 脚本，点击数数报表页面导出按钮并保存真实 CSV。",
+  "version": "1.0.0",
+  "dependencies": [],
+  "permissions": {
+    "connectors": { "allowedConnectorIds": ["feishu"] },
+    "tools": { "allowlist": ["load_skill", "read_skill_resource", "run_skill_script"] },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": ["TE 报表 URL 或包含报表链接的飞书文档", "输出目录与覆盖策略"],
+  "outputs": ["页面真实导出的 CSV", "导出 manifest、批量汇总或失败截图"],
+  "risk": { "level": "high", "reasons": ["运行浏览器自动化", "读取登录态并写入本地文件"] },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "skills/te-report-playwright-export" }
+}

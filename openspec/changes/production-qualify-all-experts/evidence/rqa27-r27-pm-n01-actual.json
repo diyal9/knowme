@@ -1,0 +1,503 @@
+{
+  "observation": {
+    "scope": "isolated QA actual task and session; not pre-gate candidate",
+    "qualification": false
+  },
+  "data": {
+    "caseId": "R27-PM-N01",
+    "id": "task-mtpo8wwc-p4a49",
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtpo8wwc-p4a49",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "RQA27 离线检索可验收需求",
+      "expertId": "product-manager",
+      "expertName": "",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。",
+      "brief": {
+        "goal": "请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。",
+        "plan": {
+          "goal": "请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "user-confirmation",
+            "type": "user_confirmation",
+            "title": "用户确认",
+            "ref": "",
+            "content": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "任务成果",
+            "type": "document",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "product-manager",
+        "agentVersion": "2.0.0",
+        "agentHash": "87d7e6a520a3ed70",
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtpo8wwc-p4a49",
+        "bindings": {
+          "skills": [
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "permissions": {},
+        "plan": {
+          "goal": "请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "sop": {
+          "version": "2.0.0",
+          "hash": "87d7e6a520a3ed70"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:18.924Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.206Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.296Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.364Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.364Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.364Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:19.420Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "正在整理最终答复…",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:31:49.022Z"
+        },
+        {
+          "id": "event-9",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "完整答复已重新生成，正在核对",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:32:28.931Z"
+        },
+        {
+          "id": "event-10",
+          "type": "execution_blocked",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 10,
+          "summary": "回复中的「日期」尚未与来源对应，需要重新核对依据",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:32:29.076Z"
+        }
+      ],
+      "attention": {
+        "kind": "evidence_incomplete",
+        "action": "retry",
+        "title": "执行结果需要重新核验",
+        "detail": "回复中的「日期」尚未与来源对应，需要重新核对依据",
+        "field": "",
+        "item": "回复中的「日期」尚未与来源对应，需要重新核对依据",
+        "question": "",
+        "example": "",
+        "options": [],
+        "defaultValue": "",
+        "required": true,
+        "createdAt": "2026-09-06T10:32:29.060Z"
+      },
+      "progress": {
+        "phase": "blocked",
+        "label": "执行结果需要重新核验",
+        "detail": "回复中的「日期」尚未与来源对应，需要重新核对依据",
+        "startedAt": "2026-09-06T10:31:19.279Z",
+        "updatedAt": "2026-09-06T10:32:29.060Z",
+        "heartbeatAt": "2026-09-06T10:32:29.060Z"
+      },
+      "inputQueue": null,
+      "deliverables": [],
+      "executionEvidence": [
+        {
+          "runId": "expert_task-mtpo8wwc-p4a49_mtpo8x95",
+          "deliverableId": "primary",
+          "gateStatus": "blocked",
+          "verificationPassed": false,
+          "verificationDiagnostics": {
+            "version": 1,
+            "runId": "expert_task-mtpo8wwc-p4a49_mtpo8x95",
+            "taskId": "task-mtpo8wwc-p4a49",
+            "candidateHash": "551f1258339c12a2fb844b4d85d6f963a0bf63a5e1ff3ab138191974bd063572",
+            "candidateChars": 5195,
+            "materialSnapshotHash": "183ae51f8432416286904bd4ac31ff644f715e484a4be90c090b7a28e291833a",
+            "materialCount": 1,
+            "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+            "fieldChecks": [
+              {
+                "label": "日期",
+                "valueHash": "ed827267b7e2980b2d5f401a8b3976f2ca33f2e31f1cb01fae9edc4501e3abcb",
+                "support": "unresolved"
+              }
+            ],
+            "fieldCheckCount": 1
+          },
+          "toolCalls": [],
+          "evidence": [],
+          "violations": [
+            {
+              "code": "ungrounded_external_fact",
+              "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+              "missingTools": [],
+              "claimLabels": [
+                "日期"
+              ]
+            }
+          ],
+          "createdAt": "2026-09-06T10:32:29.043Z"
+        }
+      ],
+      "resultSummary": "回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。",
+      "status": "needs_input",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtpo8wwc-p4a49"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-06T10:31:18.924Z",
+      "updatedAt": "2026-09-06T10:32:29.076Z"
+    },
+    "session": {
+      "id": "wb-expert-task-mtpo8wwc-p4a49",
+      "agentId": "personal",
+      "sessionKind": "expert-task",
+      "profileId": "",
+      "contextId": "",
+      "projectId": null,
+      "expertId": "product-manager",
+      "personaExpertId": "",
+      "executionPolicy": "tools-allowed",
+      "capabilitySnapshotId": "",
+      "snapshotPath": "",
+      "ephemeral": true,
+      "taskRef": {
+        "id": "task-mtpo8wwc-p4a49"
+      },
+      "knowledgeRefs": [],
+      "title": "新助手",
+      "createdAt": "2026-09-06T10:31:18.971Z",
+      "updatedAt": "2026-09-06T10:32:28.959Z",
+      "summary": "",
+      "messages": [
+        {
+          "id": "msg_expert_task-mtpo8wwc-p4a49_mtpo8x95_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「product-manager」。\n\n你是 KnowMe 产品经理。先定义用户问题和业务目标，再写需求范围、关键流程、规则、异常情况和验收标准。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n\n【必须遵循的 SOP】\n你是 KnowMe 产品经理。先定义用户问题和业务目标，再写需求范围、关键流程、规则、异常情况和验收标准。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。\n\n当前时间：2026-09-06T10:31:19.385Z\n\n材料：\n- 用户确认\n已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息：\n目标用户是10位内部试点同事，要在电脑离线时找到自己已有权读取的本地资料。用户主动绑定本地文件夹；只索引md/txt，不做PDF、不做云同步或团队共享。试点成功目标是给定找文件任务的完成率≥80%，这是未来目标，尚未测试。\n应用持续运行且绑定目录可访问时，用户删除文件后，从删除操作起60秒内该文件须从搜索结果失效。应用关闭期间发生的删除，在下次启动完成检查前不得展示为可打开的有效旧结果；不得把重启当作延长旧结果有效期的理由。无权限文件不得读取正文、内容片段或在结果中泄露旧缓存；打开结果前也必须重新检查当前权限。权限检查失败时不得按旧权限放行。\n用户可以解绑目录；解绑后该目录不得继续产生新索引或作为可搜索来源。只管理索引，不修改或删除用户原文件。文件搬移、目录临时不可达、索引失败和处理中取消都要有用户可观察的状态与恢复路径；未明确的取舍请标为设计建议/待确认，不捏造技术已验证。\n请覆盖背景和目标、范围/非目标、角色权限、主流程及状态、关键规则、异常恢复、可观察WHEN/THEN验收和开放问题。明确80%的分母与试点测量建议，不把目标写成已达成，不擅自提高业务SLA或许诺开发工期。不要十节都写待确认而不定义已有规则。\n仅本消息材料内完成，不联网、不读代码或其他文件、不执行工具、不生成文件、不外发；我授权的是形成需求初稿，不是开发或上线。\n步骤：\n1. 仅依据已给材料完成专业分析及对话交付\n风险：未核实内容不得编造成事实；无外部操作授权\n\n本轮交付物：任务成果（document）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtpo8wwc-p4a49_mtpo8x95",
+          "createdAt": "2026-09-06T10:31:19.451Z"
+        },
+        {
+          "id": "msg_expert_task-mtpo8wwc-p4a49_mtpo8x95_assistant",
+          "role": "assistant",
+          "text": "回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。",
+          "runId": "expert_task-mtpo8wwc-p4a49_mtpo8x95",
+          "createdAt": "2026-09-06T10:32:28.959Z",
+          "trace": [
+            {
+              "id": "stage_prepare",
+              "kind": "stage",
+              "title": "上下文准备完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_generate",
+              "kind": "stage",
+              "title": "完整答复已重新生成，正在核对",
+              "status": "done"
+            },
+            {
+              "id": "stage_ground",
+              "kind": "stage",
+              "title": "依据核对完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_verify_claims",
+              "kind": "stage",
+              "title": "输出已阻断未验证声明",
+              "status": "error",
+              "summary": "回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。"
+            }
+          ],
+          "protocolVersion": 2,
+          "answerHash": "8f71ae8cdf411687"
+        }
+      ],
+      "pinned": false,
+      "run": {
+        "goal": "当前工作",
+        "role": "general",
+        "status": "active",
+        "toolsUsed": [],
+        "steps": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done",
+            "at": "2026-09-06T10:32:28.959Z"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "完整答复已重新生成，正在核对",
+            "status": "done",
+            "at": "2026-09-06T10:32:28.959Z"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done",
+            "at": "2026-09-06T10:32:28.959Z"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出已阻断未验证声明",
+            "status": "error",
+            "at": "2026-09-06T10:32:28.959Z",
+            "summary": "回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。"
+          }
+        ],
+        "artifacts": [],
+        "applyLog": []
+      },
+      "displayTitle": "直接给一份可供设计、研发、测试评审的完整需求初稿，放在对",
+      "labels": [
+        "分析",
+        "资料"
+      ],
+      "grounding": "目标：请直接给一份可供设计、研发、测试评审的完整需求初稿，放在对话中，不需要文件。以下为已确认的合成产品约束，不再追问已有信息： 目标用户是10位内部试点同事，要在电\n材料：用户提到的材料（正文未提供）\n约束：用户尚未提供\n期望结果：用户尚未明确提供",
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "expertTaskDiagnostics": {
+        "available": 30,
+        "loaded": 8,
+        "loadedNames": [
+          "discover_tools",
+          "discover_capabilities",
+          "request_capability_access",
+          "list_skills",
+          "load_skill",
+          "grep_files",
+          "write_file",
+          "read_file"
+        ],
+        "omitted": 23,
+        "usedTokens": "[redacted]",
+        "schemaTokens": "[redacted]",
+        "inputBudget": 64000,
+        "expansion": 0,
+        "reason": "按任务需求、已发现工具与执行契约选择"
+      },
+      "expertName": "产品经理",
+      "expert": {
+        "id": "product-manager",
+        "name": "产品经理",
+        "description": "将业务目标和用户问题整理为边界清晰、可评审的产品需求",
+        "avatar": "office/collaborator",
+        "soul": "",
+        "sop": "你是 KnowMe 产品经理。先定义用户问题和业务目标，再写需求范围、关键流程、规则、异常情况和验收标准。\n区分事实、假设和待确认项；不以功能堆砌替代问题分析。交付必须能被设计、研发和测试直接评审。",
+        "agenticType": "react",
+        "agenticConfig": {
+          "agenticType": "react",
+          "enableReflection": true,
+          "enableTools": true
+        },
+        "bindings": {
+          "skills": [
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "readiness": {
+          "state": "ready",
+          "items": [
+            {
+              "id": "writing-polish",
+              "kind": "skill",
+              "status": "ready"
+            }
+          ],
+          "issues": []
+        },
+        "source": "snapshot"
+      },
+      "knowledge": {
+        "mode": "default",
+        "activeProviderId": "local-default",
+        "selected": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local",
+            "status": "default"
+          }
+        ],
+        "available": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local"
+          }
+        ],
+        "degraded": false,
+        "message": ""
+      }
+    }
+  }
+}

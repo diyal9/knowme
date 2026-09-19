@@ -73,6 +73,12 @@ export interface SettingsForm {
   apiEndpoint?: string
   apiKey?: string
   apiKeyConfigured?: boolean
+  credentialStatus?: {
+    encryptionAvailable?: boolean
+    apiKey?: { configured?: boolean; available?: boolean; state?: string }
+    embeddingApiKey?: { configured?: boolean; available?: boolean; state?: string }
+    gitlabToken?: { configured?: boolean; available?: boolean; state?: string }
+  }
   model?: string
   llmProvider?: string
   temperature?: number
@@ -159,6 +165,9 @@ export interface ConnectorRecord {
   secretSlots?: { key: string; label?: string; required?: boolean; target?: string; name?: string; configured?: boolean }[]
   toolPolicies?: { match?: string; risk?: string; sideEffects?: boolean; requiresApproval?: boolean; timeoutMs?: number }[]
   mcp?: { transport?: 'stdio' | 'streamable-http' | 'sse' | string; command?: string; args?: string[]; cwd?: string; url?: string; envKeys?: string[]; env?: Record<string, string> }
+  cli?: { command?: string; args?: string[]; cwd?: string; env?: Record<string, string> }
+  http?: { baseUrl?: string; method?: string; headers?: Record<string, string>; query?: Record<string, string>; body?: string }
+  ssh?: { host?: string; port?: number; username?: string; cwd?: string; command?: string }
 }
 
 export interface FeishuPermissionPlan {
@@ -238,6 +247,12 @@ export interface KnowledgeLintResult {
 }
 
 export interface KnowMeExtendedApi {
+  toolDraftsList?: () => Promise<{ ok: boolean; drafts: Array<Record<string, unknown>> }>
+  toolApproveDraft?: (payload: { draftId: string; sessionId?: string; reject?: boolean }) => Promise<import('./agent-capability-scope').TaskCapabilityGrantResult>
+  taskCapabilityGrantsList?: (sessionId: string) => Promise<{ ok: boolean; code?: string; grants: import('./agent-capability-scope').TaskCapabilityGrant[] }>
+  taskCapabilityGrantRevoke?: (payload: { sessionId: string; grantId: string }) => Promise<import('./agent-capability-scope').TaskCapabilityGrantResult>
+  openBrainPanel?: (page?: 'status' | 'review' | 'connect') => void
+  onWorkspaceOpenRoute?: (cb: (payload: { route?: string; page?: string }) => void) => () => void
   initSettings?: (cb: (settings: SettingsForm) => void) => void
   onSelectSettingsTab?: (cb: (tab: string) => void) => void
   onWorkspaceOpenSettings?: (cb: (tab: string) => void) => () => void
@@ -254,13 +269,15 @@ export interface KnowMeExtendedApi {
   }>
   llmModels?: () => Promise<{ presets?: { id: string; label?: string }[] }>
   llmSetModel?: (payload: { model?: string; provider?: string }) => Promise<{ ok?: boolean; error?: string }>
-  sourcesAddLocal?: () => Promise<{ ok?: boolean; error?: string }>
+  sourcesAddLocal?: () => Promise<{ ok?: boolean; error?: string; canceled?: boolean; source?: ContentSourceRef }>
   sourcesAddGitlab?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; error?: string }>
   sourcesAddGithub?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; error?: string }>
   sourcesAddWeb?: (payload: Record<string, unknown>) => Promise<{ ok?: boolean; error?: string }>
   sourcesRemove?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   sourcesSync?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   sourcesList?: () => Promise<{ sources?: ContentSourceRef[]; activeSourceId?: string | null; gitAvailable?: boolean }>
+  sourcesTree?: (sourceId?: string) => Promise<{ ok?: boolean; error?: string; rootPath?: string; truncated?: boolean; nodes?: Array<{ type: 'dir' | 'file'; name: string; path: string; depth?: number }> }>
+  sourcesTreeChildren?: (payload: { sourceId?: string; path?: string }) => Promise<{ ok?: boolean; error?: string; truncated?: boolean; nodes?: Array<{ type: 'dir' | 'file'; name: string; path: string; depth?: number }> }>
   connectorsList?: () => Promise<{
     items?: ConnectorRecord[]
     connectors?: ConnectorRecord[]
@@ -341,6 +358,8 @@ export interface KnowMeExtendedApi {
   knowledgeStewardProposalReject?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   knowledgeStewardProposalSnooze?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   knowledgeProviderSetActive?: (id: string) => Promise<{ ok?: boolean; error?: string }>
+  knowledgeProviderSave?: (payload: { id?: string; kind?: string; displayName?: string; sourceId?: string; spaceSourceId?: string; subDir?: string; collectionId?: string; endpoint?: string; apiKey?: string; collectionIds?: string[]; topK?: number }) => Promise<{ ok?: boolean; id?: string; error?: string }>
+  knowledgeProviderRemove?: (id: string) => Promise<{ ok?: boolean; error?: string }>
   obsidianOpen?: () => Promise<{ ok?: boolean; error?: string }>
   capabilityPickLocalFolder?: () => Promise<{ ok?: boolean; path?: string }>
   capabilityPickZipFile?: () => Promise<{ ok?: boolean; path?: string }>
@@ -374,6 +393,25 @@ export interface KnowMeExtendedApi {
   onWorkbenchDaemonLogEvent?: (cb: (event: unknown) => void) => () => void
   capabilityInstall?: (payload: Record<string, unknown>) => Promise<unknown>
   capabilityImport?: (payload: Record<string, unknown>) => Promise<unknown>
+  skillCheck?: (payload: { skillId?: string; id?: string; sessionId?: string }) => Promise<{
+    ok?: boolean
+    status?: 'available' | 'unavailable' | 'invalid'
+    code?: string
+    message?: string
+    id?: string
+    name?: string
+  }>
+  skillPackageFiles?: (payload: { skillId?: string; id?: string; maxFiles?: number }) => Promise<{
+    ok?: boolean
+    files?: { path: string; size?: number }[]
+    error?: string
+  }>
+  skillPackageFile?: (payload: { skillId?: string; id?: string; path: string; maxBytes?: number }) => Promise<{
+    ok?: boolean
+    path?: string
+    content?: string
+    error?: string
+  }>
   expertGet?: (expertId: string) => Promise<unknown>
   expertSave?: (payload: Record<string, unknown>) => Promise<unknown>
   expertDelete?: (payload: Record<string, unknown>) => Promise<unknown>

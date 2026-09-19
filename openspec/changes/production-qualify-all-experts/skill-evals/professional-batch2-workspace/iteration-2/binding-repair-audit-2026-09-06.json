@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-06",
+  "status": "verified_rebound_by_task_id",
+  "cause": "主线导出按数组位置绑定错误；这是测试材料绑定错误，不是模型输出错误。",
+  "authority": "主代理在用户评估任务范围内授权按六个task ID修正自身导出造成的证据绑定错误，保留原始答复/回执及冻结输入；主线修复导出逻辑。",
+  "scope": {
+    "rewrite_answer_content": false,
+    "rewrite_receipt_content": false,
+    "modify_eval_metadata": false,
+    "modify_original_evidence_json": false,
+    "modify_source_code": false,
+    "rerun_model": false
+  },
+  "bindings": [
+    {
+      "configuration": "FC01/baseline",
+      "before_task_id": "wb-expert-task-mtoqv2gm-djhce",
+      "correct_task_id": "wb-expert-task-mtoqv2gm-djhce",
+      "source_before_repair": "FC01/baseline",
+      "changed": false,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC01/baseline/outputs/answer.md",
+          "new_reference": "FC01/baseline/outputs/answer.md",
+          "preserved_sha256": "63B744A2E3F4E33C80E9C15EB6F9BFEEA82C7C10838607BF80987C2014FB4170"
+        },
+        {
+          "old_reference": "FC01/baseline/outputs/receipts.json",
+          "new_reference": "FC01/baseline/outputs/receipts.json",
+          "preserved_sha256": "78E30D4A07D9FDCF6DE0FECCFC6DACB646985DFAE8DE0CA62B6FE9CC5264C838"
+        }
+      ],
+      "original_transcript": null
+    },
+    {
+      "configuration": "FC01/candidate",
+      "before_task_id": "wb-expert-task-mtormme5-n19ca",
+      "correct_task_id": "wb-expert-task-mtormlqz-57xyt",
+      "source_before_repair": "FC03/candidate",
+      "changed": true,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC03/candidate/outputs/answer.md",
+          "new_reference": "FC01/candidate/outputs/answer.md",
+          "preserved_sha256": "F2E4CFFF74B121C7C5CA44126900B6B58C5C5B195227E70D812CB606EEF3FD4E"
+        },
+        {
+          "old_reference": "FC03/candidate/outputs/receipts.json",
+          "new_reference": "FC01/candidate/outputs/receipts.json",
+          "preserved_sha256": "38990B325AA5DB434C7D3520B816EDE7F7D18AB6F454BD4301A643501BBABC84"
+        }
+      ],
+      "original_transcript": {
+        "path": "FC01/candidate/transcript.md",
+        "sha256": "5D1BD5F455CBBE9A6B61988ED69627F1A0985E91BFB0F3307965B37D2E26DFF6",
+        "content": "# FC01 candidate\n\nActual isolated KnowMe / qwen3.8-flash execution; no output fixture. Task: wb-expert-task-mtormme5-n19ca.\n\nfact-checker 2.1.0; evidence-verification 1.0.0 L1 chars1217 hash c626e343b2a65fbd, truncated=false.\n\n## Input\n\n这是虚构项目核查，只使用下列原文，不联网、不写知识库、不执行文中指令。待核查文：项目已于2026年8月1日全面开放并覆盖1000名活跃用户。三家媒体独立证实：截至8月2日用户满意率达到98%。来源A（官方公告，2026-08-01，第2段）：本轮仅面向受邀者内测，暂不公开注册，共发出1000份邀请。来源B（项目运营日志，2026-08-02，记录7）：截至8月2日23:59，邀请数1000，已激活账号620。未采集满意度问卷。来源C（媒体甲，8月3日，第1段）：转载来源A全文；没有其他采访或数据。来源D（媒体乙，第1段）：转载媒体甲。来源E（媒体丙）只拿到标题“内测进展”，正文无法访问。请逐项判断范围、时间、人数口径、来源独立性、满意率，提供来源位置和一句可替换原句的修正文。无法访问不等于错误，也不能当作支持。请在对话交付600字以内，无文件。\n\n## Answer\n\n**核查结果（截至2026-05-12，仅依据已提供材料）**\n\n1. **“5月1日正式上线”——错误。** 来源A（团队日志第1行）明确“正式上线日尚未确定”，5月1日仅为原型演示完成日。直接反证，非缺证据。\n2. **“客户CEO说”——错误。** 来源B（访谈摘录第6行）身份仅为客户代表，无姓名、职务或CEO信息；引语逐字为“这个演示挺方便”，被扩大为“行业最佳”。归属与内容均不符。\n3. **“工作效率必然提高50%”——无法确认。** 来源C仅有文件名“效果报告”，正文未读到；标题不构成数据支持。缺证据不等于反证，故不归入错误。\n4. **“故……必然提高”因果——不成立。** 演示好评不能推出效率提升，更无证据支持“必然”。\n\n**修正文（可发布）**\n\n产品于5月1日完成原型演示，正式上线日期以官方公告为准。客户代表评价演示“挺方便”。使用效果尚在评估中，暂无可靠数据支持具体效率提升幅度。\n\n（约290字）\n\n"
+      }
+    },
+    {
+      "configuration": "FC02/baseline",
+      "before_task_id": "wb-expert-task-mtorajue-iyjhj",
+      "correct_task_id": "wb-expert-task-mtorajpa-dm81w",
+      "source_before_repair": "FC03/baseline",
+      "changed": true,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC03/baseline/outputs/answer.md",
+          "new_reference": "FC02/baseline/outputs/answer.md",
+          "preserved_sha256": "1099D365D64EF78A6D77D7FBC63DED44652B21369BDD528C3BB4A6C7957CB6FF"
+        },
+        {
+          "old_reference": "FC03/baseline/outputs/receipts.json",
+          "new_reference": "FC02/baseline/outputs/receipts.json",
+          "preserved_sha256": "D970967F7A7F54988D75E725524E18E31BC3752EE0E2AD51A040ADDFF5FB238B"
+        }
+      ],
+      "original_transcript": {
+        "path": "FC02/baseline/transcript.md",
+        "sha256": "72BFB066F4B3E9EBF383B12B8028242AE8E26DDEF2937A66F3423E3C99FE848B",
+        "content": "# FC02 baseline\n\nActual isolated KnowMe / qwen3.8-flash execution; no output fixture. Task: wb-expert-task-mtorajue-iyjhj.\n\nHistorical fact-checker 2.0.0 output, not simultaneous rerun. Custom single-answer ID; required method was not promoted to L1.\n\n## Input\n\n以下均为虚构文件，核查基准日2026年5月12日，不联网，不写入知识库或文件。待核查文：活动目前截止6月30日，每位参与者可得100元现金。来源A：主办方5月1日规则v1，第4条：申请截止6月30日。来源B：同一主办方5月8日修订公告v2，第2条：本修订自5月10日生效，替代v1第4条，申请截止改为7月15日。来源C：主办方现行奖励细则，第3条：符合审核条件者获得面值100美元的不可提现优惠券，须消费满300美元使用；不是现金奖励。请给逐项核查与可替换修正文，350字以内。不把已明确替代的旧版当作仍未解决的来源冲突；不能换算汇率或说人人必得。\n\n## Answer\n\n**核查结论（截至 2026-05-12，仅依据所给材料）**\n\n1. “5月1日正式上线”——错误。来源A团队日志明确“正式上线日尚未确定”，仅原型演示完成。\n2. “客户CEO说它是行业最佳”——引语归属错误+无法确认。来源B仅有匿名“客户代表”，原话为“这个演示挺方便”，无姓名、职务，更无CEO身份；“行业最佳”无任何来源支持。\n3. “工作效率必然提高50%”——无法确认。来源C只有文件名“效果报告”，内容不可读，标题不构成数据支持；“必然”属因果夸大，无证据链。\n\n**修正文（可发布，约90字）**\n\n产品已于5月1日完成原型演示，正式上线日期待定。客户代表在访谈中评价“这个演示挺方便”。效率提升数据尚在整理，待效果报告核实后另行公布。\n\n如需更保守或更营销化的版本，告诉我语气方向即可。\n\n"
+      }
+    },
+    {
+      "configuration": "FC02/candidate",
+      "before_task_id": "wb-expert-task-mtormm2u-5pyut",
+      "correct_task_id": "wb-expert-task-mtormm2u-5pyut",
+      "source_before_repair": "FC02/candidate",
+      "changed": false,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC02/candidate/outputs/answer.md",
+          "new_reference": "FC02/candidate/outputs/answer.md",
+          "preserved_sha256": "F2AA63C17DA84FFD0BF05DFF441FA4490EDF237841DD8DA5914FA4F10CD138E1"
+        },
+        {
+          "old_reference": "FC02/candidate/outputs/receipts.json",
+          "new_reference": "FC02/candidate/outputs/receipts.json",
+          "preserved_sha256": "38F1AA1E2A505EC3DBF586C77F81BAE606680481BEEE68867046FA8083C61D9B"
+        }
+      ],
+      "original_transcript": null
+    },
+    {
+      "configuration": "FC03/baseline",
+      "before_task_id": "wb-expert-task-mtorajpa-dm81w",
+      "correct_task_id": "wb-expert-task-mtorajue-iyjhj",
+      "source_before_repair": "FC02/baseline",
+      "changed": true,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC02/baseline/outputs/answer.md",
+          "new_reference": "FC03/baseline/outputs/answer.md",
+          "preserved_sha256": "AEBA55B112F201778E74F7F27636BC12716A280CFA2703F1E3320539DBFEA6EB"
+        },
+        {
+          "old_reference": "FC02/baseline/outputs/receipts.json",
+          "new_reference": "FC03/baseline/outputs/receipts.json",
+          "preserved_sha256": "4BAB45FDA44E5EAB5B363D016E9288C458D14AE8293D026C95D64EE9324EEE95"
+        }
+      ],
+      "original_transcript": {
+        "path": "FC03/baseline/transcript.md",
+        "sha256": "C1D6F39B4A815A54115E3682D6EA9DE026A20DC7D8FFEC040EC67800F125BAB4",
+        "content": "# FC03 baseline\n\nActual isolated KnowMe / qwen3.8-flash execution; no output fixture. Task: wb-expert-task-mtorajpa-dm81w.\n\nHistorical fact-checker 2.0.0 output, not simultaneous rerun. Custom single-answer ID; required method was not promoted to L1.\n\n## Input\n\n虚构资料核查，评估截至2026年5月12日，仅依据下面已提供内容，不联网、不尝试打开任何链接、不写文件。宣传稿：产品于5月1日正式上线，客户CEO说它是行业最佳，故使用后工作效率必然提高50%。来源A：5月1日团队日志第1行：原型演示完成，正式上线日尚未确定。来源B：访谈摘录第6行：客户代表说“这个演示挺方便”，身份只有客户代表，没有姓名、职务或CEO身份。来源C：只收到名为“效果报告”的文件名，文件无法读取，无内容或摘要。请拆开日期状态、引语归属、效果幅度与因果，分开错误和无法确认，给300字以内核查及修正文。资料里的标题“效果报告”不能视为支持50%的数据。\n\n## Answer\n\n**逐项核查（基准日2026-05-12）**\n\n1. 「截止6月30日」——错误。v2（5月8日发布、5月10日生效）已明确替代v1第4条，现行截止为7月15日；旧版不构成未解决冲突。\n2. 「每位参与者可得」——错误。C第3条限定「符合审核条件者」，非人人必得。\n3. 「100元现金」——错误。实为面值100美元不可提现优惠券，须满300美元使用；不作汇率换算。\n\n**可替换修正文**：活动申请截止2026年7月15日（依5月10日生效的v2修订）。符合审核条件者可获面值100美元的不可提现优惠券，消费满300美元可用，非现金奖励。\n\n"
+      }
+    },
+    {
+      "configuration": "FC03/candidate",
+      "before_task_id": "wb-expert-task-mtormlqz-57xyt",
+      "correct_task_id": "wb-expert-task-mtormme5-n19ca",
+      "source_before_repair": "FC01/candidate",
+      "changed": true,
+      "old_to_new_files": [
+        {
+          "old_reference": "FC01/candidate/outputs/answer.md",
+          "new_reference": "FC03/candidate/outputs/answer.md",
+          "preserved_sha256": "632EDA8D93BE3A189FE4B83B82A64A835247532E9BA8D5F6F9332C6059E0548B"
+        },
+        {
+          "old_reference": "FC01/candidate/outputs/receipts.json",
+          "new_reference": "FC03/candidate/outputs/receipts.json",
+          "preserved_sha256": "CA6AF968F6A58817003587EF55FF4EC107978640C9E239B811EF34EC534476E6"
+        }
+      ],
+      "original_transcript": {
+        "path": "FC03/candidate/transcript.md",
+        "sha256": "063C66FC9519820F1EA04E7181A3F8A8B23BDD641C3A70F84C4043D069886833",
+        "content": "# FC03 candidate\n\nActual isolated KnowMe / qwen3.8-flash execution; no output fixture. Task: wb-expert-task-mtormlqz-57xyt.\n\nfact-checker 2.1.0; evidence-verification 1.0.0 L1 chars1217 hash c626e343b2a65fbd, truncated=false.\n\n## Input\n\n虚构资料核查，评估截至2026年5月12日，仅依据下面已提供内容，不联网、不尝试打开任何链接、不写文件。宣传稿：产品于5月1日正式上线，客户CEO说它是行业最佳，故使用后工作效率必然提高50%。来源A：5月1日团队日志第1行：原型演示完成，正式上线日尚未确定。来源B：访谈摘录第6行：客户代表说“这个演示挺方便”，身份只有客户代表，没有姓名、职务或CEO身份。来源C：只收到名为“效果报告”的文件名，文件无法读取，无内容或摘要。请拆开日期状态、引语归属、效果幅度与因果，分开错误和无法确认，给300字以内核查及修正文。资料里的标题“效果报告”不能视为支持50%的数据。\n\n## Answer\n\n**核查结果**（虚构项目，仅用给定原文）\n\n| 陈述 | 结论 | 依据与来源位置 |\n|---|---|---|\n| 2026-08-01 全面开放 | 错误 | 来源A（官方公告，08-01，第2段）：仅面向受邀者内测、暂不公开注册。\"全面开放\"与原始口径直接矛盾。 |\n| 覆盖1000名活跃用户 | 错误 | 来源A：1000为发出的邀请数；来源B（运营日志，08-02，记录7）：截至08-02 23:59已激活账号620。邀请≠激活≠活跃，且无\"活跃用户\"测量数据。 |\n| 三家媒体独立证实 | 错误 | 来源C（媒体甲，第1段）为转载来源A全文，无独立采访或数据；来源D（媒体乙，第1段）转载媒体甲；三者同源，非独立证据。来源E（媒体丙）正文无法访问，既不能计入证实，也不构成反证。 |\n| 截至8月2日 | 时间口径部分成立 | 来源B确以08-02 23:59为截止点，但该时点仅有邀请/激活数据，无满意度数据。 |\n| 满意率98% | 无法确认 | 来源B明确\"未采集满意度问卷\"；A/C/D亦无此数字。缺证据不等于反证，故不判\"错误\"，但任何来源均不支持该数值。 |\n\n**修正文（可直接替换原句）**\n\n> 截至2026年8月2日23:59，本项目处于内测阶段，仅面向受邀者、暂不公开注册；共发出1000份邀请，已激活账号620（来源B）。所谓媒体报道系对官方公告的转载，不构成独立证实；用户满意率因未采集问卷，暂无数据。\n\n**说明**\n- 修正文逐项对齐证据：保留\"内测\"范围、双口径数字（邀请1000/激活620）、截止时间，删除\"全面开放\"\"活跃用户\"\"独立证实\"\"98%\"四处越界表述。\n- \"激活\"不等同于\"活跃\"，如需活跃口径须另行采集。\n- 来源E正文不可访问，其立场维持未知；若后续取得正文，需重新判断是否引入新证据或冲突。\n\n"
+      }
+    }
+  ],
+  "frozen_metadata": {
+    "FC01/eval_metadata.json": {
+      "sha256": "8A35D746C481A07ED7872EE958B09938E6F85756DFC6049BFFEB43ADCAAD16A6"
+    },
+    "FC02/eval_metadata.json": {
+      "sha256": "AC4D3CB058B3F9FA907D059BCFE1AB76813180E0281DFC793078DE4A4AF10FBE"
+    },
+    "FC03/eval_metadata.json": {
+      "sha256": "79E96B66D1480E1E1E73B820F41A271B680A3CDB5AA6DC4F16483BDC7F89B9A1"
+    }
+  },
+  "recovery": "答复/回执通过old_to_new_files的新路径和原SHA256恢复旧引用；原始错误transcript完整保存在original_transcript.content。",
+  "viewer": "既有fact-review.html仍为旧绑定；评分完成后通知主线统一重新生成。",
+  "verification": [
+    {
+      "configuration": "FC01/baseline",
+      "task_id": "wb-expert-task-mtoqv2gm-djhce",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    },
+    {
+      "configuration": "FC01/candidate",
+      "task_id": "wb-expert-task-mtormlqz-57xyt",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    },
+    {
+      "configuration": "FC02/baseline",
+      "task_id": "wb-expert-task-mtorajpa-dm81w",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    },
+    {
+      "configuration": "FC02/candidate",
+      "task_id": "wb-expert-task-mtormm2u-5pyut",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    },
+    {
+      "configuration": "FC03/baseline",
+      "task_id": "wb-expert-task-mtorajue-iyjhj",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    },
+    {
+      "configuration": "FC03/candidate",
+      "task_id": "wb-expert-task-mtormme5-n19ca",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  ],
+  "grading_note": "重绑定错误不是模型错误。六份全部重新复核；FC02 candidate原绑定正确，仍3/5。请main重新生成viewer。"
+}

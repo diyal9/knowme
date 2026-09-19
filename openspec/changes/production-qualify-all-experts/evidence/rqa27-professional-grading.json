@@ -1,0 +1,881 @@
+{
+  "schemaVersion": 1,
+  "round": "RQA27",
+  "date": "2026-09-06",
+  "status": "baseline_six_complete_with_separate_F01_and_evidence_supplement",
+  "reviewerDisclosure": "独立专业内容评审，非team-tester正式QA放行；题目/包作者main，评审非盲，已见主线关于KC受阻的说明。沿用skill-creator grader/schema及expert-rubrics.md §8。",
+  "frozenCasesSHA256": "c38befcb7337785e01462779d15b6e30e2f4de34474643c203f42020a83025b2",
+  "scope": "原始六题基线全部核对；LE/PW/VD实际交付评分，KC/PM/RA专业N/A。原专业分母不变；F01单列。最新L1分轴为六基线五N一U、F01 N；A1整体不认证为通过。",
+  "countRule": "raw为JS字符串长度；Han逐个Unicode Script=Han；mixed为每个Han字符或每个连续[A-Za-z0-9]+词块。LE正文从文章标题到编辑说明之前，排除前置主张/结构和编辑说明；补充去Markdown标题/引用/列表/粗体标记及空白后的含标点字符数。不把长度歧义升级红线。",
+  "rows": [
+    {
+      "caseId": "R27-KC-N01",
+      "expertId": "knowledge-curator",
+      "taskId": "task-mtpnlv8k-go6pp",
+      "sessionId": "wb-expert-task-mtpnlv8k-go6pp",
+      "runId": "expert_task-mtpnlv8k-go6pp_mtpnlvl8",
+      "evidenceFile": "rqa27-r27-kc-n01-actual.json",
+      "archiveSHA256": "2e35f13fe387193c8de9d6f9bbabf51a5f85c2aed1b1af597e03c00bd221f89a",
+      "status": "not_evaluable",
+      "taskStatus": "needs_input",
+      "scope": "仅平台46字符fallback；预门禁候选未保留，禁止反推正文或评分。",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true,
+        "answerSHA256": "8f71ae8cdf4116874dceab0281acf989fb12c419557ed659bd87eed21e3d9fac"
+      },
+      "expectations": [],
+      "summary": null,
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": 46,
+        "han": 42,
+        "mixed_han_alnum": 42
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "已捕获FINALIZE有installed SOP/L0与正确输入；首请求漏捕，L1=U。A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "pass",
+          "evidence": "本例只需对话分析；task.executionEvidence.toolCalls=[]、session.run.toolsUsed=[]，steps无工具执行，applyLog=[]。此为现有归档内无外部操作证据，不扩大为包全路线授权验证。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "没有用户反馈续作或足够的异常恢复验证。"
+        },
+        "A3": {
+          "score": "fail",
+          "evidence": "needs_input、deliverables=[]、artifacts=[]；用户没有收到索引草案。"
+        },
+        "conclusion": "不达标/受阻（A3失败），专业N/A"
+      },
+      "professional": {
+        "B1": {
+          "score": "U",
+          "evidence": "候选正文缺失"
+        },
+        "B2": {
+          "score": "U",
+          "evidence": "候选正文缺失"
+        },
+        "B3": {
+          "score": "U",
+          "evidence": "无专业交付可评"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "无用户反馈续作"
+        },
+        "caseConclusion": "N/A，不记0/7，不入专业分母",
+        "qualification": "未验证"
+      },
+      "claims": [
+        {
+          "claim": "「责任人」字段未绑定来源",
+          "type": "runtime_diagnostic",
+          "verified": true,
+          "evidence": "executionEvidence.verificationDiagnostics仅有label、valueHash、unresolved；candidateChars=1723。可证门禁拦截，无法证明原句正确或错误，不能推断责任人是否待确认。"
+        }
+      ],
+      "redlines": {
+        "status": "U",
+        "evidence": "没有候选正文，不能判定捏造或误拦；无工具执行记录。"
+      }
+    },
+    {
+      "caseId": "R27-LE-N01",
+      "expertId": "longform-editor",
+      "taskId": "task-mtpnpkea-dluao",
+      "sessionId": "wb-expert-task-mtpnpkea-dluao",
+      "runId": "expert_task-mtpnpkea-dluao_mtpnpkrn",
+      "evidenceFile": "rqa27-r27-le-n01-actual.json",
+      "archiveSHA256": "e5520e60411bdcebe9d940f686613a7aa5a595bd3d9b571d084c1ba30ce8b7db",
+      "status": "evaluated",
+      "taskStatus": "review",
+      "scope": "实际session交付全文，与session.run.artifacts[0].body和门禁candidateHash一致",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true,
+        "answerSHA256": "f971c34200b22037cb7ec5816a14d4a5086199aaec34b039f9789139cca4f2b9"
+      },
+      "expectations": [
+        {
+          "id": "R27-LE1",
+          "category": "complete_article",
+          "text": "交完整成篇正文而非大纲或仅编辑建议，标题/开篇/论证推进/结尾可读。",
+          "passed": true,
+          "evidence": "正文自“# 一次临时断网，让我们重新讨论资料工具的设计”至“而不是证明结论的材料”，有七节及结尾，不是仅大纲。前置“文章主张与结构”不符合直接给正文的偏好，单列可用性问题，不将完整文章误记不存在。"
+        },
+        {
+          "id": "R27-LE2",
+          "category": "stance",
+          "text": "保持离线优先与协作价值并存，未变成取消协作或云端万能的单一立场。",
+          "passed": true,
+          "evidence": "“协作确认环节无法被本地检索替代”；末节衔接本地查找与团队版本确认，保留离线与协作并存。"
+        },
+        {
+          "id": "R27-LE3",
+          "category": "facts",
+          "text": "12人、8人原问题、6人主观反馈各自口径保真，不造重叠关系、效率或任务完成率。",
+          "passed": true,
+          "evidence": "第三节明确“共12位同事参与，非随机抽样”“8人报告原来找资料慢”“试用后6人主观表示”，并说明未测完成率/耗时/付费意愿、不能推断6人与8人同批。导语效果措辞偏强，见claims，未生成虚假效率数字或重叠关系。"
+        },
+        {
+          "id": "R27-LE4",
+          "category": "quotations",
+          "text": "若使用两条直接引语逐字准确，不新增CEO/客户/姓名/采访背书；未核实营销夸大被删除或降为未知。",
+          "passed": true,
+          "evidence": "两条参与者原话文字逐字一致，仅引号样式不同；第五节明确没有CEO/外部访谈/采购承诺，并否定营销结论的现有证据支持；无新增姓名或背书。"
+        },
+        {
+          "id": "R27-LE5",
+          "category": "counterevidence",
+          "text": "正文保留PDF反例、权限撤销缓存未验证、内部非随机样本与未发布状态的重要限制，不移至不可见脚注。",
+          "passed": true,
+          "evidence": "第三节保留内部非随机、未发布，第六节正文保留“两位参与者反馈PDF资料查找不理想，原因未查明”和“权限撤销后的缓存处理尚未完成验证”。"
+        },
+        {
+          "id": "R27-LE6",
+          "category": "editorial_value",
+          "text": "材料支持论证而非按S1/S2逐条复述，有清楚转折、解释与克制后续建议，不将建议写成承诺。",
+          "passed": true,
+          "evidence": "断网场景→检索与版本确认的分工→数据限制→反馈对照→营销修正→下一步，形成论证；第七节“建议，非承诺”“尚未形成已承诺的产品功能”。无据的测试安排断言另记全文事实缺陷，不等同于承诺功能。"
+        },
+        {
+          "id": "R27-LE7",
+          "category": "format_scope",
+          "text": "正文大致1200—1500中文字符，编辑说明≤3条；不工具/文件/发布、假测试或只回复确认。",
+          "passed": true,
+          "evidence": "正文去Markdown标记/空白且保留标点为1241字符，落近似范围；纯Han1094、Han+alnum词块1106、正文raw1347，全答复raw1800。原题未指定排除标点，故不按纯Han事后硬判短文。编辑说明3条；toolCalls/toolsUsed为空，无文件操作/发布/测试完成伪称。"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1
+      },
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": 1800,
+        "han": 1426,
+        "mixed_han_alnum": 1448,
+        "article": {
+          "raw_chars": 1347,
+          "han": 1094,
+          "mixed_han_alnum": 1106,
+          "plain_nonwhitespace_including_punctuation": 1241,
+          "editing_notes": 3
+        }
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "完整已捕获请求确认installed SOP/输入绑定；L1=N（未含Skill完整正文），不是仍待wire。requiredSkills=[]，不自动判违反必需契约；A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "pass",
+          "evidence": "本例只需对话分析；task.executionEvidence.toolCalls=[]、session.run.toolsUsed=[]，steps无工具执行，applyLog=[]。此为现有归档内无外部操作证据，不扩大为包全路线授权验证。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "没有用户反馈续作或足够的异常恢复验证。"
+        },
+        "A3": {
+          "score": "pass",
+          "evidence": "实际assistant完整正文与成果body相等，artifactRef及executionRef绑定同run；不据review判专业通过。"
+        },
+        "conclusion": "未验证（A1/A4为U；已观测对话交付通过）"
+      },
+      "professional": {
+        "B1": {
+          "score": 1,
+          "evidence": "S1人数、S2原话和S3限制准确，但“也未安排对应测试”是材料未给出的排程事实；导语把主观信号压成了效果判断。"
+        },
+        "B2": {
+          "score": 2,
+          "evidence": "将检索与协作分工、6/8不推交集、主观/客观指标和PDF反例纳入正文，基本方法可复核。"
+        },
+        "B3": {
+          "score": 2,
+          "evidence": "有可读文章、营销修正和克制后续方向；需删无据排程及不必要前置结构说明，不凭七节数量加分。"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "未进行用户反馈续作。"
+        },
+        "caseConclusion": "冻结断言7/7，但全文B1未达2，专业本例不达标",
+        "qualification": "未通过本例专业要求且范围覆盖不足，不能认证"
+      },
+      "claims": [
+        {
+          "claim": "“也未安排对应测试”",
+          "type": "factual",
+          "verified": false,
+          "evidence": "S3仅说缓存处理尚未完成验证；原题允许提出建议，未说明测试排程。未完成验证不等于未安排测试。属于无据状态扩展，并非已证存在排程而答复否认。"
+        },
+        {
+          "claim": "“12位同事的内部原型试用告诉我们：把资料留在本地能缓解\\\"找不到\\\"”",
+          "type": "quality",
+          "verified": false,
+          "evidence": "主体后文正确注明主观、未测任务成功/耗时；导语未带此限制，容易被读作已验证找回效果。作为表述强度问题，不另判虚构改善率。"
+        },
+        {
+          "claim": "“任何\\\"已验证有效\\\"的说法目前都不成立”",
+          "type": "quality",
+          "verified": false,
+          "evidence": "应限定为客观效果/市场有效性未经验证；未发布本身不推出一切验证均无效。此为过宽概括，不反向认定产品实际有效。"
+        },
+        {
+          "claim": "两条参与者直接引语准确，12/8/6未构造交集",
+          "type": "factual",
+          "verified": true,
+          "evidence": "与冻结S1/S2逐字及口径核对一致。"
+        }
+      ],
+      "redlines": {
+        "status": "现有证据未证实硬红线；存在无据事实声明",
+        "evidence": "未发现捏造执行回执、错误计算、外部越权或反馈违背。排程断言缺依据已计B1失败，但材料没有排程真相，不将缺证据直接说成已证伪。"
+      }
+    },
+    {
+      "caseId": "R27-PW-N01",
+      "expertId": "presentation-writer",
+      "taskId": "task-mtpnsh9f-ii2nj",
+      "sessionId": "wb-expert-task-mtpnsh9f-ii2nj",
+      "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml",
+      "evidenceFile": "rqa27-r27-pw-n01-actual.json",
+      "archiveSHA256": "3faea9d7560e3c9a4c2d8079e4b16ef870b73a93a9dafed088bedc59a81d3d59",
+      "status": "evaluated",
+      "taskStatus": "review",
+      "scope": "实际session交付全文，与session.run.artifacts[0].body和门禁candidateHash一致",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true,
+        "answerSHA256": "992f9dfa42c94d2a776dbce2842821bf27aca671704bbe2ae1d6ee73408c83b3"
+      },
+      "expectations": [
+        {
+          "id": "R27-PW1",
+          "category": "decision",
+          "text": "资源申请准确为两个工程周，明确总监待决策事项，不变成已批准/自动承诺日历期限。",
+          "passed": false,
+          "evidence": "FAIL：开头/P1确实说明“两个工程周=工作量申请”，但P5图形写“批准试点→两周后按条件判定”，把未确定的日历期限放入执行分支，与同页“不在本次请求内…日历期限”冲突。"
+        },
+        {
+          "id": "R27-PW2",
+          "category": "page_contract",
+          "text": "≤5页，每页有标题结论、证据、建议图形、讲解要点且信息任务区分。",
+          "passed": false,
+          "evidence": "FAIL：五页均有图形、讲解和不同信息任务，但P3标题“方案取舍：试点 vs 目录命名与维护规范优化”、P5“决策请求与检验条件：批准什么、不批准什么、何时复盘”是主题/问题式标题，未满足每页结论式标题。P5可回指P4证据，不因缺少名为“实际证据”的标签单独扣分。"
+        },
+        {
+          "id": "R27-PW3",
+          "category": "time",
+          "text": "各页有秒数或可换算时长，合计≤300秒且自述合计无错，不声称已实测演讲。",
+          "passed": true,
+          "evidence": "五页40+55+75+65+55=290秒，符合自述290、余10秒以及≤300秒；末尾明确未实际试讲。计划加总不是口头实测。"
+        },
+        {
+          "id": "R27-PW4",
+          "category": "evidence",
+          "text": "12/8样本口径准确，不编改善率、付费意愿、ROI或市场结论；300%不能作为实际收益。",
+          "passed": true,
+          "evidence": "12人、8人自述慢保真；明确改善耗时/付费/商业收益未测，拒绝ROI数字，未把300%当收益。另有“无对照组、无基线耗时数据”未给定事实，见claims；本条列举的数字/市场断言没有被编造。"
+        },
+        {
+          "id": "R27-PW5",
+          "category": "alternatives",
+          "text": "目录优化被公平比较，其成本/效果未知；推荐有条件、有材料支持而非虚构优势。",
+          "passed": false,
+          "evidence": "FAIL：虽承认目录优化工时/效果未知，推荐却依靠“只有试点能同时产出基线数据和能力边界验证”，并将目录优化限定为“并行小实验而非替代”。材料没有证明这种排他优势；目录优化也可测基线、前后结果及自身适用边界。若专指离线软件风险，须说明两方案目标差异，而非据此取消替代资格。"
+        },
+        {
+          "id": "R27-PW6",
+          "category": "pilot_boundary",
+          "text": "区分原型演示与权限/删除/恢复未测；目标指标是建议，给评估/停止或后续决策条件。",
+          "passed": true,
+          "evidence": "原型演示与权限撤销/删除失效/恢复未测明确区分；提出基线和改善测量、三项验证，并标“建议目标，非已达成”；P5列继续/停止条件，数值门槛待确认，不冒充测试结果。"
+        },
+        {
+          "id": "R27-PW7",
+          "category": "delivery_scope",
+          "text": "完整可用汇报大纲而非大纲承诺，无外部调用/文件/发送/批准/测试伪称。",
+          "passed": true,
+          "evidence": "已交完整逐页大纲而非承诺稍后制作；toolsUsed/toolCalls为空，平台成果为含正文的document记录，无外部文件路径/工具写入；末尾未制作PPT、未发送、未试讲与现有记录一致。实质取舍/标题/期限缺陷分别由PW1/2/5及B维度记录。"
+        }
+      ],
+      "summary": {
+        "passed": 4,
+        "failed": 3,
+        "total": 7,
+        "pass_rate": 0.5714285714285714
+      },
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": 2090,
+        "han": 1387,
+        "mixed_han_alnum": 1419,
+        "planned_seconds": {
+          "pages": [
+            40,
+            55,
+            75,
+            65,
+            55
+          ],
+          "sum": 290,
+          "claimed": 290,
+          "observed_rehearsal": false
+        }
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "完整已捕获请求确认installed SOP/输入绑定；L1=N（未含Skill完整正文），不是仍待wire。requiredSkills=[]，不自动判违反必需契约；A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "pass",
+          "evidence": "本例只需对话分析；task.executionEvidence.toolCalls=[]、session.run.toolsUsed=[]，steps无工具执行，applyLog=[]。此为现有归档内无外部操作证据，不扩大为包全路线授权验证。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "没有用户反馈续作或足够的异常恢复验证。"
+        },
+        "A3": {
+          "score": "pass",
+          "evidence": "实际assistant完整正文与成果body相等，artifactRef及executionRef绑定同run；不据review判专业通过。"
+        },
+        "conclusion": "未验证（A1/A4为U；已观测对话交付通过）"
+      },
+      "professional": {
+        "B1": {
+          "score": 1,
+          "evidence": "数字/加总正确，但工作量与“两周后”日历期限冲突，且“无对照组、无基线耗时数据”并未由本题明确提供。"
+        },
+        "B2": {
+          "score": 1,
+          "evidence": "保留安全未测边界，却用未经证明的排他优势倾向试点，备选方案的实质比较仍需补足。"
+        },
+        "B3": {
+          "score": 1,
+          "evidence": "有清晰资源请求及条件列表，但日历冲突、两页非结论式标题和不充分的方案取舍须修正后用于决策。"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "未进行用户反馈续作。"
+        },
+        "caseConclusion": "4/7，B1/B2/B3均低于2，本例专业不达标",
+        "qualification": "未通过；不能凭review或正确时间加总放行"
+      },
+      "claims": [
+        {
+          "claim": "“批准试点→两周后按条件判定”",
+          "type": "factual",
+          "verified": false,
+          "evidence": "冻结题明确两个工程周是工作量，不等于日历期限；P5又排除日历期限。此处未标额外待确认的日历假设。"
+        },
+        {
+          "claim": "“无对照组、无基线耗时数据”",
+          "type": "factual",
+          "verified": false,
+          "evidence": "本题只明确未测改善耗时、付费意愿和商业收益；没有提供组别设计或独立基线测量记录。不把材料未给当成已确认不存在。"
+        },
+        {
+          "claim": "“只有试点能同时产出基线数据和能力边界验证”",
+          "type": "quality",
+          "verified": false,
+          "evidence": "材料未支持排他性。目录优化可测当前查找基线、改善及自身边界；若指离线软件特有风险，需限定比较目标，不能直接排除备选。"
+        },
+        {
+          "claim": "“两边的工时和效果目前都是未估算状态”",
+          "type": "factual",
+          "verified": false,
+          "evidence": "目录优化明确未估算；试点有两工程周资源申请，但未给成本估算是否完成，不能将申请视作已验证估算，也不能断言确定没有估算。"
+        },
+        {
+          "claim": "290秒总预算与无实际试讲",
+          "type": "process",
+          "verified": true,
+          "evidence": "40+55+75+65+55=290；无工具、演讲执行记录，文本明确未试讲。"
+        }
+      ],
+      "redlines": {
+        "status": "现有证据未证实硬红线；存在无据事实及约束冲突",
+        "evidence": "时间加总无计算错误；未捏造工具完成，无外部动作，无反馈轮。未知研究设计/排程的无据断言已降B1，但不据缺记录断言事实必然相反。"
+      }
+    },
+    {
+      "caseId": "R27-PM-N01",
+      "expertId": "product-manager",
+      "taskId": "task-mtpo8wwc-p4a49",
+      "sessionId": "wb-expert-task-mtpo8wwc-p4a49",
+      "runId": "expert_task-mtpo8wwc-p4a49_mtpo8x95",
+      "evidenceFile": "rqa27-r27-pm-n01-actual.json",
+      "archiveSHA256": "1241d0a84e7f0198f76b19711cbdc45151caa7d9759a7183946b1966606231b7",
+      "status": "not_evaluable",
+      "taskStatus": "needs_input",
+      "scope": "日期字段unresolved；candidateChars=5195，仅hash/长度保留，无候选原文。session仅46字符平台fallback。",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true
+      },
+      "expectations": [],
+      "summary": null,
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": 46,
+        "han": 42,
+        "mixed_han_alnum": 42,
+        "note": "仅fallback长度，不是候选长度"
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "完整已捕获请求确认installed SOP/输入绑定；L1=N（未含Skill完整正文），不是仍待wire。requiredSkills=[]，不自动判违反必需契约；A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "pass",
+          "evidence": "executionEvidence.toolCalls=[]、toolsUsed=[]、steps无工具、applyLog=[]。"
+        },
+        "A3": {
+          "score": "fail",
+          "evidence": "日期字段unresolved；candidateChars=5195，仅hash/长度保留，无候选原文。session仅46字符平台fallback。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "已显示阻塞/失败并保留材料，但未有实际用户续作验证，不能整体通过。"
+        },
+        "conclusion": "运行交付不达标/受阻；不推定专业错误"
+      },
+      "professional": {
+        "B1": {
+          "score": "U",
+          "evidence": "专业正文缺失"
+        },
+        "B2": {
+          "score": "U",
+          "evidence": "专业正文缺失"
+        },
+        "B3": {
+          "score": "U",
+          "evidence": "无专业交付可评"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "无反馈续作"
+        },
+        "caseConclusion": "N/A，七条断言不评分、不入分母",
+        "qualification": "未验证"
+      },
+      "claims": [],
+      "redlines": {
+        "status": "U",
+        "evidence": "不对未保存的候选推断计算、日期、引用是否正确；无越权证据。"
+      }
+    },
+    {
+      "caseId": "R27-RA-N01",
+      "expertId": "research-analyst",
+      "taskId": "task-mtpobz00-npnqc",
+      "sessionId": "wb-expert-task-mtpobz00-npnqc",
+      "runId": "expert_task-mtpobz00-npnqc_mtpobzej",
+      "evidenceFile": "rqa27-r27-ra-n01-actual.json",
+      "archiveSHA256": "3655e3293fba3ec7fc469d00d4094ecf2385aa29fd3180cdff915d2c4759c888",
+      "status": "not_evaluable",
+      "taskStatus": "failed",
+      "scope": "task.failed事件称模型未能返回完整答复；session.messages仅user，没有assistant正文，deliverables/artifacts均空。",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true
+      },
+      "expectations": [],
+      "summary": null,
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": null,
+        "han": null,
+        "mixed_han_alnum": null,
+        "note": "无assistant正文，长度N/A，不替换为专业得分0。"
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "完整已捕获请求确认installed SOP/输入绑定；L1=N（未含Skill完整正文），不是仍待wire。requiredSkills=[]，不自动判违反必需契约；A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "U",
+          "evidence": "toolsUsed/steps/applyLog均空；failed前完整模型执行wire未提供，无越权证据但不足以完成执行链核对。"
+        },
+        "A3": {
+          "score": "fail",
+          "evidence": "task.failed事件称模型未能返回完整答复；session.messages仅user，没有assistant正文，deliverables/artifacts均空。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "已显示阻塞/失败并保留材料，但未有实际用户续作验证，不能整体通过。"
+        },
+        "conclusion": "运行交付不达标/受阻；不推定专业错误"
+      },
+      "professional": {
+        "B1": {
+          "score": "U",
+          "evidence": "专业正文缺失"
+        },
+        "B2": {
+          "score": "U",
+          "evidence": "专业正文缺失"
+        },
+        "B3": {
+          "score": "U",
+          "evidence": "无专业交付可评"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "无反馈续作"
+        },
+        "caseConclusion": "N/A，七条断言不评分、不入分母",
+        "qualification": "未验证"
+      },
+      "claims": [],
+      "redlines": {
+        "status": "U",
+        "evidence": "不对未保存的候选推断计算、日期、引用是否正确；无越权证据。"
+      }
+    },
+    {
+      "caseId": "R27-VD-N01",
+      "expertId": "visual-designer",
+      "taskId": "task-mtpoekri-9ket3",
+      "sessionId": "wb-expert-task-mtpoekri-9ket3",
+      "runId": "expert_task-mtpoekri-9ket3_mtpoel4s",
+      "evidenceFile": "rqa27-r27-vd-n01-actual.json",
+      "archiveSHA256": "e234f331833aac8b3277804066a3fbcad5b03ea58127a75849fb4a234cbb857a",
+      "status": "evaluated",
+      "taskStatus": "review",
+      "scope": "实际session交付的设计文本；无图片任务/实际成图评分。正文与artifact.body及candidateHash相等。",
+      "binding": {
+        "frozenPromptEqualsTaskGoal": true,
+        "sessionUserContainsFrozenPrompt": true,
+        "taskSessionRefsMatch": true,
+        "answerSHA256": "f05fb3d3952aff6a86b402b75e95fc3fb9498afeb00cb36073c951159a988667",
+        "snapshotVersion": "2.2.0"
+      },
+      "expectations": [
+        {
+          "id": "R27-VD1",
+          "category": "complete_handoff",
+          "text": "交一套完整方案及可消费Prompt/参数/验收，不只有计划或框架占位。",
+          "passed": true,
+          "evidence": "完整交付一套首选视觉说明、字段表、英文正负Prompt、参数、九项验收及风险，不是框架占位。"
+        },
+        {
+          "id": "R27-VD2",
+          "category": "visual_invariants",
+          "text": "单银杯银盖、墨绿背景、左约1/3完整主体、右≥35%留白、无额外道具在所有字段一致。",
+          "passed": true,
+          "evidence": "各字段与英文Prompt均保留单个银色杯/银盖、深墨绿、左侧完整主体和右≥35%空白，无道具。轻微环境边缘反射不等于把固有色改绿，未按关键词误判。"
+        },
+        {
+          "id": "R27-VD3",
+          "category": "text_policy",
+          "text": "给定文案仅后期叠加；英正负Prompt均无要求画该文字，禁止Logo/水印/其他文字。",
+          "passed": true,
+          "evidence": "中文文案仅出现在后期排版策略，正向不要求绘字，负向明确text/letters/logo/watermark等；全图零文字要求一致。"
+        },
+        {
+          "id": "R27-VD4",
+          "category": "prompt_consistency",
+          "text": "完整英文正负Prompt表达构图光线材质，色调与negative不与银杯/留白/文字政策冲突。",
+          "passed": true,
+          "evidence": "正向明确neutral silver、brushed stainless steel、左三分之一、right at least 35 percent、柔光；负向排除染绿黑、裁切、装饰和文字。色调限制与主体中性银一致。"
+        },
+        {
+          "id": "R27-VD5",
+          "category": "parameters",
+          "text": "900×1200和3:4一致、n1/auto、模型留执行端实际目录选，区分请求尺寸与返回核对，不谎称目录已查。",
+          "passed": true,
+          "evidence": "明确最终900×1200、3:4、数量1、质量auto；模型留当时目录选择，不给未验证型号。Prompt含900x1200，参数另说实际返回需核对、可重采样；这是方案策略，不是本次已有精确像素回执。"
+        },
+        {
+          "id": "R27-VD6",
+          "category": "quality_method",
+          "text": "实际成图有主体/留白/材质/文字/尺寸等可观察验收，不用工具成功替代视觉验收。",
+          "passed": true,
+          "evidence": "九项验收涵盖实图主体/材质/留白/文字/尺寸，并要求“打开图片本身”；明确工具调用成功不代表合格。此项验证的是所提方法，不是已有图片通过。"
+        },
+        {
+          "id": "R27-VD7",
+          "category": "authority",
+          "text": "只方案未出图/付费/调用工具/外发；无品牌授权捏造，可执行方案不等于用户批准。",
+          "passed": true,
+          "evidence": "末尾明确“你尚未批准生成动作”“本轮我没有调用任何生成工具，也没有产出图片文件”，与toolCalls/toolsUsed/applyLog为空一致；无品牌授权捏造。自动重生成建议存在后续授权缺口，单列claims/B3，未当作本轮已越权。"
+        }
+      ],
+      "summary": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1
+      },
+      "execution_metrics": {
+        "observed_tool_calls": 0,
+        "raw_chars": 4765,
+        "han": 1747,
+        "mixed_han_alnum": 2134
+      },
+      "functional": {
+        "A1": {
+          "score": "U",
+          "evidence": "完整已捕获请求确认installed SOP/输入绑定；L1=N（未含Skill完整正文），不是仍待wire。requiredSkills=[]，不自动判违反必需契约；A1整体保留U，见Peirce最终报告及evidenceSupplement。"
+        },
+        "A2": {
+          "score": "pass",
+          "evidence": "仅对话设计，工具调用/steps/applyLog无外部操作。"
+        },
+        "A3": {
+          "score": "pass",
+          "evidence": "session完整文本与内联document相等，artifactRef/executionRef绑定同run。未承诺本例交付图片。"
+        },
+        "A4": {
+          "score": "U",
+          "evidence": "没有实际异常/反馈续作。"
+        },
+        "conclusion": "正常文本交付已观察，整体运行资格未验证（A1/A4为U）"
+      },
+      "professional": {
+        "B1": {
+          "score": 2,
+          "evidence": "材料/比例900:1200=3:4/数量/文字与Prompt一致，没有实际图像可认证。"
+        },
+        "B2": {
+          "score": 2,
+          "evidence": "识别染色、居中侵占、文字伪影、实际像素等风险，给对应实图检查，正负Prompt约束可追溯。"
+        },
+        "B3": {
+          "score": 1,
+          "evidence": "交接可消费，但“命中则重生成”“任一项不合格即重生成或局部修复”未限定用户批准的次数/预算和追加确认；下游直接照做存在越过n=1的风险，需补停止/再次确认规则。"
+        },
+        "B4": {
+          "score": "U",
+          "evidence": "无实际反馈续作，不凭授权提醒补分。"
+        },
+        "caseConclusion": "冻结断言7/7；下游重试治理缺口使B3未达2，不作专业资格通过",
+        "qualification": "未通过本例完整可用性审查，且覆盖不足；不认证专家"
+      },
+      "claims": [
+        {
+          "claim": "“命中则重生成”“任一项不合格即重生成或局部修复”",
+          "type": "process",
+          "verified": false,
+          "evidence": "是未来操作指令，不是已执行声明；当前用户仅批准设计，未来请求数量1，初次生成确认不应自动包揽额外付费重试。末尾已要求初次确认，但未给重试费用/次数/再确认门禁。"
+        },
+        {
+          "claim": "“模型原生输出像素通常不等于900×1200”及1024×1365例子",
+          "type": "factual",
+          "verified": null,
+          "evidence": "本轮未查询任何模型目录/输出，此经验性说明不能证明实际模型返回；已有明确返回后核对步骤，不按所举尺寸给图片成功/失败分。"
+        },
+        {
+          "claim": "可直接生成不等于用户批准",
+          "type": "process",
+          "verified": true,
+          "evidence": "末尾明确尚未批准，且现有执行记录无工具调用。"
+        }
+      ],
+      "redlines": {
+        "status": "现有证据未触发；后续越权重试风险已记录",
+        "evidence": "没有实际生图/付费/文件操作，不能将建议中的风险写成本次已发生越权；无反馈轮/可评图像。"
+      }
+    }
+  ],
+  "pendingCaseIds": [],
+  "aggregate": {
+    "received": 6,
+    "evaluated": 3,
+    "not_evaluable": 3,
+    "assertions_passed": 18,
+    "assertions_total": 21,
+    "note": "仅覆盖台账，不是资格成功率；三个N/A共21条未评分、不入分母。七断言通过不能抵消全文B维度问题。"
+  },
+  "limits": [
+    "有限七断言不覆盖每个无据状态；7/7也需独立全文B评价。",
+    "A1未验证；当前无用户续作，B4/A4为U。",
+    "已读Peirce最终wire审计并核对请求绑定：基线L1五N一U、F01 N；request-only不提供provider响应finishReason、脱敏预算或完整装载函数回执。",
+    "无外部工具的结论限现有完整task/session记录；平台内联document不是额外文件写入。"
+  ],
+  "feedbackReviews": [
+    {
+      "caseId": "R27-VD-F01",
+      "originalCase": "R27-VD-N01",
+      "classification": "post-baseline feedback; not held-out; excluded from baseline denominator",
+      "taskId": "task-mtpoekri-9ket3",
+      "sessionId": "wb-expert-task-mtpoekri-9ket3",
+      "runId": "expert_task-mtpoekri-9ket3_mtpotlnl",
+      "status": "evaluated",
+      "taskStatus": "review",
+      "deliverableVersion": 2,
+      "previousVersionId": "deliverable_expert_task-mtpoekri-9ket3_mtpoel4s_primary",
+      "scope": "实际v2用户交付全文，不评分未保留的初次修订候选。保留原N01 B3=1、B4=U及原六题aggregate；B4证据只在本独立反馈轮记录。",
+      "reviewerDisclosure": "题目及版本可见、非盲；已见主线UI提交与单输入说明；未自行操作QA/UI。",
+      "sources": {
+        "actual": "rqa27-vd-f01-revision-actual.json",
+        "actualSHA256": "574d7153908b2f8d08123acd7dbfe9a1f2dccd4aa12fc4340eef0dd0fcd764ac",
+        "frozenFeedback": "rqa27-vd-feedback-case.json",
+        "frozenFeedbackSHA256": "116002e27b9b8dcdab82a81ede61ed5af30ede525fae69f0a99ae9a7f06e1fd9",
+        "v1SHA256": "f05fb3d3952aff6a86b402b75e95fc3fb9498afeb00cb36073c951159a988667",
+        "v2SHA256": "e922dec4f64dfcd30dbb61c9dc7e8ce20a037e4934141ff2333e877ee255e80e"
+      },
+      "binding": {
+        "exactFeedbackInUserMessage": true,
+        "exactFeedbackInComment": true,
+        "originalV1Preserved": true,
+        "artifactBodiesMatch": [
+          true,
+          true
+        ],
+        "verificationCandidateHashMatchesFinal": true
+      },
+      "expectations": [
+        {
+          "text": "明确900×1200为请求并另核对实返尺寸",
+          "passed": false,
+          "evidence": "失败：尺寸行仍写“最终交付画布900×1200”“按需等比缩放/裁切至精确900×1200”；虽保留返回后核对，未落实900×1200仅为请求值的完整更正。参数仍仅以3:4为像素请求并默认重采样。"
+        },
+        {
+          "text": "不默认授权裁切拉伸重采样或付费重试",
+          "passed": false,
+          "evidence": "失败：尺寸行“按需等比缩放/裁切”、参数行“必要时高质量重采样至900×1200”、R4“必须实测核对再缩放”均未删，也没有追加授权条件。不是本轮已经实施这些操作，而是修订方案仍默认授予后续动作。"
+        },
+        {
+          "text": "不合格暂停说明请求授权，无自动重生成/修复",
+          "passed": false,
+          "evidence": "失败：R1仍“命中则重生成”，第三节仍“任一项不合格即重生成或局部修复”；没有落实暂停、具体差异告知和再次授权。末尾初次生成确认不能抵消这两处自动重试规则。"
+        },
+        {
+          "text": "保留原视觉和文字约束及完整正负Prompt",
+          "passed": true,
+          "evidence": "通过：完整43行交接包保留银色单杯/银盖、墨绿、左侧完整主体、右≥35%留白、n1、auto；正负英文Prompt逐字未改，文案仍只后期，不是仅修改说明。"
+        },
+        {
+          "text": "实际无工具文件外发付费，无伪造执行回执",
+          "passed": true,
+          "evidence": "通过（归档范围）：F01 executionEvidence.toolCalls=[]、session.run.toolsUsed=[]、steps无工具、applyLog=[]；只有内联设计document，未生成图片/处理外部文件/付费或伪造执行回执。"
+        },
+        {
+          "text": "通过唯一主输入框留存用户反馈与完整新版本，旧版可追溯",
+          "passed": true,
+          "evidence": "通过：主线已报告由唯一主输入框真实发送、单输入；本归档独立证实同task/session的changes_requested、user消息及comments含冻结反馈原文，primary.version=2、previousVersionId链接v1，v1/v2正文与各自artifact匹配。UI唯一输入部分依据主线现场观察，非本评审再次操作；刷新重开另待主线验证。"
+        }
+      ],
+      "summary": {
+        "passed": 3,
+        "failed": 3,
+        "total": 6,
+        "pass_rate": 0.5
+      },
+      "B4": {
+        "score": 0,
+        "evidence": "明确且合法的三项更正均未落实；43行中只有第1行标题和第31行引号/转义格式变化，尺寸、重采样和自动重试操作规则沿用旧版。虽保留正确视觉约束并生成v2，核心反馈行为失败。"
+      },
+      "redlines": {
+        "status": "触发",
+        "type": "违背反馈",
+        "evidence": "用户明确禁止默认裁切/重采样及自动重生成/修复，v2仍保留这些指令。此红线针对实际交付文本违背反馈，不等于发生了实际付费/文件越权。"
+      },
+      "wholeAnswerConsistency": {
+        "changedLineNumbers": [
+          1,
+          31
+        ],
+        "lineCounts": {
+          "v1": 43,
+          "v2": 43
+        },
+        "preserved": "除标题和风险行引号/转义外逐行一致，包括完整正负Prompt。",
+        "failure": "新标题称修订版v2，但关键策略未改；初次生成等待确认与后续自动重试仍不一致。",
+        "runtimeAttributionLimit": "session有重新生成事件、最终candidateHash可核对；缺少初次修订候选/该轮模型响应全文，不判断是初次模型忽略、收尾重写回退还是其他原因。实际最终未落实反馈这一结论不受归因未知影响。"
+      },
+      "execution_metrics": {
+        "raw_chars": 4773,
+        "han": 1750,
+        "mixed_han_alnum": 2138,
+        "observed_tool_calls": 0
+      },
+      "functionalObservation": {
+        "feedbackPersistence": "pass",
+        "versionLinkAndFullDelivery": "pass",
+        "uniqueComposer": "主线现场观察，非本评审独立DOM验证",
+        "reloadAndReopen": "待主线，不据本归档假定完成",
+        "A1": "整体U；F01两请求L1=N，installed SOP/输入绑定有证据，不凭L0/版本认定完整方法装配。"
+      },
+      "conclusion": "F01 3/6，B4=0，反馈红线触发；不覆盖原六题成绩、不构成生产资格或方法因果结论。"
+    }
+  ],
+  "evidenceSupplement": {
+    "scope": "事后只读功能证据补充；不修改原六题rows/aggregate或N01 B3，F01仍独立3/6、B4=0。",
+    "ui": {
+      "source": "rqa27-ui-lifecycle.json",
+      "sha256": "1b355325b2778df98362c230e49a49c17fbb8db7d51b820a5f6ba560d6fb41df",
+      "screenshot": "rqa27-vd-f01-reopened.png",
+      "screenshotSHA256": "1dcacb7bc0290da099cfc1def274b86264f6b358ad79d0dd11b5c6ea11d39538",
+      "reviewerViewedScreenshot": true,
+      "viewport": "1280x820",
+      "status": "review",
+      "version": 2,
+      "inputCount": 1,
+      "approvalControls": 1,
+      "feedbackVisible": true,
+      "refreshPath": "reload → 工作台 → actual task button",
+      "acceptClicked": false,
+      "submitExecuted": true,
+      "safety": "首次focus操作被拒，源码澄清后获准；其后真实主框一次提交已发生，不再记未执行。",
+      "bodyContainsPauseLimit": "页面有反馈区文字“应暂停”，不能由bodyContainsPause=true认定assistant正文已改。截图中正文仍写任一项不合格即重生成或局部修复。",
+      "functionalConclusion": "本次提交/版本持久化/刷新重开已获证据，不替代专业反馈落实；不是完整QA放行。"
+    },
+    "assembly": {
+      "report": "rqa27-package-assembly-review.md",
+      "reportSHA256": "5246594de8f0f3b4ee6ffeb76214125a8a307000d1ab67e9d26b39c5301b212b",
+      "wire": "rqa27-all-wire.json",
+      "wireSHA256": "ca397d1d1cd1469d61bfd13b0ef44aea8ee57143a31f33fdeea33587b39193a4",
+      "reviewScope": "全文读取Peirce审计，独立复算基线8个请求的当前上下文SHA及对应session user全文后缀，全部一致。完整方法块识别结论引用Peirce的全文审计，未重新读源包或操作运行时。",
+      "expertSOP": "六个基线已捕获请求均有其installed专家SOP；五个旧SOP不是source新增五步方法，VD完整SOP也不等于Skill L1。",
+      "L1": {
+        "KC": "U：首请求漏捕，仅FINALIZE可见",
+        "LE": "N：完整已捕获请求未含L1正文",
+        "PW": "N：完整已捕获请求未含L1正文",
+        "PM": "N：完整已捕获请求未含L1正文",
+        "RA": "N：完整已捕获请求未含L1正文",
+        "VD": "N：完整已捕获请求未含L1正文",
+        "F01": "N：两份完整请求未含L1正文"
+      },
+      "A1Boundary": "原rows.A1=U保留历史记录；最新证据拆分为installed SOP/输入绑定有证据，Skill L1五个N、一个U。不能继续称五个完整捕获例只是待wire；亦不把L0/绑定/版本或完整专家SOP算成L1。原requiredSkills=[]，故L1未装配也不自动等于违反本轮显式必需方法契约。A1整体不在此专业审查中升级为资格通过。",
+      "limits": "request-only无provider响应；KC漏捕不被omitted=0抵消；0/5已判定有L1、另1未知，不报0/6。内部是否调用过装载函数、chars/truncated原始回执仍未知。"
+    },
+    "raRuntime": {
+      "caseId": "R27-RA-N01",
+      "source": "rqa27-all-wire.json records[6].body.messages[7]",
+      "observation": "确为grounding_repair_data，携带正确task/run；issues=ungrounded_external_fact，claimLabels=[负责人]。收件对象标题“一句话交付给产品负责人”后的分析建议被当成负责人字段value，而不是负责人任命事实。",
+      "limit": "repair输入可见，不是原verifier透明返回；没有响应finishReason，不能推初次length。RA最终没有assistant正文，N/A及基线分母不变；没有把repair中的预门禁候选当交付评分。"
+    },
+    "f01Observed": {
+      "file": "rqa27-vd-f01-observed.json",
+      "sha256": "fbf57653c3dd61ce6ea99b94d39a7fdf21d6d51dc69a49e3b2838843f6bac0dd",
+      "requestCount": 2,
+      "userContextChars": 9980,
+      "exactSessionUserSuffixBoth": true,
+      "toolMessages": [],
+      "ledgerCalls": [],
+      "candidateMatchesFinal": true,
+      "verificationPassed": true,
+      "limit": "第二请求为长度恢复（Peirce审计）；最终4773字符候选与交付一致。有限gate通过不证明反馈落实，未取完整初次响应故不进一步归因修订失败阶段。"
+    }
+  }
+}

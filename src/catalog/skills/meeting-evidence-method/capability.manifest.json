@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "meeting-evidence-method",
+  "kind": "skill",
+  "name": "会议证据与纪要整理",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

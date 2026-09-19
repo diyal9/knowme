@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 3,
+  "id": "image-producer",
+  "kind": "expert",
+  "name": "生图执行专家",
+  "description": "从视觉目标、方案设计到真实生图和修改验收，完成端到端图像生产。",
+  "version": "4.0.0",
+  "dependencies": [
+    { "id": "creative-concept-method", "kind": "skill", "required": true },
+    { "id": "visual-brief-prompt", "kind": "skill", "required": true },
+    { "id": "th-art-intake", "kind": "skill", "required": true },
+    { "id": "th-art-prompt-enrich", "kind": "skill", "required": true },
+    { "id": "th-art-pango-generate", "kind": "skill", "required": true },
+    { "id": "writing-polish", "kind": "skill", "required": false },
+    { "id": "pango-image-mcp", "kind": "connector", "required": true },
+    { "id": "photoshop-mcp", "kind": "connector", "required": false }
+  ],
+  "permissions": {
+    "connectors": { "allowedConnectorIds": ["pango-image-mcp", "photoshop-mcp"] },
+    "tools": { "allowlist": ["list_paint_models", "generate_image"] },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": ["主体与使用场景", "风格或参考方向", "画面比例"],
+  "outputs": ["真实生成图片"],
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "confirm-then-generate",
+        "deliverables": [{
+          "id": "generated-image",
+          "title": "生成图片",
+          "type": "image",
+          "required": true,
+          "requiredSkills": ["th-art-intake", "th-art-prompt-enrich", "th-art-pango-generate"],
+          "requiredTools": ["generate_image"],
+          "requiredConnectorIds": ["pango-image-mcp"],
+          "requiredEvidence": [{ "kind": "tool_result", "tool": "generate_image" }],
+          "requiredArtifacts": [{ "type": "image" }],
+          "minArtifacts": 1,
+          "completionConditions": [
+            { "type": "tool_success", "tool": "generate_image" },
+            { "type": "artifact_present" }
+          ],
+          "executionRoute": "pango-generate",
+          "executionRouteDescription": "确认 Brief 后编译 Prompt，并调用盘古生成真实图片。"
+        }],
+        "qualityReview": {
+          "enabled": true,
+          "criteria": [
+            "确认本轮generate_image有成功调用回执、至少一个当前任务image artifact及decoded-file解码事实；请求参数、任务号、URL或文字说明不能替代真实图片。",
+            "只依据实际可见图像复核主体、数量、构图、裁切、缩略图识别、色彩、光线、材质、文字和品牌；不可见或未核查项必须标为未知，不得从元数据臆测。",
+            "修改轮逐项对照变更集、保留集和指定基图，说明目标变化、越界变化与未核查项；不得用风格统一扩大授权，也不得覆盖旧版或让参考风格图替代基图。",
+            "区分本地拒绝、服务失败、媒体保存/解码失败和副作用未知；已发出请求时禁止自动重试或额外付费生成，交付只简述真实结果、偏差和下一步。"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "total_duration_seconds": 32.706,
+  "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+  "executor_start": "2026-09-06T04:19:53.482Z",
+  "executor_end": "2026-09-06T04:20:26.188Z",
+  "total_tokens": null
+}

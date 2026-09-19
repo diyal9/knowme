@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { waitFor } from '@testing-library/react'
 import { useAppStore } from '../../app/store'
 import { makeRunState, mockApi, resetAppStore } from '../../test/helpers'
+import type { WorkbenchTask } from '../../../shared/api'
 
 describe('workbench dialogue send', () => {
   beforeEach(() => {
@@ -125,7 +126,7 @@ describe('workbench dialogue send', () => {
       agentId: 'general',
       role: 'general',
       conversationMode: 'expert-discussion',
-      sessionId: expect.stringMatching(/discussion-v2$/),
+      sessionId: expect.stringMatching(/discussion-v3$/),
       prompt: '为什么这次没有完成？',
       expertDiscussionContext: expect.objectContaining({
         taskId: 'task-1', goal: '导入外部工作流', resultSummary: '预检没有通过。',
@@ -156,5 +157,28 @@ describe('workbench dialogue send', () => {
       '?',
       expect.stringContaining('查看成果内容'),
     ])
+  })
+
+  it('handles explicit expert acceptance in the collaboration lane without invoking the LLM', async () => {
+    const generate = vi.fn(async () => ({ text: '不应调用' }))
+    const review = vi.fn(async () => ({ ok: true, task: { id: 'task-1', status: 'completed' } }))
+    mockApi({
+      aiGenerate: generate,
+      expertTaskGet: async () => ({ ok: true, task: { id: 'task-1', kind: 'expert', status: 'review', deliverables: [{ deliverableId: 'd1', acceptanceStatus: 'pending' }] } as WorkbenchTask }),
+      expertTaskReviewDeliverable: review,
+    })
+    useAppStore.setState({
+      expertRoom: { id: 'task-1', taskId: 'task-1', name: '产品经理', goal: '整理需求', log: [], messages: [], skills: [], connectors: [], knowledgeRefs: [], taskStatus: 'review' },
+      workbenchDialogue: { composer: '接受成果', attachments: [] },
+      isGenerating: false,
+    })
+
+    useAppStore.getState().sendWorkbenchMessage()
+
+    await waitFor(() => expect(review).toHaveBeenCalledWith(expect.objectContaining({
+      taskId: 'task-1', deliverableId: 'd1', action: 'accept', decision: 'accept',
+    })))
+    expect(generate).not.toHaveBeenCalled()
+    expect(useAppStore.getState().expertRoom?.messages.at(-1)?.text).toContain('成果已接受')
   })
 })

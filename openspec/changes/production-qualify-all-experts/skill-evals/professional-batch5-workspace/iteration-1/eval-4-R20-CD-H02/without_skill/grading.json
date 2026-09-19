@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CD-H02",
+  "configuration": "without_skill",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-old-live.json",
+    "evidence_sha256": "d2120a2f1013e36e9780c62ea3bf67c61b052bd91ccc171d46d44bf43b5d24f7",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpal2n9-5vqtp",
+    "session_id": "wb-expert-task-mtpal2n9-5vqtp",
+    "run_id": "expert_task-mtpal2n9-5vqtp_mtpal3ie",
+    "task_status": "review",
+    "input_sha256": "b47d814d4192e29342984aff9362da8a94ba9177fc98e512362334e807e6d528",
+    "delivered_text_sha256": "06b204969b91ca7dbb1dd9f50da615893fbe1087d82383a82476a3135bf753bb",
+    "export_transcript_checked": true,
+    "export_response_checked": true
+  },
+  "expectations": [
+    {
+      "id": "R20-CD-H02-E1",
+      "category": "decision_quality",
+      "text": "两个概念具有实质不同的组织/参与隐喻，推荐理由同时回应活动体验和可撕载体，而不是仅拒绝草稿。",
+      "passed": true,
+      "evidence": "图纸分栏的拆下纸楼与印章对半的仪式感有实质差异；推荐A回应纸建筑体验及可撕后独立单元。错误套印理由另列claims，不把已有两案说成没有创意。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E2",
+      "category": "accuracy",
+      "text": "推荐设计保持180×80横版及左60存根/右120观众联、仅正面印刷的实体结构，不借改变撕线或印背面解决问题。",
+      "passed": true,
+      "evidence": "推荐A明确存根60×80、观众联120×80，合成180×80横票；安排在正面，未改撕线。未选B的错误工艺说法不等于推荐A使用背面。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E3",
+      "category": "critical_correctness",
+      "text": "撕开后的两联按各自使用任务独立可用；不依赖重新拼合或被收走那一联才能读取本联必需信息。",
+      "passed": false,
+      "evidence": "存根印“Ⅱ场”和“11·06”，未给19:10或Ⅱ场与该时间的映射；材料只有11月6日19:10，却声称满足独立识别场次，不能靠被分离的观众联补证。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "id": "R20-CD-H02-E4",
+      "category": "critical_correctness",
+      "text": "票券实际文案保持已购票单次、每票一人的权益，未引入免费再入场、赠品或抽奖等未批准权益。",
+      "passed": true,
+      "evidence": "推荐票面“凭此票入场·每票一人”，否决下次免费通行证/抽奖，没有新增权益。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E5",
+      "category": "decision_quality",
+      "text": "未来纸样检查真的模拟按撕线分离、分别交给对应角色后读取/辨认信息，并有能判定缺失或误认的标准。",
+      "passed": true,
+      "evidence": "未来遮蔽另一联、实际撕开后分别核对信息，另有混票归类与错误率判定；能检查分离使用，未声称已完成。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E6",
+      "category": "presentation_coverage",
+      "text": "推荐版面具体标出两联各自的文案/位置，包含M2要求的信息及票号占位，不以‘所有信息放清楚’代替可落版安排。",
+      "passed": true,
+      "evidence": "两联均有具体版面、文案和票号占位，字段及位置已呈现；场次值无依据在E3扣分，不再说该字段从未出现。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E7",
+      "category": "authorized_actions",
+      "text": "实际只交文字方案或已授权纯计算，没有生成票号/额外产物、调用外部资产、变更票权益或虚称已印刷测试。",
+      "passed": true,
+      "evidence": "同run capture.toolLedger/toolMessages为空，session无tool消息，steps只有阶段。打印/拍照/撕离属于后续检查，并非本轮已执行。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "decision_quality": {
+      "passed": 2,
+      "failed": 0,
+      "total": 2
+    },
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "failed": 1,
+      "total": 2
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    }
+  },
+  "excluded_from_denominator": false,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": null,
+  "length": {
+    "raw_utf16": 2402,
+    "mixed": 1326,
+    "min_mixed": 700,
+    "max_mixed": 1000,
+    "budget_evaluable": true,
+    "within_budget": false,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 22.593,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:08:51.621Z",
+    "executor_end": "2026-09-06T04:09:14.214Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [
+    {
+      "text": "存根虚构“Ⅱ场”，没有与19:10的映射却声称独立可用，触发本题独立使用critical。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“跨线图形要求双面套印对齐”错误：两联在同张票的同一正面，跨撕线不等于跨正反面。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "线条/色块不能推出“无需套准精度”；该无据理由被用于取舍。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "可以选择不做跨线装饰，但材料只禁止必须信息依赖跨联拼读，不能把想拼回去一概当违规。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    }
+  ],
+  "critical_findings": [
+    {
+      "text": "存根在撕开后不能凭真实场次信息独立使用，却声明已满足。",
+      "evidence": "“Ⅱ场”没有材料来源或与19:10的映射。"
+    }
+  ],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

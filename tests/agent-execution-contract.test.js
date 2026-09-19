@@ -53,4 +53,21 @@ describe('agent execution completion contract', () => {
     assert.equal(terminal.code, 'execution_contract_unmet')
     assert.equal(terminal.executionEvidence.gateStatus, 'blocked')
   })
+
+  it('accepts concrete file mutations for the host write_file capability', () => {
+    const contract = {
+      requiredTools: ['write_file'],
+      requiredEvidence: [{ kind: 'tool_result', tool: 'write_file' }],
+      completionConditions: [{ type: 'tool_success', tool: 'write_file' }],
+    }
+    for (const tool of ['write_file', 'create_file', 'apply_patch']) {
+      const assessed = validateExecutionCompletion(contract, {
+        executionEvidence: {
+          toolCalls: [{ name: tool, status: 'ok' }],
+          evidence: [{ status: 'ok', provenance: { tool } }],
+        },
+      })
+      assert.equal(assessed.ok, true, tool)
+    }
+  })
 })

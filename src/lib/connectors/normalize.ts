@@ -1,7 +1,31 @@
 'use strict'
 
-const BUILTIN_IDS = new Set(['feishu', 'mcp-default', 'photoshop-mcp', 'cocos-creator-mcp'])
+const BUILTIN_IDS = new Set([
+  'feishu', 'mcp-default', 'pango-image-mcp', 'pango-data-mcp',
+  'thinkingdata-analysis-mcp', 'photoshop-mcp', 'cocos-creator-mcp',
+  'cli-generic', 'http-generic', 'ssh-generic',
+])
+const CONNECTOR_TYPES = new Set(['mcp', 'cli', 'http', 'ssh', 'feishu'])
 const MCP_TRANSPORTS = new Set(['stdio', 'streamable-http', 'sse'])
+const FULL_FEISHU_ALLOWLIST = [
+  'feishu.search_docs', 'feishu.read_doc', 'feishu.query_bitable',
+  'feishu.list_wiki_spaces', 'feishu.list_wiki_nodes', 'feishu.get_wiki_node',
+  'feishu.meeting_candidates', 'feishu.meeting_read', 'feishu.related_chats',
+  'feishu.today_priority', 'feishu.doc_kb_suggest', 'feishu.draft_write_doc',
+  'feishu.draft_minute_permission', 'feishu.draft_send_message', 'feishu.draft_create_task',
+  'feishu.draft_update_doc', 'feishu.draft_calendar_event', 'feishu.draft_drive_upload',
+  'feishu.draft_wiki_node', 'feishu.draft_bitable_record',
+]
+const LEGACY_FEISHU_ALLOWLIST = new Set([
+  'feishu.search_docs', 'feishu.read_doc', 'feishu.meeting_candidates',
+  'feishu.list_wiki_spaces', 'feishu.list_wiki_nodes', 'feishu.get_wiki_node',
+])
+
+function isLegacyFeishuAllowlist(list) {
+  const normalized = clampAllowlist(list)
+  return normalized.length === LEGACY_FEISHU_ALLOWLIST.size
+    && normalized.every((name) => LEGACY_FEISHU_ALLOWLIST.has(name))
+}
 
 function clampStr(v, max = 200) {
   return String(v == null ? '' : v).trim().slice(0, max)
@@ -114,7 +138,7 @@ function defaultConnectors() {
       title: '飞书',
       enabled: false,
       agentVisible: true,
-      allowlist: [],
+      allowlist: [...FULL_FEISHU_ALLOWLIST],
       meta: { identityHint: '使用本机 lark-cli 登录态，KnowMe 不保存飞书 Token' },
     },
     {
@@ -153,9 +177,7 @@ function normalizeConnector(raw = {}, fallbackId = '') {
   const id = clampStr(raw.id || fallbackId, 80) || `conn_${Date.now()}`
   // The built-in Feishu connector must never be downgraded to MCP when an
   // enable/disable patch omits `type`, or when an older config was corrupted.
-  const type = id === 'feishu'
-    ? 'feishu'
-    : raw.type === 'mcp' ? 'mcp' : raw.type === 'feishu' ? 'feishu' : 'mcp'
+  const type = id === 'feishu' ? 'feishu' : CONNECTOR_TYPES.has(String(raw.type || '').toLowerCase()) ? String(raw.type).toLowerCase() : 'mcp'
   const base = {
     id,
     type,
@@ -179,6 +201,19 @@ function normalizeConnector(raw = {}, fallbackId = '') {
   }
   if (type === 'mcp') {
     base.mcp = normalizeMcp(raw.mcp || {})
+  } else if (type === 'feishu') {
+    base.cli = {
+      command: clampStr(raw.cli?.command || 'lark-cli', 260),
+      args: clampArgs(raw.cli?.args),
+      cwd: clampStr(raw.cli?.cwd, 500),
+      env: clampRecord(raw.cli?.env),
+    }
+  } else if (type === 'cli') {
+    base.cli = { command: clampStr(raw.cli?.command, 260), args: clampArgs(raw.cli?.args), cwd: clampStr(raw.cli?.cwd, 500), env: clampRecord(raw.cli?.env) }
+  } else if (type === 'http') {
+    base.http = { baseUrl: clampStr(raw.http?.baseUrl || raw.http?.url, 1000), method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(String(raw.http?.method).toUpperCase()) ? String(raw.http.method).toUpperCase() : 'GET', headers: clampRecord(raw.http?.headers, 32, 400), query: clampRecord(raw.http?.query, 32, 400), body: clampStr(raw.http?.body, 5000) }
+  } else if (type === 'ssh') {
+    base.ssh = { host: clampStr(raw.ssh?.host, 255), port: Math.max(1, Math.min(65535, Number(raw.ssh?.port) || 22)), username: clampStr(raw.ssh?.username, 120), cwd: clampStr(raw.ssh?.cwd, 500), command: clampStr(raw.ssh?.command, 500) }
   }
   return base
 }
@@ -190,6 +225,9 @@ function mergeWithDefaults(storedList) {
   const list = Array.isArray(storedList) ? storedList : []
   for (const raw of list) {
     const n = normalizeConnector(raw)
+    if (n.id === 'feishu' && isLegacyFeishuAllowlist(n.allowlist)) {
+      n.allowlist = [...FULL_FEISHU_ALLOWLIST]
+    }
     const prev = byId.get(n.id)
     byId.set(n.id, prev ? { ...prev, ...n, meta: { ...prev.meta, ...n.meta } } : n)
   }
@@ -223,6 +261,9 @@ function publicConnectorView(conn, status = null, configuredKeys = []) {
       env: { ...(conn.mcp.env || {}) },
     }
   }
+  if ((conn.type === 'cli' || conn.type === 'feishu') && conn.cli) view.cli = { ...conn.cli, args: [...(conn.cli.args || [])], env: { ...(conn.cli.env || {}) } }
+  if (conn.type === 'http' && conn.http) view.http = { ...conn.http, headers: { ...(conn.http.headers || {}) }, query: { ...(conn.http.query || {}) } }
+  if (conn.type === 'ssh' && conn.ssh) view.ssh = { ...conn.ssh }
   if (status) view.status = status
   return view
 }
@@ -244,6 +285,8 @@ module.exports = {
   publicConnectorView,
   projectedToolNames,
   projectFeishuToolNames,
+  FULL_FEISHU_ALLOWLIST,
+  isLegacyFeishuAllowlist,
   feishuToolNeedsUserIdentity,
   clampAllowlist,
   normalizeSecretSlots,

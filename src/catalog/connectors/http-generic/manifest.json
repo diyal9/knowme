@@ -1,0 +1,12 @@
+{
+  "id": "http-generic",
+  "kind": "connector",
+  "type": "http",
+  "version": "1.0.0",
+  "title": "HTTP API",
+  "description": "把 REST API 或 Webhook 包装成 Agent 可调用的请求连接器，支持默认 URL、方法、请求头和请求体。",
+  "capabilities": ["http", "rest", "webhook"],
+  "http": { "baseUrl": "", "method": "GET", "headers": {}, "query": {}, "body": "" },
+  "secretSlots": [{ "key": "API_TOKEN", "label": "API Token", "required": false, "target": "bearer" }],
+  "toolPolicies": [{ "match": "*", "risk": "network", "sideEffects": true, "requiresApproval": true }]
+}

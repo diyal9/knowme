@@ -1,0 +1,46 @@
+{
+  "notice": "从原始导出 wire 按 sourceWireIndex 选取的 tools/call 观察记录；保留完整 prompt 与已记录的参考图字节指纹。不代表完整网络日志或独立服务端回执。observer 的 label 不作为配置/版本依据，实际 task/session/run 与 assignmentSnapshot 为准。",
+  "caseId": "R26-IP-H02",
+  "config": "with_skill",
+  "file": "rqa26-candidate-h02-lossless.json",
+  "taskId": "task-mtpmgiwr-ceqif",
+  "sessionId": "wb-expert-task-mtpmgiwr-ceqif",
+  "runId": "expert_task-mtpmgiwr-ceqif_mtpmgmts",
+  "calls": [
+    {
+      "sourceWireIndex": 1,
+      "observation": {
+        "label": "candidate-H02",
+        "transport": "fetch",
+        "startedAt": "2026-09-06T09:41:28.993Z",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "1788687688990-318303",
+          "method": "tools/call",
+          "params": {
+            "name": "generate_image",
+            "arguments": {
+              "prompt": "Professional product photo retouching / background replacement edit. Keep the exact same image composition and the SAME single brushed stainless steel silver thermos bottle in the identical position, size and proportion (bottle on the left side of the frame, clean empty space on the right). ONLY change the seamless studio backdrop color: replace the dark green/teal seamless sweep background — both the wall behind the bottle and the floor surface around and under the bottle base — with a clean, neutral warm gray seamless studio backdrop (soft warm taupe-gray, even, smooth, no props, no patterns, no texture noise, no vignette). The bottle itself must NOT be redesigned or repainted: preserve its original bright silver brushed-metal material and color on BOTH the body and the screw cap, including the cap seam line and the bottom band; do not turn the bottle black, dark, or coated in warm gray. Preserve the original soft studio lighting direction, the vertical highlight gradient on the cylinder, and the soft contact shadow beneath the bottle, adjusting only for the new warm gray environment. Slight environmental reflection tint changes on the metal caused by the new background are acceptable. No text, no logo, no watermark, no added objects, no crop change, no camera angle change. Photorealistic commercial e-commerce product photography quality.",
+              "model": "gpt-image-2",
+              "n": 1,
+              "quality": "auto",
+              "size": "896x1200",
+              "aspect_ratio": "3:4",
+              "reference_images": [
+                {
+                  "kind": "image-bytes",
+                  "mimeType": "image/jpeg",
+                  "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+                  "byteLength": 455950
+                }
+              ],
+              "include_cos_urls": true
+            }
+          }
+        },
+        "status": 200,
+        "returnedAt": "2026-09-06T09:41:48.532Z"
+      }
+    }
+  ]
+}

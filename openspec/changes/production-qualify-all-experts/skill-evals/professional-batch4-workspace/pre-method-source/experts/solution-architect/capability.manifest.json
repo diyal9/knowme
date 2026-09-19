@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "solution-architect",
+  "kind": "expert",
+  "name": "解决方案架构师",
+  "description": "将需求和约束转化为可评审的系统边界、组件划分与技术方案",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "需求、非功能指标和现有系统资料",
+    "技术、成本、合规和时间约束"
+  ],
+  "outputs": [
+    "系统边界、组件与关键接口方案",
+    "权衡记录、风险与验证计划"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/solution-architect"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "系统边界、组件与关键接口方案",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "权衡记录、风险与验证计划",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

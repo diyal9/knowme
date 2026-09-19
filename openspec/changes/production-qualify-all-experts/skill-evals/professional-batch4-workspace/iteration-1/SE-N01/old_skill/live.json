@@ -1,0 +1,171 @@
+{
+  "task": {
+    "id": "task-mtozhwxb-u3xwt",
+    "title": "QA-SE-N01 tenant-reservation-atomicity-and-replay",
+    "expertId": "software-engineer",
+    "status": "review",
+    "brief": {
+      "goal": "请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。",
+      "plan": {
+        "goal": "请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与任务边界",
+          "按专家方法给出静态分析及可审查交付",
+          "复核反例、未验证项及风险"
+        ],
+        "risks": [
+          "仅使用题面材料，不调用外部工具",
+          "不得把推演或建议写成已执行验证"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "SE-N01",
+          "type": "reference",
+          "title": "冻结合成材料与委托",
+          "ref": "",
+          "content": "请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。\n\n[M1 业务与接口契约]\n导出接口 reserve(db, {tenant, sku, requestId, qty})，成功返回 {remaining: number}。tenant、sku、requestId已由入口验证为非空字符串；qty仍需本函数验证为正的安全整数，否则抛Error('INVALID_QTY')，不改变库存/请求账本。\n库存以(tenant,sku)隔离，初始是非负安全整数，不能超卖。同租户requestId标识一次业务请求，不同租户允许相同requestId。同键同sku/qty的重放须返回首次成功的原结果，不再次扣减；同键不同sku或qty须抛Error('IDEMPOTENCY_CONFLICT')。不足抛Error('OUT_OF_STOCK')，不占用requestId。成功扣减与请求账本必须一起提交，不能一项成功一项失败。数据库错误原样向上抛出，不伪造业务成功。\n\n[M2 唯一可用数据库契约，均为本题定义，不需查资料]\ndb.getStock(tenant,sku)：异步返回库存，不存在视为0。\ndb.setStock(tenant,sku,n)：异步写库存。\ndb.getRequest(tenant,requestId)：异步返回undefined或{sku,qty,result}。\ndb.putRequest(tenant,requestId,record)：异步插入，已存在则抛唯一键冲突。\n上述单独操作原子，但多个调用间可被其他进程穿插。\ndb.tx(tenant, async tx => {...})：同租户事务可串行化，包括尚不存在的请求键；tx提供相同四个方法且限制在该tenant内。回调异常会回滚全部写入；成功则一起持久提交。db.tx返回回调结果。跨租户独立。断连可能发生在提交前或提交后，调用方收到同一种数据库超时；数据库仍保证全有或全无，调用方事后可用相同requestId再次请求。没有外部支付、消息或其他副作用。\n服务有两个进程，请勿发明新的数据库API或引入外部依赖。\n\n[M3 当前实现]\nasync function reserve(db, { tenant, sku, requestId, qty }) {\n  const old = await db.getRequest(tenant, requestId);\n  if (old) return old.result;\n  const stock = await db.getStock(tenant, sku);\n  if (stock < qty) throw new Error('OUT_OF_STOCK');\n  await db.setStock(tenant, sku, stock - qty);\n  const result = { remaining: stock - qty };\n  await db.putRequest(tenant, requestId, { sku, qty, result });\n  return result;\n}\n\n[M4 用于分析的起点，并非测试回执]\nA租户P库存5。请求r1要4件、r2要3件，两个进程可先后读到5。另有A/r3与B/r3同名请求，两个租户P均有库存。现有测试只描述了顺序成功扣一件；没有执行记录，其他覆盖情况未知。\n\n请说明原实现的决定性失败时序、为什么修法覆盖它而常见较小改法不够。测试设计写出受控初态/操作与可观察结果，区分推演和实测；指出尚待真实工程验证的边界。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "一份正常对话中的工程审查答复，包含最小完整修正代码、失败时序、替代方案取舍及可执行测试设计；不需文件成果或固定模板。",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "software-engineer",
+      "agentVersion": "2.0.0",
+      "agentHash": "b47062b9ed246bc0",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtozhwxb-u3xwt",
+      "bindings": {
+        "skills": [
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {},
+      "plan": {
+        "goal": "请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与任务边界",
+          "按专家方法给出静态分析及可审查交付",
+          "复核反例、未验证项及风险"
+        ],
+        "risks": [
+          "仅使用题面材料，不调用外部工具",
+          "不得把推演或建议写成已执行验证"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "b47062b9ed246bc0"
+      }
+    },
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtozhwxb-u3xwt_mtozhx2v",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-05T22:58:56.167Z"
+      }
+    ],
+    "deliverables": [
+      {
+        "deliverableId": "primary",
+        "title": "一份正常对话中的工程审查答复，包含最小完整修正代码、失败时序、替代方案取舍及可执行测试设计；不需文件成果或固定模板。",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtozhwxb-u3xwt#deliverable_expert_task-mtozhwxb-u3xwt_mtozhx2v_primary",
+        "artifactRefs": [
+          "wb-expert-task-mtozhwxb-u3xwt#deliverable_expert_task-mtozhwxb-u3xwt_mtozhx2v_primary"
+        ],
+        "executionRef": "agent-run:expert_task-mtozhwxb-u3xwt_mtozhx2v",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-05T22:58:56.182Z"
+      }
+    ]
+  },
+  "session": {
+    "id": "wb-expert-task-mtozhwxb-u3xwt",
+    "messages": [
+      {
+        "id": "msg_expert_task-mtozhwxb-u3xwt_mtozhx2v_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师。先理解仓库规则、现有实现和验收标准，再以最小完整变更实现。必须验证变更，不伪造测试结果，不在未授权情况执行高风险操作。\n\n【必须遵循的 SOP】\n你是 KnowMe 软件开发工程师。先理解仓库规则、现有实现和验收标准，再以最小完整变更实现。必须验证变更，不伪造测试结果，不在未授权情况执行高风险操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。\n\n当前时间：2026-09-05T22:58:28.663Z\n\n材料：\n- 冻结合成材料与委托\n请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。\n\n[M1 业务与接口契约]\n导出接口 reserve(db, {tenant, sku, requestId, qty})，成功返回 {remaining: number}。tenant、sku、requestId已由入口验证为非空字符串；qty仍需本函数验证为正的安全整数，否则抛Error('INVALID_QTY')，不改变库存/请求账本。\n库存以(tenant,sku)隔离，初始是非负安全整数，不能超卖。同租户requestId标识一次业务请求，不同租户允许相同requestId。同键同sku/qty的重放须返回首次成功的原结果，不再次扣减；同键不同sku或qty须抛Error('IDEMPOTENCY_CONFLICT')。不足抛Error('OUT_OF_STOCK')，不占用requestId。成功扣减与请求账本必须一起提交，不能一项成功一项失败。数据库错误原样向上抛出，不伪造业务成功。\n\n[M2 唯一可用数据库契约，均为本题定义，不需查资料]\ndb.getStock(tenant,sku)：异步返回库存，不存在视为0。\ndb.setStock(tenant,sku,n)：异步写库存。\ndb.getRequest(tenant,requestId)：异步返回undefined或{sku,qty,result}。\ndb.putRequest(tenant,requestId,record)：异步插入，已存在则抛唯一键冲突。\n上述单独操作原子，但多个调用间可被其他进程穿插。\ndb.tx(tenant, async tx => {...})：同租户事务可串行化，包括尚不存在的请求键；tx提供相同四个方法且限制在该tenant内。回调异常会回滚全部写入；成功则一起持久提交。db.tx返回回调结果。跨租户独立。断连可能发生在提交前或提交后，调用方收到同一种数据库超时；数据库仍保证全有或全无，调用方事后可用相同requestId再次请求。没有外部支付、消息或其他副作用。\n服务有两个进程，请勿发明新的数据库API或引入外部依赖。\n\n[M3 当前实现]\nasync function reserve(db, { tenant, sku, requestId, qty }) {\n  const old = await db.getRequest(tenant, requestId);\n  if (old) return old.result;\n  const stock = await db.getStock(tenant, sku);\n  if (stock < qty) throw new Error('OUT_OF_STOCK');\n  await db.setStock(tenant, sku, stock - qty);\n  const result = { remaining: stock - qty };\n  await db.putRequest(tenant, requestId, { sku, qty, result });\n  return result;\n}\n\n[M4 用于分析的起点，并非测试回执]\nA租户P库存5。请求r1要4件、r2要3件，两个进程可先后读到5。另有A/r3与B/r3同名请求，两个租户P均有库存。现有测试只描述了顺序成功扣一件；没有执行记录，其他覆盖情况未知。\n\n请说明原实现的决定性失败时序、为什么修法覆盖它而常见较小改法不够。测试设计写出受控初态/操作与可观察结果，区分推演和实测；指出尚待真实工程验证的边界。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请作为软件工程师，静态审查并修正下面的库存预留函数。全部材料为合成夹具，无真实仓库。只在答复中给可审查的修正代码或补丁、关键反例和定向测试设计；不要访问文件、联网、调用工具或部署，不要声称修改或运行已完成。无需实际数据库即可按给定契约作答。\n步骤：\n1. 核对所给材料与任务边界\n2. 按专家方法给出静态分析及可审查交付\n3. 复核反例、未验证项及风险\n风险：仅使用题面材料，不调用外部工具；不得把推演或建议写成已执行验证\n\n本轮交付物：一份正常对话中的工程审查答复，包含最小完整修正代码、失败时序、替代方案取舍及可执行测试设计；不需文件成果或固定模板。（answer）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtozhwxb-u3xwt_mtozhx2v",
+        "createdAt": "2026-09-05T22:58:29.082Z"
+      },
+      {
+        "id": "msg_expert_task-mtozhwxb-u3xwt_mtozhx2v_assistant",
+        "role": "assistant",
+        "text": "# 库存预留函数静态审查\n\n以下全部基于题面 M1–M4 合成夹具推演，未访问任何仓库、数据库或工具；所有\"失败时序\"\"测试设计\"均为静态分析产物，不是实测回执。\n\n## 1. 原实现的决定性失败时序\n\n### 缺陷 A：检查与扣减非原子（超卖 / 幂等账本错乱）\n\n`getRequest → getStock → setStock → putRequest` 四步之间可被另一进程穿插（M2 明确\"多个调用间可被其他进程穿插\"）。用 M4 数据构造反例：\n\n**A-1 超卖（双读 5）**\n```\n进程1: getRequest(A,r1)=∅   getStock(A,P)=5\n进程2: getRequest(A,r2)=∅   getStock(A,P)=5        ← 读到同一旧值\n进程1: setStock(A,P,1)      putRequest(A,r1,{remaining:1})\n进程2: setStock(A,P,2)      putRequest(A,r2,{remaining:2})   ← 后写覆盖前写\n结果: 库存=2，但实际售出 7 > 5；且 r2 返回 remaining:2 是错误值。\n```\n更糟的交错：进程2 先 `putRequest(r2)`，进程1 后 `putRequest(r1)` 抛唯一键冲突——该异常按契约\"原样向上抛出\"，r1 明明库存够却收到非业务错误，而库存已被进程2 扣掉，r1 无账本记录。\n\n**A-2 幽灵重放（扣减成功、账本失败）**\n```\n进程1: getStock=5 → setStock(A,P,1) 成功 → putRequest 抛冲突/崩溃\n后续同 requestId 的重放请求: getRequest=∅ → 再次从 1 起扣 → 重复扣减。\n```\n违反\"成功扣减与请求账本必须一起提交\"。\n\n**A-3 部分回滚残留**\n若把 setStock 放事务外、putRequest 放事务内（或反之），回调异常只回滚事务内的写入，事务外的 setStock 残留。\n\n### 缺陷 B：完全不做 qty 校验\n\n契约要求 qty 为正安全整数否则抛 `INVALID_QTY` 且不改变任何状态。原函数直接 `stock < qty` 比较：\n- `qty=-3`：`5 < -3` 为 false → 通过 → `setStock(8)`，库存凭空增加；\n- `qty=1.5`：通过 → 写入非整数库存；\n- `qty=2**53`：越过 MAX_SAFE_INTEGER；\n- `qty=NaN`：`5 < NaN` 为 false → 通过 → `setStock(NaN)` 污染库存。\n\n**关键反例（B + A 组合）**：负 qty 绕过 `OUT_OF_STOCK` 检查后，还可能在事务版本里以\"合法请求\"身份占用 requestId，导致后续同键正 qty 重放被判 `IDEMPOTENCY_CONFLICT`。\n\n### 缺陷 C：重放未按 sku/qty 比对\n\n`if (old) return old.result;` —— 同 tenant+requestId、不同 sku 或 qty 的重放会静默返回首次结果，违反 `IDEMPOTENCY_CONFLICT` 要求。\n\n### 缺陷 D：租户外泄漏风险\n\n`db.getStock(tenant,sku)` 等顶层方法本身带 tenant 参数，看似隔离，但正确做法是把整个\"读请求账本→读库存→写库存→写账本\"序列放进 `db.tx(tenant, ...)`，由同租户串行化保证跨租户独立（M2）。原实现根本没用 tx，谈不上租户边界，但需说明：**仅靠 tx 包裹不够**，见下节。\n\n## 2. 修正代码（最小完整变更）\n\n```js\nasync function reserve(db, { tenant, sku, requestId, qty }) {\n  // B: 前置校验，任何读写发生之前完成，失败不触碰库存/账本\n  if (!Number.isInteger(qty) || qty <= 0 || !Number.isSafeInteger(qty)) {\n    throw new Error('INVALID_QTY');\n  }\n\n  // 整体放入同租户事务：串行化覆盖\"尚不存在的请求键\"（M2），\n  // 扣减与账本要么一起提交、要么一起回滚（解决 A-2/A-3）\n  return db.tx(tenant, async (tx) => {\n    const old = await tx.getRequest(tenant, requestId);\n    if (old) {\n      // C: 重放必须比对 sku/qty\n      if (old.sku !== sku || old.qty !== qty) {\n        throw new Error('IDEMPOTENCY_CONFLICT');\n      }\n      return old.result; // 原结果，不再扣减\n    }\n\n    const stock = await tx.getStock(tenant, sku); // 不存在视为 0\n    if (stock < qty) throw new Error('OUT_OF_STOCK'); // 回滚，不占用 requestId\n\n    const remaining = stock - qty;\n    await tx.setStock(tenant, sku, remaining);\n    const result = { remaining };\n    await tx.putRequest(tenant, requestId, { sku, qty, result });\n    return result;\n  });\n}\n```\n\n要点：\n- **校验在 tx 之外**：`INVALID_QTY` 路径零次数据库调用，天然满足\"不改变库存/请求账本\"。\n- **`OUT_OF_STOCK` 通过抛异常触发回滚**：即使先写了什么也会回滚；这里顺序是先检查后写，回滚只是兜底。\n- **超时语义**：断连可能发生在提交前或提交后，调用方拿到同一个数据库超时。两种情况下的收敛行为都正确——提交前：什么都没发生，重试走全新路径；提交后：账本已落库，重试命中 `old` 分支返回原结果。这正是\"调用方事后可用相同 requestId 再次请求\"的依据，无需引入新 API。\n\n## 3. 为什么常见较小改法不够\n\n| 改法 | 遗漏 |\n|---|---|\n| 只加 qty 校验（C 的最小版） | 超卖 A-1、幽灵重放 A-2 原样存在 |\n| 只把四步包进 `db.tx` 但不比对 sku/qty | 冲突检测缺失：`{sku:P,qty:4}` 之后 `{sku:P,qty:99}` 同键重放会静默返回 `{remaining:1}`，等于允许用旧结果\"确认\"一笔从未扣过的量 |\n| 保留顶层调用、只在 `putRequest` 冲突后重读再返回 | 冲突后重读到的记录若属于并发中的另一笔不同参数请求，无法区分\"真重放\"与\"参数漂移\"；且 setStock 已在事务外落库，回滚不掉——需要补偿逻辑，复杂度反而更高，仍不满足\"一起提交\" |\n| 用 `putRequest` 先行占位、成功后再扣库存 | 占位后扣减失败要删占位记录，删除与扣减之间又出现新的穿插窗口；且 `OUT_OF_STOCK` 要求\"不占用 requestId\"，占位方案违约 |\n| 乐观 CAS（读-改-写重试循环） | M2 没有提供 compare-and-set API，发明它违反\"不引入新数据库 API\"；即便模拟重试，扣减与账本仍是两次独立提交，A-2 依旧成立 |\n\n核心：只有**同租户事务串行化 + 事务内先查账本再扣减 + 参数比对**三者同时在场，才覆盖全部决定性时序。\n\n## 4. 定向测试设计（受控初态 / 操作 / 可观察结果）\n\n标注 **[推演]**：按 M2 契约的逻辑必然性；**[待实测]**：需在真实工程环境验证。\n\n### T1 基础正确性 [推演]\n| # | 初态 | 操作 | 期望 |\n|---|---|---|---|\n| 1.1 | A/P=5 | reserve(A,P,r1,4) | `{remaining:1}`；stock=1；A/r1 记录存在 |\n| 1.2 | 同上 | 同参数重放 r1 | 返回 `{remaining:1}`，stock 仍 1，账本无第二条 |\n| 1.3 | A/P=5 | reserve(A,P,r1,-3) / 1.5 / 0 / 2**53 / NaN | 均抛 `INVALID_QTY`，getStock/getRequest 与初态逐字节一致 |\n| 1.4 | A/P=2 | reserve(A,P,r9,3) | 抛 `OUT_OF_STOCK`；`getRequest(A,r9)=undefined` |\n| 1.5 | A/P 不存在 | reserve(A,P,r1,1) | 视为 0 → `OUT_OF_STOCK` |\n\n### T2 幂等冲突 [推演]\n- 2.1：A/r1 已成功 `{P,4}`；再发 `{Q,4}` 同键 → `IDEMPOTENCY_CONFLICT`，stock(Q) 不变。\n- 2.2：A/r1 已成功 `{P,4}`；再发 `{P,5}` → `IDEMPOTENCY_CONFLICT`。\n- 2.3：A/r3 `{P,4}` 成功；B/r3 `{P,4}` → 独立成功（跨租户同名 requestId 合法）。\n\n### T3 并发决定性反例（复现 M4）[推演，需真实引擎实测]\n- 3.1 **双读 5**：A/P=5，两进程分别执行 r1(4)、r2(3)。串行化后必为某一顺序，例如 r1 先：r1→`{remaining:1}`，r2 在事务内读到 stock=1 → `OUT_OF_STOCK`；反向顺序则 r2 成功 `{remaining:2}`、r1 `OUT_OF_STOCK`。**不变量：任意交错下最终 stock ≥ 0 且 stock = 5 − Σ成功扣减**。\n- 3.2 **同名跨租户并发**：A/r3 与 B/r3 各 `{P,4}` 同时发起，两事务分属不同租户，互不阻塞，均成功。\n- 3.3 **同键同参并发**：两进程同时发 A/r1 `{P,4}`，A/P=5。一个成功 `{remaining:1}`，另一个在事务内命中 `old` 分支返回同一 `{remaining:1}`；总扣减恰为 4。\n\n### T4 故障注入 [待实测]\n- 4.1 事务提交前杀连接 → 超时；重试同 requestId → 全新成功路径，stock 只扣一次。\n- 4.2 提交后 ack 丢失 → 超时；重试 → 命中账本返回原结果，**不得**二次扣减。这是\"全有或全无 + 相同 requestId 可重放\"契约的核心验收点。\n- 4.3 `tx` 回调内部对 `setStock` 注入抛错 → 回滚后 `getRequest` 无记录、stock 不变。\n\n### T5 现有测试缺口 [推演]\nM4 提到现有测试只覆盖\"顺序成功扣一件\"。至少缺：T1.3 非法 qty 五变体、T2 冲突、T3 全部并发交错、T4 提交前后断连。建议把 T3 做成参数化交错测试（固定 seed 的调度",
+        "runId": "expert_task-mtozhwxb-u3xwt_mtozhx2v",
+        "createdAt": "2026-09-05T22:58:56.138Z",
+        "trace": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "回答生成完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done"
+          }
+        ],
+        "protocolVersion": 2,
+        "answerHash": "3821ca026fbb40e9"
+      }
+    ]
+  }
+}

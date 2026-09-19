@@ -1,7 +1,0 @@
-{
-  "id": "meeting-scribe",
-  "kind": "expert",
-  "version": "2.0.0",
-  "skills": ["writing-polish"],
-  "connectors": ["feishu"]
-}

@@ -41,6 +41,8 @@ contextBridge.exposeInMainWorld('knowme', {
     list: () => capInvoke('skill-list'),
     load: payload => capInvoke('skill-load', payload),
     readResource: payload => capInvoke('skill-read-resource', payload),
+    packageFiles: payload => capInvoke('skill-package-files', payload || {}),
+    packageFile: payload => capInvoke('skill-package-file', payload || {}),
     runScript: payload => capInvoke('skill-run-script', payload),
     migrateLegacy: payload => capInvoke('skill-migrate-legacy', payload),
     tasks: () => capInvoke('skill-task-list'),

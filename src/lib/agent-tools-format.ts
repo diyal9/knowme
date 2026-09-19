@@ -138,8 +138,10 @@ function parseToolArguments(raw) {
       return { ok: false, code: 'invalid_args', message: '工具参数必须是 JSON 对象' }
     }
     return { ok: true, args: parsed }
-  } catch {
-    return { ok: false, code: 'invalid_args', message: '工具参数不是合法 JSON' }
+  } catch (error) {
+    const diagnostics = require('./tool-json-diagnostics').toolJsonDiagnostics(text, error)
+    const detail = `类型=${diagnostics.reason}；字符数=${diagnostics.chars}；位置=${diagnostics.position ?? '未知'}；指纹=${diagnostics.fingerprint}`
+    return { ok: false, code: 'invalid_args', diagnostics, message: `工具参数不是合法 JSON（${detail}）。该调用尚未执行。` }
   }
 }
 
@@ -176,8 +178,14 @@ function formatSearchHits(hits = []) {
 
 function formatProviderResult(providerResult = {}) {
   if (providerResult.ok === false) {
-    const msg = String(providerResult.message || '知识检索失败').trim()
-    return { ok: false, text: msg, preview: msg.slice(0, MAX_UI_PREVIEW_CHARS), sources: [] }
+    const msg = String(providerResult.message || providerResult.error || '知识检索失败').trim()
+    return {
+      ok: false,
+      text: msg,
+      preview: msg.slice(0, MAX_UI_PREVIEW_CHARS),
+      sources: [],
+      diagnostics: providerResult.diagnostics || undefined,
+    }
   }
   const hits = Array.isArray(providerResult.hits) ? providerResult.hits : []
   const sources = hits.slice(0, 8).map((hit, i) => ({
@@ -303,9 +311,8 @@ function normalizeExtraDefinitions(extraDefinitions = [], options = {}) {
       .map(item => String(item || '').trim())
       .filter(Boolean),
   )
-  const budget = Number.isFinite(Number(options.budget)) && Number(options.budget) > 0
-    ? Math.floor(Number(options.budget))
-    : EXTRA_TOOL_BUDGET
+  // This is the authorized execution catalog, not a model schema window.
+  // Projection budgets belong to selectToolDefinitions; never lose tools here.
   const candidates = []
   const seen = new Set(['search_knowledge', 'fabric_search', 'kb_query', 'kb_get'])
   for (const def of list) {
@@ -327,24 +334,7 @@ function normalizeExtraDefinitions(extraDefinitions = [], options = {}) {
       },
     })
   }
-  if (candidates.length <= budget) return candidates.map(item => item.def)
-
-  candidates.sort((a, b) => a.priority - b.priority || a.order - b.order)
-  const kept = candidates.slice(0, budget)
-  const dropped = candidates.slice(budget)
-  const keptNames = new Set(kept.map(item => item.def.function.name))
-  const droppedNames = dropped.map(item => item.def.function.name)
-  logger?.warn?.('system', 'tool-surface-truncated', '工具面超出投影预算，已裁剪低优先级工具', {
-    budget,
-    total: candidates.length,
-    dropped: droppedNames.slice(0, 32),
-    missingRequired: [...required].filter(name => !keptNames.has(name)),
-  })
-  // 保持原始注册顺序输出，避免下游依赖排序语义。
-  return candidates
-    .filter(item => keptNames.has(item.def.function.name))
-    .sort((a, b) => a.order - b.order)
-    .map(item => item.def)
+  return candidates.map(item => item.def)
 }
 
 /**

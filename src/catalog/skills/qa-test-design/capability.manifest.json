@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "id": "qa-test-design",
+  "kind": "skill",
+  "name": "风险导向测试设计",
+  "version": "1.4.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

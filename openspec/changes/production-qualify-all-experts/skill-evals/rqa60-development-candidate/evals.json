@@ -1,0 +1,42 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-07T09:40:00+08:00",
+  "suite": "RQA60",
+  "purpose": "Candidate recheck of the current development Experts after package-contract hardening. These two samples cannot qualify either Expert.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 150
+  },
+  "evals": [
+    {
+      "id": "SE05",
+      "expertId": "software-engineer",
+      "title": "严格重叠区间归并与引用隔离",
+      "scenario": "normal",
+      "prompt": "请作为软件工程师静态审查并修正下面的 JavaScript 函数。只在对话中给出完整修正代码、决定性反例和定向测试设计；不访问文件、不调用工具，不声称已修改或已运行。\n\n合同：normalizeRanges(ranges) 只接受数组；每项必须是长度恰好为2的 [start,end]，两端是非负安全整数且 start<end，否则统一抛 Error('INVALID_RANGE')。区间为 [start,end)，只有正长度重叠才归并，端点接触要保留为两段；重复区间去重，重叠可传递。返回按 start 数值升序。成功和失败都不得修改输入，返回外层及每个子数组都不与输入共享引用。最多10万段。\n\n当前实现：\nfunction normalizeRanges(ranges) {\n  ranges.sort();\n  const result = [];\n  for (const r of ranges) {\n    const last = result[result.length - 1];\n    if (last && r[0] <= last[1]) last[1] = r[1];\n    else result.push(r);\n  }\n  return result;\n}\n\n给出 X=[[10,14],[2,7],[6,9],[9,10]]、Y=[[1,8],[2,3],[7,10],[10,12]]、Z=[[2,5],[5,8],[4,6]] 的预期，并说明为什么仅改数值排序仍不够。",
+      "assertions": [
+        "完整实现严格校验外层、行形状、安全整数与 start<end，非法值统一 INVALID_RANGE。",
+        "使用数值排序、严格正重叠和 max 终点，X为 [[2,9],[9,10],[10,14]]，Y为 [[1,10],[10,12]]，Z为 [[2,8]]。",
+        "无论成功或失败都不修改输入，返回子数组与输入无引用共享，并给出可观察测试。",
+        "解释数值排序之外的独立缺陷，复杂度与十万段规模相容。",
+        "清楚区分静态推演与真实测试，不虚构工具、文件或通过回执。"
+      ]
+    },
+    {
+      "id": "SA05",
+      "expertId": "solution-architect",
+      "title": "离线检索与撤权上界决策",
+      "scenario": "edge",
+      "prompt": "请作为解决方案架构师给出可供技术负责人拍板的方案。只分析以下合成材料，不联网、不调用工具、不部署或声称已压测。\n\n桌面端已有本地全文索引，正文和缓存在设备上；服务端是文档版本和工作区权限的唯一权威源。每设备约2万份文本，平均40KiB；2名开发、4周，不新增托管服务。\n\n已批准硬要求：服务端撤销某工作区权限后至多5分钟，该账号不得经客户端新查询、打开或缓存命中获取该工作区的标题、摘要或正文。销售提出“断网8小时仍可搜索打开所有旧资料”，但尚未批准。\n\n服务端可按(account,workspace)签发最长5分钟许可，含到期时间和单调权限版本；新许可必须在线重新授权。客户端运行期有可靠单调计时；重启/休眠后无法证明仍有效时，只能在线重授权或拒绝新访问。同步响应可能乱序或重放旧版本；任务可能在许可有效时开始，过期后才产生结果。无设备性能、索引体积或延迟基线。\n\n请识别必须拍板的冲突，比较至少两个符合硬要求的方案，选一个并说明代价。给出权威与本地所有权、关键接口/门禁、失效时序、可逆迁移及可测验收。性能数字只能写待验证目标。",
+      "assertions": [
+        "明确8小时无限离线与5分钟撤权硬保证不可同时满足，不暗改已批准要求。",
+        "比较至少两个真正合规的方案，给出有条件推荐、断网可用性与实现代价。",
+        "权限按 account/workspace 隔离，查询、打开、缓存命中和结果交付均有资格门禁，不把索引一致性当权限有效性。",
+        "正确处理过期后才完成的查询、重启/休眠和乱序旧版本，不允许本地重新计时或版本回退。",
+        "迁移/回退不恢复旧授权，验收包含撤权与断网受控时序；不虚构已测性能、容量或工期。"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1635 @@
+{
+  "suite": "RQA61",
+  "executedAt": "2026-09-07T05:54:39Z",
+  "results": [
+    {
+      "evalId": "SE10",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "create": {
+        "ok": true,
+        "task": {
+          "taskVersion": 2,
+          "activityContractVersion": 1,
+          "id": "task-mtqto4ck-hu345",
+          "projectId": null,
+          "projectSnapshot": null,
+          "kind": "expert",
+          "title": "[RQA61 SE10] 完成后重开并保持既有约束",
+          "expertId": "software-engineer",
+          "expertName": "software-engineer",
+          "workflowId": "",
+          "workflowName": "",
+          "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+          "brief": {
+            "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+            "plan": null,
+            "requiresMaterials": false,
+            "requiredInputs": [],
+            "materials": [
+              {
+                "id": "provided-context",
+                "type": "text",
+                "title": "冻结验收题",
+                "ref": "",
+                "content": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。"
+              }
+            ],
+            "deliverables": [
+              {
+                "id": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "required": true,
+                "acceptanceCriteria": [],
+                "requiredTools": [],
+                "requiredSkills": [
+                  "software-change-verification"
+                ],
+                "requiredConnectorIds": [],
+                "requiredEvidence": [],
+                "requiredArtifacts": [],
+                "minArtifacts": 0,
+                "completionConditions": []
+              }
+            ],
+            "constraints": [
+              "不得执行外部写入。",
+              "不得调用工具。",
+              "不得声称已运行测试。"
+            ],
+            "dueAt": ""
+          },
+          "assignmentSnapshot": {
+            "agentId": "software-engineer",
+            "agentVersion": "2.2.0",
+            "agentHash": "18bcf4d4e7195931",
+            "hashes": {
+              "expert": "18bcf4d4e7195931",
+              "skills": {
+                "code-review": "17d5214576de2834",
+                "software-change-verification": "829c8afc1a1e3a6a"
+              },
+              "connectors": {}
+            },
+            "profileId": "",
+            "profileVersion": "",
+            "profileHash": "",
+            "snapshotRef": "expert-snapshot:wb-expert-task-mtqto4ck-hu345",
+            "bindings": {
+              "skills": [
+                "software-change-verification",
+                "code-review"
+              ],
+              "connectors": []
+            },
+            "permissions": {
+              "connectors": {
+                "allowedConnectorIds": []
+              },
+              "tools": {
+                "allowlist": []
+              },
+              "network": false,
+              "write": false,
+              "externalWrite": false
+            },
+            "plan": null,
+            "sop": {
+              "version": "2.2.0",
+              "hash": "18bcf4d4e7195931"
+            }
+          },
+          "visibility": "private",
+          "participants": [],
+          "events": [
+            {
+              "id": "event-1",
+              "type": "created",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 1,
+              "summary": "已确认委托单并开始预检",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:50:52.676Z"
+            },
+            {
+              "id": "event-2",
+              "type": "preflight_passed",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 2,
+              "summary": "预检通过",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:50:53.314Z"
+            }
+          ],
+          "attention": null,
+          "progress": {
+            "phase": "preflight",
+            "label": "执行条件检查通过",
+            "detail": "",
+            "startedAt": "2026-09-07T05:50:53.290Z",
+            "updatedAt": "2026-09-07T05:50:53.290Z",
+            "heartbeatAt": "2026-09-07T05:50:53.290Z"
+          },
+          "inputQueue": null,
+          "deliverables": [],
+          "executionEvidence": [],
+          "resultSummary": "",
+          "status": "starting",
+          "execRef": {
+            "kind": "session",
+            "id": "wb-expert-task-mtqto4ck-hu345"
+          },
+          "taskRef": null,
+          "knowledgeRefs": [],
+          "pinned": false,
+          "schedule": {
+            "type": "daily",
+            "dailyTime": "09:00",
+            "intervalValue": 24,
+            "intervalUnit": "hour",
+            "onceAt": "",
+            "cronExpr": ""
+          },
+          "scheduleEnabled": false,
+          "scheduleLabel": "",
+          "nextRunAt": "",
+          "lastScheduledAt": "",
+          "scheduleParentId": "",
+          "legacySchedule": {
+            "scheduleEnabled": false,
+            "schedule": {
+              "type": "daily",
+              "dailyTime": "09:00",
+              "intervalValue": 24,
+              "intervalUnit": "hour",
+              "onceAt": "",
+              "cronExpr": ""
+            },
+            "scheduleLabel": ""
+          },
+          "createdAt": "2026-09-07T05:50:52.676Z",
+          "updatedAt": "2026-09-07T05:50:53.314Z"
+        },
+        "started": true,
+        "preflightIssues": []
+      },
+      "steps": [
+        {
+          "action": "first_delivery",
+          "task": {
+            "id": "task-mtqto4ck-hu345",
+            "status": "review",
+            "resultSummary": "## 契约与验收基线\n\n| 项目 | 约定 |\n|---|---|\n| **输入** | `fetchPage({cursor, signal})`；`{ maxPages, signal }`，其中 `maxPages` 为正安全整数 |\n| **输出** | 按页面顺序、页内顺序展平后的数组，SameValueZero 去重（首次出现优先） |\n| **分页终止** | `nextCursor === null` 正常结束；调用达 `maxPages` 次后仍有 `nextCursor` 则抛 `Error('PAGE_LIMIT')` |\n| **",
+            "deliverables": [
+              {
+                "deliverableId": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "version": 1,
+                "required": true,
+                "previousVersionId": "",
+                "artifactRef": "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary",
+                "artifactRefs": [
+                  "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary"
+                ],
+                "executionRef": "agent-run:expert_task-mtqto4ck-hu345_mtqto552",
+                "kind": "deliverable",
+                "source": "expert",
+                "sequence": 1,
+                "evidenceStatus": "verified",
+                "acceptanceStatus": "pending",
+                "comments": [],
+                "createdAt": "2026-09-07T05:52:04.291Z"
+              }
+            ],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:52.676Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.314Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.435Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.746Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:51:41.455Z"
+              },
+              {
+                "id": "event-9",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "回答生成完成",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:04.033Z"
+              },
+              {
+                "id": "event-10",
+                "type": "deliverable_ready",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "专业答复",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:04.312Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.2.0",
+                "hash": "18bcf4d4e7195931"
+              },
+              "skills": [
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": true,
+              "rewritten": false,
+              "initialPassed": true,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T05:52:04.312Z"
+          }
+        },
+        {
+          "action": "accept",
+          "result": {
+            "ok": true,
+            "task": {
+              "taskVersion": 2,
+              "activityContractVersion": 1,
+              "id": "task-mtqto4ck-hu345",
+              "projectId": null,
+              "projectSnapshot": null,
+              "kind": "expert",
+              "title": "[RQA61 SE10] 完成后重开并保持既有约束",
+              "expertId": "software-engineer",
+              "expertName": "software-engineer",
+              "workflowId": "",
+              "workflowName": "",
+              "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+              "brief": {
+                "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+                "plan": null,
+                "requiresMaterials": false,
+                "requiredInputs": [],
+                "materials": [
+                  {
+                    "id": "provided-context",
+                    "type": "text",
+                    "title": "冻结验收题",
+                    "ref": "",
+                    "content": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。"
+                  }
+                ],
+                "deliverables": [
+                  {
+                    "id": "primary",
+                    "title": "专业答复",
+                    "type": "answer",
+                    "required": true,
+                    "acceptanceCriteria": [],
+                    "requiredTools": [],
+                    "requiredSkills": [
+                      "software-change-verification"
+                    ],
+                    "requiredConnectorIds": [],
+                    "requiredEvidence": [],
+                    "requiredArtifacts": [],
+                    "minArtifacts": 0,
+                    "completionConditions": []
+                  }
+                ],
+                "constraints": [
+                  "不得执行外部写入。",
+                  "不得调用工具。",
+                  "不得声称已运行测试。"
+                ],
+                "dueAt": ""
+              },
+              "assignmentSnapshot": {
+                "agentId": "software-engineer",
+                "agentVersion": "2.2.0",
+                "agentHash": "18bcf4d4e7195931",
+                "hashes": {
+                  "expert": "18bcf4d4e7195931",
+                  "skills": {
+                    "code-review": "17d5214576de2834",
+                    "software-change-verification": "829c8afc1a1e3a6a"
+                  },
+                  "connectors": {}
+                },
+                "profileId": "",
+                "profileVersion": "",
+                "profileHash": "",
+                "snapshotRef": "expert-snapshot:wb-expert-task-mtqto4ck-hu345",
+                "bindings": {
+                  "skills": [
+                    "software-change-verification",
+                    "code-review"
+                  ],
+                  "connectors": []
+                },
+                "permissions": {
+                  "connectors": {
+                    "allowedConnectorIds": []
+                  },
+                  "tools": {
+                    "allowlist": []
+                  },
+                  "network": false,
+                  "write": false,
+                  "externalWrite": false
+                },
+                "plan": null,
+                "sop": {
+                  "version": "2.2.0",
+                  "hash": "18bcf4d4e7195931"
+                }
+              },
+              "visibility": "private",
+              "participants": [],
+              "events": [
+                {
+                  "id": "event-1",
+                  "type": "created",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 1,
+                  "summary": "已确认委托单并开始预检",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:52.676Z"
+                },
+                {
+                  "id": "event-2",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 2,
+                  "summary": "预检通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.314Z"
+                },
+                {
+                  "id": "event-3",
+                  "type": "preflight_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 3,
+                  "summary": "正在检查技能、连接器和工具权限",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.435Z"
+                },
+                {
+                  "id": "event-4",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 4,
+                  "summary": "执行条件检查通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-5",
+                  "type": "task_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 5,
+                  "summary": "专家已开始执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-6",
+                  "type": "sop_applied",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 6,
+                  "summary": "已加载专家 SOP，按最小必要路径执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-7",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 7,
+                  "summary": "正在准备上下文…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.746Z"
+                },
+                {
+                  "id": "event-8",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 8,
+                  "summary": "正在整理最终答复…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:51:41.455Z"
+                },
+                {
+                  "id": "event-9",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 9,
+                  "summary": "回答生成完成",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:52:04.033Z"
+                },
+                {
+                  "id": "event-10",
+                  "type": "deliverable_ready",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 10,
+                  "summary": "专业答复",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:52:04.312Z"
+                },
+                {
+                  "id": "review-mtqtpopv",
+                  "type": "deliverable_accepted",
+                  "kind": "review",
+                  "source": "system",
+                  "sequence": 11,
+                  "summary": "初次验收通过，用于验证完成后重开",
+                  "actorId": "user",
+                  "createdAt": "2026-09-07T05:52:05.731Z"
+                }
+              ],
+              "attention": null,
+              "progress": {
+                "phase": "review",
+                "label": "成果已生成，等待验收",
+                "detail": "",
+                "startedAt": "2026-09-07T05:50:53.415Z",
+                "updatedAt": "2026-09-07T05:52:04.291Z",
+                "heartbeatAt": "2026-09-07T05:52:04.291Z"
+              },
+              "inputQueue": null,
+              "deliverables": [
+                {
+                  "deliverableId": "primary",
+                  "title": "专业答复",
+                  "type": "answer",
+                  "version": 1,
+                  "required": true,
+                  "previousVersionId": "",
+                  "artifactRef": "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary",
+                  "artifactRefs": [
+                    "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary"
+                  ],
+                  "executionRef": "agent-run:expert_task-mtqto4ck-hu345_mtqto552",
+                  "kind": "deliverable",
+                  "source": "expert",
+                  "sequence": 1,
+                  "evidenceStatus": "verified",
+                  "acceptanceStatus": "accepted",
+                  "comments": [
+                    {
+                      "id": "comment-mtqtpopv",
+                      "body": "初次验收通过，用于验证完成后重开",
+                      "authorId": "user",
+                      "createdAt": "2026-09-07T05:52:05.731Z"
+                    }
+                  ],
+                  "createdAt": "2026-09-07T05:52:04.291Z"
+                }
+              ],
+              "executionEvidence": [
+                {
+                  "runId": "expert_task-mtqto4ck-hu345_mtqto552",
+                  "deliverableId": "primary",
+                  "gateStatus": "verified",
+                  "verificationPassed": true,
+                  "verificationDiagnostics": {
+                    "version": 1,
+                    "runId": "expert_task-mtqto4ck-hu345_mtqto552",
+                    "taskId": "task-mtqto4ck-hu345",
+                    "candidateHash": "1be52af54b8a5f35bdefe666fcc7ef3073eadec057df67a64c045d5ee419b581",
+                    "candidateChars": 5951,
+                    "materialSnapshotHash": "1a5678c6c202234962e78fa4fb178e7b4a17c2376245faeff32ebc157ceca9c2",
+                    "materialCount": 1,
+                    "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+                    "fieldChecks": [],
+                    "fieldCheckCount": 0
+                  },
+                  "qualificationContext": {
+                    "contractVersion": 1,
+                    "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+                    "complete": true,
+                    "missing": [],
+                    "agent": {
+                      "id": "software-engineer",
+                      "version": "2.2.0",
+                      "hash": "18bcf4d4e7195931"
+                    },
+                    "skills": [
+                      {
+                        "id": "code-review",
+                        "hash": "17d5214576de2834"
+                      },
+                      {
+                        "id": "software-change-verification",
+                        "hash": "829c8afc1a1e3a6a"
+                      }
+                    ],
+                    "connectors": [],
+                    "model": {
+                      "provider": "dashscope",
+                      "id": "qwen3.8-max",
+                      "requestedId": "qwen3.8-max",
+                      "label": "Qwen 3.8 Max",
+                      "autoRouted": false
+                    }
+                  },
+                  "qualityGuardrail": {
+                    "mode": "same_model_guardrail",
+                    "enabled": true,
+                    "passed": true,
+                    "rewritten": false,
+                    "initialPassed": true,
+                    "finalPassed": false
+                  },
+                  "toolCalls": [],
+                  "evidence": [],
+                  "violations": [],
+                  "createdAt": "2026-09-07T05:52:04.196Z"
+                }
+              ],
+              "resultSummary": "## 契约与验收基线\n\n| 项目 | 约定 |\n|---|---|\n| **输入** | `fetchPage({cursor, signal})`；`{ maxPages, signal }`，其中 `maxPages` 为正安全整数 |\n| **输出** | 按页面顺序、页内顺序展平后的数组，SameValueZero 去重（首次出现优先） |\n| **分页终止** | `nextCursor === null` 正常结束；调用达 `maxPages` 次后仍有 `nextCursor` 则抛 `Error('PAGE_LIMIT')` |\n| **",
+              "status": "completed",
+              "execRef": {
+                "kind": "session",
+                "id": "wb-expert-task-mtqto4ck-hu345"
+              },
+              "taskRef": null,
+              "knowledgeRefs": [],
+              "pinned": false,
+              "schedule": {
+                "type": "daily",
+                "dailyTime": "09:00",
+                "intervalValue": 24,
+                "intervalUnit": "hour",
+                "onceAt": "",
+                "cronExpr": ""
+              },
+              "scheduleEnabled": false,
+              "scheduleLabel": "",
+              "nextRunAt": "",
+              "lastScheduledAt": "",
+              "scheduleParentId": "",
+              "legacySchedule": {
+                "scheduleEnabled": false,
+                "schedule": {
+                  "type": "daily",
+                  "dailyTime": "09:00",
+                  "intervalValue": 24,
+                  "intervalUnit": "hour",
+                  "onceAt": "",
+                  "cronExpr": ""
+                },
+                "scheduleLabel": ""
+              },
+              "createdAt": "2026-09-07T05:50:52.676Z",
+              "updatedAt": "2026-09-07T05:52:05.759Z"
+            },
+            "started": false
+          }
+        },
+        {
+          "action": "reopen",
+          "result": {
+            "ok": true,
+            "task": {
+              "taskVersion": 2,
+              "activityContractVersion": 1,
+              "id": "task-mtqto4ck-hu345",
+              "projectId": null,
+              "projectSnapshot": null,
+              "kind": "expert",
+              "title": "[RQA61 SE10] 完成后重开并保持既有约束",
+              "expertId": "software-engineer",
+              "expertName": "software-engineer",
+              "workflowId": "",
+              "workflowName": "",
+              "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+              "brief": {
+                "goal": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
+                "plan": null,
+                "requiresMaterials": false,
+                "requiredInputs": [],
+                "materials": [
+                  {
+                    "id": "provided-context",
+                    "type": "text",
+                    "title": "冻结验收题",
+                    "ref": "",
+                    "content": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。"
+                  }
+                ],
+                "deliverables": [
+                  {
+                    "id": "primary",
+                    "title": "专业答复",
+                    "type": "answer",
+                    "required": true,
+                    "acceptanceCriteria": [],
+                    "requiredTools": [],
+                    "requiredSkills": [
+                      "software-change-verification"
+                    ],
+                    "requiredConnectorIds": [],
+                    "requiredEvidence": [],
+                    "requiredArtifacts": [],
+                    "minArtifacts": 0,
+                    "completionConditions": []
+                  }
+                ],
+                "constraints": [
+                  "不得执行外部写入。",
+                  "不得调用工具。",
+                  "不得声称已运行测试。"
+                ],
+                "dueAt": ""
+              },
+              "assignmentSnapshot": {
+                "agentId": "software-engineer",
+                "agentVersion": "2.2.0",
+                "agentHash": "18bcf4d4e7195931",
+                "hashes": {
+                  "expert": "18bcf4d4e7195931",
+                  "skills": {
+                    "code-review": "17d5214576de2834",
+                    "software-change-verification": "829c8afc1a1e3a6a"
+                  },
+                  "connectors": {}
+                },
+                "profileId": "",
+                "profileVersion": "",
+                "profileHash": "",
+                "snapshotRef": "expert-snapshot:wb-expert-task-mtqto4ck-hu345",
+                "bindings": {
+                  "skills": [
+                    "software-change-verification",
+                    "code-review"
+                  ],
+                  "connectors": []
+                },
+                "permissions": {
+                  "connectors": {
+                    "allowedConnectorIds": []
+                  },
+                  "tools": {
+                    "allowlist": []
+                  },
+                  "network": false,
+                  "write": false,
+                  "externalWrite": false
+                },
+                "plan": null,
+                "sop": {
+                  "version": "2.2.0",
+                  "hash": "18bcf4d4e7195931"
+                }
+              },
+              "visibility": "private",
+              "participants": [],
+              "events": [
+                {
+                  "id": "event-1",
+                  "type": "created",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 1,
+                  "summary": "已确认委托单并开始预检",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:52.676Z"
+                },
+                {
+                  "id": "event-2",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 2,
+                  "summary": "预检通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.314Z"
+                },
+                {
+                  "id": "event-3",
+                  "type": "preflight_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 3,
+                  "summary": "正在检查技能、连接器和工具权限",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.435Z"
+                },
+                {
+                  "id": "event-4",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 4,
+                  "summary": "执行条件检查通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-5",
+                  "type": "task_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 5,
+                  "summary": "专家已开始执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-6",
+                  "type": "sop_applied",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 6,
+                  "summary": "已加载专家 SOP，按最小必要路径执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.677Z"
+                },
+                {
+                  "id": "event-7",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 7,
+                  "summary": "正在准备上下文…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:50:53.746Z"
+                },
+                {
+                  "id": "event-8",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 8,
+                  "summary": "正在整理最终答复…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:51:41.455Z"
+                },
+                {
+                  "id": "event-9",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 9,
+                  "summary": "回答生成完成",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:52:04.033Z"
+                },
+                {
+                  "id": "event-10",
+                  "type": "deliverable_ready",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 10,
+                  "summary": "专业答复",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:52:04.312Z"
+                },
+                {
+                  "id": "review-mtqtpopv",
+                  "type": "deliverable_accepted",
+                  "kind": "review",
+                  "source": "system",
+                  "sequence": 11,
+                  "summary": "初次验收通过，用于验证完成后重开",
+                  "actorId": "user",
+                  "createdAt": "2026-09-07T05:52:05.731Z"
+                },
+                {
+                  "id": "review-mtqtpos3",
+                  "type": "changes_requested",
+                  "kind": "review",
+                  "source": "system",
+                  "sequence": 12,
+                  "summary": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+                  "actorId": "user",
+                  "createdAt": "2026-09-07T05:52:05.811Z"
+                }
+              ],
+              "attention": null,
+              "progress": {
+                "phase": "preflight",
+                "label": "正在检查执行条件",
+                "detail": "",
+                "startedAt": "2026-09-07T05:52:05.856Z",
+                "updatedAt": "2026-09-07T05:52:05.856Z",
+                "heartbeatAt": "2026-09-07T05:52:05.856Z"
+              },
+              "inputQueue": null,
+              "deliverables": [
+                {
+                  "deliverableId": "primary",
+                  "title": "专业答复",
+                  "type": "answer",
+                  "version": 1,
+                  "required": true,
+                  "previousVersionId": "",
+                  "artifactRef": "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary",
+                  "artifactRefs": [
+                    "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary"
+                  ],
+                  "executionRef": "agent-run:expert_task-mtqto4ck-hu345_mtqto552",
+                  "kind": "deliverable",
+                  "source": "expert",
+                  "sequence": 1,
+                  "evidenceStatus": "verified",
+                  "acceptanceStatus": "changes_requested",
+                  "comments": [
+                    {
+                      "id": "comment-mtqtpopv",
+                      "body": "初次验收通过，用于验证完成后重开",
+                      "authorId": "user",
+                      "createdAt": "2026-09-07T05:52:05.731Z"
+                    },
+                    {
+                      "id": "comment-mtqtpos3",
+                      "body": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+                      "authorId": "user",
+                      "createdAt": "2026-09-07T05:52:05.811Z"
+                    }
+                  ],
+                  "createdAt": "2026-09-07T05:52:04.291Z"
+                }
+              ],
+              "executionEvidence": [
+                {
+                  "runId": "expert_task-mtqto4ck-hu345_mtqto552",
+                  "deliverableId": "primary",
+                  "gateStatus": "verified",
+                  "verificationPassed": true,
+                  "verificationDiagnostics": {
+                    "version": 1,
+                    "runId": "expert_task-mtqto4ck-hu345_mtqto552",
+                    "taskId": "task-mtqto4ck-hu345",
+                    "candidateHash": "1be52af54b8a5f35bdefe666fcc7ef3073eadec057df67a64c045d5ee419b581",
+                    "candidateChars": 5951,
+                    "materialSnapshotHash": "1a5678c6c202234962e78fa4fb178e7b4a17c2376245faeff32ebc157ceca9c2",
+                    "materialCount": 1,
+                    "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+                    "fieldChecks": [],
+                    "fieldCheckCount": 0
+                  },
+                  "qualificationContext": {
+                    "contractVersion": 1,
+                    "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+                    "complete": true,
+                    "missing": [],
+                    "agent": {
+                      "id": "software-engineer",
+                      "version": "2.2.0",
+                      "hash": "18bcf4d4e7195931"
+                    },
+                    "skills": [
+                      {
+                        "id": "code-review",
+                        "hash": "17d5214576de2834"
+                      },
+                      {
+                        "id": "software-change-verification",
+                        "hash": "829c8afc1a1e3a6a"
+                      }
+                    ],
+                    "connectors": [],
+                    "model": {
+                      "provider": "dashscope",
+                      "id": "qwen3.8-max",
+                      "requestedId": "qwen3.8-max",
+                      "label": "Qwen 3.8 Max",
+                      "autoRouted": false
+                    }
+                  },
+                  "qualityGuardrail": {
+                    "mode": "same_model_guardrail",
+                    "enabled": true,
+                    "passed": true,
+                    "rewritten": false,
+                    "initialPassed": true,
+                    "finalPassed": false
+                  },
+                  "toolCalls": [],
+                  "evidence": [],
+                  "violations": [],
+                  "createdAt": "2026-09-07T05:52:04.196Z"
+                }
+              ],
+              "resultSummary": "## 契约与验收基线\n\n| 项目 | 约定 |\n|---|---|\n| **输入** | `fetchPage({cursor, signal})`；`{ maxPages, signal }`，其中 `maxPages` 为正安全整数 |\n| **输出** | 按页面顺序、页内顺序展平后的数组，SameValueZero 去重（首次出现优先） |\n| **分页终止** | `nextCursor === null` 正常结束；调用达 `maxPages` 次后仍有 `nextCursor` 则抛 `Error('PAGE_LIMIT')` |\n| **",
+              "status": "starting",
+              "execRef": {
+                "kind": "session",
+                "id": "wb-expert-task-mtqto4ck-hu345"
+              },
+              "taskRef": null,
+              "knowledgeRefs": [],
+              "pinned": false,
+              "schedule": {
+                "type": "daily",
+                "dailyTime": "09:00",
+                "intervalValue": 24,
+                "intervalUnit": "hour",
+                "onceAt": "",
+                "cronExpr": ""
+              },
+              "scheduleEnabled": false,
+              "scheduleLabel": "",
+              "nextRunAt": "",
+              "lastScheduledAt": "",
+              "scheduleParentId": "",
+              "legacySchedule": {
+                "scheduleEnabled": false,
+                "schedule": {
+                  "type": "daily",
+                  "dailyTime": "09:00",
+                  "intervalValue": 24,
+                  "intervalUnit": "hour",
+                  "onceAt": "",
+                  "cronExpr": ""
+                },
+                "scheduleLabel": ""
+              },
+              "createdAt": "2026-09-07T05:50:52.676Z",
+              "updatedAt": "2026-09-07T05:52:05.881Z"
+            },
+            "started": true
+          }
+        },
+        {
+          "action": "reopened_delivery",
+          "task": {
+            "id": "task-mtqto4ck-hu345",
+            "status": "failed",
+            "resultSummary": "## 契约与验收基线\n\n| 项目 | 约定 |\n|---|---|\n| **输入** | `fetchPage({cursor, signal})`；`{ maxPages, signal }`，其中 `maxPages` 为正安全整数 |\n| **输出** | 按页面顺序、页内顺序展平后的数组，SameValueZero 去重（首次出现优先） |\n| **分页终止** | `nextCursor === null` 正常结束；调用达 `maxPages` 次后仍有 `nextCursor` 则抛 `Error('PAGE_LIMIT')` |\n| **",
+            "deliverables": [
+              {
+                "deliverableId": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "version": 1,
+                "required": true,
+                "previousVersionId": "",
+                "artifactRef": "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary",
+                "artifactRefs": [
+                  "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary"
+                ],
+                "executionRef": "agent-run:expert_task-mtqto4ck-hu345_mtqto552",
+                "kind": "deliverable",
+                "source": "expert",
+                "sequence": 1,
+                "evidenceStatus": "verified",
+                "acceptanceStatus": "changes_requested",
+                "comments": [
+                  {
+                    "id": "comment-mtqtpopv",
+                    "body": "初次验收通过，用于验证完成后重开",
+                    "authorId": "user",
+                    "createdAt": "2026-09-07T05:52:05.731Z"
+                  },
+                  {
+                    "id": "comment-mtqtpos3",
+                    "body": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+                    "authorId": "user",
+                    "createdAt": "2026-09-07T05:52:05.811Z"
+                  }
+                ],
+                "createdAt": "2026-09-07T05:52:04.291Z"
+              }
+            ],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:52.676Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.314Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.435Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.677Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:50:53.746Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:51:41.455Z"
+              },
+              {
+                "id": "event-9",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "回答生成完成",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:04.033Z"
+              },
+              {
+                "id": "event-10",
+                "type": "deliverable_ready",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "专业答复",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:04.312Z"
+              },
+              {
+                "id": "review-mtqtpopv",
+                "type": "deliverable_accepted",
+                "kind": "review",
+                "source": "system",
+                "sequence": 11,
+                "summary": "初次验收通过，用于验证完成后重开",
+                "actorId": "user",
+                "createdAt": "2026-09-07T05:52:05.731Z"
+              },
+              {
+                "id": "review-mtqtpos3",
+                "type": "changes_requested",
+                "kind": "review",
+                "source": "system",
+                "sequence": 12,
+                "summary": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+                "actorId": "user",
+                "createdAt": "2026-09-07T05:52:05.811Z"
+              },
+              {
+                "id": "event-13",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 13,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:05.948Z"
+              },
+              {
+                "id": "event-14",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 14,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:06.189Z"
+              },
+              {
+                "id": "event-15",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 15,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:06.189Z"
+              },
+              {
+                "id": "event-16",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 16,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:06.189Z"
+              },
+              {
+                "id": "event-17",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 17,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:06.255Z"
+              },
+              {
+                "id": "event-18",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 18,
+                "summary": "正在整理最终答复…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:52:53.966Z"
+              },
+              {
+                "id": "event-19",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 19,
+                "summary": "生成失败",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:54:39.106Z"
+              },
+              {
+                "id": "event-20",
+                "type": "failed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 20,
+                "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:54:39.230Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.2.0",
+                "hash": "18bcf4d4e7195931"
+              },
+              "skills": [
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": true,
+              "rewritten": false,
+              "initialPassed": true,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T05:54:39.230Z"
+          }
+        }
+      ],
+      "final": {
+        "id": "task-mtqto4ck-hu345",
+        "status": "failed",
+        "resultSummary": "## 契约与验收基线\n\n| 项目 | 约定 |\n|---|---|\n| **输入** | `fetchPage({cursor, signal})`；`{ maxPages, signal }`，其中 `maxPages` 为正安全整数 |\n| **输出** | 按页面顺序、页内顺序展平后的数组，SameValueZero 去重（首次出现优先） |\n| **分页终止** | `nextCursor === null` 正常结束；调用达 `maxPages` 次后仍有 `nextCursor` 则抛 `Error('PAGE_LIMIT')` |\n| **",
+        "deliverables": [
+          {
+            "deliverableId": "primary",
+            "title": "专业答复",
+            "type": "answer",
+            "version": 1,
+            "required": true,
+            "previousVersionId": "",
+            "artifactRef": "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary",
+            "artifactRefs": [
+              "wb-expert-task-mtqto4ck-hu345#deliverable_expert_task-mtqto4ck-hu345_mtqto552_primary"
+            ],
+            "executionRef": "agent-run:expert_task-mtqto4ck-hu345_mtqto552",
+            "kind": "deliverable",
+            "source": "expert",
+            "sequence": 1,
+            "evidenceStatus": "verified",
+            "acceptanceStatus": "changes_requested",
+            "comments": [
+              {
+                "id": "comment-mtqtpopv",
+                "body": "初次验收通过，用于验证完成后重开",
+                "authorId": "user",
+                "createdAt": "2026-09-07T05:52:05.731Z"
+              },
+              {
+                "id": "comment-mtqtpos3",
+                "body": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+                "authorId": "user",
+                "createdAt": "2026-09-07T05:52:05.811Z"
+              }
+            ],
+            "createdAt": "2026-09-07T05:52:04.291Z"
+          }
+        ],
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:52.676Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.314Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.435Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.677Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.677Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.677Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:50:53.746Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:51:41.455Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "回答生成完成",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:04.033Z"
+          },
+          {
+            "id": "event-10",
+            "type": "deliverable_ready",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "专业答复",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:04.312Z"
+          },
+          {
+            "id": "review-mtqtpopv",
+            "type": "deliverable_accepted",
+            "kind": "review",
+            "source": "system",
+            "sequence": 11,
+            "summary": "初次验收通过，用于验证完成后重开",
+            "actorId": "user",
+            "createdAt": "2026-09-07T05:52:05.731Z"
+          },
+          {
+            "id": "review-mtqtpos3",
+            "type": "changes_requested",
+            "kind": "review",
+            "source": "system",
+            "sequence": 12,
+            "summary": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
+            "actorId": "user",
+            "createdAt": "2026-09-07T05:52:05.811Z"
+          },
+          {
+            "id": "event-13",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 13,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:05.948Z"
+          },
+          {
+            "id": "event-14",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 14,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:06.189Z"
+          },
+          {
+            "id": "event-15",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 15,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:06.189Z"
+          },
+          {
+            "id": "event-16",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 16,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:06.189Z"
+          },
+          {
+            "id": "event-17",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 17,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:06.255Z"
+          },
+          {
+            "id": "event-18",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 18,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:52:53.966Z"
+          },
+          {
+            "id": "event-19",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 19,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:54:39.106Z"
+          },
+          {
+            "id": "event-20",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 20,
+            "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:54:39.230Z"
+          }
+        ],
+        "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.2.0",
+            "hash": "18bcf4d4e7195931"
+          },
+          "skills": [
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": true,
+          "passed": true,
+          "rewritten": false,
+          "initialPassed": true,
+          "finalPassed": false
+        },
+        "updatedAt": "2026-09-07T05:54:39.230Z"
+      }
+    }
+  ]
+}

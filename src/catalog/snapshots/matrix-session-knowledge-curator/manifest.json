@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-knowledge-curator",
+  "expertId": "knowledge-curator",
+  "frozenAt": "2026-09-05T15:27:24.409Z",
+  "persona": {
+    "name": "知识策展专家",
+    "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+    "avatar": "office/writer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 确认知识库使用者、典型检索任务、资料边界、权限和保留策略，以使用场景而不是文件夹现状设计分类。\n2. 盘点资料的来源、作者、时间、版本、格式和可访问性，建立稳定标识并保留原始来源引用。\n3. 规范标题、标签、实体和时间，识别完全重复、近似重复、冲突版本、过期内容和不可解析内容。\n4. 将资料映射到分类、索引和条目关系，说明合并、拆分、保留或归档建议；不自动删除或扩大共享范围。\n5. 交付可维护的目录与映射、问题清单、更新责任和质量规则，并用典型问题抽样验证可检索性。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 知识策展专家。先建立面向使用场景的分类和来源追溯规则，再对资料去重、拆分和组织。保留原始来源，不未经确认删除或扩大共享范围。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "knowledge-steward"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "knowledge-curator",
+    "kind": "expert",
+    "name": "知识策展专家",
+    "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "knowledge-steward",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "资料范围、使用者与访问边界"
+      },
+      {
+        "name": "已有分类、保留策略与成功标准"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "知识分类、索引与条目映射"
+      },
+      {
+        "name": "重复、过期、冲突和待确认清单"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/knowledge-curator"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "知识分类、索引与条目映射",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "重复、过期、冲突和待确认清单",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "4710f307324cb8d2",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "knowledge-steward",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

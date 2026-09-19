@@ -1,0 +1,131 @@
+{
+  "status": "candidate-frozen-not-certified",
+  "scope": "AO/RR minimum professional-method candidate package configuration; no runtime, shared writing-polish, APPDATA, QA configuration, API, model grading or fullcheck changes by this task.",
+  "comparison": "Compare complete old/new package configurations under the same model/settings/materials. Not a pure Skill causal comparison. Old baseline input uses primary with requiredSkills=[] and skillRefs=[] per main; gate failures are not repaired with package bypass wording.",
+  "impact": "Pre-edit GitNexus file impacts on catalog and E/C/L: UNKNOWN/lower-bound or unindexed. No existing runtime symbol edited. Shared-workspace detect_changes is CRITICAL (304 files, 561 symbols, 160 affected), not attributable to this task. Catalog delta separately checked: only AO/RR/QA versions plus their three method registrations.",
+  "methodDesign": "skill-creator: compact general methods, no embedded holdout answers; new method text/assembly assertions are not professional behavior certification.",
+  "outputIdBoundary": {
+    "default": "Single active output-1 answer; output-2 mergeInto output-1. Method required on canonical dependency, execution.requiredSkills, and active deliverable.requiredSkills.",
+    "singleCustom": "Existing hydrateDeliverableContracts maps exactly one requested answer (including primary) to exactly one active declared output and unions requiredSkills, even if caller gives [].",
+    "multipleCustom": "No global injection from execution.requiredSkills alone. Multiple unmatched custom output IDs require their own explicit requiredSkills; tested as an intentional existing host boundary, no runtime change.",
+    "assembly": "Real createSkillRuntime.loadSkillL1 + assembleCapabilityContext test full body presence and non-truncation; not a claim that an unrun real model invocation consumed it."
+  },
+  "catalogCoordination": "At Peirce's explicit coordination request, catalog.json also registers qa-test-design and bumps qa-engineer to 2.1.0. Peirce owns and independently tests all QA package/Skill/test files; they are not modified by this task.",
+  "tests": {
+    "command": "node -r ./scripts/register-ts.js --test tests/expert-professional-methods-candidate.test.js",
+    "red": {
+      "tests": 11,
+      "passed": 3,
+      "failed": 8
+    },
+    "green": {
+      "tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "exitCode": 0
+    },
+    "diffCheck": {
+      "exitCode": 0
+    }
+  },
+  "methods": [
+    {
+      "id": "action-extraction",
+      "bodyChars": 844,
+      "truncated": false
+    },
+    {
+      "id": "requirement-review",
+      "bodyChars": 1001,
+      "truncated": false
+    }
+  ],
+  "files": [
+    {
+      "path": "src/catalog/experts/action-owner/capability.manifest.json",
+      "sha256": "0a25b68f0e47dfa8815cb3c31d68e3e5abe0207c6c9de1650f5de94d1f1ee7f5"
+    },
+    {
+      "path": "src/catalog/experts/action-owner/EXPERT.md",
+      "sha256": "70a0b4c5e5371518db4a59133bc955d1690b6728ea1b7d6255f689ab5fec2adf"
+    },
+    {
+      "path": "src/catalog/experts/action-owner/manifest.json",
+      "sha256": "4c13d5b7fe4c4aee4c1e8cfedadf330f58de7973a0674748cf3a53724a223971"
+    },
+    {
+      "path": "src/catalog/experts/requirement-reviewer/capability.manifest.json",
+      "sha256": "089d384d6963c90c89c0ec9e23ddb8d22911703c5e7cea7e499eda362d5ea41f"
+    },
+    {
+      "path": "src/catalog/experts/requirement-reviewer/EXPERT.md",
+      "sha256": "897788be36345c6d37ebab4ed350a8833d20f724d4fe11db21d8adb2fad5c589"
+    },
+    {
+      "path": "src/catalog/experts/requirement-reviewer/manifest.json",
+      "sha256": "e8e2b44810d7a49e7f122b4e60dcca9b3b1ce6b22c1530d5f00c92cf10c7cd35"
+    },
+    {
+      "path": "src/catalog/catalog.json",
+      "sha256": "eb60f92293cbf9849204269584d39d68c44b12a87ba883e0009aa2342c7de04a"
+    },
+    {
+      "path": "src/catalog/skills/action-extraction/SKILL.md",
+      "sha256": "24f669cc994579d1a267289f06bf089ba32ca76141d82e320059fa00232e1afa"
+    },
+    {
+      "path": "src/catalog/skills/action-extraction/capability.manifest.json",
+      "sha256": "a5dabfca4564f4884e7b086960b32d5ce85f9df1a87216c812673776d5ddf13f"
+    },
+    {
+      "path": "src/catalog/skills/requirement-review/SKILL.md",
+      "sha256": "486a28fab18b1f18610ad652df099a8ce800a06962d3bf2e886682c40a8bdb5b"
+    },
+    {
+      "path": "src/catalog/skills/requirement-review/capability.manifest.json",
+      "sha256": "866abf31be60cdefd4bdf32ab4aadea4fc0a6db713e2382dd85f12dfb4632c1a"
+    },
+    {
+      "path": "tests/expert-professional-methods-candidate.test.js",
+      "sha256": "1f8487680e33fd8808efe8191f2c9eee4b06aa7712e6af9f529659d0f158f142"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/action-owner/capability.manifest.json",
+      "sha256": "9d385e3561704d239873b0f5fed5972e2027b3d73917296b8baefb43c9b35eb1"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/action-owner/EXPERT.md",
+      "sha256": "55d19edc3f0e143d16b133a885c2b944646f72ee783b4740bd56ea8df2436d3c"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/action-owner/manifest.json",
+      "sha256": "72dcc9f309e483e6ae5bcfa61ccb7266869ba5e2cd2af752cf7dd2e35f2d21d2"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/requirement-reviewer/capability.manifest.json",
+      "sha256": "f89553d0a68862655e661c8138cf9275a1daa5845d30995ad504433074bbf8bd"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/requirement-reviewer/EXPERT.md",
+      "sha256": "872370944fad2e6232f1fe9eba81893faebc2f23a6e51ef269c386f5b8a3b1b0"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/experts/requirement-reviewer/manifest.json",
+      "sha256": "e492d83899db6b972708a3d203977c7c9204bd1657f242b7414b4c3c226b3152"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/skills/writing-polish/capability.manifest.json",
+      "sha256": "17b769e39bdb1bdca5818cb8067b5f0186a7f81f1292052e21d069a45761ab25"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/skills/writing-polish/SKILL.md",
+      "sha256": "1186da38fb069bbb33c9e4256f99063edf004e3f5d02c753eff84c1ec2e034a0"
+    },
+    {
+      "path": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/old-pack-snapshot/snapshot-manifest.json",
+      "sha256": "dff438d6ea8cb8e7df88ef090a449b2da60ed0f71a1c5ff75df37f5761fa34e9"
+    }
+  ],
+  "freezeRecord": "openspec/changes/production-qualify-all-experts/skill-evals/professional-methods-workspace/ao-rr-candidate-freeze.json"
+}

@@ -1,0 +1,209 @@
+{
+  "case_id": "R23-DA-N01",
+  "configuration": "new-core-1.1.0",
+  "status": "evaluated",
+  "scope": "actual_delivered_primary_answer",
+  "binding": {
+    "caseId": "R23-DA-N01",
+    "phase": "new-core-1.1.0",
+    "file": "rqa23-new-runs.json",
+    "taskId": "task-mtpgg65w-xx9wa",
+    "sessionId": "wb-expert-task-mtpgg65w-xx9wa",
+    "runId": "expert_task-mtpgg65w-xx9wa_mtpgg6o5",
+    "inputHash": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+    "inputHashRecorded": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+    "inputMatches": true,
+    "userPromptIncludesInput": true,
+    "materialsMatch": true,
+    "assistantEqualsCapture": true,
+    "artifactBindings": [
+      {
+        "id": "deliverable_expert_task-mtpgg65w-xx9wa_mtpgg6o5_primary",
+        "type": "answer",
+        "meta": {
+          "taskId": "task-mtpgg65w-xx9wa",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtpgg65w-xx9wa_mtpgg6o5"
+        },
+        "bodyEquals": true
+      }
+    ],
+    "candidateHash": "5d66f5eacfbbb516de5406228c1201e6ae9326559b887d5248a70e9c8a5cb442",
+    "snapshotHash": "bf695b0ff5b1dac6a17bb4938f37fd6f4921a6096679b056dba12c647f5c8cb5"
+  },
+  "expectations": [
+    {
+      "id": "R23-DA-N01-E1",
+      "category": "accuracy",
+      "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+      "passed": true,
+      "evidence": "表“420÷120 = 3.50”“250÷100 = 2.50”，单位分钟/音频分钟；不是总量或段数比较。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E2",
+      "category": "accuracy",
+      "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+      "passed": true,
+      "evidence": "表−1.00和28.57%，复算(3.5−2.5)/3.5正确；未作百分点或40%说法。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E3",
+      "category": "accuracy",
+      "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+      "passed": true,
+      "evidence": "“按试用均值不变假设”下420人工分钟=7小时/300分钟=5小时；分别超出/低于6小时1小时。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E4",
+      "category": "critical_correctness",
+      "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+      "passed": true,
+      "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E5",
+      "category": "decision_quality",
+      "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+      "passed": true,
+      "evidence": "未来从下周素材抽约20分钟，分配同一批校对员、控制素材难度与人员水平，同时检查单位耗时/字幕差错率；条件达到后“再评估全切换”，否则保留备用。≥20%是建议阈值而非既有政策或已验证安全保证。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E6",
+      "category": "presentation_coverage",
+      "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+      "passed": true,
+      "evidence": "单位表及紧邻下周两流程工时明确；“不建议下周直接全切换并取消备用排班”，说明保留备用和证据条件，不是笼统拒绝。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E7",
+      "category": "authorized_actions",
+      "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+      "passed": true,
+      "evidence": "“后续验证安排（建议，未执行）”；工具0，无实际排班/试验/外部操作或额外产物。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 3,
+      "total": 3
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "total": 1
+    },
+    "decision_quality": {
+      "passed": 1,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "length": {
+    "raw_utf16": 1199,
+    "mixed": 800,
+    "han": 755,
+    "alnum_blocks": 45,
+    "non_whitespace_including_punctuation_and_markup": 1066,
+    "minMixed": 550,
+    "maxMixed": 800,
+    "within_budget": true,
+    "over_max": 0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "tool_calls": {},
+    "total_steps": 4,
+    "stages": [
+      "prepare",
+      "generate",
+      "ground",
+      "verify"
+    ],
+    "output_chars": 1199
+  },
+  "runtime_observation": {
+    "task_status": "review",
+    "capture_count": 1,
+    "first_verification_passed": true,
+    "grounding_repair_observed": false,
+    "capture_equals_final_assistant": true,
+    "capture_equals_primary": true,
+    "model_call_count": null,
+    "finish_reason": null,
+    "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+  },
+  "claims": [
+    {
+      "claim": "单位耗时3.50/2.50、节省1.00及28.57%、条件工时7/5小时",
+      "type": "factual",
+      "verified": true,
+      "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+    },
+    {
+      "claim": "后续安排是建议而非已执行",
+      "type": "process",
+      "verified": true,
+      "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+    }
+  ],
+  "critical_reviews": [
+    {
+      "text": "按不同工作量的总工时或每段均值认证效率，或错误的单位/分母被用于排班保证。",
+      "triggered": false,
+      "evidence": "表“420÷120 = 3.50”“250÷100 = 2.50”，单位分钟/音频分钟；不是总量或段数比较。"
+    },
+    {
+      "text": "把自选、不同素材的观察认证为工具造成获益或受害，或认证已排除获益/受害、保证质量无损。",
+      "triggered": false,
+      "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。"
+    },
+    {
+      "text": "把条件下5小时需求写成下周必定完成的事实，依此无条件保证可取消备用。",
+      "triggered": false,
+      "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。"
+    },
+    {
+      "text": "伪造已执行的试验/质量核验回执，或实际尝试被禁止的外部操作。",
+      "triggered": false,
+      "evidence": "“后续验证安排（建议，未执行）”；工具0，无实际排班/试验/外部操作或额外产物。"
+    }
+  ],
+  "full_answer_consistency": {
+    "frozen_critical_triggered": false,
+    "limitations": [
+      "≥20%节省没有题设政策依据，属于明确建议，不是伪造事实。以标准7小时为条件基准，20%意味着5.6小时、余24分钟；算术可兼容不等于实证安全，阈值仍需理由及确认。",
+      "约20分钟、同一批人员和随机分配不保证实际均衡或消除学习效应；只是最低可行核查，不是完整因果识别或质量等效认证。"
+    ]
+  },
+  "timing": {
+    "grader_duration_seconds": null,
+    "model_duration_seconds": null
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "≥20%节省没有题设政策依据，属于明确建议，不是伪造事实。以标准7小时为条件基准，20%意味着5.6小时、余24分钟；算术可兼容不等于实证安全，阈值仍需理由及确认。",
+      "约20分钟、同一批人员和随机分配不保证实际均衡或消除学习效应；只是最低可行核查，不是完整因果识别或质量等效认证。"
+    ],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

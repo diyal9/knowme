@@ -15,6 +15,20 @@ export function SettingsAiPanel({ form, onPatch }: Props) {
   const [presets, setPresets] = useState<{ id: string; label?: string }[]>([])
   const [probeBusy, setProbeBusy] = useState(false)
   const [probeHint, setProbeHint] = useState('')
+  const credentialState = form.credentialStatus?.apiKey?.state || ''
+  const credentialLocked = credentialState === 'secure_storage_unavailable' || credentialState === 'decrypt_failed'
+  const credentialLabel = credentialLocked
+    ? '已保存，但当前无法解锁'
+    : credentialState === 'available'
+      ? '已配置，安全存储可用'
+      : credentialState === 'legacy_plaintext'
+        ? '已配置，等待安全迁移'
+        : ''
+  const credentialHelp = credentialState === 'secure_storage_unavailable'
+    ? '当前系统安全存储不可用，请使用正式安装版或启用系统凭据服务；也可重新输入并保存'
+    : credentialState === 'decrypt_failed'
+      ? '历史密钥无法解密，请重新输入 API Key 并保存'
+      : ''
 
   useEffect(() => {
     void (async () => {
@@ -92,6 +106,15 @@ export function SettingsAiPanel({ form, onPatch }: Props) {
           placeholder={form.apiKeyConfigured ? '已配置（留空则不修改）' : 'sk-…'}
           autoComplete="off"
         />
+        {credentialLabel ? (
+          <div className={`settings-credential-status${credentialLocked ? ' locked' : ' ready'}`} role="status">
+            <span className="settings-credential-dot" aria-hidden="true" />
+            <span>{credentialLabel}</span>
+            {credentialHelp ? (
+              <span className="settings-credential-help">{credentialHelp}</span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
       <div className="settings-field">
         <label htmlFor="llmProvider">Provider</label>

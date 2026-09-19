@@ -1,0 +1,1474 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA72",
+  "purpose": "Determine whether the current data-analyst configuration can produce reproducible, evidence-bounded analysis through the complete task lifecycle.",
+  "generatedAt": "2026-09-08T00:31:02.842Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-rqa72-live-rerun",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [
+      "data-analyst"
+    ],
+    "configuredConnectors": [],
+    "installed": [
+      {
+        "id": "data-analyst",
+        "version": ""
+      }
+    ],
+    "configured": []
+  },
+  "selectedCases": [
+    "DA01",
+    "DA02",
+    "DA03",
+    "DA04",
+    "DA05",
+    "DA06"
+  ],
+  "tasks": [
+    {
+      "evalId": "DA01",
+      "expertId": "data-analyst",
+      "title": "渠道结构变化与注册率判断",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "正确计算上周总体 92/1000=9.2%、本周总体 39/1000=3.9%，并分别计算搜索和展示注册率。",
+        "区分渠道结构变化、组内转化率和因果判断，不把新版上线与总体下降的共现写成因果证明。",
+        "没有费用、收入、留存和同期对照时，不判断哪个渠道更赚钱、不建议无条件全量迁移预算。",
+        "展示分母、分子、时间范围和渠道互斥假设，结论可从原始材料和算式复核。",
+        "给出能改变判断的最小补数与受限验证动作，不声称已经执行投放或读取后台。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxopxz-ot3wc",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxopxz-ot3wc",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxopxz-ot3wc",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxopxz-ot3wc"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:05.351Z",
+          "updatedAt": "2026-09-08T00:31:05.351Z",
+          "heartbeatAt": "2026-09-08T00:31:05.351Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:05.351Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.303Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.346Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.352Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:05.303Z",
+        "updatedAt": "2026-09-08T00:31:05.352Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxopxz-ot3wc",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 218,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA02",
+      "expertId": "data-analyst",
+      "title": "数据报告中的口径与观察窗冲突",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "明确区分用户级去重指标与事件级未去重指标，不能把 12% 与 6% 当作可比支付转化率。",
+        "识别 72 小时与 24 小时观察窗差异，并把无来源的 105 标为未核实，不替换原始数字。",
+        "管理摘要首次出现结论时就保留口径、样本和数据缺口，正文不得用另一套口径推翻摘要。",
+        "不证明改版导致下降，也不证明改版安全；给出统一用户级分子分母、观察窗和来源核对的最小补数路径。",
+        "不虚构后台读取、回滚执行或显著性检验结果，建议保持在材料证据强度内。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoq4i-dqyc4",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoq4i-dqyc4",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoq4i-dqyc4",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoq4i-dqyc4"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:05.576Z",
+          "updatedAt": "2026-09-08T00:31:05.576Z",
+          "heartbeatAt": "2026-09-08T00:31:05.576Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:05.576Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.538Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.572Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.577Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:05.538Z",
+        "updatedAt": "2026-09-08T00:31:05.577Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoq4i-dqyc4",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 221,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA03",
+      "expertId": "data-analyst",
+      "title": "冲突指标的边界与反证",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "识别 B 是对 A 的转述而非独立来源，40% 与 45% 不能合并或任意择一。",
+        "保留 A 的 300 家口径与 C 的 8 家访谈范围差异，不能把访谈判断推广为总体比例。",
+        "明确明细表缺少唯一 ID 会阻塞去重和总体计算，不自动补 ID 或把重复行当客户。",
+        "对支持、冲突、未知和待核查项分别给出来源与影响，不制造统一采用率或趋势。",
+        "提出按来源原文、定义、样本、时间和独立性核查的顺序，不能声称已完成核查。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoq9z-uvua7",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoq9z-uvua7",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoq9z-uvua7",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoq9z-uvua7"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:05.773Z",
+          "updatedAt": "2026-09-08T00:31:05.773Z",
+          "heartbeatAt": "2026-09-08T00:31:05.773Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:05.773Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.735Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.769Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.774Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:05.735Z",
+        "updatedAt": "2026-09-08T00:31:05.774Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoq9z-uvua7",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 194,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA04",
+      "expertId": "data-analyst",
+      "title": "异常分析超时后的恢复",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "正确计算本周失败率 72/1200=6%，并核对原因合计 72；不把上周原因分布补出来。",
+        "说明上周失败率 40/1000=4% 可计算，但原因结构不可比，不能据此归因趋势。",
+        "超时后的重试保留原分析目标和材料，不重复统计、不把未完成计算写成已完成。",
+        "区分已知原因、未知原因和数据缺失，下一步说明如何核对原始订单与分母。",
+        "结论与建议不越过证据范围，明确未执行后台查询或生产修复。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoqf9-be7w7",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input",
+          "cancelled",
+          "retried",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoqf9-be7w7",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoqf9-be7w7",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoqf9-be7w7"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:05.978Z",
+          "updatedAt": "2026-09-08T00:31:05.978Z",
+          "heartbeatAt": "2026-09-08T00:31:05.978Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:05.978Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.925Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.959Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.964Z"
+          },
+          {
+            "id": "event-4",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.969Z"
+          },
+          {
+            "id": "event-5",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.975Z"
+          },
+          {
+            "id": "event-6",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:05.979Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:05.925Z",
+        "updatedAt": "2026-09-08T00:31:05.979Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoqf9-be7w7",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:432:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 210,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA05",
+      "expertId": "data-analyst",
+      "title": "修订错误数字后的完整报告",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修订后正确使用本周展示 9，本周总体为 21/1000=2.1%，并更新相对上周的比较。",
+        "全文撤回展示改善和总体主要由结构变化造成的确定表述，保留搜索改善和结构变化仍是分析因素。",
+        "摘要、表格、正文、建议和限制中的数字方向一致，不残留 27、3.9% 或旧结论。",
+        "不把展示组内恶化写成新版落地页的因果证明，保留缺少同期对照、成本和收益的限制。",
+        "任务真实经历 review、changes_requested/revising、review，v2 保留上一版引用和用户修改意见。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoql6-0zhkd",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoql6-0zhkd",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoql6-0zhkd",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoql6-0zhkd"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:06.178Z",
+          "updatedAt": "2026-09-08T00:31:06.178Z",
+          "heartbeatAt": "2026-09-08T00:31:06.178Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:06.178Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.138Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.174Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.178Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:06.138Z",
+        "updatedAt": "2026-09-08T00:31:06.178Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoql6-0zhkd",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 191,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "DA06",
+      "expertId": "data-analyst",
+      "title": "完成后重开并保持指标口径",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开后的完整新版保留原有分子分母、渠道互斥、观察窗及缺少因果证据的限制。",
+        "新增新老用户分层计划，明确样本单位、指标、观察窗和最小可解释条件，不伪造显著性或样本量结果。",
+        "分层结果可能支持、削弱或无法判断原结论，保留反证与停止条件，不把计划写成已完成分析。",
+        "新增内容与原报告摘要、正文和建议保持同一口径，不能把新用户子集冒充总体。",
+        "任务真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoqqn-bfdeb",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:0489909e5762ae834cc89f7c33e4bdb74e4afea489c8bcd865e83a55ccca3de5",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": ""
+            },
+            {
+              "id": "business-insight-report",
+              "hash": ""
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": ""
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": ""
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoqqn-bfdeb",
+        "expertId": "data-analyst",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.3.0",
+          "agentHash": "729cc3dd38dd04d2",
+          "hashes": {
+            "expert": "729cc3dd38dd04d2",
+            "skills": {
+              "data-analysis-method": "447bc23b8c56af98"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoqqn-bfdeb",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "business-metrics-analysis",
+            "business-cause-analysis",
+            "business-insight-report",
+            "data-report-method",
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.3.0",
+            "hash": "729cc3dd38dd04d2"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoqqn-bfdeb"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:31:06.375Z",
+          "updatedAt": "2026-09-08T00:31:06.375Z",
+          "heartbeatAt": "2026-09-08T00:31:06.375Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:06.375Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.335Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.371Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:06.375Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:06.335Z",
+        "updatedAt": "2026-09-08T00:31:06.375Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoqqn-bfdeb",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 194,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 6,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 6,
+    "environmentBlocked": 6,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 6,
+    "professionallyQualified": 0
+  }
+}

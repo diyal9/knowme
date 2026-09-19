@@ -1,5 +1,7 @@
 'use strict'
 
+const { randomUUID } = require('node:crypto')
+
 /**
  * Knowledge provider CRUD + kb-mount IPC.
  * Provider helpers (listProvidersRedacted / resolve*) stay in main for agent/capability use.
@@ -35,17 +37,40 @@ function registerKnowledgeProviderIpc(ipcMain, deps) {
       const userData = app.getPath('userData')
       const cfg = knowledgeOs.loadConfig(userData)
       const providers = Array.isArray(cfg.providers) ? [...cfg.providers] : []
-      const kind = payload.kind === 'remote-rag' ? 'remote-rag' : 'local'
+      const requestedKind = String(payload.kind || 'local')
+      const kind = ['ragflow', 'remote-rag', 'folder', 'gitlab', 'qmd-local'].includes(requestedKind)
+        ? requestedKind
+        : 'local'
       const id = payload.id && payload.id !== 'local-default'
         ? String(payload.id)
-        : `kp_${Date.now().toString(36)}`
+        : `kp_${randomUUID()}`
 
-      if (kind === 'local') {
+      if (kind === 'local' && !payload.id) {
         knowledgeOs.saveConfig(userData, {
           spaceSourceId: payload.spaceSourceId || null,
           subDir: String(payload.subDir || ''),
         })
         return { ok: true, ...listProvidersRedacted() }
+      }
+
+      if (kind === 'qmd-local' || kind === 'folder' || kind === 'gitlab') {
+        const idx = providers.findIndex((p) => p.id === id)
+        const rec = knowledgeProvider.normalizeProvider({
+          ...(idx >= 0 ? providers[idx] : {}),
+          id,
+          kind,
+          displayName: String(payload.displayName || (kind === 'gitlab' ? 'GitLab 工作副本' : kind === 'qmd-local' ? 'LLM Wiki' : '本地文件夹')).slice(0, 60),
+          sourceId: payload.sourceId || payload.spaceSourceId || null,
+          subDir: String(payload.subDir || ''),
+          repositoryRef: String(payload.repositoryRef || payload.projectPath || ''),
+          collectionId: payload.collectionId || (kind === 'qmd-local' ? `wiki_${id}` : id),
+          scope: payload.scope || 'client',
+          authority: payload.authority || 3,
+        })
+        if (idx >= 0) providers[idx] = rec
+        else providers.push(rec)
+        knowledgeOs.saveConfig(userData, { providers })
+        return { ok: true, id, ...listProvidersRedacted() }
       }
 
       const idx = providers.findIndex((p) => p.id === id)
@@ -57,10 +82,14 @@ function registerKnowledgeProviderIpc(ipcMain, deps) {
       }
       const rec = {
         id,
-        kind: 'remote-rag',
-        displayName: String(payload.displayName || '远程 RAG 知识库').slice(0, 60),
+        kind,
+        displayName: String(payload.displayName || (kind === 'ragflow' ? 'RAGFlow 知识库' : '远程 RAG 知识库')).slice(0, 60),
         endpoint: String(payload.endpoint || ''),
         collection: String(payload.collection || ''),
+        collectionIds: Array.isArray(payload.collectionIds)
+          ? [...new Set(payload.collectionIds.map(item => String(item || '').trim()).filter(Boolean))]
+          : (Array.isArray(prev.collectionIds) ? prev.collectionIds : []),
+        collections: Array.isArray(prev.collections) ? prev.collections : [],
         topK: Number.isFinite(payload.topK) ? payload.topK : knowledgeProvider.DEFAULT_TOPK,
         apiKeyEnc,
       }

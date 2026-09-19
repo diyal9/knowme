@@ -1,0 +1,143 @@
+{
+  "diagnostic": "RQA03 observed liveness defects",
+  "realNetworkCalls": 0,
+  "realSleepCalls": 0,
+  "fakeTimersAllReleased": true,
+  "results": [
+    {
+      "case": "execute/status",
+      "cancelledStatus": "cancelled",
+      "signalAborted": true,
+      "executeSettled": false,
+      "registeredControllers": 1,
+      "heartbeatTimers": 1,
+      "retryOk": false,
+      "retryError": "专家仍在执行，无需重复启动",
+      "probeArguments": [
+        {
+          "kind": "status",
+          "argc": 1,
+          "hasAbortSignal": false
+        }
+      ],
+      "modelCalls": 0,
+      "afterManualRelease": {
+        "controllers": 0,
+        "heartbeatTimers": 0,
+        "status": "cancelled"
+      }
+    },
+    {
+      "case": "execute/tools",
+      "cancelledStatus": "cancelled",
+      "signalAborted": true,
+      "executeSettled": false,
+      "registeredControllers": 1,
+      "heartbeatTimers": 1,
+      "retryOk": false,
+      "retryError": "专家仍在执行，无需重复启动",
+      "probeArguments": [
+        {
+          "kind": "status",
+          "argc": 1,
+          "hasAbortSignal": false
+        },
+        {
+          "kind": "tools",
+          "argc": 1,
+          "hasAbortSignal": false
+        }
+      ],
+      "modelCalls": 0,
+      "afterManualRelease": {
+        "controllers": 0,
+        "heartbeatTimers": 0,
+        "status": "cancelled"
+      }
+    },
+    {
+      "case": "createStart/status/cancel-then-late-success",
+      "before": {
+        "status": "cancelled",
+        "createSettled": false,
+        "controllers": 0,
+        "heartbeatTimers": 0
+      },
+      "startedAfterCancel": true,
+      "afterStatus": "failed",
+      "modelCalls": [
+        {
+          "runId": "expert_rqa03_mtotjv2x",
+          "aborted": false
+        }
+      ],
+      "cancellationEventSurvives": false
+    },
+    {
+      "case": "createStart/tools/cancel-then-late-success",
+      "before": {
+        "status": "cancelled",
+        "createSettled": false,
+        "controllers": 0,
+        "heartbeatTimers": 0
+      },
+      "startedAfterCancel": true,
+      "afterStatus": "failed",
+      "modelCalls": [
+        {
+          "runId": "expert_rqa03_mtotjv30",
+          "aborted": false
+        }
+      ],
+      "cancellationEventSurvives": false
+    },
+    {
+      "case": "createStart/cancel/retry/late-result-race",
+      "overlap": {
+        "retryAcceptedWhileOriginalPending": true,
+        "preflightAttempts": 3,
+        "oldCreateReplacedRetryController": true,
+        "retryControllerAborted": false,
+        "heartbeatTimers": 2
+      },
+      "orphan": {
+        "controllers": 0,
+        "heartbeatTimers": 1,
+        "lateControllerAborted": false
+      },
+      "modelCallsAfterSecondCancel": [
+        {
+          "runId": "expert_rqa03_mtotjv32",
+          "aborted": false
+        },
+        {
+          "runId": "expert_rqa03_mtotjv33",
+          "aborted": false
+        }
+      ],
+      "finalStatus": "failed"
+    },
+    {
+      "case": "Promise.all/optional-provider-hang",
+      "completedRequiredProvider": "a",
+      "settledBeforeManualRelease": false,
+      "afterOptionalReject": {
+        "ok": true,
+        "issues": []
+      }
+    },
+    {
+      "case": "actual-MCP-HTTP/headers-ready-body-hang",
+      "before": {
+        "bodyReadStarted": true,
+        "settled": false,
+        "remainingDeadlineTimers": 0,
+        "signalAborted": false
+      },
+      "afterManualBodyRelease": {
+        "ok": true,
+        "tools": []
+      }
+    }
+  ]
+}

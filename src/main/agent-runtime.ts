@@ -350,7 +350,7 @@ ctx.getWorkbenchAgentTeamRunner = function getWorkbenchAgentTeamRunner() {
     });
     return ctx.workbenchAgentTeamRunner;
 };
-ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({ rootRunId, goal, permissions = {}, workflowPackage = null, workflowInputs = {} } = {}) {
+ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({ rootRunId, goal, permissions = {}, projectId = null, workflowPackage = null, workflowInputs = {} } = {}) {
     const runtime = ctx.ensureAgentTeamRuntime();
     const settings = ctx.loadSettings();
     const endpoint = ctx.normalizeChatEndpoint(settings.apiEndpoint);
@@ -374,7 +374,10 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
         endpoint: settings.apiEndpoint,
     });
     const tokenCalKey = ctx.llmUsage.calibrationKey(routedModel.provider, routedModel.model || 'gpt-4o-mini');
-    const sourceRoot = ctx.getActiveSourceRoot();
+    const projectContext = projectId ? ctx.resolveProjectContext(projectId) : null;
+    if (projectId && (!projectContext?.ok || !projectContext.workspace?.rootPath))
+        throw new Error(projectContext?.error || '任务绑定的项目当前不可用');
+    const sourceRoot = projectContext?.workspace?.rootPath || ctx.getActiveSourceRoot();
     const externalWorkflowTools = externalWorkflowRecipes.buildExternalWorkflowToolBundle(workflowPackage, workflowInputs);
     const runPermissions = {
         ...permissions,
@@ -401,6 +404,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             throw new Error(expert.message || `未知 Agent: ${expertId}`);
         const childSession = ctx.agentSessions.createSession('general', 1, {
             expertId,
+            projectId: projectId || undefined,
             ephemeral: true,
             role: 'general',
             goal: String(childCtx.prompt || '').slice(0, 2000),
@@ -468,7 +472,11 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             },
             { role: 'user', content: handoffText },
         ];
-        const artifactTools = ctx.agentArtifactTools.buildArtifactTools({ runId: childRunId });
+        const artifactTools = ctx.agentArtifactTools.buildArtifactTools({
+            runId: childRunId,
+            projectId: projectId || undefined,
+            sourceId: projectContext?.workspace?.sourceId,
+        });
         const extraTools = ctx.mergeExtraTools(artifactTools, externalWorkflowTools);
         const bindings = ctx.getSessionCapabilityBindings(childSession, ctx.ensureCapabilityHub().expertRuntime());
         const resolvedSurface = await ctx.resolveToolSurfaceForRun({
@@ -521,7 +529,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             runStartedAt: Date.now(),
             effectivePersonalization: { applied: [], omitted: [] },
             ctxBundle: {
-                contextInfo: { workbenchAgentGraph: true, goal, sourceRoot: sourceRoot || '' },
+                contextInfo: { workbenchAgentGraph: true, projectId: projectId || null, goal, sourceRoot: sourceRoot || '' },
                 taskFrame: childCtx.executionContract || null,
             },
             loadAgentSessions: ctx.loadAgentSessions,
@@ -547,6 +555,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
     return factory;
 };
 ctx.SOURCES_FILE = ctx.path.join(ctx.app.getPath('userData'), 'sources.json');
+ctx.PROJECTS_FILE = ctx.path.join(ctx.app.getPath('userData'), 'projects.json');
 ctx.LOGS_DIR = ctx.path.join(ctx.app.getPath('userData'), 'logs');
 if (!ctx.fs.existsSync(ctx.DATA_DIR))
     ctx.fs.mkdirSync(ctx.DATA_DIR, { recursive: true });
@@ -560,11 +569,35 @@ try {
     ctx.logger.system('app-start', 'KnowMe 主进程启动', { version: ctx.app.getVersion(), platform: process.platform });
 }
 catch { /* logging must never crash startup */ }
-ctx.gotSingleInstanceLock = ctx.app.requestSingleInstanceLock();
+// Automated qualification uses an explicit isolated userData directory and must be able
+// to run beside the user's production app. The production path keeps the global lock.
+ctx.gotSingleInstanceLock = process.env.KNOWME_TEST_SEAM === '1'
+    ? true
+    : ctx.app.requestSingleInstanceLock();
 if (!ctx.gotSingleInstanceLock) {
     ctx.app.quit();
 }
-ctx.loadSettings = () => ctx.settingsSecure.load(ctx.SETTINGS_FILE);
+ctx.loadSettings = () => {
+    const settings = ctx.settingsSecure.load(ctx.SETTINGS_FILE);
+    // Automated qualification may use a local OpenAI-compatible fixture. Keep
+    // this seam test-only so production settings still come exclusively from
+    // the encrypted settings store.
+    if (process.env.KNOWME_TEST_SEAM !== '1')
+        return settings;
+    const testApiKey = String(process.env.KNOWME_TEST_API_KEY || '').trim();
+    const testApiEndpoint = String(process.env.KNOWME_TEST_API_ENDPOINT || '').trim();
+    const testModel = String(process.env.KNOWME_TEST_MODEL || '').trim();
+    const testProvider = String(process.env.KNOWME_TEST_PROVIDER || '').trim();
+    if (!testApiKey && !testApiEndpoint && !testModel && !testProvider)
+        return settings;
+    return {
+        ...settings,
+        ...(testApiKey ? { apiKey: testApiKey } : {}),
+        ...(testApiEndpoint ? { apiEndpoint: testApiEndpoint } : {}),
+        ...(testModel ? { model: testModel } : {}),
+        ...(testProvider ? { provider: testProvider } : {}),
+    };
+};
 ctx.saveSettings_ = s => ctx.settingsSecure.save(ctx.SETTINGS_FILE, s);
 ctx.loadAgentStore = function loadAgentStore() {
     try {

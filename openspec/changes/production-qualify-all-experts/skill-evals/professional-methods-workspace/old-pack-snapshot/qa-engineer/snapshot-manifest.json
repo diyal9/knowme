@@ -1,0 +1,31 @@
+{
+  "purpose": "qa-engineer 2.0.0 and unchanged code-review dependency before 2.1.0 method candidate; not a model rerun",
+  "capturedDate": "2026-09-06",
+  "files": [
+    {
+      "source": "src/catalog/experts/qa-engineer/EXPERT.md",
+      "snapshot": "experts/qa-engineer/EXPERT.md",
+      "sourceSha256": "E999616A126C2CB126FF63D69B080D403674BD296806EA3FC323CF6295D113EA"
+    },
+    {
+      "source": "src/catalog/experts/qa-engineer/capability.manifest.json",
+      "snapshot": "experts/qa-engineer/capability.manifest.json",
+      "sourceSha256": "9A3F221F530CB4BAA5D654C9EFD2A347E81718D771D2947FADDD9B97BF4E38A1"
+    },
+    {
+      "source": "src/catalog/experts/qa-engineer/manifest.json",
+      "snapshot": "experts/qa-engineer/manifest.json",
+      "sourceSha256": "F34AEC0C4C9F676B3BD0312ABD9047247C5BCF39ACEB7BCE8F2B07480F413B78"
+    },
+    {
+      "source": "src/catalog/skills/code-review/SKILL.md",
+      "snapshot": "skills/code-review/SKILL.md",
+      "sourceSha256": "17D5214576DE283419285D6DA3B1EA7A797CDCF825E125468B53BEB2FBCDCA8E"
+    },
+    {
+      "source": "src/catalog/skills/code-review/capability.manifest.json",
+      "snapshot": "skills/code-review/capability.manifest.json",
+      "sourceSha256": "A29D50E76B9B169A771F0200D789B49193C27C17B83E18F82261BBAF91923430"
+    }
+  ]
+}

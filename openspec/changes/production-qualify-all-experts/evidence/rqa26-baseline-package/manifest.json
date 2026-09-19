@@ -1,0 +1,7 @@
+{
+  "id": "image-producer",
+  "kind": "expert",
+  "version": "3.2.0",
+  "skills": ["th-art-intake", "th-art-prompt-enrich", "th-art-pango-generate"],
+  "connectors": ["pango-image-mcp", "photoshop-mcp"]
+}

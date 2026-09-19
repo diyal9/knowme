@@ -1,0 +1,26 @@
+{
+  "suite": "RQA75 software engineer normal coverage completion",
+  "evaluatedAt": "2026-09-08T07:55:52.087Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+      "tasks": [
+        {
+          "taskId": "task-mtsdkrbb-9mo27",
+          "evalId": "SE11",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

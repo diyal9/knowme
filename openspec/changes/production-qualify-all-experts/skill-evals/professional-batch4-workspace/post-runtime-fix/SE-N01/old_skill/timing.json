@@ -1,0 +1,6 @@
+{
+  "total_tokens": 30426,
+  "duration_ms": 48964,
+  "total_duration_seconds": 48.964,
+  "source": "Actual isolated executor/provider metrics; not subagent timing"
+}

@@ -1,0 +1,37 @@
+{
+  "source": "actual AgentRunExecutor metrics",
+  "metrics": {
+    "rounds": 1,
+    "toolCalls": 0,
+    "firstTokenMs": 3015,
+    "bufferedDraftsDiscarded": 0,
+    "answerCommitMs": 23569,
+    "bufferMs": 20554,
+    "outputDiagnostics": [
+      {
+        "runId": "expert_task-mtp2j2o3-836i0_mtp2j32o",
+        "round": 1,
+        "phase": "VERIFY_CLAIMS",
+        "code": "answer_committed",
+        "hash": "d29d6c7dec018f03",
+        "length": 4497,
+        "timingMs": 23569,
+        "count": 0
+      }
+    ],
+    "usage": {
+      "promptTokens": 4629,
+      "completionTokens": 2287,
+      "totalTokens": 6916,
+      "source": "provider"
+    },
+    "modelCompletions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "stop"
+      }
+    ],
+    "contextTokens": 4629,
+    "totalMs": 23594
+  }
+}

@@ -7,8 +7,8 @@ const fs = require('fs')
 const path = require('path')
 const { AgentRunExecutor, RunPhase } = require('../src/lib/agent-run-executor')
 const { createMockRunPorts } = require('../src/lib/agent-run-ports')
-const { EventType, VERSION } = require('../src/lib/agent-output-protocol')
-const { buildToolDisplaySummary } = require('../src/lib/agent-tool-display')
+const { EventType, VERSION, mapLegacyEvent } = require('../src/lib/agent-output-protocol')
+const { buildToolDisplayError, buildToolDisplaySummary } = require('../src/lib/agent-tool-display')
 const { normalizeSession } = require('../src/lib/agent-sessions')
 const { canonicalize } = require('../src/lib/agent-output-assembler')
 const { stripDisplayProtocolText } = require('../src/lib/agent-suggestion')
@@ -159,6 +159,27 @@ describe('B3 tool display summary hides sensitive full text', () => {
     )
   })
 
+  it('builds structured safe error details without exposing raw tool output', () => {
+    assert.deepEqual(buildToolDisplayError({
+      ok: false,
+      code: 'invalid_args',
+      message: '文档链接格式无效',
+      text: 'FULL_PRIVATE_STACK',
+    }), {
+      errorCode: 'invalid_args',
+      errorMessage: '文档链接格式无效',
+    })
+    assert.deepEqual(buildToolDisplayError({
+      ok: false,
+      code: 'task_failed',
+      message: '{"ok":false,"log_id":"secret"}',
+      text: 'FULL_PRIVATE_STACK',
+    }), {
+      errorCode: 'task_failed',
+      errorMessage: '命令执行失败',
+    })
+  })
+
   it('executor tool.completed payload summary is display-safe', async () => {
     const fixture = {
       input: { prompt: '查', tier: 'retrieval', forceTools: true, runId: 'run_tool_privacy' },
@@ -181,6 +202,25 @@ describe('B3 tool display summary hides sensitive full text', () => {
     for (const evt of toolDone) {
       assert.ok(!String(evt.payload?.summary || '').includes('FULL_PRIVATE'))
     }
+  })
+
+  it('preserves structured tool failure details through protocol and message state', () => {
+    const event = mapLegacyEvent({
+      type: 'tool.failed',
+      id: 'tool_feishu',
+      kind: 'tool',
+      title: '飞书：read_doc',
+      status: 'error',
+      toolName: 'feishu.read_doc',
+      errorCode: 'invalid_args',
+      errorMessage: '文档链接格式无效',
+    }, { runId: 'run_tool_error', seq: 1 })
+    assert.equal(event.payload.errorCode, 'invalid_args')
+    assert.equal(event.payload.errorMessage, '文档链接格式无效')
+
+    const reduced = reduceMessageEvent(createMessageState('run_tool_error'), event)
+    assert.equal(reduced.state.timeline[0].errorCode, 'invalid_args')
+    assert.equal(reduced.state.timeline[0].errorMessage, '文档链接格式无效')
   })
 })
 

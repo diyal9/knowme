@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA62",
+  "purpose": "Determine whether the current product-manager configuration deserves expert status through professional correctness and full task lifecycle evidence.",
+  "generatedAt": "2026-09-09T03:35:44.161Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\qualification\\rqa167-pm01-locked-diagnostic",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "providerSeed": {
+      "requested": true,
+      "copied": true,
+      "source": "encrypted_settings_only",
+      "encryptedProviderConfigured": true
+    },
+    "modelProfile": {
+      "provider": "dashscope",
+      "model": "qwen3.8-flash",
+      "label": "Qwen 3.8 Flash",
+      "maxOutput": 131072
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "PM01"
+  ],
+  "tasks": [
+    {
+      "evalId": "PM01",
+      "expertId": "product-manager",
+      "title": "访客申请与失败恢复 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "直接交付包含背景问题、目标、范围、非目标、角色场景、流程、规则、异常、验收、风险待确认的完整 PRD。",
+        "没有把缺失的转化率或时长基线编造成事实，成功指标明确标记基线或目标值待确认。",
+        "申请、待审批、已批准、已生效或可使用、已使用、已取消、已过期等状态及允许动作前后一致。",
+        "网络超时、重复提交、审批失败、取消冲突与重试恢复说明数据保存、幂等结果和用户下一步。",
+        "验收标准使用可复现的前置状态、动作和可观察结果，覆盖正常、异常与恢复路径。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mttjq3ap-toeww",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "系统安全存储",
+          "detail": "Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ],
+        "executionRoutes": []
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:3a41b5efa02c6b4ffba48f28cdb37f6e8624b67a78dad6db65c6a09a74e31339",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:3a41b5efa02c6b4ffba48f28cdb37f6e8624b67a78dad6db65c6a09a74e31339",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "cc38aa16c3522b671079c88ca8c0d227b01be17567897fbd2b24e919510674be"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "系统安全存储",
+        "detail": "Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mttjq3ap-toeww",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mttjq3ap-toeww",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mttjq3ap-toeww"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待解锁 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-09T03:35:47.051Z",
+          "updatedAt": "2026-09-09T03:35:47.051Z",
+          "heartbeatAt": "2026-09-09T03:35:47.051Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要解锁 AI 配置",
+          "detail": "Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。",
+          "field": "",
+          "item": "系统安全存储",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-09T03:35:47.051Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-09T03:35:46.992Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-09T03:35:47.046Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "已保存的 AI 配置无法解锁",
+            "actorId": "",
+            "createdAt": "2026-09-09T03:35:47.051Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-09T03:35:46.992Z",
+        "updatedAt": "2026-09-09T03:35:47.062Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mttjq3ap-toeww",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:261:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:662:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:851:19)",
+      "elapsedMs": 262,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 1,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 1,
+    "environmentBlocked": 1,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

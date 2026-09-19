@@ -11,7 +11,30 @@ function registerWorkbenchLocalStoresIpc(ipcMain, deps) {
     getWorkbenchTaskDraftStore,
     getWorkbenchTaskStore,
     getWorkbenchWorkflowPackageStore,
+    getActiveProjectId,
+    resolveProjectContext,
   } = deps
+
+  function withProjectBinding(input = {}) {
+    const explicitProjectId = String(input?.projectId || '').trim()
+    const projectId = explicitProjectId || String(getActiveProjectId?.() || '').trim()
+    if (!projectId) return input || {}
+    if (input?.projectSnapshot) return { ...input, projectId }
+    const context = resolveProjectContext?.(projectId)
+    if (!context?.ok) return { ...input, projectId }
+    return {
+      ...input,
+      projectId,
+      projectSnapshot: {
+        projectId,
+        workspaceSourceId: context.workspace?.sourceId || context.project?.workspaceSourceId || '',
+        branch: context.workspace?.branch || '',
+        repositoryRef: context.workspace?.repositoryRef || '',
+        outputPolicy: context.project?.outputPolicy || { deliverablesDir: 'outputs', conflictStrategy: 'version' },
+        capturedAt: new Date().toISOString(),
+      },
+    }
+  }
 
   ipcMain.handle('workbench-todo-list', () => getWorkbenchTodoStore().list())
   ipcMain.handle('workbench-todo-add', (_e, text) =>
@@ -31,7 +54,7 @@ function registerWorkbenchLocalStoresIpc(ipcMain, deps) {
   ipcMain.handle('workbench-task-list', () => getWorkbenchTaskStore().list())
   ipcMain.handle('workbench-task-get', (_e, id = '') => getWorkbenchTaskStore().get(id))
   ipcMain.handle('workbench-task-create', (_e, input = {}) =>
-    getWorkbenchTaskStore().create(input || {}))
+    getWorkbenchTaskStore().create(withProjectBinding(input || {})))
   ipcMain.handle('workbench-task-update', (_e, payload = {}) =>
     getWorkbenchTaskStore().update(payload?.id, payload?.patch || {}))
   ipcMain.handle('workbench-task-archive', (_e, id = '') =>

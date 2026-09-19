@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "business-insight-report",
+  "kind": "skill",
+  "name": "商业洞察报告",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "businessInsightReport",
+          "title": "洞察报告",
+          "subtitle": "结论、证据与行动建议",
+          "icon": "fileText",
+          "group": "business-analysis",
+          "modes": ["analysis", "writing"],
+          "surfaces": ["scene", "workflow"],
+          "prompt": "请将分析结果整理成带证据强度、限制、优先级和验证计划的商业洞察报告。"
+        }]
+      }
+    }
+  }
+}

@@ -70,6 +70,13 @@ function createCapabilityExperts(deps) {
       || existing?.manifest
       || catalogBase?.manifest
       || null
+    // A saved custom expert passed structural validation, but has not yet
+    // completed an isolated professional qualification run. Persist that
+    // distinction so the Hub never presents it as verified by omission.
+    const qualification = existing?.qualification
+      || catalogBase?.qualification
+      || capabilityManifest?.metadata?.knowme?.qualification
+      || { state: 'ready', issues: [], limitedSkills: [], assessedAtImport: false }
     const nameSource = String(
       payload.nameSource || existing?.nameSource || catalogBase?.nameSource || 'user',
     ).trim() || 'user'
@@ -91,6 +98,7 @@ function createCapabilityExperts(deps) {
       installedAt: existing?.installedAt || now,
       updatedAt: now,
       manifest: capabilityManifest,
+      qualification,
       dependencies: capabilityManifest?.dependencies || existing?.dependencies || [],
       permissions: capabilityManifest?.permissions || existing?.permissions || {},
       inputs: capabilityManifest?.inputs || existing?.inputs || [],
@@ -123,6 +131,7 @@ function createCapabilityExperts(deps) {
       featured: catalogBase?.featured === true,
       contentHash,
       manifest: capabilityManifest,
+      qualification,
       dependencies: capabilityManifest?.dependencies || catalogBase?.dependencies || [],
       permissions: capabilityManifest?.permissions || catalogBase?.permissions || {},
       inputs: capabilityManifest?.inputs || catalogBase?.inputs || [],

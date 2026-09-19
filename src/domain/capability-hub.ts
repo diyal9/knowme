@@ -19,13 +19,60 @@ export type HubCapabilityItem = CapabilityItem & {
   permissions?: Record<string, unknown>
   inputs?: unknown[]
   outputs?: unknown[]
+  knowledgeRefs?: unknown[]
+  sop?: string
+  useCases?: string[]
+  boundaries?: string[]
   risk?: { level?: string; reasons?: string[] }
   provenance?: { ref?: string; source?: string; trust?: string; adaptedFrom?: string }
   skills?: Array<string | { id?: string; name?: string }>
   connectors?: Array<string | { id?: string; name?: string }>
+  readiness?: {
+    state?: 'ready' | 'limited'
+    items?: Array<{ id: string; kind: string; required?: boolean; status?: string; reason?: string }>
+    issues?: Array<{ code?: string; dependency?: { id?: string; kind?: string }; message?: string }>
+    routes?: Array<{
+      id: string
+      label?: string
+      state?: 'ready' | 'limited'
+      requiredSkills?: string[]
+      requiredConnectorIds?: string[]
+      issues?: Array<{ code?: string; dependency?: { id?: string; kind?: string }; message?: string }>
+    }>
+  }
+  type?: string
+}
+
+export function isExpertQualificationLimited(item: HubCapabilityItem): boolean {
+  return item.kind === 'expert' && item.qualification?.state === 'limited'
+}
+
+/** Structural validation passed, but no isolated professional qualification run has been recorded. */
+export function isExpertQualificationUnverified(item: HubCapabilityItem): boolean {
+  return item.kind === 'expert'
+    && !!item.qualification
+    && item.qualification?.state !== 'limited'
+    && item.qualification?.assessedAtImport !== true
+}
+
+/** 运行时依赖未就绪：专家包本身有效，但当前环境无法真正执行。 */
+export function isExpertRuntimeLimited(item: HubCapabilityItem): boolean {
+  return item.kind === 'expert' && item.readiness?.state === 'limited'
+}
+
+export function isExpertAvailableForNewTask(item: Pick<CapabilityItem, 'kind' | 'lifecycle' | 'qualification' | 'readiness'>): boolean {
+  if (item.kind !== 'expert') return true
+  if (item.lifecycle?.newTasks === false) return false
+  // Keep the expert visible for history and diagnosis, but do not expose a
+  // start entry that is guaranteed to fail during session snapshot/runtime
+  // creation. Missing readiness is intentionally allowed for legacy entries.
+  if (item.qualification?.state === 'limited') return false
+  if (item.readiness?.state === 'limited') return false
+  return true
 }
 
 export type HubSourceFilter = '全部来源' | '官方' | '组织' | '我的'
+export type ConnectorType = 'mcp' | 'cli' | 'http' | 'ssh'
 
 export const HUB_EXPERT_SOURCE_FILTERS: HubSourceFilter[] = ['全部来源', '官方', '组织', '我的']
 
@@ -36,6 +83,13 @@ export const HUB_TAB_CATEGORIES: Record<CapabilityKind, string[]> = {
   skill: [...EXPERT_DOMAIN_CATEGORIES],
   connector: ['全部', '收藏', '办公协作', '视觉创作', '游戏研发', '知识与数据', '研发工具', '通用连接'],
 }
+
+export const CONNECTOR_TYPE_FILTERS: Array<{ id: ConnectorType; label: string; hint: string }> = [
+  { id: 'mcp', label: 'MCP 服务', hint: '连接外部工具与应用' },
+  { id: 'cli', label: '命令行', hint: '调用本机或工作区命令' },
+  { id: 'http', label: 'HTTP API', hint: '配置 GET / POST 请求' },
+  { id: 'ssh', label: 'SSH 主机', hint: '连接远程服务器' },
+]
 
 export const HUB_TAB_COPY: Record<CapabilityKind, { catalog: string; empty: string; featured: string; unit: string }> = {
   expert: {
@@ -167,6 +221,20 @@ export function connectorBroadCategory(item: HubCapabilityItem): string {
   return '通用连接'
 }
 
+export function connectorType(item: HubCapabilityItem): ConnectorType {
+  // Feishu is implemented through the local lark-cli login/runtime. Keep the
+  // internal `feishu` type for its dedicated auth flow, but present the user
+  // facing connection method as CLI.
+  if (item.id === 'feishu') return 'cli'
+  const explicit = String((item as HubCapabilityItem & { type?: string }).type || '').toLowerCase()
+  if (['mcp', 'cli', 'http', 'ssh'].includes(explicit)) return explicit as ConnectorType
+  const text = [item.id, item.name, item.description, ...(item.tags || [])].filter(Boolean).join(' ').toLowerCase()
+  if (/ssh|远程主机|服务器/.test(text)) return 'ssh'
+  if (/http|api|rest|webhook/.test(text)) return 'http'
+  if (/cli|命令行|shell|terminal/.test(text)) return 'cli'
+  return 'mcp'
+}
+
 export function isCuratedExpert(item: HubCapabilityItem): boolean {
   return item.kind === 'expert' && ['curated', 'pack', 'official'].includes(String(item.source || ''))
 }
@@ -190,6 +258,10 @@ export function isMyExpert(item: HubCapabilityItem): boolean {
 
 /** 私人自建 Agent 不回流到所有用户可见的专家目录。 */
 export function isExpertCatalogEntry(item: HubCapabilityItem): boolean {
+  // Catalog visibility and task launchability are separate concerns. A
+  // limited expert must remain discoverable so the user can inspect the
+  // blocking dependency and repair it; launch surfaces apply the stricter
+  // isExpertAvailableForNewTask gate.
   return item.kind === 'expert' && !isUserCreatedExpert(item)
 }
 
@@ -205,6 +277,10 @@ export function matchesHubCategory(item: HubCapabilityItem, category: string): b
   }
   if (item.category === category) return true
   return (item.categories || []).some((cat) => String(cat) === category)
+}
+
+export function matchesConnectorType(item: HubCapabilityItem, type?: string): boolean {
+  return !type || type === 'all' || connectorType(item) === type
 }
 
 export function matchesHubSource(item: HubCapabilityItem, sourceFilter: HubSourceFilter | string = '全部来源'): boolean {
@@ -258,7 +334,13 @@ export function hubOriginLabel(item: HubCapabilityItem): string {
 
 export function hubItemBadges(item: HubCapabilityItem, offline = false): { label: string; className: string }[] {
   const badges: { label: string; className: string }[] = []
-  if (item.kind === 'expert' && isCuratedExpert(item)) badges.push({ label: '认证', className: 'official verified' })
+  // “已合并” describes a lifecycle decision, not a temporary readiness
+  // failure. Keep limited experts diagnosable with their precise blocker.
+  if (item.kind === 'expert' && item.lifecycle?.newTasks === false) badges.push({ label: '已合并', className: 'legacy' })
+  if (isExpertQualificationLimited(item)) badges.push({ label: '能力受限', className: 'limited' })
+  if (isExpertQualificationUnverified(item)) badges.push({ label: '待专业验收', className: 'pending' })
+  if (isExpertRuntimeLimited(item)) badges.push({ label: '当前不可执行', className: 'limited' })
+  if (item.kind === 'expert' && isCuratedExpert(item)) badges.push({ label: '官方', className: 'official' })
   if (item.legacy) badges.push({ label: 'Legacy', className: 'legacy' })
   if (item.kind === 'expert' && isMyExpert(item)) {
     badges.push({ label: '已添加', className: 'installed' })
@@ -287,6 +369,7 @@ export function filterHubItems(
     category?: string
     sourceFilter?: HubSourceFilter | string
     installedOnly?: boolean
+    connectorType?: ConnectorType | 'all'
   },
 ): CapabilityItem[] {
   const q = String(opts.query || '').trim().toLowerCase()
@@ -294,6 +377,7 @@ export function filterHubItems(
   return items.filter((item) => {
     const hubItem = item as HubCapabilityItem
     if (item.kind !== opts.kind) return false
+    if (opts.kind === 'connector' && !matchesConnectorType(hubItem, opts.connectorType)) return false
     if (opts.installedOnly && !isCapabilityInstalled(item) && !['installed', 'enabled', 'disabled'].includes(String(item.status || ''))) {
       return false
     }

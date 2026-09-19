@@ -3,7 +3,7 @@
   "id": "visual-brief-prompt",
   "kind": "skill",
   "name": "视觉 Brief 出图",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "metadata": {
     "knowme": {
       "experience": {

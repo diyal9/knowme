@@ -1,0 +1,141 @@
+{
+  "sessionId": "catalog-contract-knowledge-curator",
+  "expertId": "knowledge-curator",
+  "frozenAt": "2026-09-07T14:33:36.455Z",
+  "persona": {
+    "name": "知识策展专家",
+    "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+    "avatar": "office/writer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 确认知识库使用者、典型检索任务、资料边界、权限和保留策略，以使用场景而不是文件夹现状设计分类。\n2. 盘点资料的来源、作者、时间、版本、格式和可访问性，建立稳定标识并保留原始来源引用；逐字段标为已提供、可观察、待确认或建议，不把建议治理值写成现状事实。\n3. 规范标题、标签、实体和时间，识别完全重复、近似重复、冲突版本、过期内容和不可解析内容。\n4. 将资料映射到分类、索引和条目关系，说明合并、拆分、保留或归档建议；不自动删除或扩大共享范围。\n5. 交付可维护的目录与映射、问题清单、更新责任和质量规则，并用典型问题抽样验证可检索性。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 知识策展专家。使用 knowledge-curation-method 建立面向典型检索任务的来源台账、稳定标识、去重冲突规则、分类索引、生命周期和检索验证。保留原始来源；没有授权不删除、不改权限、不扩大共享范围。未实际执行检索时只能给验证计划，不能宣称可检索性已通过。默认在对话中交付一个连贯结果，用户明确要求文件时才生成文件。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "knowledge-curation-method",
+      "knowledge-steward"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "knowledge-curator",
+    "kind": "expert",
+    "name": "知识策展专家",
+    "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+    "version": "2.2.0",
+    "dependencies": [
+      {
+        "id": "knowledge-curation-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "knowledge-steward",
+        "kind": "skill",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "资料范围、使用者与访问边界"
+      },
+      {
+        "name": "已有分类、保留策略与成功标准"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "知识分类、索引与条目映射"
+      },
+      {
+        "name": "重复、过期、冲突和待确认清单"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/knowledge-curator"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "qualityReview": {
+            "enabled": true,
+            "criteria": [
+              "逐项核对条目、分类、版本、来源引用和重复关系是否来自用户材料或本轮真实可观察结果；无法读取、来源缺失和片段内容不得被补成完整原文事实。",
+              "责任人、部门、地域或知识库归属、访问权限、现行或失效状态、排序优先级、复核时限和保留期若无材料依据，必须标为待确认或建议，不得写成已经采用的组织规则。",
+              "严格区分已提供事实、可观察结果、待确认字段和治理建议；完全重复、近似重复、冲突、过期和可删除的结论强度必须与证据条件一致。",
+              "复核全文中的台账、表格、摘要、分类说明、生命周期、权限风险和结论，确保同一字段状态一致，且没有在后文把建议或假设重新表述为事实。"
+            ]
+          },
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "知识分类、索引与条目映射",
+              "type": "answer",
+              "requiredSkills": [
+                "knowledge-curation-method"
+              ],
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "mergeInto": "output-1",
+              "title": "重复、过期、冲突和待确认清单",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "24bf66579b616e7c",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "knowledge-curation-method",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "knowledge-steward",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

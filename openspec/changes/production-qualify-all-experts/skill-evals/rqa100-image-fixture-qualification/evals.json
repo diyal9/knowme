@@ -1,0 +1,88 @@
+{
+  "status": "frozen_fixture_qualification",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "suite": "RQA100 image producer local fixture lifecycle",
+  "purpose": "Verify the generic KnowMe runtime closes the image-agent conversation, artifact, failure, retry and revision loops without using external credentials. This fixture proves plumbing, not visual quality.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 90
+  },
+  "setup": {
+    "installCapabilities": ["pango-image-mcp"],
+    "configureConnectors": [
+      {
+        "id": "pango-image-mcp",
+        "type": "mcp",
+        "enabled": true,
+        "mcp": {
+          "transport": "streamable-http",
+          "urlFromEnv": "KNOWME_PANGO_MCP_URL"
+        }
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": "FIXTURE-IP01",
+      "expertId": "image-producer",
+      "title": "真实图片回执进入待验收",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "prompt": "用户已确认 Brief，请直接执行：生成一张 1:1 的深蓝色扁平机器人头像图标，纯色浅背景，无文字、无 Logo。必须真实调用 generate_image；只有拿到工具成功回执、可解码的本地图片 artifact 和可见图片后，才能交付。",
+      "constraints": ["必须调用 generate_image", "不得把 Prompt 或 URL 当成图片", "图片成果与普通对话说明分开"],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": ["实际调用 generate_image", "存在可解码图片 artifact", "任务进入待验收并保留对话输入框"]
+    },
+    {
+      "id": "FIXTURE-IP02",
+      "expertId": "image-producer",
+      "title": "工具成功但没有图片回执",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "needs_input",
+      "expectedAttentionKind": "artifact_missing",
+      "expectedHasDeliverable": false,
+      "prompt": "用户已确认生成机器人头像。测试故障注入：generate_image 返回成功文本，但不返回任何图片数据或可下载图片。请停止在真实结果边界，不要创建伪造图片成果；说明没有收到图片，并保留任务背景以便重试。",
+      "constraints": ["允许调用 generate_image", "无图片时不得进入待验收", "不得显示空的成功成果物"],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": ["进入 artifact_missing", "不生成虚假成果", "失败后仍可从输入框重试"]
+    },
+    {
+      "id": "FIXTURE-IP03",
+      "expertId": "image-producer",
+      "title": "取消后重试保留原 Brief",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "prompt": "用户已确认 Brief：生成一张 4:3 的暖灰背景产品插画，主体为完整的白色桌面灯，光线柔和，无文字。任务被取消后允许重试；重试必须沿用这份 Brief，不得把取消轮当成成功成果。",
+      "constraints": ["取消轮不产生伪成果", "重试沿用原始比例、主体和约束", "只在真实图片 artifact 返回后进入待验收"],
+      "deliverables": [{ "id": "generated-image", "title": "桌面灯产品插画", "type": "image", "required": true }],
+      "assertions": ["事件包含 cancelled 与 retried/resumed", "重试产生新的执行证据和图片", "重新打开任务后图片与输入框仍可用"]
+    },
+    {
+      "id": "FIXTURE-IP04",
+      "expertId": "image-producer",
+      "title": "退回修改保留上一版并生成新版本",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "reviewComment": "基于上一版真实图片修改：只把背景改为纯白，并保留机器人主体形状、表情、双眼位置、比例、无文字和无 Logo。交付完整新版，不要用普通风格参考图替代上一版基图。",
+      "prompt": "用户已确认生成一张 1:1 的深蓝色扁平机器人头像图标，纯色浅背景，无文字、无 Logo。必须真实生成图片并进入待验收；后续修改以本轮生成的图片作为基图。",
+      "constraints": ["修改轮使用上一版 image artifact 作为基图", "只改变背景颜色", "新版本链接 previousVersionId"],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": ["经历 review → changes_requested → review", "新请求携带上一版 artifact", "旧版仍可查看"]
+    },
+    {
+      "id": "FIXTURE-IP05",
+      "expertId": "image-producer",
+      "title": "验收后重开保留图片证据",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "reviewComment": "重开任务，仅修正背景为纯色，保留原主体、比例、无文字和无 Logo；保留上一版供比较。",
+      "prompt": "用户已确认生成一张 1:1 的深蓝色扁平机器人头像图标，纯色背景，无文字、无 Logo。真实生成后进入待验收，验收动作由测试流程执行。",
+      "constraints": ["重开继承上一版 artifact 和完整对话", "新版本必须再次调用 generate_image", "不得丢失旧版或用户意见"],
+      "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
+      "assertions": ["经历 review → completed → changes_requested → review", "新版带 previousVersionId", "刷新或重进任务后图片和输入框仍可用"]
+    }
+  ]
+}

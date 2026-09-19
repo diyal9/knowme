@@ -1,5 +1,7 @@
 'use strict'
 
+const bundledKnowledgePacks = require('../lib/bundled-knowledge-packs')
+
 /**
  * 工作台货架/mode、管线投影与 app.whenReady。
  * 不负责进程守卫（见 process-guards.ts）或渲染层 UI。
@@ -380,9 +382,26 @@ if (ctx.gotSingleInstanceLock) {
             console.error('[capability-hub]', err?.stack || err);
         }
         try {
-            ctx.knowledgeOs.ensureDirs(ctx.app.getPath('userData'));
+            const userData = ctx.app.getPath('userData');
+            const knowledgePaths = ctx.knowledgeOs.ensureDirs(userData);
+            const packResult = bundledKnowledgePacks.syncBundledKnowledgePack({
+                packId: 'th-bi-operations-analytics',
+                version: '1.0.0',
+                packRoot: ctx.path.join(__dirname, '..', 'assets', 'knowledge-packs', 'th-bi-operations-analytics'),
+                wikiRoot: knowledgePaths.wiki,
+            });
+            if (packResult.conflicts.length) {
+                console.warn('[knowledge-pack] preserved user edits', {
+                    packId: packResult.packId,
+                    conflicts: packResult.conflicts,
+                });
+            }
+            if (packResult.changed)
+                await ctx.llmwikiService.refresh(userData);
         }
-        catch { /* */ }
+        catch (err) {
+            console.warn('[knowledge-pack]', err?.message || err);
+        }
         ctx.productMemory.ensureMemory(ctx.MEMORY_DIR);
         ctx.purgeEmptyClosedNotes();
         const trayImage = ctx.makeTrayIcon();

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 3,
+  "id": "sentiment-opinion-expert",
+  "kind": "expert",
+  "name": "舆情专家",
+  "description": "基于 last30days-cn 完成中文平台近时段主题舆情调研与证据化报告的专业工作伙伴",
+  "version": "1.0.0",
+  "dependencies": [
+    {
+      "id": "last30days-cn",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": ["run_skill_script"]
+    },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": [
+    "调研主题、时间范围与关注平台（可选）",
+    "输出深度（quick / deep）与交付形态（compact / md / html）"
+  ],
+  "outputs": [
+    "带来源的舆情结论与证据摘要",
+    "平台覆盖、稀疏信号与后续跟踪建议"
+  ],
+  "risk": {
+    "level": "medium",
+    "reasons": ["会访问公开中文平台检索接口，可能使用本机平台 Cookie"]
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/sentiment-opinion-expert"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "带来源的舆情结论与证据摘要",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "mergeInto": "output-1",
+            "title": "平台覆盖、稀疏信号与后续跟踪建议",
+            "type": "answer",
+            "required": true
+          }
+        ],
+        "routes": [
+          {
+            "id": "topic-sentiment",
+            "default": true,
+            "skillId": "last30days-cn",
+            "requiredTools": ["run_skill_script"],
+            "toolAllowlist": ["run_skill_script"],
+            "description": "调用 last30days-cn 收集中文平台近时段主题证据并合成舆情结论。",
+            "qualityReview": {
+              "enabled": true,
+              "criteria": [
+                "关键结论必须能追溯到本轮 last30days 回执中的平台与 URL。",
+                "不得编造互动量、日期、跨平台情绪或未返回的来源。",
+                "覆盖稀疏、缓存结果或平台失败必须显式告知用户。"
+              ]
+            }
+          }
+        ],
+        "qualityReview": {
+          "enabled": true,
+          "criteria": [
+            "只使用 last30days-cn 技能获取证据。",
+            "时间范围、来源清单与正文引用一致。",
+            "引擎未就绪时进入可恢复阻塞，不编造舆情。"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -244,7 +244,11 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
   return {
     ok: true,
     text: formatMeetingCandidates(top, days, identity),
-    meta: { workflow: 'meeting_candidates', days, candidates: top, identity },
+    // `turnComplete` is a generic host-runtime contract: the tool has already
+    // produced the complete user-facing result for this turn. Zero candidates
+    // cannot feed the later read stage, so another model/tool round would only
+    // duplicate work or invent a locator.
+    meta: { workflow: 'meeting_candidates', days, candidates: top, identity, turnComplete: top.length === 0 },
   }
 }
 

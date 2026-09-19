@@ -1,0 +1,31 @@
+{
+  "suite": "RQA76 image producer normal coverage completion",
+  "evaluatedAt": "2026-09-08T00:31:20.368Z",
+  "agents": [
+    {
+      "agentId": "image-producer",
+      "currentConfigurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+      "tasks": [
+        {
+          "taskId": "task-mtrxp41x-5zg7g",
+          "evalId": "IP06",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "generate_image",
+            "detail": "联合工具面未提供必需工具：generate_image"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

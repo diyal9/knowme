@@ -64,4 +64,23 @@ describe('assistant message virtuoso threshold', () => {
     expect(screen.getByTestId('agent-message-virtuoso')).toBeInTheDocument()
     expect(screen.queryByTestId('agent-message-static-list')).not.toBeInTheDocument()
   })
+
+  it('places the measured elapsed time before an AI reply', () => {
+    const { chatLogRef } = mountLog()
+    render(
+      <AssistantMessageVirtuoso
+        messages={[
+          { id: 'user', role: 'user', text: '继续', createdAt: '2026-09-18T10:00:00.000Z' },
+          { id: 'assistant', role: 'assistant', text: '好的', elapsedMs: 8_590 },
+        ]}
+        chatLogRef={chatLogRef}
+        lastAssistantId="assistant"
+        isGenerating={false}
+        onFollowUp={() => undefined}
+        onStructuredPick={() => undefined}
+        onImageOpen={() => undefined}
+      />,
+    )
+    expect(screen.getByLabelText('本轮用时 9秒')).toBeInTheDocument()
+  })
 })

@@ -1,0 +1,102 @@
+{
+  "expectations": [
+    {
+      "text": "明确6名独立参与者、9条材料记录，U1的I1/I2/T1不能变成3人，U5的I6/T2不能变成2人；若报告状态不确定主题比例，以U1/U2两名不同参与者作2/6样本描述，而不是3/9等记录占比冒充人数或总体比例。",
+      "passed": false,
+      "evidence": "answer.md全文仅‘收到。’，没有分析单位、参与者人数、记录数或去重说明。独立核算原材料为I1至I7加T1/T2共9条、U1至U6共6人；I1/I2/T1属于U1，I6/T2属于U5，不能增加独立人数。没有报告错误分母，不等于已完成正确去重交付。"
+    },
+    {
+      "text": "至少把状态可理解性/重复操作顾虑关联I1/I2/I3，把归档导出任务关联I5，把工作区边界信任风险关联I6，并保留各自采集上下文；原话不被润色成新引语，不把U1刷新后出结果解释为已证明刷新修复故障。",
+      "passed": false,
+      "evidence": "全文‘收到。’没有主题、记录ID、采集上下文或证据映射。未将I1/I2/I3的状态理解、I5归档任务、I6边界信任现象转为可追溯分析。没有篡改引语或宣称刷新修复，但正向分析要求全部缺失。"
+    },
+    {
+      "text": "保留I4清晰断网提示且平时够用、I7日常满意且不需要导出的反例，区分新成员/管理员和不同故障情景；说明付费内测自选、管理员偏多、无流失样本及I5诱导提问限制，不能声称总体偏好、饱和或因果成立。",
+      "passed": false,
+      "evidence": "‘收到。’没有保留I4/I7反例，未区分两名新成员与四名管理员，也没有说明自选内测、流失/未激活/非付费人群缺失及I5诱导提问。未外推总体或因果不构成此复合断言的通过证据。"
+    },
+    {
+      "text": "对批量导出是否独占迭代给有依据的有条件判断，区分一人归档需求与购买权限未知；对U5单人高潜在影响给核验优先级而非宣称已泄漏或因低频忽略，机会/建议中的收益与原因也不得补造。",
+      "passed": false,
+      "evidence": "‘收到。’未回答是否把整个迭代投入批量导出，未评估I5的单人归档需求与非购买决策者边界，也未给U5少数高潜在影响现象的核验优先级。没有提供任何机会、取舍或条件，不替模型补出推荐；也不把沉默误记为明确宣告无风险。"
+    },
+    {
+      "text": "后续研究在最多6个名额内给出对象选择、中性问法或行为观察、可区分替代解释的记录项及会改变建议的结果；至少验证状态理解与真实等待/故障的区别，以及工作区预览边界现象，不只问想要哪些功能，不虚构已招募/已验证。",
+      "passed": false,
+      "evidence": "全文无研究计划、名额分配、对象选择、中性问法、观察任务或改变建议的判据。未设计区分状态理解与真实等待/故障的记录项，也无使用合成工作区材料核验预览边界的安排。未实际招募或调查符合禁止执行边界，但不能以零操作代替应交付的预算内研究设计。"
+    }
+  ],
+  "summary": { "passed": 0, "failed": 5, "total": 5, "pass_rate": 0 },
+  "claims": [],
+  "claims_review": {
+    "scope": "已检查完整答复，包括主表外内容；本次根本没有表格、建议或附注。",
+    "finding": "‘收到。’仅确认接收，不包含可验证的研究事实、推断、收益或完成声明。无实质claims可逐项验证；空数组不表示专业通过。",
+    "platform_boundary": "review/DONE/verified是平台记录，不是模型提供研究分析的证据，也不能当作模型声称研究已完成。",
+    "professional_hard_failure": "已给完整冻结材料并明确委托，但模型只确认接收，没有交付任何所需分析或研究建议。按实际答案评分为0/5，不是工程无输出N/A。"
+  },
+  "hard_failure_condition_review": [
+    { "condition_index": 1, "status": "not_observed", "evidence": "未计数、未外推、未声称饱和；断言1/3因完全缺少所需分析失败，不伪造重复计数或外推行为。" },
+    { "condition_index": 2, "status": "not_observed", "evidence": "未引用受访者、未叙述事故或调查成果，也未声称刷新有效或已泄漏；不捏造模型的虚假事实。" },
+    { "condition_index": 3, "status": "not_observed", "evidence": "没有优先级理由或无风险结论；确实漏交高潜在影响核验，但不能把漏交等同于依据低频宣告无风险。断言4已判失败。" }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["outputs目录只有answer.md，无user_notes.md或metrics.json。", "为何仅回复确认语，当前评分不作运行时、提示词或模型机制归因。"],
+    "needs_review": ["应完成去重、证据主题、反例与局限、迭代取舍及预算内研究计划；不是把确认语润色得更长。"],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "冻结5断言和全部notes足以识别本次完全未交付，未修改题目或要求。每条均有正向交付要求，不能因模型未说错误事实而空泛通过。"
+  },
+  "timing": {
+    "total_duration_seconds": 1.494,
+    "duration_ms": 1494,
+    "total_tokens": 8923,
+    "source": "old_skill/timing.json metrics.totalMs与usage，已与同run capture逐字段核对；不是grader耗时"
+  },
+  "observed_metrics": {
+    "source": "answer.md及同run capture.metrics只读核算",
+    "answer_text": "收到。",
+    "answer_utf16_chars_excluding_file_newline": 3,
+    "answer_file_utf16_chars": 4,
+    "answer_han_chars": 2,
+    "answer_alnum_blocks": 0,
+    "answer_han_plus_alnum_blocks": 2,
+    "answer_non_whitespace_codepoints_including_punctuation": 3,
+    "length_limit_in_frozen_prompt": null,
+    "length_verdict": "未设长度阈值；失败来自全部实质交付缺失，不是标点或字数启发式",
+    "provider_prompt_tokens": 8921,
+    "provider_completion_tokens": 2,
+    "provider_total_tokens": 8923,
+    "rounds": 1,
+    "tool_calls": 0
+  },
+  "review_metadata": {
+    "case_id": "UR-N01",
+    "configuration": "old_skill",
+    "installed_agent_version": "2.0.0",
+    "blind": false,
+    "candidate_author_participation": false,
+    "ur_skill_read_for_grading": false,
+    "task_id": "task-mtp24yzq-x736d",
+    "session_id": "wb-expert-task-mtp24yzq-x736d",
+    "run_id": "expert_task-mtp24yzq-x736d_mtp24z58",
+    "model_finish_reason": "stop",
+    "platform_task_status": "review",
+    "platform_terminal": "DONE",
+    "platform_gate_status": "verified",
+    "professional_status": "fail",
+    "gradable": true,
+    "not_applicable": false,
+    "professional_certification": false,
+    "binding_verified": "按task ID从rqa15-old-live提取task/capture，与transcript完全一致；metadata的prompt/expectations/notes/hard-fail逐项等于原冻结UR-N01；材料content等于prompt；answer为capture.text加一个换行；timing.metrics等于capture.metrics。",
+    "skill_context_boundary": "assignmentSnapshot仅证明旧版2.0.0绑定writing-polish；primary.requiredSkills=[]。本导出无contextAudit，不推断完整Skill正文实际装配。未读取UR候选方法或其包内容。",
+    "comparison_boundary": "计划为UR-N01/UR-H02新旧2x2非盲互审；本次只评分UR-N01旧版1份，其余未评分，不记0或N/A，不提前比较版本效果或作Skill因果归因。",
+    "input_sha256": {
+      "eval_metadata.json": "c1ca690b457878a06a4fcdc364cf43a0ba69f6b8e34baf04c4b68b11ed124a99",
+      "old_skill/transcript.json": "e3bd2e0d49d824d30b84a3e04a35fc4d1053ba7b1eeaf8f60a5be51dc6934f95",
+      "old_skill/outputs/answer.md": "739e64954fbe6d9cfc12e2a252491816938796676a5743455a061b88e97b07bd",
+      "old_skill/timing.json": "10858aa1a3e535f6e7ff8c482271c524ea612d9593f047c088f03bcb21e45e9e"
+    }
+  }
+}

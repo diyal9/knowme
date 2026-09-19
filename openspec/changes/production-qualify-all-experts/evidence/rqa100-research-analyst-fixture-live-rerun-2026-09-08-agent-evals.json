@@ -1,0 +1,83 @@
+{
+  "suite": "RQA74 research analyst lifecycle completion",
+  "evaluatedAt": "2026-09-08T08:04:47.064Z",
+  "agents": [
+    {
+      "agentId": "research-analyst",
+      "currentConfigurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+      "tasks": [
+        {
+          "taskId": "task-mtsdw8jq-lw4cx",
+          "evalId": "RA05",
+          "scenario": "edge",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdw8qn-qdoe3",
+          "evalId": "RA06",
+          "scenario": "retry",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdw95a-xrzk0",
+          "evalId": "RA07",
+          "scenario": "revision",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "capability_unavailable",
+            "action": "open_capability",
+            "item": "search_web",
+            "detail": "联合工具面未提供必需工具：search_web"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtsdw9c0-xlagl",
+          "evalId": "RA08",
+          "scenario": "reopen",
+          "status": "review",
+          "configurationId": "expert-config-v2:496990db198b44cce386b742626d885d5928492f487a3ae663b3f1281bb3f8ff",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

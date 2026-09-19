@@ -15,7 +15,7 @@ async function executeAgentGenerate(env) {
   const {
     AgentRunExecutor, buildProductionRunPorts, resolveAgentExecutorMode, resolveGroundingRuntimeMode,
     feishuGrounding, feishuGroundingAdapter, agentVerify, agentRun, writingWorkflow, llmUsage,
-    productMemory, normalizeAssistantOutput, agentProcessTools, logger, contextEngine,
+    productMemory, brainService, app, normalizeAssistantOutput, agentProcessTools, logger, contextEngine,
   } = L
   const {
     loadSettings, saveSettings_, loadAgentSessions, saveAgentSessions, getFeishuGroundingContext,
@@ -47,6 +47,7 @@ async function executeAgentGenerate(env) {
     } = prepared
     const {
       teamRuntime, toolSurface, toolExecutor, connectorRuntime, resolvedSurface, feishuIntent,
+      systemFeishuEnabled,
     } = surface
 
     const suppressStreamForFeishuGuard = !!(
@@ -80,7 +81,9 @@ async function executeAgentGenerate(env) {
       onStreamChunk: null,
       runStartedAt,
       effectivePersonalization,
-      ctxBundle: { contextInfo, taskFrame: groundingTaskFrame },
+      ctxBundle: { contextInfo, taskFrame: groundingTaskFrame, providedMaterials: prepared.providedMaterials },
+      taskRef: payload.taskRef,
+      workbenchTaskId: payload.workbenchTaskId,
       loadAgentSessions,
       saveAgentSessions,
       productMemoryCapture: productMemory.capture,
@@ -115,31 +118,46 @@ async function executeAgentGenerate(env) {
         }
       },
       postProcessHooks: async ({ fullText, toolMessages: toolMsgs, session: sess }) => {
-        const feishuGroundingContext = await getFeishuGroundingContext()
-        // The meeting-candidates tool is a deterministic intermediate step.
-        // Always surface its own returned list (including an explicit empty
-        // result) before asking the model to compose a final answer. This
-        // prevents a model's generic "no evidence" sentence from replacing a
-        // valid candidate response during FINALIZE/grounding.
-        const latestMeetingCandidates = [...(Array.isArray(toolMsgs) ? toolMsgs : [])]
-          .reverse()
-          .find(item => item?.toolName === 'feishu.meeting_candidates' && item?.status === 'done')
-        const hasMeetingRead = (Array.isArray(toolMsgs) ? toolMsgs : [])
-          .some(item => item?.toolName === 'feishu.meeting_read' && item?.status === 'done')
-        if (latestMeetingCandidates && !hasMeetingRead && String(latestMeetingCandidates.text || '').trim()) {
-          return String(latestMeetingCandidates.text).trim()
+        // Expert planning/discussion deliberately runs without tools. It is a
+        // conversation about the task, not an attempted Feishu read. Do not
+        // probe Feishu or replace the expert's planning answer with the
+        // generic "没有拿到工具返回" guard in this phase.
+        const collaborationOnly = payload.conversationMode === 'expert-planning'
+          || payload.conversationMode === 'expert-discussion'
+        const formalExecution = payload.conversationMode === 'expert-execution'
+        // Formal obligations come from structured contracts, never from the
+        // display label, task ID, SOP, or source material. Runtime GROUND keeps
+        // its independent strict gate; legacy needs the same declared-receipt
+        // check here because it skips that phase. Neither path guesses intent.
+        if (formalExecution && resolveGroundingRuntimeMode() === 'legacy') {
+          feishuGroundingAdapter.assertDeclaredExecutionEvidence([
+            sess?.referenceState?.taskFrame,
+            groundingTaskFrame,
+            payload.executionContract,
+          ], toolMsgs, sess)
         }
-        if (resolveGroundingRuntimeMode() === 'legacy') {
-          const feishuHint = feishuGrounding.buildFeishuGroundingHint(prompt, toolMsgs, fullText, {
-            ...feishuGroundingContext,
-            priorFeishuFacts: hasPriorFeishuFacts(sess),
-          })
-          if (feishuHint) return feishuHint
-        } else {
-          const feishuHint = feishuGroundingAdapter.buildLegacyPostProcessHint(prompt, toolMsgs, fullText, {
-            ...feishuGroundingContext,
-            priorFeishuFacts: hasPriorFeishuFacts(sess),
-          })
+        if (!collaborationOnly && !formalExecution) {
+          const discoveredFeishuContext = await getFeishuGroundingContext()
+          const feishuGroundingContext = systemFeishuEnabled && discoveredFeishuContext.connectorEnabled === false
+            ? {
+                ...discoveredFeishuContext,
+                // The built-in surface is already projected for this explicit
+                // request. Do not tell the model the connector is absent just
+                // because the Expert has no per-agent binding or the default
+                // connector record is disabled; lark-cli auth is checked when
+                // the projected tool actually runs.
+                connectorEnabled: true,
+                allowlist: null,
+                projectedAllowlist: null,
+              }
+            : discoveredFeishuContext
+          const feishuHint = feishuGroundingAdapter.buildChatPostProcessHint(
+            prepared.contextDraft?.prompt || prompt, toolMsgs, fullText, {
+              ...feishuGroundingContext,
+              referenceState: ports.grounding?.getReferenceState?.() || sess?.referenceState,
+              priorFeishuFacts: hasPriorFeishuFacts(sess),
+            },
+          )
           if (feishuHint) return feishuHint
         }
         const planPartial = agentVerify.buildPartialFinalizeNote(
@@ -157,25 +175,36 @@ async function executeAgentGenerate(env) {
     try {
       const kernelResult = await AgentRunExecutor.run({
         ...payload,
+        providedMaterials: prepared.providedMaterials,
         // Keep the configured name available to the final output gate. It is
         // identity metadata, never a required response prefix.
         assistantDisplayName: effectivePersonalization.agentDisplayName || '',
       }, ports, emit)
       const failed = Boolean(kernelResult.error && (kernelResult.terminal === 'ERROR' || kernelResult.terminal === 'FAILED'))
+      const evidenceBlocked = kernelResult.terminal === 'ERROR'
+        && (kernelResult.executionEvidence?.gateStatus === 'blocked'
+          || kernelResult.executionEvidence?.verificationPassed === false)
+      const unsuccessful = failed || evidenceBlocked
       env.settleAdoptedRun = null
       teamRuntime.manager.completeAdoptedRun(runId, {
-        terminal: kernelResult.cancelled ? 'cancelled' : (failed ? 'failed' : 'completed'),
-        status: kernelResult.cancelled ? 'cancelled' : (failed ? 'failed' : 'completed'),
-        ok: !failed && !kernelResult.cancelled,
+        terminal: kernelResult.cancelled ? 'cancelled' : (unsuccessful ? 'failed' : 'completed'),
+        status: kernelResult.cancelled ? 'cancelled' : (unsuccessful ? 'failed' : 'completed'),
+        ok: !unsuccessful && !kernelResult.cancelled,
         cancelled: kernelResult.cancelled === true,
         summary: kernelResult.text || String(kernelResult.error || ''),
         report: kernelResult.report,
         metrics: kernelResult.metrics,
-        stopReason: (failed || kernelResult.cancelled)
-          ? String(kernelResult.error || kernelResult.terminal || '')
+        stopReason: (unsuccessful || kernelResult.cancelled)
+          ? String(kernelResult.error || kernelResult.executionEvidence?.violations?.[0]?.message || kernelResult.terminal || '')
           : null,
       })
       if (kernelResult.cancelled) {
+        contextEngine.recordContextOutcome({
+          status: 'cancelled',
+          scene: contextInfo?.contextManifest?.scene,
+          promptVersion: contextInfo?.contextManifest?.promptPackVersion,
+          model: modelProfile.model,
+        })
         return {
           error: String(kernelResult.error || '请求已取消'),
           cancelled: true,
@@ -183,16 +212,67 @@ async function executeAgentGenerate(env) {
         }
       }
       if (failed) {
-        return fail(kernelResult.error)
+        contextEngine.recordContextOutcome({
+          status: 'failed',
+          scene: contextInfo?.contextManifest?.scene,
+          promptVersion: contextInfo?.contextManifest?.promptPackVersion,
+          model: modelProfile.model,
+        })
+        // Keep the humanized public error while preserving typed kernel
+        // diagnostics. Expert tasks and qualification harnesses need the
+        // actual review findings and budget metrics; collapsing this to
+        // `{ error, runId }` made every professional rejection look alike.
+        const projectedFailure = fail(kernelResult.error)
+        return {
+          ...projectedFailure,
+          code: kernelResult.code || kernelResult.errorInfo?.code || kernelResult.report?.error?.code || null,
+          errorInfo: kernelResult.errorInfo || kernelResult.report?.error || null,
+          metrics: kernelResult.metrics || null,
+          report: kernelResult.report || null,
+          executionEvidence: kernelResult.executionEvidence || null,
+          terminal: kernelResult.terminal || null,
+          protocolVersion: kernelResult.protocolVersion || null,
+        }
       }
       const finalSession = ports._state?.session || session
+      try {
+        if (brainService && app && typeof brainService.observeConversation === 'function') {
+          brainService.observeConversation(app.getPath('userData'), {
+            text: prompt,
+            sessionId: finalSession?.id,
+            runId,
+            taskId: finalSession?.taskRef?.id,
+            projectId: finalSession?.projectId,
+            agentId: finalSession?.agentId || payload.agentId || 'personal',
+            ephemeral: finalSession?.ephemeral === true || payload.ephemeral === true,
+            allowPromotionProposal: payload.knowledgePolicy?.allowPromotionProposal,
+            sourceLabel: '你在伙伴对话中的明确表达',
+          }, { memoryDir: MEMORY_DIR })
+        }
+      } catch { /* cognition observation must never block the completed answer */ }
+      contextEngine.recordContextOutcome({
+        text: kernelResult.text,
+        identity: contextInfo?.contextManifest?.identity,
+        identityAsked: /你叫什么|你的名字|你是谁|自我介绍|what(?:'s| is) your name|who are you|introduce yourself/i.test(String(prompt || '')),
+        toolCalls: kernelResult.metrics?.toolCalls || 0,
+        retries: kernelResult.metrics?.retries || 0,
+        status: kernelResult.cancelled ? 'cancelled' : (evidenceBlocked ? 'failed' : 'completed'),
+        scene: contextInfo?.contextManifest?.scene,
+        promptVersion: contextInfo?.contextManifest?.promptPackVersion,
+        model: modelProfile.model,
+      })
       return {
         streamed: kernelResult.streamed, runId, sessionId: finalSession.id,
         artifacts: finalSession?.run?.artifacts || [],
+        // Tool-owned artifacts may not be materialized into the generic session
+        // artifact store. Preserve their refs so expert runtimes can promote a
+        // generated image URL/data block into a reviewable deliverable.
+        artifactRefs: Array.isArray(kernelResult.artifactRefs) ? kernelResult.artifactRefs : [],
         toolCalls: kernelResult.metrics?.toolCalls || 0, compacted: false,
         metrics: kernelResult.metrics, protocolVersion: kernelResult.protocolVersion || null,
         answerHash: kernelResult.answerHash || null, terminal: kernelResult.terminal || null,
         text: String(kernelResult.text || ''),
+        attention: kernelResult.attention || null,
         executionEvidence: kernelResult.executionEvidence || {
           gateStatus: 'not_required', verificationPassed: true, toolCalls: [], evidence: [], violations: [],
         },

@@ -1,0 +1,193 @@
+{
+  "expectations": [
+    {
+      "text": "明确8小时无限离线访问与5分钟撤权硬保证在给定信息下不可同时满足；保留硬保证，明确离线访问最多限有效许可剩余期/过期拒绝，或将放宽硬保证单列为需重新批准，不能采纳10分钟同步或恢复网络才撤权来声称满足现约束。",
+      "passed": true,
+      "evidence": "通过的是冲突取舍，不是整份安全方案。§1否决10分钟同步并保留已批准硬要求；§2方案C明确不满足5分钟、需书面豁免且不计可行备选；§7最终选择60秒有界许可，过期完全不可用，放弃8小时连续离线。§1离线只读旧缓存的措辞有歧义，但后文明确许可过期不得查看，未将8小时方案伪装为当前合规。§4把T4撤权/T4.5访问判违规的错误在断言2与claims记录；更短TTL本身可选，不把保守策略当成违反硬要求。"
+    },
+    {
+      "text": "比较至少两个真正符合硬要求的可行方案并给推荐和代价，例如逐次在线授权的本地检索与有界许可的本地检索；比较断网可用性、延迟依赖、实现/运维与4周约束，不把一个违反硬要求的方案算第二个可行方案，也不凭进程拆分保证P95。",
+      "passed": false,
+      "evidence": "§2列出短许可本地检索与逐次在线授权两种不同策略，也写断网及成本代价；方案C明确排除、未凑数。但比较与推荐的核心推导失效：§4称T0签5min、T4撤销、T4.5访问‘违规’，从而断言必须逐次在线或TTL远小于5min。实际T4.5仅在撤权后0.5min，T5到期只比撤权晚1min，符合≤5min。§2又称A是两人四周约束下‘唯一’同时满足撤权与隔离的路径，却已列可用的在线B且无实现估算。60秒A可作为更严取舍，不足以修复错误排除其他可行策略和无据工期理由；故不是两种真正可行策略的可靠比较。并未因B不支持离线而扣分，完全在线是冻结题允许的选项。"
+    },
+    {
+      "text": "给出权威服务端与本地索引/缓存的职责、按account/workspace隔离的权限与数据键、查询/打开/缓存命中及交付结果的许可检查；撤W1不能借共享缓存越权或无理由使W2永久不可用，明确索引一致性不等于权限有效性。",
+      "passed": false,
+      "evidence": "服务端权限/文档权威、本地索引/缓存职责及(account,workspace)逻辑或物理分区均有，W2可独立刷新，缓存过期禁止返回标题/摘要/正文也是正确点。但§2/§3仅在查询/打开前及缓存命中时校验，正文从未给出长任务完成、向UI交付结果前重新校验/过滤。A2明确任务可能有效期内开始、过期后生成结果，不能替答复补上最终输出门禁。不是仅缺术语，而是缺少一个实际安全检查位置。"
+    },
+    {
+      "text": "用具体失效序列处理至少许可过期时正在运行的查询、重启/休眠无法证明有效、旧版本授权响应乱序到达三类情况：交付前拒绝或过滤、保守重新授权/拒绝、不让旧许可覆盖较新撤权，且不靠本地重新计时或无限延长TTL。",
+      "passed": false,
+      "evidence": "重启/休眠不能证明时间连续时UNKNOWN并重新授权/拒绝、旧响应99低于高水位100时丢弃均有具体过程，未用重启续期。但三个必需序列中的‘有效时开始、过期后完成’完全没有处理。静态反例：T0签60秒许可、T1秒撤权、T59秒查询通过入口检查、T302秒才返回结果；已过T60到期且越过撤权后T301的硬界限，文中没有交付前检查阻止返回。该反例检验的是方案缺口，不声称客户端实际执行过泄漏。§4的T4/T4.5错误另见断言2；不能以有三段场景标题代替三类覆盖。"
+    },
+    {
+      "text": "迁移和回退均保持权限硬约束，不因恢复旧索引/缓存恢复旧授权；给出包含断网撤权的受控时序验收与性能验证的负载/设备条件/测量边界，明确所有结果未测，原始材料体积不能直接当索引内存或已证明容量。",
+      "passed": false,
+      "evidence": "§5影子期‘不拦截请求’，灰度回退‘一键切回旧版校验逻辑’，全量后恢复旧二进制；只要求数据结构兼容，未保证旧路径也执行同一有效许可门禁。不能替旧实现证明安全，也不能把旧版真实存在泄漏当成已知事实；缺失回退安全前提已不满足断言。另称迁移不可逆并仅重建索引，缺可逆切换证据。撤销验收仅在线撤销；离线测试只覆盖重启，没有断网后撤权的截止时间序列。P99<5min不能作为所有访问的硬上界。性能表有2万×40KiB与CPU/内存/耗时，但无设备基准、冷热缓存、查询负载和计时起止；‘建立基线’还不是可执行测量契约。未把原始体积当索引内存，未声称实际压测成功，这些正确点保留。"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  },
+  "claims": [
+    {
+      "claim": "T=0签发5分钟许可、T=4撤销、T=4.5访问违反撤权后至多5分钟要求。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "撤销后仅经过0.5分钟；既定到期T5距撤权1分钟。只要使用服务端到期界限、不可续期且在交付检查，旧许可在撤权前签发、最长5分钟即可给出≤5分钟上界。按分钟解释原时间线；不论T4/T4.5误用秒或分钟，该例都尚未越过5分钟。"
+    },
+    {
+      "claim": "只有逐次在线检查或远短于5分钟的TTL才能满足硬要求。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "A2已经提供最长5分钟许可、单调计时及在线再次授权能力。必要条件是正确到期执行，而非必须把5分钟改成60秒；短TTL是可选取舍。"
+    },
+    {
+      "claim": "方案A是两人四周下唯一满足撤权时效和隔离的可实现路径；两人四周足够完成。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "A1只给资源上限，没有模块规模、测试/迁移工作量或估算。答复已提出在线B，亦未证明B无法隔离。§7把时间上限升为完成保证，属于未经证实的可行性判断，不是捏造实际报价或已执行工程。"
+    },
+    {
+      "claim": "长时间离线的预授权包可借额外推送通道解决5分钟撤权。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "§2C的‘除非引入推送通道’不能解决给定长断连：无可达通道时推送不能送达。若改成另有始终可达链路，必须更改前提；答复未给。C最终被排除，故不记成当前已批准8小时方案。"
+    },
+    {
+      "claim": "先查询/打开检查、过期拒绝新请求即可覆盖全部受限交付。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "未覆盖已经在有效期内启动但过期后完成的结果，见断言3/4具体时序。内存旧结果语句有歧义，但§7要求许可未过期；不将歧义直接记为明确允许永久缓存访问。"
+    },
+    {
+      "claim": "旧校验逻辑/旧二进制回退是保持安全要求的可逆迁移。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "没有回退授权门禁或拒绝不兼容旧版本的条件；影子期也未说明另有强制安全底线。旧索引可恢复不等于授权可恢复。这里是不充分的方案保证，不断言旧实现已被实际证明越权。"
+    },
+    {
+      "claim": "P99撤销延迟小于5分钟能够证明撤权硬上界。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "P99会留下尾部例外，A1要求的是至多5分钟后的所有新访问拒绝。§6在线用例没有补齐离线撤权及过期任务尾部覆盖。P99可作运行监控，不能替代硬上界验收。"
+    },
+    {
+      "claim": "合并缓存必然只能全清或超时，直接违反隔离。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "物理共享存储可用(account,workspace)键及逐次授权实现隔离。批评无隔离设计合理，但不能仅由‘合并’推出物理共享必然越权；答复自身§1也允许逻辑分区。"
+    },
+    {
+      "claim": "重启/休眠不可靠时重新授权或拒绝，旧版本响应丢弃。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "§3及§4明确UNKNOWN、在线刷新/离线拒绝；99<100丢弃。此处认可已给机制，不自动扩展到同版本重放、未知撤权状态持久化等未说明场景。"
+    },
+    {
+      "claim": "正文保持拟议迁移/测试语境，没有宣称实际部署或已验证性能容量。",
+      "type": "process",
+      "verified": true,
+      "evidence": "§6明确待验证、§1拒绝P95保证，同run 0tools。静态方案的部署动作不是本人已执行；无工具不会自动证明事实均正确。"
+    }
+  ],
+  "hard_failure_condition_review": [
+    {
+      "condition": "声称无限8小时离线访问和5分钟撤权已由10分钟轮询、单独索引服务或恢复联网解决，隐性放松已批准硬要求。",
+      "status": "not_observed_as_current_approved_solution",
+      "evidence": "最终明确拒绝8小时离线与5分钟保证同时满足，C需豁免且排除。存在推送和时间上界推理错误，但不扩大为已经批准长期离线。"
+    },
+    {
+      "condition": "方案允许重启续期、过期查询结果/缓存继续向撤权账号返回受限内容，或跨工作区泄漏。",
+      "status": "design_allows_unchecked_late_result_by_omission",
+      "evidence": "有效期内启动的查询缺交付复检，有可构造超过撤权5分钟才返回的路径；回退路径亦未保证权限底线。未实际执行，不宣称发生真实数据泄漏；未观察到重启续期的明确许可。"
+    },
+    {
+      "condition": "无实际回执却宣称性能、安全性、容量或部署已经验证；捏造预算/报价/批准记录。",
+      "status": "no_fabricated_execution_receipt_observed",
+      "evidence": "没有实际测试/部署已成功声明或虚构报价批准；‘两人四周足够’是无据实施承诺，单独记claims，不把它误称为实际预算回执。"
+    }
+  ],
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "output_chars": 4987,
+    "source": "指定run capture.result.metrics及result.text；未另造工具执行"
+  },
+  "timing": {
+    "executor_duration_seconds": 59.949,
+    "total_duration_seconds": 59.949,
+    "source": "capture.result.metrics.totalMs=59949；无独立grader耗时，不填"
+  },
+  "observed_metrics": {
+    "answer_chars": 4987,
+    "answer_file_chars": 4988,
+    "han_chars": 2579,
+    "alnum_blocks": 237,
+    "han_plus_alnum_blocks": 2816,
+    "non_whitespace_including_punctuation_and_markdown": 4433,
+    "length_limit": null,
+    "length_verdict": "冻结题未设长度上限，4987是raw字符而非中文计字；不按Markdown长度扣分",
+    "provider_prompt_tokens": 11029,
+    "provider_completion_tokens": 5482,
+    "provider_total_tokens": 16511,
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "requested_output_tokens": [
+      2600,
+      5200
+    ],
+    "policy_max_output": 131072
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "评分时无独立user_notes/timing.json；耗时与tokens直接来自同run provider metrics。",
+      "本导出显示requiredSkills声明及SOP路由，未提供同run skill.explicit-content hash/chars/contextAudit，不能凭声明另推完整方法装配。"
+    ],
+    "needs_review": [
+      "我是SA候选包/architecture-decision方法作者，且收到主线问题提示；本报告不是作者独立或盲评，需主线另复核。",
+      "五断言结论应与额外专业硬伤分开，不以平台verified作为专业合格。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "五断言及notes足以区分本例主要问题；按全篇机制而非标题关键词核对。工期承诺与推送前提作为额外claims保留，不修改冻结输入。"
+  },
+  "review_metadata": {
+    "case_id": "SA-N01",
+    "iteration": "runtime-repair-iteration",
+    "installed_agent_version": "2.1.0",
+    "candidate_author_participation": true,
+    "blind": false,
+    "prior_main_findings_exposed": true,
+    "independent_author_review": false,
+    "main_review_required": true,
+    "professional_status": "fail",
+    "professional_certification": false,
+    "task_id": "task-mtp2j3g0-uo0z8",
+    "session_id": "wb-expert-task-mtp2j3g0-uo0z8",
+    "run_id": "expert_task-mtp2j3g0-uo0z8_mtp40w2z",
+    "task_status": "review",
+    "terminal": "DONE",
+    "platform_gate_status": "verified",
+    "binding_verified": "capture按task+指定新run与rqa16 raw匹配；task对象完全相同；同run user包含冻结prompt，assistant与capture.result.text和answer.md一致；五expectations、notes、硬条件与原冻结case一致。session有旧run历史，未混为本轮。",
+    "comparison_boundary": "RQA16运行时修复后同候选重试，非Skill A/B；不覆盖RQA15失败/N/A。无法凭最终答复推断错误首次来自MODEL还是FINALIZE；H02此次needs_input平台拒绝，专业N/A且未在本目录打0分。",
+    "input_sha256": {
+      "evidence/rqa16-sa-retry-live-2026-09-06.json": "38c60bade933c18898809aa0c9235dfa99ac682c6fde0e05660685c51bf7c2a7",
+      "skill-evals/professional-batch4-workspace/runtime-repair-iteration/SA-N01/transcript.json": "c589c9159c9276ceb6653ddcdfacae352fb859ab0ba9d4d8b0983759e5eb4a82",
+      "skill-evals/professional-batch4-workspace/runtime-repair-iteration/SA-N01/outputs/answer.md": "cba9ebd7e16eaff2c78ec47f64676a97451bf0e937e3a7fd91f516c0fafd8eca",
+      "skill-evals/professional-batch4-workspace/method-iteration-1/SA-N01/eval_metadata.json": "11a1b293b120e0527221103cd1f9e0dc86fea12b634764231dc6b60ded4f0a1d"
+    }
+  }
+}

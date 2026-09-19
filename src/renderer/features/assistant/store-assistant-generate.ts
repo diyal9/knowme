@@ -105,6 +105,7 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
           trace: settleExecutionTrace(msg.trace, terminalStatus),
           elapsedMs: msg.startedAt ? Date.now() - msg.startedAt : msg.elapsedMs,
           firstTokenMs: msg.firstTokenMs || (final.text && msg.startedAt ? Date.now() - msg.startedAt : msg.firstTokenMs),
+          ...(final.structuredUi ? { structuredUi: final.structuredUi } : {}),
         })),
       }
     })

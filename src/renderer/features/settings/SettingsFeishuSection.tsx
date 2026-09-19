@@ -1,5 +1,5 @@
 /**
- * 设置页飞书连接区块：一键授权主路径、权限确认、高级白名单。
+ * 设置页飞书连接区块：lark-cli 一键授权主路径、权限确认、高级白名单。
  * 状态文案与主 CTA 由 buildFeishuCardModel 决定，本组件不内联就绪分支。
  */
 import { useEffect, useState } from 'react'
@@ -101,7 +101,7 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
             data-mode={card.primaryMode}
             onClick={onPrimaryClick}
           >
-            {actionBusy ? '连接中…' : card.primaryLabel}
+            {actionBusy ? '授权中…' : card.primaryLabel}
           </button>
           <button type="button" className="settings-btn" onClick={() => void onRefresh()}>
             刷新状态
@@ -135,7 +135,7 @@ export function SettingsFeishuSection({ feishu, status, polling, flash, onRefres
           )}
           <div className="settings-actions" style={{ padding: '8px 0 0' }}>
             <button type="button" className="settings-btn primary" disabled={actionBusy} onClick={() => void startAuth(true)}>
-              {actionBusy ? '连接中…' : '确认并授权'}
+              {actionBusy ? '授权中…' : '确认并授权飞书 CLI'}
             </button>
             <button type="button" className="settings-btn" onClick={() => setConfirmOpen(false)}>
               取消

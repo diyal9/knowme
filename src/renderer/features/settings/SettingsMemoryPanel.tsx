@@ -1,91 +1,56 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import type { GlobalMemoryItem, MemoryOverview, MemoryPattern, MemoryRecord } from '../../../shared/api-extended'
+import { useCallback, useEffect, useState } from 'react'
+import type { PersonalAgentProfile } from '../../../shared/api'
 import { SettingsToggle } from './SettingsToggle'
 
 type Props = { flash: (msg: string, kind?: 'ok' | 'err') => void }
-type MemoryType = GlobalMemoryItem['type']
+type MemoryScope = 'preferences' | 'goals' | 'projects' | 'relationships'
+type BrainScope = 'global' | 'project' | 'organization'
 
-const TYPE_LABELS: Record<MemoryType, string> = {
-  fact: '个人事实', preference: '长期偏好', goal: '目标与关注',
-  relationship: '人物与关系', decision: '经验与决策',
-}
+const MEMORY_SCOPE_LABEL: Record<MemoryScope, string> = { preferences: '偏好与纠正', goals: '目标与关注', projects: '项目与决策', relationships: '人物与关系' }
+const BRAIN_SCOPE_LABEL: Record<BrainScope, string> = { global: '关于我的协作理解', project: '当前项目与工作状态', organization: '组织知识与授权来源' }
 
 export function SettingsMemoryPanel({ flash }: Props) {
-  const [learning, setLearning] = useState(false)
-  const [items, setItems] = useState<GlobalMemoryItem[]>([])
-  const [patterns, setPatterns] = useState<MemoryPattern[]>([])
-  const [recent, setRecent] = useState<MemoryRecord[]>([])
-  const [stats, setStats] = useState<MemoryOverview['stats']>({})
-  const [type, setType] = useState<MemoryType>('fact')
-  const [text, setText] = useState('')
-  const [scope, setScope] = useState<'global' | 'project'>('global')
-  const [project, setProject] = useState('')
-  const [filter, setFilter] = useState<'all' | MemoryType>('all')
-  const [showActivity, setShowActivity] = useState(false)
+  const [learning, setLearning] = useState(true)
+  const [memoryScopes, setMemoryScopes] = useState<MemoryScope[]>(['preferences', 'goals', 'projects'])
+  const [brainScopes, setBrainScopes] = useState<BrainScope[]>(['global', 'project'])
+  const [confirmGrowth, setConfirmGrowth] = useState(true)
+  const [protectSensitive, setProtectSensitive] = useState(true)
+  const [retention, setRetention] = useState('archive')
+  const [saving, setSaving] = useState(false)
 
   const refresh = useCallback(async () => {
     try {
-      const overview = await window.api?.memoryOverview?.()
+      const [overview, personal] = await Promise.all([window.api?.memoryOverview?.(), window.api?.personalAgentGet?.()])
       setLearning(overview?.config?.learningEnabled !== false)
-      setItems(overview?.globalMemories || [])
-      setPatterns((overview?.patterns || []).filter((item) => item.prompt_state === 'pending' && (item.review_ready || Number(item.count || 0) >= 3)))
-      setRecent(overview?.recent || [])
-      setStats(overview?.stats || {})
-    } catch { setItems([]) }
+      const profile = personal?.profile as PersonalAgentProfile | undefined
+      const memoryPolicy = profile?.memoryPolicy || {}; const knowledgePolicy = profile?.knowledgePolicy || {}
+      if (Array.isArray(memoryPolicy.scopes)) setMemoryScopes(memoryPolicy.scopes as MemoryScope[])
+      if (Array.isArray(knowledgePolicy.brainScopes)) setBrainScopes(knowledgePolicy.brainScopes as BrainScope[])
+      if (typeof memoryPolicy.confirmGrowth === 'boolean') setConfirmGrowth(memoryPolicy.confirmGrowth)
+      if (typeof memoryPolicy.protectSensitive === 'boolean') setProtectSensitive(memoryPolicy.protectSensitive)
+      if (typeof memoryPolicy.projectRetention === 'string') setRetention(memoryPolicy.projectRetention)
+    } catch { /* keep safe defaults */ }
   }, [])
 
   useEffect(() => { void refresh() }, [refresh])
-  const visibleItems = useMemo(() => filter === 'all' ? items : items.filter((item) => item.type === filter), [filter, items])
-
-  const remember = async () => {
-    const content = text.trim()
-    if (!content) return
-    const result = await window.api?.memoryGlobalUpsert?.({ type, text: content, scope, project })
-    if (!result?.ok) return flash(result?.error || '保存记忆失败', 'err')
-    setText(''); setProject(''); flash('已加入我的记忆'); void refresh()
+  const toggle = <T extends string>(list: T[], item: T, setter: (next: T[]) => void) => setter(list.includes(item) ? list.filter((value) => value !== item) : [...list, item])
+  const savePolicy = async () => {
+    setSaving(true)
+    try {
+      await window.api?.memorySetLearning?.(learning)
+      const result = await window.api?.personalAgentSave?.({ summary: '调整协作记忆与隐私设置', patch: { memoryPolicy: { scopes: memoryScopes, confirmGrowth, protectSensitive, projectRetention: retention }, knowledgePolicy: { brainScopes, allowPersonalMemory: brainScopes.includes('global'), allowRemoteQuery: brainScopes.includes('organization'), allowPromotionProposal: true, allowDirectWrite: false } } })
+      if (result?.ok === false) flash(result.error || '保存失败', 'err'); else flash('设置已保存')
+    } catch { flash('保存失败', 'err') } finally { setSaving(false) }
+  }
+  const clearMemory = async () => {
+    const result = await window.api?.memoryClear?.() as { ok?: boolean; error?: string } | undefined
+    if (result?.ok === false) flash(result.error || '清除失败', 'err'); else flash('协作记忆已清除')
   }
 
-  const review = async (item: MemoryPattern, action: 'accepted' | 'dismissed') => {
-    await window.api?.memoryReviewPattern?.({ id: item.id, action, summary: item.summary })
-    flash(action === 'accepted' ? '已确认长期偏好' : '已忽略记忆建议'); void refresh()
-  }
-
-  return <div className="memory-center">
-    <section className="memory-hero">
-        <div><span className="memory-eyebrow">全局长期记忆</span><h2>我的记忆</h2><p>关于你的事实、偏好、目标、关系和重要决策。跨会话生效，由你决定记住什么。</p></div>
-      <div className="memory-hero-stat"><strong>{items.length}</strong><span>条已确认记忆</span></div>
-    </section>
-
-    <section className="memory-add-panel">
-      <div className="memory-section-head"><div><h3>记住一件事</h3><p>你明确添加的内容会立即成为全局记忆。</p></div></div>
-      <div className="memory-compose-row">
-        <select aria-label="记忆类型" value={type} onChange={(event) => setType(event.target.value as MemoryType)}>{Object.entries(TYPE_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}</select>
-        <input aria-label="记忆内容" value={text} onChange={(event) => setText(event.target.value)} placeholder="例如：我是游戏服务端开发者；方案请先给结论。" onKeyDown={(event) => { if (event.key === 'Enter') void remember() }} />
-        <button type="button" className="settings-btn primary" disabled={!text.trim()} onClick={() => void remember()}>记住</button>
-      </div>
-      <div className="memory-scope-row">
-        <label><input type="radio" name="memory-scope" checked={scope === 'global'} onChange={() => setScope('global')} /> 全局生效</label>
-        <label><input type="radio" name="memory-scope" checked={scope === 'project'} onChange={() => setScope('project')} /> 仅特定项目</label>
-        {scope === 'project' ? <input aria-label="适用项目" value={project} onChange={(event) => setProject(event.target.value)} placeholder="项目名称" /> : null}<span>仅保存在本机</span>
-      </div>
-    </section>
-
-    {patterns.length ? <section className="memory-suggestions">
-      <div className="memory-section-head"><div><h3>等待你确认</h3><p>智能伙伴从重复协作中发现的稳定偏好，确认前不会生效。</p></div><b>{patterns.length}</b></div>
-      {patterns.map((item) => <div className="memory-suggestion" key={item.id}><div><small>长期偏好 · 已观察 {item.count || 3} 次</small><strong>{item.summary}</strong></div><div><button type="button" className="settings-btn" onClick={() => void review(item, 'dismissed')}>忽略</button><button type="button" className="settings-btn primary" onClick={() => void review(item, 'accepted')}>确认记住</button></div></div>)}
-    </section> : null}
-
-    <section className="memory-library">
-      <div className="memory-section-head"><div><h3>已记住</h3><p>KnowMe 会按当前任务选择相关记忆，不会把所有内容都发送给模型。</p></div></div>
-      <div className="memory-filters"><button type="button" className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>全部</button>{Object.entries(TYPE_LABELS).map(([id, label]) => <button type="button" key={id} className={filter === id ? 'active' : ''} onClick={() => setFilter(id as MemoryType)}>{label}</button>)}</div>
-      {!visibleItems.length ? <div className="memory-empty"><strong>还没有这类记忆</strong><span>可以直接告诉 KnowMe，也可以让智能伙伴在协作中逐渐发现。</span></div> : <div className="memory-grid">{visibleItems.map((item) => <article className="memory-item" key={item.id}><div className="memory-item-meta"><span>{TYPE_LABELS[item.type]}</span><small>{item.scope === 'project' ? item.project || '项目记忆' : '全局'}</small></div><p>{item.text}</p><footer><span>{item.source?.label || '由你添加'} · 已确认</span><button type="button" aria-label={`忘记：${item.text}`} onClick={async () => { await window.api?.memoryGlobalRemove?.(item.id); flash('已忘记这条内容'); void refresh() }}>忘记</button></footer></article>)}</div>}
-    </section>
-
-    <section className="memory-learning">
-      <SettingsToggle checked={learning} onChange={async (next) => { setLearning(next); await window.api?.memorySetLearning?.(next) }} label="允许智能伙伴发现记忆建议" sub="只识别重复出现的偏好与纠正；任务名、入口选择和完成记录不会自动成为长期记忆。" />
-      <button type="button" className="memory-activity-toggle" onClick={() => setShowActivity((value) => !value)}>{showActivity ? '收起' : '查看'}近期活动记录（{stats?.recentCount ?? recent.length}）</button>
-      {showActivity ? <div className="memory-activity-list">{recent.slice(0, 12).map((row, index) => <div key={`${row.ts || index}-${row.summary}`}><small>{row.kind || 'activity'}</small><span>{row.summary}</span></div>)}</div> : null}
-      <div className="memory-data-actions"><span>记忆保存在本机，可随时查看目录或清除自动学习记录。</span><button type="button" className="settings-btn" onClick={() => window.api?.openMemoryDir?.()}>打开目录</button><button type="button" className="settings-btn" onClick={async () => { if (!window.confirm('清除自动学习记录和推断？已确认的全局记忆不会删除。')) return; await window.api?.memoryClear?.(); flash('已清除自动学习记录'); void refresh() }}>清除活动</button></div>
-    </section>
+  return <div className="memory-center memory-privacy-center">
+    <section className="memory-hero"><div><span className="memory-eyebrow">记忆与隐私</span><h2>控制协作记忆如何工作</h2><p>协作记忆的具体内容在伙伴设置中管理；这里仅控制学习、读取和保存规则。</p></div></section>
+    <section className="memory-learning memory-policy-card"><div className="memory-section-head"><div><h3>自动学习</h3><p>控制伙伴是否可以从协作中发现记忆候选。</p></div></div><SettingsToggle checked={learning} onChange={setLearning} label="允许从对话中发现记忆建议" sub="候选会先进入伙伴设置的“待确认”，不会直接成为长期记忆。" /><SettingsToggle checked={confirmGrowth} onChange={setConfirmGrowth} label="长期协作记忆逐条确认" sub="你的偏好、约束和工作理解必须由你确认后才会生效。" /><SettingsToggle checked={protectSensitive} onChange={setProtectSensitive} label="敏感内容禁止学习" sub="敏感内容不会被加入协作记忆，也不会发送给远程知识源。" /><div className="memory-policy-options"><strong>允许形成记忆的内容</strong><div>{(Object.keys(MEMORY_SCOPE_LABEL) as MemoryScope[]).map((scope) => <label key={scope}><input type="checkbox" checked={memoryScopes.includes(scope)} onChange={() => toggle(memoryScopes, scope, setMemoryScopes)} />{MEMORY_SCOPE_LABEL[scope]}</label>)}</div></div></section>
+    <section className="memory-learning memory-policy-card"><div className="memory-section-head"><div><h3>读取范围</h3><p>控制伙伴在回答时可以使用哪些协作上下文。</p></div></div><div className="memory-policy-options brain-scope-options">{(Object.keys(BRAIN_SCOPE_LABEL) as BrainScope[]).map((scope) => <label key={scope}><input type="checkbox" checked={brainScopes.includes(scope)} onChange={() => toggle(brainScopes, scope, setBrainScopes)} /><span><strong>{BRAIN_SCOPE_LABEL[scope]}</strong><small>{scope === 'organization' ? '包含按需查询的外挂知识库入口' : scope === 'project' ? '用于跨任务保持当前项目连续性' : '用于调整伙伴的回复风格与内容深度'}</small></span></label>)}</div><div className="memory-policy-retention"><label htmlFor="projectRetention">项目结束后的保留方式</label><select id="projectRetention" value={retention} onChange={(event) => setRetention(event.target.value)}><option value="archive">归档，仍可检索</option><option value="review">结束时逐项确认</option><option value="forget">结束后失效</option></select></div><div className="memory-policy-save"><span>设置会影响后续协作。</span><button type="button" className="settings-btn primary" disabled={saving} onClick={() => void savePolicy()}>{saving ? '保存中…' : '保存设置'}</button></div></section>
+    <section className="memory-data-actions"><span>所有协作记忆均保存在本机。</span><button type="button" className="settings-btn" onClick={() => window.api?.openMemoryDir?.()}>打开记忆目录</button><button type="button" className="settings-btn danger" onClick={() => void clearMemory()}>清除全部记忆</button></section>
   </div>
 }

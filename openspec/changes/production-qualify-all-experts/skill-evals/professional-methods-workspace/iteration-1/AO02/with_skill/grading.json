@@ -1,0 +1,128 @@
+{
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "binding": {
+    "evalId": "AO02",
+    "configuration": "with_skill",
+    "taskId": "task-mtox1mbq-a3ywx",
+    "sessionId": "wb-expert-task-mtox1mbq-a3ywx",
+    "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+    "expertId": "action-owner",
+    "agentVersion": "2.1.0",
+    "agentHash": "70a0b4c5e5371518",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "skillRefs": [
+          "action-extraction"
+        ],
+        "explicitContent": [
+          {
+            "id": "skill.explicit-content",
+            "kind": "skill",
+            "authority": "data",
+            "trust": "trusted",
+            "sourceTrust": "user",
+            "projectedRole": "user",
+            "critical": false,
+            "source": {
+              "type": "skill-runtime",
+              "idHash": "3b283e93debf035e"
+            },
+            "cachePolicy": "session",
+            "usedTokens": 529,
+            "chars": 866,
+            "hash": "185a3c82bd1e32a1",
+            "truncated": false,
+            "sensitive": false
+          }
+        ]
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "保留陈青承诺1—40行且不扩成全片；余桐不是已承诺行动负责人。",
+      "passed": true,
+      "evidence": "表第1行限定1—40，未新增41行以后工作；余桐标“非承诺…不纳入追踪”。"
+    },
+    {
+      "text": "1—20回执只作部分证据，不能宣告全部完成，也不能断言其余行实际上没做。",
+      "passed": true,
+      "evidence": "第1行虽用“部分执行”，紧随的完整限定为“仅1-20行有回执，21-40行无证据（未证明）”，未断言21-40实际上没做。按整句明确证据限定判通过。"
+    },
+    {
+      "text": "周牧期限保留收到完成确认后24小时，未触发且不臆造绝对日期。",
+      "passed": true,
+      "evidence": "周牧行“确认后24h内”，依赖陈青“审校完成”确认，状态“前置条件未满足”；未造绝对日期。这里将未启动读为约定流程尚未触发，不是实测活动断言。"
+    },
+    {
+      "text": "未明确完成标准、主责裁决或补证安排不变成已约定义务；建议性质清楚。",
+      "passed": true,
+      "evidence": "必要缺口仅列进度、确认时间及未提供的截止/验收信息，没有指派必须补交或编造已确认标准、裁决人。提缺口本身不等于新增承诺。"
+    },
+    {
+      "text": "表格和附加结论一致、内容精简，全文不超280混合字数，无外部成功宣称。",
+      "passed": true,
+      "evidence": "全文混合144字≤280；表与附注均保持局部有证、全量未证明及前置未满足，没有外部成功宣称。"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1,
+    "score": "5/5",
+    "professional_hard_errors": false
+  },
+  "claims": [
+    {
+      "claim": "21—40行是否已核对尚未证明",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[3]只提供1—20回执；正文显式写“无证据（未证明）”，并未把未知判为否定。"
+    },
+    {
+      "claim": "周牧期限为确认后24h内，当前约定触发条件未满足",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[2][3]直接支持；正文没有按无依据日期判断延期。"
+    },
+    {
+      "claim": "余桐只是提议、不纳入承诺追踪",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[4]与表第3行相符。"
+    },
+    {
+      "claim": "具体日历截止日或验收标准在材料中缺失",
+      "type": "factual",
+      "verified": true,
+      "evidence": "附注第2条是信息缺口，不含具体值或要求双方新增期限；不能把“双方约定的…缺失”反读为双方已作出某项具体约定。已知相对期限仍在表内保留。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Entire same-run assistant reply, including headings, all table cells and trailing notes; excludes filesystem trailing newline",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 280,
+    "full_unicode_chars": 304,
+    "non_whitespace_chars": 242,
+    "han_chars": 133,
+    "mixed_words": 144,
+    "punctuation_chars": 60,
+    "professional_length_passed": true
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "可把“部分执行”改为“部分有证、全量未证明”，把“未启动”改为“触发条件未满足”，减少读者将证据状态误读成实测状态的风险；本例完整限定已清楚，不据标题孤立判错。"
+      }
+    ],
+    "overall": "No definite additional hard error found in this single answer; not a general capability qualification."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix."
+}

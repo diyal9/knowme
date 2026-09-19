@@ -7,7 +7,7 @@ import { buildFeishuCardModel, feishuUserReady } from './settings-connector-stat
 describe('buildFeishuCardModel', () => {
   it('shows one-click auth when disconnected', () => {
     const card = buildFeishuCardModel({ ok: false, message: '未连接', state: 'auth_required', userReady: false })
-    expect(card.primaryLabel).toBe('一键授权')
+    expect(card.primaryLabel).toBe('授权飞书 CLI')
     expect(card.primaryDisabled).toBe(false)
     expect(card.primaryMode).toBe('full-auth')
     expect(card.needsConfirm).toBe(true)
@@ -22,7 +22,7 @@ describe('buildFeishuCardModel', () => {
       capabilities: { docsKb: { ready: false, missing: ['文档'] } },
       permissions: { known: true, complete: false, categories: [{ id: 'docs', label: '文档', state: 'missing' }] },
     })
-    expect(card.primaryLabel).toBe('一键授权')
+    expect(card.primaryLabel).toBe('授权飞书 CLI')
     expect(card.primaryDisabled).toBe(false)
     expect(card.statusText).toMatch(/文档/)
   })
@@ -73,5 +73,19 @@ describe('buildFeishuCardModel', () => {
     expect(feishuUserReady({ message: '未连接' })).toBe(false)
     expect(feishuUserReady({ state: 'auth_required' })).toBe(false)
     expect(feishuUserReady({ userReady: true, state: 'online' })).toBe(true)
+  })
+
+  it('keeps CLI authorization available when the user identity needs refresh', () => {
+    const status = {
+      connected: true,
+      userReady: true,
+      state: 'connected',
+      message: 'User identity needs refresh and will be refreshed automatically on the next user API call.',
+    }
+    expect(feishuUserReady(status)).toBe(false)
+    const card = buildFeishuCardModel(status)
+    expect(card.primaryLabel).toBe('授权飞书 CLI')
+    expect(card.primaryDisabled).toBe(false)
+    expect(card.primaryMode).toBe('full-auth')
   })
 })

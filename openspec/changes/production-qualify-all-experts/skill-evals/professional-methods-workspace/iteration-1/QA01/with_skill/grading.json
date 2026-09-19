@@ -1,0 +1,138 @@
+{
+  "expectations": [
+    {
+      "text": "所有新设计用例标未执行/待执行，日志仅材料分析，不能报动态执行通过率或已验收通过。",
+      "passed": true,
+      "evidence": "TC1-6及TC8均标“未执行”；TC7是已有L的静态核对，单列“材料分析(非本人执行)”，不是把新动态设计说成已执行。无本人通过率/整体通过宣称。"
+    },
+    {
+      "text": "日志只支持两次请求返回同一T及状态done，不证明数据库唯一、文件正确或权限安全。",
+      "passed": true,
+      "evidence": "明确L两次POST同T、done是观测层结论，并列出缺数据库计数、权限/刷新/取消覆盖及文件内容证据。无数据库唯一、文件正确或权限安全通过宣称；“独立于客户端超时”的宽泛措辞另在claims限缩。"
+    },
+    {
+      "text": "覆盖成员/管理员隔离及越权请求，明确前置身份/资源和可观察结果。",
+      "passed": true,
+      "evidence": "TC3给普通成员U与他人记录R_other，操作全部导出、预期拒绝或仅返回自建记录不泄露他人；TC4给管理员A/项目N条记录及导出全部观察，提供了成员/管理员与越权的基本覆盖。软删附加假设和行数判据局限另列claims。"
+    },
+    {
+      "text": "覆盖并发同键、超时同键重试及24小时边界的可观察去重结果，不新增未定义过期键处理规则。",
+      "passed": false,
+      "evidence": "TC1设创建距当前23:59:59，却在“以创建时刻+24h为窗口”分支预期新ID≠T；未指定跨界等待/受控时钟，界内新建违反R2，端点待定不消除此错误。TC2是断开后的顺序重试，未明确两请求受控并发；也未保留题中30秒时点。"
+    },
+    {
+      "text": "覆盖刷新任务恢复和取消完成竞态，保留已下载文件不追溯删除边界，发布证据不足结论明确。",
+      "passed": false,
+      "evidence": "TC5覆盖刷新，TC8保留旧文件豁免，发布不整体通过；但TC6前置为“已done但随后被取消”，并无取消与完成交错的操作/释放顺序及不同结果判据，不能当取消完成竞态覆盖。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "professionalScorable": true,
+  "professionalVerdict": "hard_fail",
+  "binding": {
+    "evalId": "QA01",
+    "configuration": "with_skill",
+    "taskId": "task-mtowze06-flgkn",
+    "sessionId": "wb-expert-task-mtowze06-flgkn",
+    "runId": "expert_task-mtowze06-flgkn_mtowzee3",
+    "agentVersion": "2.1.0",
+    "taskStatus": "review",
+    "deliverableId": "output-1",
+    "inputMatchesFrozen": true,
+    "checkpointRunIdVerified": true,
+    "sourceRoot": "D:/UserCaches/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de"
+  },
+  "contextAudit": [
+    {
+      "runId": "expert_task-mtowze06-flgkn_mtowzee3",
+      "skillRefs": [
+        "qa-test-design"
+      ],
+      "explicitContent": [
+        {
+          "id": "skill.explicit-content",
+          "hash": "7fd29382fb4eaf38",
+          "chars": 1016,
+          "truncated": false
+        }
+      ]
+    }
+  ],
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "output_chars": 1300,
+    "transcript_chars": 3554
+  },
+  "length": {
+    "han": 658,
+    "alnum_blocks": 96,
+    "mixed": 754,
+    "punctuation": 189,
+    "mixed_plus_punctuation": 943,
+    "raw_codepoints": 1300,
+    "limit": 800,
+    "within_limit": true,
+    "method": "Whole answer, including headings/tables/extra prose; Han characters + /[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/ blocks. Punctuation and raw Markdown reported separately, not used as Chinese length failure."
+  },
+  "claims": [
+    {
+      "claim": "TC1：创建23:59:59前的同键请求可在创建+24h窗口分支新建ID。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "操作没有明确跨界；按给定前置仍处24h内，新的任务与R2最多一个任务冲突。需受控时间而不是新增失效语义。"
+    },
+    {
+      "claim": "TC6取消后下载必须4xx拒绝。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "R3保证不得下载新结果，未规定HTTP状态码族，其他不返回新结果的协议响应也可能符合。这里只能验证行为不变量。"
+    },
+    {
+      "claim": "TC4管理员全部导出含软删/归档，软删豁免规则待确认。",
+      "type": "quality",
+      "verified": false,
+      "verificationStatus": "unverifiable",
+      "severity": "scope_caution",
+      "evidence": "材料没有这些状态或豁免要求。可作为明确标注的候选数据/待确认条件，但不应在未确认前固定N条和豁免；“权限视图一致”仍需具体内容对账，行数本身不证明完整性。"
+    },
+    {
+      "claim": "L说明后台执行独立于客户端超时。",
+      "type": "factual",
+      "verified": false,
+      "verificationStatus": "unverifiable",
+      "severity": "overgeneralization",
+      "evidence": "L只观察一次超时后同T到done，结合R2可说本样本与后台可能继续相容，不能据此确认一般架构独立性或所有超时行为；不将此措辞判为本人执行。"
+    },
+    {
+      "claim": "唯一约束报错日志可作TC2的最低补证替代。",
+      "type": "quality",
+      "verified": false,
+      "severity": "hard_fail",
+      "evidence": "报错最多证明某次插入被拒绝，不能单独证明最后只存在一个任务、正确响应复用T或没有其他副作用；应与权威计数/身份及请求回执关联。索引DDL作为静态佐证可建议，不等于动态验收。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "No model rerun or application test performed by grader; static designs are not personal execution claims."
+    ],
+    "needs_review": [
+      "All extra expectations must be grounded in requirements or explicit conditional decisions; passing frozen assertions does not override hard-fail claims."
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言之外需逐条检查所有测试预期是否由需求推出；关键词、正确主表或较高断言通过率不能掩盖附加错误。"
+      }
+    ],
+    "overall": "两道已披露回归题、四份整包配置输出；2.1.0 vs 2.0.0不是纯Skill因果，也不是专家生产认证。"
+  }
+}

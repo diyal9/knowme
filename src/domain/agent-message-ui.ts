@@ -1,5 +1,7 @@
 import type { ChatMessage, StructuredChoiceBar, StructuredChoiceItem } from '../shared/api'
 
+const STRUCTURED_CHOICE_ACTIONS = new Set(['fill', 'send', 'copy', 'open_link', 'open_knowledge'])
+
 function asRecord(raw: unknown): Record<string, unknown> {
   return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {}
 }
@@ -18,8 +20,21 @@ function parseChoiceItem(raw: unknown): StructuredChoiceItem | null {
 }
 
 export function parseStructuredChoiceBars(raw: unknown): StructuredChoiceBar[] {
-  if (!Array.isArray(raw)) return []
+  if (!Array.isArray(raw)) {
+    const record = asRecord(raw)
+    if (Array.isArray(record.items)) {
+      return parseStructuredChoiceBars([record])
+    }
+    return []
+  }
   const bars: StructuredChoiceBar[] = []
+  const wrappedBars = raw.filter((entry) => Array.isArray(asRecord(entry).items))
+  if (!wrappedBars.length) {
+    const items = raw.map(parseChoiceItem).filter(Boolean) as StructuredChoiceItem[]
+    return items.length
+      ? [{ kind: 'choice', title: '下一步建议', items }]
+      : []
+  }
   for (const entry of raw) {
     const rec = asRecord(entry)
     const items = Array.isArray(rec.items) ? rec.items.map(parseChoiceItem).filter(Boolean) as StructuredChoiceItem[] : []
@@ -31,6 +46,80 @@ export function parseStructuredChoiceBars(raw: unknown): StructuredChoiceBar[] {
     })
   }
   return bars
+}
+
+function readJsonValueAt(source: string, start: number): { value: unknown; end: number } | null {
+  const opening = source[start]
+  if (opening !== '{' && opening !== '[') return null
+  const stack: string[] = []
+  let inString = false
+  let escaped = false
+  for (let index = start; index < source.length; index += 1) {
+    const char = source[index]
+    if (inString) {
+      if (escaped) escaped = false
+      else if (char === '\\') escaped = true
+      else if (char === '"') inString = false
+      continue
+    }
+    if (char === '"') {
+      inString = true
+      continue
+    }
+    if (char === '{' || char === '[') {
+      stack.push(char)
+      continue
+    }
+    if (char !== '}' && char !== ']') continue
+    const expected = char === '}' ? '{' : '['
+    if (stack.pop() !== expected) return null
+    if (!stack.length) {
+      try {
+        return { value: JSON.parse(source.slice(start, index + 1)), end: index + 1 }
+      } catch {
+        return null
+      }
+    }
+  }
+  return null
+}
+
+function hasSuggestionContext(source: string, start: number): boolean {
+  const before = source.slice(Math.max(0, start - 320), start)
+  return /下一步|建议|可直接点选|交付建议|操作建议|选择一项/i.test(before)
+}
+
+/**
+ * 兼容旧会话中未拆出 ui 字段的 assistant 消息。
+ * 只接受行首的 JSON，且必须是白名单 action 的建议项，避免把普通配置 JSON 变成按钮。
+ */
+export function extractStructuredChoiceFromText(text: string): {
+  text: string
+  bars: StructuredChoiceBar[]
+} | null {
+  const source = String(text || '').replace(/\r\n/g, '\n')
+  const candidates: number[] = []
+  for (let index = 0; index < source.length; index += 1) {
+    if (source[index] !== '{' && source[index] !== '[') continue
+    const lineStart = source.lastIndexOf('\n', index - 1) + 1
+    if (source.slice(lineStart, index).trim()) continue
+    candidates.push(index)
+  }
+  for (let index = candidates.length - 1; index >= 0; index -= 1) {
+    const start = candidates[index]
+    const parsed = readJsonValueAt(source, start)
+    if (!parsed) continue
+    const bars = parseStructuredChoiceBars(parsed.value)
+    if (!bars.length) continue
+    if (bars.some((bar) => bar.items.some((item) => !STRUCTURED_CHOICE_ACTIONS.has(String(item.action || ''))))) continue
+    const trailing = source.slice(parsed.end).trim()
+    if (start !== 0 && trailing && !hasSuggestionContext(source, start)) continue
+    const body = `${source.slice(0, start)}\n${source.slice(parsed.end)}`
+      .replace(/\n{3,}/g, '\n\n')
+      .trim()
+    return { text: body, bars }
+  }
+  return null
 }
 
 export function parseGroundingStatus(raw: unknown) {
@@ -56,6 +145,10 @@ export function enrichChatMessage(raw: unknown, fallback: Partial<ChatMessage>):
   const role: ChatMessage['role'] = rec.role === 'user' || rec.role === 'assistant' || rec.role === 'system' || rec.role === 'error'
     ? rec.role
     : (fallback.role || 'assistant')
+  const rawText = String(rec.text || rec.content || fallback.text || '')
+  const textChoice = role === 'assistant' && rec.streaming !== true && fallback.streaming !== true
+    ? extractStructuredChoiceFromText(rawText)
+    : null
   const ui = parseStructuredChoiceBars(rec.ui)
   const groundingStatus = parseGroundingStatus(rec.groundingStatus)
   const suggestionChosenIndex = Number.isInteger(rec.suggestionChosenIndex)
@@ -70,7 +163,7 @@ export function enrichChatMessage(raw: unknown, fallback: Partial<ChatMessage>):
   return {
     id: String(rec.id || fallback.id || ''),
     role,
-    text: String(rec.text || rec.content || fallback.text || ''),
+    text: textChoice?.text ?? rawText,
     createdAt,
     streaming: rec.streaming === true || fallback.streaming,
     thinking: rec.thinking === true || fallback.thinking,
@@ -80,7 +173,7 @@ export function enrichChatMessage(raw: unknown, fallback: Partial<ChatMessage>):
     trace: Array.isArray(rec.trace) ? rec.trace as ChatMessage['trace'] : fallback.trace,
     attachmentName: String(rec.attachmentName || fallback.attachmentName || '').trim() || undefined,
     groundingStatus,
-    structuredUi: ui.length ? ui : undefined,
+    structuredUi: ui.length ? ui : textChoice?.bars,
     suggestionChosenIndex,
     protocolVersion: Number(rec.protocolVersion) || fallback.protocolVersion,
     runId: String(rec.runId || fallback.runId || '').trim() || undefined,

@@ -1,5 +1,7 @@
 'use strict'
 
+const { matchesRequiredTool } = require('./agent-tool-requirements')
+
 /**
  * Agent 完成协议的唯一规范化与验收入口。
  * UI、Launcher、远程后端都只能提交事实；是否完成由这里判定。
@@ -89,7 +91,7 @@ function validateExecutionCompletion(contractInput, result = {}) {
   const evidence = evidenceEntries(result)
   const artifacts = artifactEntries(result)
   const violations = []
-  const missingTools = contract.requiredTools.filter(name => !calls.some(call => call?.name === name))
+  const missingTools = contract.requiredTools.filter(name => !calls.some(call => matchesRequiredTool(call?.name, name)))
   if (missingTools.length) {
     violations.push({
       code: 'missing_required_tools',
@@ -99,7 +101,7 @@ function validateExecutionCompletion(contractInput, result = {}) {
   }
   const unmetEvidence = contract.requiredEvidence.filter(rule => !evidence.some((entry) => {
     if (entry?.status !== 'ok') return false
-    if (rule.tool && entry?.provenance?.tool !== rule.tool) return false
+    if (rule.tool && !matchesRequiredTool(entry?.provenance?.tool, rule.tool)) return false
     if (rule.kind && rule.kind !== 'tool_result' && entry?.provenance?.kind !== rule.kind) return false
     if (rule.kind === 'tool_result' && !entry?.provenance?.tool) return false
     if (rule.forbidTruncated && ['truncated', 'empty'].includes(entry?.status)) return false
@@ -110,7 +112,7 @@ function validateExecutionCompletion(contractInput, result = {}) {
     violations.push({ code: 'missing_required_evidence', message: '必需执行证据尚未满足', unmet: unmetEvidence })
   }
   const unmetConditions = contract.completionConditions.filter((condition) => {
-    if (condition.type === 'tool_success') return !calls.some(call => call?.name === condition.tool)
+    if (condition.type === 'tool_success') return !calls.some(call => matchesRequiredTool(call?.name, condition.tool))
     if (condition.type === 'evidence_present') {
       return !evidence.some(entry => entry?.status === 'ok'
         && (!condition.kind || entry?.provenance?.kind === condition.kind))

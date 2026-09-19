@@ -92,6 +92,19 @@ function registerAgentSessionUiIpc(ipcMain, deps) {
     const next = saveAgentStore(sessions, { openSessionIds, activeSessionId })
     return { ok: true, ui: next.ui, createdSessionId }
   })
+
+  ipcMain.handle('agent-session-clear-history', () => {
+    const { sessions } = loadAgentStore()
+    const session = agentSessions.createSession('personal', 1, {
+      sessionKind: 'personal-topic',
+      profileId: 'my-knowme',
+    })
+    const next = saveAgentStore([session], {
+      openSessionIds: [session.id],
+      activeSessionId: session.id,
+    })
+    return { ok: true, session, removedCount: sessions.length, ui: next.ui }
+  })
 }
 
 module.exports = { registerAgentSessionUiIpc }

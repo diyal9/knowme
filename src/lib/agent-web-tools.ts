@@ -9,6 +9,7 @@
 
 const webFetch = require('./web-fetch')
 const webSearch = require('./web-search')
+const dns = require('dns').promises
 
 const WEB_FETCH_CONTRACT = {
   source: 'builtin',
@@ -132,20 +133,62 @@ function formatSearchResults(result) {
   return lines.join('\n')
 }
 
+function resolveTestFixtureOptions(options = {}) {
+  const seamEnabled = process.env.KNOWME_TEST_SEAM === '1'
+  const fixtureEndpoint = String(process.env.KNOWME_TEST_WEB_FIXTURE_ENDPOINT || '').trim()
+  if (!seamEnabled || !fixtureEndpoint) return options
+
+  let fixtureBase
+  try {
+    fixtureBase = new URL(fixtureEndpoint)
+  } catch {
+    return options
+  }
+  const fixtureHost = String(process.env.KNOWME_TEST_WEB_FIXTURE_HOST || 'example.com').trim().toLowerCase()
+  const baseFetch = typeof options.fetchImpl === 'function' ? options.fetchImpl : globalThis.fetch
+  const baseLookup = typeof options.lookup === 'function' ? options.lookup : dns.lookup.bind(dns)
+
+  return {
+    ...options,
+    searchEndpointBuilder: options.searchEndpointBuilder || (({ query, mode, recencyDays }) => {
+      const endpoint = new URL('/search', fixtureBase)
+      endpoint.searchParams.set('q', query)
+      endpoint.searchParams.set('mode', mode)
+      if (recencyDays != null) endpoint.searchParams.set('recency_days', String(recencyDays))
+      return endpoint.href
+    }),
+    fetchImpl: options.fetchImpl || (async (url, init) => {
+      let parsed
+      try { parsed = new URL(url) } catch { return baseFetch(url, init) }
+      if (parsed.hostname.toLowerCase() !== fixtureHost) return baseFetch(url, init)
+      const endpoint = new URL('/page', fixtureBase)
+      endpoint.searchParams.set('url', parsed.href)
+      return baseFetch(endpoint.href, init)
+    }),
+    lookup: options.lookup || (async (hostname, lookupOptions) => {
+      if (String(hostname || '').toLowerCase() === fixtureHost) {
+        return [{ address: '93.184.216.34', family: 4 }]
+      }
+      return baseLookup(hostname, lookupOptions)
+    }),
+  }
+}
+
 /**
  * @param {{ signal?: AbortSignal, fetchImpl?: Function, lookup?: Function,
  *           timeoutMs?: number }} [options]
  * @returns {{ definitions: object[], handlers: Record<string, Function> }}
  */
 function buildWebTools(options = {}) {
+  const resolvedOptions = resolveTestFixtureOptions(options)
   async function handleSearchWeb(args = {}, signal) {
     const query = String(args.query || '').trim()
     const result = await webSearch.searchWeb(query, {
-      signal: signal || options.signal,
-      fetchImpl: options.searchFetchImpl || options.fetchImpl,
-      endpointBuilder: options.searchEndpointBuilder,
-      timeoutMs: options.searchTimeoutMs,
-      now: options.now,
+      signal: signal || resolvedOptions.signal,
+      fetchImpl: resolvedOptions.searchFetchImpl || resolvedOptions.fetchImpl,
+      endpointBuilder: resolvedOptions.searchEndpointBuilder,
+      timeoutMs: resolvedOptions.searchTimeoutMs,
+      now: resolvedOptions.now,
       mode: args.mode,
       recencyDays: args.recency_days,
       limit: args.limit,
@@ -193,10 +236,10 @@ function buildWebTools(options = {}) {
   async function handleFetchWebPage(args = {}, signal) {
     const url = String(args.url || '').trim()
     const page = await webFetch.fetchReadablePage(url, {
-      signal: signal || options.signal,
-      fetchImpl: options.fetchImpl,
-      lookup: options.lookup,
-      timeoutMs: options.timeoutMs,
+      signal: signal || resolvedOptions.signal,
+      fetchImpl: resolvedOptions.fetchImpl,
+      lookup: resolvedOptions.lookup,
+      timeoutMs: resolvedOptions.timeoutMs,
     })
     if (!page.ok) {
       return {
@@ -233,5 +276,6 @@ module.exports = {
   SEARCH_WEB_TOOL,
   formatPage,
   formatSearchResults,
+  resolveTestFixtureOptions,
   buildWebTools,
 }

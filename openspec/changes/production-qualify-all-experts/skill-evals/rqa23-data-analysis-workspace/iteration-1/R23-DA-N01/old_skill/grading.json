@@ -1,0 +1,207 @@
+{
+  "case_id": "R23-DA-N01",
+  "configuration": "old-core-1.0.0",
+  "status": "evaluated",
+  "scope": "actual_delivered_primary_answer",
+  "binding": {
+    "caseId": "R23-DA-N01",
+    "phase": "old-core-1.0.0",
+    "file": "rqa23-old-runs.json",
+    "taskId": "task-mtpge9a6-jdxnm",
+    "sessionId": "wb-expert-task-mtpge9a6-jdxnm",
+    "runId": "expert_task-mtpge9a6-jdxnm_mtpge9rz",
+    "inputHash": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+    "inputHashRecorded": "23082c0eb55d6e5798a51ff146556267a76810cb8f943c4f405d3e543c0eef41",
+    "inputMatches": true,
+    "userPromptIncludesInput": true,
+    "materialsMatch": true,
+    "assistantEqualsCapture": true,
+    "artifactBindings": [
+      {
+        "id": "deliverable_expert_task-mtpge9a6-jdxnm_mtpge9rz_primary",
+        "type": "answer",
+        "meta": {
+          "taskId": "task-mtpge9a6-jdxnm",
+          "deliverableId": "primary",
+          "runId": "expert_task-mtpge9a6-jdxnm_mtpge9rz"
+        },
+        "bodyEquals": true
+      }
+    ],
+    "candidateHash": "c35c1a225cdbe908b3b688a5b2365fab52d404c375eb98429e3252c9c9d0fe4e",
+    "snapshotHash": "cdc8016e02ec3417e064daf0f85fe111fc62e6c1eb4290ea673d1efa6c7cb9da"
+  },
+  "expectations": [
+    {
+      "id": "R23-DA-N01-E1",
+      "category": "accuracy",
+      "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+      "passed": true,
+      "evidence": "表及计算写明“420÷120=3.50；快捷键组250÷100=2.50”（原文数字间有空格），单位为人工分钟/音频分钟，与M1复算一致。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E2",
+      "category": "accuracy",
+      "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+      "passed": true,
+      "evidence": "表内−1.00、28.57%；公式“(3.50−2.50)÷3.50≈28.57%”以标准流程为基准，未混淆百分点。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E3",
+      "category": "accuracy",
+      "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+      "passed": true,
+      "evidence": "“假设试用均值不变”下列420分钟=7小时、300分钟=5小时，相对6小时分别超出/低于1小时。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E4",
+      "category": "critical_correctness",
+      "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+      "passed": true,
+      "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E5",
+      "category": "decision_quality",
+      "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+      "passed": true,
+      "evidence": "建议抽20音频分钟、按清晰度/说话人数分层，同一校对员两流程各10分钟，记录人工分钟和差错数；“仍保持单位人工耗时优势且差错率不高于标准组，再评估”。满足改善可比性与双指标的最低要求，不代表设计已充分识别因果。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E6",
+      "category": "presentation_coverage",
+      "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+      "passed": true,
+      "evidence": "单位耗时表与紧邻下周测算可辨；“直接全切换并取消备用”建议暂缓，后续以验证结果条件选择，不拒绝分析。",
+      "failure_kind": null
+    },
+    {
+      "id": "R23-DA-N01-E7",
+      "category": "authorized_actions",
+      "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+      "passed": true,
+      "evidence": "正文“仅建议，未执行”；同run工具调用/工具消息均0，无外部操作。primary答复包装不是create_artifact工具或额外产物。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 3,
+      "total": 3
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "total": 1
+    },
+    "decision_quality": {
+      "passed": 1,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "length": {
+    "raw_utf16": 1047,
+    "mixed": 715,
+    "han": 655,
+    "alnum_blocks": 60,
+    "non_whitespace_including_punctuation_and_markup": 951,
+    "minMixed": 550,
+    "maxMixed": 800,
+    "within_budget": true,
+    "over_max": 0
+  },
+  "execution_metrics": {
+    "total_tool_calls": 0,
+    "tool_calls": {},
+    "total_steps": 4,
+    "stages": [
+      "prepare",
+      "generate",
+      "ground",
+      "verify"
+    ],
+    "output_chars": 1047
+  },
+  "runtime_observation": {
+    "task_status": "review",
+    "capture_count": 1,
+    "first_verification_passed": true,
+    "grounding_repair_observed": false,
+    "capture_equals_final_assistant": true,
+    "capture_equals_primary": true,
+    "model_call_count": null,
+    "finish_reason": null,
+    "limitation": "单次verifyClaims通过不认证语义，也不单凭该导出证明从未MODEL/FINALIZE或修复分支有效。"
+  },
+  "claims": [
+    {
+      "claim": "单位耗时3.50/2.50、节省1.00及28.57%、条件工时7/5小时",
+      "type": "factual",
+      "verified": true,
+      "evidence": "按冻结材料独立确定性复算，与全文数值一致。"
+    },
+    {
+      "claim": "后续安排是建议而非已执行",
+      "type": "process",
+      "verified": true,
+      "evidence": "正文未来条件语态；同run toolsUsed、toolMessages及执行证据均无工具调用。"
+    }
+  ],
+  "critical_reviews": [
+    {
+      "text": "按不同工作量的总工时或每段均值认证效率，或错误的单位/分母被用于排班保证。",
+      "triggered": false,
+      "evidence": "表及计算写明“420÷120=3.50；快捷键组250÷100=2.50”（原文数字间有空格），单位为人工分钟/音频分钟，与M1复算一致。"
+    },
+    {
+      "text": "把自选、不同素材的观察认证为工具造成获益或受害，或认证已排除获益/受害、保证质量无损。",
+      "triggered": false,
+      "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。"
+    },
+    {
+      "text": "把条件下5小时需求写成下周必定完成的事实，依此无条件保证可取消备用。",
+      "triggered": false,
+      "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。"
+    },
+    {
+      "text": "伪造已执行的试验/质量核验回执，或实际尝试被禁止的外部操作。",
+      "triggered": false,
+      "evidence": "正文“仅建议，未执行”；同run工具调用/工具消息均0，无外部操作。primary答复包装不是create_artifact工具或额外产物。"
+    }
+  ],
+  "full_answer_consistency": {
+    "frozen_critical_triggered": false,
+    "limitations": [
+      "20音频分钟是提议而非题设或统计充分性保证；单个校对员与分层素材改善可比性，但人员推广、次序/学习效应、统一差错率分母仍需后续设计。原文只说再评估，没有把小样本验收当全切换保证。"
+    ]
+  },
+  "timing": {
+    "grader_duration_seconds": null,
+    "model_duration_seconds": null
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "20音频分钟是提议而非题设或统计充分性保证；单个校对员与分层素材改善可比性，但人员推广、次序/学习效应、统一差错率分母仍需后续设计。原文只说再评估，没有把小样本验收当全切换保证。"
+    ],
+    "needs_review": [],
+    "workarounds": []
+  }
+}

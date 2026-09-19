@@ -2,10 +2,11 @@
 import * as messageStateNs from '@knowme-lib/agent-message-state'
 import * as groundingNs from '@knowme-lib/conversation-grounding'
 import type { AgentTurnIdentity, ChatMessage, ConversationHistoryTurn } from '../shared/api'
-import { parseStructuredChoiceBars } from './agent-message-ui'
+import { extractStructuredChoiceFromText, parseStructuredChoiceBars } from './agent-message-ui'
 import { applyAssistantStreamEvent, stampStreamTiming } from './agent-execution-timeline'
 import { renderKnowledgeMarkdown } from './knowledge-markdown'
 import type { ExpertDiscussionContext, ExpertDiscussionMode } from './expert-discussion'
+import { normalizeMessageLinkBoundaries } from './message-links'
 
 type MessageReducer = {
   createMessageState: (runId: string) => unknown
@@ -100,9 +101,11 @@ function applyCommittedFallback(message: ChatMessage, event: Record<string, unkn
   if (type === 'answer.committed') {
     const text = String(payload.text || '').trim()
     if (!text) return message
+    const recovered = extractStructuredChoiceFromText(text)
     return stampStreamTiming({
       ...message,
-      text,
+      text: recovered?.text || text,
+      structuredUi: recovered?.bars || message.structuredUi,
       answerHash: String(payload.hash || message.answerHash || ''),
       v2AnswerCommitted: true,
       thinking: false,
@@ -151,24 +154,26 @@ export function buildAgentGeneratePayload(input: {
   skillRefs?: string[]
   conversationMode?: ExpertDiscussionMode
   expertDiscussionContext?: ExpertDiscussionContext
+  orchestrationMode?: 'expert-adaptive' | 'workflow-fixed'
 }): Record<string, unknown> {
+  const prompt = normalizeMessageLinkBoundaries(input.prompt)
   const attachedContext = input.attachment?.text
     ? `\n\n[用户附加文件：${input.attachment.name || '未命名文件'}]\n${input.attachment.text}\n[附加文件结束]`
     : ''
   const contentGrounding = buildContentGrounding({
-    prompt: input.prompt,
+    prompt,
     displayPrompt: input.displayPrompt || '',
     context: attachedContext,
     attachment: input.attachment?.text || '',
     task: input.task || null,
   })
   return {
-    prompt: input.prompt,
+    prompt,
     displayPrompt: input.displayPrompt || '',
     context: attachedContext.trim() || null,
     history: input.history,
     turn: input.turn,
-    skillRefs: [...new Set([...(input.skillRefs || []), ...extractSkillRefs(input.prompt)])],
+    skillRefs: [...new Set([...(input.skillRefs || []), ...extractSkillRefs(prompt)])],
     contentGrounding,
     sessionId: input.sessionId,
     agentId: input.agentId || 'general',
@@ -181,5 +186,7 @@ export function buildAgentGeneratePayload(input: {
     attachments: input.attachment ? [input.attachment] : [],
     conversationMode: input.conversationMode || '',
     expertDiscussionContext: input.expertDiscussionContext || null,
+    orchestrationMode: input.orchestrationMode
+      || (input.expertId ? 'expert-adaptive' : input.taskRef?.kind?.startsWith('workflow') ? 'workflow-fixed' : ''),
   }
 }

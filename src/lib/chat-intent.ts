@@ -22,6 +22,9 @@ const KNOWLEDGE_RE =
 const WORK_VERB_RE =
   /(总结|概括|归纳|摘要|整理|润色|改写|重写|续写|扩写|精简|翻译|校对|纠错|提炼|拆解|拆分|分析|对比|比较|生成|起草|写|回复|回信|优化|列出|梳理|规划|设计|检查|评审|复盘|建议|方案|计划)/
 
+// Selecting the executable tier only enables discovery; it never authorizes an operation.
+const CAPABILITY_ACTION_RE = /(发送|发给|发出去|上传|下载|打开|保存|存到|导出|删除|移动|重命名|预订|预定|预约|订.{0,12}(?:会议室|会议)|调用|连接器|能力中心|用.{0,20}(?:处理|修|编辑))|\b(?:send|upload|download|open|save|export|rename|book|invoke)\b/i
+
 // 飞书连接器意图：须至少走 assist，否则 main.js 会关闭 tools，模型只能谎称「无法访问飞书」
 const FEISHU_RE = /(飞书|feishu|lark)/i
 const FEISHU_WORK_RE =
@@ -41,9 +44,11 @@ const VERY_SHORT_CHARS = 4
  * @param {boolean} [opts.hasNoteContext] 是否存在打开文件正文
  * @param {string[]} [opts.slashRefs] 已解析的 /技能 引用
  * @param {string} [opts.role] 会话角色（steward 强制走检索）
+ * @param {boolean} [opts.hasImage] 当前用户提供图片
+ * @param {boolean} [opts.hasPendingWork] 主进程确认仍有未完成步骤
  * @returns {'chat'|'assist'|'retrieval'}
  */
-function classifyIntent({ prompt = '', hasNoteContext = false, slashRefs = [], role = '' } = {}) {
+function classifyIntent({ prompt = '', hasNoteContext = false, slashRefs = [], role = '', hasImage = false, hasPendingWork = false } = {}) {
   try {
     const p = String(prompt || '').trim()
     const refs = Array.isArray(slashRefs) ? slashRefs.filter(Boolean) : []
@@ -56,7 +61,8 @@ function classifyIntent({ prompt = '', hasNoteContext = false, slashRefs = [], r
     if (isSteward || hasSlash || hasAt || knowledgeIntent) return 'retrieval'
 
     const workVerb = WORK_VERB_RE.test(p)
-    if (workVerb || hasNoteContext || feishuWork) return 'assist'
+    const resumeWork = hasPendingWork && /^(?:继续|接着|重试|再试一次|continue|retry)[。.!！\s]*$/i.test(p)
+    if (workVerb || hasNoteContext || feishuWork || hasImage || CAPABILITY_ACTION_RE.test(p) || resumeWork) return 'assist'
 
     const veryShort = p.length <= VERY_SHORT_CHARS
     if (!veryShort && QUESTION_RE.test(p)) return 'assist'

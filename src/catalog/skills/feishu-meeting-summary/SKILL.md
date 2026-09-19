@@ -4,9 +4,9 @@ description: >-
   检索飞书妙记会议候选，用户选定后读取正文并输出结构化会议总结。Use when the user asks
   for meeting summary, meeting minutes, or Feishu 妙记 recap.
 slash: /feishu-meeting-summary
-version: 1.0.0
+version: 1.2.0
 disable-model-invocation: true
-requiredTools: [feishu.meeting_candidates, feishu.meeting_read]
+requiredTools: [feishu.meeting_candidates]
 ---
 
 # 飞书会议总结
@@ -18,7 +18,8 @@ requiredTools: [feishu.meeting_candidates, feishu.meeting_read]
 
 ## 时间范围
 
-- 默认统计 **最近 3 个自然日（含今天）** 与用户相关的会议
+- 用户明确给出“今天、昨天、本周、某日或起止日期”时，必须原样保留该时间范围，不得为了增加候选而自行扩大；“今天”传 `days: 1`
+- 只有用户完全没有给出时间范围时，才默认统计 **最近 3 个自然日（含今天）** 与用户相关的会议
 - 会议范围：用户作为组织者、参会人、被 @ 提及或会后待办责任人的记录
 - 若任务声明其他天数，传给 `feishu.meeting_candidates` 的 `days`（1–30）
 
@@ -28,13 +29,15 @@ requiredTools: [feishu.meeting_candidates, feishu.meeting_read]
 
 1. 确认飞书 user 授权；未授权时提示授权，**不要编造会议**
 2. 调用 `feishu.meeting_candidates`（`days` 见上）拉取候选
+   - 当前回合只调用一次；成功回执已经返回后，不再次调用候选查询，也不调用 `discover_tools` 重找同一工具
+   - 只有宿主明确报告工具尚未投影时才允许工具发现；发现后仍只执行一次候选查询
 3. **仅展示候选会议列表**：
    - 每场会议只显示 **一张可打开的飞书妙记卡片**
    - 会议标题、日期时间、组织者全部放在卡片内
    - 卡片外不重复展示
    - **不显示**原始 `minute_token` / url
 4. **不要**直接读取正文、**不要**直接总结
-5. 若首轮为 0 条：先自动放宽关键词再检索一轮；仍为 0 则诚实说明「最近 N 天没有找到相关会议」，可附可选下一步（换时间范围或指定主题）。**不要**罗列可能原因，**不要**请求粘贴链接
+5. 若首轮为 0 条：诚实说明「最近 N 天没有找到相关会议」，可附可选下一步（换时间范围或指定主题）。把零候选视为本轮有效结果，**不要**继续调用读取工具，**不要**罗列可能原因，**不要**请求粘贴链接
 6. 若接口错误（Internal error / 请重试 / 服务器繁忙）：只回一句「飞书接口暂时故障，请稍后再试」。**严禁**粘贴原始报错 JSON、log_id、堆栈
 
 ### 阶段二：用户选定后总结
@@ -58,7 +61,7 @@ requiredTools: [feishu.meeting_candidates, feishu.meeting_read]
 
 - 不要用 `feishu.search_docs` 替代会议工具
 - 不要在阶段一调用 `feishu.meeting_read`
-- 不要中途让用户回复序号后继续（阶段一仅展示，阶段二等用户明确选择）
+- 阶段一展示候选后停止本轮；用户通过卡片或序号明确选定后，才在下一轮读取
 
 ## 零候选与权限
 

@@ -1,0 +1,48 @@
+{
+  "source": {
+    "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa26-actual-runs-lossless.json",
+    "sha256": "3d69aa3dc389ccfca8681af7337a5ac21d6b4d17ca3a1cbfafddf28ebed3ac10",
+    "jsonPath": "data.blocked"
+  },
+  "taskId": "task-mtpkut6w-6cluf",
+  "sessionId": "wb-expert-task-mtpkut6w-6cluf",
+  "runId": "expert_task-mtpkut6w-6cluf_mtpkuxml",
+  "status": "needs_input",
+  "configuration": "old-3.2.0 initial blocked",
+  "agentVersion": "3.2.0",
+  "sop": {
+    "version": "3.2.0",
+    "hash": "dcf7730df6be94b0"
+  },
+  "finalAssistantMessage": null,
+  "artifacts": [],
+  "executionEvidence": [],
+  "attention": {
+    "kind": "operation_status_unknown",
+    "action": "provide_input",
+    "title": "需要核对操作结果",
+    "detail": "「generate_image」未返回可确认的结果，操作可能已经生效。为避免重复执行，已停止自动重试。请先核对目标端的结果，再决定是否重新执行；任务材料已保留。",
+    "field": "",
+    "item": "",
+    "question": "「generate_image」未返回可确认的结果，操作可能已经生效。为避免重复执行，已停止自动重试。请先核对目标端的结果，再决定是否重新执行；任务材料已保留。",
+    "example": "",
+    "options": [],
+    "defaultValue": "",
+    "required": true,
+    "createdAt": "2026-09-06T08:56:39.018Z"
+  },
+  "textFileSerialization": null,
+  "baseReference": {
+    "artifactId": "image_6c8124d9d8735d9b",
+    "taskId": "task-mtphk5gg-jinbr",
+    "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+    "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+    "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+    "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+    "width": 896,
+    "height": 1200,
+    "mimeType": "image/jpeg",
+    "source": "evidence/rqa24-baseline-discovery-v1.json → v1Session.run.artifacts[image_6c8124d9d8735d9b]；冻结时重新计算原图hash一致。"
+  },
+  "limitations": "非盲、可见配置标签、非随机顺序运行；每题每配置 n=1。比较旧整包 3.2.0 与候选整包 3.4.0，不是纯 Skill 因果对照。平台 review/verificationPassed 不等于专业合格；无稳定性或生产资格结论。"
+}

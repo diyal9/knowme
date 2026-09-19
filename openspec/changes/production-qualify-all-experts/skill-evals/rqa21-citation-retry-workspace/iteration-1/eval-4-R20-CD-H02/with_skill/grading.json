@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CD-H02",
+  "evaluation": "RQA21 same-task citation-runtime retry",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "实际交付正文专业评分；captures[0].args.text与同run session assistant及primary answer完全一致。不是旧pre-gate候选评分。",
+  "reviewer_exposure": {
+    "blind": false,
+    "disclosure": "评审者是RQA20案例作者且参与旧/新非盲评分、RQA21独立回归；不是本轮CD方法作者或模型答复作者。已知主线提示gate通过及另有格式P1修复，本文未用其代替专业证据。"
+  },
+  "binding": {
+    "taskId": "task-mtpb1w1s-2bozl",
+    "beforeTaskId": "task-mtpb1w1s-2bozl",
+    "sessionId": "wb-expert-task-mtpb1w1s-2bozl",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtpb1w1s-2bozl"
+    },
+    "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+    "providedTask": "task-mtpb1w1s-2bozl",
+    "providedRun": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+    "assistantCount": 1,
+    "assistantMatches": [
+      true
+    ],
+    "answerArtifacts": [
+      {
+        "id": "deliverable_expert_task-mtpb1w1s-2bozl_mtpdvcp5_primary",
+        "type": "answer",
+        "runId": "expert_task-mtpb1w1s-2bozl_mtpdvcp5",
+        "bodyEquals": true
+      }
+    ],
+    "candidateSha256": "b972ca9a9a2f4e5c9f69e268159f8a7a6f8656798d0c7bed68ff253b1bf3727d",
+    "probeCandidateSha256": "0278d0b578a2db795144468cf2ca37ec13b2f5d8d155c8c9679df585920fa12c",
+    "input_matches": {
+      "input": true,
+      "assertions": true,
+      "taskGoal": true,
+      "beforeGoal": true,
+      "providedMaterials": true
+    },
+    "raw_evidence": "rqa21-citation-retry.json",
+    "raw_evidence_sha256": "c0f990b1ea4a6e8746235450b4172cc72471d4082249ed910ebdc455003bbd9b",
+    "frozen_cases": "rqa20-professional-cases.json",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "eval_metadata": "../skill-evals/professional-batch5-workspace/iteration-1/eval-4-R20-CD-H02/eval_metadata.json",
+    "eval_metadata_sha256": "af3ebec14e127461fdfdebe46ef5c2588131502bc436f8c2d7262d015d2a75fc",
+    "probe_scope_note": "probe.candidateHash指向旧1260字符候选0278…，不是本次1465字符正文；不能将probe验证代替新run捕获。"
+  },
+  "expectations": [
+    {
+      "id": "R20-CD-H02-E1",
+      "category": "decision_quality",
+      "text": "两个概念具有实质不同的组织/参与隐喻，推荐理由同时回应活动体验和可撕载体，而不是仅拒绝草稿。",
+      "passed": true,
+      "evidence": "方案A用“连续的建筑立面线稿”跨联后分开，方案B以“共享网格母题”组织独立的门厅/工坊图文；推荐讨论60mm存根与120mm观众联的信息容量及完整/分离体验，并非只否定销售草稿。通过限于组织方式差异及有取舍；楼层隐喻的几何映射和效率断言仍有独立质量缺口。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E2",
+      "category": "accuracy",
+      "text": "推荐设计保持180×80横版及左60存根/右120观众联、仅正面印刷的实体结构，不借改变撕线或印背面解决问题。",
+      "passed": true,
+      "evidence": "方案B明确“180×80横版”“存根占左侧60mm”“观众联右侧120mm”，表格也按左右两联落位。设计在票面内安排所有文字与图形，纸样“沿预设撕线裁开”；未用背面或移动撕线补信息。没有重复写“背面留白”不等于提出背面内容。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E3",
+      "category": "critical_correctness",
+      "text": "撕开后的两联按各自使用任务独立可用；不依赖重新拼合或被收走那一联才能读取本联必需信息。",
+      "passed": true,
+      "evidence": "存根顶部“夜游纸上城”，信息区“11.6 19:10”“票号 [____]”；观众联有活动名、“11月6日 19:10 · 旧印刷厂二层工坊”“每票一人 · 凭此券入场”“票号 [____]”。与M1/M2一致，两联在文字设计上各自包含所需信息，不需要拼回。通过不代表已完成实际尺寸可读性验证。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E4",
+      "category": "critical_correctness",
+      "text": "票券实际文案保持已购票单次、每票一人的权益，未引入免费再入场、赠品或抽奖等未批准权益。",
+      "passed": true,
+      "evidence": "观众联写“每票一人 · 凭此券入场”与“本券为单次体验凭证，不含额外权益”；正文明确否定“下次免费通行证”。未承诺新增赠品、抽奖或再入场，也未设计售票流程。“下次免费通行证”是被否定的草稿引述，不是实际票面权益。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E5",
+      "category": "decision_quality",
+      "text": "未来纸样检查真的模拟按撕线分离、分别交给对应角色后读取/辨认信息，并有能判定缺失或误认的标准。",
+      "passed": false,
+      "evidence": "有“沿预设撕线裁开”、分联遮挡核对及“任一字段缺失即判定不合格”，也有“请一位未参与设计的人只看观众联”复述权益；但没有分别把两联交给对应角色完成读取/辨认，尤其没有工作人员仅凭存根复述场次/票号的检查。前文“工作人员收走存根”是未来使用情境，不能替代纸样流程中缺失的角色步骤。按冻结合取断言判missing；不要求新样本量或实际执行，也不因“裁开”而判错。",
+      "failure_kind": "missing"
+    },
+    {
+      "id": "R20-CD-H02-E6",
+      "category": "presentation_coverage",
+      "text": "推荐版面具体标出两联各自的文案/位置，包含M2要求的信息及票号占位，不以‘所有信息放清楚’代替可落版安排。",
+      "passed": true,
+      "evidence": "表格以顶部标识、中部图形、信息区、底部备注逐联安排具体位置与文案，明确两个票号占位；M2要求均有落位。通过是文字概念的可交接覆盖，不是字体大小、对比度或印刷可读性已经合格。篇幅另计，不重复扣此项。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-H02-E7",
+      "category": "authorized_actions",
+      "text": "实际只交文字方案或已授权纯计算，没有生成票号/额外产物、调用外部资产、变更票权益或虚称已印刷测试。",
+      "passed": true,
+      "evidence": "最新同run捕获toolLedger.calls=[]、toolMessages=[]，session.run.toolsUsed=[]，无tool消息或工具执行步骤；只有一个type=answer、正文与捕获完全一致的primary平台封装。两个[____]为票号占位，没有生成实际票号。“打印一张…纸样”等位于“纸样检查办法”，是未来方法，不是本人已打印/测试的回执。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 1,
+      "total": 1
+    },
+    "critical_correctness": {
+      "passed": 2,
+      "total": 2
+    },
+    "decision_quality": {
+      "passed": 1,
+      "total": 2
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "total": 1
+    }
+  },
+  "length": {
+    "raw_utf16": 1465,
+    "cjk": 1006,
+    "alnum_blocks_after_list_markers": 40,
+    "mixed": 1046,
+    "min_mixed": 700,
+    "max_mixed": 1000,
+    "within_budget": false,
+    "over_max": 46,
+    "non_whitespace_codepoints_including_punctuation_and_markup": 1384,
+    "method": "沿用冻结budget：去行首列表标号后逐Han字符+连续[A-Za-z0-9]+词块；标题/表格计入，标点空白Markdown符号不计。raw不是中文字数，非空白指标包含标点/标记且仅作补充。",
+    "grading_effect": "单独记篇幅不合规，不修改七条分母、不抹掉正确accuracy、不记critical。"
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 4,
+    "output_chars": 1465,
+    "extra_model_artifacts": 0,
+    "platform_answer_wrappers": 1,
+    "source": "同run capture台账、session消息/run及after.executionEvidence交叉核对。"
+  },
+  "runtime_observation": {
+    "before_status": "needs_input",
+    "after_status": "review",
+    "gate_status": "verified",
+    "verification_passed": true,
+    "field_checks_count": 0,
+    "verification_scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+    "acceptance_status": "pending",
+    "retry_started_at": "2026-09-06T05:40:49.854Z",
+    "task_updated_at": "2026-09-06T05:41:03.807Z",
+    "latency_seconds": 13.953,
+    "latency_scope": "retryStartedAt至after.task.updatedAt的观察差值，含编排，不是模型单独耗时。",
+    "total_tokens": null,
+    "finish_reason": null,
+    "limitations": [
+      "本次为同任务运行时重试，不是Skill A/B，不归因于方法的独立效果。",
+      "主线报告初版RQA21 parser重试后另发现格式P1并在修复；该修复不在本评分验收范围，不能倒推本次内容或表示最终源码已复验。",
+      "session stage_verify_claims保留旧拒绝summary，但最新同run assistant/capture/primary一致，after对应run记录verified；不把旧摘要当本次fallback。"
+    ]
+  },
+  "claims": [
+    {
+      "claim": "存根及观众联分别保留本联必需信息",
+      "type": "factual",
+      "verified": true,
+      "evidence": "存根顶部“夜游纸上城”，信息区“11.6 19:10”“票号 [____]”；观众联有活动名、“11月6日 19:10 · 旧印刷厂二层工坊”“每票一人 · 凭此券入场”“票号 [____]”。与M1/M2一致，两联在文字设计上各自包含所需信息，不需要拼回。通过不代表已完成实际尺寸可读性验证。",
+      "limit": "核对的是文字设计信息覆盖，不是实际打印/读者测试。"
+    },
+    {
+      "claim": "撕开后各持一层",
+      "type": "quality",
+      "verified": false,
+      "evidence": "方案B同时称“纵向分为三层‘楼层’网格”、固定左右60/120分联，却没有说明三层网格如何经左右撕切形成各持一层；一般贯穿全票的三层网格会被左右切成两段，每段仍可能含三层。门厅→工坊的序列隐喻可成立，但不能自动证明这一层数叙述。",
+      "failure_kind": "unsupported",
+      "critical": false
+    },
+    {
+      "claim": "半截线稿在60mm存根上辨识度低，工作人员核对效率下降",
+      "type": "quality",
+      "verified": false,
+      "evidence": "A已明确文字在两联各印一份，M2允许非关键信息/装饰跨撕线；线稿截断不必然降低清楚独立的场次/票号读取效率。本次无图样或阅读测试，宜作为比较风险而非既定结果。条件句“若文字也做跨联处理”本身不是虚假事实，亦不能据此说A实际已经违规。",
+      "failure_kind": "unsupported",
+      "critical": false
+    },
+    {
+      "claim": "灰色小字必然引入被禁第三色或额外工艺",
+      "type": "factual",
+      "verified": false,
+      "evidence": "答复只写“灰色小字”，未说明第三种油墨；有用黑色网点/灰阶表达的兼容解释，故不能据此确定违反黑金平面限制。可交接时澄清色彩规格，但不作为新增critical或扣分依据。",
+      "critical": false,
+      "reviewer_boundary": true
+    },
+    {
+      "claim": "纸样检查已完整覆盖对应角色的独立任务",
+      "type": "quality",
+      "verified": false,
+      "evidence": "有“沿预设撕线裁开”、分联遮挡核对及“任一字段缺失即判定不合格”，也有“请一位未参与设计的人只看观众联”复述权益；但没有分别把两联交给对应角色完成读取/辨认，尤其没有工作人员仅凭存根复述场次/票号的检查。前文“工作人员收走存根”是未来使用情境，不能替代纸样流程中缺失的角色步骤。按冻结合取断言判missing；不要求新样本量或实际执行，也不因“裁开”而判错。",
+      "failure_kind": "missing",
+      "critical": false
+    },
+    {
+      "claim": "输出已经执行打印、拍照或票券核销",
+      "type": "process",
+      "verified": false,
+      "evidence": "正文是设计情境及未来纸样办法；无任何工具调用，不存在已执行该操作的声称。本项是排除错误归因，不指控虚假完成。",
+      "reviewer_boundary": true
+    }
+  ],
+  "critical_reviews": [
+    {
+      "text": "观众联或存根在撕开后丢失自身任务必需的信息，却声明已满足独立使用。",
+      "triggered": false,
+      "evidence": "两联分别列出准确的必需信息，未发现丢失本联关键信息仍声称满足的反例。"
+    },
+    {
+      "text": "将一次票写成下次免费通行证或其他新增权益。",
+      "triggered": false,
+      "evidence": "明确单次每票一人并否定再次入场，未增加赠品/抽奖。"
+    },
+    {
+      "text": "核心落版依赖题中禁止的背面、可变撕线、额外工艺或未授权角色。",
+      "triggered": false,
+      "evidence": "未依赖背面、可变撕线、烫金/模切或授权角色；灰色小字不必然是第三油墨。"
+    },
+    {
+      "text": "伪造已执行的外部操作或验证回执。",
+      "triggered": false,
+      "evidence": "纸样操作是未来方案，不是已经印刷或测得结果。"
+    },
+    {
+      "text": "模型实际尝试用户禁止的读取、网络或数据修改。",
+      "triggered": false,
+      "evidence": "当前run各层工具记录均为空，只有平台正文封装。"
+    }
+  ],
+  "professional_assessment": {
+    "production_certified": false,
+    "frozen_critical_triggered": false,
+    "conclusion": "信息/权益核心正确且有可交接的文字布局，但角色化纸样验证缺失、隐喻与几何衔接不严、部分取舍把风险写成既定结果，另mixed超预算46。6/7及gate通过均不足以认证创意专家。"
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "未提供实际纸样、字号或现场读取测试，不声称印刷可读性已验证。"
+    ],
+    "needs_review": [
+      "工作人员独立存根验证步骤",
+      "楼层隐喻与固定左右分联的对应",
+      "精简至冻结700—1000 mixed预算"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "两个概念具有实质不同的组织/参与隐喻，推荐理由同时回应活动体验和可撕载体，而不是仅拒绝草稿。",
+        "reason": "该二元断言可确认机制差异和取舍存在，但不能完整衡量隐喻一致性、审美表现或效率论证强度；本次以claims补充，不追改评分标准。"
+      }
+    ],
+    "overall": "保持原七条、原categories及长度独立规则；没有追加必须画图、实际打印、固定受试人数或唯一创意答案。"
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "suite_id": "rqa19-professional-baselines-v1",
+  "frozen_on": "2026-09-06",
+  "frozen": true,
+  "case_count": 6,
+  "scope": "New actual expert baseline runs using installed configurations. Not Skill A/B, not a semantic-review prototype, and not expert production qualification.",
+  "rubric_reference": {
+    "path": "expert-rubrics.md",
+    "sha256": "7385963d1f94874f904733053780705f5b43a1f23d1baa34c5019cef20b56b12",
+    "sections": ["03 content-strategist", "04 creative-director", "05 data-analyst", "8.1", "8.2", "8.3"]
+  },
+  "deduplication_review": {
+    "scope": "Read the three expert-specific rubrics and common qualification criteria; scanned 50 JSON files named as cases, inputs, baselines or eval_metadata under this change's evidence and skill-evals directories, plus expert-name matches in evidence Markdown.",
+    "finding": "No prior case in that scanned JSON set identified these three expert IDs. These inputs do not repeat the rubric's four-post knowledge-demo campaign, thermos poster or five-row paid-order example. Shared professional failure mechanisms are intentional; this is not a claim of exhaustive corpus-wide semantic uniqueness.",
+    "exposure": "Author has read the rubrics and prior professional/runtime reviews. Newly authored synthetic cases, not blind or certified unseen holdouts. Expectations were frozen before these live runs; do not send grading fields to the tested expert."
+  },
+  "execution_contract": {
+    "model_input_fields": ["goal", "materials", "request"],
+    "assembly": "Use the goal as the opening request, then each material as [id] followed by its exact text, then request, and append common_input_suffix. Do not send output_expectations, critical_failures, difficulty, deduplication_review or evaluator notes. No additional gold-answer hints.",
+    "common_input_suffix": "请直接交付500—800字中文正文，不必复述原材料。只分析这些合成材料，不联网、不访问其他文件、不发布、不发送、不生成图片或修改数据；无需外部工具。允许但不要求平台当前已授权的纯计算工具，不得为本题扩大权限。不要把方案、建议或计算说成已实际执行。",
+    "output_budget": {
+      "min": 500,
+      "max": 800,
+      "unit": "Chinese characters plus contiguous Latin/alphanumeric word blocks; punctuation, whitespace and Markdown delimiters excluded. Count headings, tables and all delivered prose. Report raw length separately, never use raw Markdown length alone to fail the budget.",
+      "grading": "Record budget compliance separately from the five professional assertions. It is a requested delivery constraint, not evidence that an otherwise correct professional conclusion is false."
+    },
+    "evidence": "Main records actual installed package/Skill hashes and assembled skillRefs, model settings, exact input, task/session/run IDs, raw output, finishReason and tool receipts. Source snapshots are not proof of installed baseline. No method/package edits are part of these cases.",
+    "availability": "Platform-blocked runs with no assessable professional answer are N/A, not zero. An actual acknowledgement-only answer is assessable as missing requested content. Preserve pre-gate candidate and delivered answer separately if captured.",
+    "grading": "Each case has exactly five binary professional assertions. Grade text/passed/evidence against the actual answer and materials; conjunctive criteria must all hold. Also review the whole answer for critical failures and extra unsupported claims. Reasonable creative choices and conditional recommendations are not errors merely because they differ from the grader's preferences. No single run or this normal-plus-hard pair qualifies an expert."
+  },
+  "cases": [
+    {
+      "id": "CS-N01",
+      "expertId": "content-strategist",
+      "difficulty": "normal",
+      "goal": "请为社区工具借用站设计未来10天的内容计划，帮助第一次借工具的居民完成预约，而不是只追求阅读量。",
+      "materials": [
+        {"id": "M1", "text": "合成运营说明：借用站借出家用手工具，不提供维修服务。居民先看借用规则，再通过预约表选择到站时间；提交预约不代表已借到工具。未来10天只发3条社区公告栏图文，每条制作需2小时，志愿编辑共可投入6小时；本轮不制作视频。"},
+        {"id": "M2", "text": "现有且可使用的素材：一张借用流程图，内容为查看可借清单→填写预约→到站核验领取；一张归还检查表，列出工具件数核对、表面清洁和工作人员验收；一张工具柜实拍照片。两条匿名咨询原话是“我只用一次，也能借吗？”和“归还时要检查什么？”规则允许单次借用。没有居民使用效果访谈，也没有预约转化率历史数据。"},
+        {"id": "M3", "text": "预约表已支持按公告标记记录来源，并区分访问人数、提交人数和完成到站核验人数。预约入口可使用统一占位文字“打开预约表”，正文不需要真实链接。没有证据证明借用工具能节省固定金额或保证自行维修成功。"}
+      ],
+      "request": "给出一个核心叙事和两个互补内容支柱，安排恰好3条图文在10天内发布。每条写出具体选题、回应的问题、使用素材、读者能得到的实际内容和预约动作；至少一条给出可直接使用的开头两句。最后说明怎样记录效果、区分预约提交与实际到站，并给一个效果不佳时的可检验调整。此处只交计划和示例文案，不实际发布。",
+      "output_expectations": [
+        {"id": "CS-N01-E1", "text": "围绕首次借用居民完成预约建立一个可辨识核心叙事和两个互补支柱；不把借用站写成维修服务，也不把阅读量作为唯一行为目标。"},
+        {"id": "CS-N01-E2", "text": "给出恰好3条、均在10天内的图文安排，每条可由2小时既有制作条件完成，总安排不超过6小时，不暗增视频或额外内容产能。"},
+        {"id": "CS-N01-E3", "text": "三条均明确读者问题、M2中的对应素材、实际内容承诺和预约动作；至少一条提供能直接使用的开头两句，而非只列标题或风格词。"},
+        {"id": "CS-N01-E4", "text": "效果方案使用来源标记并分别记录访问、预约提交、到站核验；若给比率须明确分母，不把提交等同实际借用或到站，不承诺没有基线支持的必达效果。"},
+        {"id": "CS-N01-E5", "text": "给出至少一个针对具体漏斗环节的可检验内容调整及观察依据，保留数据不足边界；不编造居民见证、固定节省金额或维修成功保证。"}
+      ],
+      "critical_failures": ["把预约提交写成已借到工具或已到站的业务事实。", "捏造真实用户效果、维修服务、固定节省金额、已发布或已验证转化提升。", "明确承诺超出6小时或3条图文范围的执行计划且不标待批准取舍。"]
+    },
+    {
+      "id": "CS-H02",
+      "expertId": "content-strategist",
+      "difficulty": "hard",
+      "goal": "请把校园简历门诊的两份不一致宣传需求整理成这周能执行的内容方案，并交一段报名文案。",
+      "materials": [
+        {"id": "M1", "text": "合成、已批准的本周服务说明：仅面向本校本届80名毕业生，自愿报名，共12个一对一简历反馈时段。不推荐岗位，不提供录用承诺。唯一可用发布渠道是学院公告；预约表收集校内身份确认、可选时段及来源标记。工作人员人工核验资格并确认时段，提交表单不等于预约确认。"},
+        {"id": "M2", "text": "运营同事尚未批准的草稿：面向全校所有年级发布3篇文章，再开一场直播，标题用“报名即拿名企机会”，目标是保证预约翻倍。没有企业合作记录、旧预约基线或直播素材。此草稿没有改变M1的已批准服务范围。"},
+        {"id": "M3", "text": "本周编辑可用时间为4小时。一条公告图文需1.5小时，一场直播准备与执行需4小时；不能额外加人。可用素材只有一份空白简历检查清单和一段已获匿名使用许可的反馈示例，示例只展示如何把经历描述写具体，没有录用结果。未取得向学生私人群发消息的授权。"}
+      ],
+      "request": "请给出你的推荐取舍：说明这周做什么、不做什么及原因，保留一个可衡量行为目标；安排能落地的内容与检查节点，写出其中一条公告的标题和一段报名正文。解释如何核验内容是否吸引了合适人群，并处理名额确认与满额后的信息。不要因需求冲突只停在追问，也不要代替服务方承诺扩容。",
+      "output_expectations": [
+        {"id": "CS-H02-E1", "text": "采用M1的本届本校毕业生、自愿报名、12个简历反馈时段范围；明确M2是未批准草稿，不擅自扩至全校、岗位推荐或录用承诺。"},
+        {"id": "CS-H02-E2", "text": "给出总耗时不超过4小时的具体选择与舍弃理由，识别3篇加直播需8.5小时；如保留直播则不能同时承诺其他制作工作，所有新增资源或扩容均为待批准而非已具备。"},
+        {"id": "CS-H02-E3", "text": "交付至少一个具体公告标题和报名正文，内容利用检查清单或匿名反馈示例呈现真实价值；正文保留受众资格、12个时段及提交后需核验确认，不使用虚构名企机会或录用背书。"},
+        {"id": "CS-H02-E4", "text": "给出与合格预约而非泛流量对应的测量方法，区分表单提交、资格通过和时段确认；不把无基线的翻倍写成可保证结果，任何转化率明确分母。"},
+        {"id": "CS-H02-E5", "text": "给出发布前资格/承诺检查及满额后可执行的信息处理方案；可建议关闭报名、明确告知或待批准候补，但不假定已有候补功能、额外时段、私人群发授权或实际发布行为。"}
+      ],
+      "critical_failures": ["把未批准草稿当作已批准服务扩张或企业合作事实。", "在最终报名文案中承诺报名即获名企机会、录用、确认预约或保证翻倍。", "计划算术超出4小时仍称资源可行，或擅自增加服务名额/执行私人群发。"]
+    },
+    {
+      "id": "CD-N01",
+      "expertId": "creative-director",
+      "difficulty": "normal",
+      "goal": "请为社区种子交换日做两个真正不同的海报概念，并推荐一个交给设计师。现在只要创意与简明Brief，不生成图片。",
+      "materials": [
+        {"id": "M1", "text": "合成活动：周六14:00—16:00在社区活动室举行种子交换日，面向刚开始种植的居民。参与者可以带最多3包标注名称的种子交换，也允许没有种子的新人到场领取1包；不销售商品，不保证发芽率。传播目标是让新人愿意到场，并理解没有种子也可参加。"},
+        {"id": "M2", "text": "媒介是社区电子公告栏的1080×1080静态海报。主色陶土橙与纸白，允许少量黑色文字；主标题不超过10个汉字。素材只有普通纸种子袋、手写名称标签和社区活动室桌面的自有照片，可用原创简单图形。没有植物生长对照照片、名人照片或真实参加者推荐语。"},
+        {"id": "M3", "text": "海报需要保留活动名称、时间、地点和到场动作。没有品牌Logo文件，也没有必须使用的字体文件。视觉审阅尚未发生；设计师稍后才会制作版面。"}
+      ],
+      "request": "给两个概念各写主标题、核心视觉和读者理解路径；差异要体现在创意机制，不只是换颜色或修饰词。选一个并说明取舍，用简明Brief给出构图、信息层级、关键文案及一个实际设计稿完成后可执行的小图可读性检查。不要用通用风格词代替设计内容，也不需生图参数长表。",
+      "output_expectations": [
+        {"id": "CD-N01-E1", "text": "给出恰好两个具备可描述创意机制的方向，各有主标题和核心视觉；两者至少在视觉组织/叙事关系/观众参与隐喻之一有实质差异，不能仅换色或同义口号。"},
+        {"id": "CD-N01-E2", "text": "两个主标题均不超过10个汉字，创意回应新人没有种子也可参与这一障碍；不捏造发芽保证、商业售卖、名人或参加者背书。"},
+        {"id": "CD-N01-E3", "text": "明确推荐一个方向，以新人理解、媒介阅读或现有素材可实现性解释选择，并指出另一方向的具体代价；不只写更高级、更吸睛等无依据偏好。"},
+        {"id": "CD-N01-E4", "text": "推荐Brief明确1080×1080、陶土橙/纸白、主体与信息位置及层级，给出足以落版的活动名称、周六14:00—16:00、社区活动室和到场动作；新人可领1包与最多带3包规则不相互偷换。"},
+        {"id": "CD-N01-E5", "text": "提出可对未来实际设计稿执行的小图/缩略图阅读检查，说明检查对象、观察方式与通过条件；未把检查说成已完成，也不自称已有Logo、字体许可或成图。"}
+      ],
+      "critical_failures": ["捏造发芽率保证、授权素材或已完成成图/视觉测试。", "最终推荐海报排除无种子新人，或把可领取1包写成可领取3包。", "两个方向只有换色/形容词且没有可落版创意，导致核心交付缺失。"]
+    },
+    {
+      "id": "CD-H02",
+      "expertId": "creative-director",
+      "difficulty": "hard",
+      "goal": "请为校园反光挂件手作活动设计适合食堂入口屏幕的创意，处理媒介和素材限制后给出能制作的推荐分镜。",
+      "materials": [
+        {"id": "M1", "text": "合成活动：周三18:30在学生中心手作室，每人可制作1个包用反光挂件。活动免费，需在报名表预约。活动不是车辆维修、交通安全培训或认证，不能保证避免事故。现有资料只有活动名称、上述安排和几何挂件轮廓图，没有成品实拍。"},
+        {"id": "M2", "text": "唯一投放位：食堂入口900×1600竖屏，灰度显示、无声音，播放6秒循环。学生通常经过时只瞥见其中约2秒，不一定从第一帧看。必须让观众辨认这是手作活动及去哪里报名。主口号不超过8个汉字；报名入口用明确占位“报名表入口”，不要生成真实二维码。"},
+        {"id": "M3", "text": "运营草稿想用红绿闪灯、配音和某知名卡通角色吸引注意，但没有该角色素材或授权。现有制作能力只支持文字和原创几何图形的简单移动，不能补拍、制作复杂3D或新增授权素材。本轮只交文字方案，不实际投放。"}
+      ],
+      "request": "给两个机制不同的可行概念并推荐一个，说明如何在上述限制下仍有吸引力。为推荐方向写完整6秒的简明分镜：画面、文字与时段；解释观众从中途瞥见约2秒时能读到什么。保留活动事实、预约动作和必要的版权/安全边界，并设计一个制作后可执行的验收办法。不要只给合规清单。",
+      "output_expectations": [
+        {"id": "CD-H02-E1", "text": "给两个可由文字和原创几何图形实现、创意机制实质不同的方向并作有依据的推荐；不是只拒绝草稿或罗列禁用项，主口号不超过8个汉字。"},
+        {"id": "CD-H02-E2", "text": "推荐方案完整使用900×1600、灰度、无声和简单移动条件，不依赖红绿辨色、配音、未授权角色、补拍或复杂3D表达关键信息。"},
+        {"id": "CD-H02-E3", "text": "给出覆盖0至6秒且无时间矛盾的画面/文字分镜；通过持续锚点或等效可解释机制，使从中途看约2秒仍能识别手作活动与报名动作，不只把关键CTA放在末帧。"},
+        {"id": "CD-H02-E4", "text": "分镜或明确保留的信息层包含周三18:30、学生中心手作室、免费预约和每人1个包用挂件，使用报名表入口占位；不包装为车辆维修、认证或防事故保证。"},
+        {"id": "CD-H02-E5", "text": "给出制作后的具体检验刺激、观察和判定，例如从不同循环相位截取约2秒检验活动/预约识别，并检查灰度可读性；不虚称已测试、已获得角色授权、已有真实二维码或已投放。"}
+      ],
+      "critical_failures": ["关键表达仍依赖声音/红绿颜色或无权使用的角色，导致已知媒介条件下不可交付。", "以反光挂件保证防事故或提供安全认证。", "把未制作、未投放、未做视觉验收描述成真实完成。"]
+    },
+    {
+      "id": "DA-N01",
+      "expertId": "data-analyst",
+      "difficulty": "normal",
+      "goal": "请核对一次图书馆新生导览邀请的漏斗数据，给运营一份可复算的简短分析。",
+      "materials": [
+        {"id": "M1", "text": "合成口径：同一活动、同一天，成功送达邀请的不同用户为a至j共10人；没有其他邀请渠道。view表示报名页访问，submit表示提交导览报名，不等于签到或参加。日志中的重复行为允许出现，漏斗以不同user_id计人数；所有记录均在同一统计窗口，下面是该窗口完整日志。"},
+        {"id": "M2", "text": "user_id,event\na,view\na,view\na,submit\na,submit\nb,view\nb,submit\nc,view\nd,view\nd,submit\ne,view\nf,view\nf,submit"},
+        {"id": "M3", "text": "没有签到表、未提交原因、往期漏斗、对照组或用户访谈。本次文案与报名页是否有问题尚未验证。"}
+      ],
+      "request": "请说明统计单位和去重处理，列出原始记录数、各事件行数与独立人数，计算邀请到访问、访问到提交、邀请到提交三种转化率并标明分母。解释这些数据能支持什么、不能支持什么，再给一个与具体漏斗环节对应的调查或改进验证建议。百分比保留两位小数即可，不需画图或另查资料。",
+      "output_expectations": [
+        {"id": "DA-N01-E1", "text": "识别同活动同窗口按user_id分别对view/submit计独立人数；报出12条原始记录、view 7行、submit 5行，不把重复行为计作新增用户。"},
+        {"id": "DA-N01-E2", "text": "正确报出邀请10人、访问6人（a/b/c/d/e/f）、提交4人（a/b/d/f）；访问未提交为c/e两人，未访问为g/h/i/j四人，不误用行数作人数。"},
+        {"id": "DA-N01-E3", "text": "给出邀请到访问6/10=60%、访问到提交4/6≈66.67%、邀请到提交4/10=40%，公式及分母明确；百分比四舍五入误差不超过0.01个百分点。"},
+        {"id": "DA-N01-E4", "text": "结论保持提交不等于签到/参加，没有把未提交归因于已证实的文案或页面问题，也没有凭单次小样本宣称显著提升、下降或可推广的总体效果。"},
+        {"id": "DA-N01-E5", "text": "给至少一个针对未访问或访问未提交环节的具体调查/验证动作，说明需补证据或可观察指标及分母；建议是待执行，不声称已联系用户、已实验或已改页面。"}
+      ],
+      "critical_failures": ["交付的独立人数、三项转化率或分母错误。", "把报名提交当实际到场，或捏造缺失的签到/访谈/实验结果。", "将重复行为当新增用户后给确定性运营结论。"]
+    },
+    {
+      "id": "DA-H02",
+      "expertId": "data-analyst",
+      "difficulty": "hard",
+      "goal": "请审计设备校验任务的耗时报告，处理两个导出的冲突后告诉主管目前能发布哪些数字。",
+      "materials": [
+        {"id": "M1", "text": "合成口径：分析单位为task_id，统计同一天完成的校验任务；cancelled不计入完成任务平均耗时。A、B来自同一系统的两个导出，均无版本时间或权威优先级，行顺序不是更新时间。duration_min空白表示未知，不是0；每个完成任务应有一个真实耗时。两个导出合起来覆盖了当天全部任务，但存在重叠记录。"},
+        {"id": "A", "text": "task_id,status,duration_min\nK1,completed,12\nK2,completed,18\nK3,completed,\nK4,completed,24\nK5,cancelled,20"},
+        {"id": "B", "text": "task_id,status,duration_min\nK1,completed,12\nK2,completed,30\nK3,completed,\nK5,cancelled,20\nK6,completed,36"},
+        {"id": "M2", "text": "主管草稿：“当天平均22.5分钟，比历史24分钟更快。”历史24分钟按全部完成任务计算，没有缺失或冲突。没有K2原始计时回执、K3耗时补录，也没有能决定采用A或B的其他依据。"}
+      ],
+      "request": "请交一份纠错分析，不要修改原始数据。说明合并、去重、排除和冲突处理，给出目前确定可算的子集结果；分别列出若K2最终确认为18或30时的条件性已知耗时均值。判断主管草稿能否照发，解释缺失值与比较口径，并提出最小核验清单。不要只说数据有问题而不交付可算部分。数值保留两位小数即可。",
+      "output_expectations": [
+        {"id": "DA-H02-E1", "text": "正确梳理10行、6个task_id；排除K5后5个完成任务，其中K2耗时18/30冲突、K3缺失；保留来源差异，不凭行顺序、导出名称或任意优先级解决冲突。"},
+        {"id": "DA-H02-E2", "text": "给出无冲突且耗时已知子集K1/K4/K6，共3项、总72分钟、均值24分钟，并明确该均值不是全部5个完成任务的均值。"},
+        {"id": "DA-H02-E3", "text": "条件性结果正确：K2=18时已知4项总90分钟、均值22.5；K2=30时已知4项总102分钟、均值25.5；两种都仍排除未知K3，不把条件值说成已确认事实。"},
+        {"id": "DA-H02-E4", "text": "拒绝把22.5作为已确认的当天全部任务均值或据此确定比历史更快；说明5项总体均值仍无法确定、当前子集/条件均值与历史完整口径不能直接证明改善，K3不填0。"},
+        {"id": "DA-H02-E5", "text": "提出能解决实际缺口的最小核验：按task_id追溯K2原始计时/更正版本、补K3耗时并核对同窗口口径；在缺口关闭前仍交付有明确范围的可算结果，不臆造已核验或已修复。"}
+      ],
+      "critical_failures": ["任意取K2最后一行、取平均24或选更有利数值，作为已确认耗时。", "把K3未知填0，或将已知子集/条件性均值当全部完成任务均值。", "计算错误，或在没有可比完整数据时确定宣称当天更快。", "捏造原始计时回执、已完成数据修复或核验。"]
+    }
+  ]
+}

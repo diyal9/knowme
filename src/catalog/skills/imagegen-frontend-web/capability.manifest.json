@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 3,
+  "id": "imagegen-frontend-web",
+  "kind": "skill",
+  "name": "网页视觉参考设计",
+  "description": "按网站分区设计横向视觉参考，统一品牌与构图；实际出图需要可用的生图工具。",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "skills/imagegen-frontend-web"
+  }
+}

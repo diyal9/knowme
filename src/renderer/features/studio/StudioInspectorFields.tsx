@@ -1,6 +1,7 @@
 import type { StudioNode } from '../../../domain/studio'
 import { useAppStore } from '../../app/store'
 import { StudioAgentFields } from './StudioAgentFields'
+import { buildKnowledgeSelectionOptions } from '../../../shared/knowledge-selection'
 
 type Props = {
   node: StudioNode
@@ -21,7 +22,8 @@ export function StudioInspectorFields({ node, simpleMode, hasNextStep, onPatch }
     { id: 'local-default', name: '本地知识库', kind: 'local' },
     { id: 'feishu-default', name: '飞书知识库', kind: 'feishu' },
     { id: 'rag-default', name: 'RAG 知识库', kind: 'rag' },
-    ...knowledgeProviders.filter((item) => !['local-default', 'feishu-default', 'rag-default'].includes(item.id)),
+    ...buildKnowledgeSelectionOptions(knowledgeProviders)
+      .filter((item) => !['local-default', 'feishu-default', 'rag-default'].includes(item.id)),
   ]
 
   if (node.kind === 'start' || node.kind === 'end') {

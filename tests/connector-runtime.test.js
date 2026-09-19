@@ -9,7 +9,8 @@ const os = require('os')
 const path = require('path')
 const { createMcpHostRegistry } = require('../src/lib/mcp-host')
 const connectorCaps = require('../src/lib/connector-capabilities')
-const { buildConnectorToolSurface } = require('../src/lib/connectors/tool-runtime')
+const { buildConnectorToolSurface, executeGenericConnector } = require('../src/lib/connectors/tool-runtime')
+const { createRegistry } = require('../src/lib/tool-contract-registry')
 const store = require('../src/lib/connectors/store')
 const { createCapabilityStore, resolvePaths } = require('../src/lib/capability-store')
 
@@ -198,7 +199,7 @@ describe('connector tool-runtime multi MCP integration', () => {
     try { fs.rmSync(dir, { recursive: true, force: true }) } catch { /* ignore */ }
   })
 
-  it('buildConnectorToolSurface closes multiple ephemeral MCP sessions', async () => {
+  it('buildConnectorToolSurface lazily opens and closes multiple ephemeral MCP sessions', async t => {
     let openChildren = 0
     const spawnImpl = () => {
       openChildren += 1
@@ -230,17 +231,34 @@ describe('connector tool-runtime multi MCP integration', () => {
       spawnImpl,
       ephemeralMcpSessions: true,
     })
+    t.after(() => runtime.close())
+    assert.equal(openChildren, 0)
+    assert.deepEqual(runtime.surface.getToolDefinitions().map(d => d.function.name).filter(n => n.startsWith('mcp_load_')).sort(),
+      ['mcp_load_one', 'mcp_load_two'])
+    assert.equal(runtime.surface.getToolDefinitions().some(d => d.function.name.startsWith('mcp.')), false)
+    const executor = runtime.surface.createToolExecutor()
+    assert.equal((await executor.executeToolCall({ name: 'mcp_load_one', arguments: '{}' })).ok, true)
+    assert.equal(openChildren, 1)
+    assert.equal(runtime.surface.getToolDefinitions().some(d => d.function.name === 'mcp.two.tool_a'), false)
+    assert.equal((await executor.executeToolCall({ name: 'mcp_load_two', arguments: '{}' })).ok, true)
     const names = runtime.surface.getToolDefinitions()
       .map((d) => d.function.name)
       .filter((n) => n.startsWith('mcp.'))
       .sort()
     assert.deepEqual(names, ['mcp.one.tool_a', 'mcp.two.tool_a'])
     assert.equal(openChildren, 2)
+    for (const name of names) {
+      const record = runtime.surface.getToolRecords().find(d => d.function.name === name)
+      assert.equal(record._knowme.source, 'mcp')
+      assert.equal(record._knowme.mcpSchemaLoader, false)
+      assert.equal(record._knowme.requiresApproval, true)
+      assert.equal((await executor.executeToolCall({ name, arguments: '{}' })).code, 'approval_required')
+    }
     await runtime.close()
     assert.equal(openChildren, 0)
   })
 
-  it('runs a manifest-only connector through the unified store', async () => {
+  it('loads then runs a manifest-only connector through the unified store', async t => {
     const paths = resolvePaths(dir)
     const connectorDir = path.join(paths.connectors, 'manifest-only')
     fs.mkdirSync(connectorDir, { recursive: true })
@@ -251,6 +269,7 @@ describe('connector tool-runtime multi MCP integration', () => {
       version: '1.0.0',
       type: 'mcp',
       allowlist: ['echo'],
+      toolPolicies: [{ match: 'echo', risk: 'read', sideEffects: false, requiresApproval: false }],
       mcp: { command: 'mock', args: [], envKeys: [] },
     }), 'utf8')
     createCapabilityStore({ userData: dir }).upsertEntry({
@@ -261,12 +280,31 @@ describe('connector tool-runtime multi MCP integration', () => {
       status: 'enabled',
     })
 
+    let spawned = 0
+    const spawnEcho = createMockMcpSpawn({ tools: [{ name: 'echo', description: 'Echo' }] })
     const runtime = await buildConnectorToolSurface(dir, {
-      spawnImpl: createMockMcpSpawn({ tools: [{ name: 'echo', description: 'Echo' }] }),
+      spawnImpl: () => { spawned++; return spawnEcho() },
       ephemeralMcpSessions: true,
     })
+    t.after(() => runtime.close())
+    assert.equal(spawned, 0)
+    const initial = runtime.surface.getToolDefinitions().map(d => d.function.name)
+    assert.ok(initial.includes('mcp_load_manifest_only'))
+    assert.equal(initial.includes('mcp.manifest_only.echo'), false)
+    const executor = runtime.surface.createToolExecutor()
+    assert.equal((await executor.executeToolCall({ name: 'mcp_load_manifest_only', arguments: '{}' })).ok, true)
+    assert.equal(spawned, 1)
     const names = runtime.surface.getToolDefinitions().map(d => d.function.name)
     assert.ok(names.includes('mcp.manifest_only.echo'))
+    const record = runtime.surface.getToolRecords().find(d => d.function.name === 'mcp.manifest_only.echo')
+    assert.equal(record._knowme.source, 'mcp')
+    assert.equal(record._knowme.connectorId, 'manifest-only')
+    assert.equal(record._knowme.mcpSchemaLoader, false)
+    assert.equal(record._knowme.sideEffects, false)
+    assert.equal(record._knowme.requiresApproval, false)
+    const called = await executor.executeToolCall({ name: 'mcp.manifest_only.echo', arguments: '{}' })
+    assert.equal(called.ok, true)
+    assert.equal(called.text, 'called:echo')
     await runtime.close()
   })
 
@@ -283,6 +321,54 @@ describe('connector tool-runtime multi MCP integration', () => {
     })
     const names = runtime.surface.getToolDefinitions().map((d) => d.function.name)
     assert.ok(names.includes('feishu.draft_write_doc'))
+    await runtime.close()
+  })
+
+  it('projects built-in Feishu CLI tools for a system run without an Expert binding', async () => {
+    const unbound = await buildConnectorToolSurface(dir, {
+      allowedConnectorIds: [],
+      includeSystemFeishu: true,
+      spawnImpl: () => { throw new Error('MCP should not spawn for Feishu-only system surface') },
+    })
+    const names = unbound.surface.getToolDefinitions().map((d) => d.function.name)
+    assert.ok(names.includes('feishu.search_docs'))
+    assert.ok(names.includes('feishu.read_doc'))
+    assert.ok(names.includes('feishu.draft_write_doc'))
+    await unbound.close()
+
+    const ordinary = await buildConnectorToolSurface(dir, {
+      allowedConnectorIds: [],
+      spawnImpl: () => { throw new Error('MCP should not spawn for an ordinary unbound surface') },
+    })
+    assert.equal(ordinary.surface.getToolDefinitions().some((d) => d.function.name.startsWith('feishu.')), false)
+    await ordinary.close()
+  })
+
+  it('returns a structured actionable failure when a CLI exits non-zero', async () => {
+    const result = await executeGenericConnector({
+      type: 'cli',
+      cli: { command: process.execPath, args: ['-e', "process.stderr.write('cli exploded'); process.exit(7)"] },
+    })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'cli_exit_nonzero')
+    assert.match(result.text, /CLI 退出失败.*7.*cli exploded/)
+    assert.equal(result.meta.exitCode, 7)
+  })
+
+  it('registers generic CLI connectors with connector semantics in v1', async () => {
+    store.upsertConnector(dir, {
+      id: 'local-cli',
+      type: 'cli',
+      enabled: true,
+      cli: { command: process.execPath, args: ['-e', "process.stdout.write('ok')"] },
+    })
+    const reg = createRegistry()
+    const runtime = await buildConnectorToolSurface(dir, { registry: reg })
+    const name = 'connector_local_cli_call'
+    assert.equal(reg.has(name), true)
+    assert.equal(reg.get(name).contract.source, 'connector')
+    assert.equal(reg.get(name).contract.connectorType, 'cli')
+    assert.deepEqual(reg.getRegistrationIssues(), [])
     await runtime.close()
   })
 })

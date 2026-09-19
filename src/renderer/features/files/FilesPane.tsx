@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import '../../../secondary-dialog.css'
+import type { AgentRunArtifact } from '../../../shared/api'
 import { fileTreeNodeIcon, filterVisibleNodes, sourceKindLabel } from '../../../domain/file-tree'
 import { Icon } from '../../app/Icon'
 import { useAppStore } from '../../app/store'
@@ -7,7 +8,10 @@ import { TreeIcon } from './TreeIcon'
 
 export function FilesPane() {
   const query = useAppStore((s) => s.fileTreeQuery)
+  const projects = useAppStore((s) => s.projects)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
   const sources = useAppStore((s) => s.sources)
+  const sessions = useAppStore((s) => s.sessions)
   const activeSourceId = useAppStore((s) => s.activeSourceId)
   const fileTreeNodes = useAppStore((s) => s.fileTreeNodes)
   const loading = useAppStore((s) => s.fileTreeLoading)
@@ -15,7 +19,8 @@ export function FilesPane() {
   const collapsed = useAppStore((s) => s.fileTreeCollapsed)
   const setQuery = useAppStore((s) => s.setFileTreeQuery)
   const loadFileTree = useAppStore((s) => s.loadFileTree)
-  const selectSource = useAppStore((s) => s.selectSource)
+  const selectProject = useAppStore((s) => s.selectProject)
+  const relinkProject = useAppStore((s) => s.relinkProject)
   const toggleFileDir = useAppStore((s) => s.toggleFileDir)
   const createSourceFile = useAppStore((s) => s.createSourceFile)
   const collapseFileTree = useAppStore((s) => s.collapseFileTree)
@@ -45,6 +50,30 @@ export function FilesPane() {
     () => sources.find((s) => s.id === activeSourceId) || null,
     [sources, activeSourceId],
   )
+
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === activeProjectId) || null,
+    [projects, activeProjectId],
+  )
+  const visibleProjects = useMemo(
+    () => projects.filter((project) => project.status !== 'archived'),
+    [projects],
+  )
+  const recentArtifacts = useMemo(() => {
+    const seen = new Set<string>()
+    return sessions.flatMap((session) => (session.run?.artifacts || []).map((artifact) => ({
+      ...artifact,
+      ownerProjectId: artifact.projectId || artifact.meta?.projectId || session.projectId || null,
+      path: artifact.targetPath || artifact.meta?.path || '',
+      content: artifact.body || String((artifact as AgentRunArtifact & { content?: string }).content || ''),
+    }))).filter((artifact) => {
+      if (!activeProjectId || artifact.ownerProjectId !== activeProjectId) return false
+      const key = `${artifact.id}:${artifact.path}`
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    }).slice(-6).reverse()
+  }, [activeProjectId, sessions])
 
   useEffect(() => {
     void loadFileTree()
@@ -87,22 +116,37 @@ export function FilesPane() {
     }
   }
 
-  function renderSourceSwitcher() {
-    if (!activeSource) return null
-    const meta = sourceKindLabel(activeSource)
+  function openArtifactPreview(artifact: typeof recentArtifacts[number]) {
+    const path = String(artifact.path || '').replace(/\\/g, '/')
+    if (path && !/^[a-z]:\//i.test(path) && !path.split('/').includes('..')) {
+      void openFilePreview(path)
+      return
+    }
+    setPreviewPath(`成果 / ${artifact.title || artifact.id}`)
+    setPreviewText(artifact.content || '此成果只保留了运行引用，可回到原任务查看完整内容。')
+    setPreviewLoading(false)
+  }
+
+  function renderProjectSwitcher() {
+    if (!activeProject || !activeSource) return null
+    const meta = activeProject.status === 'missing'
+      ? '目录不可用'
+      : activeProject.status === 'readonly'
+        ? '只读'
+        : sourceKindLabel(activeSource)
     const title = activeSource.rootPath || activeSource.displayName || ''
-    if (sources.length > 1) {
+    if (visibleProjects.length > 1) {
       return (
         <label className="source-switcher files-source-switch" title={title}>
           <div className="source-switcher-text">
             <select
               className="source-switcher-select"
               aria-label="切换内容源"
-              value={activeSourceId || ''}
-              onChange={(e) => void selectSource(e.target.value)}
+              value={activeProjectId || ''}
+              onChange={(e) => void selectProject(e.target.value)}
             >
-              {sources.map((src) => (
-                <option key={src.id} value={src.id}>{src.displayName || src.id}</option>
+              {visibleProjects.map((project) => (
+                <option key={project.id} value={project.id}>{sources.find((source) => source.id === project.workspaceSourceId)?.displayName || project.name || project.id}</option>
               ))}
             </select>
             <span className="source-switcher-meta">{meta}</span>
@@ -191,7 +235,7 @@ export function FilesPane() {
         <span className="ico search-ico" data-icon="searchLine" aria-hidden="true" />
         <input
           type="search"
-          placeholder={sources.length ? '搜索文件…' : '搜索源…'}
+          placeholder="搜索文件…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="搜索文件"
@@ -200,13 +244,33 @@ export function FilesPane() {
       </div>
       <div className="tree" id="tree">
         {loading ? <div className="tree-empty">加载文件树…</div> : null}
-        {!loading && sources.length === 0 ? (
-          <div className="tree-empty">前往设置添加本地文件夹或 GitLab 项目。</div>
+        {!loading && projects.length === 0 ? (
+          <div className="tree-empty">前往设置添加本地文件夹或 Git 仓库。</div>
         ) : null}
-        {!loading && activeSource ? renderSourceSwitcher() : null}
+        {!loading && activeProject && activeSource ? renderProjectSwitcher() : null}
+        {!loading && activeProject?.status === 'missing' ? (
+          <div className="tree-empty">
+            文件目录不可用。<button type="button" className="link-btn" onClick={() => void relinkProject(activeProject.id)}>重新定位</button>
+          </div>
+        ) : null}
+        {!loading && activeProject?.status === 'readonly' ? (
+          <div className="tree-empty tiny">此目录为只读，Agent 不会写入文件。</div>
+        ) : null}
+        {!loading && recentArtifacts.length ? (
+          <section className="project-recent-artifacts" aria-label="最近成果" data-testid="project-recent-artifacts">
+            <header><span>最近成果</span><small>来自 Agent 与工作流</small></header>
+            {recentArtifacts.map((artifact) => (
+              <button type="button" key={`${artifact.id}:${artifact.path}`} onClick={() => openArtifactPreview(artifact)} title={artifact.path || artifact.title || artifact.id}>
+                <TreeIcon name="fileText" extraClass="file-ico" />
+                <span>{artifact.title || artifact.path || '未命名成果'}</span>
+                <small>{artifact.path || artifact.type || '运行成果'}</small>
+              </button>
+            ))}
+          </section>
+        ) : null}
         {!loading && activeSource && visibleNodes.length === 0 ? (
           <div className="tree-empty">
-            {query.trim() ? '没有匹配的文件。' : '此源下暂无文本文件。'}
+            {query.trim() ? '没有匹配的文件。' : '此源下暂无可显示的文件。'}
           </div>
         ) : null}
         {!loading && visibleNodes.length > 0 ? (

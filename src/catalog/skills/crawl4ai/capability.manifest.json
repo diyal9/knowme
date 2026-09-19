@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 3,
+  "id": "crawl4ai",
+  "kind": "skill",
+  "name": "Crawl4AI 网页抓取",
+  "description": "用 Crawl4AI 抓取 JS 重度页面并输出 Markdown 或结构化内容。",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": ["run_skill_script"] },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "risk": {
+    "level": "medium",
+    "reasons": ["会启动无头浏览器访问用户指定的公开网页"]
+  }
+}

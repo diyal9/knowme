@@ -6,6 +6,7 @@ import '../styles/workspace-chrome.css' // 壳：rail / side / main
 import '../app/ui-system.css'
 import '../styles/agent-chrome.css' // 默认助理路由：对话列样式
 import '../styles/workspace-overlays.css'
+import '../styles/marquee-text.css'
 import '../app/legacy-bridge.css'
 
 /**

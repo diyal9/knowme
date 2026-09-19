@@ -12,9 +12,11 @@ const { assembleCapabilityContext, isLegacySlashRef } = require('../src/lib/agen
 const { createSession, normalizeSession } = require('../src/lib/agent-sessions')
 const { buildSkillTools, SKILL_TOOL_NAMES } = require('../src/lib/agent-skill-tools')
 const { createCapabilityStore } = require('../src/lib/capability-store')
+const { buildQualificationContext } = require('../src/lib/expert-task-runtime')
 const { readMainIpcBundle } = require('./helpers/main-ipc-bundle')
 const preload = readPreload()
 const mainSource = readMainIpcBundle()
+const agentRuntimeSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'main', 'agent-runtime.ts'), 'utf8')
 
 function tmpDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'km-cap-int-'))
@@ -59,6 +61,10 @@ describe('capability integration wiring', () => {
   it('isolates Electron smoke user data behind the explicit test seam', () => {
     assert.match(mainSource, /KNOWME_TEST_SEAM\s*===\s*'1'/)
     assert.match(mainSource, /KNOWME_TEST_USER_DATA_DIR/)
+    assert.match(agentRuntimeSource, /KNOWME_TEST_SEAM === '1'[\s\S]*requestSingleInstanceLock/)
+    assert.match(agentRuntimeSource, /KNOWME_TEST_API_KEY/)
+    assert.match(agentRuntimeSource, /KNOWME_TEST_API_ENDPOINT/)
+    assert.match(agentRuntimeSource, /KNOWME_TEST_MODEL/)
     assert.match(mainSource, /\.join\((?:scope\.|ctx\.)?app\.getPath\('appData'\),\s*'KnowMe'\)/)
   })
 
@@ -66,6 +72,27 @@ describe('capability integration wiring', () => {
     const guards = fs.readFileSync(path.join(__dirname, '..', 'src', 'main', 'process-guards.ts'), 'utf8')
     assert.match(guards, /ctx\.app\.relaunch\(\{\s*args:\s*nextArgs\s*\}\)/)
     assert.doesNotMatch(guards, /KNOWME_TEST_SEAM.*return/)
+  })
+
+  it('does not block qualification identity on an optional bundled Skill', () => {
+    const context = buildQualificationContext(
+      { expertId: 'product-manager', assignmentSnapshot: {} },
+      {
+        capabilityManifest: {
+          version: '2.5.0',
+          dependencies: [
+            { id: 'product-definition-method', kind: 'skill', required: true },
+            { id: 'writing-polish', kind: 'skill', required: false },
+          ],
+        },
+        bindings: { skills: ['product-definition-method', 'writing-polish'], connectors: [] },
+        hashes: { expert: 'expert-hash', skills: { 'product-definition-method': 'required-hash', 'writing-polish': '' }, connectors: {} },
+      },
+      { provider: 'custom', model: 'qualification-fixture', requestedModel: 'qualification-fixture', label: 'fixture' },
+    )
+    assert.equal(context.complete, true)
+    assert.deepEqual(context.missing, [])
+    assert.match(context.configurationId, /^expert-config-v2:/)
   })
 
   it('wires pack dependency manifests and blocks unavailable required tools in main', () => {
@@ -105,6 +132,37 @@ describe('capability integration wiring', () => {
     assert.match(result.dynamicCapabilityContext, /专家 SOP · 办公搭档/)
   })
 
+  it('projects bound capabilities into planning without restoring executable bindings', () => {
+    const result = assembleCapabilityContext({
+      session: { id: 'planning-1', personaExpertId: 'office-partner', expertId: '' },
+      prompt: '总结今天的飞书聊天',
+      tier: 'chat',
+      expertRuntime: {
+        getSessionPersona: () => ({
+          ok: true,
+          persona: { name: '办公协作专家', sop: '先预检，再读取并标注来源。' },
+          bindings: { skills: ['feishu-related-chats'], connectors: ['feishu'] },
+          readiness: {
+            state: 'ready',
+            items: [
+              { id: 'feishu-related-chats', kind: 'skill', status: 'ready' },
+              { id: 'feishu', kind: 'connector', status: 'ready' },
+            ],
+          },
+        }),
+      },
+      skillRuntime: {
+        findSkillRecord: () => ({ name: '相关聊天整理', description: '读取指定时间范围内的消息' }),
+      },
+    })
+    assert.equal(result.bindings.skills, null)
+    assert.deepEqual(result.planningCapabilities.skills[0], {
+      id: 'feishu-related-chats', name: '相关聊天整理', description: '读取指定时间范围内的消息', status: 'ready', reason: '',
+    })
+    assert.equal(result.planningCapabilities.connectors[0].id, 'feishu')
+    assert.match(result.planningCapabilities.sop, /先预检/)
+  })
+
   it('legacy slash refs stay on legacySkillContext path', () => {
     const legacyCtx = '【Legacy OKF】/kb-steward 技能正文'
     const skillRuntime = {
@@ -136,6 +194,70 @@ describe('capability integration wiring', () => {
 
     const conn = createMinimalPackage('connector', { id: 'my-conn', name: 'Conn' })
     assert.ok(conn.files['manifest.json'].includes('"kind": "connector"'))
+  })
+
+  it('installs an expert with its declared Skill dependency closure', async () => {
+    const userData = tmpDir()
+    try {
+      const hub = createCapabilityHubService({
+        getUserData: () => userData,
+        getKnowledgeDir: () => path.join(userData, 'knowledge'),
+        getConnectorsApi: () => null,
+        bundledRoot: path.join(__dirname, '../src/catalog'),
+      })
+
+      const installed = await hub.installCapability({
+        id: 'product-manager',
+        enabled: true,
+        riskConfirmed: true,
+      })
+      assert.equal(installed.ok, true)
+      assert.deepEqual(installed.dependencyUpdates.map(item => item.id).sort(), [
+        'product-definition-method', 'requirement-review',
+        'research-evidence-analysis',
+      ].sort())
+
+      const store = JSON.parse(fs.readFileSync(path.join(userData, 'capabilities', 'install-store.json'), 'utf8'))
+      for (const skillId of installed.dependencyUpdates.map(item => item.id)) {
+        assert.equal(store.entries[skillId]?.kind, 'skill')
+        assert.equal(store.entries[skillId]?.enabled, true)
+      }
+      assert.equal(store.entries['product-manager']?.kind, 'expert')
+    } finally {
+      fs.rmSync(userData, { recursive: true, force: true })
+    }
+  })
+
+  it('keeps a user-owned same-id Skill when installing its declaring expert', async () => {
+    const userData = tmpDir()
+    try {
+      const hub = createCapabilityHubService({
+        getUserData: () => userData,
+        getKnowledgeDir: () => path.join(userData, 'knowledge'),
+        getConnectorsApi: () => null,
+        bundledRoot: path.join(__dirname, '../src/catalog'),
+      })
+      const installed = await hub.installCapability({ id: 'product-manager', enabled: true, riskConfirmed: true })
+      assert.equal(installed.ok, true)
+
+      const installFile = path.join(userData, 'capabilities', 'install-store.json')
+      const store = JSON.parse(fs.readFileSync(installFile, 'utf8'))
+      store.entries['product-definition-method'] = {
+        ...store.entries['product-definition-method'],
+        source: 'custom',
+        version: '9.0.0',
+      }
+      fs.writeFileSync(installFile, JSON.stringify(store, null, 2))
+
+      const reinstalled = await hub.installCapability({ id: 'product-manager', enabled: true, riskConfirmed: true })
+      assert.equal(reinstalled.ok, true)
+      assert.ok(reinstalled.warnings.some(item => item.code === 'dependency_update_not_managed'))
+      const after = JSON.parse(fs.readFileSync(installFile, 'utf8'))
+      assert.equal(after.entries['product-definition-method'].source, 'custom')
+      assert.equal(after.entries['product-definition-method'].version, '9.0.0')
+    } finally {
+      fs.rmSync(userData, { recursive: true, force: true })
+    }
   })
 
   it('migrateConnectorsIfNeeded is idempotent with backup', () => {
@@ -458,7 +580,7 @@ systemPrompt: "你是配置协作助手。"
 name: "孤儿专家"
 description: "仅有落盘未登记"
 avatar: ""
-skills: []
+skills: ["missing-skill"]
 connectors: []
 systemPrompt: "你是孤儿专家。"
 ---
@@ -475,6 +597,9 @@ systemPrompt: "你是孤儿专家。"
     assert.ok(orphan, 'orphan expert appears in list')
     assert.equal(orphan.source, 'custom')
     assert.equal(orphan.name, '孤儿专家')
+    assert.equal(orphan.readiness.state, 'limited')
+    assert.equal(orphan.readiness.items[0].id, 'missing-skill')
+    assert.equal(orphan.readiness.issues[0].code, 'unavailable_skill')
 
     fs.rmSync(userData, { recursive: true, force: true })
   })

@@ -1,0 +1,25 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-07T19:07:23.327Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:c60a2cf706ce00eb6ed311ed638716af8d6b61fe029c1b7092c5d53c6378988b",
+      "tasks": [
+        {
+          "taskId": "task-mtrm4lub-91mj8",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "review",
+          "configurationId": "expert-config-v2:c60a2cf706ce00eb6ed311ed638716af8d6b61fe029c1b7092c5d53c6378988b",
+          "hardFailure": false,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

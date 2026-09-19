@@ -24,7 +24,12 @@ async function applyFileDraft(draft, adapter = {}) {
         if (typeof adapter.rollbackFromBackup === 'function') await adapter.rollbackFromBackup(draft)
         return { ok: false, code: 'write_failed', text: String(r.error || '写入失败') }
       }
-      return { ok: true, text: `已写入 ${rel}` }
+      return {
+        ok: true,
+        text: `已写入 ${rel}`,
+        artifacts: [{ id: `file:${rel}`, type: 'file', title: rel }],
+        artifactRefs: [{ id: `file:${rel}`, type: 'file', kind: 'file', title: rel }],
+      }
     }
     if (action === 'move_path') {
       if (typeof adapter.movePath !== 'function') return { ok: false, code: 'tool_unavailable', text: '移动不可用' }

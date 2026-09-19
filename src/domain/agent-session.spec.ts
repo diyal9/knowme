@@ -8,6 +8,7 @@ import {
   isWorkbenchOwnedSession,
   parseSessionList,
   parseSessionRecord,
+  removeExtractedImageReferences,
   resolveSessionTabLabel,
 } from './agent-session'
 
@@ -33,20 +34,30 @@ describe('agent session helpers', () => {
         goal: '写文件',
         artifacts: [{
           id: 'art-1',
+          projectId: 'project-1',
           type: 'editor_patch',
           title: '替换',
           body: 'hello',
           status: 'draft',
-          meta: { sourceId: 'src', path: 'a.md', mode: 'replace' },
+          url: 'https://cdn.example.test/a.png',
+          path: 'generated/a.png',
+          meta: { projectId: 'project-1', sourceId: 'src', path: 'a.md', mode: 'replace', taskId: 'task-1', runId: 'run-1' },
         }],
       },
     })
     expect(session?.run?.artifacts?.[0]).toMatchObject({
       id: 'art-1',
+      projectId: 'project-1',
       type: 'editor_patch',
       targetPath: 'a.md',
-      meta: { sourceId: 'src', path: 'a.md', mode: 'replace' },
+      url: 'https://cdn.example.test/a.png',
+      path: 'generated/a.png',
+      meta: { projectId: 'project-1', sourceId: 'src', path: 'a.md', mode: 'replace', taskId: 'task-1', runId: 'run-1' },
     })
+  })
+
+  it('preserves stable project ownership when parsing a session', () => {
+    expect(parseSessionRecord({ id: 's-project', projectId: 'project-1', title: '项目对话' })?.projectId).toBe('project-1')
   })
 
   it('dedupes repeated openSessionIds', () => {
@@ -99,6 +110,7 @@ describe('agent session helpers', () => {
       firstUserText: '请整理本周项目风险并生成同步稿',
     })).toBe('请整理本周项目风险并生成同步稿')
     expect(resolveSessionTabLabel({ id: 's5', title: '新主题' }, { firstUserText: '你好' })).toBe('新主题')
+    expect(resolveSessionTabLabel({ id: 's6', title: '8', agentId: 'general' })).toBe('新主题')
   })
 
   it('dedupes open session ids in order', () => {
@@ -136,5 +148,10 @@ describe('agent session helpers', () => {
       'https://x.test/a.png',
       'https://x.test/b.jpg',
     ])
+    expect(extractImageUrls('打开 [候选图](https://x.test/c.webp)')).toEqual(['https://x.test/c.webp'])
+  })
+
+  it('removes image references after the message layer renders thumbnails', () => {
+    expect(removeExtractedImageReferences('结果如下：\n\n![图](https://x.test/a.png)\n\n[候选图](https://x.test/c.webp)\n\nhttps://x.test/b.jpg\n\n请确认。')).toBe('结果如下：\n\n请确认。')
   })
 })

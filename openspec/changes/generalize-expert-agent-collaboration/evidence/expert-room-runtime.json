@@ -1,0 +1,21 @@
+{
+  "ok": true,
+  "expertRoomVisible": true,
+  "composerCount": 1,
+  "nestedReviewInputCount": 0,
+  "primaryStatusCount": 1,
+  "imagePreviewCount": 1,
+  "thumbnail": {
+    "naturalWidth": 1600,
+    "naturalHeight": 1000,
+    "objectFit": "contain"
+  },
+  "dialog": {
+    "naturalWidth": 1600,
+    "naturalHeight": 1000,
+    "objectFit": "contain",
+    "clientWidth": 818,
+    "clientHeight": 661
+  },
+  "consoleErrors": []
+}

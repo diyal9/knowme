@@ -1,0 +1,1113 @@
+{
+  "version": "3.2.0",
+  "rubric": "AgentEvals v3.2 · lifecycle-scoped production candidates + configuration-scoped runtime evidence + legacy compatibility audit",
+  "evaluatedAt": "2026-09-07T12:50:22.447Z",
+  "source": "src/catalog/experts",
+  "total": 9,
+  "averageDesignScore": 100,
+  "averageOverallScore": null,
+  "qualificationSummary": {
+    "qualified": 0,
+    "failed": 0,
+    "insufficientEvidence": 0,
+    "unverified": 9
+  },
+  "expertTitleSummary": {
+    "eligible": 0,
+    "notEligible": 0,
+    "pendingEvidence": 9
+  },
+  "portfolioSummary": {
+    "productionCandidates": 9,
+    "legacyPackages": 13,
+    "legacyPackagesInstalled": 13,
+    "legacyPackagesWithErrors": 0
+  },
+  "agents": [
+    {
+      "agentId": "data-analyst",
+      "name": "数据分析师",
+      "description": "以数据分析、商业洞察和数据报告三种模式交付可复核的分析与决策依据",
+      "useCases": [
+        "指标异常分析和专项分析",
+        "数据口径检查与指标设计",
+        "经营复盘、商业洞察和业务异常归因",
+        "周月度数据报告与管理摘要"
+      ],
+      "skills": [
+        "data-analysis-method",
+        "business-metrics-analysis",
+        "business-cause-analysis",
+        "business-insight-report",
+        "data-report-method",
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "image-producer",
+      "name": "生图执行专家",
+      "description": "按生图方案生成候选图，记录参数并整理可供选版的图像交付包",
+      "useCases": [
+        "宣传图候选生成",
+        "概念图探索",
+        "多比例视觉变体"
+      ],
+      "skills": [
+        "th-art-intake",
+        "th-art-prompt-enrich",
+        "th-art-pango-generate"
+      ],
+      "connectors": [
+        "pango-image-mcp",
+        "photoshop-mcp"
+      ],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "knowledge-curator",
+      "name": "知识策展专家",
+      "description": "将分散资料去重、分类并组织为可检索、可维护的知识结构",
+      "useCases": [
+        "项目知识库初建和重构",
+        "文档去重、分类与过期检查"
+      ],
+      "skills": [
+        "knowledge-curation-method",
+        "knowledge-steward"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "office-partner",
+      "name": "办公协作专家",
+      "description": "以办公写作、会议纪要和行动项三种模式完成可追溯的协作交付",
+      "useCases": [
+        "工作同步与周报",
+        "邮件和群消息草拟",
+        "会议后的协作闭环"
+      ],
+      "skills": [
+        "office-collaboration-method",
+        "meeting-evidence-method",
+        "action-extraction",
+        "writing-polish",
+        "feishu-meeting-summary",
+        "feishu-related-chats",
+        "feishu-today-priority",
+        "feishu-doc-kb"
+      ],
+      "connectors": [
+        "feishu"
+      ],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "product-manager",
+      "name": "产品经理",
+      "description": "以产品定义、用户研究和需求评审三种模式推进产品决策与交付",
+      "useCases": [
+        "新功能需求说明",
+        "现有体验改版",
+        "业务规则与异常流程梳理",
+        "用户反馈与访谈材料分析",
+        "PRD 完整性与验收评审"
+      ],
+      "skills": [
+        "product-definition-method",
+        "requirement-review",
+        "research-evidence-analysis",
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "qa-engineer",
+      "name": "质量测试专家",
+      "description": "根据需求和变更证据设计测试，输出风险分级的验收结论",
+      "useCases": [
+        "功能验收和回归风险评估",
+        "需求可测性审查"
+      ],
+      "skills": [
+        "qa-test-design",
+        "code-review"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "research-analyst",
+      "name": "研究分析师",
+      "description": "以研究综合和事实核查两种模式产出可追溯、可复核的结论",
+      "useCases": [
+        "行业、竞品和专题桌面研究",
+        "多来源观点比较与研究综述",
+        "给定材料或公开来源的逐项事实核查"
+      ],
+      "skills": [
+        "research-synthesis-method",
+        "evidence-verification",
+        "knowledge-steward",
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "software-engineer",
+      "name": "软件开发工程师",
+      "description": "以工程实现和架构决策两种模式交付可审查的软件方案、变更与验证证据",
+      "useCases": [
+        "功能开发、缺陷修复和小型重构",
+        "代码审查后的明确修订",
+        "缺陷诊断、并发与恢复分析、静态代码方案",
+        "新系统、跨系统集成、架构改造与技术选型"
+      ],
+      "skills": [
+        "software-change-verification",
+        "architecture-decision",
+        "code-review"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    },
+    {
+      "agentId": "visual-designer",
+      "name": "视觉方案设计师",
+      "description": "以创意概念和视觉方案两种模式形成传播创意、画面决策与标准生图交接包；不直接生成图片",
+      "useCases": [
+        "传播创意、核心概念与主文案",
+        "主视觉方案设计",
+        "盘古生图交接包",
+        "品牌视觉一致性检查"
+      ],
+      "skills": [
+        "creative-concept-method",
+        "visual-brief-prompt",
+        "writing-polish"
+      ],
+      "connectors": [],
+      "dimensions": {
+        "identity": 100,
+        "contract": 100,
+        "boundaries": 100,
+        "skills": 100,
+        "grounding": 100,
+        "package": 100
+      },
+      "designScore": 100,
+      "issues": [],
+      "runtime": {
+        "sampleCount": 0,
+        "observedSampleCount": 0,
+        "dimensions": {},
+        "rawScore": null,
+        "displayScore": null,
+        "confidence": "unverified",
+        "missing": [
+          "completion",
+          "quality",
+          "evidence",
+          "efficiency",
+          "fit"
+        ],
+        "configurationSummaries": [],
+        "qualification": {
+          "requiredSampleCount": 6,
+          "minimumScore": 85,
+          "missingScenarios": [
+            "normal:2",
+            "edge",
+            "retry",
+            "revision",
+            "reopen"
+          ],
+          "hardFailures": 0,
+          "weakTasks": 0,
+          "configurationId": null,
+          "configurationIds": [],
+          "unscopedSamples": 0,
+          "mixedConfigurations": false,
+          "observedHardFailures": 0,
+          "requiredConfigurationIdentity": "agent+skills+connectors+model",
+          "state": "unverified"
+        }
+      },
+      "overallScore": null,
+      "qualification": {
+        "requiredSampleCount": 6,
+        "minimumScore": 85,
+        "missingScenarios": [
+          "normal:2",
+          "edge",
+          "retry",
+          "revision",
+          "reopen"
+        ],
+        "hardFailures": 0,
+        "weakTasks": 0,
+        "configurationId": null,
+        "configurationIds": [],
+        "unscopedSamples": 0,
+        "mixedConfigurations": false,
+        "observedHardFailures": 0,
+        "requiredConfigurationIdentity": "agent+skills+connectors+model",
+        "state": "unverified",
+        "packageGate": {
+          "passed": true,
+          "designScore": 100,
+          "errorCount": 0
+        }
+      },
+      "expertTitle": {
+        "eligible": false,
+        "state": "pending_evidence",
+        "reason": "A valid package or installed Skill is not expert proof; configuration-scoped normal, edge, retry, revision and reopen evidence is still incomplete."
+      },
+      "confidence": "unverified"
+    }
+  ],
+  "legacyAgents": [
+    {
+      "agentId": "action-owner",
+      "name": "行动项管理员",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "office-partner"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "business-insight-analyst",
+      "name": "商业洞察专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "data-analyst"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "content-strategist",
+      "name": "内容策划专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "skill",
+            "id": "content-strategy-method"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "creative-director",
+      "name": "创意策划",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "visual-designer"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "data-report-editor",
+      "name": "数据报告专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "data-analyst"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "external-capability-importer",
+      "name": "智能体运维专员",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "workflow",
+            "id": "capability-import"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "fact-checker",
+      "name": "事实核查专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "research-analyst"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "longform-editor",
+      "name": "长文编辑",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "skill",
+            "id": "longform-editing-method"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "meeting-scribe",
+      "name": "会议纪要专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "office-partner"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "presentation-writer",
+      "name": "汇报撰写专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "skill",
+            "id": "decision-presentation-method"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "requirement-reviewer",
+      "name": "需求评审专家",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "product-manager"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "solution-architect",
+      "name": "解决方案架构师",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "software-engineer"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    },
+    {
+      "agentId": "user-researcher",
+      "name": "用户研究员",
+      "lifecycle": {
+        "state": "legacy",
+        "newTasks": false,
+        "successors": [
+          {
+            "kind": "expert",
+            "id": "product-manager"
+          }
+        ]
+      },
+      "packageInstalled": true,
+      "designScore": 100,
+      "issues": []
+    }
+  ]
+}

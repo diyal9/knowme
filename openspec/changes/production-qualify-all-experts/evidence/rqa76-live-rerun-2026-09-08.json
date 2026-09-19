@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA76 image producer normal coverage completion",
+  "purpose": "Add a second normal task for the retained image-producer configuration; success still requires a real image artifact and visible preview.",
+  "generatedAt": "2026-09-08T00:31:20.368Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-rqa76-live-rerun",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [
+      "pango-image-mcp"
+    ],
+    "configuredConnectors": [
+      "pango-image-mcp"
+    ],
+    "installed": [
+      {
+        "id": "pango-image-mcp",
+        "version": ""
+      }
+    ],
+    "configured": [
+      {
+        "id": "pango-image-mcp",
+        "ok": true
+      }
+    ]
+  },
+  "selectedCases": [
+    "IP06"
+  ],
+  "tasks": [
+    {
+      "evalId": "IP06",
+      "expertId": "image-producer",
+      "title": "确认后生成产品插画并交付预览",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "用户确认后实际调用 generate_image，执行证据包含完整工具回执",
+        "当前任务存在可解码的 image artifact，并能在对话中显示真实图片预览",
+        "交付说明只陈述已核实的比例、主体和图片存在事实，未视觉核查项明确为未知",
+        "图片预览与普通对话说明分离，验收入口仍由统一对话流程控制",
+        "图片工具失败或返回空数据时不伪造结果，并给出可重试的下一步"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxp41x-5zg7g",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "item": "generate_image",
+          "detail": "联合工具面未提供必需工具：generate_image"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:112f269b6482fee0ec070c5492aea078afb4e997186c526828d35561c96079d0",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "image-producer",
+            "version": "4.0.0",
+            "hash": "d4ea0ed7f7bb615e"
+          },
+          "skills": [
+            {
+              "id": "creative-concept-method",
+              "hash": "acb33851a5f233f6"
+            },
+            {
+              "id": "th-art-intake",
+              "hash": "7eb281eda9c199d6"
+            },
+            {
+              "id": "th-art-pango-generate",
+              "hash": "29a053f284a40911"
+            },
+            {
+              "id": "th-art-prompt-enrich",
+              "hash": "c5389f2787404251"
+            },
+            {
+              "id": "visual-brief-prompt",
+              "hash": "cc4e9250d4aa02cc"
+            },
+            {
+              "id": "writing-polish",
+              "hash": "1186da38fb069bbb"
+            }
+          ],
+          "connectors": [
+            {
+              "id": "pango-image-mcp",
+              "hash": "connector:pango-image-mcp"
+            },
+            {
+              "id": "photoshop-mcp",
+              "hash": "connector:photoshop-mcp"
+            }
+          ],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "capability_unavailable",
+        "action": "open_capability",
+        "item": "generate_image",
+        "detail": "联合工具面未提供必需工具：generate_image"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxp41x-5zg7g",
+        "expertId": "image-producer",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "image-producer",
+          "agentVersion": "4.0.0",
+          "agentHash": "d4ea0ed7f7bb615e",
+          "hashes": {
+            "expert": "d4ea0ed7f7bb615e",
+            "skills": {
+              "creative-concept-method": "acb33851a5f233f6",
+              "th-art-intake": "7eb281eda9c199d6",
+              "th-art-pango-generate": "29a053f284a40911",
+              "th-art-prompt-enrich": "c5389f2787404251",
+              "visual-brief-prompt": "cc4e9250d4aa02cc",
+              "writing-polish": "1186da38fb069bbb"
+            },
+            "connectors": {
+              "pango-image-mcp": "connector:pango-image-mcp",
+              "photoshop-mcp": "connector:photoshop-mcp"
+            }
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxp41x-5zg7g",
+          "bindings": {
+            "skills": [
+              "creative-concept-method",
+              "visual-brief-prompt",
+              "th-art-intake",
+              "th-art-prompt-enrich",
+              "th-art-pango-generate",
+              "writing-polish"
+            ],
+            "connectors": [
+              "pango-image-mcp",
+              "photoshop-mcp"
+            ]
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": [
+                "pango-image-mcp",
+                "photoshop-mcp"
+              ]
+            },
+            "tools": {
+              "allowlist": [
+                "list_paint_models",
+                "generate_image"
+              ]
+            },
+            "network": true,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "4.0.0",
+            "hash": "d4ea0ed7f7bb615e"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxp41x-5zg7g"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：generate_image",
+          "startedAt": "2026-09-08T00:31:23.724Z",
+          "updatedAt": "2026-09-08T00:31:23.724Z",
+          "heartbeatAt": "2026-09-08T00:31:23.724Z"
+        },
+        "attention": {
+          "kind": "capability_unavailable",
+          "action": "open_capability",
+          "title": "需要启用任务能力",
+          "detail": "联合工具面未提供必需工具：generate_image",
+          "field": "",
+          "item": "generate_image",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:31:23.724Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:23.589Z"
+          },
+          {
+            "id": "event-2",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "generate_image：联合工具面未提供必需工具：generate_image；pango-image-mcp：请配置 MCP 服务 URL；photoshop-mcp：连接器不存在",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:31:23.725Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:31:23.589Z",
+        "updatedAt": "2026-09-08T00:31:23.738Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxp41x-5zg7g",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 联合工具面未提供必需工具：generate_image\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 463,
+      "install": {
+        "ok": true,
+        "id": "image-producer",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 1,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 1,
+    "environmentBlocked": 1,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

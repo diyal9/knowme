@@ -1,4 +1,5 @@
 'use strict'
+const { expertRouteLabel } = require('../shared/expert-display')
 
 /**
  * expert-runtime — EXPERT.md + manifest 解析、bindings 校验、Session 快照与试聊 DTO。
@@ -21,6 +22,7 @@ const {
   resolveSoulSop,
   synthesizeSystemPrompt,
 } = require('./expert-agentic-profile')
+const { normalizeExpertPromptSchema, lintExpertPrompt } = require('./expert-prompt-governance')
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/
 
@@ -60,7 +62,7 @@ function parseAgenticConfigValue(val) {
 }
 
 /**
- * 解析 EXPERT.md frontmatter：name, description, avatar, skills[], connectors[],
+ * 解析 EXPERT.md frontmatter：name, description, avatar, skills[], connectors[], optionalConnectors[],
  * systemPrompt, soul, sop, agenticType, agenticConfig
  */
 function parseExpertFrontmatter(content) {
@@ -100,7 +102,7 @@ function parseExpertFrontmatter(content) {
     if (idx < 0) continue
     const key = trimmed.slice(0, idx).trim()
     const val = trimmed.slice(idx + 1).trim()
-    if (['skills', 'connectors', 'useCases', 'boundaries', 'inputContract', 'outputContract'].includes(key)) {
+    if (['skills', 'connectors', 'optionalConnectors', 'useCases', 'boundaries', 'inputContract', 'outputContract'].includes(key)) {
       frontmatter[key] = parseInlineList(val)
       if (!val) listKey = key
     } else if (key === 'orchestrationEnabled') {
@@ -138,6 +140,7 @@ function parseExpertFrontmatter(content) {
     avatar: String(frontmatter.avatar || '').trim(),
     skills: Array.isArray(frontmatter.skills) ? frontmatter.skills.map(String) : [],
     connectors: Array.isArray(frontmatter.connectors) ? frontmatter.connectors.map(String) : [],
+    optionalConnectors: Array.isArray(frontmatter.optionalConnectors) ? frontmatter.optionalConnectors.map(String) : [],
     useCases: Array.isArray(frontmatter.useCases) ? frontmatter.useCases.map(String) : [],
     boundaries: Array.isArray(frontmatter.boundaries) ? frontmatter.boundaries.map(String) : [],
     inputContract: Array.isArray(frontmatter.inputContract) ? frontmatter.inputContract.map(String) : [],
@@ -172,6 +175,7 @@ function buildManifest(expertParsed, expertMdContent) {
     name: expertParsed.name,
     skills: expertParsed.skills,
     connectors: expertParsed.connectors,
+    optionalConnectors: expertParsed.optionalConnectors,
     updatedAt: new Date().toISOString(),
   }
 }
@@ -186,6 +190,13 @@ function atomicWriteJson(filePath, data, fsImpl = fs) {
 
 function normalizeExpertId(id) {
   return String(id || '').trim().replace(/\\/g, '/').replace(/^\/+|\/+$/g, '')
+}
+
+function allExpertConnectorIds(expert = {}) {
+  return [...new Set([
+    ...(Array.isArray(expert.connectors) ? expert.connectors : []),
+    ...(Array.isArray(expert.optionalConnectors) ? expert.optionalConnectors : []),
+  ].map(String).map((id) => id.trim()).filter(Boolean))]
 }
 
 function validateExpertPackage(parsed) {
@@ -208,7 +219,9 @@ function validateExpertPackage(parsed) {
       issues.push({ code: 'parallel_cap_exceeded', message: 'maxParallel 不能超过 1' })
     }
   }
-  return { ok: issues.length === 0, issues }
+  const promptLint = lintExpertPrompt(parsed)
+  issues.push(...promptLint.errors.map(item => ({ code: item.code, message: item.message, field: item.field })))
+  return { ok: issues.length === 0, issues, warnings: promptLint.warnings, promptSchema: promptLint.schema }
 }
 
 function validateBindings(expert, { availableSkills = [], availableConnectors = [] } = {}) {
@@ -237,26 +250,89 @@ function validateBindings(expert, { availableSkills = [], availableConnectors = 
   return { ok: issues.length === 0, issues }
 }
 
+function normalizeReadinessIds(value) {
+  const values = Array.isArray(value) ? value : [value]
+  return [...new Set(values.map((item) => String(item || '').trim()).filter(Boolean))]
+}
+
+function buildRouteReadiness(expert, skillSet = null, connectorSet = null) {
+  const routes = expert?.capabilityManifest?.metadata?.knowme?.execution?.routes
+  if (!Array.isArray(routes)) return []
+  return routes.map((route, index) => {
+    const id = String(route?.id || '').trim()
+    if (!id) return null
+    const requiredSkills = normalizeReadinessIds([...(Array.isArray(route?.requiredSkills) ? route.requiredSkills : []), route?.skillId])
+    const requiredConnectorIds = normalizeReadinessIds([...(Array.isArray(route?.requiredConnectorIds) ? route.requiredConnectorIds : []), route?.connectorId])
+    const issues = []
+    if (skillSet) {
+      for (const dependency of requiredSkills) {
+        if (!skillSet.has(dependency)) issues.push({
+          code: 'route_skill_unavailable',
+          dependency: { id: dependency, kind: 'skill' },
+          message: `技能未安装或已停用: ${dependency}`,
+        })
+      }
+    }
+    if (connectorSet) {
+      for (const dependency of requiredConnectorIds) {
+        if (!connectorSet.has(dependency)) issues.push({
+          code: 'route_connector_unavailable',
+          dependency: { id: dependency, kind: 'connector' },
+          message: `连接器未安装或已停用: ${dependency}`,
+        })
+      }
+    }
+    return {
+      id,
+      label: expertRouteLabel(route, index),
+      state: issues.length ? 'limited' : 'ready',
+      requiredSkills,
+      requiredConnectorIds,
+      issues,
+    }
+  }).filter(Boolean)
+}
+
 function buildBindingReadiness(expert, options = {}) {
   const skillIds = Array.isArray(options.availableSkills) ? options.availableSkills.map(String) : null
   const connectorIds = Array.isArray(options.availableConnectors) ? options.availableConnectors.map(String) : null
   const skillSet = skillIds ? new Set(skillIds) : null
   const connectorSet = connectorIds ? new Set(connectorIds) : null
+  const declaredDependencies = Array.isArray(expert.capabilityManifest?.dependencies)
+    ? expert.capabilityManifest.dependencies
+      .filter(item => item?.id && (item.kind === 'skill' || item.kind === 'connector'))
+      .map(item => ({ id: String(item.id), kind: item.kind, required: item.required !== false }))
+    : []
+  const declaredIds = new Set(declaredDependencies.map(item => `${item.kind}:${item.id}`))
+  const skillDependencies = declaredDependencies.some(item => item.kind === 'skill')
+    ? declaredDependencies.filter(item => item.kind === 'skill')
+    : (expert.skills || []).map(id => ({ id: String(id), kind: 'skill', required: true }))
+  const connectorDependencies = declaredDependencies.some(item => item.kind === 'connector')
+    ? declaredDependencies.filter(item => item.kind === 'connector')
+    : [
+      ...(expert.connectors || []).map(id => ({ id: String(id), kind: 'connector', required: true })),
+      ...(expert.optionalConnectors || []).map(id => ({ id: String(id), kind: 'connector', required: false })),
+    ]
+  const dependencies = [...skillDependencies, ...connectorDependencies]
+    .filter(item => !declaredIds.has(`${item.kind}:${item.id}`) || declaredDependencies.includes(item))
   const items = [
-    ...(expert.skills || []).map(id => ({
-      id: String(id),
-      kind: 'skill',
-      status: !skillSet || skillSet.has(String(id)) ? 'ready' : 'limited',
-      ...(!skillSet || skillSet.has(String(id)) ? {} : { reason: '技能未安装或已停用' }),
-    })),
-    ...(expert.connectors || []).map(id => ({
-      id: String(id),
-      kind: 'connector',
-      status: !connectorSet || connectorSet.has(String(id)) ? 'ready' : 'limited',
-      ...(!connectorSet || connectorSet.has(String(id)) ? {} : { reason: '连接器未安装或已停用' }),
-    })),
+    ...dependencies.map(item => {
+      const available = item.kind === 'skill'
+        ? (!skillSet || skillSet.has(item.id))
+        : (!connectorSet || connectorSet.has(item.id))
+      return {
+        id: item.id,
+        kind: item.kind,
+        required: item.required,
+        status: available ? 'ready' : (item.required ? 'limited' : 'optional'),
+        ...(!available ? {
+          reason: item.required ? `${item.kind === 'skill' ? '技能' : '连接器'}未安装或已停用` : `可选${item.kind === 'skill' ? '技能' : '连接器'}未安装或已停用`,
+        } : {}),
+      }
+    }),
   ]
-  const limited = items.filter(item => item.status !== 'ready')
+  const limited = items.filter(item => item.required !== false && item.status !== 'ready')
+  const routes = buildRouteReadiness(expert, skillSet, connectorSet)
   return {
     state: limited.length ? 'limited' : 'ready',
     items,
@@ -265,12 +341,14 @@ function buildBindingReadiness(expert, options = {}) {
       dependency: { id: item.id, kind: item.kind },
       message: `${item.reason}: ${item.id}`,
     })),
+    ...(routes.length ? { routes } : {}),
   }
 }
 
 /**
  * @param {{
  *   capabilitiesRoot: string,
+ *   snapshotRoot?: string,
  *   fsImpl?: typeof fs,
  *   getSkillHashes?: (ids: string[]) => Record<string, string>,
  *   getConnectorHashes?: (ids: string[]) => Record<string, string>,
@@ -278,6 +356,7 @@ function buildBindingReadiness(expert, options = {}) {
  */
 function createExpertRuntime(deps = {}) {
   const capabilitiesRoot = String(deps.capabilitiesRoot || '').trim()
+  const snapshotRootOverride = String(deps.snapshotRoot || '').trim()
   const fsImpl = deps.fsImpl || fs
   const getSkillHashes =
     typeof deps.getSkillHashes === 'function' ? deps.getSkillHashes : () => ({})
@@ -293,7 +372,7 @@ function createExpertRuntime(deps = {}) {
   }
 
   function snapshotsRoot() {
-    return path.join(capabilitiesRoot, 'snapshots')
+    return snapshotRootOverride || path.join(capabilitiesRoot, 'snapshots')
   }
 
   function expertDir(expertId) {
@@ -374,6 +453,7 @@ function createExpertRuntime(deps = {}) {
         avatar: loaded.avatar,
         skills: loaded.skills,
         connectors: loaded.connectors,
+        optionalConnectors: loaded.optionalConnectors,
         soul: loaded.soul,
         sop: loaded.sop,
         agenticType: loaded.agenticType,
@@ -441,6 +521,7 @@ function createExpertRuntime(deps = {}) {
       avatar: String(payload.avatar || '').trim(),
       skills: Array.isArray(payload.skills) ? payload.skills.map(String) : [],
       connectors: Array.isArray(payload.connectors) ? payload.connectors.map(String) : [],
+      optionalConnectors: Array.isArray(payload.optionalConnectors) ? payload.optionalConnectors.map(String) : [],
       soul: resolved.soul,
       sop: resolved.sop,
       agenticType: resolved.agenticType,
@@ -461,6 +542,7 @@ function createExpertRuntime(deps = {}) {
       `avatar: ${JSON.stringify(parsed.avatar)}`,
       `skills: [${parsed.skills.map((s) => JSON.stringify(s)).join(', ')}]`,
       `connectors: [${parsed.connectors.map((c) => JSON.stringify(c)).join(', ')}]`,
+      ...(parsed.optionalConnectors.length ? [`optionalConnectors: [${parsed.optionalConnectors.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
       `agenticType: ${JSON.stringify(parsed.agenticType)}`,
       `agenticConfig: ${JSON.stringify(parsed.agenticConfig)}`,
       `soul: ${JSON.stringify(parsed.soul)}`,
@@ -527,7 +609,7 @@ function createExpertRuntime(deps = {}) {
       },
       bindings: {
         skills: expert.skills,
-        connectors: expert.connectors,
+        connectors: allExpertConnectorIds(expert),
       },
       capabilityManifest: expert.capabilityManifest && typeof expert.capabilityManifest === 'object'
         ? expert.capabilityManifest
@@ -550,13 +632,25 @@ function createExpertRuntime(deps = {}) {
 
     const expert = loadExpert(eid)
     if (!expert.ok) return expert
+    const qualification = expert.capabilityManifest?.metadata?.knowme?.qualification
+    if (qualification?.state === 'limited') {
+      const issues = Array.isArray(qualification.issues) ? qualification.issues.map(String) : []
+      const limitedSkills = Array.isArray(qualification.limitedSkills) ? qualification.limitedSkills.map(String) : []
+      return {
+        ok: false,
+        code: 'expert_contract_limited',
+        message: `专家“${expert.name || eid}”的能力合同未就绪，请先修复受限能力后再执行。`,
+        issues,
+        limitedSkills,
+      }
+    }
     const readiness = buildBindingReadiness(expert, {
       availableSkills: getAvailableSkillIds ? getAvailableSkillIds() : null,
       availableConnectors: getAvailableConnectorIds ? getAvailableConnectorIds() : null,
     })
 
     const skillHashes = getSkillHashes(expert.skills)
-    const connectorHashes = getConnectorHashes(expert.connectors)
+    const connectorHashes = getConnectorHashes(allExpertConnectorIds(expert))
     const snapshot = buildSnapshotManifest(
       {
         sessionId: sid,
@@ -570,7 +664,7 @@ function createExpertRuntime(deps = {}) {
         agenticConfig: expert.agenticConfig,
         systemPrompt: expert.systemPrompt,
         skills: expert.skills,
-        connectors: expert.connectors,
+        connectors: allExpertConnectorIds(expert),
         manifest: expert.manifest,
         capabilityManifest: expert.capabilityManifest,
       },
@@ -648,7 +742,7 @@ function createExpertRuntime(deps = {}) {
       },
       bindings: {
         skills: expert.skills,
-        connectors: expert.connectors,
+        connectors: allExpertConnectorIds(expert),
       },
       capabilityManifest: expert.capabilityManifest || null,
       readiness: buildBindingReadiness(expert, {
@@ -770,9 +864,12 @@ module.exports = {
   validateExpertPackage,
   validateBindings,
   buildBindingReadiness,
+  buildRouteReadiness,
   buildManifest,
   atomicWriteJson,
   contentHash,
   normalizeAgenticType,
   resolveSoulSop,
+  normalizeExpertPromptSchema,
+  lintExpertPrompt,
 }

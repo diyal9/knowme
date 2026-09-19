@@ -9,7 +9,7 @@ const catalog = {
   items: [
     { id: 'e1', kind: 'expert' as const, name: '产品经理', description: '需求澄清', category: '产品与研究' },
     { id: 's1', kind: 'skill' as const, name: '写纪要', description: '会议纪要', category: '办公' },
-    { id: 'c1', kind: 'connector' as const, name: '飞书 MCP', description: 'IM 连接器', category: '飞书' },
+    { id: 'c1', kind: 'connector' as const, name: '飞书', description: 'lark-cli 连接器', category: '飞书' },
   ],
 }
 
@@ -129,6 +129,41 @@ describe('capability hub overlay', () => {
     expect(screen.getByTestId('hub-detail-drawer-backdrop')).toHaveClass('secondary-dialog-mask', 'open')
   })
 
+  it('shows route-specific readiness without hiding the expert details', async () => {
+    mockApi({
+      capabilityList: async () => ({
+        ok: true,
+        items: [{
+          id: 'image-producer',
+          kind: 'expert' as const,
+          name: '生图执行专家',
+          description: '视觉内容生产',
+          category: '视觉创意',
+          readiness: {
+            state: 'ready' as const,
+            routes: [
+              { id: 'local-brief', label: '整理视觉 Brief', state: 'ready' as const, issues: [] },
+              {
+                id: 'pango-generate',
+                label: '调用生图服务',
+                state: 'limited' as const,
+                issues: [{ code: 'route_skill_unavailable', message: '技能未安装或已停用: image-generate' }],
+              },
+            ],
+          },
+        }],
+      }),
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(await within(hub).findByRole('button', { name: '查看详情：生图执行专家' }))
+    const drawer = screen.getByTestId('hub-detail-drawer')
+    expect(within(drawer).getByRole('region', { name: '专家执行路径' })).toHaveTextContent('整理视觉 Brief')
+    expect(within(drawer).getByRole('region', { name: '专家执行路径' })).toHaveTextContent('调用生图服务')
+    expect(within(drawer).getByRole('region', { name: '专家执行路径' })).toHaveTextContent('缺少依赖')
+    expect(within(drawer).getByRole('region', { name: '专家执行路径' })).toHaveTextContent('缺失项只影响对应专项路径')
+  })
+
   it('switches tab to skills', async () => {
     mockApi({
       capabilityList: async (opts) => ({
@@ -168,13 +203,15 @@ describe('capability hub overlay', () => {
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
-    await waitFor(() => expect(within(hub).getByRole('button', { name: '查看并安装：写纪要' })).toBeInTheDocument())
-    fireEvent.click(within(hub).getByRole('button', { name: '查看并安装：写纪要' }))
+    await waitFor(() => expect(within(hub).getByRole('button', { name: '查看详情：写纪要' })).toBeInTheDocument())
+    expect(within(hub).queryByRole('button', { name: '查看并安装：写纪要' })).not.toBeInTheDocument()
+    expect(within(hub).queryByRole('button', { name: '管理技能：写纪要' })).not.toBeInTheDocument()
+    fireEvent.click(within(hub).getByRole('button', { name: '查看详情：写纪要' }))
     const drawer = screen.getByTestId('hub-detail-drawer')
     expect(drawer).toHaveTextContent('写纪要')
     fireEvent.click(within(drawer).getByRole('button', { name: '安装' }))
     await waitFor(() => expect(install).toHaveBeenCalledWith({ id: 's1', kind: 'skill' }))
-    await waitFor(() => expect(within(screen.getByTestId('hub-detail-drawer')).getByLabelText('在新会话中使用')).toBeInTheDocument())
+    await waitFor(() => expect(within(screen.getByTestId('hub-detail-drawer')).getByText('新会话默认启用')).toBeInTheDocument())
   })
 
   it('configures, tests and authorizes an installed MCP connector in the hub', async () => {
@@ -204,7 +241,7 @@ describe('capability hub overlay', () => {
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     fireEvent.click(within(hub).getByRole('tab', { name: '连接器' }))
-    fireEvent.click(await within(hub).findByRole('button', { name: '管理连接器：Cocos Creator MCP' }))
+    fireEvent.click(await within(hub).findByRole('button', { name: '查看详情：Cocos Creator MCP' }))
     const manager = await screen.findByTestId('hub-connector-manager')
     expect(within(manager).getByLabelText('传输方式')).toHaveValue('sse')
     expect(within(manager).getByText(/PSD 工作流/)).toBeInTheDocument()
@@ -261,11 +298,74 @@ describe('capability hub overlay', () => {
     expect(screen.getByRole('heading', { name: '产品经理' })).toBeInTheDocument()
   })
 
+  it('requires an explicit risk confirmation before summoning a high-risk expert', async () => {
+    let installed = false
+    const precheck = vi.fn(async () => ({
+      ok: true,
+      preview: {
+        name: '运营数据分析专家·数据靓仔',
+        risk: {
+          level: 'high',
+          reasons: ['可访问公司数据服务', '飞书填表属于外部写入且必须逐次确认'],
+        },
+        permissions: { network: true, write: true, externalWrite: true },
+        dependencies: { requiredIssues: [], optionalWarnings: [] },
+        rollbackHint: '安装后可在能力详情中停用或卸载。',
+      },
+    }))
+    const install = vi.fn(async () => {
+      installed = true
+      return { ok: true }
+    })
+    const bind = vi.fn(async () => ({ ok: true }))
+    mockApi({
+      capabilityList: async () => ({
+        ok: true,
+        items: [{
+          id: 'operations-data-analyst',
+          kind: 'expert' as const,
+          name: '运营数据分析专家·数据靓仔',
+          description: '运营数据分析',
+          category: '数据分析',
+          source: 'curated',
+          installed,
+          enabled: installed,
+          risk: { level: 'high', reasons: ['可访问公司数据服务'] },
+          permissions: { network: true, write: true, externalWrite: true },
+        }],
+      }),
+      capabilityInstallPrecheck: precheck,
+      capabilityInstall: install,
+      workbenchModeBindExpert: bind,
+      workbenchModeList: async () => ({ ok: true, modes: [], activeModeId: '' }),
+    })
+
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(await within(hub).findByRole('button', { name: '查看详情：运营数据分析专家·数据靓仔' }))
+    fireEvent.click(within(screen.getByTestId('hub-detail-drawer')).getByRole('button', { name: '召唤专家' }))
+
+    const confirmation = await screen.findByTestId('hub-summon-confirm')
+    expect(precheck).toHaveBeenCalledWith({ id: 'operations-data-analyst', kind: 'expert' })
+    expect(install).not.toHaveBeenCalled()
+    expect(bind).not.toHaveBeenCalled()
+    expect(confirmation).toHaveTextContent('可访问公司数据服务')
+    expect(confirmation).toHaveTextContent('外部系统写入')
+
+    fireEvent.click(within(confirmation).getByRole('button', { name: '确认风险并召唤' }))
+    await waitFor(() => expect(install).toHaveBeenCalledWith({
+      id: 'operations-data-analyst',
+      kind: 'expert',
+      riskConfirmed: true,
+    }))
+    expect(bind).toHaveBeenCalledWith({ expertId: 'operations-data-analyst' })
+  })
+
   it('opens a private Agent detail drawer before entering maintenance', async () => {
     const items = [
       { id: 'e1', kind: 'expert' as const, name: '产品经理', description: '需求澄清', category: '办公', source: 'custom', installed: true },
       { id: 's1', kind: 'skill' as const, name: '写纪要', description: '会议纪要', category: '办公', installed: true },
-      { id: 'c1', kind: 'connector' as const, name: '飞书 MCP', description: 'IM 连接器', category: '飞书', installed: true },
+      { id: 'c1', kind: 'connector' as const, name: '飞书', description: 'lark-cli 连接器', category: '飞书', installed: true },
     ]
     mockApi({
       capabilityList: async (opts) => ({ ok: true, items: items.filter((item) => item.kind === opts?.kind) }),
@@ -310,6 +410,78 @@ describe('capability hub overlay', () => {
     expect(screen.getByRole('heading', { name: '办公写作专家' })).toBeInTheDocument()
   })
 
+  it('shows imported contract limitations and does not present a limited expert as executable', async () => {
+    mockApi({
+      capabilityList: async (opts) => ({
+        ok: true,
+        items: opts?.kind === 'expert'
+          ? [{
+              id: 'limited-expert',
+              kind: 'expert' as const,
+              name: '待修复专家',
+              description: '导入包缺少执行合同',
+              source: 'custom',
+              installed: true,
+              enabled: true,
+              qualification: {
+                state: 'limited' as const,
+                issues: ['undeclared_connector_contract'],
+                limitedSkills: ['image-generation'],
+                assessedAtImport: true,
+              },
+            }]
+          : [],
+      }),
+      expertGet: async () => ({ ok: true, expert: { id: 'limited-expert', name: '待修复专家' } }),
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('button', { name: '我的专家' }))
+    fireEvent.click(await within(hub).findByRole('button', { name: '打开我的专家：待修复专家' }))
+
+    const drawer = screen.getByTestId('hub-detail-drawer')
+    expect(drawer).toHaveTextContent('能力受限')
+    expect(drawer).toHaveTextContent('image-generation')
+    expect(drawer).toHaveTextContent('undeclared_connector_contract')
+    expect(within(drawer).getByRole('button', { name: '修复能力合同后再打开' })).toBeDisabled()
+  })
+
+  it('shows runtime dependency readiness before opening an installed expert', async () => {
+    mockApi({
+      capabilityList: async (opts) => ({
+        ok: true,
+        items: opts?.kind === 'expert'
+          ? [{
+              id: 'image-expert',
+              kind: 'expert' as const,
+              name: '生图专家',
+              description: '生成图片',
+              source: 'custom',
+              installed: true,
+              enabled: true,
+              readiness: {
+                state: 'limited' as const,
+                items: [{ id: 'pango-image-mcp', kind: 'connector', required: true, status: 'limited', reason: '连接器未安装或已停用' }],
+                issues: [{ code: 'unavailable_connector', dependency: { id: 'pango-image-mcp', kind: 'connector' }, message: '连接器未安装或已停用: pango-image-mcp' }],
+              },
+            }]
+          : [],
+      }),
+      expertGet: async () => ({ ok: true, expert: { id: 'image-expert', name: '生图专家', description: '生成图片' } }),
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('button', { name: '我的专家' }))
+    await waitFor(() => expect(within(hub).getByRole('heading', { name: '生图专家' })).toBeInTheDocument())
+    expect(hub).toHaveTextContent('当前不可执行')
+    fireEvent.click(within(hub).getByRole('button', { name: '打开我的专家：生图专家' }))
+
+    const drawer = screen.getByTestId('hub-detail-drawer')
+    expect(drawer).toHaveTextContent('当前不可执行')
+    expect(drawer).toHaveTextContent('连接器：pango-image-mcp')
+    expect(within(drawer).getByRole('button', { name: '完成依赖安装/授权后再打开' })).toBeDisabled()
+  })
+
   it('updates or uninstalls an installed curated expert from its detail drawer', async () => {
     const update = vi.fn(async () => ({ ok: true }))
     const uninstall = vi.fn(async () => ({ ok: true }))
@@ -348,7 +520,7 @@ describe('capability hub overlay', () => {
     fireEvent.change(within(hub).getByLabelText('搜索能力'), { target: { value: '飞书' } })
     fireEvent.click(within(hub).getByRole('tab', { name: '连接器' }))
     await waitFor(() => {
-      expect(within(hub).getByRole('heading', { name: '飞书 MCP' })).toBeInTheDocument()
+      expect(within(hub).getByRole('heading', { name: '飞书' })).toBeInTheDocument()
     })
   })
 
@@ -373,8 +545,8 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
     expect(within(hub).queryByText('测试专家')).not.toBeInTheDocument()
     fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
-    expect(hub.querySelector('.hub-badge.verified.icon-only[aria-label="认证"]')).toBeTruthy()
-    expect(hub.querySelector('.hub-badge.verified [data-icon="badgeCheck"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-badge.official[aria-label="官方"]')).toBeTruthy()
+    expect(hub.querySelector('.hub-badge.verified')).toBeFalsy()
     fireEvent.click(within(hub).getByRole('heading', { name: '产品经理' }))
     const drawer = screen.getByTestId('hub-detail-drawer')
     expect(drawer).toHaveClass('secondary-dialog')

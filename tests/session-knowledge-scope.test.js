@@ -9,6 +9,7 @@ const {
   validateSessionContextPatch,
 } = require('../src/lib/capability-hub-service')
 const { createSession } = require('../src/lib/agent-sessions')
+const { makeKnowledgeCollectionRef } = require('../src/shared/knowledge-selection')
 
 const catalog = {
   activeProviderId: 'local-default',
@@ -66,6 +67,34 @@ describe('session knowledge scope', () => {
     assert.equal(scope.degraded, false)
   })
 
+  it('scopes a selected RAGFlow collection back to its provider', () => {
+    const ref = makeKnowledgeCollectionRef('kp_remote', 'dataset-rules')
+    const session = createSession('general', 1, { knowledgeRefs: [{ id: ref }] })
+    const scope = resolveSessionRetrievalProviders(session, {
+      resolveProviderById: (id) => id === 'kp_remote'
+        ? { id, kind: 'ragflow', collectionIds: ['dataset-rules', 'dataset-other'], collection: 'dataset-rules' }
+        : null,
+      getActiveProvider: () => null,
+    })
+    assert.equal(scope.degraded, false)
+    assert.deepEqual(scope.providers[0].collectionIds, ['dataset-rules'])
+    assert.equal(scope.providers[0].collection, 'dataset-rules')
+  })
+
+  it('rejects a collection outside the provider grant', () => {
+    const ref = makeKnowledgeCollectionRef('kp_remote', 'dataset-secret')
+    const session = createSession('general', 1, { knowledgeRefs: [{ id: ref }] })
+    const scope = resolveSessionRetrievalProviders(session, {
+      resolveProviderById: (id) => id === 'kp_remote'
+        ? { id, kind: 'ragflow', collectionIds: ['dataset-rules'] }
+        : null,
+      getActiveProvider: () => null,
+    })
+    assert.equal(scope.providers.length, 0)
+    assert.equal(scope.degraded, true)
+    assert.deepEqual(scope.missingIds, [ref])
+  })
+
   it('allows session context IPC patch for knowledgeRefs and capability bindings', () => {
     assert.equal(validateSessionContextPatch({ knowledgeRefs: [] }).ok, true)
     assert.equal(validateSessionContextPatch({ skills: ['a'], connectors: [] }).ok, true)
@@ -116,8 +145,8 @@ describe('session knowledge scope', () => {
       fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'agent-generate-libs.ts'), 'utf8'),
     ].join('\n')
     assert.ok(aiGenerate.includes('resolveSessionRetrievalScope(session)'), 'ai-generate resolves scope from stored Session')
-    assert.ok(aiGenerate.includes("['local', 'qmd-local'].includes"), 'local provider kinds are recognized explicitly')
-    assert.ok(aiGenerate.includes('heavyCtx && localKnowledgeEnabled'), 'local snippets are excluded from remote-only or degraded scopes')
-    assert.ok(aiGenerate.includes('providers: retrievalScope.providers'), 'Fabric receives only resolved providers')
+    assert.ok(!aiGenerate.includes('productKnowledge.getContextSnippet('), 'a local provider grant cannot read the global knowledge index')
+    assert.ok(!aiGenerate.includes('productKnowledge.getSkillContext('), 'Skill bodies cannot bypass activation via truncated global snippets')
+    assert.ok(aiGenerate.includes('providers = retrievalProviders.filter'), 'Fabric receives only policy-filtered resolved providers')
   })
 })

@@ -25,6 +25,8 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
     workbenchAgentEventList,
     getWorkbenchWorkflowPackageStore,
     getConnectorsApi,
+    getActiveProjectId,
+    resolveProjectContext,
   } = deps
   const externalRunContexts = deps.workbenchExternalRunContexts || new Map()
   const externalPreflightDeps = () => ({
@@ -99,6 +101,20 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
   ))
 
   ipcMain.handle('workbench-agent-graph-start', async (_e, payload = {}) => {
+    const projectId = String(payload.projectId || getActiveProjectId?.() || '').trim()
+    if (!projectId) {
+      return { ok: false, code: 'project_required', error: '请先选择一个项目，再启动 Agent 工作流' }
+    }
+    const projectContext = resolveProjectContext?.(projectId)
+    if (!projectContext?.ok || !projectContext.workspace?.rootPath) {
+      return { ok: false, code: 'project_unavailable', error: projectContext?.error || '任务绑定的项目当前不可用，请先重新关联项目目录' }
+    }
+    if (projectContext.project?.status === 'readonly') {
+      return { ok: false, code: 'project_readonly', error: '该项目当前为只读状态，不能启动会产生文件的 Agent 工作流' }
+    }
+    if (!projectContext.workspace.available || !projectContext.workspace.writable || projectContext.project?.status === 'archived') {
+      return { ok: false, code: 'project_unavailable', error: '任务绑定的项目当前不可用，请先重新关联项目目录' }
+    }
     const executionPackage = loadExecutionPackage(payload.teamPackageId || payload.workflowId)
     const executionPayload = graphPayloadFromPackage(payload, executionPackage)
     if (executionPackage && externalWorkflowRecipes.isArtBundlePackage(executionPackage)) {
@@ -151,6 +167,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
       },
       meta: {
         workbenchAgentGraph: true,
+        projectId,
         goal: compiled.composition.goal,
         teamPackageId: compiled.teamPackage.packageId,
         compositionHash: compiled.snapshot.compositionHash,
@@ -166,6 +183,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
     workbenchAgentRunEvents.set(rootRunId, [{
       type: 'workbench.graph.started',
       rootRunId,
+      projectId,
       goal: compiled.composition.goal,
       at: new Date().toISOString(),
     }])
@@ -174,6 +192,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
         rootRunId,
         goal: compiled.composition.goal,
         permissions,
+        projectId,
         workflowPackage: executionPackage,
         workflowInputs: payload.inputs || {},
       })
@@ -229,6 +248,7 @@ function registerWorkbenchAgentGraphIpc(ipcMain, deps) {
     })
     return {
       ok: true,
+      projectId,
       rootRunId,
       mode: 'agent-graph',
       composition: compiled.composition,

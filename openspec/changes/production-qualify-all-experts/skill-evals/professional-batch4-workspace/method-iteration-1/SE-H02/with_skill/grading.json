@@ -1,0 +1,198 @@
+{
+  "expectations": [
+    {
+      "text": "给出完整可审查实现，按 M1 验证外层/行形状、非负安全整数及 start<end；非法值统一抛 INVALID_RANGE，不隐式数值转换，空输入返回新空数组。",
+      "passed": true,
+      "evidence": "完整实现先Array.isArray检查外层，for...of检查每行数组和长度2，再Number.isSafeInteger、非负及start<end，非法统一INVALID_RANGE；无隐式转换，空输入新result。审查者原代码probe补证23类非法、稀疏输入、空数组及MAX_SAFE边界通过；不是专家执行回执。"
+    },
+    {
+      "text": "实现按数值起点排序、严格正重叠归并并取最大终点；给出 X=[[2,9],[9,10],[10,14]]、Y=[[1,10],[10,12]]、Z=[[2,8]] 的正确推演结果，端点接触不被单独归并。",
+      "passed": true,
+      "evidence": "代码数值起点排序、严格<合并、Math.max保留最大终点；74-76的X/Y/Z逐项复算正确，包括Z的桥接传递闭包。probe三个原夹具及重复/嵌套/接触/桥接均通过。"
+    },
+    {
+      "text": "实现成功和失败均不修改输入外层/子数组，结果不共享输入数组引用；提出可观察的深冻结或前后快照检查，以及修改返回子数组不影响输入的测试。",
+      "passed": true,
+      "evidence": "代码只排序外层副本，修改的是新建result子数组，校验过程不写输入；97-99已有成功前后快照和修改返回值不影响输入的可观察测试。审查者另以深冻结、共享输入行、结果修改和晚到非法行验证成功/失败不变性与无别名。原文缺失败不变性测试设计由断言5扣分，不把审查者补测冒充原设计。"
+    },
+    {
+      "text": "解释至少两个数值排序之外的独立缺陷，并给对应反例（例如嵌套区间终点缩短、接触误并、输入/返回别名、校验缺失）；实现复杂度与说明一致，适合十万段，不以时间点枚举或全对比较替代可伸缩排序扫描。",
+      "passed": true,
+      "evidence": "诊断指出原地sort、端点接触误并、返回子数组别名和校验缺失，给出了接触及别名检查例；排序扫描为O(N log N)时间/O(N)空间，适合给定规模，无时间点枚举或全对比较。正文没有专门演示原last[1]=r[1]缩短的完整时序，但代码Math.max及B2已有相应反例，且断言不要求枚举所有缺陷。绝对50ms声明另列未验证claim，不改变量级算法判断。"
+    },
+    {
+      "text": "定向测试包含合法、非法、重复/嵌套/接触与失败不变性，写清输入和可观察结果；明确仅为静态代码/设计，不伪称实测通过，不把未知其它测试覆盖写成已确定缺失。",
+      "passed": false,
+      "evidence": "V/I/B表和X/Y/Z有合法、非法、嵌套、接触、桥接及成功不变性，但没有相同区间重复输入的测试，也没有非法行触发抛错后检查外层/子数组不变的测试。82/113明确未执行，未将未知旧覆盖说成缺失；仍因缺失要求的两类可观察设计判不通过，审查者11组probe不为此项补分。"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 4263,
+    "transcript_chars": 20119
+  },
+  "timing": {
+    "executor_duration_seconds": 41.211
+  },
+  "claims": [
+    {
+      "claim": "X/Y/Z结果符合严格正重叠规则",
+      "type": "factual",
+      "verified": true,
+      "evidence": "74-76与静态复算及审查者probe一致：X=[[2,9],[9,10],[10,14]]，Y=[[1,10],[10,12]]，Z=[[2,8]]。"
+    },
+    {
+      "claim": "成功或失败不修改输入、返回数组不共享输入引用",
+      "type": "quality",
+      "verified": true,
+      "evidence": "原代码校验只读、排序副本、push新子数组；深冻结/晚到非法行/别名probe通过。限普通值，契约排除Proxy、访问器等元编程。"
+    },
+    {
+      "claim": "十万段通常<50ms",
+      "type": "quality",
+      "verified": false,
+      "evidence": "116没有环境、输入分布、样本和专家实测；审查者Node v24.14.0两次100k样本43.959ms及54.833ms，不能证明‘通常’，也不据单次55ms推断所有环境都慢。复杂度不蕴含具体毫秒阈值。"
+    },
+    {
+      "claim": "可用Math.max内联优化不佳解释性能并手动比较",
+      "type": "factual",
+      "verified": false,
+      "evidence": "116为条件化微优化建议，不是声称已测出的瓶颈；没有profile支持此处是瓶颈，不能作为当前性能诊断。"
+    },
+    {
+      "claim": "满足额外空间线性约束",
+      "type": "factual",
+      "verified": true,
+      "evidence": "64的实际O(N)空间成立；M1要求合适规模算法并说明复杂度，不是明确另给O(N)硬阈值，‘约束’表述不应当作新增已定要求。"
+    },
+    {
+      "claim": "本轮没有工具或真实测试回执",
+      "type": "process",
+      "verified": true,
+      "evidence": "本run toolCalls=0、空tool ledger；70/82/113均标静态。后来审查者probe不改变这条过程事实。"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "测试存在性与原代码正确性分开。额外审查者probe不抵销原测试设计遗漏。"
+      },
+      {
+        "reason": "原始性能声明必须另列，不可因五断言接近满分而略过未测绝对数字。"
+      }
+    ],
+    "overall": "冻结断言不修改；代码正确性、测试设计及额外声明分列。作者曝光，等待非作者互审；非生产资格。"
+  },
+  "assessment_context": {
+    "case_id": "SE-H02",
+    "configuration": "with_skill",
+    "task_id": "task-mtp2lh9n-n8ya7",
+    "run_id": "expert_task-mtp2lh9n-n8ya7_mtp2lhpo",
+    "agent_version": "2.1.0",
+    "reviewer_role": "candidate_author",
+    "blind": false,
+    "independent_of_candidate_author": false,
+    "non_author_cross_review_pending": true,
+    "professional_qualification_passed": false,
+    "hard_failure_triggered": false,
+    "hard_failure_note": "未发现冻结硬失败中的修正代码违约、实际工具越权或伪造实测；全文论证/性能及测试设计问题见claims，不另加硬失败类别。",
+    "source_sha256": {
+      "eval_metadata.json": "3a5cdde9056502c6a8c68ded17371f0fcf604464b7d87ea0f31eb50fa1663550",
+      "with_skill/transcript.json": "28b63fe2ce8ddb20a61335cca4dd14aafa6174add1d3403e2e5928d436f598b4",
+      "with_skill/outputs/answer.md": "73e474b2b3ff979996309513b9e30d7d30b9f3d60181decd021d28181f3b8bc7"
+    },
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "length"
+      },
+      {
+        "phase": "FINALIZE",
+        "finishReason": "stop"
+      }
+    ],
+    "final_answer_chars": 4262,
+    "source_binding_verified": true,
+    "scope": "只对完整最终答复评分；模型length修复不扣专业分，丢弃草稿不补分；单次非盲作者评审不能证明方法因果提升。",
+    "old_baseline": "N/A: MODEL length + FINALIZE length, no answer; not zero and no delta"
+  },
+  "reviewer_probe": {
+    "reviewerProbe": true,
+    "expertReceipt": false,
+    "node": "v24.14.0",
+    "answerSha256": "73e474b2b3ff979996309513b9e30d7d30b9f3d60181decd021d28181f3b8bc7",
+    "passed": 11,
+    "total": 11,
+    "rows": [
+      {
+        "name": "X",
+        "passed": true
+      },
+      {
+        "name": "Y",
+        "passed": true
+      },
+      {
+        "name": "Z",
+        "passed": true
+      },
+      {
+        "name": "invalid ordinary values: 23",
+        "passed": true
+      },
+      {
+        "name": "sparse outer and sparse rows",
+        "passed": true
+      },
+      {
+        "name": "empty new outer and MAX_SAFE endpoints",
+        "passed": true
+      },
+      {
+        "name": "deep freeze + aliases + result mutation",
+        "passed": true
+      },
+      {
+        "name": "late invalid row leaves successful-prefix input unchanged",
+        "passed": true
+      },
+      {
+        "name": "duplicates, nesting, touch and bridge",
+        "passed": true
+      },
+      {
+        "name": "100000 disjoint-reverse",
+        "passed": true
+      },
+      {
+        "name": "100000 overlap-reverse",
+        "passed": true
+      }
+    ],
+    "timings": [
+      {
+        "kind": "disjoint-reverse",
+        "elapsedMs": 43.959,
+        "inputCount": 100000,
+        "outputCount": 100000
+      },
+      {
+        "kind": "overlap-reverse",
+        "elapsedMs": 54.833,
+        "inputCount": 100000,
+        "outputCount": 1
+      }
+    ],
+    "performanceClaim": "two local samples, not evidence of generally <50ms",
+    "artifact": "method-se-review-2026-09-06.md contains exact script and captured results",
+    "counts_toward_expert_tool_receipt": false,
+    "counts_toward_original_test_design": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "id": "th-art-pango-generate",
+  "kind": "skill",
+  "name": "盘古真实生图",
+  "description": "调用盘古 MCP 生成真实图片并保存为 KnowMe 图片成果。",
+  "version": "1.1.0",
+  "permissions": {
+    "tools": { "allowlist": ["list_paint_models", "generate_image"] },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  }
+}

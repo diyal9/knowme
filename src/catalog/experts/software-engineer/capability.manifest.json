@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 3,
+  "id": "software-engineer",
+  "kind": "expert",
+  "name": "Web 开发专家",
+  "description": "聚焦网站与 Web 系统，以 HTML/CSS、Vue、React、TypeScript 完成前端设计、实现方案、代码审查与质量验证。",
+  "version": "3.1.0",
+  "dependencies": [
+    {
+      "id": "frontend-design",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "imagegen-frontend-web",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "software-change-verification",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "architecture-decision",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "qa-test-design",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "code-review",
+      "kind": "skill",
+      "required": false
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": [
+        "read_file",
+        "list_dir",
+        "grep_files",
+        "write_file",
+        "create_file",
+        "apply_patch",
+        "mkdir",
+        "run_task",
+        "start_process",
+        "task_status",
+        "task_logs",
+        "cancel_task"
+      ]
+    },
+    "network": false,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": [
+    "网站或 Web 系统目标、页面与交互需求、验收标准",
+    "现有 HTML/Vue/React/TypeScript 项目、设计资料与 API 契约"
+  ],
+  "outputs": [
+    "Web 页面与组件实现方案或有实际执行证据的代码变更",
+    "响应式、无障碍、交互和测试结果，注明未验证项"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/software-engineer"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "qualityReview": {
+          "enabled": true,
+          "criteria": [
+            "按材料或实际代码逐步重放控制流、分支可达性、读写时序和最终状态；删除与真实分支矛盾的故障故事、不会刷新的局部值或把条件性风险写成已发生缺陷的表述。",
+            "逐项对照用户验收条件与关键反例检查测试覆盖，包含正常、边界和失败不变性；不得用一个相邻用例、审查者补测或未知现有覆盖替代原答案缺失的测试。",
+            "性能、耗时、规模、测试通过和修改完成等声明必须有本轮执行证据或回执；未运行时明确写成目标、设计或待验证，不凭经验给出确定保证。",
+            "复核全文中的代码、注释、测试、风险和结论是否完整一致，没有未完成句、截断代码或省略关键分支；工具或代码未实际执行时不得把静态方案写成已落地结果。",
+            "逐项核对 Web 页面与组件状态、移动端布局、键盘操作、表单校验及 API 加载/空/错误状态；以真实文件、构建、测试或浏览器记录区分已验证与待验证。"
+          ]
+        },
+        "routes": [
+          {
+            "id": "web-visual-reference",
+            "label": "网页视觉参考设计",
+            "description": "按需设计网站分区视觉参考；真实图片生成必须具备可用的生图工具，不以文字冒充图片。",
+            "keywords": [
+              "网页视觉参考",
+              "网站视觉参考",
+              "网页设计参考图",
+              "网站设计参考图",
+              "网页生图",
+              "网站生图"
+            ],
+            "requiredSkills": [
+              "imagegen-frontend-web",
+              "frontend-design"
+            ]
+          },
+          {
+            "id": "architecture-decision",
+            "description": "围绕 Web 系统进行 Vue/React、TypeScript、组件、路由、状态与 API 契约设计。",
+            "keywords": [
+              "架构评估",
+              "架构设计",
+              "技术方案",
+              "方案选型",
+              "技术选型",
+              "ADR",
+              "质量属性",
+              "故障边界",
+              "迁移策略",
+              "系统边界",
+              "跨系统集成"
+            ],
+            "requiredSkills": [
+              "architecture-decision"
+            ],
+            "qualityReview": {
+              "enabled": true,
+              "criteria": [
+                "逐项复算时间、TTL、起算点、误差和边界事件；合法的边界内访问不得误判为违约，撤销、许可到期和离线窗口不得被静默改成另一时限。",
+                "每个访问或处理保证都要覆盖开始时资格、执行中变化以及完成后结果交付或可见前的复检；只在入口检查不能被描述为全流程保证。",
+                "迁移、灰度和回滚必须保持同一安全门禁、权威版本与拒绝策略；回退代码或数据不得重新启用已否决的授权语义，也不得用一键回滚掩盖不可逆状态。",
+                "人力、工期、成本、性能和容量结论必须来自材料、计算或真实测量；否则标为假设、待测目标或条件分支。复核全文、摘要与表格，删除无依据承诺和未闭合方案。"
+              ]
+            },
+            "label": "Web 架构与技术选型"
+          },
+          {
+            "id": "software-change-verification",
+            "description": "使用 HTML/CSS、Vue、React、TypeScript 进行页面、组件、表单与业务交互设计和实现；实际文件操作以可用工具为准。",
+            "default": true,
+            "requiredSkills": [
+              "frontend-design",
+              "software-change-verification"
+            ],
+            "label": "网站与 Web 系统开发"
+          },
+          {
+            "id": "quality-verification",
+            "description": "检查 Web 页面的响应式、无障碍、表单、路由、接口状态和回归证据；未运行的检查明确标注。",
+            "keywords": [
+              "测试设计",
+              "测试计划",
+              "验收测试",
+              "质量评估",
+              "发布判断",
+              "回归测试",
+              "缺陷复现",
+              "测试用例"
+            ],
+            "requiredSkills": [
+              "qa-test-design"
+            ],
+            "qualityReview": {
+              "enabled": true,
+              "criteria": [
+                "每个结论必须对应可观察的需求、测试步骤、实际结果或明确未执行状态；测试设计不能冒充测试通过。",
+                "覆盖正常、边界、失败、恢复和关键状态转换，且不得以相邻用例替代题面要求的原子条件。",
+                "不得补造数据库、接口、锁、状态码或环境事实；实现细节未知时以黑盒可观察条件表达。",
+                "发布结论必须由实际证据支持，并明确阻断项、剩余风险、未覆盖范围和复测条件。"
+              ]
+            },
+            "label": "Web 质量验证"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "Web 开发成果与验证说明",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "mergeInto": "output-1",
+            "title": "测试结果、风险和未完成项",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

@@ -50,7 +50,11 @@ export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }
       </summary>
       <div className="agent-execution-list" role="log" aria-live="polite">
         {view.rows.map((row) => {
-          const statusLabel = row.status === 'pending' ? '进行中' : row.status === 'error' ? '未完成' : '已完成'
+          const statusLabel = row.status === 'pending'
+            ? '进行中'
+            : row.status === 'error'
+              ? (row.kind === 'tool' ? '工具调用失败' : '处理未完成')
+              : '已完成'
           const head = (
             <>
               <span className="agent-trace-mark" aria-hidden="true">{row.status === 'pending' ? '●' : row.status === 'error' ? '!' : '✓'}</span>
@@ -58,11 +62,17 @@ export function AgentExecutionTimeline({ view }: { view: ExecutionTimelineView }
               {row.durationLabel ? <span className="agent-trace-meta">{row.durationLabel}</span> : null}
             </>
           )
-          if (row.expandable && row.hint) {
+          if (row.expandable) {
             return (
               <details key={row.id} className={`agent-trace-row ${row.kind} ${row.status}`}>
                 <summary aria-label={`${row.title}，${statusLabel}`}>{head}</summary>
-                <pre>{row.hint}</pre>
+                {row.errorCode || row.errorMessage ? (
+                  <dl className="agent-trace-error-details">
+                    {row.errorCode ? <div><dt>错误码</dt><dd><code>{row.errorCode}</code></dd></div> : null}
+                    {row.errorMessage ? <div><dt>错误信息</dt><dd>{row.errorMessage}</dd></div> : null}
+                    {row.hint ? <div><dt>补充信息</dt><dd>{row.hint}</dd></div> : null}
+                  </dl>
+                ) : row.hint ? <pre>{row.hint}</pre> : null}
               </details>
             )
           }

@@ -30,6 +30,29 @@ function estimateTokens(value) {
   return Math.ceil(cjk / 1.5 + other / 4)
 }
 
+function createTokenEstimator({ tokenizer, calibrationFactor = 1 } = {}) {
+  const factor = Math.max(0.5, Math.min(2, Number(calibrationFactor) || 1))
+  return (value) => {
+    const text = String(value || '')
+    if (!text) return 0
+    try {
+      if (typeof tokenizer === 'function') {
+        const count = Number(tokenizer(text))
+        if (Number.isFinite(count) && count >= 0) return Math.ceil(count)
+      }
+      if (tokenizer && typeof tokenizer.countTokens === 'function') {
+        const count = Number(tokenizer.countTokens(text))
+        if (Number.isFinite(count) && count >= 0) return Math.ceil(count)
+      }
+      if (tokenizer && typeof tokenizer.encode === 'function') {
+        const encoded = tokenizer.encode(text)
+        if (Array.isArray(encoded) || ArrayBuffer.isView(encoded)) return encoded.length
+      }
+    } catch { /* provider tokenizer is an optional optimization */ }
+    return Math.max(1, Math.ceil(estimateTokens(text) * factor))
+  }
+}
+
 function contentText(content) {
   if (Array.isArray(content)) {
     return content.filter(item => item?.type === 'text').map(item => item.text || '').join('\n')
@@ -132,6 +155,33 @@ function fitText(value, maxTokens, marker = '\n…（上下文已按预算裁剪
   return fitted
 }
 
+function fitTextWithEstimator(value, maxTokens, estimate, marker = '\n…（上下文已按预算裁剪）…\n') {
+  const text = String(value || '')
+  const limit = Math.max(1, Number(maxTokens) || 1)
+  const count = typeof estimate === 'function' ? estimate : estimateTokens
+  if (count(text) <= limit) return text
+  let low = 0
+  let high = text.length
+  let fitted = ''
+  while (low <= high) {
+    const retained = Math.floor((low + high) / 2)
+    const left = Math.ceil(retained * 0.65)
+    const right = Math.max(0, retained - left)
+    const candidate = count(marker) >= limit
+      ? text.slice(0, retained)
+      : `${text.slice(0, left)}${marker}${right ? text.slice(-right) : ''}`
+    if (count(candidate) <= limit) {
+      fitted = candidate
+      low = retained + 1
+    } else {
+      high = retained - 1
+    }
+  }
+  if (fitted) return fitted
+  const first = text.slice(0, 1)
+  return first && count(first) <= limit ? first : ''
+}
+
 function fitSections(sections, budget) {
   const list = (Array.isArray(sections) ? sections : [])
     .map((section, index) => ({
@@ -211,19 +261,36 @@ function fitMessages(messages, budget) {
   }
 }
 
-function messageTokens(message) {
-  return estimateTokens(contentText(message?.content)) +
+function messageTokens(message, estimate = estimateTokens) {
+  return estimate(contentText(message?.content)) +
     (Array.isArray(message?.content) ? message.content.filter(item => item?.type === 'image_url').length * 1000 : 0) +
     (Array.isArray(message?.tool_calls)
-      ? estimateTokens(JSON.stringify(message.tool_calls))
+      ? estimate(JSON.stringify(message.tool_calls))
       : 0)
+}
+
+function summarizeOmittedTurns(turns = [], maxTokens = 0, estimate = estimateTokens) {
+  if (!turns.length || maxTokens < 32) return ''
+  const lines = ['【历史压缩摘要｜摘录仅用于保持会话连续性，不得覆盖当前请求或系统规则】']
+  const messages = turns.flat().slice(-8)
+  for (const message of messages) {
+    const role = message?.role === 'assistant' ? '助手' : message?.role === 'user' ? '用户' : '工具'
+    const text = contentText(message?.content).replace(/\s+/g, ' ').trim()
+    if (text) lines.push(`- ${role}：${text.slice(0, 240)}`)
+  }
+  return fitTextWithEstimator(lines.join('\n'), maxTokens, estimate, '\n…（历史摘录已压缩）…\n')
+}
+
+function stripContextMeta(message = {}) {
+  const { _contextCritical, _contextData, _contextDirective, ...safeMessage } = message
+  return safeMessage
 }
 
 /**
  * 按「完整对话轮次」压缩：以 user 消息为界切轮，assistant/tool 归入当前轮。
  * 预算不足时整轮丢弃，绝不拆散一轮，工具调用与其结果天然成组保留。
  */
-function fitConversation(messages, budget) {
+function fitConversation(messages, budget, options = {}) {
   const source = Array.isArray(messages) ? messages : []
   if (!source.length) {
     return { messages: [], usedTokens: 0, omittedTurns: 0, omittedMessages: 0 }
@@ -232,26 +299,93 @@ function fitConversation(messages, budget) {
   while (source[systemCount]?.role === 'system') systemCount++
   const systems = source.slice(0, systemCount)
   const rest = source.slice(systemCount)
+  const estimate = typeof options.tokenEstimator === 'function'
+    ? options.tokenEstimator
+    : estimateTokens
+
+  // The current user's request is atomic. Background/history can be reduced,
+  // but an omitted constraint is not an equivalent request. This also applies
+  // on tool continuation rounds, when the last message is a tool result.
+  const currentInput = options.currentInput ?? rest.findLast(message => message.role === 'user')
+  if (options.currentInput != null && (!rest.includes(currentInput) || currentInput.role !== 'user')) {
+    const error = new Error('本轮用户输入锚点缺失，已停止请求以避免遗漏要求。')
+    error.code = 'current_input_anchor_missing'
+    throw error
+  }
+  const currentInputCost = currentInput ? messageTokens(currentInput, estimate) : 0
+  const inputBudget = Math.max(1, Number(budget) || 1)
+  if (currentInputCost > inputBudget) {
+    const error = new Error('本轮输入超出模型上下文预算，已停止请求以避免遗漏要求。请缩小本轮材料范围或选择更大上下文的模型；原任务和修改意见仍保留。')
+    error.code = 'current_input_budget_exceeded'
+    error.details = { requiredTokens: currentInputCost, budget: inputBudget }
+    throw error
+  }
 
   const turns = []
+  let inCurrentTurn = false
   for (const message of rest) {
-    if (message.role === 'user' || !turns.length) {
+    if ((!inCurrentTurn && message.role === 'user') || !turns.length) {
       turns.push([message])
     } else {
       turns[turns.length - 1].push(message)
     }
+    if (message === currentInput) inCurrentTurn = true
+  }
+
+  // Synthetic users after the anchor belong to this execution, as do all
+  // assistant/tool pairs. Reserve their indivisible metadata before background.
+  const currentFixedCost = (turns[turns.length - 1] || []).reduce((sum, message) => sum + (
+    message === currentInput ? messageTokens(message, estimate)
+      : messageTokens(message, estimate) - estimate(contentText(message.content))
+  ), 0)
+  if (currentFixedCost > inputBudget) {
+    const error = new Error('本轮输入与工具调用记录超出模型上下文预算，已停止请求，未截断用户要求或工具参数。')
+    error.code = 'current_input_budget_exceeded'
+    error.details = { requiredTokens: currentFixedCost, budget: inputBudget }
+    throw error
+  }
+  // A budget gate is not a mandatory compaction pass. Do not apply the legacy
+  // per-message caps to evidence that already fits as a complete conversation.
+  const sourceCost = source.reduce((sum, message) => sum + messageTokens(message, estimate), 0)
+  const sourceCriticalCost = systems.reduce((sum, message) => sum + (
+    message._contextCritical === true ? messageTokens(message, estimate) : 0
+  ), 0)
+  if (sourceCost <= inputBudget && sourceCriticalCost <= 8000) {
+    return {
+      messages: source.map(stripContextMeta),
+      usedTokens: sourceCost,
+      omittedTurns: 0,
+      omittedMessages: 0,
+      historyCompaction: null,
+    }
+  }
+  const fitContent = (content, tokens) => {
+    if (!Array.isArray(content)) return tokens > 0 ? fitTextWithEstimator(content, tokens, estimate) : ''
+    const texts = []
+    return content.flatMap(part => {
+      if (part.type !== 'text') return [part]
+      if (tokens <= 0) return []
+      // Count separators and tokenizer interactions across the entire text,
+      // rather than treating multipart text as independent token allowances.
+      const text = fitTextWithEstimator(part.text, tokens, value => estimate(texts.concat(value).join('\n')))
+      if (!text) return []
+      texts.push(text)
+      return [{ ...part, text }]
+    })
   }
 
   let remaining = Math.max(1, Number(budget) || 1)
   const head = []
   if (systems.length) {
-    const systemCosts = systems.map(message => messageTokens(message))
+    const systemCosts = systems.map(message => messageTokens(message, estimate))
     const totalSystemCost = systemCosts.reduce((sum, cost) => sum + cost, 0)
     const criticalCost = systems.reduce((sum, message, index) => (
       sum + (message?._contextCritical === true ? systemCosts[index] : 0)
     ), 0)
-    const tailReserve = rest.length
-      ? Math.min(512, Math.max(64, Math.floor((Number(budget) || 1) * 0.1)))
+    const tailReserve = currentInput
+      ? currentFixedCost
+      : rest.length
+        ? Math.min(512, Math.max(64, Math.floor((Number(budget) || 1) * 0.1)))
       : 0
     const criticalLimit = Math.min(8000, Math.max(0, remaining - tailReserve))
     if (criticalCost > criticalLimit) {
@@ -277,10 +411,12 @@ function fitConversation(messages, budget) {
           ? Math.max(1, Math.floor(nonCriticalBudget * (systemCosts[i] / nonCriticalCost)))
           : 1
       const allowed = critical ? proportional : Math.min(remainingNonCriticalBudget, proportional)
-      const content = critical ? systems[i].content : fitText(systems[i].content, allowed)
-      const { _contextCritical, _contextData, ...safeMessage } = systems[i]
+      const fixed = systemCosts[i] - estimate(contentText(systems[i].content))
+      if (!critical && fixed > allowed) continue
+      const content = critical ? systems[i].content : fitContent(systems[i].content, allowed - fixed)
+      const safeMessage = stripContextMeta(systems[i])
       head.push({ ...safeMessage, content })
-      const used = estimateTokens(content)
+      const used = messageTokens({ ...safeMessage, content }, estimate)
       remaining -= used
       if (!critical) remainingNonCriticalBudget -= used
     }
@@ -289,39 +425,76 @@ function fitConversation(messages, budget) {
 
   const keptTurns = []
   let keptMessages = 0
+  const historyReserve = options.preserveHistorySummary === true && turns.length > 2
+    ? Math.min(
+        Math.max(64, Number(options.historySummaryTokens) || 256),
+        Math.max(0, Math.min(remaining - currentFixedCost, Math.floor(remaining * 0.08))),
+      )
+    : 0
+  let turnRemaining = Math.max(0, remaining - historyReserve)
   for (let i = turns.length - 1; i >= 0; i--) {
     const turn = turns[i]
-    const cost = turn.reduce((sum, message) => sum + messageTokens(message), 0)
-    // 最新一轮至少保留（可裁剪文本），其余轮次预算不足则整轮丢弃
-    if (keptTurns.length && cost > remaining) break
+    const cost = turn.reduce((sum, message) => sum + messageTokens(message, estimate), 0)
+    // 最新一轮保留；只可裁剪非用户正文，其余轮次预算不足则整轮丢弃。
+    if (keptTurns.length && cost > turnRemaining) break
     keptTurns.unshift(turn)
-    remaining -= cost
+    turnRemaining -= cost
     keptMessages += turn.length
-    if (remaining <= 0) break
+    if (turnRemaining <= 0) break
   }
 
+  const omittedTurnCount = Math.max(0, turns.length - keptTurns.length)
+  const historySummary = summarizeOmittedTurns(
+    turns.slice(0, omittedTurnCount),
+    historyReserve,
+    estimate,
+  )
+  const historyMessages = historySummary
+    ? [{ role: 'user', content: historySummary }]
+    : []
   const flat = keptTurns.flat()
-  // 若最新一轮超出剩余预算，对其消息文本做一次裁剪保底
+  // Reserve the full current request and indivisible tool/image metadata first.
   const budgetLeftForTail = Math.max(1, Number(budget) || 1) -
-    head.reduce((sum, message) => sum + messageTokens(message), 0)
-  let tailBudget = budgetLeftForTail
+    head.reduce((sum, message) => sum + messageTokens(message, estimate), 0)
+  let tailBudget = Math.max(0, budgetLeftForTail - historyMessages.reduce(
+    (sum, message) => sum + messageTokens(message, estimate),
+    0,
+  ))
+  const fixedCost = flat.reduce((sum, message) => sum + (message === currentInput
+    ? messageTokens(message, estimate)
+    : messageTokens(message, estimate) - estimate(contentText(message.content))), 0)
+  if (fixedCost > tailBudget) {
+    const error = new Error('本轮输入与工具调用记录超出模型上下文预算，已停止请求，未截断用户要求或工具参数。请缩小本轮范围或选择更大上下文的模型。')
+    error.code = 'current_input_budget_exceeded'
+    error.details = { requiredTokens: fixedCost, budget: tailBudget }
+    throw error
+  }
+  tailBudget -= fixedCost
   const fitted = flat.map((message, index) => {
+    if (message === currentInput) return stripContextMeta(message)
     const isLast = index === flat.length - 1
     const allowed = Math.min(tailBudget, isLast ? 6000 : 4000)
-    const content = Array.isArray(message.content)
-      ? message.content
-      : fitText(message.content, Math.max(1, allowed))
-    tailBudget -= estimateTokens(content)
-    return { ...message, content }
+    const content = fitContent(message.content, Math.max(0, allowed))
+    tailBudget -= estimate(contentText(content))
+    return { ...stripContextMeta(message), content }
   })
 
-  const result = head.concat(fitted)
-  const usedTokens = result.reduce((sum, message) => sum + messageTokens(message), 0)
+  const result = head.concat(historyMessages, fitted)
+  const usedTokens = result.reduce((sum, message) => sum + messageTokens(message, estimate), 0)
+  if (usedTokens > inputBudget) {
+    const error = new Error('上下文装配超出模型预算，已停止请求。')
+    error.code = 'context_budget_exceeded'
+    error.details = { requiredTokens: usedTokens, budget: inputBudget }
+    throw error
+  }
   return {
     messages: result,
     usedTokens,
-    omittedTurns: Math.max(0, turns.length - keptTurns.length),
+    omittedTurns: omittedTurnCount,
     omittedMessages: Math.max(0, rest.length - keptMessages),
+    historyCompaction: historySummary
+      ? { version: 1, strategy: 'extractive', summarizedTurns: omittedTurnCount, summaryTokens: estimate(historySummary) }
+      : null,
   }
 }
 
@@ -378,12 +551,15 @@ module.exports = {
   DEFAULT_CONTEXT_WINDOW,
   MODEL_PROFILES,
   estimateTokens,
+  createTokenEstimator,
   getModelProfile,
   getRequestPolicy,
   fitText,
+  fitTextWithEstimator,
   fitSections,
   fitMessages,
   fitConversation,
+  summarizeOmittedTurns,
   getCacheControlPolicy,
   applyCacheControlMessages,
 }

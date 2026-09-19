@@ -1,0 +1,55 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "suite": "RQA76 image producer normal coverage completion",
+  "purpose": "Add a second normal task for the retained image-producer configuration; success still requires a real image artifact and visible preview.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": ["pango-image-mcp"],
+    "configureConnectors": [
+      {
+        "id": "pango-image-mcp",
+        "type": "mcp",
+        "enabled": true,
+        "mcp": {
+          "transport": "streamable-http",
+          "urlFromEnv": "KNOWME_PANGO_MCP_URL",
+          "urlFromCursorServer": "pango-skillsrv"
+        },
+        "secretsFromCursorHeaders": {
+          "PANGO_ACCESS_TOKEN": "Authorization"
+        }
+      }
+    ]
+  },
+  "evals": [
+    {
+      "id": "IP06",
+      "expertId": "image-producer",
+      "title": "确认后生成产品插画并交付预览",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "prompt": "用户已确认以下 Brief，请直接执行，不再重复确认：生成一张 4:3 的暖灰背景产品插画，主体是完整的白色桌面灯，光线柔和，画面无文字、无 Logo，适合作为产品概念图。必须真实调用 generate_image；只有拿到工具成功回执、可解码的图片 artifact 和对话中的可见图片预览后，才能交付。请简要说明实际核查结果，不要把 Prompt 或 URL 当图片。",
+      "constraints": [
+        "必须真实调用 generate_image，不得退化为文字方案或文档成果",
+        "交付必须包含可解码的 image artifact 和可见预览",
+        "没有真实图片时必须进入失败或等待输入闭环，不得创建占位成功卡片"
+      ],
+      "deliverables": [
+        { "id": "generated-image", "title": "桌面灯产品插画", "type": "image", "required": true }
+      ],
+      "assertions": [
+        "用户确认后实际调用 generate_image，执行证据包含完整工具回执",
+        "当前任务存在可解码的 image artifact，并能在对话中显示真实图片预览",
+        "交付说明只陈述已核实的比例、主体和图片存在事实，未视觉核查项明确为未知",
+        "图片预览与普通对话说明分离，验收入口仍由统一对话流程控制",
+        "图片工具失败或返回空数据时不伪造结果，并给出可重试的下一步"
+      ]
+    }
+  ]
+}

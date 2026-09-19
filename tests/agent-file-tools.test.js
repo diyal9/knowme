@@ -98,6 +98,7 @@ describe('agent-file-tools', () => {
     })
     assert.equal(r.ok, true)
     assert.equal(written.content, 'new')
+    assert.deepEqual(r.artifactRefs, [{ id: 'file:a.txt', type: 'file', kind: 'file', title: 'a.txt' }])
   })
 
   it('lists directory entries', async () => {

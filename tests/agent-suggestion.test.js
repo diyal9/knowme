@@ -169,6 +169,21 @@ describe('agent-suggestion', () => {
     assert.ok(!bodyWithoutBlock.includes('"items"'))
   })
 
+  it('extracts an unfenced suggestion JSON block when prose follows it', () => {
+    const text = [
+      '下一步建议（您可直接点选）',
+      '[{"label":"生成清单","action":"send","payload":"请生成清单"}]',
+      '',
+      '如果需要，我也可以继续补充说明。',
+    ].join('\n')
+    const { bodyWithoutBlock, bar } = parseSuggestionBlock(text)
+    assert.ok(bar)
+    assert.equal(bar.items[0].label, '生成清单')
+    assert.ok(bodyWithoutBlock.includes('下一步建议'))
+    assert.ok(bodyWithoutBlock.includes('继续补充说明'))
+    assert.ok(!bodyWithoutBlock.includes('"label"'))
+  })
+
   it('does not treat unrelated json fences as suggestions', () => {
     const text = '看这段配置：\n```json\n{"port": 8080, "host": "local"}\n```'
     const { bar } = parseSuggestionBlock(text)

@@ -44,12 +44,15 @@ export function buildFeishuClarificationPrompt(
   const intent = classifyFeishuIntent(userPrompt)
   if (!intent.mentions) return null
   const status = connector?.status || {}
-  const needsUserAuth = !connector?.enabled || status.state === 'auth_required' || !status.userReady
+  // Missing userReady is an unknown status, not proof of missing auth. The
+  // main-process readiness contract follows the same rule; only an explicit
+  // auth_required/userReady:false should stop a valid request.
+  const needsUserAuth = !connector?.enabled || status.state === 'auth_required' || status.userReady === false
   const needsFunctionClarify = intent.kind === 'unknown'
   if (!needsUserAuth && !needsFunctionClarify) return null
   const directives = ['你是 KnowMe。先进行澄清，不要直接执行工具。']
   if (needsFunctionClarify) {
-    directives.push('当前仅支持飞书文档/知识库只读能力；请询问用户要搜索关键词、浏览知识库空间，还是读取指定文档。')
+    directives.push('当前可使用已授权的飞书办公 CLI 能力，包括文档、知识库、会议、聊天、日程、待办和多维表格；涉及发送、创建、修改或上传时会先生成草稿并等待用户确认。请询问用户希望完成的具体目标。')
   }
   if (needsUserAuth) {
     directives.push(`明确当前飞书状态：${deriveFeishuUsageHint(connector)}。给出最短下一步：到“设置 → 连接器”启用飞书并完成 user 授权。`)

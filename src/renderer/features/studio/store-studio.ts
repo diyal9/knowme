@@ -480,6 +480,12 @@ export function createStudioManageSlice(set: StoreSet, get: StoreGet) {
             id: String(rec.id || rec.knowledgeId || ''),
             name: String(rec.displayName || rec.name || rec.title || rec.id || ''),
             kind: String(rec.kind || rec.type || ''),
+            collectionIds: Array.isArray(rec.collectionIds) ? rec.collectionIds.map(String) : [],
+            collections: Array.isArray(rec.collections) ? rec.collections.map((collection) => ({
+              id: String(collection?.id || ''),
+              name: String(collection?.name || collection?.displayName || collection?.id || ''),
+              description: String(collection?.description || ''),
+            })).filter((collection) => collection.id) : [],
           }
         }).filter((item) => item.id)
         set({ studioKnowledgeProviders: providers })

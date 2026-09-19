@@ -1,0 +1,142 @@
+{
+  "expectations": [
+    {
+      "text": "全面开放判错误，8月1日仅受邀内测且未公开注册，引用A第2段。",
+      "passed": true,
+      "evidence": "表格第一行引用A（08-01，第2段）“仅面向受邀者内测、暂不公开注册”，将8月1日全面开放判错误。"
+    },
+    {
+      "text": "1000邀请不能当活跃用户，620是已激活也不能无条件称活跃，时间截至8月2日23:59引用B记录7。",
+      "passed": true,
+      "evidence": "表格第二行注明来源B记录7、08-02 23:59已激活620，并明确“邀请≠激活≠活跃”；修正文仍称1000份邀请、620已激活。"
+    },
+    {
+      "text": "C转A、D转C不是独立验证，E正文不可访问不能认定支持或反证。",
+      "passed": false,
+      "evidence": "表格正确区分C→A、D→C转载链，E正文不可访问，说明部分也保留E未知。但独立修正文泛称“所谓媒体报道系对官方公告的转载”，未限定C/D，把未知E也卷入概括；主表正确不足以令整份交付通过。"
+    },
+    {
+      "text": "98%满意率没有支持，B未采集问卷不等价证明满意率必然不是98%；应无法确认。",
+      "passed": true,
+      "evidence": "98%明确判“无法确认”，并写“缺证据不等于反证，故不判‘错误’”。没有把B未采问卷推成98%必假。对所有满意度数据的概括另列断言外问题。"
+    },
+    {
+      "text": "修正文正确保留范围/时间/邀请及激活口径，600字以内、不假称查询外网或写入KB。",
+      "passed": false,
+      "evidence": "修正文将A于8月1日所载内测状态无新增依据挪到“截至2026年8月2日23:59”，并泛化转载范围及“未采集问卷，暂无数据”。B只支持统计时点及问卷记录。正文保留人数口径、回执无外部动作，但不满足时点/范围保真。长度520（含标点629）口径跨600，不以原始Markdown或字数判失败。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "claims": [
+    {
+      "claim": "截至2026年8月2日23:59，本项目处于内测阶段，仅面向受邀者、暂不公开注册",
+      "type": "factual",
+      "verified": false,
+      "evidence": "A是8月1日公告；B的8月2日记录只有邀请、激活和未采问卷，不能将A状态无条件延长到B统计时点。未知是否变化，不代表已开放。"
+    },
+    {
+      "claim": "所谓媒体报道系对官方公告的转载",
+      "type": "factual",
+      "verified": false,
+      "evidence": "仅C/D已证实转载链；E正文未知。后文另称E未知不能修复独立替换段落的全称泛化。"
+    },
+    {
+      "claim": "用户满意率因未采集问卷，暂无数据",
+      "type": "factual",
+      "verified": false,
+      "evidence": "B仅说未采满意度问卷；不能泛称所有来源或其他测量方式都无满意率数据。可说给定已读材料不足以核验98%。"
+    },
+    {
+      "claim": "修正文逐项对齐证据",
+      "type": "quality",
+      "verified": false,
+      "evidence": "数字口径对齐，但状态时点和来源范围未对齐；这是质量自述，不是专业验收证据。"
+    },
+    {
+      "claim": "所提供回执中未见外部读取或知识库/文件写入工具动作",
+      "type": "process",
+      "verified": true,
+      "evidence": "receipts tools=[]、run.toolsUsed=[]、applyLog=[]，成果类型answer。仅限提交记录；平台“输出验证通过”不是专业认证。"
+    }
+  ],
+  "professional_review": {
+    "verdict": "not_qualified",
+    "hard_fail": true,
+    "hard_failures": [
+      "独立修正文把8月1日状态外推至8月2日，扩大转载来源与问卷/数据范围。"
+    ],
+    "contract_failures": [
+      "独立修正文的来源范围/时间/不确定性未保真。"
+    ],
+    "qualified_boundary": "范围、邀请/激活/活跃和98%无法确认的主表判断有合格部分；独立修正文仍不可直接发布。",
+    "production_certification": false
+  },
+  "length_check": {
+    "method": "去除Markdown表分隔行/竖线/强调/标题/引用/列表标记；CJK逐字 + 连续[A-Za-z0-9]+词块；另加Unicode标点数。仅heuristic，非官方中文字数或token。",
+    "cjk_chars": 471,
+    "alnum_blocks": 49,
+    "cjk_plus_alnum_blocks": 520,
+    "with_punctuation": 629,
+    "raw_markdown_chars": 786,
+    "limit": 600,
+    "used_raw_markdown_length_as_chinese_limit": false
+  },
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "evidence_limits": {
+    "user_notes_present": false,
+    "executor_metrics_present": false,
+    "timing_present": false,
+    "note": "无独立metrics/timing文件，不伪填耗时或token；长度为评分者本地计数。"
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "冻结断言不变；未来将CEO身份未知与引语文本错误显式分开，并独立核查修正文状态/来源范围/发布计划，避免只查主表。"
+      },
+      {
+        "reason": "未来预先冻结中文长度口径。当前CJK+alnum与含标点指标跨阈值，不将原始Markdown长度作为中文超字数证据。"
+      }
+    ],
+    "overall": "三种冻结反例各两配置，六输出不是六独立反例。历史baseline不是同时重跑，版本和方法装配不同，不能独立归因Skill；单次通过也不构成生产认证。"
+  },
+  "provenance": {
+    "scope": "仅提交的虚构材料；未调用外部API、未改源码/冻结输入/原始evidence JSON。证据按主代理在用户评估任务范围内授权的task ID重绑定，正文/回执SHA原样保留。",
+    "configuration": "candidate",
+    "task_id": "wb-expert-task-mtormlqz-57xyt",
+    "answer_sha256": "F2E4CFFF74B121C7C5CA44126900B6B58C5C5B195227E70D812CB606EEF3FD4E",
+    "receipts_sha256": "38990B325AA5DB434C7D3520B816EDE7F7D18AB6F454BD4301A643501BBABC84",
+    "transcript_sha256": "3BE5972D7BB24A549F2F9F35DA20B99F8ED2BB67F406C513DE4CC87298471E3F",
+    "eval_metadata_sha256": "8A35D746C481A07ED7872EE958B09938E6F85756DFC6049BFFEB43ADCAAD16A6",
+    "historical_baseline": false,
+    "binding_audit": "../../binding-repair-audit-2026-09-06.json",
+    "binding_verified": {
+      "configuration": "FC01/candidate",
+      "task_id": "wb-expert-task-mtormlqz-57xyt",
+      "task_match": true,
+      "transcript_task_match": true,
+      "input_match": true,
+      "answer_match": true,
+      "hashes_preserved": true,
+      "metadata_unchanged": true,
+      "receipt_keys": [
+        "id",
+        "run",
+        "tools",
+        "configuration"
+      ],
+      "artifact_task_match": true,
+      "receipt_body_match": true,
+      "receipt_configuration_match": true,
+      "semantic_review": "人工复核原文和答案：FC01内测/人数/转载链，FC02版本/币种/奖励条件，FC03原型/引语/效果；主题与taskID一致。"
+    }
+  }
+}

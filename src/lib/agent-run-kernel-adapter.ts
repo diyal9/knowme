@@ -9,7 +9,10 @@ const llmUsage = require('./llm-usage')
 const agentRun = require('./agent-run')
 const agentSessions = require('./agent-sessions')
 const groundingRuntime = require('./agent-grounding-runtime')
-const { reconcileConversationLog } = require('./agent-conversation-log')
+const { providedMaterialsFromInput } = require('./provided-materials')
+const { buildMediaObservation } = require('./agent-media-resources')
+const { resolveProfile } = require('./llm-model-catalog')
+const { upsertConversationMessage, withConversationIdentity } = require('./agent-conversation-log')
 const { bindRunRuntimeContext, unbindRunRuntimeContext } = require('./tool-contract-registry')
 
 const DEFAULT_CANCEL_BUDGET_MS = 3000
@@ -55,6 +58,10 @@ function buildProductionRunPorts(state) {
   } = state
 
   let session = initialSession
+  const providedMaterials = providedMaterialsFromInput({
+    taskRef: state.taskRef, workbenchTaskId: state.workbenchTaskId,
+    providedMaterials: ctxBundle.providedMaterials,
+  }, runId)
   let apiMessages = initialMessages
   let referenceState = groundingRuntime.deserializeReferenceState(session?.referenceState || {})
   let evidenceLedger = groundingRuntime.createEvidenceLedger({ runId: runId || state.runId || 'run' })
@@ -75,17 +82,22 @@ function buildProductionRunPorts(state) {
     const replaceKnownMessageIds = options.replaceKnownMessageIds instanceof Set
       ? options.replaceKnownMessageIds
       : null
-    const mergedMessages = latest
-      ? (replaceKnownMessageIds
-          ? reconcileConversationLog(
-              incomingSession.messages,
-              (latest.messages || []).filter(item => !replaceKnownMessageIds.has(String(item?.id || ''))),
-              { sessionId: incomingSession.id },
-            )
-          : reconcileConversationLog(latest.messages, incomingSession.messages, {
-              sessionId: incomingSession.id,
-            }))
+    // Both sides here are trusted persisted/runtime records, not a renderer
+    // recovery snapshot. The latter intentionally drops tools and structured
+    // metadata and must not be used to save an execution transcript.
+    const canonical = replaceKnownMessageIds ? incomingSession.messages : latest?.messages || []
+    const additions = replaceKnownMessageIds
+      ? (latest?.messages || []).filter(item => !replaceKnownMessageIds.has(String(item?.id || '')))
       : incomingSession.messages
+    let mergedMessages = (canonical || []).map((item, index) => withConversationIdentity(item, { sessionId: incomingSession.id, index })).filter(Boolean)
+    for (const [index, item] of (additions || []).entries()) {
+      const message = withConversationIdentity(item, { sessionId: incomingSession.id, index })
+      if (!message) continue
+      const exists = mergedMessages.some(existing => existing.id === message.id)
+      if (!exists || (!replaceKnownMessageIds && message.runId === runId)) {
+        mergedMessages = upsertConversationMessage(mergedMessages, message)
+      }
+    }
     const merged = latest
       ? {
           ...latest,
@@ -183,7 +195,7 @@ function buildProductionRunPorts(state) {
       load: () => settings,
     },
     context: {
-      build: async () => ({
+      build: async (input = {}) => ({
         tier,
         messages: apiMessages,
         session,
@@ -194,21 +206,32 @@ function buildProductionRunPorts(state) {
         effectivePersonalization,
         contextInfo: ctxBundle.contextInfo,
         taskFrame: ctxBundle.taskFrame || null,
+        providedMaterials: providedMaterialsFromInput({ ...input, providedMaterials }, runId),
         alreadyPrepared: true,
       }),
     },
     llm: {
-      complete: async ({ messages, tools, toolsEnabled, forceToolCall, policy: reqPolicy, round, onSnapshot, finalize }) => {
+      complete: async ({ messages, tools, toolsEnabled, forceToolCall, forceToolName, policy: reqPolicy, round, onSnapshot, finalize }) => {
         const msgs = messages || apiMessages
+        // The executor owns each request's allowance (including length repair).
+        // Preserve legacy defaults only when no per-request allowance exists;
+        // neither a finalizer nor a request policy may widen the model cap.
+        const outputTokens = reqPolicy?.outputTokens || (finalize ? 2400 : policy.outputTokens)
+        const maxOutput = Math.min(reqPolicy?.maxOutput || Infinity, policy.maxOutput || Infinity)
         const body = {
           model: routedModel.model || 'gpt-4o-mini',
           messages: msgs,
-          [reqPolicy?.parameter || policy.parameter]: finalize
-            ? Math.min(reqPolicy?.maxOutput || policy.maxOutput, 2400)
-            : reqPolicy?.outputTokens || policy.outputTokens,
+          [reqPolicy?.parameter || policy.parameter]: Math.min(outputTokens, maxOutput),
           temperature: reqPolicy?.temperature || policy.temperature,
           stream: true,
-          ...(toolsEnabled && tools?.length ? { tools, tool_choice: forceToolCall ? 'required' : 'auto' } : {}),
+          ...(toolsEnabled && tools?.length ? {
+            tools,
+            tool_choice: forceToolCall
+              ? (forceToolName
+                  ? { type: 'function', function: { name: forceToolName } }
+                  : 'required')
+              : 'auto',
+          } : {}),
         }
         const wrappedSnapshot = (snapshot) => {
           onSnapshot?.(snapshot)
@@ -248,6 +271,11 @@ function buildProductionRunPorts(state) {
           remainingTimeoutMs: remaining,
         })
       },
+    },
+    media: {
+      observeArtifacts: artifacts => buildMediaObservation(artifacts, {
+        supportsVision: resolveProfile({ ...settings, model: routedModel?.model || settings?.model }).supportsVision,
+      }),
     },
     orchestration: orchestrationPort || undefined,
     runtime: {

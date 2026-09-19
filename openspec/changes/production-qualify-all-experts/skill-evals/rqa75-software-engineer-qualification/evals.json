@@ -1,0 +1,30 @@
+{
+  "status": "frozen_before_execution",
+  "frozenAt": "2026-09-08T00:00:00+08:00",
+  "frozenAtNote": "This suite adds coverage only; it does not by itself qualify the expert.",
+  "suite": "RQA75 software engineer normal coverage completion",
+  "purpose": "Add a second normal task for the retained software-engineer configuration without changing the existing lifecycle contracts.",
+  "executionPolicy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "evals": [
+    {
+      "id": "SE11",
+      "expertId": "software-engineer",
+      "title": "事件订阅器的完整实现",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "prompt": "请作为软件工程师实现 JavaScript 函数 createEventBus()，只在对话中给出完整实现、复杂度和决定性测试设计；不访问文件、不调用工具、不声称已运行。合同：subscribe(type, handler) 返回幂等 unsubscribe；同一 handler 对同一 type 不重复注册；emit(type, payload) 按注册顺序同步调用当前订阅快照；emit 期间新增订阅下一次才生效，取消订阅不会阻止当前快照中已经取出的后续 handler；handler 抛错不能阻止其他 handler，并汇总为 AggregateError；未知 type 合法但不产生副作用。",
+      "assertions": [
+        "给出完整可替换实现，subscribe、unsubscribe、emit 接口和幂等行为一致",
+        "正确处理注册顺序、emit 快照、emit 中增删订阅和未知事件类型",
+        "单个 handler 抛错时继续调用其他 handler，并以可观察方式汇总错误",
+        "给出重复订阅、取消、快照、顺序、异常和未知类型测试设计",
+        "给出合理时间/空间复杂度并诚实区分设计与未真实运行"
+      ]
+    }
+  ]
+}

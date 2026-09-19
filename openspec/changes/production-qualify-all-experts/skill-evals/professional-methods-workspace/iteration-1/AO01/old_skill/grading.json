@@ -1,0 +1,109 @@
+{
+  "grading_status": "evaluated",
+  "professional_scorable": true,
+  "binding": {
+    "evalId": "AO01",
+    "configuration": "old_skill",
+    "taskId": "task-mtowd8nz-1tamv",
+    "sessionId": "wb-expert-task-mtowd8nz-1tamv",
+    "runId": "expert_task-mtowd8nz-1tamv_mtowd8tp",
+    "expertId": "action-owner",
+    "agentVersion": "2.0.0",
+    "agentHash": "55d19edc3f0e143d",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtowd8nz-1tamv_mtowd8tp",
+        "skillRefs": [],
+        "explicitContent": []
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "接口字段表重复[1]/[4]合并且保留两个来源、李明、9月8日、研发测试确认无遗漏。",
+      "passed": true,
+      "evidence": "outputs/answer.md 表第1行合并为“提交接口字段表”，主责李明、2026-09-08、研发与测试确认无遗漏，来源[1][4]均保留；同run上下文当前年为2026。"
+    },
+    {
+      "text": "王芳截止保留确认后两个工作日，不按提交日推算绝对日期；联调完成标准待定。",
+      "passed": true,
+      "evidence": "表中截止虽写待确认，缺口第1条完整保留“两个工作日”以“字段表确认通过”为起点，并明确缺日历/实际确认日无法推算；表及缺口第2条将联调标准标待定。按全文而非只看单元格判通过。"
+    },
+    {
+      "text": "回滚演练列主责未定，不能选赵强或周敏，也不能捏造协作者、日期。",
+      "passed": true,
+      "evidence": "表第3行主责/日期均待定；缺口第3条准确保留赵强组、周敏组及主持暂未议定，未指定主责或协作者。"
+    },
+    {
+      "text": "自动提醒仅建议不建承诺行动；无外部任务创建/通知成功宣称。",
+      "passed": true,
+      "evidence": "说明第1条将[3]列提议、非决议、不入行动项；全文无外部成功宣称，同run executionEvidence.toolCalls=[]。"
+    },
+    {
+      "text": "直接给完整精简表及必要缺口，不要求重复提供已知信息。",
+      "passed": true,
+      "evidence": "已直接给六列表、三条必要缺口，无需重述已知承诺。追问实际确认基准、验收标准、未来分工均为未知项；全文混合336字≤500。"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1,
+    "score": "5/5",
+    "professional_hard_errors": false
+  },
+  "claims": [
+    {
+      "claim": "接口字段表于9月8日提交，由李明负责，研发与测试确认无遗漏",
+      "type": "factual",
+      "verified": true,
+      "evidence": "[1][4]直接支持；2026年来自同run宿主当前时间，未改月日。"
+    },
+    {
+      "claim": "字段表确认后的两个工作日不能在缺日历与实际确认日时换算为绝对截止",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入末句明确缺少这两项；原文缺口第1条未把9月8日提交日当确认日。"
+    },
+    {
+      "claim": "请求补充未来分工和联调标准",
+      "type": "factual",
+      "verified": true,
+      "evidence": "属于明确列出的缺口追问，不是声称分工已定或新增已承诺事项。"
+    },
+    {
+      "claim": "回滚演练的主责及协作者尚未议定",
+      "type": "factual",
+      "verified": true,
+      "evidence": "输入[5]及表/缺口一致，无强选人。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Entire same-run assistant reply, including headings, all table cells and trailing notes; excludes filesystem trailing newline",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 500,
+    "full_unicode_chars": 604,
+    "non_whitespace_chars": 512,
+    "han_chars": 318,
+    "mixed_words": 336,
+    "punctuation_chars": 136,
+    "professional_length_passed": true
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "建议把已知相对期限直接保留在表内，而非降为待确认后仅在附注恢复；这是可用性改进，本例全文已完整保留期限，不据此判失败。"
+      },
+      {
+        "reason": "增加全文所有实体姓名与来源一致的断言；目前责任分配断言未必覆盖附注中的姓名误抄。"
+      }
+    ],
+    "overall": "No definite additional hard error found in this single answer; not a general capability qualification."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix."
+}

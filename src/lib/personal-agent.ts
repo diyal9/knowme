@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
+const defaultGrowthLedger = require('./growth-ledger')
 
 const MY_KNOWME_PROFILE_ID = 'my-knowme'
 const PERSONAL_AGENT_ID = 'personal'
@@ -113,8 +114,11 @@ function createPersonalAgentService(options = {}) {
   const pathImpl = options.path || path
   const profileStore = options.profileStore
   const productMemory = options.productMemory
+  const brainService = options.brainService
   const memoryDir = cleanText(options.memoryDir, 1000)
   const auditFile = options.auditFile || pathImpl.join(cleanText(options.userData, 1000), 'personal-agent-growth.json')
+  const userData = cleanText(options.userData || pathImpl.dirname(auditFile), 1000)
+  const unifiedLedger = options.growthLedger || defaultGrowthLedger
   const loadSettings = typeof options.loadSettings === 'function' ? options.loadSettings : () => ({})
 
   if (!profileStore) throw new Error('personal-agent requires profileStore')
@@ -158,6 +162,7 @@ function createPersonalAgentService(options = {}) {
       proposalId: cleanText(detail.proposalId, 120),
       memoryRef: cleanText(detail.memoryRef, 160),
       reversible: detail.reversible === true,
+      profileBefore: detail.profileBefore ? clone(detail.profileBefore) : undefined,
       createdAt: nowIso(),
     }
     state.events.push(event)
@@ -208,9 +213,11 @@ function createPersonalAgentService(options = {}) {
 
   function createProposal(input = {}) {
     const state = readGrowth()
+    const capabilityOperation = input.patch?.capabilityEffect || input.patch?.operation
     const proposal = {
       id: `proposal_${crypto.randomUUID()}`,
       kind: cleanText(input.kind, 40) || 'behavior',
+      targetType: input.targetType || (capabilityOperation ? 'capability' : ['memory', 'knowledge'].includes(input.kind) ? 'brain' : 'partner_profile'),
       summary: cleanText(input.summary || input.text, 500),
       patch: clone(input.patch || {}),
       status: 'pending',
@@ -304,6 +311,19 @@ if (!summary) return { ok: false, code: 'empty_teaching', error: '请输入要�
     if (kind !== 'memory' || !explicitlyRemember) {
       return createProposal({ kind, summary, patch: input.patch, source: 'personal-agent-teach' })
     }
+    if (brainService && typeof brainService.observeConversation === 'function') {
+      const observed = brainService.observeConversation(userData, {
+        text: /^(?:请)?记住/.test(summary) ? summary : `请记住：${summary}`,
+        agentId: 'personal',
+        allowPromotionProposal: true,
+        sourceLabel: '你明确要求伙伴记住',
+        documentRef: `personal-agent-teach:${crypto.createHash('sha256').update(summary, 'utf8').digest('hex').slice(0, 20)}`,
+      }, { memoryDir })
+      const proposal = observed?.proposals?.[0] || observed?.duplicates?.[0]
+      if (proposal) return { ok: true, applied: false, requiresConfirmation: proposal.status !== 'confirmed', proposal }
+      if (observed?.ok === false) return observed
+      return { ok: false, code: 'proposal_not_created', error: '没有形成可确认的长期理解' }
+    }
     const remembered = typeof productMemory?.upsertGlobalMemory === 'function'
       ? productMemory.upsertGlobalMemory(memoryDir, {
           type: 'preference',
@@ -318,6 +338,15 @@ if (!summary) return { ok: false, code: 'empty_teaching', error: '请输入要�
       summary,
       memoryRef,
       reversible: true,
+    })
+    unifiedLedger.append(userData, {
+      id: event.id,
+      targetType: 'brain',
+      kind: 'cognition',
+      summary,
+      effects: [{ op: 'remember_memory', id: memoryRef }],
+      reverseEffects: [{ op: 'remove_memory', id: memoryRef }],
+      source: 'personal-agent',
     })
     return { ok: true, applied: true, requiresConfirmation: false, memoryRef, undoEventId: event.id, event }
   }
@@ -334,9 +363,14 @@ if (!summary) return { ok: false, code: 'empty_teaching', error: '请输入要�
         : productMemory.retractExplicitPreference(memoryDir, event.memoryRef)
       if (!retracted.ok) return retracted
     }
+    if (event.profileBefore) {
+      const restored = profileStore.save(event.profileBefore, { confirmedRisk: true })
+      if (!restored.ok) return restored
+    }
     event.status = 'reverted'
     event.revertedAt = nowIso()
     writeGrowth(state)
+    unifiedLedger.markReverted(userData, eventId)
     const undoEvent = appendEvent('memory_reverted', { summary: `撤销：${event.summary}`, memoryRef: event.memoryRef })
     return { ok: true, reverted: event, event: undoEvent }
   }
@@ -355,6 +389,33 @@ if (!summary) return { ok: false, code: 'empty_teaching', error: '请输入要�
       appendEvent('proposal_rejected', { summary: proposal.summary, proposalId: proposal.id })
       return { ok: true, proposal }
     }
+    if (proposal.targetType === 'brain') {
+      const remembered = typeof productMemory?.upsertGlobalMemory === 'function'
+        ? productMemory.upsertGlobalMemory(memoryDir, {
+            type: 'preference',
+            text: proposal.summary,
+            scope: 'global',
+            source: { type: 'personal-agent', label: '由用户确认的伙伴提案' },
+          })
+        : productMemory?.rememberExplicitPreference(memoryDir, proposal.summary, { source: 'personal-agent-proposal' })
+      if (remembered?.ok === false) return remembered
+      const memoryRef = cleanText(remembered?.item?.id || remembered?.pattern?.id || remembered?.id, 160)
+      proposal.status = 'applied'
+      proposal.updatedAt = nowIso()
+      writeGrowth(state)
+      const event = appendEvent('proposal_applied', { summary: proposal.summary, proposalId: proposal.id, memoryRef, reversible: true })
+      unifiedLedger.append(userData, {
+        id: event.id,
+        proposalId: proposal.id,
+        targetType: 'brain',
+        kind: 'cognition',
+        summary: proposal.summary,
+        effects: [{ op: 'remember_memory', id: memoryRef }],
+        reverseEffects: [{ op: 'remove_memory', id: memoryRef }],
+        source: 'personal-agent-proposal',
+      })
+      return { ok: true, proposal, memoryRef, event }
+    }
     const current = ensureProfile()
     if (!current.ok) return current
     const saved = profileStore.save({
@@ -369,8 +430,18 @@ if (!summary) return { ok: false, code: 'empty_teaching', error: '请输入要�
     proposal.status = 'applied'
     proposal.updatedAt = nowIso()
     writeGrowth(state)
-    appendEvent('proposal_applied', { summary: proposal.summary, proposalId: proposal.id })
-    return { ok: true, proposal, profile: saved.profile }
+    const event = appendEvent('proposal_applied', { summary: proposal.summary, proposalId: proposal.id, reversible: true, profileBefore: current.profile })
+    unifiedLedger.append(userData, {
+      id: event.id,
+      proposalId: proposal.id,
+      targetType: proposal.targetType === 'capability' ? 'capability' : 'partner_profile',
+      kind: proposal.kind,
+      summary: proposal.summary,
+      effects: [proposal.patch],
+      reverseEffects: [{ op: 'restore_profile', value: current.profile }],
+      source: 'personal-agent-proposal',
+    })
+    return { ok: true, proposal, profile: saved.profile, event }
   }
 
   function growthList(input = {}) {

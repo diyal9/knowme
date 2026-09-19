@@ -201,6 +201,7 @@ function createMockRunPorts(fixture, signal) {
     tools: {
       surface: {
         getToolDefinitions: () => [{ type: 'function', function: { name: 'search_knowledge', description: 'mock' } }],
+        getToolRecords: () => Array.isArray(fixture.toolRecords) ? fixture.toolRecords : [require('./agent-tools').SEARCH_KNOWLEDGE_TOOL],
         validateToolCall: (name, args) => ({ ok: true, args: typeof args === 'string' ? JSON.parse(args || '{}') : (args || {}) }),
       },
       execute: async (toolCall) => {
@@ -213,13 +214,16 @@ function createMockRunPorts(fixture, signal) {
         }
         toolCallIndex += 1
         if (script.fail) {
-          const failResult = { ok: false, code: script.code || 'network', message: script.message || 'mock failure', text: script.text || script.message || 'mock failure' }
+          const failResult = { ok: false, code: script.code || 'network', message: script.message || 'mock failure', text: script.text || script.message || 'mock failure',
+            ...(typeof script.executionStarted === 'boolean' ? { executionStarted: script.executionStarted } : {}) }
           toolLedger = groundingRuntime.recordToolCall(toolLedger, { id: toolCall.id, name, status: 'fail' })
           evidenceLedger = groundingRuntime.appendEvidence(evidenceLedger, { source: 'tool', toolCallId: toolCall.id, status: 'fail', digest: failResult.text, provenance: { tool: name, callId: toolCall.id } })
           return failResult
         }
         const result = {
           ok: script.ok !== false,
+          ...(typeof script.executionStarted === 'boolean' ? { executionStarted: script.executionStarted } : {}),
+          ...(typeof script.code === 'string' ? { code: script.code } : {}),
           text: script.text || 'mock tool result',
           preview: script.preview || script.text || 'mock tool result',
           sources: script.sources || [],

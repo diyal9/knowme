@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 3,
+  "id": "content-strategist",
+  "kind": "expert",
+  "name": "内容策划专家",
+  "description": "把传播目标、受众和素材转成可执行的内容策略与选题计划",
+  "version": "2.0.0",
+  "dependencies": [
+    {
+      "id": "writing-polish",
+      "kind": "skill",
+      "required": true
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "inputs": [
+    "传播目标、目标受众与渠道",
+    "可用素材、时间范围与禁用项"
+  ],
+  "outputs": [
+    "内容策略与核心叙事",
+    "带优先级的选题计划和验收点"
+  ],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "experts/content-strategist"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "sop-first",
+        "deliverables": [
+          {
+            "id": "output-1",
+            "title": "内容策略与核心叙事",
+            "type": "answer",
+            "required": true
+          },
+          {
+            "id": "output-2",
+            "title": "带优先级的选题计划和验收点",
+            "type": "answer",
+            "required": true
+          }
+        ]
+      }
+    }
+  }
+}

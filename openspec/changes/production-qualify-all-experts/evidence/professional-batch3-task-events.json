@@ -1,0 +1,592 @@
+[
+  {
+    "id": "task-mtotfx1i-lg9q9",
+    "title": "QA-RR-01 规则冲突与可测性",
+    "status": "review",
+    "assignmentSnapshot": {
+      "agentId": "requirement-reviewer",
+      "agentVersion": "2.0.0",
+      "agentHash": "872370944fad2e62",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtotfx1i-lg9q9",
+      "bindings": {
+        "skills": [
+          "writing-polish"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "评审给定导出需求的冲突和验收缺口，提出可回填建议但不擅自决定业务规则",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "872370944fad2e62"
+      }
+    },
+    "attention": null,
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.606Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.756Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.762Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.768Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.768Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.768Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.773Z"
+      },
+      {
+        "id": "event-8",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "搜索知识库",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:59.593Z"
+      },
+      {
+        "id": "event-9",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "搜索知识库",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:59.65Z"
+      },
+      {
+        "id": "event-10",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "回答生成完成",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:08.764Z"
+      },
+      {
+        "id": "event-11",
+        "type": "tool_completed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 11,
+        "summary": "已完成：search_knowledge",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:08.803Z"
+      },
+      {
+        "id": "event-12",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 12,
+        "summary": "评审给定导出需求的冲突和验收缺口，提出可回填建议但不擅自决定业务规则",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:08.803Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtotfx1i-lg9q9_mtotfx62",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [
+          {
+            "id": "call_ea7cfca81b6049b9a53f6acf",
+            "name": "search_knowledge",
+            "status": "ok",
+            "resultRef": "",
+            "error": "",
+            "durationMs": 57
+          }
+        ],
+        "evidence": [
+          {
+            "id": "ev_1788638948766_48beb5",
+            "status": "ok",
+            "digest": "未找到相关知识条目。",
+            "provenance": {
+              "tool": "search_knowledge",
+              "callId": "call_ea7cfca81b6049b9a53f6acf"
+            }
+          }
+        ],
+        "violations": [],
+        "createdAt": "2026-09-05T20:09:08.791Z"
+      }
+    ]
+  },
+  {
+    "id": "task-mtotfwwc-jfxne",
+    "title": "QA-AO-01 承诺边界与相对依赖",
+    "status": "review",
+    "assignmentSnapshot": {
+      "agentId": "action-owner",
+      "agentVersion": "2.0.0",
+      "agentHash": "55d19edc3f0e143d",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtotfwwc-jfxne",
+      "bindings": {
+        "skills": [
+          "writing-polish"
+        ],
+        "connectors": [
+          "feishu"
+        ]
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": [
+            "feishu"
+          ]
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": true,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "从已确认纪要提取可追踪行动及缺口，不创建外部任务",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "55d19edc3f0e143d"
+      }
+    },
+    "attention": null,
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.42Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.582Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.589Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.596Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.596Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.596Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.604Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "回答生成完成",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:02.741Z"
+      },
+      {
+        "id": "event-9",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "从已确认纪要提取可追踪行动及缺口，不创建外部任务",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:02.783Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtotfwwc-jfxne_mtotfx1a",
+        "deliverableId": "primary",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-05T20:09:02.772Z"
+      }
+    ]
+  },
+  {
+    "id": "task-mtotfx67-mplj8",
+    "title": "QA-QA-01 权限与重试的证据分级",
+    "status": "failed",
+    "assignmentSnapshot": {
+      "agentId": "qa-engineer",
+      "agentVersion": "2.0.0",
+      "agentHash": "e999616a126c2cb1",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtotfx67-mplj8",
+      "bindings": {
+        "skills": [
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "依据需求和有限真实式日志设计风险导向测试，不把未执行验证当作通过",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "sop": {
+        "version": "2.0.0",
+        "hash": "e999616a126c2cb1"
+      }
+    },
+    "attention": {
+      "kind": "retryable_failure",
+      "action": "retry",
+      "title": "本次执行未完成",
+      "detail": "工具调用未成功：当前 Agent 未获授权读取该知识库：local-pkg:okf\n请根据报错修正后重试。",
+      "field": "",
+      "item": "专家执行",
+      "question": "",
+      "example": "",
+      "options": [],
+      "defaultValue": "",
+      "required": true,
+      "createdAt": "2026-09-05T20:09:02.732Z"
+    },
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.775Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.918Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.924Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.93Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.93Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.93Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:57.935Z"
+      },
+      {
+        "id": "event-8",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "调用工具：knowledge_search",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:59.668Z"
+      },
+      {
+        "id": "event-9",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "调用工具：knowledge_search",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:08:59.673Z"
+      },
+      {
+        "id": "event-10",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "调用工具：kb_get",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:00.822Z"
+      },
+      {
+        "id": "event-11",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 11,
+        "summary": "调用工具：kb_get",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:00.835Z"
+      },
+      {
+        "id": "event-12",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 12,
+        "summary": "调用工具：fabric_search",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:01.696Z"
+      },
+      {
+        "id": "event-13",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 13,
+        "summary": "调用工具：fabric_search",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:01.746Z"
+      },
+      {
+        "id": "event-14",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 14,
+        "summary": "调用工具：kb_query",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:02.714Z"
+      },
+      {
+        "id": "event-15",
+        "type": "tool_progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 15,
+        "summary": "调用工具：kb_query",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:02.719Z"
+      },
+      {
+        "id": "event-16",
+        "type": "failed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 16,
+        "summary": "工具调用未成功：当前 Agent 未获授权读取该知识库：local-pkg:okf\n请根据报错修正后重试。",
+        "actorId": "",
+        "createdAt": "2026-09-05T20:09:02.733Z"
+      }
+    ],
+    "executionEvidence": []
+  }
+]

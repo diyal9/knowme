@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "recordType": "agent_observed_check",
+  "observedDate": "2026-09-06",
+  "observer": "RQA24 scoped IPC implementation agent",
+  "attribution": "This agent ran and observed check session 94873; this is not a second check run by main.",
+  "workspace": "D:/aispace/knowme",
+  "command": "npm run check",
+  "sessionId": 94873,
+  "exitCode": 0,
+  "stages": {
+    "backend": {
+      "command": "node -r ./scripts/register-ts.js --test tests/*.test.js",
+      "total": 3345,
+      "passed": 3294,
+      "failed": 0,
+      "skipped": 51
+    },
+    "lint": {
+      "passed": true,
+      "observedMarkers": ["lint ok", "\"errorCount\": 0"]
+    },
+    "renderer": {
+      "testFilesPassed": 85,
+      "testFilesTotal": 85,
+      "passed": 597,
+      "total": 597,
+      "observedSummary": "Test Files 85 passed (85); Tests 597 passed (597)"
+    },
+    "rendererTypecheck": {
+      "command": "tsc --noEmit -p tsconfig.json",
+      "passed": true,
+      "evidence": "Final stage was reached and the enclosing npm run check process exited 0. No separate per-stage exit code was returned."
+    }
+  },
+  "targetedTestsAtThisCheck": {
+    "path": "tests/capability-hub-connector-auth.test.js",
+    "command": "node -r ./scripts/register-ts.js --test tests/capability-hub-connector-auth.test.js",
+    "redBeforeOptionalResolverFix": { "total": 23, "passed": 15, "failed": 8, "exitCode": 1 },
+    "greenAfterOptionalResolverFix": { "total": 23, "passed": 23, "failed": 0, "exitCode": 0 },
+    "laterMainRunExcluded": "Main subsequently reported 29 current targeted tests green. Those later tests/results are not attributed to check 94873 or to this agent's frozen 23-test run."
+  },
+  "observedFileHashes": [
+    {
+      "path": "src/lib/capability-hub/ipc.ts",
+      "algorithm": "SHA256",
+      "value": "171b191889ccece5641966ddfaa88fe8097dfb11ebd9e6b19e0774c024bdde7e"
+    },
+    {
+      "path": "tests/capability-hub-connector-auth.test.js",
+      "algorithm": "SHA256",
+      "value": "24bdea088cbe5a16a62a02570746debb55fbfb678e4e63e14e6f547ced74c00b"
+    }
+  ],
+  "scopeEvidence": {
+    "productionChange": "Only the two connector health/preview runtime-options expressions changed to getConnectorsApi?.()?.resolveRuntimeOptions?.(conn) || {} in this follow-up.",
+    "reconstructedPreviousSourceSHA256": "ee318debd8378964d04e4e26bd11a2925c96c4f817ad30618d30abd90a31d875",
+    "reconstructionMatched": true,
+    "hashTiming": "The two hashes were observed after launching check and reconfirmed while it was running. This agent made no subsequent source/test edits. They are historical check-window hashes, not a claim about files at record creation time.",
+    "impact": "GitNexus returned UNKNOWN/lower-bound for registerCapabilityHubIpc; its direct service registration caller was manually checked.",
+    "wholeTreeFreeze": false
+  },
+  "warningsAndLimitations": [
+    "The initial command output was truncated by the tool output budget. Later polling output was filtered for stage summaries or retained as a tail; complete stdout/stderr was not saved to a file.",
+    "No exhaustive warning inventory is available from the retained output. Do not interpret this record as asserting zero warnings.",
+    "Backend output also contained a secondary zero-test runner summary; 3345/3294/51 above refers to the actual main backend suite, not that empty summary.",
+    "The workspace is shared and contains parallel changes. Only the two owned file hashes were checked; this record does not certify a transitive or whole-repository source freeze.",
+    "MCP transport in the new IPC tests was mocked. This check did not perform real image generation, model requests, installation, or QA UI acceptance.",
+    "The fullcheck result establishes the observed engineering test outcome, not professional image quality, successful reference editing, or the contents loaded by an isolated QA process."
+  ],
+  "toolEvidence": {
+    "launchChunkId": "8d7b04",
+    "sessionPolls": "write_stdin session_id=94873; backend summary and lint success observed before renderer completion",
+    "finalCompletion": "write_stdin returned exit_code=0 with renderer 85 files/597 tests passed and final tsc command",
+    "ownedHashVerificationChunkId": "c4c6c6"
+  }
+}

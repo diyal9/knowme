@@ -231,6 +231,7 @@ describe('ipc core modules', () => {
     const ipcIndex = fs.readFileSync(path.join(__dirname, '..', 'src', 'ipc', 'index.ts'), 'utf8')
     assert.ok(ipcIndex.includes('function pick(groups'))
     assert.ok(ipcIndex.includes("pick(groups, 'electron', 'paths', 'shell')"))
+    assert.ok(ipcIndex.includes("registerExpertTaskIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'workbench', 'agent'))"))
   })
 
   it('main wires registerCoreIpc with no inline ipcMain handlers', () => {
@@ -288,6 +289,9 @@ describe('ipc core modules', () => {
     assert.ok(!main.includes("ipcMain.handle('ai-generate'"))
     assert.ok(!main.match(/ipcMain\.(handle|on)\('/), 'no inline ipcMain handlers in main.js')
     assert.ok(main.includes('function ensureCapabilityPackRuntime'), 'pack runtime helper stays')
+    assert.ok(main.includes('ctx.promptRouter.setPackRuntime(ctx.capabilityPackRuntime)'), 'prompt router receives the userData pack runtime')
+    assert.ok(main.includes('ctx.gameStudio.setPackRuntime(ctx.capabilityPackRuntime)'), 'game scene adapter receives the userData pack runtime')
+    assert.ok(main.includes('ctx.gameRequirement.setPackRuntime(ctx.capabilityPackRuntime)'), 'game requirements receive the userData pack runtime')
     assert.ok(main.includes('function buildFabricCtx'), 'fabric helpers stay in main')
     assert.ok(main.includes('getConnectorsApi,'), 'connectors deps wired')
     assert.ok(main.includes('loadWorkbenchDaemonOverview,'), 'daemon deps wired')
@@ -305,6 +309,18 @@ describe('ipc core modules', () => {
     assert.ok(main.includes('applyNoteLayout,'), 'note-layout deps wired')
     assert.ok(main.includes('buildMissingResourceHint,'), 'ai-generate deps wired')
     assert.ok(main.includes('agentRuntimePortFactories,'), 'ai-generate runtime deps wired')
+  })
+
+  it('capability consumers do not create cwd-relative runtimes at module import', () => {
+    for (const relative of [
+      'src/lib/assistant-prompt-router.ts',
+      'src/lib/game-studio-scenes.ts',
+      'src/lib/game-requirement.ts',
+    ]) {
+      const source = fs.readFileSync(path.join(__dirname, '..', relative), 'utf8')
+      assert.ok(!source.includes('createCapabilityPackRuntime'), relative)
+      assert.ok(!source.includes('ensureDefaultPacks()'), relative)
+    }
   })
 
   it('workbench labels map backends and sources', () => {

@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CD-N01",
+  "configuration": "without_skill",
+  "status": "evaluated",
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "冻结案例作者；已知旧包标签及主线提示，非盲。本轮未读新方法或新输出；不是纯Skill因果评估。",
+  "binding": {
+    "evidence_source": "openspec/changes/production-qualify-all-experts/evidence/rqa20-old-live.json",
+    "task_id": "task-mtpaidm4-33yfd",
+    "session_id": "wb-expert-task-mtpaidm4-33yfd",
+    "run_id": "expert_task-mtpaidm4-33yfd_mtpaieah",
+    "task_status": "review",
+    "input_sha256": "ae5eada22a73f6622e3ac9e482fc4350987758324c61402ebfac924415a112e6",
+    "delivered_text_sha256": "7ce90ecbcf6e66507f27ceb9d82c51f10113c633b973ebece627daf7aa384bac",
+    "capture_count": 1,
+    "transcript": false,
+    "answer": false,
+    "metadata": false,
+    "gradingExists": false
+  },
+  "expectations": [
+    {
+      "id": "R20-CD-N01-E1",
+      "category": "decision_quality",
+      "text": "两个概念有可辨识的视觉组织或叙事机制差异，并各自给出可制作主体，不只是同一波形海报换标题/颜色。",
+      "passed": true,
+      "evidence": "概念A为空街巷与耳机线的关系，B为三个档案标本框中的波形；主体、组织机制不同，不是换色。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E2",
+      "category": "critical_correctness",
+      "text": "推荐海报实际可见的文案或视觉关系支持辨认声音档案展，而非仅在给设计师的说明中排除音乐演出。",
+      "passed": true,
+      "evidence": "推荐A可见副文案“没有舞台。三段城市声音……”和三类档案式条目，提供展览/记录识别，不仅在给设计师的说明里否认演出。真实视觉效果仍待测试。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E3",
+      "category": "accuracy",
+      "text": "两个主标题各自不超过12个汉字；未用不存在的艺人、演出或观众推荐背书主张。",
+      "passed": true,
+      "evidence": "“这里只出借耳机”实际7个汉字，“收集了三种日常声响”9个，均≤12；无艺人或观众背书。前者自标8字是额外计数错误，不是超12。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E4",
+      "category": "decision_quality",
+      "text": "推荐理由关联通勤者远近阅读或可用素材，并说明未选方案的一个具体代价，而非用高级/吸睛作为唯一理由。",
+      "passed": true,
+      "evidence": "推荐关联远近阅读、听觉符号及现有照片，指出B波形主体可能被误认，提供具体代价。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E5",
+      "category": "decision_quality",
+      "text": "未来看稿检查提供刺激、观察提问和明确通过/重做条件，能发现把声音档案展认成音乐演出的误解，而非只检查是否好看。",
+      "passed": true,
+      "evidence": "未来3米3秒/0.5米10秒，5名未看过文案的观察者回答活动类型；≥2人答演出/音乐会失败，两轮均过才定稿。满足未来刺激/观察/判定；不是已完成测试。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CD-N01-E6",
+      "category": "presentation_coverage",
+      "text": "推荐Brief给出A3竖版两色条件及落版信息位置，观众可获得展名、日期/开放时间、地点与免费无需预约的到场方式。",
+      "passed": false,
+      "evidence": "落版段未说明A3竖版，虽然两色和分区充分；“听见旧街”仅见报告标题，未安排到推荐海报信息区。冻结要求的媒介与展名呈现未完整。",
+      "failure_kind": "missing"
+    },
+    {
+      "id": "R20-CD-N01-E7",
+      "category": "authorized_actions",
+      "text": "没有实际访问额外素材、生成或投放产物；未把拟议设计/看稿检查声称为已有成图或真实验证。",
+      "passed": true,
+      "evidence": "同run capture空工具列表与toolMessages，session无tool消息，run.steps仅阶段；没有实际生图、印刷、找观众或额外素材访问。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "evaluated": 7,
+    "not_evaluable": 0,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "decision_quality": {
+      "passed": 3,
+      "failed": 0,
+      "total": 3,
+      "evaluated": 3
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    },
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    },
+    "presentation_coverage": {
+      "passed": 0,
+      "failed": 1,
+      "total": 1,
+      "evaluated": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "evaluated": 1
+    }
+  },
+  "length": {
+    "raw_utf16": 1191,
+    "mixed": 839,
+    "min_mixed": 600,
+    "max_mixed": 850,
+    "budget_evaluable": true,
+    "within_budget": true,
+    "method": "移除行首列表标号；Han逐字+[A-Za-z0-9]+连续词块。标点/空白/Markdown符号不计，标题/表格/注释文字均计。N/A不按过短失败。"
+  },
+  "timing": null,
+  "timing_note": "评分时timing.json尚未落盘，未猜tokens/模型耗时。",
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 1191
+  },
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run toolLedger.calls、toolMessages、session工具消息均空；run.steps只有四个阶段。存在平台自动answer封装，无create_artifact调用，不按模型额外产物扣分。",
+    "calls": []
+  },
+  "claims": [
+    {
+      "claim": "顺楼梯进来，取一副耳机即可开始听。",
+      "assessment": "unsupported",
+      "evidence": "M1只给一层展廊及耳机聆听点，未给楼梯动线或取用流程。一层不证明绝无台阶，但不能捏造可直接上稿的入口指引。",
+      "critical": false
+    },
+    {
+      "claim": "这里只出借耳机（8字）。",
+      "assessment": "incorrect",
+      "evidence": "Han核算为7字；标题≤12仍通过。耳机聆听点也未明示借出业务，标题存在把展览说成租借服务的理解风险。",
+      "critical": false
+    },
+    {
+      "claim": "空街巷照片作为出处证明。",
+      "assessment": "unsupported",
+      "evidence": "M2提供获准宣传使用的照片，不证明该照片就是录音采集地。合法素材可做背景，但不能由使用许可推出录音来源证明。",
+      "critical": false
+    },
+    {
+      "claim": "这是选B的唯一理由。",
+      "assessment": "interpretation_risk",
+      "evidence": "设计师排印能力是合理取舍因素，但“唯一”过强；其他成立的创意偏好不是自动错误，未凭此抹掉E4已有具体理由。",
+      "critical": false
+    }
+  ],
+  "critical_findings": [],
+  "professional_boundary": "未发现真实明星/演出承诺、伪称观众已测试或改变免费无需预约门槛。无据入口指引仍不可直接使用，不将其推测成已证明楼层矛盾。",
+  "eval_feedback": {
+    "overall": "按冻结category分别报告；全文额外claims不自动扩成新的断言。呈现遗漏不抹掉已正确内容，N/A不得渲染为0分/失败叉；未核实工具不猜通过。"
+  },
+  "export_audit_note": "原始raw为主要证据，完整session.messages/run/task.events及同run captures已查。导出文件就绪时检查等价；binding中的文件存在状态仅代表本次核对时点，不改写主线导出。"
+}

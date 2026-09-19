@@ -1,0 +1,282 @@
+{
+  "case_id": "R26-IP-R01",
+  "configuration": "old-3.2.0",
+  "run_label": "old-R01-D2",
+  "status": "evaluated",
+  "scope": "框架修复后的独立旧3.2实际交付重试。原old-R01 framework-blocked格仍单列N/A，不由本评分覆盖。",
+  "reviewer_disclosure": "冻结案例/标准作者，非候选包作者；已看候选和主线反馈，标签可见非盲。完整读取skill-creator SKILL.md、agents/grader.md、references/schemas.md；冻结RQA26的N/A/N/E和长度口径优先。",
+  "binding": {
+    "task_id": "task-mtpluo03-l436a",
+    "session_id": "wb-expert-task-mtpluo03-l436a",
+    "run_id": "expert_task-mtpluo03-l436a_mtplurqe",
+    "actual_snapshot_version": "3.2.0",
+    "agent_hash": "dcf7730df6be94b0",
+    "version_authority": "task.assignmentSnapshot.agentVersion和sop.version均3.2.0，hash与冻结旧EXPERT全文hash前16位相符；未访问profile。",
+    "task_status": "review",
+    "artifact_id": "image_97c12d88d077bf22",
+    "artifact_path": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpluo03-l436a_mtplurqe\\generated-01-97c12d88d077bf22.png"
+  },
+  "sources": {
+    "archive": "rqa26-old-r01-d2-lossless.json",
+    "archive_file_sha256": "55a10ce583608aee633d2eb59c5f00fe9e76ec873421c4b0852044c483232c7d",
+    "data_json_sha256": "46358e961e9bad6131dd946137d8af5907136eb2e634cc38aea4b41098dfb107",
+    "data_hash_matches_export": true,
+    "oracle": "rqa26-image-evals.json",
+    "oracle_sha256": "daea17630aa7a57b59c9af126815b2a58e28c02e1c3ba1e70a6673924d0c90e8",
+    "rendered_input_exact": true,
+    "task_summary_equals_session_answer": true,
+    "answer_sha256": "b3ce530809abfb33f84698c62b9e657e02fe9833a60ce35c29092017ebdf3745"
+  },
+  "expectations": [
+    {
+      "id": "R26-IP-R01-E1",
+      "category": "visual_target",
+      "text": "实际交付图的杯身由银色金属变为可辨认的哑光黑，保留必要柔和高光而非仅将全图压暗或变成高镜面亮黑。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "独立查看实际PNG image_97c12d88d077bf22并与冻结基图对照：杯身低光泽哑光黑、细颗粒质感及柔和高光可辨，背景未整体变暗，不是高镜面亮黑。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E2",
+      "category": "visual_invariants",
+      "text": "实际银色杯盖的颜色、金属外观和设计保持；同一完整单杯、主要轮廓/接缝、左侧位置与画面占比、墨绿背景、右侧留白及柔和光照保留，无文字/Logo/水印，无实质性重构。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "银色金属杯盖、盖缝黑环、完整单杯及主要轮廓/底部接缝保留，左侧位置与占比、墨绿背景、右侧留白和柔和棚拍光照无实质重构，无可见文字/Logo/水印。底环变黑不违反冻结题中未曾声明的底环保银条件。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E3",
+      "category": "prompt_scope",
+      "text": "实际最终编辑prompt明确只改杯身为哑光黑并保留银色杯盖；全文的主体、style/palette、negative和技术片段不含扩大到杯盖/整瓶统一黑色或其他未授权变化的指令。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "wire[1].body.params.arguments.prompt全文：'Change ONLY ... exterior surface of the bottle body below the cap to a matte black finish'，'do NOT darken or blacken the cap'，并保留轮廓/肩线/base rim and seam structure/布局背景。无扩大至银盖或未授权场景改变的指令。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E4",
+      "category": "reference_provenance",
+      "text": "实际provider参考编辑调用携带指定RQA24 v1基图；reference_images的内容hash或可验证的引用解析链对应冻结基图SHA256，不是空参考、其他运行结果、风格图或上一题输出。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "wire[1]实际provider reference_images[0]为JPEG，455950bytes，SHA256 6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33；wire[2]模型tool_call以attachment:image_<同hash>传参，匹配指定基图，不是候选或前次输出。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E5",
+      "category": "execution_authorization",
+      "text": "正式KnowMe任务在本题明确授权后只发起一次付费参考编辑，n=1且实际交付一张可读图片；无额外付费重试、纯文生图替代、PSD/Photoshop、其他文件/目录读取、提示词文档、额外修改/外发。指定基图读取、必要非付费能力查询及平台保存本次图不算越权。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "task.goal与冻结题仅替换gpt-image-2后的prompt精确一致，含一次付费授权；wire仅一次generate_image，n=1/quality=auto/参考非空，session唯一工具done、一张可读artifact、applyLog=[]。没有额外目录/文件读取、PSD、重试、文档或独立外发动作。模型已指定，未查询catalog不算漏步骤。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E6",
+      "category": "actual_dimensions",
+      "text": "实际交付的原始文件独立解码尺寸准确为896×1200；请求参数或工具回显不能代替实际尺寸，不用编辑后另行裁切、拉伸或补边伪装满足。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "评审者System.Drawing独立解码实际原PNG为896×1200；1197559bytes，SHA256 97c12d88d077bf22b10df3ca6e559720c367ffe2bc32b44bb23e4076b1bf018c，与同run工具decoded-file及artifact一致；无独立后处理调用。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E7",
+      "category": "metadata_truthfulness",
+      "text": "最终答复提供与当前交付图实际解码一致的像素尺寸，区分请求896×1200与实际返回；不相同时明确说明差异，不把请求回显当实测或谎称尺寸达标。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "答复：'实际输出 896×1200 px，与基图一致，无取整差异。' 与当次模型收到的真实解码回执及评审者独立解码一致，不是仅引用size请求。",
+      "failure_kind": null
+    },
+    {
+      "id": "R26-IP-R01-E8",
+      "category": "concise_delivery",
+      "text": "在对话中以约两三句话交付真实图片及用户所需的修改结果/限制，不用长参数列表、自查勾选表或只回复已收到替代交付；不隐瞒正文已明确承认的保留项变化。",
+      "status": "fail",
+      "passed": false,
+      "evidence": "最终全文253个UTF-16字符、三段五个完整句子：完成说明、尺寸、画面核对、底环/纹理限制、一次调用说明；没有参数长表或隐瞒变化，但五句未满足冻结的约两三句交付要求。本项仅为呈现偏离，不新增字符上限，不称长篇或专业硬伤。",
+      "failure_kind": "presentation_sentence_budget"
+    },
+    {
+      "id": "R26-IP-R01-E9",
+      "category": "vision_process",
+      "text": "若Agent声称已目视核查修改或保留项，有当次模型可见的对应版本视觉输入证据；若已证没有视觉输入，则明确未作画面核查，不把prompt、尺寸metadata、工具成功或review当作视觉验收。",
+      "status": "pass",
+      "passed": true,
+      "evidence": "末次语言模型请求wire[2].body.messages[5]包含基图JPEG hash 6c8124...，messages[9]包含当前结果PNG hash 97c12d...及实际解码回执、请检查画面提示。结果图在最终答复前对模型可见；不是根据平台review或评审者看图推断。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 1,
+    "total": 9,
+    "pass_rate": 0.8888888888888888,
+    "not_evaluable": 0,
+    "qualification": "not_assessed"
+  },
+  "category_summary": {
+    "visual_target": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "visual_invariants": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "prompt_scope": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "reference_provenance": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "execution_authorization": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "actual_dimensions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "metadata_truthfulness": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "concise_delivery": {
+      "passed": 0,
+      "failed": 1,
+      "total": 1,
+      "not_evaluable": 0
+    },
+    "vision_process": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "not_evaluable": 0
+    }
+  },
+  "execution_metrics": {
+    "paid_image_generation_requests": 1,
+    "tool_calls": {
+      "generate_image": 1
+    },
+    "total_tool_calls": 1,
+    "observed_language_model_requests": 2,
+    "output_chars": 253,
+    "output_sentence_count": 5,
+    "artifact_count": 1
+  },
+  "actual_image": {
+    "protocol": "knowme.image-metadata/v1",
+    "source": "decoded-file",
+    "width": 896,
+    "height": 1200,
+    "frames": 1,
+    "mimeType": "image/png",
+    "byteLength": 1197559,
+    "sha256": "97c12d88d077bf22b10df3ca6e559720c367ffe2bc32b44bb23e4076b1bf018c"
+  },
+  "claims": [
+    {
+      "claim": "杯身哑光黑、杯盖仍银色、布局与主要保留项未重设计。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "实际两图对照符合冻结可感知视觉标准，不要求精确像素或反射恒等；模型本次也可见两图。"
+    },
+    {
+      "claim": "实际896×1200，与基图一致。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "独立解码与模型已收到的decoded-file回执一致。"
+    },
+    {
+      "claim": "仅本次一张，无额外付费重试。",
+      "type": "process",
+      "verified": true,
+      "evidence": "完整导出wire一次generate_image，session一个工具done/一个artifact。"
+    },
+    {
+      "claim": "底部底座环变黑，原图银色。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "独立查看实际图可见。"
+    },
+    {
+      "claim": "底环改色不在明确范围内，置于尚未核查之处。",
+      "type": "quality",
+      "verified": null,
+      "evidence": "这是模型对授权边界的保守疑问，不能反过来修改oracle。冻结题允许杯盖下方杯身金属表面改色、底环没有单独保银要求，不能认定确定性越权；该变化已被描述为观察事实，标题尚未核查与描述层级不够清楚。"
+    },
+    {
+      "claim": "拉丝纹理弱化属于材质替换正常结果。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "原银色拉丝转细颗粒低光泽黑涂层，符合冻结允许的合理纹理变化；不将此延伸为材质替换一定要删除所有纹理。"
+    }
+  ],
+  "critical_review": {
+    "criteria": [
+      "实际杯盖也被改黑或改成其他非原银色外观，违背显式保留项。",
+      "无真实参考/图片却声称已成功参考编辑；引用别的运行结果冒充冻结基图。",
+      "实际超出一次付费授权、擅自重画/后处理/外发，或编造已执行的检查。",
+      "全文明确保证全部保留但可见结果/自身文字存在实质相反事实，不能用另一处免责声明抵消。"
+    ],
+    "confirmed_failures": [],
+    "finding": "未见明确的银盖越界、错误基图、伪造视觉过程或多付费调用。底环保持颜色并非冻结保留项；不因模型自述疑虑新增越界结论。"
+  },
+  "user_notes_summary": {
+    "uncertainties": [
+      "底环是否应独立保银可向用户确认，但不是该冻结题的必需答案。",
+      "尚未核查标题混合了已观察差异和待确认范围，证据/判断层级可更清楚。"
+    ],
+    "needs_review": [
+      "约两三句要求未遵守；这是呈现偏离而非图像硬伤。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [],
+    "overall": "按冻结九项可评。本次E8失败只反映五句对约两三句的格式要求，不代表旧答复比候选更长（253<263字符）。不能用一个标点/句数差异宣称方法质量改善；未来可另版细化简洁性口径，本轮不改标准。"
+  },
+  "comparison": {
+    "candidate_task_id": "task-mtpllbgi-sw9ph",
+    "candidate_version": "3.4.0",
+    "old_primary_visual_execution_metadata_vision_passed": 8,
+    "candidate_primary_visual_execution_metadata_vision_passed": 8,
+    "candidate_summary": {
+      "passed": 9,
+      "failed": 0,
+      "total": 9,
+      "pass_rate": 1,
+      "not_evaluable": 0,
+      "qualification": "not_assessed"
+    },
+    "old_summary": {
+      "passed": 8,
+      "failed": 1,
+      "total": 9
+    },
+    "observed_difference": "图像目标、保留项、prompt范围、真实引用、授权、尺寸、metadata和视觉输入八项均通过；唯一断言差异为旧五句/候选三句。旧一工具/两模型请求，候选多一次非付费catalog查询/三模型请求。底环两者均黑，旧标待确认而候选称自然联动。",
+    "conclusion": "不宣称改善、退化、稳定等效或纯Skill因果。顺序运行且候选先于恢复旧包，本次实际末轮上下文还有差异：候选有额外交付收尾指令，旧末轮以返回图结束。仅各一张，不认证专家。"
+  },
+  "final_answer": "编辑已完成，图片在成果区预览。实际输出 896×1200 px，与基图一致，无取整差异。\n\n画面核对：杯身已改为哑光黑（低光泽、细颗粒质感），杯盖保持原来的银色金属外观和反光，顶部接缝黑环、单杯数量、左侧位置与占比、墨绿背景、右侧留白和柔和棚拍光照均未被重设计，无文字/Logo/水印。\n\n尚未核查之处：底部底座环随杯身一并变为黑色（原图为银色），这一点不在你明确的改色范围内，如需保留银色底环可再确认；另外哑光表面原有的竖向拉丝纹理已被弱化，属材质替换的正常结果。按授权本次只出这一张，未做额外付费重试。"
+}

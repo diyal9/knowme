@@ -6,6 +6,7 @@ import type { CapabilityItem } from '../../../shared/api'
 import { ExpertAvatarMark } from '../expert/ExpertAvatarMark'
 import { useAppStore } from '../../app/store'
 import { parseExpertWorkbenchDetail, type ExpertWorkbenchDetail } from '../../../domain/expert-workbench-detail'
+import { buildKnowledgeSelectionOptions } from '../../../shared/knowledge-selection'
 
 function providerStatus(kind: string, enabled = true) {
   if (!enabled) return '未启用'
@@ -53,13 +54,11 @@ export function TaskComposerModal({
 
   const selected = experts.find((item) => item.id === expertId) || experts[0]
   const knowledgeOptions = useMemo(() => {
-    if (providers.length) {
-      return providers.map((item) => ({
+    if (providers.length) return buildKnowledgeSelectionOptions(providers).map((item) => ({
         id: item.id,
         title: item.name || item.id,
         status: providerStatus(item.kind || ''),
       }))
-    }
     return [...knowledgeWiki, ...knowledgeOkf].map((item) => ({
       id: item.path,
       title: item.title || '我的知识',

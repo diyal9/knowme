@@ -1,0 +1,1383 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA62",
+  "purpose": "Determine whether the current product-manager configuration deserves expert status through professional correctness and full task lifecycle evidence.",
+  "generatedAt": "2026-09-08T00:30:52.027Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-rqa62-live-rerun",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "gpt-4o-mini",
+      "label": "gpt-4o-mini",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "PM01",
+    "PM02",
+    "PM03",
+    "PM04",
+    "PM05",
+    "PM06"
+  ],
+  "tasks": [
+    {
+      "evalId": "PM01",
+      "expertId": "product-manager",
+      "title": "访客申请与失败恢复 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "直接交付包含背景问题、目标、范围、非目标、角色场景、流程、规则、异常、验收、风险待确认的完整 PRD。",
+        "没有把缺失的转化率或时长基线编造成事实，成功指标明确标记基线或目标值待确认。",
+        "申请、待审批、已批准、已生效或可使用、已使用、已取消、已过期等状态及允许动作前后一致。",
+        "网络超时、重复提交、审批失败、取消冲突与重试恢复说明数据保存、幂等结果和用户下一步。",
+        "验收标准使用可复现的前置状态、动作和可观察结果，覆盖正常、异常与恢复路径。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxohhm-sr9uo",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxohhm-sr9uo",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxohhm-sr9uo",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxohhm-sr9uo"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:54.406Z",
+          "updatedAt": "2026-09-08T00:30:54.406Z",
+          "heartbeatAt": "2026-09-08T00:30:54.406Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:54.406Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.346Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.401Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.406Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:54.346Z",
+        "updatedAt": "2026-09-08T00:30:54.417Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxohhm-sr9uo",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 271,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM02",
+      "expertId": "product-manager",
+      "title": "团队席位与成员生命周期 PRD",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "清楚区分已知事实、假设和待确认项，不编造活跃率基线、目标值或文档归属决策。",
+        "管理员与成员权限，以及 invited、active、expired、removed 等成员状态和席位占用规则闭环。",
+        "并发邀请、重复邀请、席位满、邀请过期、移除与重新邀请的优先级和恢复行为可判断。",
+        "历史文档保留、原作者显示、访问撤销与待定归属规则互不矛盾，并指出隐私或审计风险。",
+        "WHEN/THEN 验收覆盖正常邀请、并发去重、满额失败保留、过期、移除和重开恢复。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxohop-bojgz",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxohop-bojgz",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxohop-bojgz",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxohop-bojgz"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:54.648Z",
+          "updatedAt": "2026-09-08T00:30:54.648Z",
+          "heartbeatAt": "2026-09-08T00:30:54.648Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:54.648Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.601Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.645Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.648Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:54.601Z",
+        "updatedAt": "2026-09-08T00:30:54.658Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxohop-bojgz",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 238,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM03",
+      "expertId": "product-manager",
+      "title": "冲突导出规则的产品决策边界",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "明确指出法务与销售承诺冲突，未擅自选择一方或写成最终规则。",
+        "仍交付不依赖冲突决策的目标、范围、角色、计数口径、隐私约束和可评审流程框架。",
+        "把审批规则列为会改变流程与验收的阻塞决策，并提出一个清楚、可直接回答的问题或决策表。",
+        "免费版每日 10 次与企业版不限的口径包含用户、工作区、时区、成功或尝试计数等必要待确认项，不编造默认值。",
+        "验收仅覆盖已确定规则；依赖冲突决策的验收明确标记待确认，不伪称可开发。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxohv3-4thnc",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxohv3-4thnc",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxohv3-4thnc",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxohv3-4thnc"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:54.878Z",
+          "updatedAt": "2026-09-08T00:30:54.878Z",
+          "heartbeatAt": "2026-09-08T00:30:54.878Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:54.878Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.831Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.874Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:54.878Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:54.831Z",
+        "updatedAt": "2026-09-08T00:30:54.887Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxohv3-4thnc",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 229,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM04",
+      "expertId": "product-manager",
+      "title": "通知排期任务取消后重试",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "重试后仍使用原任务目标和材料，交付完整 PRD，而不是只回复已恢复或要求重新补充。",
+        "草稿、待提交、已排期、发送中、已完成、已取消和未知结果等状态及允许动作一致。",
+        "重复提交与超时未知结果采用可观察的幂等和查询恢复语义，不鼓励盲目重试。",
+        "正文与受众条件的保存、取消边界、发送开始竞态和失败后的用户下一步明确。",
+        "未编造送达率基线；验收覆盖取消、重复提交、超时查询、恢复重试和重开。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoi1f-tjlc0",
+      "checkpoints": {
+        "cancelledStatus": "cancelled"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input",
+          "cancelled",
+          "retried",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoi1f-tjlc0",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoi1f-tjlc0",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoi1f-tjlc0"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:55.120Z",
+          "updatedAt": "2026-09-08T00:30:55.120Z",
+          "heartbeatAt": "2026-09-08T00:30:55.120Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:55.120Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.059Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.105Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.109Z"
+          },
+          {
+            "id": "event-4",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.114Z"
+          },
+          {
+            "id": "event-5",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.118Z"
+          },
+          {
+            "id": "event-6",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.121Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:55.059Z",
+        "updatedAt": "2026-09-08T00:30:55.130Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoi1f-tjlc0",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:432:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 241,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM05",
+      "expertId": "product-manager",
+      "title": "修改访客二维码有效期",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修改轮交付完整替换版，并保留网络超时幂等、取消规则和其他未受影响内容。",
+        "所有自然日有效旧规则已替换为到访前 30 分钟至后 2 小时，正文不存在冲突口径。",
+        "一次延长 1 小时仅由前台执行且仅限未核销访客，说明重复延长、临界时刻和并发操作。",
+        "状态、过期计算、取消与核销竞态、异常恢复及验收标准同步更新。",
+        "生命周期真实经历 review、changes_requested/revising、review，v2 保留 previousVersionId 和用户意见。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoi86-cl7ee",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoi86-cl7ee",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoi86-cl7ee",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoi86-cl7ee"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:55.349Z",
+          "updatedAt": "2026-09-08T00:30:55.349Z",
+          "heartbeatAt": "2026-09-08T00:30:55.349Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:55.349Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.302Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.345Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.350Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:55.302Z",
+        "updatedAt": "2026-09-08T00:30:55.360Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoi86-cl7ee",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 229,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    },
+    {
+      "evalId": "PM06",
+      "expertId": "product-manager",
+      "title": "完成后重开席位需求",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开后的完整新版保留并发邀请、席位满保留输入、邀请过期、移除和原作者规则。",
+        "新增 active member 到 guest 的降级状态变化，立即释放席位且不造成重复占用或越权。",
+        "访客只能查看明确分享文档，访问收缩、缓存或在途访问、撤销和重开后的表现可验收。",
+        "待定文档归属仍保持待确认，没有因新增访客角色被静默决定。",
+        "生命周期真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。"
+      ],
+      "status": "needs_input",
+      "taskId": "task-mtrxoien-xctjc",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": true,
+        "blockedReason": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "item": "AI 接口",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+        },
+        "checks": {},
+        "events": [
+          "created",
+          "preflight_passed",
+          "needs_input"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "655cece570d46dd310785f1cadcd7c71d291fc876d9919400cc55ce8dedd13c0"
+          },
+          "agent": {
+            "id": "product-manager",
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          },
+          "skills": [
+            {
+              "id": "product-definition-method",
+              "hash": "f9a6522c96c781c5"
+            },
+            {
+              "id": "requirement-review",
+              "hash": "4c726e9160088005"
+            },
+            {
+              "id": "research-evidence-analysis",
+              "hash": "9cc475f0aa02c91f"
+            },
+            {
+              "id": "writing-polish",
+              "hash": ""
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "gpt-4o-mini",
+            "requestedId": "gpt-4o-mini",
+            "label": "gpt-4o-mini",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": {
+        "kind": "configuration_required",
+        "action": "open_settings",
+        "item": "AI 接口",
+        "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+      },
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtrxoien-xctjc",
+        "expertId": "product-manager",
+        "status": "needs_input",
+        "assignmentSnapshot": {
+          "agentId": "product-manager",
+          "agentVersion": "2.5.0",
+          "agentHash": "6752df8e902a4cdf",
+          "hashes": {
+            "expert": "6752df8e902a4cdf",
+            "skills": {
+              "product-definition-method": "f9a6522c96c781c5",
+              "requirement-review": "4c726e9160088005",
+              "research-evidence-analysis": "9cc475f0aa02c91f"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtrxoien-xctjc",
+          "bindings": {
+            "skills": [
+              "product-definition-method",
+              "requirement-review",
+              "research-evidence-analysis",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.5.0",
+            "hash": "6752df8e902a4cdf"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtrxoien-xctjc"
+        },
+        "progress": {
+          "phase": "blocked",
+          "label": "等待 AI 配置",
+          "detail": "",
+          "startedAt": "2026-09-08T00:30:55.581Z",
+          "updatedAt": "2026-09-08T00:30:55.581Z",
+          "heartbeatAt": "2026-09-08T00:30:55.581Z"
+        },
+        "attention": {
+          "kind": "configuration_required",
+          "action": "open_settings",
+          "title": "需要完成 AI 配置",
+          "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。",
+          "field": "",
+          "item": "AI 接口",
+          "question": "",
+          "example": "",
+          "options": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T00:30:55.581Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.535Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.577Z"
+          },
+          {
+            "id": "event-3",
+            "type": "needs_input",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "需要先配置 AI 接口",
+            "actorId": "",
+            "createdAt": "2026-09-08T00:30:55.581Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-08T00:30:55.535Z",
+        "updatedAt": "2026-09-08T00:30:55.590Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtrxoien-xctjc",
+        "messages": [],
+        "text": ""
+      },
+      "error": "Error: waiting for review v1 stopped at needs_input: 尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:131:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:436:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:593:19)",
+      "elapsedMs": 229,
+      "install": {
+        "ok": true,
+        "id": "product-manager",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 6,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 6,
+    "lifecycleFailed": 0,
+    "runtimeFailed": 0,
+    "runtimeNeedsInput": 6,
+    "environmentBlocked": 6,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 6,
+    "professionallyQualified": 0
+  }
+}

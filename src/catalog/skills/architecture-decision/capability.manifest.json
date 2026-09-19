@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 3,
+  "id": "architecture-decision",
+  "kind": "skill",
+  "name": "架构决策与机制验算",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

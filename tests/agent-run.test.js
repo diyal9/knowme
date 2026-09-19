@@ -49,6 +49,22 @@ describe('agent-run', () => {
     assert.equal(s.run.artifacts[0].status, 'rejected')
   })
 
+  it('preserves generic capability artifact types across normalization', () => {
+    for (const type of ['answer', 'document', 'image', 'table', 'checklist', 'code', 'vendor.canvas']) {
+      const artifact = agentRun.normalizeArtifact({ type, title: type, body: 'content' })
+      assert.equal(artifact.type, type)
+    }
+    assert.equal(agentRun.normalizeArtifact({ type: '../unsafe', title: 'unsafe' }).type, 'text')
+  })
+
+  it('preserves generic media sources across normalization', () => {
+    const artifact = agentRun.normalizeArtifact({
+      type: 'image', title: '远程图', url: 'https://cdn.example.test/image.png', path: 'generated/image.png',
+    })
+    assert.equal(artifact.url, 'https://cdn.example.test/image.png')
+    assert.equal(artifact.path, 'generated/image.png')
+  })
+
   it('records tools and uses goal as tab title fallback', () => {
     let s = createSession('steward', 1, { goal: '知识健康检查' })
     s = agentRun.recordTool(s, 'wiki.lint')

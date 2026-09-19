@@ -6,6 +6,7 @@ import {
   shelfRowCapacity,
   workbenchHomeExperts,
 } from './workbench-home'
+import { isExpertAvailableForNewTask } from './capability-hub'
 
 describe('workflow shelf layout', () => {
   it('keeps the visible card count aligned with the responsive grid', () => {
@@ -36,14 +37,41 @@ describe('workbench home experts', () => {
     const items = [
       { id: 'office-partner', kind: 'expert' as const, name: '办公伙伴' },
       { id: 'producer', kind: 'expert' as const, name: '制作人' },
+      { id: 'limited-qualification', kind: 'expert' as const, name: '能力合同未就绪', qualification: { state: 'limited' as const } },
+      { id: 'limited-runtime', kind: 'expert' as const, name: '运行依赖未就绪', readiness: { state: 'limited' as const } },
       { id: 'test1', kind: 'expert' as const, name: 'test1' },
       { id: 'writing-polish', kind: 'skill' as const, name: '写作润色' },
     ]
     const modes = [
-      { id: 'office', bindings: [{ expertId: 'office-partner' }, { expertId: 'test1' }] },
+      { id: 'office', bindings: [
+        { expertId: 'office-partner' },
+        { expertId: 'limited-qualification' },
+        { expertId: 'limited-runtime' },
+        { expertId: 'test1' },
+      ] },
     ]
-    expect(boundWorkbenchExpertIds(modes)).toEqual(new Set(['office-partner', 'test1']))
+    expect(boundWorkbenchExpertIds(modes)).toEqual(new Set(['office-partner', 'limited-qualification', 'limited-runtime', 'test1']))
     expect(workbenchHomeExperts(items, modes).map((item) => item.id)).toEqual(['office-partner'])
     expect(workbenchHomeExperts(items, [])).toEqual([])
+  })
+
+  it('does not offer experts whose package or runtime dependencies are limited', () => {
+    expect(isExpertAvailableForNewTask({
+      kind: 'expert',
+      lifecycle: { newTasks: true },
+      qualification: { state: 'limited' },
+    })).toBe(false)
+    expect(isExpertAvailableForNewTask({
+      kind: 'expert',
+      lifecycle: { newTasks: true },
+      readiness: { state: 'limited' },
+    })).toBe(false)
+    expect(isExpertAvailableForNewTask({
+      kind: 'expert',
+      lifecycle: { newTasks: true },
+      qualification: { state: 'ready' },
+      readiness: { state: 'ready' },
+    })).toBe(true)
+    expect(isExpertAvailableForNewTask({ kind: 'skill' })).toBe(true)
   })
 })

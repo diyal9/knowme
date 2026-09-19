@@ -47,8 +47,25 @@ function normalizeCatalogEntry(raw = {}) {
     permissions: raw.permissions && typeof raw.permissions === 'object' ? raw.permissions : {},
     inputs: Array.isArray(raw.inputs) ? raw.inputs : [],
     outputs: Array.isArray(raw.outputs) ? raw.outputs : [],
+    skills: Array.isArray(raw.skills) ? raw.skills : [],
+    connectors: Array.isArray(raw.connectors) ? raw.connectors : [],
+    knowledgeRefs: Array.isArray(raw.knowledgeRefs) ? raw.knowledgeRefs : [],
+    sop: String(raw.sop || '').trim(),
+    useCases: Array.isArray(raw.useCases) ? raw.useCases.map(String) : [],
+    boundaries: Array.isArray(raw.boundaries) ? raw.boundaries.map(String) : [],
     risk: raw.risk && typeof raw.risk === 'object' ? raw.risk : { level: 'low', reasons: [] },
     provenance: raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : {},
+    lifecycle: raw.lifecycle && typeof raw.lifecycle === 'object'
+      ? {
+          state: String(raw.lifecycle.state || 'active').trim() || 'active',
+          newTasks: raw.lifecycle.newTasks !== false,
+          successors: Array.isArray(raw.lifecycle.successors)
+            ? raw.lifecycle.successors
+              .map(item => ({ kind: String(item?.kind || '').trim(), id: String(item?.id || '').trim() }))
+              .filter(item => item.kind && item.id)
+            : [],
+        }
+      : { state: 'active', newTasks: true, successors: [] },
   }
 }
 
@@ -124,6 +141,10 @@ function loadBundledCatalog(bundledRoot = defaultBundledRoot()) {
         normalized.outputs = normalized.manifest.outputs
         normalized.risk = normalized.manifest.risk
         normalized.provenance = normalized.manifest.provenance
+        normalized.knowledgeRefs = normalized.manifest.knowledgeRefs || normalized.manifest.metadata?.knowledgeRefs || normalized.knowledgeRefs
+        normalized.sop = normalized.manifest.sop || normalized.manifest.metadata?.sop || normalized.sop
+        normalized.useCases = normalized.manifest.useCases || normalized.useCases
+        normalized.boundaries = normalized.manifest.boundaries || normalized.boundaries
       }
       entries.push(normalized)
     }

@@ -23,6 +23,13 @@ export function HubConnectorManager({ connectorId, onChanged }: { connectorId: s
   const [cwd, setCwd] = useState('')
   const [url, setUrl] = useState('')
   const [env, setEnv] = useState('')
+  const [type, setType] = useState('mcp')
+  const [method, setMethod] = useState('GET')
+  const [headers, setHeaders] = useState('')
+  const [body, setBody] = useState('')
+  const [host, setHost] = useState('')
+  const [port, setPort] = useState('22')
+  const [username, setUsername] = useState('')
   const [secrets, setSecrets] = useState<Record<string, string>>({})
   const [tools, setTools] = useState<ToolItem[]>([])
   const [references, setReferences] = useState<ReferenceItem[]>([])
@@ -34,12 +41,19 @@ export function HubConnectorManager({ connectorId, onChanged }: { connectorId: s
     const item = (list?.connectors || list?.items || []).find((entry) => entry.id === connectorId) || null
     setConnector(item)
     if (item) {
+      setType(item.type || 'mcp')
       setTransport(item.mcp?.transport || (item.mcp?.url ? 'streamable-http' : 'stdio'))
       setCommand(item.mcp?.command || '')
       setArgs((item.mcp?.args || []).join('\n'))
       setCwd(item.mcp?.cwd || '')
       setUrl(item.mcp?.url || '')
       setEnv(Object.entries(item.mcp?.env || {}).map(([key, value]) => `${key}=${value}`).join('\n'))
+      setMethod(item.http?.method || 'GET')
+      setHeaders(Object.entries(item.http?.headers || {}).map(([key, value]) => `${key}=${value}`).join('\n'))
+      setBody(item.http?.body || '')
+      setHost(item.ssh?.host || '')
+      setPort(String(item.ssh?.port || 22))
+      setUsername(item.ssh?.username || '')
     }
     const refs = await window.api?.connectorsReferences?.(connectorId)
     setReferences(refs?.references || [])
@@ -52,9 +66,9 @@ export function HubConnectorManager({ connectorId, onChanged }: { connectorId: s
   async function save() {
     setBusy('save')
     try {
-      const result = await window.api?.connectorsUpsert?.({
+      const common = {
         id: connectorId,
-        type: 'mcp',
+        type,
         title: connector?.title || connector?.name || connectorId,
         enabled: connector?.enabled !== false,
         mcp: {
@@ -66,7 +80,11 @@ export function HubConnectorManager({ connectorId, onChanged }: { connectorId: s
           env: parseEnv(env),
           envKeys: [],
         },
-      })
+        cli: { command: command.trim(), args: args.split(/\r?\n/).map((value) => value.trim()).filter(Boolean), cwd: cwd.trim(), env: parseEnv(env) },
+        http: { baseUrl: url.trim(), method, headers: parseEnv(headers), query: {}, body },
+        ssh: { host: host.trim(), port: Number(port) || 22, username: username.trim(), cwd: cwd.trim(), command: command.trim() },
+      }
+      const result = await window.api?.connectorsUpsert?.(common)
       if (result?.ok === false) throw new Error(result.error || '连接器配置保存失败')
       const secretPatch = Object.fromEntries(Object.entries(secrets).filter(([, value]) => value !== ''))
       if (Object.keys(secretPatch).length) {
@@ -129,12 +147,15 @@ export function HubConnectorManager({ connectorId, onChanged }: { connectorId: s
           <option value="sse">Legacy SSE</option>
         </select>
       </div>
-      {transport === 'stdio' ? <>
+      {type === 'mcp' && transport === 'stdio' ? <>
         <div className="hub-field"><label htmlFor="connectorCommand">启动命令</label><input id="connectorCommand" value={command} onChange={(event) => setCommand(event.target.value)} placeholder="node / npx / 可执行文件绝对路径" /></div>
         <div className="hub-field"><label htmlFor="connectorArgs">参数（每行一个）</label><textarea id="connectorArgs" value={args} onChange={(event) => setArgs(event.target.value)} rows={3} /></div>
         <div className="hub-field"><label htmlFor="connectorCwd">工作目录</label><input id="connectorCwd" value={cwd} onChange={(event) => setCwd(event.target.value)} /></div>
         <div className="hub-field"><label htmlFor="connectorEnv">非敏感环境变量（KEY=value）</label><textarea id="connectorEnv" value={env} onChange={(event) => setEnv(event.target.value)} rows={3} /></div>
-      </> : <div className="hub-field"><label htmlFor="connectorUrl">服务 URL</label><input id="connectorUrl" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="http://127.0.0.1:3103/sse" /></div>}
+      </> : type === 'mcp' ? <div className="hub-field"><label htmlFor="connectorUrl">服务 URL</label><input id="connectorUrl" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="http://127.0.0.1:3103/sse" /></div>
+        : type === 'cli' ? <><div className="hub-field"><label htmlFor="connectorCommand">命令</label><input id="connectorCommand" value={command} onChange={(event) => setCommand(event.target.value)} placeholder="例如 git、node 或自定义脚本" /></div><div className="hub-field"><label htmlFor="connectorArgs">参数（每行一个）</label><textarea id="connectorArgs" value={args} onChange={(event) => setArgs(event.target.value)} rows={3} /></div><div className="hub-field"><label htmlFor="connectorCwd">工作目录</label><input id="connectorCwd" value={cwd} onChange={(event) => setCwd(event.target.value)} /></div></>
+        : type === 'http' ? <><div className="hub-field"><label htmlFor="connectorUrl">默认 URL</label><input id="connectorUrl" type="url" value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://api.example.com/v1/items" /></div><div className="hub-field"><label htmlFor="connectorMethod">请求方法</label><select id="connectorMethod" value={method} onChange={(event) => setMethod(event.target.value)}>{['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map((value) => <option key={value}>{value}</option>)}</select></div><div className="hub-field"><label htmlFor="connectorHeaders">请求头（KEY=value）</label><textarea id="connectorHeaders" value={headers} onChange={(event) => setHeaders(event.target.value)} rows={3} /></div><div className="hub-field"><label htmlFor="connectorBody">默认请求体（JSON）</label><textarea id="connectorBody" value={body} onChange={(event) => setBody(event.target.value)} rows={4} /></div></>
+        : <><div className="hub-field"><label htmlFor="connectorHost">主机地址</label><input id="connectorHost" value={host} onChange={(event) => setHost(event.target.value)} placeholder="server.example.com" /></div><div className="hub-field"><label htmlFor="connectorPort">端口</label><input id="connectorPort" type="number" value={port} onChange={(event) => setPort(event.target.value)} /></div><div className="hub-field"><label htmlFor="connectorUsername">用户名</label><input id="connectorUsername" value={username} onChange={(event) => setUsername(event.target.value)} /></div><div className="hub-field"><label htmlFor="connectorCommand">默认命令</label><input id="connectorCommand" value={command} onChange={(event) => setCommand(event.target.value)} placeholder="可选" /></div></>}
       {(connector.secretSlots || []).map((slot) => (
         <div className="hub-field" key={slot.key}>
           <label htmlFor={`connectorSecret-${slot.key}`}>{slot.label || slot.key}{slot.required ? '（必填）' : ''}</label>

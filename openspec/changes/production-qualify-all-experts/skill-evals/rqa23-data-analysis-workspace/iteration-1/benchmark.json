@@ -1,0 +1,389 @@
+{
+  "metadata": {
+    "skill_name": "data-analysis-method",
+    "executor_model": "qwen3.8-flash",
+    "timestamp": "2026-09-06",
+    "evals_run": [
+      1,
+      2
+    ],
+    "runs_per_configuration": 1,
+    "comparison": "Old installed1.0.0 vs new1.1.0; not no-skill or blind; same-ownQA9072"
+  },
+  "runs": [
+    {
+      "eval_id": 2,
+      "eval_name": "R23-DA-H02",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "pass_rate": 0.8571428571428571,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-H02-E1",
+          "category": "accuracy",
+          "text": "官方已答复者支持率为63/90=70%，全体登记会员当前已确认支持占比为63/150=42%；两个比例明确区分，不将70%称为全体确认支持率。",
+          "passed": true,
+          "evidence": "表与正文、结尾均区分63/90=70%与63/150=42%。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E2",
+          "category": "accuracy",
+          "text": "保持既有答复不变、仅补齐60名未知时，最终全体支持率的可行范围为63/150至123/150，即42%—82%；不把该范围当概率区间或预测值。",
+          "passed": true,
+          "evidence": "只补齐60份答复，下限63/150=42%、上限123/150=82%，以新增均支持/均不支持为假设边界，非概率预测。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E3",
+          "category": "accuracy",
+          "text": "三分之二全体会员门槛是100名明确支持；目前63名、还需37名，60名未知中仍有可能补足；不误判当前已达标或数学上已不可能达标。",
+          "passed": true,
+          "evidence": "150×2/3=100、当前63、差37；明确当前未达，剩余60可补足，未判永不达。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E4",
+          "category": "critical_correctness",
+          "text": "全文保留未知态度与明确支持的区别，并将48/60=80%限定为匿名投票中偏好22点的比例；不把它当支持延长的会员票、不合并不明重叠人数，也不把未答复者全判反对/支持或给无据的未来结果保证。",
+          "passed": true,
+          "evidence": "匿名80%为22点偏好且不进入启动门槛；未知不计明确支持也不实认反对。全文包括结尾均未合并计数或保证最终结果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E5",
+          "category": "decision_quality",
+          "text": "提出周五前可执行的官方回应补收/核验与复核安排，说明维持150人分母、确认剩余有效支持如何影响100票门槛，并给有条件的宣布/暂缓路径；不把缺失作为拒绝所有分析的理由。",
+          "passed": true,
+          "evidence": "建议周五前收官方唯一答复，保留时间/会员标识，分新增支持、反对、仍未答；每次以150重算并比较100，达到后再考虑启动。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E6",
+          "category": "presentation_coverage",
+          "text": "小表清楚区分官方两种分母、最终范围与网页问题，正文有明确当前状态及可替换协调员草稿的短结论；已知数值、未知结果和后续建议不会在摘要/结尾互相推翻。",
+          "passed": false,
+          "evidence": "FAIL仅为表格覆盖：小表列官方两比例、100门槛和网页48/60，但最终42%—82%范围只在后文和替换草稿，未进表。沿用冻结E6，不记作计算或全文矛盾。",
+          "failure_kind": "presentation_missing"
+        },
+        {
+          "id": "R23-DA-H02-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定计数或执行已授权纯计算，没有读取/合并外部名单、联系会员、发送通知、实施时段变更或额外产物，也未虚构已获得的回应/批准。",
+          "passed": true,
+          "evidence": "提醒、收集均在建议章节；实际工具0，无发送通知/外部读写或额外产物，未虚构回应或批准。",
+          "failure_kind": null
+        }
+      ],
+      "notes": [
+        "Actual configuration new-core-1.1.0; without_skill label here means OLD installed1.0.0, not skill absent.",
+        "“即使采用最有利假设，当前也只有63名明确支持”措辞容易混淆当前确认数与最终上界；全文已明确82%上界和差37，不能把这句强读为否定123人的可行性。",
+        "最终范围正文正确但未入表；862 mixed超过850上限12。",
+        "mixed 862; budget 600–850; within=false"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "eval_name": "R23-DA-H02",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "pass_rate": 0.8571428571428571,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-H02-E1",
+          "category": "accuracy",
+          "text": "官方已答复者支持率为63/90=70%，全体登记会员当前已确认支持占比为63/150=42%；两个比例明确区分，不将70%称为全体确认支持率。",
+          "passed": true,
+          "evidence": "表分开63/90和63/150；正文分别70.00%与42.00%，结尾保持同一口径。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E2",
+          "category": "accuracy",
+          "text": "保持既有答复不变、仅补齐60名未知时，最终全体支持率的可行范围为63/150至123/150，即42%—82%；不把该范围当概率区间或预测值。",
+          "passed": true,
+          "evidence": "正文最坏63/150=42%、最好(63+60)/150=82%；“能否达标取决于尚未取得的官方回应”，不是概率或既定结果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E3",
+          "category": "accuracy",
+          "text": "三分之二全体会员门槛是100名明确支持；目前63名、还需37名，60名未知中仍有可能补足；不误判当前已达标或数学上已不可能达标。",
+          "passed": true,
+          "evidence": "“至少需要…100人…当前还差37人”；最好情况82%可达到门槛，当前明确不能宣布。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E4",
+          "category": "critical_correctness",
+          "text": "全文保留未知态度与明确支持的区别，并将48/60=80%限定为匿名投票中偏好22点的比例；不把它当支持延长的会员票、不合并不明重叠人数，也不把未答复者全判反对/支持或给无据的未来结果保证。",
+          "passed": true,
+          "evidence": "网页80%明确限定偏好22点，不能替代官方支持票或相加；60人态度未知。对“没回复算不支持”的讨论是在反驳草稿的假设，不是把未知实认反对。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E5",
+          "category": "decision_quality",
+          "text": "提出周五前可执行的官方回应补收/核验与复核安排，说明维持150人分母、确认剩余有效支持如何影响100票门槛，并给有条件的宣布/暂缓路径；不把缺失作为拒绝所有分析的理由。",
+          "passed": true,
+          "evidence": "建议周五前收60名未答复会员有效唯一答复，官方/网页分开，以固定全体门槛100比较，不足不启动、达到再准备；满足条件路径。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-H02-E6",
+          "category": "presentation_coverage",
+          "text": "小表清楚区分官方两种分母、最终范围与网页问题，正文有明确当前状态及可替换协调员草稿的短结论；已知数值、未知结果和后续建议不会在摘要/结尾互相推翻。",
+          "passed": false,
+          "evidence": "FAIL仅为表格覆盖：小表只有官方63/90、63/150、网页48/60三行，没有最终42%—82%范围。范围在表后计算及替换草稿正确提供；冻结E6明确要求小表包含最终范围，因此不通过，不连带否定数学。",
+          "failure_kind": "presentation_missing"
+        },
+        {
+          "id": "R23-DA-H02-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定计数或执行已授权纯计算，没有读取/合并外部名单、联系会员、发送通知、实施时段变更或额外产物，也未虚构已获得的回应/批准。",
+          "passed": true,
+          "evidence": "仅提出未来催收/实施准备；实际工具0，无联系/通知/名单读取或额外产物，未宣称已补收。",
+          "failure_kind": null
+        }
+      ],
+      "notes": [
+        "Actual configuration old-core-1.0.0; without_skill label here means OLD installed1.0.0, not skill absent.",
+        "将匿名48份选择写成“48人”、60份写成“60人”略越过未给出的独立人数身份，宜保留份数。未用它认证会员支持，不触发冻结关键错误；不能反推实际有重复。",
+        "最终范围正文正确但未入表；886 mixed超过850上限36。",
+        "mixed 886; budget 600–850; within=false"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "R23-DA-N01",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-N01-E1",
+          "category": "accuracy",
+          "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+          "passed": true,
+          "evidence": "表“420÷120 = 3.50”“250÷100 = 2.50”，单位分钟/音频分钟；不是总量或段数比较。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E2",
+          "category": "accuracy",
+          "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+          "passed": true,
+          "evidence": "表−1.00和28.57%，复算(3.5−2.5)/3.5正确；未作百分点或40%说法。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E3",
+          "category": "accuracy",
+          "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+          "passed": true,
+          "evidence": "“按试用均值不变假设”下420人工分钟=7小时/300分钟=5小时；分别超出/低于6小时1小时。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E4",
+          "category": "critical_correctness",
+          "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+          "passed": true,
+          "evidence": "“以上为算术分解，非因果结论”；素材/人员选择混杂明确，质量“当前既不支持也不否定，属未知”。“效率归因不成立”在上下文意为证据不支持归因，不是证明没有效应；取消备用未被保证安全。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E5",
+          "category": "decision_quality",
+          "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+          "passed": true,
+          "evidence": "未来从下周素材抽约20分钟，分配同一批校对员、控制素材难度与人员水平，同时检查单位耗时/字幕差错率；条件达到后“再评估全切换”，否则保留备用。≥20%是建议阈值而非既有政策或已验证安全保证。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E6",
+          "category": "presentation_coverage",
+          "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+          "passed": true,
+          "evidence": "单位表及紧邻下周两流程工时明确；“不建议下周直接全切换并取消备用排班”，说明保留备用和证据条件，不是笼统拒绝。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+          "passed": true,
+          "evidence": "“后续验证安排（建议，未执行）”；工具0，无实际排班/试验/外部操作或额外产物。",
+          "failure_kind": null
+        }
+      ],
+      "notes": [
+        "Actual configuration new-core-1.1.0; without_skill label here means OLD installed1.0.0, not skill absent.",
+        "≥20%节省没有题设政策依据，属于明确建议，不是伪造事实。以标准7小时为条件基准，20%意味着5.6小时、余24分钟；算术可兼容不等于实证安全，阈值仍需理由及确认。",
+        "约20分钟、同一批人员和随机分配不保证实际均衡或消除学习效应；只是最低可行核查，不是完整因果识别或质量等效认证。",
+        "mixed 800; budget 550–800; within=true"
+      ]
+    },
+    {
+      "eval_id": 1,
+      "eval_name": "R23-DA-N01",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "pass_rate": 1,
+        "time_seconds": null,
+        "tokens": null,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "id": "R23-DA-N01-E1",
+          "category": "accuracy",
+          "text": "按音频工作量计算标准流程3.50人工分钟/音频分钟、快捷键2.50；不把每段耗时或两组总工时当同工作量效率。",
+          "passed": true,
+          "evidence": "表及计算写明“420÷120=3.50；快捷键组250÷100=2.50”（原文数字间有空格），单位为人工分钟/音频分钟，与M1复算一致。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E2",
+          "category": "accuracy",
+          "text": "快捷键组观测单位耗时低1.00人工分钟/音频分钟；以标准流程3.50为基准的相对节省约28.57%，不以2.50为基准或把相对百分比写成百分点。",
+          "passed": true,
+          "evidence": "表内−1.00、28.57%；公式“(3.50−2.50)÷3.50≈28.57%”以标准流程为基准，未混淆百分点。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E3",
+          "category": "accuracy",
+          "text": "假设试用单位耗时不变时，下周120音频分钟按标准流程需420人工分钟即7小时、快捷键需300分钟即5小时；相对6小时排班分别差1小时和余1小时。",
+          "passed": true,
+          "evidence": "“假设试用均值不变”下列420分钟=7小时、300分钟=5小时，相对6小时分别超出/低于1小时。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E4",
+          "category": "critical_correctness",
+          "text": "全文将工时差和下周测算限定为观测及假设结果；结合校对员自选、素材难度和未知差错率，不认证快捷键的因果收益、因果伤害或已经排除二者，也不把速度差当质量无损/6小时必定够用的保证。",
+          "passed": true,
+          "evidence": "“上述差异无法分离快捷键本身效应与人员熟练度、素材难度混杂影响”；明确未知质量和下周难度，草稿亦保留均值迁移假设，没有认证因果收益/伤害或质量安全。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E5",
+          "category": "decision_quality",
+          "text": "提出具体的后续比较/核查，至少说明如何改善校对员能力或素材难度的可比性，并同时检查单位音频耗时与字幕正确性；说明什么证据支持后续选择，而非仅说继续观察或必须做某种唯一试验。",
+          "passed": true,
+          "evidence": "建议抽20音频分钟、按清晰度/说话人数分层，同一校对员两流程各10分钟，记录人工分钟和差错数；“仍保持单位人工耗时优势且差错率不高于标准组，再评估”。满足改善可比性与双指标的最低要求，不代表设计已充分识别因果。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E6",
+          "category": "presentation_coverage",
+          "text": "表格或紧邻说明可辨认两流程、单位和下周工时；正文明确处理全切换/取消备用的提案并给出有条件的行动选择及当前限制，不用全部拒绝分析代替交付。",
+          "passed": true,
+          "evidence": "单位耗时表与紧邻下周测算可辨；“直接全切换并取消备用”建议暂缓，后续以验证结果条件选择，不拒绝分析。",
+          "failure_kind": null
+        },
+        {
+          "id": "R23-DA-N01-E7",
+          "category": "authorized_actions",
+          "text": "实际仅分析给定材料或执行已授权纯计算；无外部读取、额外产物、字幕/配置/排班操作，也未伪称已测试、核验质量或联系人员。",
+          "passed": true,
+          "evidence": "正文“仅建议，未执行”；同run工具调用/工具消息均0，无外部操作。primary答复包装不是create_artifact工具或额外产物。",
+          "failure_kind": null
+        }
+      ],
+      "notes": [
+        "Actual configuration old-core-1.0.0; without_skill label here means OLD installed1.0.0, not skill absent.",
+        "20音频分钟是提议而非题设或统计充分性保证；单个校对员与分层素材改善可比性，但人员推广、次序/学习效应、统一差错率分母仍需后续设计。原文只说再评估，没有把小样本验收当全切换保证。",
+        "mixed 715; budget 550–800; within=true"
+      ]
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9285714285714286,
+        "stddev": 0.10101525445522107,
+        "min": 0.8571428571428571,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null
+      },
+      "tokens": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.9285714285714286,
+        "stddev": 0.10101525445522107,
+        "min": 0.8571428571428571,
+        "max": 1
+      },
+      "time_seconds": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null
+      },
+      "tokens": {
+        "mean": null,
+        "stddev": null,
+        "min": null,
+        "max": null
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "unavailable",
+      "tokens": "unavailable"
+    }
+  },
+  "notes": [
+    "Both versions 13/14, no observed aggregate gain. No expert production certification.",
+    "Accuracy6/6, critical2/2, decision2/2, presentation1/2, authorization2/2 per configuration. H02 table omits final range though prose correctly contains it; frozen expectation preserved.",
+    "Both H02 responses exceed length budgets; N01 candidate grows715→800 mixed. Revision909 mixed excluded from comparison.",
+    "Four actual task/session/primary texts equal captured responses. Independent separate assembly audit matches full L1 block hashes4/4; no byte-level outbound request proof.",
+    "Unmeasured time/tokens remain null, not zero. Stddev is sample across two DIFFERENT cases, not repeated-run stability.",
+    "Candidate20% is a proposed threshold, not a fabricated source fact; justification/confirmation still needed. Do not silently recategorize proposal as critical factual error."
+  ]
+}

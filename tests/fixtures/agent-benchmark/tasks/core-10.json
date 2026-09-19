@@ -15,21 +15,21 @@
       "intent": "Refuse ungrounded meeting claims when tool missing",
       "fixtureFile": "meeting-read-no-tool.json",
       "inputConstraints": { "tier": "retrieval", "forceTools": true },
-      "rubric": { "requiredTools": [], "forbiddenClaims": ["议题："], "expectTerminal": "DONE", "minScore": 1 }
+      "rubric": { "requiredTools": [], "forbiddenClaims": ["议题："], "expectTerminal": "ERROR", "minScore": 1 }
     },
     {
       "id": "skill-required-unmet",
       "intent": "Skill requiredTools governance refusal",
       "fixtureFile": "skill-required-unmet.json",
       "inputConstraints": { "tier": "retrieval", "forceTools": true },
-      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "DONE", "minScore": 1 }
+      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "ERROR", "minScore": 1 }
     },
     {
       "id": "tool-budget-conflict",
       "intent": "Tool budget conflict must not hallucinate completion",
       "fixtureFile": "tool-budget-conflict.json",
       "inputConstraints": { "tier": "retrieval", "forceTools": true },
-      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "DONE", "minScore": 1 }
+      "rubric": { "forbiddenClaims": ["议题：", "已读取"], "expectTerminal": "ERROR", "minScore": 1 }
     },
     {
       "id": "numeric-deixis",
@@ -57,7 +57,7 @@
       "intent": "Thin body title-only grounding",
       "fixtureFile": "thin-body-title.json",
       "inputConstraints": { "tier": "retrieval" },
-      "rubric": { "expectTerminal": "DONE", "minScore": 1 }
+      "rubric": { "expectTerminal": "ERROR", "minScore": 1 }
     },
     {
       "id": "recovery-after-error",
@@ -71,7 +71,7 @@
       "intent": "Governance refusal on ungrounded external facts",
       "fixtureFile": "governance-refusal.json",
       "inputConstraints": { "tier": "retrieval", "forceTools": true },
-      "rubric": { "forbiddenClaims": ["已确认发布"], "expectTerminal": "DONE", "minScore": 1 }
+      "rubric": { "forbiddenClaims": ["已确认发布"], "expectTerminal": "ERROR", "minScore": 1 }
     }
   ]
 }

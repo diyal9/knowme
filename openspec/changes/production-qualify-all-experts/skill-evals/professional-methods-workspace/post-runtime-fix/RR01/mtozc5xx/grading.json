@@ -1,0 +1,108 @@
+{
+  "expectations": [
+    {
+      "text": "不形式通过，指出§1/§2权限冲突，区分需求缺陷和已实现漏洞。",
+      "passed": true,
+      "evidence": "完整assistant L1给出‘阻塞（需修改）’，L5定位§1/§2并说‘若按§2实现，将导致越权风险’，不是声称已实现越权。L7明确‘此为基于§1的测试假设，需先解决§2冲突’。"
+    },
+    {
+      "text": "指出§3/§4软删除口径冲突，给候选澄清而不擅定唯一规则。",
+      "passed": true,
+      "evidence": "L10识别默认不导出与强制包含的冲突；L11在‘待决策’下列排除、包含或可选配置，L12用‘若决定’分支，没有把某一方案冒充已定规则。可选配置属于扩围建议而非已发生事实；本项不据此误判失败。其行数验收缺陷另计第四项。"
+    },
+    {
+      "text": "§5重复请求策略待定、§6后台继续及保留期限待定，不强推自选数值或实现。",
+      "passed": false,
+      "evidence": "L16/L21确实列待决策，‘如24小时’也只是举例，不因该例扣分。但L22将‘若任务继续运行’直接推出‘提示出现后1分钟……应能下载完整文件’，材料从未承诺这时已完成或下载就绪；只条件化是否继续，没有条件化新加的一分钟完成保证。L17允许重复分支还无条件要求两任务均成功。"
+    },
+    {
+      "text": "§7速度和完整性缺可测指标；WHEN/THEN示例条件清楚，决策待定部分标明条件化。",
+      "passed": false,
+      "evidence": "L25正确指出不可测，L27有计时起止与待确认阈值；但L12/L26/L27把完整性缩成行数相等：源记录A、B导成A、A仍通过，不能排除丢失/重复或字段错误。L12又用项目非软删/总记录数，未与权限过滤集合求交。L17允许相同文件链接替代同一任务，不能排除双任务共享链接。L22的一分钟完成判据还引入未定SLA。不能只凭出现WHEN/THEN通过。"
+    },
+    {
+      "text": "保持非目标不增加审批/邮件，无动态验证宣称，交付精简明确结论与定位。",
+      "passed": false,
+      "evidence": "有明确结论、位置与优先级，没有审批/邮件或动态测试宣称，同run toolCalls为空；但全文混合计数741，超过冻结题面的700字上限41（约5.9%）。计入全部标题、正文、示例和总结，汉字699+拉丁字母/数字词42；忽略标点、空白和Markdown控制符，不以raw Markdown 1100字符判超限。"
+    }
+  ],
+  "summary": { "passed": 2, "failed": 3, "total": 5, "pass_rate": 0.4 },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "output_chars": 1100,
+    "output_han_chars": 699,
+    "output_latin_numeric_tokens": 42,
+    "output_mixed_units": 741,
+    "output_limit": 700,
+    "source": "same-run task.executionEvidence.toolCalls and full session assistant text; no executor metrics/timing file was supplied"
+  },
+  "claims": [
+    {
+      "claim": "材料有§1/§2权限冲突、§3/§4软删除冲突，§5/§6待决策、§7不可测。",
+      "type": "factual",
+      "verified": true,
+      "evidence": "冻结RR01的§1—§7逐项支持；评审结论是材料上的判断，不需外部执行回执。"
+    },
+    {
+      "claim": "若任务继续运行，提示出现后1分钟应能下载完整文件。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "这是未获支持的验收规则，不是已发生事件的虚构。§6只固定30秒提示；继续运行不蕴含一分钟后完成。"
+    },
+    {
+      "claim": "导出记录总数与数据库查询结果一致可以充当不丢数据的验收依据。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "A、B被导为A、A时计数仍相等；无记录身份和字段对账，错误输出仍可通过。"
+    },
+    {
+      "claim": "返回相同任务标识或文件链接即可验证去重。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "两个独立任务可以共享结果链接，链接相同不能证明任务去重；冻结材料也未决定去重契约。"
+    },
+    {
+      "claim": "结果文件保留多久（如24小时）；量化性能阈值（如：1万条记录导出耗时<10秒）。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "仅验证其建议/待定身份：这些值位于待决策或回填建议的‘如’中，性能THEN还使用待确认阈值。没有把它们当已定业务规则；不表示这些示例数值已获业务批准。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": ["权限与软删除口径、重复策略、超时继续/终止及留存、性能阈值仍待业务决策"],
+    "needs_review": ["移除未定的一分钟完成硬预期", "以权限与删除口径交集对记录身份和内容验收", "压缩至700混合字数以内"],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      { "assertion": "§7速度和完整性缺可测指标；WHEN/THEN示例条件清楚，决策待定部分标明条件化。", "reason": "明确加入反例排除：等行数但遗漏/重复、双任务同链接、超时后仍运行未完成。不能只检查WHEN/THEN形式或待定标签。" },
+      { "reason": "明确全文规则组合：权限范围与删除口径同时生效；性能约束应在THEN，不能将达标作为WHEN前提；候选建议在后续例子中不能静默变成硬规则。" }
+    ],
+    "overall": "冻结五断言保留原文，按grader二元评分不授部分分。平台verified不代表专业验收；本次独立补测不更新旧12run对照或其聚合。"
+  },
+  "provenance": {
+    "eval_id": "RR01",
+    "task_id": "task-mtowzdmo-c9tm5",
+    "run_id": "expert_task-mtowzdmo-c9tm5_mtozc5xx",
+    "session_id": "wb-expert-task-mtowzdmo-c9tm5",
+    "assistant_message_id": "msg_expert_task-mtowzdmo-c9tm5_mtozc5xx_assistant",
+    "input_file": "skill-evals/professional-methods-workspace/frozen-inputs.json",
+    "capture_file": "evidence/rqa13-rr01-postfix-live-2026-09-06.json",
+    "selector": "session.session.messages.filter(m => m.role === 'assistant' && m.runId === 'expert_task-mtowzdmo-c9tm5_mtozc5xx')",
+    "matching_assistant_count": 1,
+    "text_line_numbering": "assistant.text.split('\\n'), one-based; not JSON file line numbers",
+    "input_sha256": "f3ba2dbfc83e96bfc9c403ef9c97daadd12570d550a080b4f09c7e3481691fd2",
+    "answer_sha256": "b1ad685433d943bd033bf59c4efde7e50e3617b7ed538547986541e27c1f61b2",
+    "frozen_inputs_file_sha256": "6c6c22dcb900ce78892bb16e855507d67fae32faca49125ac7eff5df9b21e5db",
+    "capture_sha256": "84920d0284ad385197f9b23ce1db8c092cbba9845e25d73f392a436550a94be1",
+    "same_run_user_contains_frozen_input": true,
+    "task_material_equals_frozen_input": true,
+    "persisted_artifact_equals_assistant": true,
+    "platform_status": "review",
+    "platform_gate": "verified",
+    "professional_qualified": false,
+    "comparison_scope": "standalone post-runtime-fix evaluation; excluded from original 12-run comparison",
+    "length_regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)* (gu)"
+  }
+}

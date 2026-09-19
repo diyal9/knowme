@@ -162,7 +162,9 @@ async function previewMcpTools(connector, opts = {}) {
   const projected = mcpHost.projectMcpTools(listed.tools, allowlist, conn.id)
   const projectedAllowlist = projected.map((d) => d.function.name)
   const allow = new Set(allowlist)
-  const tools = (listed.tools || []).slice(0, 64).map((t) => {
+  // This DTO also supplies allowlist selection and execution preflight. A UI
+  // display limit must not erase discovered tools or their selected state.
+  const tools = (listed.tools || []).map((t) => {
     const rawName = String(t?.name || '')
     const projectedName = mcpHost.buildMcpAgentToolName(conn.id, rawName)
     return {

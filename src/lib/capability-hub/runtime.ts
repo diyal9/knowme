@@ -4,13 +4,45 @@
  */
 'use strict'
 
-const fs = require('fs')
 const path = require('path')
 const { resolvePaths } = require('../capability-store')
 const { createSkillRuntime } = require('../skill-runtime')
 const { mergeSkillTaskCatalog } = require('../skill-task-catalog')
 const { createExpertRuntime } = require('../expert-runtime')
 const { fail } = require('./map')
+
+function serializeSkillScriptArgs(input = {}) {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    return { ok: false, code: 'invalid_args', message: '技能脚本 args 必须是对象' }
+  }
+  const stringify = (value) => {
+    if (typeof value === 'string') return value
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value)
+    if (value && typeof value === 'object') return JSON.stringify(value)
+    return String(value)
+  }
+  if (Object.prototype.hasOwnProperty.call(input, 'argv')) {
+    if (!Array.isArray(input.argv)) return { ok: false, code: 'invalid_args', message: 'args.argv 必须是数组' }
+    return { ok: true, argv: input.argv.map(stringify) }
+  }
+
+  const argv = []
+  for (const [rawKey, rawValue] of Object.entries(input)) {
+    const key = String(rawKey || '').trim()
+    if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(key)) {
+      return { ok: false, code: 'invalid_args', message: `无效的技能脚本参数名: ${key || '(空)'}` }
+    }
+    if (rawValue == null) continue
+    const flag = `--${key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`
+    const values = Array.isArray(rawValue) ? rawValue : [rawValue]
+    for (const value of values) {
+      if (value === true) argv.push(flag)
+      else if (value === false) argv.push(`${flag}=false`)
+      else argv.push(flag, stringify(value))
+    }
+  }
+  return { ok: true, argv }
+}
 
 /**
  * 构建 Hub 内 skill/expert runtime 与相关 helper。
@@ -24,6 +56,8 @@ function createCapabilityRuntime(deps) {
     getPackSkillSources,
     getPackEmptyStateGroups,
     getPackScenesForUi,
+    getConnectorStatus,
+    getExpertSnapshotRoot,
   } = deps
 
   function capabilitiesRoot() {
@@ -53,29 +87,13 @@ function createCapabilityRuntime(deps) {
       return fail('invalid_path', '脚本必须在技能 scripts/ 目录内')
     }
 
-    const ext = path.extname(scriptAbs).toLowerCase()
     const sandboxTools = agentSandbox.buildSandboxTools({
       workdir: scriptsRoot,
       permissions,
     })
-
-    if (ext === '.py') {
-      const code = fs.readFileSync(scriptAbs, 'utf8')
-      return sandboxTools.handlers.run_python({ code })
-    }
-    if (ext === '.js' || ext === '.mjs') {
-      const command = process.platform === 'win32'
-        ? `node "${scriptAbs.replace(/"/g, '\\"')}"`
-        : `node ${JSON.stringify(scriptAbs)}`
-      return sandboxTools.handlers.run_shell({ command })
-    }
-    if (ext === '.sh' || ext === '.bash') {
-      const command = process.platform === 'win32'
-        ? `bash "${scriptAbs.replace(/"/g, '\\"')}"`
-        : `bash ${JSON.stringify(scriptAbs)}`
-      return sandboxTools.handlers.run_shell({ command })
-    }
-    return fail('unsupported_script', `不支持的脚本类型: ${ext || '(无扩展名)'}`)
+    const serialized = serializeSkillScriptArgs(ctx.args || {})
+    if (!serialized.ok) return fail(serialized.code, serialized.message)
+    return sandboxTools.runScriptFile({ scriptAbs, argv: serialized.argv })
   }
 
   function skillRuntime() {
@@ -84,6 +102,7 @@ function createCapabilityRuntime(deps) {
       knowledgeDir: getKnowledgeDir(),
       getInstallStore: buildInstallStoreMap,
       getPackSkillSources: getPackSkillSources || undefined,
+      getConnectorStatus: getConnectorStatus || undefined,
       runScript: (ctx) => runSkillScriptInSandbox(ctx),
     })
   }
@@ -112,6 +131,7 @@ function createCapabilityRuntime(deps) {
     })
     return createExpertRuntime({
       capabilitiesRoot: capabilitiesRoot(),
+      snapshotRoot: typeof getExpertSnapshotRoot === 'function' ? getExpertSnapshotRoot() : '',
       getSkillHashes: (ids) => {
         const out = {}
         for (const id of ids) {
@@ -143,4 +163,5 @@ function createCapabilityRuntime(deps) {
 
 module.exports = {
   createCapabilityRuntime,
+  serializeSkillScriptArgs,
 }

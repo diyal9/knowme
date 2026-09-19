@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-CS-H02",
+  "configuration": "with_skill",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-new-live.json",
+    "evidence_sha256": "ac0890d3143aaafdf82b8775474590f0703b7989c75f596cde72101bb847c3ef",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpazete-hgu70",
+    "session_id": "wb-expert-task-mtpazete-hgu70",
+    "run_id": "expert_task-mtpazete-hgu70_mtpazh8g",
+    "task_status": "review",
+    "input_sha256": "d7e9547a7fcdee3b6b82d3705bcd81382f38b7d07fa327786a2878ba3beddf70",
+    "delivered_text_sha256": "84374e2be14e5b3bac21c74d2d6db997e1f73440a41597d3ee50314814250634",
+    "export_transcript_checked": true,
+    "export_response_checked": true
+  },
+  "expectations": [
+    {
+      "id": "R20-CS-H02-E1",
+      "category": "accuracy",
+      "text": "正文与示例保持两个截止点对应正确：3月15日18:00停止v1写入，3月31日18:00停止v1历史查询，均为北京时间。",
+      "passed": true,
+      "evidence": "北京时间3月15日18:00写入停、3月31日18:00历史查询停，示例和排期一致。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-H02-E2",
+      "category": "critical_correctness",
+      "text": "明确不采信未批准草稿中的自动升级、零中断、数据当天清空和新增购买要求；全文没有将其中任一项重新当已批准事实。",
+      "passed": true,
+      "evidence": "自动升级、零中断、清空数据、新增购买要求逐项剔除，未重新采纳。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-H02-E3",
+      "category": "decision_quality",
+      "text": "对只用v1、混用、只用v2客户给出与其实际依赖相称的沟通动作，混用不等于已完成迁移，只用v2不被要求重新迁移v1。",
+      "passed": true,
+      "evidence": "三组60/40/20分别提示迁移、残留依赖、无需首轮迁移，未把混用等于完成。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-H02-E4",
+      "category": "decision_quality",
+      "text": "两轮邮件与说明页的职责/节奏服务于提前行动和后续核验，不把所有关键行动提示留到相关接口停止之后。",
+      "passed": true,
+      "evidence": "2月8日、3月1日两轮均提前，说明页承担资料/事实，邮件承担行动。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-H02-E5",
+      "category": "critical_correctness",
+      "text": "跟进判定区分通知触达或已读与实际迁移验证，不用邮件打开回执单独认证业务已无旧接口依赖。",
+      "passed": false,
+      "evidence": "把“v2持续写入且v1写入归零”标“大概率完成”，只查写入而没有涵盖历史查询；v2写入+v1历史查询持续存在完全符合该条件但迁移未完成，前文“三步确认任何v1依赖”未贯穿判定。",
+      "failure_kind": "unsupported"
+    },
+    {
+      "id": "R20-CS-H02-E6",
+      "category": "presentation_coverage",
+      "text": "有一封能独立理解的受影响群体通知示例，告知影响、需要的行动及可使用的已有迁移材料，而非只列邮件主题。",
+      "passed": true,
+      "evidence": "有给A组的完整可用邮件，含影响、两个截止、三步及对照表/版本页入口。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-CS-H02-E7",
+      "category": "authorized_actions",
+      "text": "实际行为仅拟方案/文案或已授权纯计算，没有外部发送、客户数据访问、接口改动或虚构已验证回执。",
+      "passed": true,
+      "evidence": "全部同run captures、session消息和steps交叉检查无工具调用或外部执行。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "failed": 1,
+      "total": 2
+    },
+    "decision_quality": {
+      "passed": 2,
+      "failed": 0,
+      "total": 2
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    }
+  },
+  "excluded_from_denominator": false,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": null,
+  "length": {
+    "raw_utf16": 1636,
+    "mixed": 1068,
+    "min_mixed": 700,
+    "max_mixed": 1000,
+    "budget_evaluable": true,
+    "within_budget": false,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 29.175,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:20:00.578Z",
+    "executor_end": "2026-09-06T04:20:29.753Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [
+    {
+      "text": "“三处……冲突”下面实际列四项，是自检计数错误；缺证据与直接矛盾也不能一概混称冲突。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“v1写入停止必然导致未迁移方中断”范围过宽：只依赖v1历史查询的未迁移方，不因写入停用就在3月15日中断该查询功能。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“大概率完成”保留不确定字样仍不能弥补写入证据遗漏查询依赖；不是把大概率直接等同确定事实，而是该跟进标记缺充分相关范围。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "仅用v1的清单不能证明客户“未接触v2，不知从何改起”；可以是策略假设，不是已完成受众研究。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    }
+  ],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

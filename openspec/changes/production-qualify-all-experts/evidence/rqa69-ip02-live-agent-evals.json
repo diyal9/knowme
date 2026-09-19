@@ -1,0 +1,25 @@
+{
+  "suite": "RQA69",
+  "evaluatedAt": "2026-09-07T21:00:13.993Z",
+  "agents": [
+    {
+      "agentId": "image-producer",
+      "currentConfigurationId": "",
+      "tasks": [
+        {
+          "taskId": "task-mtrq5m23-rotmw",
+          "evalId": "IP02",
+          "scenario": "edge",
+          "status": "needs_input",
+          "configurationId": "",
+          "hardFailure": false,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

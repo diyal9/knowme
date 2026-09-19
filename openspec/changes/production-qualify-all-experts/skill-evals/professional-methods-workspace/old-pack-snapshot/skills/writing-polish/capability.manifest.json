@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "writing-polish",
+  "kind": "skill",
+  "name": "写作润色",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "writingPolish",
+          "title": "写作润色",
+          "subtitle": "结构、语气与可读性优化",
+          "icon": "edit",
+          "group": "writing",
+          "modes": ["writing", "general"],
+          "surfaces": ["scene", "workflow"],
+          "prompt": "请润色以下文案，保持原意与专业语气，并简要说明主要改动。"
+        }]
+      }
+    }
+  }
+}

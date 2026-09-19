@@ -23,6 +23,7 @@ export async function invokeStreamingGenerate(input: {
   skillRefs?: string[]
   conversationMode?: ExpertDiscussionMode
   expertDiscussionContext?: ExpertDiscussionContext
+  orchestrationMode?: 'expert-adaptive' | 'workflow-fixed'
 }): Promise<{ cancelled: boolean; resultError: string; resultText: string }> {
   const bridge = api()
   let resultText = ''
@@ -50,6 +51,7 @@ export async function invokeStreamingGenerate(input: {
       skillRefs: input.skillRefs,
       conversationMode: input.conversationMode,
       expertDiscussionContext: input.expertDiscussionContext,
+      orchestrationMode: input.orchestrationMode,
     }))
     cancelled = Boolean(result?.cancelled)
     resultError = String(result?.error || '').trim()

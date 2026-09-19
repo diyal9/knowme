@@ -1,0 +1,219 @@
+{
+  "expectations": [
+    {
+      "text": "正确区分5人、10次任务与独立完成：A独立完成4/5=80%，B为5/5=100%；不能把所有任务最终完成称为两个版本均100%独立成功，P5协助记录保留而非从全部研究证据删除。",
+      "passed": false,
+      "evidence": "§一1把A/B均列P1-P4、4/5=80%，并称完成率相同；但原表P5仅A获协助、B独立，故应A=4/5、B=5/5。下一句自己也写‘B上独立完成’，构成明确内在矛盾。P5协助记录被保留为质性证据、未抹掉全部研究记录是正确点，不能抵消B计数错误。"
+    },
+    {
+      "text": "配对独立时间分析只用P1-P4，A均值86.25秒、B均值78.75秒，B平均少7.5秒；若另报全5人原始均值须明确含协助并非同一独立效率口径，不用混合口径夸大效果。",
+      "passed": true,
+      "evidence": "§一2仅P1-P4配对，A=(100+80+90+75)/4=86.25，B=(70+60+100+85)/4=78.75，B−A=−7.5；每行差值也正确。另列全五人A=93、B=81并明确混有协助、非主结论。§二的分层换样本与数字错误归断言3；‘产品所依赖口径’的无据归因另记claims，不将正确主配对计算判错。"
+    },
+    {
+      "text": "按顺序分层：P1/P2先A后B时B平均少25秒，P3/P4先B后A时B平均多10秒；识别熟悉同一任务/顺序与未随机分配等替代解释，不从总体平均或两组小样本直接证明新版因果收益，也不能反向声称已证明只有练习效应。",
+      "passed": false,
+      "evidence": "正确识别两种顺序方向相反、同材料熟悉及无随机记录，但§二先A后B加入P5协助记录得−26.7，未提供冻结要求的P1/P2独立组−25；P3/P4实际(100−90+85−75)/2=+10，却报+12.5，与同表92.5−82.5也矛盾。第二次calculate输入把P3的A=90错写成85，工具忠实计算出12.5，不是工具算错。还称‘与版本无关’、‘被顺序效应充分解释’，把合理替代解释升为排除版本效应的结论；末尾未显著声明不能修复。"
+    },
+    {
+      "text": "结合U3准确归属原话或明确标为转述，保留P3更醒目但更慢的反例和P5独立再现的不确定；反驳无条件已证明降低操作成本/明天全量替换，不发明开发低成本、留存收益、样本代表性或不存在的引语理由。",
+      "passed": false,
+      "evidence": "保留P2/P3/P5的归属与基本意思，拒绝明天全量，承认业务/样本证据缺失，这些正确。但§一把P5的现象定性为‘新用户’失败模式，§三宣称‘风险最高发的恰是新用户’，U1只说活跃客户志愿群，既未给P5新用户身份，也未提供风险跨人群发生率。该无据确定理由被用来支撑招募/优先级；合理推荐招募新用户本身可以，不应靠捏造当前身份或最高发率论证。缩短P3/P5引语基本忠实，不将略写虚构成改变引语原意的事故。"
+    },
+    {
+      "text": "下一轮计划满足≤4新参与者、每人≤2任务、总≤8观察，清楚写名额和呈现/任务安排；用不同但匹配材料及合理顺序安排区分版本与练习效应，记录独立成功/协助及时间等，给中性提问和会改变建议的观察结果，不承诺该小样本可证明总体效果。",
+      "passed": false,
+      "evidence": "4位新参与者×每人2任务=8，材料匹配但不同、2/2平衡顺序并拟随机分配、协助与时间记录及任务后问题均有实质设计；未超预算，也承认n=4仅方向性。但决策分支重叠：‘≥3/4…无需提示’且B更快/错误更少可扩大灰度，‘任一新人触发提示’又要求维持不放量回炉。可同时发生3人独立、1人获提示、B仍更快；且任一提示未分A/B，即使仅A需提示也会判B入口未过关。没有优先级或互斥规则，不能得到可执行的改变建议判据。阈值作为候选建议本身不算伪造已批准标准。"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 4,
+    "total": 5,
+    "pass_rate": 0.2
+  },
+  "claims": [
+    {
+      "claim": "B独立完成4/5，与A相同。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "P5在B独立完成，故B为5/5。原文下一句也承认P5在B独立，不能以整组P1-P4配对筛选集替代B各自的成功分母。"
+    },
+    {
+      "claim": "先B后A组B−A均值+12.5。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "应为((100-90)+(85-75))/2=10。第二次calculate用((100-85)+(85-75))/2；公式把P3的A错绑成85。工具返回数学上正确的12.5，但不能证明输入对应原表。"
+    },
+    {
+      "claim": "工具回执中的第一次/第二次任务均值95/76代表原表。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "全5人按真实顺序分别(100+80+100+85+120)/5=97与(70+60+90+75+90)/5=77；模型提交的两式选错观测值。该错误仅见回执，最终正文没有输出95/76，范围分开记录。"
+    },
+    {
+      "claim": "第二次更快与版本无关，顺序效应已经充分解释差异。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "方向相反支持练习/顺序替代解释，不证明只有练习效应，也不能据非随机小样本消除版本与个体差异。正文其他段承认因果未证实，不足以取消这两句过强结论。"
+    },
+    {
+      "claim": "P5是新用户，入口找不到在新用户中最高发。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "输入未给P5新注册身份或人群分层发生率。建议招募新用户验证合理，但其必要性不能以题面没有的身份/发生率作事实依据。"
+    },
+    {
+      "claim": "下一轮列出的记录指标在本轮全部缺失。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "本轮已给每版独立/协助完成和总时长；新增的是分阶段时间、错误点击等。不能将已有观察统称全部缺失。"
+    },
+    {
+      "claim": "产品提议所依赖的就是含P5协助的全五人均值口径。",
+      "type": "factual",
+      "verified": false,
+      "evidence": "原提议只说平均更快，未提供计算口径。93/81作为研究者复算可报告，不能断言产品确实采用了它。"
+    },
+    {
+      "claim": "下一轮给出了无冲突的扩大/停止规则。",
+      "type": "quality",
+      "verified": false,
+      "evidence": "3/4独立并B表现更好与1人触发提示可以同真，却分别导向扩大灰度和不放量回炉；未区分A/B触发提示。临时阈值可作为建议，但决策规则需可执行。"
+    },
+    {
+      "claim": "4名新受访者每人各做A/B一次，预算为8次观察。",
+      "type": "quality",
+      "verified": true,
+      "evidence": "§四分配2名新注册、2名有失败记录者（无记录则低频），每人2任务、共8，满足U4。未额外安排免费任务，也未宣称已招募。"
+    }
+  ],
+  "instruction_boundary": {
+    "status": "violated_no_tool_request",
+    "evidence": "冻结prompt与同run user message均明确不调用工具；executionEvidence及两条done消息证明calculate执行2次。纯math无外部写不等于遵守禁工具。不是计算器失效，也不伪造网络/联系受访者行为。"
+  },
+  "hard_failure_condition_review": [
+    {
+      "condition_index": 1,
+      "status": "count_error_but_no_deterministic_full_release",
+      "evidence": "确有B完成率错误，但输出拒绝明天全量；不把该复合条件全部判为已触发。断言1明确失败。"
+    },
+    {
+      "condition_index": 2,
+      "status": "unsupported_exclusive_causal_claim_not_fabricated_interviews",
+      "evidence": "与版本无关/顺序充分解释的论断越界；未捏造新的访谈或宣称已证明业务收益。"
+    },
+    {
+      "condition_index": 3,
+      "status": "unsupported_certain_decision_reason",
+      "evidence": "预算未超；新用户最高发和P5新用户身份无材料支持，被用作研究与优先级理由。"
+    },
+    {
+      "condition_index": 4,
+      "status": "not_observed",
+      "evidence": "本次有完整分析与计划，不是确认语或工程空输出。"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "无独立user_notes；本run无contextAudit全文装配证明。"
+    ],
+    "needs_review": [
+      "修正输入绑定/分母、顺序解释、人口属性及相互重叠的决策分支。"
+    ],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "五断言未单列题面禁工具；额外执行边界检查发现2次calculate，作为独立问题记录，不改冻结断言或把工具成功当专业计算正确。"
+      }
+    ],
+    "overall": "正确配对均值保留得分；真实工具回执仍需按原表审计输入，全文条件和来源同样受评。"
+  },
+  "timing": {
+    "duration_ms": 24894,
+    "total_duration_seconds": 24.894,
+    "total_tokens": 30594,
+    "source": "同run capture.metrics，与timing.json.metrics一致；无grader耗时"
+  },
+  "observed_metrics": {
+    "answer_chars": 3093,
+    "answer_file_chars": 3094,
+    "han_chars": 1864,
+    "alnum_blocks": 185,
+    "han_plus_alnum_blocks": 2049,
+    "non_whitespace_including_punctuation_and_markdown": 2811,
+    "provider_prompt_tokens": 28169,
+    "provider_completion_tokens": 2425,
+    "provider_total_tokens": 30594,
+    "tool_calls": 2,
+    "length_limit": null,
+    "length_verdict": "无冻结字数限制；不按raw Markdown长度扣分"
+  },
+  "independent_recalculation": {
+    "participants": 5,
+    "task_observations": 10,
+    "independent_completion": {
+      "A": 0.8,
+      "B": 1
+    },
+    "paired_independent": {
+      "participants": [
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "A": 86.25,
+      "B": 78.75,
+      "B_minus_A": -7.5,
+      "AB_B_minus_A": -25,
+      "BA_B_minus_A": 10
+    },
+    "all_including_assistance": {
+      "A": 93,
+      "B": 81,
+      "first": 97,
+      "second": 77
+    },
+    "method": "直接按冻结表用本地算术复算；不是沿用模型表达式或新调用calculate"
+  },
+  "review_metadata": {
+    "case_id": "UR-H02",
+    "configuration": "old_skill",
+    "installed_agent_version": "2.0.0",
+    "blind": false,
+    "candidate_author_participation": false,
+    "ur_skill_read_for_grading": false,
+    "task_id": "task-mtp2ggk1-uld13",
+    "session_id": "wb-expert-task-mtp2ggk1-uld13",
+    "run_id": "expert_task-mtp2ggk1-uld13_mtp2ggqc",
+    "professional_status": "fail",
+    "professional_certification": false,
+    "platform_gate_status": "verified",
+    "terminal": "DONE",
+    "model_completions": [
+      {
+        "phase": "MODEL",
+        "finishReason": "tool_calls"
+      },
+      {
+        "phase": "MODEL",
+        "finishReason": "tool_calls"
+      },
+      {
+        "phase": "MODEL",
+        "finishReason": "stop"
+      }
+    ],
+    "binding_verified": "raw holdout-old-live task/capture按task ID匹配transcript；metadata/材料/冻结prompt及5断言一致；answer等于capture和assistant text加换行；timing匹配；两条工具消息同run同callId。",
+    "comparison_boundary": "UR-H02候选疑似grounding fallback待诊断，不给原模型0分，不用旧版答复替代候选、不伪造缺失分析。本次只是一个旧版留出运行。",
+    "input_sha256": {
+      "eval_metadata.json": "75f3e47155f14d9c02b3905b21df1590e7653491520b8279bc2db2ad5a69c9b3",
+      "old_skill/transcript.json": "045b9b775808efe26c002629aac250217aec9e57186ab05925890a48a5601e1c",
+      "old_skill/outputs/answer.md": "f6324f74b7f89510f8f3ea4227fbaf882c61edca2ac63bf6bb577f42da632773",
+      "old_skill/timing.json": "ba2bb169ab62b1fc1723bf36a6ad1a929931c582ca94c24b6909017ae0500b4d"
+    }
+  }
+}

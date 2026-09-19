@@ -1,0 +1,12 @@
+{
+  "id": "ssh-generic",
+  "kind": "connector",
+  "type": "ssh",
+  "version": "1.0.0",
+  "title": "SSH 主机",
+  "description": "连接远程 Linux 主机执行受控命令，安装后配置主机、端口、用户名和默认工作目录。",
+  "capabilities": ["ssh", "remote-shell"],
+  "ssh": { "host": "", "port": 22, "username": "", "cwd": "", "command": "" },
+  "secretSlots": [{ "key": "SSH_PASSWORD", "label": "登录密码", "required": false, "target": "env" }, { "key": "SSH_PRIVATE_KEY", "label": "私钥内容", "required": false, "target": "env" }],
+  "toolPolicies": [{ "match": "*", "risk": "external", "sideEffects": true, "requiresApproval": true }]
+}

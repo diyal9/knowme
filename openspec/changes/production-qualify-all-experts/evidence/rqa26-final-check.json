@@ -1,0 +1,137 @@
+{
+  "round": "RQA26",
+  "date": "2026-09-06",
+  "goalStatus": "active",
+  "check": {
+    "command": "npm run check",
+    "sessionId": 51355,
+    "exitCode": 0,
+    "backend": {
+      "total": 3386,
+      "pass": 3335,
+      "fail": 0,
+      "skipped": 51
+    },
+    "renderer": {
+      "files": 86,
+      "pass": 606
+    },
+    "lint": "passed",
+    "typecheck": "passed"
+  },
+  "targeted": {
+    "package": 7,
+    "attachmentReference": 5,
+    "productionAttachmentSurface": 4,
+    "trustedDispatch": 13
+  },
+  "scope": {
+    "gitDiffCheck": "exit0; existing CRLF warnings only",
+    "gitnexus": {
+      "changed_count": 705,
+      "affected_count": 172,
+      "changed_files": 323,
+      "risk_level": "critical"
+    },
+    "note": "Entire shared dirty worktree; not all changes are RQA26 or audited. No commit. Critical buildChatMessages and HIGH manual dispatch impact warned before edits."
+  },
+  "sourceHashes": {
+    "src/catalog/experts/image-producer/EXPERT.md": "b0845055f7a7dc032f99bbf0a6b5d6e26f321794e975e8ea952317768270e9ba",
+    "src/catalog/experts/image-producer/manifest.json": "4b6b97e027704c112483440cebff596adecb5c48cbfa6ee41e14508c01a0a95c",
+    "src/catalog/experts/image-producer/capability.manifest.json": "bc591332b38bdccaee477eeeb5e0eb90e8c0d0bb9fa540bc602bb7f74e816fa8",
+    "src/catalog/catalog.json": "aaced20645b8d938b0739ef1bc26bbaaf0f14a306eefae26ee902ac47598b75d",
+    "src/lib/image-attachment-resources.ts": "5ee64ba6f5d9f723e3c2ad5a43ea9ad4608b763f6595e7e104dd63398eb77fe0",
+    "src/lib/ai-assistant-context.ts": "9d2c5028e4e0893904814a9b740c5ec07326abe1c2005b1aa5a76a1d77d8c905",
+    "src/lib/agent-media-resources.ts": "77eb64549f2cca31e63766adfebba7ed98f4b3be4b4cb36c9207bcd9dafeba48",
+    "src/lib/agent-generate-tool-surface.ts": "bcb63d9d6ffa65b1dee5257635d77e6dffc3936b17ff46c6edc6b2248d7c8582",
+    "src/lib/tool-dispatch-outcome.ts": "6d0e2f86f7a3d33a9225ad6407321f12dfb5011e31538fd45aad4e68790b98cc",
+    "src/lib/agent-image-tools.ts": "3c855dcf9fd502b619e887c540fd1188b95489dff15fe6a0445d31bd3d19def0",
+    "src/lib/tool-contract-registry.ts": "79461231babbaaa01b1cac850b12c18356c01048d448ee145043ccc7c120eaab",
+    "src/lib/agent-tools-surface.ts": "60f82e974e0e92730894846095d06b41e3af81f034dc96d8dec1db126f9a0d74",
+    "tests/image-producer-package-consistency.test.js": "dc6757a52772c0f21bdbd468b3629d96c18d49fe37d64a978f335ecff12090e4",
+    "tests/image-attachment-reference.test.js": "9d28ba5ab77803e8b46719e5a9b3ab5b75a1fecd3cd0accd0e37ebbd7a0e6ed2",
+    "tests/image-attachment-surface-integration.test.js": "25e2ac9b7fba93d5f4b91fd682e7faf51af0a1fdd0054545f3a25515a8efd45f",
+    "tests/rqa26-image-dispatch-boundary.test.js": "9097bdfcc3bf6dfb160efa3936ad803d55c7a1ff679a7f297fa9f5d055d028d9"
+  },
+  "ui": {
+    "taskId": "task-mtpmgiwr-ceqif",
+    "viewport": {
+      "width": 1280,
+      "height": 820
+    },
+    "thumbnail": {
+      "complete": true,
+      "natural": [
+        896,
+        1200
+      ],
+      "rect": {
+        "x": 189.390625,
+        "y": 245.921875,
+        "width": 313.59375,
+        "height": 420,
+        "top": 245.921875,
+        "right": 502.984375,
+        "bottom": 665.921875,
+        "left": 189.390625
+      },
+      "fit": "contain",
+      "parentText": ""
+    },
+    "inputs": 1,
+    "dialog": {
+      "complete": true,
+      "natural": [
+        896,
+        1200
+      ],
+      "rect": {
+        "x": 231,
+        "y": 151.796875,
+        "width": 818,
+        "height": 573.390625,
+        "top": 151.796875,
+        "right": 1049,
+        "bottom": 725.1875,
+        "left": 231
+      },
+      "fit": "contain",
+      "viewport": [
+        1280,
+        820
+      ]
+    },
+    "afterRevisionClick": {
+      "inputs": 1,
+      "focused": true,
+      "value": ""
+    },
+    "afterReload": {
+      "inputs": 1,
+      "image": {
+        "complete": true,
+        "natural": [
+          896,
+          1200
+        ]
+      },
+      "hasFinal": 1,
+      "acceptButtons": 1
+    }
+  },
+  "evidenceIntegrity": {
+    "combinedDataSHA256": "9a91d7096875a6431dcaeffea4d2c07b5b4d4271c02f5a5fcd9f16b0c44fb2d9",
+    "oldR01DataSHA256": "46358e961e9bad6131dd946137d8af5907136eb2e634cc38aea4b41098dfb107",
+    "oldH02DataSHA256": "753fe95235d54fc078f8678174f5171d6846f3e3e85bedb242556cde71e919fc",
+    "candidateH02DataSHA256": "48d1a66132cf20d1967d3e10edbe2a84ed302292cd63eea4661e24707192d7ff",
+    "method": "Checksummed sanitized in-memory objects exported via gzip/base64, not raw HTTP capture; original plain PTY export retained separately with whitespace caveat."
+  },
+  "professionalQualification": "not_assessed",
+  "remaining": [
+    "All 24 experts production qualification",
+    "Repeated/new-input professional trials; not only known base image",
+    "Actual end-to-end paid revision and failure/retry after generic changes",
+    "Additional linked Skill reference-file method coverage",
+    "Daily profile/package distribution verification; isolated profile only"
+  ]
+}

@@ -1,0 +1,143 @@
+{
+  "taskId": "task-mtotfx67-mplj8",
+  "runId": "expert_task-mtotfx67-mplj8_mtovv5f4",
+  "assignmentSnapshot": {
+    "agentId": "qa-engineer",
+    "agentVersion": "2.0.0",
+    "agentHash": "e999616a126c2cb1",
+    "profileId": "",
+    "profileVersion": "",
+    "profileHash": "",
+    "snapshotRef": "expert-snapshot:wb-expert-task-mtotfx67-mplj8",
+    "bindings": {
+      "skills": [
+        "code-review"
+      ],
+      "connectors": []
+    },
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "plan": {
+      "goal": "依据需求和有限真实式日志设计风险导向测试，不把未执行验证当作通过",
+      "deliverables": [],
+      "acceptanceCriteria": [],
+      "capabilityUse": [],
+      "steps": [
+        "核对所给材料与证据边界",
+        "按专家SOP给出完整专业交付",
+        "复核事实、规则待定项和验收限制"
+      ],
+      "risks": [
+        "未明确责任或业务规则不可补造",
+        "静态分析不得冒充动态执行"
+      ]
+    },
+    "sop": {
+      "version": "2.0.0",
+      "hash": "e999616a126c2cb1"
+    }
+  },
+  "executionEvidence": [
+    {
+      "runId": "expert_task-mtotfx67-mplj8_mtovv5f4",
+      "deliverableId": "primary",
+      "gateStatus": "verified",
+      "verificationPassed": true,
+      "toolCalls": [],
+      "evidence": [],
+      "violations": [],
+      "createdAt": "2026-09-05T21:16:57.039Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-17",
+      "type": "retried",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 17,
+      "summary": "用户重新执行任务",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.513Z"
+    },
+    {
+      "id": "event-18",
+      "type": "preflight_started",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 18,
+      "summary": "正在检查技能、连接器和工具权限",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.52Z"
+    },
+    {
+      "id": "event-19",
+      "type": "preflight_passed",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 19,
+      "summary": "执行条件检查通过",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.534Z"
+    },
+    {
+      "id": "event-20",
+      "type": "task_started",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 20,
+      "summary": "专家已开始执行",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.534Z"
+    },
+    {
+      "id": "event-21",
+      "type": "sop_applied",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 21,
+      "summary": "已加载专家 SOP，按最小必要路径执行",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.534Z"
+    },
+    {
+      "id": "event-22",
+      "type": "progress",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 22,
+      "summary": "正在准备上下文…",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:47.544Z"
+    },
+    {
+      "id": "event-23",
+      "type": "progress",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 23,
+      "summary": "回答生成完成",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:57Z"
+    },
+    {
+      "id": "event-24",
+      "type": "deliverable_ready",
+      "kind": "event",
+      "source": "expert",
+      "sequence": 24,
+      "summary": "依据需求和有限真实式日志设计风险导向测试，不把未执行验证当作通过",
+      "actorId": "",
+      "createdAt": "2026-09-05T21:16:57.053Z"
+    }
+  ]
+}

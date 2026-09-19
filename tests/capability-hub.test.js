@@ -3,6 +3,7 @@
 const { describe, it } = require('node:test')
 const assert = require('node:assert')
 const fs = require('fs')
+const os = require('os')
 const path = require('path')
 const { currentPage } = require('./helpers/current-src')
 
@@ -47,6 +48,92 @@ describe('skill hub domain categories', () => {
     const hub = mapCatalogItemToHub({ ...review, categories: ['开发'] })
     assert.equal(hub.category, '软件研发')
     assert.deepEqual(hub.categories, ['软件研发'])
+  })
+
+  it('projects imported qualification facts without conflating install state with readiness', () => {
+    const hub = mapCatalogItemToHub({
+      id: 'limited-expert',
+      kind: 'expert',
+      name: '待修复专家',
+      installed: true,
+      enabled: true,
+      manifest: {
+        metadata: {
+          knowme: {
+            qualification: {
+              state: 'limited',
+              issues: ['undeclared_connector_contract'],
+              limitedSkills: ['image-generation'],
+              assessedAtImport: true,
+            },
+          },
+        },
+      },
+    })
+
+    assert.equal(hub.status, 'enabled')
+    assert.deepEqual(hub.qualification, {
+      state: 'limited',
+      issues: ['undeclared_connector_contract'],
+      limitedSkills: ['image-generation'],
+      assessedAtImport: true,
+    })
+  })
+
+  it('projects expert lifecycle without changing install or readiness state', () => {
+    const hub = mapCatalogItemToHub({
+      id: 'old-expert', kind: 'expert', name: '旧专家', installed: true, enabled: true,
+      lifecycle: { state: 'legacy', newTasks: false, successors: [{ kind: 'expert', id: 'new-expert' }] },
+    })
+    assert.equal(hub.status, 'enabled')
+    assert.deepEqual(hub.lifecycle, {
+      state: 'legacy', newTasks: false, successors: [{ kind: 'expert', id: 'new-expert' }],
+    })
+  })
+})
+
+describe('generic skill script arguments', () => {
+  const { createCapabilityRuntime, serializeSkillScriptArgs } = require('../src/lib/capability-hub/runtime')
+
+  it('preserves explicit argv and maps named values to predictable CLI flags', () => {
+    assert.deepEqual(serializeSkillScriptArgs({ argv: ['--input', 'a b', 2] }), {
+      ok: true,
+      argv: ['--input', 'a b', '2'],
+    })
+    assert.deepEqual(serializeSkillScriptArgs({ outputPath: 'result.json', verbose: true, tags: ['a', 'b'] }), {
+      ok: true,
+      argv: ['--output-path', 'result.json', '--verbose', '--tags', 'a', '--tags', 'b'],
+    })
+  })
+
+  it('rejects ambiguous or unsafe argument shapes before execution', () => {
+    assert.equal(serializeSkillScriptArgs({ argv: 'nope' }).code, 'invalid_args')
+    assert.equal(serializeSkillScriptArgs({ 'bad key': 'x' }).code, 'invalid_args')
+  })
+
+  it('forwards exact argv through the capability runtime to the package script', async t => {
+    const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'km-capability-script-'))
+    t.after(() => fs.rmSync(userData, { recursive: true, force: true }))
+    const scriptsRoot = path.join(userData, 'scripts')
+    const scriptAbs = path.join(scriptsRoot, 'echo-args.mjs')
+    fs.mkdirSync(scriptsRoot, { recursive: true })
+    fs.writeFileSync(scriptAbs, 'console.log(JSON.stringify(process.argv.slice(2)))\n', 'utf8')
+    const runtime = createCapabilityRuntime({
+      getUserData: () => userData,
+      getKnowledgeDir: () => path.join(userData, 'knowledge'),
+      store: { loadInstallStore: () => ({ entries: {} }) },
+      unifiedConnectors: { loadConnectors: () => [] },
+      getPackEmptyStateGroups: () => [],
+      getPackScenesForUi: () => [],
+    })
+
+    const result = await runtime.runSkillScriptInSandbox({
+      scriptsRoot,
+      scriptAbs,
+      args: { argv: ['--out', 'folder with spaces', '&literal'] },
+    })
+    assert.equal(result.ok, true)
+    assert.match(result.text, /\["--out","folder with spaces","&literal"\]/)
   })
 })
 

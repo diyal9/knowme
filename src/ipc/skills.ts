@@ -15,7 +15,7 @@ function registerSkillsIpc(ipcMain, deps) {
     try {
       const legacy = productKnowledge.listSkills(KNOWLEDGE_DIR)
       const hub = ensureCapabilityHub()
-      const stdItems = hub.skillRuntime().listSlashPickerItems({ includeLegacy: true })
+      const stdItems = hub.skillRuntime().listSlashPickerItems({ includeLegacy: false })
       const bySlash = new Map()
       for (const item of stdItems) {
         const slash = String(item.slash || item.id || '').trim()

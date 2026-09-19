@@ -1,0 +1,672 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-16T13:39:30.933Z",
+  "requiredScenarios": {
+    "normal": 2,
+    "edge": 1,
+    "retry": 1,
+    "revision": 1,
+    "reopen": 1
+  },
+  "totalExperts": 6,
+  "readyExperts": 6,
+  "incompleteExperts": 0,
+  "complete": true,
+  "experts": [
+    {
+      "expertId": "product-manager",
+      "sourceSuites": [
+        "skill-evals/rqa62-product-manager-qualification/evals.json"
+      ],
+      "caseCount": 8,
+      "scenarioCounts": {
+        "normal": 4,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "requirement-review",
+        "user-research"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 4,
+        "connectorCount": 0,
+        "capabilityDependencyCount": 4,
+        "deliverableCount": 2,
+        "routeCount": 3,
+        "conditionalRouteIds": [
+          "requirement-review",
+          "user-research"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "PM01",
+          "expertId": "product-manager",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM02",
+          "expertId": "product-manager",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM03",
+          "expertId": "product-manager",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM04",
+          "expertId": "product-manager",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM05",
+          "expertId": "product-manager",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM06",
+          "expertId": "product-manager",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "PM07",
+          "expertId": "product-manager",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "requirement-review",
+          "assertions": 4
+        },
+        {
+          "id": "PM08",
+          "expertId": "product-manager",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "user-research",
+          "assertions": 4
+        }
+      ]
+    },
+    {
+      "expertId": "office-partner",
+      "sourceSuites": [
+        "skill-evals/rqa41-office-qualification/evals.json",
+        "skill-evals/rqa73-office-qualification/evals.json"
+      ],
+      "caseCount": 12,
+      "scenarioCounts": {
+        "normal": 8,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "today-priority",
+        "meeting-summary",
+        "doc-kb",
+        "related-chats"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 8,
+        "connectorCount": 1,
+        "capabilityDependencyCount": 9,
+        "deliverableCount": 1,
+        "routeCount": 9,
+        "conditionalRouteIds": [
+          "today-priority",
+          "meeting-summary",
+          "doc-kb",
+          "related-chats"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "OP04",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP05",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP06",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 3
+        },
+        {
+          "id": "OP07",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP08",
+          "expertId": "office-partner",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP09",
+          "expertId": "office-partner",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP10",
+          "expertId": "office-partner",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP11",
+          "expertId": "office-partner",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "OP12",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "today-priority",
+          "assertions": 3
+        },
+        {
+          "id": "OP13",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "meeting-summary",
+          "assertions": 3
+        },
+        {
+          "id": "OP14",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "doc-kb",
+          "assertions": 3
+        },
+        {
+          "id": "OP15",
+          "expertId": "office-partner",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "related-chats",
+          "assertions": 3
+        }
+      ]
+    },
+    {
+      "expertId": "research-analyst",
+      "sourceSuites": [
+        "skill-evals/product-research-methods-workspace/evals.json",
+        "skill-evals/rqa74-research-qualification/evals.json"
+      ],
+      "caseCount": 9,
+      "scenarioCounts": {
+        "normal": 5,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "public-fact-check",
+        "public-web-research",
+        "knowledge-curation"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 5,
+        "connectorCount": 0,
+        "capabilityDependencyCount": 5,
+        "deliverableCount": 2,
+        "routeCount": 6,
+        "conditionalRouteIds": [
+          "public-fact-check",
+          "public-web-research",
+          "knowledge-curation"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "research-local-conflicting-materials",
+          "expertId": "research-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "research-current-public-evidence",
+          "expertId": "research-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "RA05",
+          "expertId": "research-analyst",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "RA06",
+          "expertId": "research-analyst",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "RA07",
+          "expertId": "research-analyst",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "RA08",
+          "expertId": "research-analyst",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 4
+        },
+        {
+          "id": "RA09",
+          "expertId": "research-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "public-fact-check",
+          "assertions": 3
+        },
+        {
+          "id": "RA10",
+          "expertId": "research-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "public-web-research",
+          "assertions": 3
+        },
+        {
+          "id": "RA11",
+          "expertId": "research-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "knowledge-curation",
+          "assertions": 4
+        }
+      ]
+    },
+    {
+      "expertId": "software-engineer",
+      "sourceSuites": [
+        "skill-evals/rqa61-software-engineer-qualification/evals.json",
+        "skill-evals/rqa75-software-engineer-qualification/evals.json",
+        "skill-evals/web-expert-visual-reference/evals.json"
+      ],
+      "caseCount": 9,
+      "scenarioCounts": {
+        "normal": 5,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "architecture-decision",
+        "quality-verification",
+        "web-visual-reference"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 6,
+        "connectorCount": 0,
+        "capabilityDependencyCount": 6,
+        "deliverableCount": 2,
+        "routeCount": 4,
+        "conditionalRouteIds": [
+          "web-visual-reference",
+          "architecture-decision",
+          "quality-verification"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "SE06",
+          "expertId": "software-engineer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "SE07",
+          "expertId": "software-engineer",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "SE08",
+          "expertId": "software-engineer",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "SE09",
+          "expertId": "software-engineer",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "SE10",
+          "expertId": "software-engineer",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "SE12",
+          "expertId": "software-engineer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "architecture-decision",
+          "assertions": 4
+        },
+        {
+          "id": "SE13",
+          "expertId": "software-engineer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "quality-verification",
+          "assertions": 4
+        },
+        {
+          "id": "SE11",
+          "expertId": "software-engineer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "WEB-VISUAL-01",
+          "expertId": "software-engineer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "web-visual-reference",
+          "assertions": 4
+        }
+      ]
+    },
+    {
+      "expertId": "data-analyst",
+      "sourceSuites": [
+        "skill-evals/rqa72-data-analyst-qualification/evals.json"
+      ],
+      "caseCount": 8,
+      "scenarioCounts": {
+        "normal": 4,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "data-report",
+        "business-insight"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 6,
+        "connectorCount": 0,
+        "capabilityDependencyCount": 6,
+        "deliverableCount": 2,
+        "routeCount": 3,
+        "conditionalRouteIds": [
+          "data-report",
+          "business-insight"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "DA01",
+          "expertId": "data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA02",
+          "expertId": "data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA03",
+          "expertId": "data-analyst",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA04",
+          "expertId": "data-analyst",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA05",
+          "expertId": "data-analyst",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA06",
+          "expertId": "data-analyst",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "DA07",
+          "expertId": "data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "data-report",
+          "assertions": 4
+        },
+        {
+          "id": "DA08",
+          "expertId": "data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "business-insight",
+          "assertions": 4
+        }
+      ]
+    },
+    {
+      "expertId": "image-producer",
+      "sourceSuites": [
+        "skill-evals/rqa69-image-producer-qualification/evals.json",
+        "skill-evals/rqa76-image-producer-qualification/evals.json"
+      ],
+      "caseCount": 6,
+      "scenarioCounts": {
+        "normal": 2,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "pango-generate"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 6,
+        "connectorCount": 1,
+        "capabilityDependencyCount": 8,
+        "deliverableCount": 1,
+        "routeCount": 0,
+        "conditionalRouteIds": [
+          "pango-generate"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "IP01",
+          "expertId": "image-producer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "pango-generate",
+          "assertions": 5
+        },
+        {
+          "id": "IP02",
+          "expertId": "image-producer",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "IP03",
+          "expertId": "image-producer",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "IP04",
+          "expertId": "image-producer",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "IP05",
+          "expertId": "image-producer",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "",
+          "assertions": 5
+        },
+        {
+          "id": "IP06",
+          "expertId": "image-producer",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "",
+          "assertions": 5
+        }
+      ]
+    }
+  ]
+}

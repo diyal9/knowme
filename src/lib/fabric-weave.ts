@@ -68,17 +68,20 @@ function lexicalSimilarity(a, b) {
 }
 
 function resolveProviderRoot(userData, provider, ctx = {}) {
-  if (provider.kind === 'local' || provider.kind === 'qmd-local') {
-    if (provider.spaceSourceId && Array.isArray(ctx.sources)) {
-      const src = ctx.sources.find(s => s.id === provider.spaceSourceId)
+  if (['local', 'qmd-local', 'folder', 'gitlab'].includes(provider.kind)) {
+    const sourceId = provider.sourceId || provider.spaceSourceId
+    if (sourceId && Array.isArray(ctx.sources)) {
+      const src = ctx.sources.find(s => s.id === sourceId)
       if (src?.rootPath) {
         const base = path.resolve(src.rootPath)
         const sub = String(provider.subDir || '').trim()
         if (!sub) return base
-        return path.join(base, ...sub.split('/').filter(Boolean))
+        const target = path.resolve(base, ...sub.replace(/\\/g, '/').split('/').filter(Boolean))
+        if (target !== base && !target.startsWith(`${base}${path.sep}`)) return null
+        return target
       }
     }
-    return knowledgeOs.resolveWikiRoot(userData, ctx)
+    if (provider.kind === 'local' || provider.kind === 'qmd-local') return knowledgeOs.resolveWikiRoot(userData, ctx)
   }
   return null
 }
@@ -129,6 +132,21 @@ function extractAnchors(userData, provider, ctx = {}) {
     }))
   }
   return { ok: true, anchors, root, fileCount: files.length }
+}
+
+function loadProviderDocuments(userData, provider, ctx = {}) {
+  const root = resolveProviderRoot(userData, provider, ctx)
+  if (!root || !fs.existsSync(root)) return []
+  return walkTextFiles(root).map(file => {
+    try {
+      const content = fs.readFileSync(file.abs, 'utf8')
+      return {
+        title: titleFromContent(content, path.basename(file.rel, path.extname(file.rel))),
+        path: file.rel,
+        content,
+      }
+    } catch { return null }
+  }).filter(Boolean)
 }
 
 function matchEdges(anchors, concepts, minScore = 0.18) {
@@ -231,6 +249,7 @@ function autoWeaveAndApply(userData, provider, ctx = {}) {
 module.exports = {
   resolveProviderRoot,
   extractAnchors,
+  loadProviderDocuments,
   matchEdges,
   weaveProvider,
   applyWeave,

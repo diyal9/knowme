@@ -64,7 +64,6 @@ export function DaemonComposePanel() {
     if (activeLinkPreview) return ''
     return records.find((item) => (
       item.sourceUrl &&
-      /^飞书/.test(item.sourceLabel || '') &&
       !item.sourceTitle &&
       !linkTitleCache[item.sourceUrl]
     ))?.sourceUrl || ''

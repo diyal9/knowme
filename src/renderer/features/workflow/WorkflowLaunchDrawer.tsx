@@ -83,6 +83,19 @@ function outputLabels(workflowPackage: Record<string, unknown> | null, card: She
   return labels.length ? labels : [card.outcomeLabel]
 }
 
+function workflowKnowledgeLabels(workflowPackage: Record<string, unknown> | null) {
+  const graph = asRecord(workflowPackage?.graph)
+  const labels = (Array.isArray(graph.nodes) ? graph.nodes : [])
+    .map(asRecord)
+    .filter((node) => String(node.type || '') === 'knowledge')
+    .map((node) => {
+      const config = asRecord(node.config)
+      return String(config.knowledgeName || config.knowledgeId || node.name || '').trim()
+    })
+    .filter(Boolean)
+  return [...new Set(labels)]
+}
+
 export function WorkflowLaunchDrawer({
   card,
   workflowPackage,
@@ -96,6 +109,7 @@ export function WorkflowLaunchDrawer({
 }) {
   const schema = useMemo(() => workflowFields(workflowPackage, card), [workflowPackage, card])
   const outputs = useMemo(() => outputLabels(workflowPackage, card), [workflowPackage, card])
+  const knowledgeLabels = useMemo(() => workflowKnowledgeLabels(workflowPackage), [workflowPackage])
   const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(
     schema.fields.map((field) => [field.id, field.initialValue]),
   ))
@@ -222,6 +236,16 @@ export function WorkflowLaunchDrawer({
 
           <section className="wb-workflow-launch-fields" aria-label="本次运行输入">
             {primaryFields.map((field, index) => renderField(field, index === 0))}
+          </section>
+
+          <section className="wb-task-knowledge-field wb-workflow-launch-knowledge" aria-label="本次运行知识范围">
+            <span>本次知识范围</span>
+            {knowledgeLabels.length ? (
+              <div className="wb-task-knowledge-list">
+                {knowledgeLabels.map((label) => <span key={label} className="wb-task-knowledge-option is-selected"><span className="wb-task-knowledge-meta"><strong>{label}</strong><small>按知识库节点检索</small></span></span>)}
+              </div>
+            ) : <small className="wb-task-knowledge-hint">本工作流未配置知识库节点。</small>}
+            <small className="wb-task-knowledge-hint">如需调整，请返回工作流编排修改对应的知识库节点。</small>
           </section>
 
           {advancedFields.length ? (

@@ -29,12 +29,45 @@ function load(userData) {
   }
 }
 
+function waitForFileHandleRelease(milliseconds) {
+  const delay = Math.max(1, Number(milliseconds) || 1)
+  try {
+    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay)
+  } catch {
+    // Atomics.wait is an optional synchronous backoff; the next rename attempt
+    // still provides the useful fallback on runtimes without SharedArrayBuffer.
+  }
+}
+
+function renameWithRetry(source, target, options = {}) {
+  const attempts = Math.max(1, Number(options.attempts) || 5)
+  const delayMs = Math.max(1, Number(options.delayMs) || 25)
+  let lastError
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      fs.renameSync(source, target)
+      return
+    } catch (error) {
+      lastError = error
+      const retryable = process.platform === 'win32'
+        && ['EPERM', 'EACCES', 'EBUSY'].includes(String(error?.code || ''))
+      if (!retryable || attempt === attempts - 1) throw error
+      waitForFileHandleRelease(delayMs * (attempt + 1))
+    }
+  }
+  throw lastError
+}
+
 function save(userData, data) {
   const file = storePath(userData)
   fs.mkdirSync(path.dirname(file), { recursive: true })
   const tmp = `${file}.tmp`
-  fs.writeFileSync(tmp, JSON.stringify({ ...data, version: STORE_VERSION }, null, 2), 'utf8')
-  fs.renameSync(tmp, file)
+  try {
+    fs.writeFileSync(tmp, JSON.stringify({ ...data, version: STORE_VERSION }, null, 2), 'utf8')
+    renameWithRetry(tmp, file)
+  } finally {
+    try { if (fs.existsSync(tmp)) fs.unlinkSync(tmp) } catch { /* preserve the original save error */ }
+  }
   return data
 }
 
@@ -107,6 +140,7 @@ module.exports = {
   STORE_VERSION,
   storePath,
   load,
+  renameWithRetry,
   save,
   createTask,
   getTask,

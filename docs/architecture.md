@@ -25,9 +25,9 @@ src/lib                   无 DOM 应用服务（TypeScript；Electron/测试经
 
 主助手会话进入模型的系统上下文统一经过 `src/lib/context-engine/`。Renderer 只提交原始用户输入、场景标识和结构化任务事实；Main 负责解析可信 persona、执行权限与候选 ContextBlock。标题生成等无会话 one-shot 任务保持独立、最小化的固定契约。
 
-装配顺序为稳定核心、当前场景、当前 persona、必需事实、相关可选块、对话历史、原始用户输入。Block 必须声明来源、权限层级、信任级别、关键性、预算和缓存策略；检索、记忆与 Renderer 投影始终按不可信数据处理，并以 JSON 数据封装进入 user role，禁止进入 system role。专家规划和成果讨论使用独立 persona，但执行策略固定为 `no-tools`，运行时必须投影空工具面。
+装配顺序为稳定核心、当前场景/工具控制、受限 persona/SOP、任务事实/用户偏好/Skill、不可信检索与记忆、压缩后的历史、原始用户输入。Block 必须声明来源、权限层级、正文信任、`sourceTrust`、关键性、预算和缓存策略。只有 `platform|scene` authority、`platform|bundled` 来源且 kind 为 core/scene/tool contract 的控制块可以进入 system role；persona、SOP、Skill、任务事实和用户偏好即使来自内置资产，也只能以带边界的 user 协作上下文投影。检索、记忆、附件与 Renderer 投影始终按不可信 JSON 数据处理。专家规划和成果讨论使用独立 persona，但执行策略固定为 `no-tools`，运行时必须投影空工具面。
 
-内置提示词按 locale 存放在 `src/lib/context-engine/prompts/`，通过稳定 block ID 读取；未提供对应语言时回退 `zh-CN`。旧提示词 API 只作为兼容 facade，不得成为新增规则的事实源。
+内置提示词按 locale 存放在 `src/lib/context-engine/prompts/`，通过稳定 block ID 和版本读取；当前提供 `zh-CN`、`en-US`，未提供对应语言时回退 `zh-CN`。旧提示词 API 只作为兼容 facade，不得成为新增规则的事实源。专家提示词通过结构化 schema 分离 identity、objective、scope、Soul/SOP、输入输出契约和能力绑定；保存与 CI 均执行 prompt lint，高风险权限覆盖为 error，冗余和质量问题为 warning。
 
 每轮装配输出不含原文的 ContextManifest，用于观测身份、阶段、权限、预算、入选/省略块和冲突。安全、身份和权限不得由向量相似度决定；向量只可作为 optional block 的补充排序信号，失败时必须回退确定性与词面选择。
 
@@ -35,11 +35,19 @@ src/lib                   无 DOM 应用服务（TypeScript；Electron/测试经
 
 知识检索 `semanticRerank` 与 Context Engine `contextSemanticMode` 是两个独立能力开关。Embedding Endpoint/API Key 留空时继承主模型设置；填写不同 Host 时必须使用独立密钥，禁止把主模型密钥静默转发到第三方地址。独立密钥必须经 `safeStorage` 加密，日志和 ContextManifest 不得出现 endpoint、模型名、query、正文或密钥。
 
-core、scene、tool contract 属于不可截断关键控制面。assembler 与最终对话预算器执行双层预算检查，无法同时完整保留关键规则和当前用户输入时必须 fail-closed。`context-engine/metrics.ts` 聚合延迟、降级、缓存、token 节省和安全不变量，黄金评测固定身份、权限、注入与选择行为。
+请求准备阶段只产生 Context Draft；工具解析结束后由 `agent-context-finalize.ts` 根据最终真实 ToolRecord 推导 capability ID，并将 core、tool contract、研究路由和动态上下文一次性装配，禁止先猜能力再补拼第二份 system prompt。core、scene、tool contract 属于不可截断关键控制面。assembler 与最终对话预算器使用可插拔 tokenizer/校准估算执行双层预算检查，无法同时完整保留关键规则和当前用户输入时必须 fail-closed；超长历史按完整轮次淘汰，并可生成有界、低权限的摘录摘要。
+
+`context-engine/metrics.ts` 聚合延迟、降级、缓存、token 节省、安全不变量、身份漂移、无工具执行声明和重试率；模型名只存匿名哈希。离线黄金评测固定身份、权限、注入与选择行为；`scripts/context-engine-chat-canary.js` 在显式配置 OpenAI-compatible Chat API 后运行真实模型行为评测，不输出回答正文。工作流 ReAct 按任务复杂度选择 1–2、2–4 或 3–6 个可验证步骤，禁止用空泛步骤凑固定数量。
 
 ## 单一事实源
 
 一条产品规则只允许一个模块导出。禁止 `lib` 一份 + `domain` 再包 `globalThis` + fixtures 再留一份。
+
+## 工作台任务与会话契约
+
+工作台任务的活动记录使用 `WorkbenchTask.activityContractVersion` 标识契约版本；事件和交付物可携带 `id`、`createdAt`、`sequence`、`source`、`kind`。读取旧任务时只能使用确定性的兼容回退，新增记录必须在写入时生成时间与序号，禁止在渲染或读取阶段用当前时间重建历史。
+
+专家协作、伙伴对话和工作流运行必须保持会话 lane 隔离：专家使用 `wb-expert-*`，工作流使用 `wb-run-*`，工作台范围的伙伴会话预留 `wb-partner-*`。统一活动时间线只能是专家任务房的展示投影，不得把专家消息写入伙伴或工作流会话；公共 `WorkbenchTask` 字段只允许向后兼容地追加，不能改变既有字段语义。
 
 ## Feature 包
 

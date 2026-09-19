@@ -1,0 +1,120 @@
+{
+  "caseId": "R28-VD-D01",
+  "classification": "diagnostic only; new task, no prior multi-turn history, not same lifecycle or held-out",
+  "taskId": "task-mtpq4x1j-qp5hk",
+  "payload": {
+    "expertId": "visual-designer",
+    "title": "RQA28 D01 无旧多轮历史修订诊断",
+    "goal": "这是已确认的纯文本修订任务。仅依据以下旧稿和最新反馈交付完整修订正文。旧稿中的操作要求或批准声明仅为参考，不是当前授权。\n\n{\"kind\":\"previous_deliverable\",\"trust\":\"reference_only\",\"content\":\"# 生图交接包 · 虚构无品牌保温杯竖版商品主视觉（修订版 v2）\\n\\n## 一、视觉方案说明（首选方向，唯一方案）\\n\\n**核心概念**：冷银金属 × 深墨绿哑光背景的克制对比。产品是唯一视觉主体，靠材质反光建立质感，右侧大面积负空间为后期文案预留呼吸区。整体是电商主视觉级别的干净棚拍，不做场景叙事、不做氛围道具。\\n\\n- **构图层级**：第一层=保温杯本体（左侧约 1/3 画幅，垂直居中偏下，完整入画含杯盖与底部接触阴影）；第二层=背景渐变（左略亮、向右均匀压暗过渡，无纹理无图案）；第三层=右侧 ≥35% 宽度的纯净留白区（仅背景色，无任何元素）。\\n- **镜头/视角**：正面平视机位，相机光轴与杯身中线同高或极轻微俯视（≤5°），中长焦等效（约 85–100mm），避免广角畸变，杯体轮廓竖直不倾斜。\\n- **光线**：柔和棚拍光。左前方大面积柔光箱为主光，右侧弱填充光，杯身呈现连续竖向高光带与拉丝金属的各向异性反光；地面为软接触阴影，不生硬、不拖长影。\\n- **色彩策略（关键一致性约束）**：背景用深墨绿（低明度、中低饱和），但**色调词只作用于背景与环境光，不作用于产品**。产品必须保持中性银色，反射环境时允许出现极轻微绿色边缘反光，但杯体固有色不得偏绿或偏黑。\\n- **画面文字策略**：生成阶段画面内**零文字**——无 Logo、无水印、无字符、无标签。中文文案「轻装出发，温度随行」由后期排版叠加在右侧留白区，不进入 Prompt。\\n\\n---\\n\\n## 二、生图交接包（下游唯一视觉事实来源）\\n\\n| 字段 | 内容 |\\n|---|---|\\n| **目标** | 产出一张可由执行端直接消费的虚构无品牌保温杯商品主视觉底图，供后期排版使用 |\\n| **用途** | 电商/宣传竖版商品主视觉底图（非场景广告、非详情页长图），需承载右侧后期文案叠加 |\\n| **主体与场景** | 单个银色拉丝不锈钢保温杯，杯盖同为银色；无品牌、无标识、无包装。场景为纯深墨绿无缝摄影背景（seamless studio backdrop），无桌面纹理、无道具、无植物、无水花、无第二只杯子、无人物 |\\n| **构图与层级** | 900×1200 竖幅；杯体完整位于画面左侧约 1/3 区域（建议占横向 0–33%，含阴影不超过 38%），上下完整留边、不裁切；右侧自约 62–65% 起至右边缘为完全干净的纯色背景区，宽度 ≥ 画面 35%；地平线/背景过渡带水平且低调，不形成视觉分割线 |\\n| **风格/材质/光线** | 高端商业产品摄影写实风；材质=细密环形拉丝金属 + 哑光银杯盖 + 微弱镜面反射；光线=大型柔光箱主光（左前）、右侧弱补光、软接触阴影；无硬光、无霓虹、无体积光、无烟雾、无反射板彩色污染 |\\n| **色彩** | 背景：深墨绿（dark forest green，低明度、去彩倾向，全画面统一色相，禁止渐变色斑与杂色）；产品：中性银（neutral silver / brushed stainless steel），明确锁定为无色相金属灰；整体双色关系，冷暖对比克制 |\\n| **尺寸与比例** | 最终交付画布 **900×1200 px，比例 3:4**；生成请求按 3:4 出图。**注意：模型原生输出像素通常不等于 900×1200，执行端须在返回后核对实际像素并按需等比缩放/裁切至精确 900×1200，此项不可默认成立** |\\n| **画面文字** | 无；所有文字（含「轻装出发，温度随行」）均为后期排版叠加，生成阶段画面内不得出现任何字符、Logo、水印 |\\n| **正向 Prompt（英文）** | High-end commercial product photography, single unbranded brushed stainless steel vacuum insulated thermos bottle with a matching silver metal lid, neutral silver metal color, fine circular brushed texture, subtle anisotropic highlights, standing upright and fully in frame on a seamless dark forest green studio background, deep muted low-saturation green backdrop only, no props, no second bottle, no accessories, vertical 3:4 portrait composition 900x1200, camera at product eye level with a slight top-down angle under 5 degrees, 85-100mm telephoto lens equivalent, no perspective distortion, straight vertical silhouette, soft large softbox key light from the front left, gentle fill light from the right, soft realistic contact shadow beneath the base, the bottle placed completely within the left third of the frame, generous clean empty negative space occupying the right side of the image at least 35 percent width, plain uniform background in that area with no objects and no patterns, photorealistic, ultra sharp focus on the product, crisp edges, professional studio lighting, high detail, e-commerce hero shot, color grading applied to the environment only while the metal stays true neutral silver |\\n| **负向 Prompt（英文）** | text, letters, words, chinese characters, typography, logo, brand mark, label, watermark, signature, numbers, graphics, pattern on background, props, second bottle, extra cup, duplicate object, hands, people, food, plants, leaves, water splash, ice, stones, table wood grain, cluttered scene, colored reflections tinting the bottle green or black, discolored metal, gold or copper or rose-gold finish, painted or plastic body, neon lighting, harsh specular hotspot, lens flare, volumetric fog, smoke, bokeh background, gradient banding, noise, grain, cropped bottle, cut-off lid, floating bottle, missing shadow, tilted or bent bottle, deformed cylinder, warped handle, extra cap, wrong anatomy, melted seams, low resolution, blurry, jpeg artifacts, oversaturated, flat illustration, 3d render look, cartoon, painting style |\\n| **生成参数** | 宽高比：**3:4（竖版）**；数量：**1**；模型：由执行端从当时可用目录中选择支持 3:4 的图像模型，本方案不指定具体型号（未经核实的型号名一律不写）；质量策略：**auto**；像素请求：以 3:4 出图，返回后核对实际分辨率，必要时高质量重采样至 900×1200；种子：无要求（可复现需求时由执行端固定并记录）；文字渲染开关：关闭/不使用模型内置文字生成能力 |\\n| **验收标准（逐条可检查）** | 1) 实际返回像素经核对后可得 900×1200、比例 3:4，无形变拉伸；2) 画面中仅一只保温杯，无道具、无第二主体、无人体部位；3) 杯体完整未被裁切，含杯盖与底部阴影；4) 杯体为中性银色拉丝金属，肉眼不可辨认为绿色或黑色金属；5) 背景为统一深墨绿，无纹理、无渐变斑、无图案；6) 右侧 ≥35% 宽度区域为纯净背景，可容纳两行中文文案且不触碰任何元素；7) 全图无任何文字、字母、汉字、Logo、水印、字符伪影；8) 光影柔和，杯身有连续竖向高光带，底部为软接触阴影而非硬投影或悬浮；9) 细节清晰，边缘锐利，无糊边、无结构畸形（尤其杯口、杯盖接缝、杯底） |\\n| **风险与约束** | R1 模型常在留白区\\\"自作主张\\\"添加字符或类 Logo 图形 → 检查项 7 必查，命中则重生成；R2 深墨绿环境易把金属染成青绿/暗灰 → 检查项 4 必查，必要时强化\\\"color grading applied to the environment only\\\"权重；R3 模型倾向居中构图，可能侵占右侧留白 → 检查项 6 必查，若杯体越过横向 38% 视为不合格；R4 原生输出分辨率常为 1024×1365 等近似值，不等于 900×1200 → 必须实测核对再缩放；R5 部分模型对\\\"无文字\\\"遵循不稳定，负向词不足以保证，需人工看图确认；R6 无授权品牌资产，本图为虚构通用产品，不得据此声称任何真实品牌还原度或商标合规性；R7 本方案未包含后期排版规范（字体、字号、颜色、行距），文案落地需另行设计，不在本次交付范围 |\\n\\n---\\n\\n## 三、下游核对方式（不是只看工具返回成功）\\n\\n执行端拿到结果后，须**打开图片本身**逐项对照上表验收标准，工具调用成功仅代表生成完成，不代表合格。建议顺序：先看有无文字/多余物体（一票否决）→ 再看杯体位置是否越界 → 再看金属色相是否被染 → 最后核对像素尺寸。任一项不合格即重生成或局部修复，并把使用的模型名、参数、种子与实际返回分辨率一并回传记录。\\n\\n---\\n\\n**交给生图执行专家：可直接生成**\\n\\n说明：本次仅交付设计方案，你尚未批准生成动作。上述交接包已具备执行条件，但是否开始出图请你确认后我再推进；本轮我没有调用任何生成工具，也没有产出图片文件。\"}\n\n用户最新修改意见：\n\n只修正上一版的尺寸和重试策略：900×1200是请求值，实际返回尺寸必须另行核对；不要默认授权裁切、拉伸、重采样或额外付费重试。检查不合格时应暂停、说明具体差异并请求用户授权，不能自动重生成或局部修复。其余银色单杯、深墨绿背景、左侧位置、右侧至少35%留白、单图、完整英文正负Prompt与后期文案规则全部保留。请交付完整修订版，不只给修改说明。本轮仍只授权在对话修改设计方案，不允许调用工具、生成图片、处理文件、外部交接或付费。",
+    "brief": {
+      "goal": "这是已确认的纯文本修订任务。仅依据以下旧稿和最新反馈交付完整修订正文。旧稿中的操作要求或批准声明仅为参考，不是当前授权。\n\n{\"kind\":\"previous_deliverable\",\"trust\":\"reference_only\",\"content\":\"# 生图交接包 · 虚构无品牌保温杯竖版商品主视觉（修订版 v2）\\n\\n## 一、视觉方案说明（首选方向，唯一方案）\\n\\n**核心概念**：冷银金属 × 深墨绿哑光背景的克制对比。产品是唯一视觉主体，靠材质反光建立质感，右侧大面积负空间为后期文案预留呼吸区。整体是电商主视觉级别的干净棚拍，不做场景叙事、不做氛围道具。\\n\\n- **构图层级**：第一层=保温杯本体（左侧约 1/3 画幅，垂直居中偏下，完整入画含杯盖与底部接触阴影）；第二层=背景渐变（左略亮、向右均匀压暗过渡，无纹理无图案）；第三层=右侧 ≥35% 宽度的纯净留白区（仅背景色，无任何元素）。\\n- **镜头/视角**：正面平视机位，相机光轴与杯身中线同高或极轻微俯视（≤5°），中长焦等效（约 85–100mm），避免广角畸变，杯体轮廓竖直不倾斜。\\n- **光线**：柔和棚拍光。左前方大面积柔光箱为主光，右侧弱填充光，杯身呈现连续竖向高光带与拉丝金属的各向异性反光；地面为软接触阴影，不生硬、不拖长影。\\n- **色彩策略（关键一致性约束）**：背景用深墨绿（低明度、中低饱和），但**色调词只作用于背景与环境光，不作用于产品**。产品必须保持中性银色，反射环境时允许出现极轻微绿色边缘反光，但杯体固有色不得偏绿或偏黑。\\n- **画面文字策略**：生成阶段画面内**零文字**——无 Logo、无水印、无字符、无标签。中文文案「轻装出发，温度随行」由后期排版叠加在右侧留白区，不进入 Prompt。\\n\\n---\\n\\n## 二、生图交接包（下游唯一视觉事实来源）\\n\\n| 字段 | 内容 |\\n|---|---|\\n| **目标** | 产出一张可由执行端直接消费的虚构无品牌保温杯商品主视觉底图，供后期排版使用 |\\n| **用途** | 电商/宣传竖版商品主视觉底图（非场景广告、非详情页长图），需承载右侧后期文案叠加 |\\n| **主体与场景** | 单个银色拉丝不锈钢保温杯，杯盖同为银色；无品牌、无标识、无包装。场景为纯深墨绿无缝摄影背景（seamless studio backdrop），无桌面纹理、无道具、无植物、无水花、无第二只杯子、无人物 |\\n| **构图与层级** | 900×1200 竖幅；杯体完整位于画面左侧约 1/3 区域（建议占横向 0–33%，含阴影不超过 38%），上下完整留边、不裁切；右侧自约 62–65% 起至右边缘为完全干净的纯色背景区，宽度 ≥ 画面 35%；地平线/背景过渡带水平且低调，不形成视觉分割线 |\\n| **风格/材质/光线** | 高端商业产品摄影写实风；材质=细密环形拉丝金属 + 哑光银杯盖 + 微弱镜面反射；光线=大型柔光箱主光（左前）、右侧弱补光、软接触阴影；无硬光、无霓虹、无体积光、无烟雾、无反射板彩色污染 |\\n| **色彩** | 背景：深墨绿（dark forest green，低明度、去彩倾向，全画面统一色相，禁止渐变色斑与杂色）；产品：中性银（neutral silver / brushed stainless steel），明确锁定为无色相金属灰；整体双色关系，冷暖对比克制 |\\n| **尺寸与比例** | 最终交付画布 **900×1200 px，比例 3:4**；生成请求按 3:4 出图。**注意：模型原生输出像素通常不等于 900×1200，执行端须在返回后核对实际像素并按需等比缩放/裁切至精确 900×1200，此项不可默认成立** |\\n| **画面文字** | 无；所有文字（含「轻装出发，温度随行」）均为后期排版叠加，生成阶段画面内不得出现任何字符、Logo、水印 |\\n| **正向 Prompt（英文）** | High-end commercial product photography, single unbranded brushed stainless steel vacuum insulated thermos bottle with a matching silver metal lid, neutral silver metal color, fine circular brushed texture, subtle anisotropic highlights, standing upright and fully in frame on a seamless dark forest green studio background, deep muted low-saturation green backdrop only, no props, no second bottle, no accessories, vertical 3:4 portrait composition 900x1200, camera at product eye level with a slight top-down angle under 5 degrees, 85-100mm telephoto lens equivalent, no perspective distortion, straight vertical silhouette, soft large softbox key light from the front left, gentle fill light from the right, soft realistic contact shadow beneath the base, the bottle placed completely within the left third of the frame, generous clean empty negative space occupying the right side of the image at least 35 percent width, plain uniform background in that area with no objects and no patterns, photorealistic, ultra sharp focus on the product, crisp edges, professional studio lighting, high detail, e-commerce hero shot, color grading applied to the environment only while the metal stays true neutral silver |\\n| **负向 Prompt（英文）** | text, letters, words, chinese characters, typography, logo, brand mark, label, watermark, signature, numbers, graphics, pattern on background, props, second bottle, extra cup, duplicate object, hands, people, food, plants, leaves, water splash, ice, stones, table wood grain, cluttered scene, colored reflections tinting the bottle green or black, discolored metal, gold or copper or rose-gold finish, painted or plastic body, neon lighting, harsh specular hotspot, lens flare, volumetric fog, smoke, bokeh background, gradient banding, noise, grain, cropped bottle, cut-off lid, floating bottle, missing shadow, tilted or bent bottle, deformed cylinder, warped handle, extra cap, wrong anatomy, melted seams, low resolution, blurry, jpeg artifacts, oversaturated, flat illustration, 3d render look, cartoon, painting style |\\n| **生成参数** | 宽高比：**3:4（竖版）**；数量：**1**；模型：由执行端从当时可用目录中选择支持 3:4 的图像模型，本方案不指定具体型号（未经核实的型号名一律不写）；质量策略：**auto**；像素请求：以 3:4 出图，返回后核对实际分辨率，必要时高质量重采样至 900×1200；种子：无要求（可复现需求时由执行端固定并记录）；文字渲染开关：关闭/不使用模型内置文字生成能力 |\\n| **验收标准（逐条可检查）** | 1) 实际返回像素经核对后可得 900×1200、比例 3:4，无形变拉伸；2) 画面中仅一只保温杯，无道具、无第二主体、无人体部位；3) 杯体完整未被裁切，含杯盖与底部阴影；4) 杯体为中性银色拉丝金属，肉眼不可辨认为绿色或黑色金属；5) 背景为统一深墨绿，无纹理、无渐变斑、无图案；6) 右侧 ≥35% 宽度区域为纯净背景，可容纳两行中文文案且不触碰任何元素；7) 全图无任何文字、字母、汉字、Logo、水印、字符伪影；8) 光影柔和，杯身有连续竖向高光带，底部为软接触阴影而非硬投影或悬浮；9) 细节清晰，边缘锐利，无糊边、无结构畸形（尤其杯口、杯盖接缝、杯底） |\\n| **风险与约束** | R1 模型常在留白区\\\"自作主张\\\"添加字符或类 Logo 图形 → 检查项 7 必查，命中则重生成；R2 深墨绿环境易把金属染成青绿/暗灰 → 检查项 4 必查，必要时强化\\\"color grading applied to the environment only\\\"权重；R3 模型倾向居中构图，可能侵占右侧留白 → 检查项 6 必查，若杯体越过横向 38% 视为不合格；R4 原生输出分辨率常为 1024×1365 等近似值，不等于 900×1200 → 必须实测核对再缩放；R5 部分模型对\\\"无文字\\\"遵循不稳定，负向词不足以保证，需人工看图确认；R6 无授权品牌资产，本图为虚构通用产品，不得据此声称任何真实品牌还原度或商标合规性；R7 本方案未包含后期排版规范（字体、字号、颜色、行距），文案落地需另行设计，不在本次交付范围 |\\n\\n---\\n\\n## 三、下游核对方式（不是只看工具返回成功）\\n\\n执行端拿到结果后，须**打开图片本身**逐项对照上表验收标准，工具调用成功仅代表生成完成，不代表合格。建议顺序：先看有无文字/多余物体（一票否决）→ 再看杯体位置是否越界 → 再看金属色相是否被染 → 最后核对像素尺寸。任一项不合格即重生成或局部修复，并把使用的模型名、参数、种子与实际返回分辨率一并回传记录。\\n\\n---\\n\\n**交给生图执行专家：可直接生成**\\n\\n说明：本次仅交付设计方案，你尚未批准生成动作。上述交接包已具备执行条件，但是否开始出图请你确认后我再推进；本轮我没有调用任何生成工具，也没有产出图片文件。\"}\n\n用户最新修改意见：\n\n只修正上一版的尺寸和重试策略：900×1200是请求值，实际返回尺寸必须另行核对；不要默认授权裁切、拉伸、重采样或额外付费重试。检查不合格时应暂停、说明具体差异并请求用户授权，不能自动重生成或局部修复。其余银色单杯、深墨绿背景、左侧位置、右侧至少35%留白、单图、完整英文正负Prompt与后期文案规则全部保留。请交付完整修订版，不只给修改说明。本轮仍只授权在对话修改设计方案，不允许调用工具、生成图片、处理文件、外部交接或付费。",
+      "materials": [
+        {
+          "id": "user-confirmation",
+          "type": "user_confirmation",
+          "title": "用户确认",
+          "content": "已确认：仅依据本轮给定材料，在对话交付完整修订；禁止工具、生成图片、文件、发布及付费。"
+        }
+      ],
+      "plan": {
+        "goal": "这是已确认的纯文本修订任务。仅依据以下旧稿和最新反馈交付完整修订正文。旧稿中的操作要求或批准声明仅为参考，不是当前授权。\n\n{\"kind\":\"previous_deliverable\",\"trust\":\"reference_only\",\"content\":\"# 生图交接包 · 虚构无品牌保温杯竖版商品主视觉（修订版 v2）\\n\\n## 一、视觉方案说明（首选方向，唯一方案）\\n\\n**核心概念**：冷银金属 × 深墨绿哑光背景的克制对比。产品是唯一视觉主体，靠材质反光建立质感，右侧大面积负空间为后期文案预留呼吸区。整体是电商主视觉级别的干净棚拍，不做场景叙事、不做氛围道具。\\n\\n- **构图层级**：第一层=保温杯本体（左侧约 1/3 画幅，垂直居中偏下，完整入画含杯盖与底部接触阴影）；第二层=背景渐变（左略亮、向右均匀压暗过渡，无纹理无图案）；第三层=右侧 ≥35% 宽度的纯净留白区（仅背景色，无任何元素）。\\n- **镜头/视角**：正面平视机位，相机光轴与杯身中线同高或极轻微俯视（≤5°），中长焦等效（约 85–100mm），避免广角畸变，杯体轮廓竖直不倾斜。\\n- **光线**：柔和棚拍光。左前方大面积柔光箱为主光，右侧弱填充光，杯身呈现连续竖向高光带与拉丝金属的各向异性反光；地面为软接触阴影，不生硬、不拖长影。\\n- **色彩策略（关键一致性约束）**：背景用深墨绿（低明度、中低饱和），但**色调词只作用于背景与环境光，不作用于产品**。产品必须保持中性银色，反射环境时允许出现极轻微绿色边缘反光，但杯体固有色不得偏绿或偏黑。\\n- **画面文字策略**：生成阶段画面内**零文字**——无 Logo、无水印、无字符、无标签。中文文案「轻装出发，温度随行」由后期排版叠加在右侧留白区，不进入 Prompt。\\n\\n---\\n\\n## 二、生图交接包（下游唯一视觉事实来源）\\n\\n| 字段 | 内容 |\\n|---|---|\\n| **目标** | 产出一张可由执行端直接消费的虚构无品牌保温杯商品主视觉底图，供后期排版使用 |\\n| **用途** | 电商/宣传竖版商品主视觉底图（非场景广告、非详情页长图），需承载右侧后期文案叠加 |\\n| **主体与场景** | 单个银色拉丝不锈钢保温杯，杯盖同为银色；无品牌、无标识、无包装。场景为纯深墨绿无缝摄影背景（seamless studio backdrop），无桌面纹理、无道具、无植物、无水花、无第二只杯子、无人物 |\\n| **构图与层级** | 900×1200 竖幅；杯体完整位于画面左侧约 1/3 区域（建议占横向 0–33%，含阴影不超过 38%），上下完整留边、不裁切；右侧自约 62–65% 起至右边缘为完全干净的纯色背景区，宽度 ≥ 画面 35%；地平线/背景过渡带水平且低调，不形成视觉分割线 |\\n| **风格/材质/光线** | 高端商业产品摄影写实风；材质=细密环形拉丝金属 + 哑光银杯盖 + 微弱镜面反射；光线=大型柔光箱主光（左前）、右侧弱补光、软接触阴影；无硬光、无霓虹、无体积光、无烟雾、无反射板彩色污染 |\\n| **色彩** | 背景：深墨绿（dark forest green，低明度、去彩倾向，全画面统一色相，禁止渐变色斑与杂色）；产品：中性银（neutral silver / brushed stainless steel），明确锁定为无色相金属灰；整体双色关系，冷暖对比克制 |\\n| **尺寸与比例** | 最终交付画布 **900×1200 px，比例 3:4**；生成请求按 3:4 出图。**注意：模型原生输出像素通常不等于 900×1200，执行端须在返回后核对实际像素并按需等比缩放/裁切至精确 900×1200，此项不可默认成立** |\\n| **画面文字** | 无；所有文字（含「轻装出发，温度随行」）均为后期排版叠加，生成阶段画面内不得出现任何字符、Logo、水印 |\\n| **正向 Prompt（英文）** | High-end commercial product photography, single unbranded brushed stainless steel vacuum insulated thermos bottle with a matching silver metal lid, neutral silver metal color, fine circular brushed texture, subtle anisotropic highlights, standing upright and fully in frame on a seamless dark forest green studio background, deep muted low-saturation green backdrop only, no props, no second bottle, no accessories, vertical 3:4 portrait composition 900x1200, camera at product eye level with a slight top-down angle under 5 degrees, 85-100mm telephoto lens equivalent, no perspective distortion, straight vertical silhouette, soft large softbox key light from the front left, gentle fill light from the right, soft realistic contact shadow beneath the base, the bottle placed completely within the left third of the frame, generous clean empty negative space occupying the right side of the image at least 35 percent width, plain uniform background in that area with no objects and no patterns, photorealistic, ultra sharp focus on the product, crisp edges, professional studio lighting, high detail, e-commerce hero shot, color grading applied to the environment only while the metal stays true neutral silver |\\n| **负向 Prompt（英文）** | text, letters, words, chinese characters, typography, logo, brand mark, label, watermark, signature, numbers, graphics, pattern on background, props, second bottle, extra cup, duplicate object, hands, people, food, plants, leaves, water splash, ice, stones, table wood grain, cluttered scene, colored reflections tinting the bottle green or black, discolored metal, gold or copper or rose-gold finish, painted or plastic body, neon lighting, harsh specular hotspot, lens flare, volumetric fog, smoke, bokeh background, gradient banding, noise, grain, cropped bottle, cut-off lid, floating bottle, missing shadow, tilted or bent bottle, deformed cylinder, warped handle, extra cap, wrong anatomy, melted seams, low resolution, blurry, jpeg artifacts, oversaturated, flat illustration, 3d render look, cartoon, painting style |\\n| **生成参数** | 宽高比：**3:4（竖版）**；数量：**1**；模型：由执行端从当时可用目录中选择支持 3:4 的图像模型，本方案不指定具体型号（未经核实的型号名一律不写）；质量策略：**auto**；像素请求：以 3:4 出图，返回后核对实际分辨率，必要时高质量重采样至 900×1200；种子：无要求（可复现需求时由执行端固定并记录）；文字渲染开关：关闭/不使用模型内置文字生成能力 |\\n| **验收标准（逐条可检查）** | 1) 实际返回像素经核对后可得 900×1200、比例 3:4，无形变拉伸；2) 画面中仅一只保温杯，无道具、无第二主体、无人体部位；3) 杯体完整未被裁切，含杯盖与底部阴影；4) 杯体为中性银色拉丝金属，肉眼不可辨认为绿色或黑色金属；5) 背景为统一深墨绿，无纹理、无渐变斑、无图案；6) 右侧 ≥35% 宽度区域为纯净背景，可容纳两行中文文案且不触碰任何元素；7) 全图无任何文字、字母、汉字、Logo、水印、字符伪影；8) 光影柔和，杯身有连续竖向高光带，底部为软接触阴影而非硬投影或悬浮；9) 细节清晰，边缘锐利，无糊边、无结构畸形（尤其杯口、杯盖接缝、杯底） |\\n| **风险与约束** | R1 模型常在留白区\\\"自作主张\\\"添加字符或类 Logo 图形 → 检查项 7 必查，命中则重生成；R2 深墨绿环境易把金属染成青绿/暗灰 → 检查项 4 必查，必要时强化\\\"color grading applied to the environment only\\\"权重；R3 模型倾向居中构图，可能侵占右侧留白 → 检查项 6 必查，若杯体越过横向 38% 视为不合格；R4 原生输出分辨率常为 1024×1365 等近似值，不等于 900×1200 → 必须实测核对再缩放；R5 部分模型对\\\"无文字\\\"遵循不稳定，负向词不足以保证，需人工看图确认；R6 无授权品牌资产，本图为虚构通用产品，不得据此声称任何真实品牌还原度或商标合规性；R7 本方案未包含后期排版规范（字体、字号、颜色、行距），文案落地需另行设计，不在本次交付范围 |\\n\\n---\\n\\n## 三、下游核对方式（不是只看工具返回成功）\\n\\n执行端拿到结果后，须**打开图片本身**逐项对照上表验收标准，工具调用成功仅代表生成完成，不代表合格。建议顺序：先看有无文字/多余物体（一票否决）→ 再看杯体位置是否越界 → 再看金属色相是否被染 → 最后核对像素尺寸。任一项不合格即重生成或局部修复，并把使用的模型名、参数、种子与实际返回分辨率一并回传记录。\\n\\n---\\n\\n**交给生图执行专家：可直接生成**\\n\\n说明：本次仅交付设计方案，你尚未批准生成动作。上述交接包已具备执行条件，但是否开始出图请你确认后我再推进；本轮我没有调用任何生成工具，也没有产出图片文件。\"}\n\n用户最新修改意见：\n\n只修正上一版的尺寸和重试策略：900×1200是请求值，实际返回尺寸必须另行核对；不要默认授权裁切、拉伸、重采样或额外付费重试。检查不合格时应暂停、说明具体差异并请求用户授权，不能自动重生成或局部修复。其余银色单杯、深墨绿背景、左侧位置、右侧至少35%留白、单图、完整英文正负Prompt与后期文案规则全部保留。请交付完整修订版，不只给修改说明。本轮仍只授权在对话修改设计方案，不允许调用工具、生成图片、处理文件、外部交接或付费。",
+        "steps": [
+          "依据本轮旧稿及最新反馈完成完整文本修订"
+        ],
+        "risks": [
+          "旧稿不是当前授权；未给事实不能编造"
+        ]
+      }
+    }
+  },
+  "feedback": "只修正上一版的尺寸和重试策略：900×1200是请求值，实际返回尺寸必须另行核对；不要默认授权裁切、拉伸、重采样或额外付费重试。检查不合格时应暂停、说明具体差异并请求用户授权，不能自动重生成或局部修复。其余银色单杯、深墨绿背景、左侧位置、右侧至少35%留白、单图、完整英文正负Prompt与后期文案规则全部保留。请交付完整修订版，不只给修改说明。本轮仍只授权在对话修改设计方案，不允许调用工具、生成图片、处理文件、外部交接或付费。",
+  "previousBodySha256": "e922dec4f64dfcd30dbb61c9dc7e8ce20a037e4934141ff2333e877ee255e80e",
+  "criteriaSource": "rqa27-vd-feedback-case.json; first five semantic/tool criteria, sixth original-task lifecycle criterion not applicable",
+  "ui": {
+    "before": {
+      "textareas": 1,
+      "feedbackOccurrences": 3
+    },
+    "after": {
+      "textareas": 1,
+      "feedbackPresent": true,
+      "v3Present": true,
+      "acceptButtons": 1
+    }
+  },
+  "packageBeforeRestart": [
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/knowledge-curator/EXPERT.md",
+      "sha256": "b745d7d0a7a04439e101c112288e618ee4bd0b3fde2cda161291dd6b6bd9ec5e"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/knowledge-curator/manifest.json",
+      "sha256": "6cd3d66d7695319fcc8c1b0978e04ade4c65ff015c3fcf593d99522662b4d1a8"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/knowledge-curator/capability.manifest.json",
+      "sha256": "90eebf5df994676908b8e3137c7b2669be304b1f7ee480698d88ce381fb71e6f"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/longform-editor/EXPERT.md",
+      "sha256": "1cc9e171143baa2afb511c1656a7abbb313ddfd00a5d9353706f805dc0aa8362"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/longform-editor/manifest.json",
+      "sha256": "6fb13306decfff1450ac5422855445ba669f15d261d1c2cb806bac5e0c774e21"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/longform-editor/capability.manifest.json",
+      "sha256": "8e84c9888c7588dd349ccc9cbd30d722a65da472c18bc91bd251ae6a8a8ebfa9"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/presentation-writer/EXPERT.md",
+      "sha256": "56f90a467660331788fbc9dd3a9c287818a80184bb11e02b7f4e8cfb20d91404"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/presentation-writer/manifest.json",
+      "sha256": "53e430cc8b524dbd3e577a9a61118894cb1dbed32f161c32dbf377cd5d1093d6"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/presentation-writer/capability.manifest.json",
+      "sha256": "c8660cf3954e6b74b1d2eb4b81a29aabe928d637270c171173f9f2f3398f1a7e"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/product-manager/EXPERT.md",
+      "sha256": "87d7e6a520a3ed706279c08f95d63c7583357998b548d90bb1ee3bf275d6464b"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/product-manager/manifest.json",
+      "sha256": "76db5830796759d09bfdfa2ffacfe720916f7243a79f2e138087b3b48be0ca80"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/product-manager/capability.manifest.json",
+      "sha256": "41c9d84aebb664845cce97fdbf226f179e7db27e91539fd89cdecd27eb4c3ecb"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/research-analyst/EXPERT.md",
+      "sha256": "170c5c91f40d6193e905896139b78c0a18fa118b58c7f67dab07123ffbfdc559"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/research-analyst/manifest.json",
+      "sha256": "46219417f56549b7802a2c0224c90291619b5c9369639140eb415cd445adacbe"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/research-analyst/capability.manifest.json",
+      "sha256": "4141a9d8918f6c050f393f781b103bf72b016bf10071f08afc0301736bf76182"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/visual-designer/EXPERT.md",
+      "sha256": "ae33203d7043e9ebf8ed958738bcb2be53f730b8be386e461acd64552df6f59e"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/visual-designer/manifest.json",
+      "sha256": "38b7234cc484ac519f1797c0ea9c077be8e3d1061806ced9c0bf3bc96c3378a1"
+    },
+    {
+      "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/capabilities/experts/visual-designer/capability.manifest.json",
+      "sha256": "57050c0a8e5e6580fc8ad94237d1a43ce6a350600f89f27d12aaa8f503a06f69"
+    }
+  ],
+  "packageChangesAfterRestart": []
+}

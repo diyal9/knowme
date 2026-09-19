@@ -1,0 +1,136 @@
+{
+  "eval_id": "QA01",
+  "iteration": 2,
+  "configuration": "baseline",
+  "task_id": "task-mtotfx67-mplj8",
+  "run_id": "expert_task-mtotfx67-mplj8_mtovv5f4",
+  "graded_at": "2026-09-06",
+  "grading_status": "graded",
+  "include_in_professional_aggregate": true,
+  "professional_verdict": "needs_revision",
+  "scope": "只评指定真实retry的冻结输出；未执行模型/真实API或被测系统。iteration-1仍为平台阻塞N/A，不改为0分，不计算从0分提升。",
+  "expectations": [
+    {
+      "text": "所有新设计用例标未执行/待执行，日志仅材料分析，不能报动态执行通过率或已验收通过。",
+      "passed": true,
+      "evidence": "answer.md:3 全局明确全部用例为静态设计、执行状态未执行；TC1—TC3及TC5—TC8逐行未执行，TC4(:14)写日志L部分佐证且无DB计数确认，并没有写本专家执行通过。结合全局状态给通过；建议将TC4列统一为未执行（L部分佐证），但不因版式不同虚扣。全文无动态通过率或已验收通过声明。"
+    },
+    {
+      "text": "日志只支持两次请求返回同一T及状态done，不证明数据库唯一、文件正确或权限安全。",
+      "passed": true,
+      "evidence": "answer.md:3、24—25只将L归为同键→同T→done的弱证据，明确没有DB计数、权限、取消、刷新和文件内容验证，且不能排除短暂多实例。与规则一致不等于已证明全量唯一；未作后者声称。"
+    },
+    {
+      "text": "覆盖成员/管理员隔离及越权请求，明确前置身份/资源和可观察结果。",
+      "passed": true,
+      "evidence": "answer.md:11—12（TC1/TC2）给出普通成员A/管理员B及记录a/b，A请求全项目数据不得取得b，B应得到a+b。403或过滤是满足不可泄露约束的候选响应，不是宣称已规定唯一HTTP状态；未虚构实际测试结果。"
+    },
+    {
+      "text": "覆盖并发同键、超时同键重试及24小时边界的可观察去重结果，不新增未定义过期键处理规则。",
+      "passed": false,
+      "evidence": "answer.md:13—15虽覆盖同键并发和超时复用，但TC5将>24h写成允许创建新T且不复用旧T，没有标待决策或条件化。R2仅限定24h内最多一个任务，无法推出过期后必须新建/不复用。未覆盖临界前/临界点的已定义范围；本断言因擅定过期规则不通过。"
+    },
+    {
+      "text": "覆盖刷新任务恢复和取消完成竞态，保留已下载文件不追溯删除边界，发布证据不足结论明确。",
+      "passed": false,
+      "evidence": "answer.md:16—18覆盖刷新、取消成功后的下载和已下载文件边界，:29明确证据不足；这些子项正确。但TC7前置已取消成功，TC8前置已下载，均没有取消与完成并发/先后交错及取消成功后晚到完成结果的场景，不能代替取消完成竞态，故复合断言不通过。"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 2,
+    "total": 5,
+    "pass_rate": 0.6
+  },
+  "evidence_binding": {
+    "task_id_verified": true,
+    "run_id_verified": true,
+    "task_status": "review",
+    "transcript_equals_live_messages_filtered_by_run_id": true,
+    "answer_equals_assistant_and_run_artifact": true,
+    "material_equals_original_frozen_input": true,
+    "assignment_snapshot_equals_iteration_1": true,
+    "run_tool_calls": 0,
+    "source_sha256": {
+      "evidence/professional-batch3-inputs.json": "0e523b3a791f735600c6c1c95af06402ed771bd3aaa709de57b3198e58f7bf9f",
+      "evidence/professional-batch3-task-events.json": "5094ffab0eafde1bb1d6dcbb7ffe6ec959e28d73d53a6f8298a1a3d22ff16549",
+      "evidence/qa01-retry-live-2026-09-06.json": "36716a1c69076eef58ff4d08326141289c04d80638e07cffd904e36db2abc070",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/eval_metadata.json": "7fe6fbef034bd5fad9682705d505a09a40f7fc6048b779a2bba90894f4ac9ad7",
+      "skill-evals/professional-batch3-workspace/iteration-1/QA01/baseline/grading.json": "032e49c60892d3c735286ef14c68a188d540d392d0d1a4b8a4e28b08fdbd5f7c",
+      "skill-evals/professional-batch3-workspace/iteration-2/QA01/baseline/outputs/answer.md": "a5c00024eeb14854865d3cf76cec859e8d780b34a8e54806439258b21d76bd1a",
+      "skill-evals/professional-batch3-workspace/iteration-2/QA01/baseline/outputs/receipts.json": "e8cc3da4ece402ebfd8a5484bb6ec34237ca4b75429cebd5395a9b6da9a3311e",
+      "skill-evals/professional-batch3-workspace/iteration-2/QA01/baseline/transcript.json": "0894cb8ea34742e84713f09e4f567a785e52ec2fe183a5f7f49d0cfac5d605db"
+    },
+    "note": "live.session.run.toolsUsed/steps含第一次失败的历史fabric_search等，不能当本retry工具调用。指定run executionEvidence.toolCalls=[]，transcript仅user/assistant，retry events17—24无工具事件。平台verified不是专业评分。"
+  },
+  "output_measurements": {
+    "raw_chars_trimmed": 1250,
+    "han": 665,
+    "mixed_units": 755,
+    "limit": 800,
+    "within_limit": true,
+    "test_case_count": 8,
+    "method": "全文（标题/表格/结论/建议均包含）匹配 /\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/gu；不计Markdown/标点。沿用batch3口径，不是编辑器官方字数。"
+  },
+  "claims": [
+    {
+      "claim": "TC5超过24h应允许创建新任务且不复用旧T",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:15为可观察预期而非建议；R2对>24h未规定新建、拒绝或复用，不能补成唯一规则。没有说实现已这样运行，但测试oracle已越过材料。"
+    },
+    {
+      "claim": "自动化脚本尚未覆盖TC3/TC5",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:33；输入明确无法访问代码/环境，也没给脚本清单或覆盖报告。只能说未提供自动化覆盖证据，不能断言实际脚本没有覆盖。"
+    },
+    {
+      "claim": "TC3同键并发两次均返回202+T",
+      "type": "quality",
+      "verified": false,
+      "evidence": "answer.md:13；L的顺序重试示例有202+T，R2保证24h内最多一个任务但没规定并发请求必同HTTP码。仅一个服务端任务有据；两个响应都202需另有协议依据或标条件假设。"
+    },
+    {
+      "claim": "TC4的GET T最终done是通用超时恢复的必然预期",
+      "type": "quality",
+      "verified": false,
+      "evidence": "answer.md:14；L支持该具体任务最终done，不证明任何后台任务必成功。保留同键不新增任务的强约束；若要等待done，需受控任务具备成功完成条件。"
+    },
+    {
+      "claim": "明确写出不建议基于当前材料给出通过结论",
+      "type": "process",
+      "verified": true,
+      "evidence": "answer.md:29；材料不足拒绝通过真实可见，没有动态验收宣称。"
+    },
+    {
+      "claim": "最低放行门槛是答复提出的建议，不是已批准发布政策",
+      "type": "process",
+      "verified": true,
+      "evidence": "反向核验：answer.md:27、35明确处于发布建议，且只说完成证据后方可评估发布，不是声称业务已批准或做完这几项自动通过。应评价其风险覆盖不足，不作为虚假既有政策扣分。"
+    },
+    {
+      "claim": "正文按本批计数口径未超过800字",
+      "type": "quality",
+      "verified": true,
+      "evidence": "反向核验：raw1250包含Markdown及标点；沿用混合计数755、汉字665，未见按本批口径超限，不据raw扣分。"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "下一轮拆分复合断言：保留正确静态状态和权限覆盖得分，单独检查过期规则不造、竞态时序、脚本覆盖结论证据及全文长度；不回改原五断言。"
+      },
+      {
+        "reason": "未见题应改变窗口长度/状态名/证据类型，让成功日志、未定窗口外策略和明确建议并存，检查模型是否把一条日志推广为所有执行的保证。"
+      },
+      {
+        "reason": "取消竞态rubric应以取消成功确认为条件：测试取消成功后迟到完成结果不能恢复下载；完成先于取消时不擅定取消必须成功或删除旧文件。"
+      },
+      {
+        "reason": "静态状态字段可统一为未执行；日志佐证作为独立证据列/注释，防止读者误把材料轨迹视为该用例亲自通过。"
+      }
+    ],
+    "overall": "3/5是冻结断言通过率，不是产品动态通过率或专家生产认证。平台恢复成功与方法质量分开；未见本题超长。"
+  }
+}

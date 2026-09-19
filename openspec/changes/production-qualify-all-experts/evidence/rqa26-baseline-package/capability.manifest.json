@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 3,
+  "id": "image-producer",
+  "kind": "expert",
+  "name": "生图执行专家",
+  "description": "渐进澄清视觉需求，确认方案后调用盘古生成真实图片。",
+  "version": "3.2.0",
+  "dependencies": [
+    {
+      "id": "th-art-intake",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "th-art-prompt-enrich",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "th-art-pango-generate",
+      "kind": "skill",
+      "required": true
+    },
+    {
+      "id": "pango-image-mcp",
+      "kind": "connector",
+      "required": false
+    },
+    {
+      "id": "photoshop-mcp",
+      "kind": "connector",
+      "required": false
+    }
+  ],
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": [
+        "pango-image-mcp",
+        "photoshop-mcp"
+      ]
+    },
+    "tools": {
+      "allowlist": [
+        "list_paint_models",
+        "generate_image"
+      ]
+    },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": [
+    {
+      "name": "主体与使用场景"
+    },
+    {
+      "name": "风格或参考方向"
+    },
+    {
+      "name": "画面比例"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "真实生成图片"
+    }
+  ],
+  "actions": [],
+  "risk": {
+    "level": "low",
+    "reasons": []
+  },
+  "provenance": {
+    "source": "unknown",
+    "trust": "unknown"
+  },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "confirm-then-generate",
+        "deliverables": [
+          {
+            "id": "generated-image",
+            "title": "生成图片",
+            "type": "image",
+            "required": true,
+            "requiredSkills": [
+              "th-art-intake",
+              "th-art-prompt-enrich",
+              "th-art-pango-generate"
+            ],
+            "requiredTools": [
+              "generate_image"
+            ],
+            "requiredEvidence": [
+              {
+                "kind": "tool_result",
+                "tool": "generate_image"
+              }
+            ],
+            "completionConditions": [
+              {
+                "type": "tool_success",
+                "tool": "generate_image"
+              }
+            ],
+            "executionRoute": "pango-generate",
+            "executionRouteDescription": "确认 Brief 后编译 Prompt，并调用盘古生成真实图片。"
+          }
+        ]
+      }
+    }
+  }
+}

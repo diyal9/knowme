@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 3,
+  "id": "last30days-cn",
+  "kind": "skill",
+  "name": "中文舆情 last30days",
+  "description": "调用 last30days-cn 引擎调研中文八大平台近 N 天主题讨论与舆情证据。",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": ["run_skill_script"] },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "risk": {
+    "level": "medium",
+    "reasons": ["会访问公开中文平台检索与内容接口，可能使用本机 Cookie/API Key"]
+  }
+}

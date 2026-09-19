@@ -1,0 +1,388 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA75 software engineer normal coverage completion",
+  "purpose": "Add a second normal task for the retained software-engineer configuration without changing the existing lifecycle contracts.",
+  "generatedAt": "2026-09-08T07:55:52.087Z",
+  "environment": {
+    "isolatedUserData": "D:\\aispace\\knowme\\.tmp\\qa-text-software-engineer-rqa100-20260908",
+    "testSeam": true,
+    "productionDataProtected": true,
+    "automaticProfessionalAcceptance": false,
+    "modelProfile": {
+      "provider": "custom",
+      "model": "fixture-text-model",
+      "label": "fixture-text-model",
+      "maxOutput": 4096
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "SE11"
+  ],
+  "tasks": [
+    {
+      "evalId": "SE11",
+      "expertId": "software-engineer",
+      "title": "事件订阅器的完整实现",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "给出完整可替换实现，subscribe、unsubscribe、emit 接口和幂等行为一致",
+        "正确处理注册顺序、emit 快照、emit 中增删订阅和未知事件类型",
+        "单个 handler 抛错时继续调用其他 handler，并以可观察方式汇总错误",
+        "给出重复订阅、取消、快照、顺序、异常和未知类型测试设计",
+        "给出合理时间/空间复杂度并诚实区分设计与未真实运行"
+      ],
+      "status": "failed",
+      "taskId": "task-mtsdkrbb-9mo27",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "failed"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.4.0",
+            "hash": "90442f5656655821"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": ""
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "custom",
+            "id": "fixture-text-model",
+            "requestedId": "fixture-text-model",
+            "label": "fixture-text-model",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mtsdkrbb-9mo27",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "2.4.0",
+          "agentHash": "90442f5656655821",
+          "hashes": {
+            "expert": "90442f5656655821",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mtsdkrbb-9mo27",
+          "bindings": {
+            "skills": [
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": []
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.0",
+            "hash": "90442f5656655821"
+          }
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mtsdkrbb-9mo27"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-08T07:55:54.371Z",
+          "updatedAt": "2026-09-08T07:55:54.542Z",
+          "heartbeatAt": "2026-09-08T07:55:54.542Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-08T07:55:54.542Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.311Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.367Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.371Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.385Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.385Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：独立设计测试、核对执行证据并给出风险分级的验收或发布判断。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.385Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.390Z"
+          },
+          {
+            "id": "event-8",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-08T07:55:54.542Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mtsdkrbb-9mo27_mtsdkrde",
+            "deliverableId": "primary",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:e1bf0ebaeb2f965b7908e53e2cc19017d918aa1fbf50eeb59bb9053de4313b3c",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "c3b290c5be88c2d6bdea49bd82fcab8b7923a677fb0ac9a8d232d743d084d2e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.4.0",
+                "hash": "90442f5656655821"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": ""
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "custom",
+                "id": "fixture-text-model",
+                "requestedId": "fixture-text-model",
+                "label": "fixture-text-model",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-08T07:55:54.542Z"
+          }
+        ],
+        "createdAt": "2026-09-08T07:55:54.311Z",
+        "updatedAt": "2026-09-08T07:55:54.542Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mtsdkrbb-9mo27",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责工程实现、缺陷诊断、重构、架构设计、技术选型和质量验证。根据委托自动选择 software-change-verification、architecture-decision 或 qa-test-design，只加载当前任务需要的方法。质量验证模式必须保持审查独立性：不得因为代码由自己生成就降低证据要求。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，诊断不擅自改代码，架构方案不冒充已部署结果。明确区分推演与执行证据，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 先识别本次是工程实现/诊断、架构决策还是质量验证；确认授权范围、验收标准、质量属性和不可触碰区域。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 工程实现模式使用 software-change-verification 核对接口契约、调用关系、数据流、回归面和完整故障时序；架构决策模式使用 architecture-decision 明确系统边界、组件、数据流、所有权、信任边界与不可兼得的取舍；质量验证模式使用 qa-test-design 独立核对需求可测性、正常/边界/失败覆盖、执行证据和剩余风险。\n3. 工程实现选择最小完整改动并保持接口兼容、错误可诊断和状态可恢复；架构决策比较机制不同的备选，交付推荐方案、关键接口、一致性、权限、可观测性以及可逆迁移契约。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称且可观察的验证：工程模式覆盖正常、边界与失败路径，架构模式用失效时序、容量假设和迁移/回滚演练验证保证。只有获准且具备工具时才执行。\n5. 交付代码变更或架构决策、验证证据或未执行设计，并列明权衡、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 createEventBus()，只在对话中给出完整实现、复杂度和决定性测试设计；不访问文件、不调用工具、不声称已运行。合同：subscribe(type, handler) 返回幂等 unsubscribe；同一 handler 对同一 type 不重复注册；emit(type, payload) 按注册顺序同步调用当前订阅快照；emit 期间新增订阅下一次才生效，取消订阅不会阻止当前快照中已经取出的后续 handler；handler 抛错不能阻止其他 handler，并汇总为 AggregateError；未知 type 合法但不产生副作用。\n\n当前时间：2026-09-08T07:55:54.386Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 JavaScript 函数 createEventBus()，只在对话中给出完整实现、复杂度和决定性测试设计；不访问文件、不调用工具、不声称已运行。合同：subscribe(type, handler) 返回幂等 unsubscribe；同一 handler 对同一 type 不重复注册；emit(type, payload) 按注册顺序同步调用当前订阅快照；emit 期间新增订阅下一次才生效，取消订阅不会阻止当前快照中已经取出的后续 handler；handler 抛错不能阻止其他 handler，并汇总为 AggregateError；未知 type 合法但不产生副作用。\n\n本轮交付物：事件订阅器的完整实现（answer）\n\n本轮 SOP 路由：quality-verification。独立设计测试、核对执行证据并给出风险分级的验收或发布判断。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mtsdkrbb-9mo27_mtsdkrde",
+            "createdAt": "2026-09-08T07:55:54.392Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe 软件开发工程师，负责工程实现、缺陷诊断、重构、架构设计、技术选型和质量验证。根据委托自动选择 software-change-verification、architecture-decision 或 qa-test-design，只加载当前任务需要的方法。质量验证模式必须保持审查独立性：不得因为代码由自己生成就降低证据要求。遵循本次授权与实际权限的交集：静态或禁工具委托不调用工具，诊断不擅自改代码，架构方案不冒充已部署结果。明确区分推演与执行证据，不伪造结果，不擅自发布或扩大权限。\n\n【必须遵循的 SOP】\n1. 先识别本次是工程实现/诊断、架构决策还是质量验证；确认授权范围、验收标准、质量属性和不可触碰区域。材料齐全的静态委托直接分析，不为形式完整索取仓库或调用工具。\n2. 工程实现模式使用 software-change-verification 核对接口契约、调用关系、数据流、回归面和完整故障时序；架构决策模式使用 architecture-decision 明确系统边界、组件、数据流、所有权、信任边界与不可兼得的取舍；质量验证模式使用 qa-test-design 独立核对需求可测性、正常/边界/失败覆盖、执行证据和剩余风险。\n3. 工程实现选择最小完整改动并保持接口兼容、错误可诊断和状态可恢复；架构决策比较机制不同的备选，交付推荐方案、关键接口、一致性、权限、可观测性以及可逆迁移契约。高风险、破坏性或外部状态变更先确认。\n4. 设计与风险相称且可观察的验证：工程模式覆盖正常、边界与失败路径，架构模式用失效时序、容量假设和迁移/回滚演练验证保证。只有获准且具备工具时才执行。\n5. 交付代码变更或架构决策、验证证据或未执行设计，并列明权衡、风险及未完成项；可用 code-review 辅助复查。只有真实执行的检查才能标记通过，不把方法、计划或平台验收当作回执。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 createEventBus()，只在对话中给出完整实现、复杂度和决定性测试设计；不访问文件、不调用工具、不声称已运行。合同：subscribe(type, handler) 返回幂等 unsubscribe；同一 handler 对同一 type 不重复注册；emit(type, payload) 按注册顺序同步调用当前订阅快照；emit 期间新增订阅下一次才生效，取消订阅不会阻止当前快照中已经取出的后续 handler；handler 抛错不能阻止其他 handler，并汇总为 AggregateError；未知 type 合法但不产生副作用。\n\n当前时间：2026-09-08T07:55:54.386Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 JavaScript 函数 createEventBus()，只在对话中给出完整实现、复杂度和决定性测试设计；不访问文件、不调用工具、不声称已运行。合同：subscribe(type, handler) 返回幂等 unsubscribe；同一 handler 对同一 type 不重复注册；emit(type, payload) 按注册顺序同步调用当前订阅快照；emit 期间新增订阅下一次才生效，取消订阅不会阻止当前快照中已经取出的后续 handler；handler 抛错不能阻止其他 handler，并汇总为 AggregateError；未知 type 合法但不产生副作用。\n\n本轮交付物：事件订阅器的完整实现（answer）\n\n本轮 SOP 路由：quality-verification。独立设计测试、核对执行证据并给出风险分级的验收或发布判断。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:203:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:508:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:681:19)",
+      "elapsedMs": 1041,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 0,
+    "lifecycleFailed": 1,
+    "runtimeFailed": 1,
+    "runtimeNeedsInput": 0,
+    "environmentBlocked": 0,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

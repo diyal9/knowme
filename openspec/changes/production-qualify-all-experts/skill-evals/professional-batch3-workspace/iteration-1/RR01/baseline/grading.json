@@ -1,0 +1,112 @@
+{
+  "eval_id": "RR01",
+  "task_id": "task-mtotfx1i-lg9q9",
+  "configuration": "baseline",
+  "graded_at": "2026-09-06",
+  "grading_status": "graded",
+  "include_in_professional_aggregate": true,
+  "scope": "仅评冻结真实运行；未重跑API，未修改输入/输出或方法包。断言通过率不是专业生产认证。",
+  "evidence_binding": {
+    "task_id_verified": true,
+    "receipt_equals_live_session": true,
+    "frozen_input_and_expectations_equal_metadata": true,
+    "assistant_and_artifact_equal_answer": true,
+    "source_sha256": {
+      "evidence/professional-batch3-inputs.json": "0e523b3a791f735600c6c1c95af06402ed771bd3aaa709de57b3198e58f7bf9f",
+      "evidence/professional-batch3-live.json": "828364a9cf7cd5d74e1436ea3bc35df2b47f3f30d40701104a605d96c37c0b52",
+      "evidence/professional-batch3-task-events.json": "5094ffab0eafde1bb1d6dcbb7ffe6ec959e28d73d53a6f8298a1a3d22ff16549",
+      "skill-evals/professional-batch3-workspace/iteration-1/RR01/eval_metadata.json": "bf8efdab2b62bdf2f328183ef7d95174f5b4c9a2e299e6a78f17ef5d89576fdc",
+      "skill-evals/professional-batch3-workspace/iteration-1/RR01/baseline/transcript.md": "0f3d1cfb11002ec3f2303ad49e5f420205aa3e63b7b46b49a1b7a134ca1ea905",
+      "skill-evals/professional-batch3-workspace/iteration-1/RR01/baseline/outputs/answer.md": "2e63525dc2dec82eb02365ea93e5b8b6ad6e866f362e5e876a557573ff0a09a9",
+      "skill-evals/professional-batch3-workspace/iteration-1/RR01/baseline/outputs/receipts.json": "9ec1384e7eed557ed13cc34655cb613f10232a60f722c01b15c980ae1f8b818e"
+    }
+  },
+  "expectations": [
+    {
+      "text": "不形式通过，指出§1/§2权限冲突，区分需求缺陷和已实现漏洞。",
+      "passed": true,
+      "evidence": "answer.md:1、3、9 明确需修改/静态评审/无动态验证；指出两条权限矛盾。若按§2实现即越权是相对§1的条件化风险推演，不是已实现漏洞复现声明。"
+    },
+    {
+      "text": "指出§3/§4软删除口径冲突，给候选澄清而不擅定唯一规则。",
+      "passed": true,
+      "evidence": "answer.md:10、13、27 指出默认排除与必须包含冲突；管理员可勾选被明确标为可选口径示例，并要求业务拍板；WHEN/THEN按C2选定口径。不因提出该候选而判伪造事实。"
+    },
+    {
+      "text": "§5重复请求策略待定、§6后台继续及保留期限待定，不强推自选数值或实现。",
+      "passed": false,
+      "evidence": "§5在answer.md:11、28仍待决策；§6在:17正确指出未定义并以建议提出后台继续/N待定，本身不扣分。但:29直接要求任务继续执行，未写若业务选择继续；:34只请求§6参数而非继续/终止策略决策。待定分支没有贯穿建议→测试→决策清单。不是指控已经实现后台继续或伪造既有结果。"
+    },
+    {
+      "text": "§7速度和完整性缺可测指标；WHEN/THEN示例条件清楚，决策待定部分标明条件化。",
+      "passed": false,
+      "evidence": "answer.md:18识别不可测，但:24-30没有规模/负载+可接受耗时T的性能验收式；30秒超时提示不等于速度SLA。:30抽样ID不能保证全量记录无缺失/重复，§4未定义字段集合。:29继续执行缺条件化；:24把原文已定30秒也称格式占位。C1/C2/C3引用决策方向正确，不要求模型替业务填写未知阈值。"
+    },
+    {
+      "text": "保持非目标不增加审批/邮件，无动态验证宣称，交付精简明确结论与定位。",
+      "passed": false,
+      "evidence": "answer.md:3、20保留静态边界与非目标，结论/定位明确，这些子项通过；但完整答复汉字727、混合804单位，已超过700字。失败基于明确长度约束，不因Markdown raw1290或正当候选建议扣分。"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "professional_verdict": "needs_revision",
+  "output_measurements": {
+    "han": 727,
+    "mixed_units": 804,
+    "raw_chars_trimmed": 1290,
+    "limit": 700,
+    "within_limit": false,
+    "method": "全文匹配 /\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*/gu；单汉字数也超过700，结论不依赖英文/Markdown计数争议。"
+  },
+  "claims": [
+    {
+      "claim": "C2管理员可显式勾选包含软删除",
+      "type": "factual",
+      "verified": true,
+      "evidence": "answer.md:13证实它是明确候选建议而非来源事实；:27仍按C2决策，故不构成擅定唯一口径。verified表示建议标签与决策边界核验通过，不表示该功能已存在。"
+    },
+    {
+      "claim": "30秒为格式占位，数值待业务确认",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:24；冻结输入§6已明确30秒展示提示，只有后台继续和保留期未定。把已给阈值降格为占位是事实状态失真；:29虽仍用30秒，前后不一致。"
+    },
+    {
+      "claim": "知识库中亦无相关既有规范可援引",
+      "type": "factual",
+      "verified": false,
+      "evidence": "answer.md:3；绑定task的executionEvidence仅一次search_knowledge，digest为未找到相关知识条目。只支持本次未检索到，不支持整个知识库不存在相关规范的完备判断；无充分检索覆盖证据。"
+    },
+    {
+      "claim": "抽样比对记录ID无缺失无重复可替换不丢数据验收",
+      "type": "quality",
+      "verified": false,
+      "evidence": "answer.md:22、30将示例列为替换§7；抽样检查可作补充，但不能保证未抽样集完整。应在已决定权限/软删除与快照范围下，对全量预期ID集合、重复、字段和值分别定义可观察判据。"
+    },
+    {
+      "claim": "建议补角色定义引用、后台继续及保留N天",
+      "type": "quality",
+      "verified": true,
+      "evidence": "answer.md:17、19明确为建议且N待定，提出建议不等于虚构责任已确认/列表已实现。问题在后续条件传递，不在建议存在本身。"
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "将复合断言拆为冲突定位、建议标注、决策传播、性能、全量完整性、长度，避免两项同分却代表不同专业能力；仅用于下一轮，不改冻结expectations。"
+      },
+      {
+        "reason": "新留出题混合一个已定时点与多个待定分支；通过要求原值不变、候选未冒充决定、WHEN/THEN显式依赖对应选择、未知阈值允许具名变量而非自造数值。"
+      },
+      {
+        "reason": "加入计数相同但ID集合错、少量抽样均正确而尾部缺记录的未见反例，检查完整性验收是否能识别；无需运行API。"
+      }
+    ],
+    "overall": "冲突识别和建议边界多处正确；失败不等于全面替业务拍板，也不等于模型报告了已实现漏洞。"
+  }
+}

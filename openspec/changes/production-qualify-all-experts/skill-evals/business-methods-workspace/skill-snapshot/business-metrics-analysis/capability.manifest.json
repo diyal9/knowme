@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 2,
+  "id": "business-metrics-analysis",
+  "kind": "skill",
+  "name": "业务指标分析",
+  "version": "1.0.0",
+  "metadata": {
+    "knowme": {
+      "experience": {
+        "tasks": [{
+          "id": "businessMetricsAnalysis",
+          "title": "指标分析",
+          "subtitle": "趋势、漏斗、留存与异常分析",
+          "icon": "chart",
+          "group": "business-analysis",
+          "modes": ["analysis", "general"],
+          "surfaces": ["scene", "workflow"],
+          "prompt": "请按指标口径、数据质量、异常点、可能解释和验证动作分析这组业务数据。"
+        }]
+      }
+    }
+  }
+}

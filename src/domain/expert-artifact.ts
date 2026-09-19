@@ -16,6 +16,7 @@ const ARTIFACT_KIND_LABELS: Record<string, string> = {
   csv: '表格',
   code: '代码',
   image: '图片',
+  answer: '答复',
 }
 
 export function parseExpertArtifactRef(value: unknown): { sessionId: string; artifactId: string } | null {
@@ -32,6 +33,7 @@ export function expertArtifactKind(type: unknown): string {
   if (['checklist', 'list'].includes(normalized)) return 'checklist'
   if (normalized === 'code') return 'code'
   if (normalized === 'image') return 'image'
+  if (['answer', 'reply', 'response', 'text', 'chat'].includes(normalized)) return 'answer'
   return 'document'
 }
 

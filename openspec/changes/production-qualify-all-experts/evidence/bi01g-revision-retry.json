@@ -1,0 +1,71 @@
+{
+  "artifact": {
+    "id": "deliverable_expert_task-mtopjyz4-mlmm8_mtopxi85_output-1",
+    "type": "answer",
+    "title": "业务判断与行动建议",
+    "body": "# 第 2 版：判断与行动建议（已按验收意见修订）\n\n**本轮撤回两处旧结论**：① 本周展示注册按 **9**（原用 27），全部相关数值重算；② 撤回“若新版拉低转化，应看到某组注册率恶化”的推断——渠道内人群构成变化（如展示扩量后新流量质量下降、搜索缩量后剩余人群意向更高）可能与版本效应同向叠加或反向抵消，因此**组内率没有恶化不能推出新版无害**。同时删除上一版的显著性检验段落：本数据为按周汇总、无随机分流与版本维度拆分，不满足独立二项大样本检验的适用前提。\n\n---\n\n## 结论（一段）\n\n总体注册率从上周 **9.2%**（92/1000）降到本周 **2.1%**（21/1000），**−7.1 个百分点**、少 **71 个注册**。按“基期率算结构、当期权重算组内”的两期分解，其中 **−6.4 pp 来自流量结构互换**（高率的搜索访客从 900 缩到 100，低率的展示访客从 100 扩到 900），**−0.7 pp 来自组内变化**（展示 2%→1%、搜索 10%→12%，按当期权重合并）。也就是说，**这 −7.1 pp 里约九成在算术上由投放侧的流量搬家解释，不需要引入落地页版本就能复现总量下降的方向和大部分幅度**。但这只是观测量的组成，不是因果归因：唯一带负号且时点与改版重合的信号是展示渠道 2%→1%，而它同时被“访客量放大 9 倍、人群必然变杂”这一机制完全覆盖，两个原因在这份数据里**不可区分**；反过来，也不能因为搜索组内 +2 pp 就说新版没问题。**因此今天既没有回滚新版的依据，也没有把预算全切搜索的依据**——后者还额外缺投放费用、每注册成本和搜索可承接的流量上限，12% > 1% 只说明两组人群不同，推不出增投收益。建议保持现状、补版本曝光拆分并做同期分流验证。\n\n## 关键证据表\n\n| 项目 | 上周 | 本周 | 变化 |\n|---|---|---|---|\n| 搜索：访客 / 注册 / 率 | 900 / 90 / **10.0%** | 100 / 12 / **12.0%** | 访客 **−88.9%**；率 **+2.0 pp** |\n| 展示：访客 / 注册 / 率 | 100 / 2 / **2.0%** | 900 / 9 / **1.0%** | 访客 ×9；率 **−1.0 pp** |\n| 总体：访客 / 注册 / 率 | 1000 / 92 / **9.2%** | 1000 / 21 / **2.1%** | 人数持平；率 **−7.1 pp**；注册 **−71 人** |\n| 结构效应 M = Σ(w1−w0)·r0 | — | — | **−6.4 pp** |\n| 组内效应 W = Σw1·(r1−r0) | — | — | **−0.7 pp** |\n| 验算 M+W | — | — | **−7.1 pp = 总变化 ✔** |\n| 数量差 (N1−N0)·R0 + N1·(R1−R0) | — | — | 0×9.2% + 1000×(−7.1%) = **−71 人 ✔** |\n\n口径核对：两周各完整 7 天；注册按新访客去重、分母为同口径访客；两渠道互斥且覆盖全部，合计=总体 ✔；总访客数不变，故 −71 人全部来自率变化而非流量规模变化。缺口：投放费用、收入、后续留存均无；**不知道哪些访客实际命中新版落地页**。\n\n## 竞争性解释（修订后）\n\n| 候选原因 | 支持证据 | 反证 / 尚缺条件 | 当前强度 |\n|---|---|---|---|\n| 流量结构互换 | M=−6.4 pp，占 −7.1 pp 的绝大部分，无需其他假设即可复现降幅方向 | 属算术组成，不证明“搬家”本身是好是坏 | **已被算术确认（非因果）** |\n| 新版落地页拉低转化 | 上线时点与本周一重合；展示组内 −1.0 pp 是唯一同号信号 | 该 −1.0 pp 与“展示扩量 9 倍导致人群稀释”完全重叠，无法分离；搜索组内 +2.0 pp 也**不能**作为反证（人群变化可能抵消版本效应） | **未识别** |\n| 展示扩量后人群质量稀释 | 展示访客 100→900，率 2%→1% | 无来源、关键词、设备或人群标签拆分 | 与数据相容，未识别 |\n| 搜索缩量后剩余人群意向更高 | 搜索 900→100，率 10%→12% | 同样无拆分；也可能是周内波动 | 与数据相容，未识别 |\n| 采集/去重口径变化 | — | 用户声明两周口径一致，暂无冲突证据 | 待排除 |\n\n**因果边界**：只有按周汇总 + 渠道维度，没有版本维度和同期随机对照，这份数据不具备对新版做任何方向因果判定的识别条件。\n\n## 行动建议（按影响 × 确定性 × 成本 × 可逆性）\n\n**现在可做（低成本、可逆）**\n1. **不回滚新版**：现有唯一负号信号（展示 −1.0 pp）与扩量稀释不可区分，回滚会把两种机制一起抹掉，事后更无法判断。\n2. **不把预算全切搜索**：缺费用与留存，无法比较每注册成本；且搜索已从 900 缩到 100，其 12% 是否为可复制水平未知。\n3. 补一份**版本曝光拆分**（新版 vs 旧版 × 渠道 × 日），这是回答老板问题的最小必要数据。\n\n**验证后再做（建议由投放 + 数据同学负责，窗口 7–14 天）**\n4. 在展示渠道内做 **50/50 新旧版随机分流**，随机化单位 = 新访客 ID/设备，从而把版本效应与人群构成变化分开。主指标：展示渠道注册率；次指标：D1/D7 留存（须等观察窗成熟，不用当天未成熟数据判回滚）。\n5. 停止/回滚阈值需你预先设定（**这是待确认的业务护栏，不是统计标准**）：建议以“新版相对旧版在同一渠道内的注册率绝对下降幅度 + 是否达到你们可接受的最小业务差异”双条件触发。**注意**：本周展示仅 9 个注册，此量级下一周内难以分辨 1 pp 级别差异，不要承诺一周出结论。\n6. 拿到费用后改比 **CPA（费用 ÷ 注册数）**，有留存/LTV 后再比回收；在此之前不以转化率排名决定预算。\n\n**目前不应做**\n- 不以“整体注册率大跌证明新版失败”对外定论：该表述会被结构效应误导，并掩盖真正需要审的动作——**搜索流量被砍 88.9%（900→100）**，这才是 −71 个注册中最直接的可控变量。\n\n*本轮仅为分析与建议，未执行投放、调预算或生成文件；所有数值来自本轮 `calculate` 回执，输入为你更正后的表A（本周展示注册=9）。*",
+    "status": "draft",
+    "meta": {
+      "taskId": "task-mtopjyz4-mlmm8",
+      "deliverableId": "output-1",
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopxi85"
+    }
+  },
+  "tools": [
+    {
+      "id": "msg_expert_task-mtopjyz4-mlmm8_mtopxi85_tool_266fee3b7e42",
+      "role": "tool",
+      "text": "{\"ok\":true,\"results\":[{\"label\":\"上周总体率\",\"expression\":\"100*(90+2)/(900+100)\",\"ok\":true,\"value\":9.2},{\"label\":\"本周总体率\",\"expression\":\"100*(12+9)/(100+900)\",\"ok\":true,\"value\":2.1},{\"label\":\"总体率差_pp\",\"expression\":\"100*((12+9)/1000-(90+2)/1000)\",\"ok\":true,\"value\":-7.1},{\"label\":\"搜索率_上\",\"expression\":\"100*90/900\",\"ok\":true,\"value\":10},{\"label\":\"搜索率_本\",\"expression\":\"100*12/100\",\"ok\":true,\"value\":12},{\"label\":\"展示率_上\",\"expression\":\"100*2/100\",\"ok\":true,\"value\":2},{\"label\":\"展示率_本\",\"expression\":\"100*9/900\",\"ok\":true,\"value\":1},{\"label\":\"结构效应M_pp\",\"expression\":\"100*((0.1-0.9)*0.02+(0.9-0.1)*0.10)\",\"ok\":true,\"value\":6.400000000000001},{\"label\":\"组内效应W_pp\",\"expression\":\"100*(0.1*(0.12-0.10)+0.9*(0.01-0.02))\",\"ok\":true,\"value\":-0.7000000000000002},{\"label\":\"分解验算_M加W\",\"expression\":\"-8.0+(-0.7)\",\"ok\":true,\"value\":-8.7},{\"label\":\"注册数变化\",\"expression\":\"(12+9)-(90+2)\",\"ok\":true,\"value\":-71},{\"label\":\"数量差分解\",\"expression\":\"(1000-1000)*0.092+1000*(-0.053)\",\"ok\":true,\"value\":-53},{\"label\":\"搜索缩量幅度\",\"expression\":\"100*(1-100/900)\",\"ok\":true,\"value\":88.88888888888889}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopxi85",
+      "createdAt": "2026-09-05T18:31:07.194Z",
+      "toolCallId": "call_227fbab561064e1ab5f324c9",
+      "toolName": "calculate",
+      "status": "done",
+      "durationMs": 4
+    },
+    {
+      "id": "msg_expert_task-mtopjyz4-mlmm8_mtopxi85_tool_09a1acca5b79",
+      "role": "tool",
+      "text": "{\"ok\":true,\"results\":[{\"label\":\"结构效应M_pp_修正\",\"expression\":\"100*((0.1-0.9)*0.10+(0.9-0.1)*0.02)\",\"ok\":true,\"value\":-6.400000000000001},{\"label\":\"分解验算_M加W\",\"expression\":\"-8.0+(-0.7)\",\"ok\":true,\"value\":-8.7},{\"label\":\"数量差分解_修正\",\"expression\":\"(1000-1000)*0.092+1000*(-0.071)\",\"ok\":true,\"value\":-71},{\"label\":\"展示率差_pp\",\"expression\":\"100*(9/900-2/100)\",\"ok\":true,\"value\":-1},{\"label\":\"搜索率差_pp\",\"expression\":\"100*(12/100-90/900)\",\"ok\":true,\"value\":1.9999999999999991}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopxi85",
+      "createdAt": "2026-09-05T18:31:07.194Z",
+      "toolCallId": "call_7d012e2c5abd4080a9917834",
+      "toolName": "calculate",
+      "status": "done",
+      "durationMs": 3
+    },
+    {
+      "id": "msg_expert_task-mtopjyz4-mlmm8_mtopxi85_tool_f4e09538caa0",
+      "role": "tool",
+      "text": "{\"ok\":true,\"results\":[{\"label\":\"M_结构效应\",\"expression\":\"100*((0.1-0.9)*0.10+(0.9-0.1)*0.02)\",\"ok\":true,\"value\":-6.400000000000001},{\"label\":\"W_组内效应\",\"expression\":\"100*(0.1*(0.12-0.10)+0.9*(0.01-0.02))\",\"ok\":true,\"value\":-0.7000000000000002},{\"label\":\"总变化_R1减R0\",\"expression\":\"100*(21/1000-92/1000)\",\"ok\":true,\"value\":-7.1},{\"label\":\"验算_M加W\",\"expression\":\"-6.4+-0.7\",\"ok\":true,\"value\":-7.1000000000000005}],\"precision\":\"IEEE-754 binary64 (about 15-17 significant decimal digits); decimal rounding applies, integers are exact only within +/-9007199254740991. No arbitrary precision or error bound for ill-conditioned expressions. Subnormals are rounded; underflow may become zero. Signed zero is returned as 0. Non-finite literals and intermediate results are rejected. 0^0 is 1.\"}",
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopxi85",
+      "createdAt": "2026-09-05T18:31:07.194Z",
+      "toolCallId": "call_26d8bfe9bfaa4a56915bf6f1",
+      "toolName": "calculate",
+      "status": "done",
+      "durationMs": 4
+    }
+  ],
+  "inputFeedback": "请修订：本周展示注册应为9不是27。撤回“若新版拉低转化应看到某组率恶化”这一推断，渠道内人群变化也可能抵消版本效应。请重算全部相关数值，用简洁的一段结论和关键证据表回复，保留事实和因果边界，不展示没有适用条件支持的显著性检验，不实际执行操作。",
+  "execution": {
+    "taskId": "task-mtopjyz4-mlmm8",
+    "firstAttempt": {
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopujw3",
+      "status": "failed",
+      "reason": "连接超时（15s）：dashscope.aliyuncs.com 未返回数据",
+      "versionRemained": 1
+    },
+    "retry": {
+      "via": "实际UI重新执行按钮",
+      "runId": "expert_task-mtopjyz4-mlmm8_mtopxi85",
+      "status": "review",
+      "version": 2
+    },
+    "ui": {
+      "composerCount": 1,
+      "acceptCount": 1,
+      "retryCount": 0,
+      "correctionVisible": true
+    }
+  }
+}

@@ -1,0 +1,513 @@
+{
+  "sessionId": "catalog-contract-office-partner",
+  "expertId": "office-partner",
+  "frozenAt": "2026-09-19T14:44:03.080Z",
+  "persona": {
+    "name": "办公协作专家",
+    "description": "以办公写作、会议纪要和行动项三种模式完成可追溯的协作交付",
+    "avatar": "office/writer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先识别用户要整理现有材料、直接起草，还是从外部系统读取信息；只有缺少会改变正文的关键范围或对象时，才一次提出一个问题。\n2. 用户已提供可读正文时，直接以该材料为唯一事实范围并使用 writing-polish；不得为了“验证”而强制读取飞书。用户直接要求草拟、改写或润色时也走本地写作路径。\n3. 只有用户明确要求从飞书查询时，才选一条最小读取路径：今日安排/待办/优先级 → feishu-today-priority；会议/纪要 → feishu-meeting-summary，并严格分成“候选检索”和“选定后读取”两轮；文档/知识库 → feishu-doc-kb；消息/群聊 → feishu-related-chats。\n4. 用户提供会议正文时切换会议纪要模式并使用 meeting-evidence-method；要求提取行动项时切换行动项模式并使用 action-extraction。两者都不得为表格完整性补造责任人、期限、状态或共识。\n5. 外部读取路径必须先预检对应 Skill、飞书连接器、授权和必需工具；失败就停止并说明是安装、启用还是授权问题。拿到真实结果后记录来源和时间，找不到就写“未找到”。\n6. 输出一个完整的办公协作结果，按任务需要组织事实、结论、行动项、风险和待确认项。仅当用户要求发送、发布或交付前检查时，才在正文末尾附简短检查项，不创建第二份清单成果。\n7. 任何外部写入、发送、发布或修改都必须先经用户明确确认。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是办公协作专家，负责把用户提供的材料或经授权读取的办公信息整理成可直接审阅的结果。回答简洁、完整、可执行，围绕 SOP 选择最小必要路径。\n用户已提供可读材料时直接处理，不强制调用连接器；只有用户明确要求查询飞书时，才预检并调用对应真实读取工具。不得编造消息、会议、日程或文档内容。\n正常交付只生成一个对话内结果；仅在用户要求发送、发布或交付前检查时附上检查项。任何外部写入、发送、发布或修改都必须先获得用户明确确认。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "office-collaboration-method",
+      "meeting-evidence-method",
+      "action-extraction",
+      "writing-polish",
+      "feishu-meeting-summary",
+      "feishu-related-chats",
+      "feishu-today-priority",
+      "feishu-doc-kb"
+    ],
+    "connectors": [
+      "feishu"
+    ]
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "office-partner",
+    "kind": "expert",
+    "name": "办公协作专家",
+    "description": "以办公写作、会议纪要和行动项三种模式完成可追溯的协作交付。",
+    "version": "2.4.0",
+    "dependencies": [
+      {
+        "id": "office-collaboration-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "meeting-evidence-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "action-extraction",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false
+      },
+      {
+        "id": "feishu-meeting-summary",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "feishu-related-chats",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "feishu-today-priority",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "feishu-doc-kb",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": [
+          "feishu"
+        ]
+      },
+      "tools": {
+        "allowlist": [
+          "feishu.search_docs",
+          "feishu.read_doc",
+          "feishu.query_bitable",
+          "feishu.list_wiki_spaces",
+          "feishu.list_wiki_nodes",
+          "feishu.get_wiki_node",
+          "feishu.meeting_candidates",
+          "feishu.meeting_read",
+          "feishu.related_chats",
+          "feishu.today_priority",
+          "feishu.doc_kb_suggest",
+          "feishu.draft_write_doc",
+          "feishu.draft_minute_permission",
+          "feishu.draft_send_message",
+          "feishu.draft_create_task",
+          "feishu.draft_update_doc",
+          "feishu.draft_calendar_event",
+          "feishu.draft_drive_upload",
+          "feishu.draft_wiki_node",
+          "feishu.draft_bitable_record"
+        ]
+      },
+      "network": true,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "已确认的会议、聊天、文档或知识库材料"
+      },
+      {
+        "name": "时间范围、目标、收件人、渠道与表达要求"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "办公协作结果"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "unknown",
+      "trust": "unknown"
+    },
+    "metadata": {
+      "knowledgeRefs": [
+        "feishu.meetings",
+        "feishu.im",
+        "feishu.docs",
+        "feishu.wiki"
+      ],
+      "sop": "1. 识别整理现有材料、直接起草或外部读取意图，仅在缺少会改变正文的关键范围或对象时提一个问题。\n2. 已提供可读正文时直接以材料为事实范围并使用 writing-polish，不强制读取飞书；直接草拟、改写或润色也走本地写作路径。\n3. 只有明确要求从飞书查询时才选择一条最小读取路径。\n4. 外部读取必须预检对应 Skill、飞书连接器、授权和工具；失败即停止说明，成功后记录来源和时间，找不到写“未找到”。\n5. 输出一个完整办公协作结果；仅当用户要求发送、发布或交付前检查时才在正文末尾附简短检查项，不创建第二份清单成果。\n6. 外部写入、发送、发布或修改必须先经用户明确确认。",
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "qualityReview": {
+            "enabled": true,
+            "criteria": [
+              "逐项核对日期、时间、对象和查询范围是否来自用户要求或本轮真实回执；明确的今天、某日或主题不得自行扩大成更多天数、更多会议或更多聊天。",
+              "全文中的事实、状态、数字、会议、消息和文档内容必须回指用户材料或本轮工具回执；候选标题不等于正文，零结果和读取失败不得用常识补写。",
+              "发送、发布、建任务、改文档和其他外部写入只有在本轮真实成功回执存在时才能写成已完成；确认文案、草稿或计划不得冒充已执行。",
+              "复核完整正文、摘要、行动项和结论中的责任人、期限、依赖及完成状态一致；材料未明确的字段保留待确认，不额外生成重复清单或题外版本。"
+            ]
+          },
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "办公协作结果",
+              "type": "answer",
+              "required": true
+            }
+          ],
+          "routes": [
+            {
+              "id": "action-extraction",
+              "skillId": "action-extraction",
+              "keywords": "行动项,待办事项,任务清单,负责人,责任人,截止日,截止时间,完成标准",
+              "when": {
+                "hasReadableMaterials": true,
+                "noneKeywords": [
+                  "从飞书",
+                  "读取飞书",
+                  "查询飞书",
+                  "搜索飞书",
+                  "查找飞书",
+                  "打开飞书",
+                  "获取飞书",
+                  "飞书里查",
+                  "飞书中查"
+                ]
+              },
+              "toolAllowlist": [],
+              "description": "从用户材料中提取可追踪行动项，缺失责任字段保持待确认。",
+              "qualityReview": {
+                "enabled": true,
+                "criteria": [
+                  "逐项回看来源中的姓名、团队、日期、数字和范围，避免相似实体替换、局部范围扩成全量或相对期限被擅自换算。",
+                  "区分承诺、条件承诺、提议、撤回与状态回执，并分开行动状态和证据状态。",
+                  "负责人、期限、依赖和完成标准只有明确来源才能进入行动项；缺失字段保留待确认。",
+                  "全文只保留一张紧凑主表，不得声称已创建外部任务或已发送通知。"
+                ]
+              },
+              "label": "提取行动项"
+            },
+            {
+              "id": "provided-meeting",
+              "skillId": "meeting-evidence-method",
+              "keywords": "会议纪要,整理会议,会议记录,会议转写,决议,分歧,议题",
+              "when": {
+                "hasReadableMaterials": true,
+                "noneKeywords": [
+                  "从飞书",
+                  "读取飞书",
+                  "查询飞书",
+                  "查找飞书",
+                  "打开飞书",
+                  "读取妙记",
+                  "查询妙记"
+                ]
+              },
+              "toolAllowlist": [],
+              "description": "直接依据用户提供的会议正文整理可追溯纪要。",
+              "qualityReview": {
+                "enabled": true,
+                "criteria": [
+                  "逐项核对提议、讨论、决议和争议的分类是否由会议正文支持，倾向、建议或沉默不得改写成共识。",
+                  "行动项中的负责人、截止时间、依赖、完成标准和完成状态必须来自明确原文。",
+                  "候选标题、时间和引用标识不等于会议正文，读取失败不得生成会议内容。",
+                  "复核全文摘要、议题、决议、争议、行动项与原文依据相互一致。"
+                ]
+              },
+              "label": "整理会议材料"
+            },
+            {
+              "id": "provided-material",
+              "skillId": "office-collaboration-method",
+              "when": {
+                "hasReadableMaterials": true,
+                "noneKeywords": [
+                  "从飞书",
+                  "读取飞书",
+                  "查询飞书",
+                  "搜索飞书",
+                  "查找飞书",
+                  "打开飞书",
+                  "获取飞书",
+                  "飞书里查",
+                  "飞书中查"
+                ]
+              },
+              "toolAllowlist": [],
+              "description": "直接整理用户已提供的可读材料，不强制调用外部连接器。",
+              "label": "整理已有材料"
+            },
+            {
+              "id": "direct-drafting",
+              "skillId": "office-collaboration-method",
+              "keywords": "草拟,撰写,起草,润色,改写,邮件草稿,公告草稿,通知草稿,同步稿,周报",
+              "when": {
+                "noneKeywords": [
+                  "从飞书",
+                  "读取飞书",
+                  "查询飞书",
+                  "搜索飞书",
+                  "查找飞书",
+                  "打开飞书",
+                  "获取飞书",
+                  "飞书里查",
+                  "飞书中查"
+                ]
+              },
+              "toolAllowlist": [],
+              "description": "根据用户给定目标直接起草或改写办公内容。",
+              "label": "起草与改写"
+            },
+            {
+              "id": "today-priority",
+              "skillId": "feishu-today-priority",
+              "connectorId": "feishu",
+              "keywords": "今日优先级,今天优先级,今日优先,今天安排,日程,待办,优先级",
+              "requiredTools": [
+                "feishu.today_priority"
+              ],
+              "toolAllowlist": [
+                "feishu.today_priority"
+              ],
+              "description": "先读取今日日程与待办，再整理优先级。",
+              "label": "今日安排与待办"
+            },
+            {
+              "id": "meeting-summary",
+              "skillId": "feishu-meeting-summary",
+              "connectorId": "feishu",
+              "keywords": "会议,纪要,妙记,会议记录,meeting",
+              "requiredTools": [
+                "feishu.meeting_candidates"
+              ],
+              "toolAllowlist": [
+                "feishu.meeting_candidates",
+                "feishu.meeting_read"
+              ],
+              "description": "先检索会议候选；用户选定后，平台把被绑定的读取工具加入下一轮执行契约。",
+              "label": "会议与纪要"
+            },
+            {
+              "id": "doc-kb",
+              "skillId": "feishu-doc-kb",
+              "connectorId": "feishu",
+              "keywords": "文档,知识库,资料,wiki,云盘,文件",
+              "requiredTools": [
+                "feishu.doc_kb_suggest"
+              ],
+              "toolAllowlist": [
+                "feishu.doc_kb_suggest"
+              ],
+              "description": "先查找飞书文档或知识库材料，再整理内容。",
+              "label": "文档与知识库"
+            },
+            {
+              "id": "related-chats",
+              "skillId": "feishu-related-chats",
+              "connectorId": "feishu",
+              "keywords": "飞书,消息,聊天,群聊,私聊,群消息,@我,未读",
+              "requiredTools": [
+                "feishu.related_chats"
+              ],
+              "toolAllowlist": [
+                "feishu.related_chats"
+              ],
+              "description": "先读取与用户相关的飞书聊天，再整理重点。",
+              "label": "相关消息与聊天"
+            },
+            {
+              "id": "office-collaboration",
+              "default": true,
+              "skillId": "office-collaboration-method",
+              "toolAllowlist": [],
+              "description": "按办公协作方法完成普通写作、整理或同步任务。",
+              "label": "日常办公协作"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "56ed405a7f59bac7",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "office-collaboration-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "meeting-evidence-method",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "action-extraction",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false,
+        "status": "ready"
+      },
+      {
+        "id": "feishu-meeting-summary",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "feishu-related-chats",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "feishu-today-priority",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "feishu-doc-kb",
+        "kind": "skill",
+        "required": true,
+        "status": "ready"
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false,
+        "status": "ready"
+      }
+    ],
+    "issues": [],
+    "routes": [
+      {
+        "id": "action-extraction",
+        "label": "提取行动项",
+        "state": "ready",
+        "requiredSkills": [
+          "action-extraction"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "provided-meeting",
+        "label": "整理会议材料",
+        "state": "ready",
+        "requiredSkills": [
+          "meeting-evidence-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "provided-material",
+        "label": "整理已有材料",
+        "state": "ready",
+        "requiredSkills": [
+          "office-collaboration-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "direct-drafting",
+        "label": "起草与改写",
+        "state": "ready",
+        "requiredSkills": [
+          "office-collaboration-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      },
+      {
+        "id": "today-priority",
+        "label": "今日安排与待办",
+        "state": "ready",
+        "requiredSkills": [
+          "feishu-today-priority"
+        ],
+        "requiredConnectorIds": [
+          "feishu"
+        ],
+        "issues": []
+      },
+      {
+        "id": "meeting-summary",
+        "label": "会议与纪要",
+        "state": "ready",
+        "requiredSkills": [
+          "feishu-meeting-summary"
+        ],
+        "requiredConnectorIds": [
+          "feishu"
+        ],
+        "issues": []
+      },
+      {
+        "id": "doc-kb",
+        "label": "文档与知识库",
+        "state": "ready",
+        "requiredSkills": [
+          "feishu-doc-kb"
+        ],
+        "requiredConnectorIds": [
+          "feishu"
+        ],
+        "issues": []
+      },
+      {
+        "id": "related-chats",
+        "label": "相关消息与聊天",
+        "state": "ready",
+        "requiredSkills": [
+          "feishu-related-chats"
+        ],
+        "requiredConnectorIds": [
+          "feishu"
+        ],
+        "issues": []
+      },
+      {
+        "id": "office-collaboration",
+        "label": "日常办公协作",
+        "state": "ready",
+        "requiredSkills": [
+          "office-collaboration-method"
+        ],
+        "requiredConnectorIds": [],
+        "issues": []
+      }
+    ]
+  }
+}

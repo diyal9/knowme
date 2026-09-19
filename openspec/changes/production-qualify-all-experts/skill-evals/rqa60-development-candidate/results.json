@@ -1,0 +1,190 @@
+{
+  "suite": "RQA60",
+  "evaluatedAt": "2026-09-07T14:30:00+08:00",
+  "scoringPolicy": "Frozen assertions were judged against persisted task output. Missing runtime dimensions and missing immutable configuration identity are not inferred.",
+  "excludedEnvironmentRuns": [
+    {
+      "taskId": "task-mtqods6q-6mb56",
+      "evalId": "SA05",
+      "reason": "The sandbox-started Electron process had no usable AI configuration; this is an environment block, not professional evidence."
+    }
+  ],
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+      "tasks": [
+        {
+          "taskId": "task-mtqkuqqm-8zic0",
+          "evalId": "SE05",
+          "scenario": "normal",
+          "status": "review",
+          "hardAssertionsPassed": true,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "configurationId": "",
+          "unscopedReason": "This run predates immutable Agent, Skill, connector and actual-model identity persistence. It is a valid diagnostic sample but cannot qualify a configuration."
+        },
+        {
+          "taskId": "task-mtqr19hj-h09xv",
+          "evalId": "SE05",
+          "scenario": "normal",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 4,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:b93faf0e8bf3e6f60538fe021a6b03ea4fa6a6d8751beac499ead8dea3758530",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "The answer omitted the requested time and extra-space complexity. The first completion was length-truncated, and the old recovery path bypassed the package quality review."
+        },
+        {
+          "taskId": "task-mtqruutk-egay9",
+          "evalId": "SE05",
+          "scenario": "normal",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 4,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:b93faf0e8bf3e6f60538fe021a6b03ea4fa6a6d8751beac499ead8dea3758530",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "The generic quality review ran and passed, but the final answer still omitted complexity. This demonstrates that same-model review is a guardrail rather than qualification evidence."
+        },
+        {
+          "taskId": "task-mtqs5xl6-hv6y8",
+          "evalId": "SE05",
+          "scenario": "normal",
+          "status": "review",
+          "hardAssertionsPassed": true,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "configurationSummary": "software-engineer 2.2.0 + software-change-verification 1.1.0 + code-review + no connectors + dashscope/qwen3.8-max",
+          "successSummary": "The output covered strict validation, safe integers, isolation, a decisive counterexample, O(N log N) time, O(N) extra space, the 100000-segment target and an honest not-run statement."
+        },
+        {
+          "taskId": "task-mtqsvg6a-8dwsc",
+          "evalId": "SE06-initial",
+          "scenario": "normal",
+          "status": "failed",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "configurationId": "",
+          "unscopedReason": "The initial attempt failed before failed-run configuration evidence was persisted. It remains observed availability evidence but is not assigned to a model configuration."
+        },
+        {
+          "taskId": "task-mtqsvg6a-8dwsc",
+          "evalId": "SE06",
+          "scenario": "normal",
+          "status": "review",
+          "hardAssertionsPassed": true,
+          "assertionsPassed": 5,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "successSummary": "The recovered runPool implementation passed executable validation, concurrency, ordering, fail-stop, late-rejection and invoke-once checks."
+        },
+        {
+          "taskId": "task-mtqsy54y-dvnoe",
+          "evalId": "SE07",
+          "scenario": "edge",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 1,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "Executable race replay proved that post-invalidation reads reuse the old flight and invalidating A disrupts unrelated B caching; the Promise-identity explanation is also false."
+        },
+        {
+          "taskId": "task-mtqtyl1p-2r0in",
+          "evalId": "SE08",
+          "scenario": "retry",
+          "status": "failed",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "The cancel/retry flow preserved state, but the retry ended with configuration-scoped execution failure and no deliverable."
+        },
+        {
+          "taskId": "task-mtqtjoxl-4lhtw",
+          "evalId": "SE09",
+          "scenario": "revision",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 4,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "The revised artifact is syntactically invalid JavaScript because a line comment is split by a literal newline and the following line starts with a comma. The same-model guardrail passed it."
+        },
+        {
+          "taskId": "task-mtqto4ck-hu345",
+          "evalId": "SE10",
+          "scenario": "reopen",
+          "status": "failed",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "observedModel": "dashscope/qwen3.8-max",
+          "failureSummary": "The completed task reopened, but both revision attempts failed without a cursor-cycle-aware replacement. The latest failure is configuration-scoped."
+        }
+      ]
+    },
+    {
+      "agentId": "solution-architect",
+      "tasks": [
+        {
+          "taskId": "task-mtqohzks-ayyzq",
+          "evalId": "SA05",
+          "scenario": "edge",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 1,
+          "assertionsTotal": 5,
+          "configurationId": "",
+          "observedModel": "qwen3.8-flash",
+          "failureSummary": "Only one alternative actually met the hard revocation and staffing constraints; scope, expiry/restart/replay, delivery gate and safe rollback were incomplete."
+        },
+        {
+          "taskId": "task-mtqots5l-d2xwe",
+          "evalId": "SA05",
+          "scenario": "edge",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 1,
+          "assertionsTotal": 5,
+          "configurationId": "",
+          "observedModel": "qwen3.8-flash",
+          "failureSummary": "The structured retry still lost account/workspace scope, accepted unsafe local monotonic-expiry semantics and proposed rollback that removed the safety gate."
+        },
+        {
+          "taskId": "task-mtqp2iqs-cg3wy",
+          "evalId": "SA05",
+          "scenario": "edge",
+          "status": "review",
+          "hardFailure": true,
+          "hardAssertionsPassed": false,
+          "assertionsPassed": 1,
+          "assertionsTotal": 5,
+          "configurationId": "",
+          "observedModel": "qwen3.8-max",
+          "failureSummary": "A larger model repeated the decisive architecture defects and added unsupported feasibility thresholds; model switching did not establish expert qualification."
+        }
+      ]
+    }
+  ]
+}

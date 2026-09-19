@@ -1,0 +1,46 @@
+{
+  "notice": "从原始导出 wire 按 sourceWireIndex 选取的 tools/call 观察记录；保留完整 prompt 与已记录的参考图字节指纹。不代表完整网络日志或独立服务端回执。observer 的 label 不作为配置/版本依据，实际 task/session/run 与 assignmentSnapshot 为准。",
+  "caseId": "R26-IP-R01",
+  "config": "old_skill",
+  "file": "rqa26-old-r01-d2-lossless.json",
+  "taskId": "task-mtpluo03-l436a",
+  "sessionId": "wb-expert-task-mtpluo03-l436a",
+  "runId": "expert_task-mtpluo03-l436a_mtplurqe",
+  "calls": [
+    {
+      "sourceWireIndex": 1,
+      "observation": {
+        "label": "old-R01-D2",
+        "transport": "fetch",
+        "startedAt": "2026-09-06T09:24:27.275Z",
+        "body": {
+          "jsonrpc": "2.0",
+          "id": "1788686667272-4d1600",
+          "method": "tools/call",
+          "params": {
+            "name": "generate_image",
+            "arguments": {
+              "prompt": "Edit the provided reference product photograph. Change ONLY the brushed silver metal exterior surface of the bottle body below the cap to a matte black finish (soft, low-gloss, fine-grain matte coating). Keep the screw-on cap exactly as in the original: same polished/brushed silver metal color, reflections and appearance — do NOT darken or blacken the cap. Preserve the thin dark seam ring between cap and body unchanged. Strictly preserve everything else from the source image: identical bottle silhouette, shoulder curve, base rim and seam structure, single bottle only, same position on the left side of the frame and same scale within the composition, same deep forest-green seamless studio background, same negative space on the right, same soft diffused studio lighting and gentle shadow under the bottle, same camera angle and framing. Do not redesign, recompose, re-render or repaint the scene; this is a localized color-and-finish edit. No text, no logo, no watermark, no props, no extra objects. Output size should match the source at approximately 896x1200 pixels.",
+              "model": "gpt-image-2",
+              "n": 1,
+              "quality": "auto",
+              "size": "896x1200",
+              "aspect_ratio": "3:4",
+              "reference_images": [
+                {
+                  "kind": "image-bytes",
+                  "mimeType": "image/jpeg",
+                  "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+                  "byteLength": 455950
+                }
+              ],
+              "include_cos_urls": true
+            }
+          }
+        },
+        "status": 200,
+        "returnedAt": "2026-09-06T09:24:51.059Z"
+      }
+    }
+  ]
+}

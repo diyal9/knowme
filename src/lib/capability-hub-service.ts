@@ -76,6 +76,14 @@ function createCapabilityHubService(deps = {}) {
     getPackSkillSources,
     getPackEmptyStateGroups,
     getPackScenesForUi,
+    getExpertSnapshotRoot: deps.getExpertSnapshotRoot,
+    getConnectorStatus: async (id) => {
+      const connectorsApi = getConnectorsApi()
+      if (typeof connectorsApi?.getConnectorStatus !== 'function') {
+        return { ok: false, code: 'connector_status_unavailable', message: '连接器状态检查不可用' }
+      }
+      return connectorsApi.getConnectorStatus(id)
+    },
   })
 
   const lifecycle = createCapabilityLifecycle({
@@ -103,6 +111,10 @@ function createCapabilityHubService(deps = {}) {
   })
 
   const sessionContext = createCapabilitySessionContext({
+    getUserData,
+    getCurrentSession: typeof deps.loadAgentStore === 'function'
+      ? id => deps.loadAgentStore()?.sessions?.find(session => session.id === id) || null
+      : undefined,
     getKnowledgeDir,
     getKnowledgeCatalog,
     resolveProviderById,
@@ -116,6 +128,7 @@ function createCapabilityHubService(deps = {}) {
 
   function registerIpcHandlers(handlers = {}) {
     registerCapabilityHubIpc({
+      getUserData,
       loadAgentStore: deps.loadAgentStore,
       listCapabilities: lifecycle.listCapabilities,
       listCapabilityFavorites: lifecycle.listCapabilityFavorites,

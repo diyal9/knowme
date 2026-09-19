@@ -1,5 +1,6 @@
 import type { ChatMessage, ConversationHistoryTurn } from '../shared/api'
 import { INCOMPLETE_ASSISTANT_REPLY } from './agent-v2-runtime'
+import { extractStructuredChoiceFromText } from './agent-message-ui'
 import { seedPrepareTrace } from './agent-execution-timeline'
 import { stripLeadingAssistantIdentity } from './assistant-identity'
 
@@ -37,7 +38,7 @@ export function finalizeGenerateReply(existing: ChatMessage | undefined, input: 
   resultError: string
   resultText: string
   displayName?: string
-}): { text: string; role: ChatMessage['role']; activity: string } {
+}): { text: string; role: ChatMessage['role']; activity: string; structuredUi?: ChatMessage['structuredUi'] } {
   const committed = Boolean(existing?.v2AnswerCommitted && existing.text?.trim())
   const streamedText = stripLeadingAssistantIdentity(existing?.text?.trim() || '', input.displayName)
   if (input.cancelled) {
@@ -46,9 +47,12 @@ export function finalizeGenerateReply(existing: ChatMessage | undefined, input: 
   if (input.resultError && !committed) {
     return { text: input.resultError, role: 'error', activity: '生成失败' }
   }
+  const rawText = committed ? streamedText : (streamedText || input.resultText || INCOMPLETE_ASSISTANT_REPLY)
+  const recovered = extractStructuredChoiceFromText(rawText)
   return {
-    text: committed ? streamedText : (streamedText || input.resultText || INCOMPLETE_ASSISTANT_REPLY),
+    text: recovered?.text || rawText,
     role: existing?.role || 'assistant',
     activity: '',
+    ...(recovered?.bars ? { structuredUi: recovered.bars } : {}),
   }
 }

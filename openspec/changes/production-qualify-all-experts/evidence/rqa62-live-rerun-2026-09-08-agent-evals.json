@@ -1,0 +1,126 @@
+{
+  "suite": "RQA62",
+  "evaluatedAt": "2026-09-08T00:30:52.027Z",
+  "agents": [
+    {
+      "agentId": "product-manager",
+      "currentConfigurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+      "tasks": [
+        {
+          "taskId": "task-mtrxohhm-sr9uo",
+          "evalId": "PM01",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxohop-bojgz",
+          "evalId": "PM02",
+          "scenario": "normal",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxohv3-4thnc",
+          "evalId": "PM03",
+          "scenario": "edge",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxoi1f-tjlc0",
+          "evalId": "PM04",
+          "scenario": "retry",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxoi86-cl7ee",
+          "evalId": "PM05",
+          "scenario": "revision",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        },
+        {
+          "taskId": "task-mtrxoien-xctjc",
+          "evalId": "PM06",
+          "scenario": "reopen",
+          "status": "blocked",
+          "configurationId": "expert-config-v2:1125924a542d7c0c7d524a624d42af84caa843124ace9c06e5bd19943943fa50",
+          "hardFailure": false,
+          "blockedReason": {
+            "kind": "configuration_required",
+            "action": "open_settings",
+            "item": "AI 接口",
+            "detail": "尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。"
+          },
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Environment configuration blocked execution; no professional output was produced."
+        }
+      ]
+    }
+  ]
+}

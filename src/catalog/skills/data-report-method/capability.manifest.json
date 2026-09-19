@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 3,
+  "id": "data-report-method",
+  "kind": "skill",
+  "name": "数据报告叙事与一致性核验",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": { "allowlist": [] },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  }
+}

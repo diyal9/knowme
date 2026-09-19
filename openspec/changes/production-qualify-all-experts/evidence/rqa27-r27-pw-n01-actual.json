@@ -1,0 +1,498 @@
+{
+  "observation": {
+    "scope": "actual task and session from isolated QA APIs",
+    "wire": "separate archive pending",
+    "qualification": false
+  },
+  "data": {
+    "caseId": "R27-PW-N01",
+    "id": "task-mtpnsh9f-ii2nj",
+    "task": {
+      "taskVersion": 2,
+      "activityContractVersion": 1,
+      "id": "task-mtpnsh9f-ii2nj",
+      "projectId": null,
+      "projectSnapshot": null,
+      "kind": "expert",
+      "title": "RQA27 五分钟试点决策汇报",
+      "expertId": "presentation-writer",
+      "expertName": "",
+      "workflowId": "",
+      "workflowName": "",
+      "goal": "请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。",
+      "brief": {
+        "goal": "请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。",
+        "plan": {
+          "goal": "请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "requiresMaterials": false,
+        "requiredInputs": [],
+        "materials": [
+          {
+            "id": "user-confirmation",
+            "type": "user_confirmation",
+            "title": "用户确认",
+            "ref": "",
+            "content": "已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。"
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "任务成果",
+            "type": "document",
+            "required": true,
+            "acceptanceCriteria": [],
+            "requiredTools": [],
+            "requiredSkills": [],
+            "requiredConnectorIds": [],
+            "requiredEvidence": [],
+            "requiredArtifacts": [],
+            "minArtifacts": 0,
+            "completionConditions": []
+          }
+        ],
+        "constraints": [],
+        "dueAt": ""
+      },
+      "assignmentSnapshot": {
+        "agentId": "presentation-writer",
+        "agentVersion": "2.0.0",
+        "agentHash": "56f90a4676603317",
+        "profileId": "",
+        "profileVersion": "",
+        "profileHash": "",
+        "snapshotRef": "expert-snapshot:wb-expert-task-mtpnsh9f-ii2nj",
+        "bindings": {
+          "skills": [
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "permissions": {},
+        "plan": {
+          "goal": "请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。",
+          "deliverables": [],
+          "acceptanceCriteria": [],
+          "capabilityUse": [],
+          "steps": [
+            "仅依据已给材料完成专业分析及对话交付"
+          ],
+          "risks": [
+            "未核实内容不得编造成事实；无外部操作授权"
+          ]
+        },
+        "sop": {
+          "version": "2.0.0",
+          "hash": "56f90a4676603317"
+        }
+      },
+      "visibility": "private",
+      "participants": [],
+      "events": [
+        {
+          "id": "event-1",
+          "type": "created",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 1,
+          "summary": "已确认委托单并开始预检",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.163Z"
+        },
+        {
+          "id": "event-2",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 2,
+          "summary": "预检通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.464Z"
+        },
+        {
+          "id": "event-3",
+          "type": "preflight_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 3,
+          "summary": "正在检查技能、连接器和工具权限",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.552Z"
+        },
+        {
+          "id": "event-4",
+          "type": "preflight_passed",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 4,
+          "summary": "执行条件检查通过",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.617Z"
+        },
+        {
+          "id": "event-5",
+          "type": "task_started",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 5,
+          "summary": "专家已开始执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.617Z"
+        },
+        {
+          "id": "event-6",
+          "type": "sop_applied",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 6,
+          "summary": "已加载专家 SOP，按最小必要路径执行",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.617Z"
+        },
+        {
+          "id": "event-7",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 7,
+          "summary": "正在准备上下文…",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:32.679Z"
+        },
+        {
+          "id": "event-8",
+          "type": "progress",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 8,
+          "summary": "回答生成完成",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:54.418Z"
+        },
+        {
+          "id": "event-9",
+          "type": "deliverable_ready",
+          "kind": "event",
+          "source": "expert",
+          "sequence": 9,
+          "summary": "任务成果",
+          "actorId": "",
+          "createdAt": "2026-09-06T10:18:54.610Z"
+        }
+      ],
+      "attention": null,
+      "progress": {
+        "phase": "review",
+        "label": "成果已生成，等待验收",
+        "detail": "",
+        "startedAt": "2026-09-06T10:18:32.536Z",
+        "updatedAt": "2026-09-06T10:18:54.592Z",
+        "heartbeatAt": "2026-09-06T10:18:54.592Z"
+      },
+      "inputQueue": null,
+      "deliverables": [
+        {
+          "deliverableId": "primary",
+          "title": "任务成果",
+          "type": "document",
+          "version": 1,
+          "required": true,
+          "previousVersionId": "",
+          "artifactRef": "wb-expert-task-mtpnsh9f-ii2nj#deliverable_expert_task-mtpnsh9f-ii2nj_mtpnshml_primary",
+          "artifactRefs": [
+            "wb-expert-task-mtpnsh9f-ii2nj#deliverable_expert_task-mtpnsh9f-ii2nj_mtpnshml_primary"
+          ],
+          "executionRef": "agent-run:expert_task-mtpnsh9f-ii2nj_mtpnshml",
+          "kind": "deliverable",
+          "source": "expert",
+          "sequence": 1,
+          "evidenceStatus": "verified",
+          "acceptanceStatus": "pending",
+          "comments": [],
+          "createdAt": "2026-09-06T10:18:54.592Z"
+        }
+      ],
+      "executionEvidence": [
+        {
+          "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml",
+          "deliverableId": "primary",
+          "gateStatus": "verified",
+          "verificationPassed": true,
+          "verificationDiagnostics": {
+            "version": 1,
+            "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml",
+            "taskId": "task-mtpnsh9f-ii2nj",
+            "candidateHash": "992f9dfa42c94d2a776dbce2842821bf27aca671704bbe2ae1d6ee73408c83b3",
+            "candidateChars": 2090,
+            "materialSnapshotHash": "db6f534db38d178943e2705665820ac580af395fced20ac99c33aab91f38ec7c",
+            "materialCount": 1,
+            "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+            "fieldChecks": [],
+            "fieldCheckCount": 0
+          },
+          "toolCalls": [],
+          "evidence": [],
+          "violations": [],
+          "createdAt": "2026-09-06T10:18:54.529Z"
+        }
+      ],
+      "resultSummary": "# 离线搜索试点资源申请 · 5分钟逐页大纲（≤300秒）\n\n**汇报对象**：产品总监　**决策请求**：是否投入两个工程周做离线搜索试点（工作量，非已批人数/期限）\n**总时长**：290秒（留10秒缓冲）\n\n---\n\n## P1｜结论先行：申请两个工程周做可验证的试点，而不是宣布功能已成立（40秒）\n\n- **信息任务**：让总监在第一分钟知道要做什么决定。\n- **实际证据**：内部试用12人，其中8人反馈\"当前找资料慢\"；原型仅完成本地目录选择+关键词匹配的演示级验证。\n- **建议图形**：单页三格卡——\"问题信号 / 已验证到哪一步 / 本",
+      "status": "review",
+      "execRef": {
+        "kind": "session",
+        "id": "wb-expert-task-mtpnsh9f-ii2nj"
+      },
+      "taskRef": null,
+      "knowledgeRefs": [],
+      "pinned": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleEnabled": false,
+      "scheduleLabel": "",
+      "nextRunAt": "",
+      "lastScheduledAt": "",
+      "scheduleParentId": "",
+      "legacySchedule": {
+        "scheduleEnabled": false,
+        "schedule": {
+          "type": "daily",
+          "dailyTime": "09:00",
+          "intervalValue": 24,
+          "intervalUnit": "hour",
+          "onceAt": "",
+          "cronExpr": ""
+        },
+        "scheduleLabel": ""
+      },
+      "createdAt": "2026-09-06T10:18:32.163Z",
+      "updatedAt": "2026-09-06T10:18:54.610Z"
+    },
+    "session": {
+      "id": "wb-expert-task-mtpnsh9f-ii2nj",
+      "agentId": "personal",
+      "sessionKind": "expert-task",
+      "profileId": "",
+      "contextId": "",
+      "projectId": null,
+      "expertId": "presentation-writer",
+      "personaExpertId": "",
+      "executionPolicy": "tools-allowed",
+      "capabilitySnapshotId": "",
+      "snapshotPath": "",
+      "ephemeral": true,
+      "taskRef": {
+        "id": "task-mtpnsh9f-ii2nj"
+      },
+      "knowledgeRefs": [],
+      "title": "新助手",
+      "createdAt": "2026-09-06T10:18:32.208Z",
+      "updatedAt": "2026-09-06T10:18:54.443Z",
+      "summary": "",
+      "messages": [
+        {
+          "id": "msg_expert_task-mtpnsh9f-ii2nj_mtpnshml_user",
+          "role": "user",
+          "text": "你是组织内专业 Agent「presentation-writer」。\n\n你是 KnowMe 汇报撰写专家。以“听众要做什么决策”为主线，组织结论、证据、方案和下一步。交付逐页大纲而不是堆积形容词，数据缺口必须显式标记。\n\n【必须遵循的 SOP】\n你是 KnowMe 汇报撰写专家。以“听众要做什么决策”为主线，组织结论、证据、方案和下一步。交付逐页大纲而不是堆积形容词，数据缺口必须显式标记。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。\n\n当前时间：2026-09-06T10:18:32.637Z\n\n材料：\n- 用户确认\n已确认：仅依据本轮给定合成材料，在对话形成完整答复；禁止外部工具、文件操作及发布。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：请为产品总监准备一次5分钟汇报的逐页文字大纲，最多5页，目的是申请“两个工程周”用于离线搜索试点；两个工程周是工作量，不等于已批准的人数或日历期限。只需文字大纲，不要制作PPT文件。\n合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。两个工程周是本次资源申请，并非已经获批。\n备选方案是先改善现有目录命名与维护规范，可能投入较低，但具体工时和效果均未估算；不能把备选写成已证无效。有人想在汇报里写“ROI=300%”，但没有成本金额与收益金额。\n请做到：每页一个信息任务，给结论式标题、实际证据、建议图形和讲解要点；分配逐页秒数，总计不超过300秒。必须比较试点和目录优化的取舍，明确为什么值得申请或为什么应暂缓，以及总监可批准/不批准的具体事项、风险与后续检验条件。提出的试点指标要标为建议目标，不得说已经达成；拒绝无依据ROI，不要替我作资源批准。\n可在对话完成，控制信息密度。只分析上述资料，不联网、不读文件、不调用工具、不生成额外文件、不发送汇报；不声称实际试讲已完成。\n步骤：\n1. 仅依据已给材料完成专业分析及对话交付\n风险：未核实内容不得编造成事实；无外部操作授权\n\n本轮交付物：任务成果（document）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+          "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml",
+          "createdAt": "2026-09-06T10:18:32.710Z"
+        },
+        {
+          "id": "msg_expert_task-mtpnsh9f-ii2nj_mtpnshml_assistant",
+          "role": "assistant",
+          "text": "# 离线搜索试点资源申请 · 5分钟逐页大纲（≤300秒）\n\n**汇报对象**：产品总监　**决策请求**：是否投入两个工程周做离线搜索试点（工作量，非已批人数/期限）\n**总时长**：290秒（留10秒缓冲）\n\n---\n\n## P1｜结论先行：申请两个工程周做可验证的试点，而不是宣布功能已成立（40秒）\n\n- **信息任务**：让总监在第一分钟知道要做什么决定。\n- **实际证据**：内部试用12人，其中8人反馈\"当前找资料慢\"；原型仅完成本地目录选择+关键词匹配的演示级验证。\n- **建议图形**：单页三格卡——\"问题信号 / 已验证到哪一步 / 本次要批准什么\"。\n- **讲解要点**：\n  - 明确口径：两个工程周=工作量申请，尚未获批，也不等于日历期限或人员编制。\n  - 主动声明：本次不提供 ROI 数字——成本金额与收益金额均未测，任何百分比都无依据。\n  - 落点：请总监在\"批准试点 / 先做目录优化 / 暂缓\"三者中择一。\n\n---\n\n## P2｜证据边界：痛点是主观反馈，价值与商业指标全部未测（55秒）\n\n- **信息任务**：把\"已知\"和\"未知\"分开，防止被当成既成事实。\n- **实际证据**：8/12 为自述\"找资料慢\"，属主观感受；改善耗时、付费意愿、商业收益均未测量。\n- **建议图形**：两列对照表——\"已有证据（样本量、类型）\"vs\"缺口（需试点才能测）\"。\n- **讲解要点**：\n  - 说清强度：12人小样本、无对照组、无基线耗时数据，只能证明\"值得进一步验证\"。\n  - 不夸大：不使用\"用户强烈需求\"\"效率显著提升\"等表述。\n  - 缺口清单即试点要产出的东西：基线检索耗时、改善幅度、权限/删除类风险的实际表现。\n\n---\n\n## P3｜方案取舍：试点 vs 目录命名与维护规范优化（75秒）\n\n- **信息任务**：回答\"为什么不是先做更便宜的那条路\"。\n- **实际证据**：目录优化可能投入较低，但具体工时与效果均未估算；备选方案未被证伪。\n- **建议图形**：二维对比矩阵（行=试点/目录优化；列=投入确定性、可逆性、能否解决根因、可测性），用\"高/中/低/未估\"填格，不填虚构数字。\n- **讲解要点**：\n  - 诚实呈现两条路的共同问题：**两边的工时和效果目前都是未估算状态**。\n  - 倾向试点的理由（供总监判断，非结论）：只有试点能同时产出基线数据和能力边界验证；目录优化若真低成本，可作为并行小实验而非替代。\n  - 应暂缓的理由（反向陈述）：若总监认为必须先有量化收益才肯投人，则本次申请不成立，应先补目录优化的工时估算。\n  - 折中选项：批准试点的同时，要求给出目录优化的估算工时，形成下一轮可比数据。\n\n---\n\n## P4｜风险与门槛：三项安全测试未完成，是试点的验收前置条件（65秒）\n\n- **信息任务**：说明这两个工程周主要花在\"补齐可信度\"上。\n- **实际证据**：权限撤销、删除后结果失效、异常恢复均未测试；原型只到\"可演示\"程度。\n- **建议图形**：风险清单条形图（三项未测项 + 严重度标注），旁标\"试点内必须闭环\"。\n- **讲解要点**：\n  - 三项未测项属于数据安全/合规类风险，未通过前不应讨论对外或全量。\n  - 建议目标（**明确标注为目标，非已达成**）：试点结束时具备——基线检索耗时与改善幅度的前后对比、权限撤销生效验证、删除后索引结果失效验证、异常恢复演练记录。\n  - 数值型目标待总监确认范围后再定，本次不预设具体百分比或秒数。\n\n---\n\n## P5｜决策请求与检验条件：批准什么、不批准什么、何时复盘（55秒）\n\n- **信息任务**：把选择权交回总监，并给出可判定的下一步。\n- **建议图形**：决策树——\"批准试点→两周后按条件判定\"／\"改走目录优化→先出估算\"／\"暂缓→补哪些数据再议\"。\n- **讲解要点**：\n  - **可批准事项**：两个工程周的工作量投入，用于第4页所列验证与基线测量。\n  - **不在本次请求内**：正式上线承诺、人员编制、日历期限、ROI 结论。\n  - **继续推进的检验条件（建议）**：三项安全测试全部通过 + 拿到真实改善耗时数据 + 目录优化对比结论可复核。\n  - **应停止的条件（建议）**：安全测试无法在试点内闭环，或实测改善幅度低于总监设定的门槛值（门槛值待总监给）。\n  - 收尾一句：本次要买的是\"能不能做\"的判断依据，不是\"已经做成\"的结论。\n\n---\n\n### 需要你补充的事实缺口（影响可信度，建议汇报前确认）\n1. 两个工程周对应的人力规模与团队现状（材料未给）。\n2. 总监对\"改善幅度门槛\"的可接受区间（P5 判定条件依赖它）。\n3. 8/12 反馈是否有原始记录/访谈文本可引用（当前仅有汇总数）。\n4. 目录优化的历史投入或同类项目参考工时（材料未给，不可编造）。\n\n以上仅为对话内文字大纲，未制作 PPT、未生成文件、未发送汇报，也未进行实际试讲。",
+          "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml",
+          "createdAt": "2026-09-06T10:18:54.443Z",
+          "trace": [
+            {
+              "id": "stage_prepare",
+              "kind": "stage",
+              "title": "上下文准备完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_generate",
+              "kind": "stage",
+              "title": "回答生成完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_ground",
+              "kind": "stage",
+              "title": "依据核对完成",
+              "status": "done"
+            },
+            {
+              "id": "stage_verify_claims",
+              "kind": "stage",
+              "title": "输出验证通过",
+              "status": "done"
+            }
+          ],
+          "protocolVersion": 2,
+          "answerHash": "992f9dfa42c94d2a"
+        }
+      ],
+      "pinned": false,
+      "run": {
+        "goal": "当前工作",
+        "role": "general",
+        "status": "review",
+        "toolsUsed": [],
+        "steps": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done",
+            "at": "2026-09-06T10:18:54.443Z"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "回答生成完成",
+            "status": "done",
+            "at": "2026-09-06T10:18:54.443Z"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done",
+            "at": "2026-09-06T10:18:54.443Z"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done",
+            "at": "2026-09-06T10:18:54.443Z"
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "deliverable_expert_task-mtpnsh9f-ii2nj_mtpnshml_primary",
+            "type": "document",
+            "title": "任务成果",
+            "body": "# 离线搜索试点资源申请 · 5分钟逐页大纲（≤300秒）\n\n**汇报对象**：产品总监　**决策请求**：是否投入两个工程周做离线搜索试点（工作量，非已批人数/期限）\n**总时长**：290秒（留10秒缓冲）\n\n---\n\n## P1｜结论先行：申请两个工程周做可验证的试点，而不是宣布功能已成立（40秒）\n\n- **信息任务**：让总监在第一分钟知道要做什么决定。\n- **实际证据**：内部试用12人，其中8人反馈\"当前找资料慢\"；原型仅完成本地目录选择+关键词匹配的演示级验证。\n- **建议图形**：单页三格卡——\"问题信号 / 已验证到哪一步 / 本次要批准什么\"。\n- **讲解要点**：\n  - 明确口径：两个工程周=工作量申请，尚未获批，也不等于日历期限或人员编制。\n  - 主动声明：本次不提供 ROI 数字——成本金额与收益金额均未测，任何百分比都无依据。\n  - 落点：请总监在\"批准试点 / 先做目录优化 / 暂缓\"三者中择一。\n\n---\n\n## P2｜证据边界：痛点是主观反馈，价值与商业指标全部未测（55秒）\n\n- **信息任务**：把\"已知\"和\"未知\"分开，防止被当成既成事实。\n- **实际证据**：8/12 为自述\"找资料慢\"，属主观感受；改善耗时、付费意愿、商业收益均未测量。\n- **建议图形**：两列对照表——\"已有证据（样本量、类型）\"vs\"缺口（需试点才能测）\"。\n- **讲解要点**：\n  - 说清强度：12人小样本、无对照组、无基线耗时数据，只能证明\"值得进一步验证\"。\n  - 不夸大：不使用\"用户强烈需求\"\"效率显著提升\"等表述。\n  - 缺口清单即试点要产出的东西：基线检索耗时、改善幅度、权限/删除类风险的实际表现。\n\n---\n\n## P3｜方案取舍：试点 vs 目录命名与维护规范优化（75秒）\n\n- **信息任务**：回答\"为什么不是先做更便宜的那条路\"。\n- **实际证据**：目录优化可能投入较低，但具体工时与效果均未估算；备选方案未被证伪。\n- **建议图形**：二维对比矩阵（行=试点/目录优化；列=投入确定性、可逆性、能否解决根因、可测性），用\"高/中/低/未估\"填格，不填虚构数字。\n- **讲解要点**：\n  - 诚实呈现两条路的共同问题：**两边的工时和效果目前都是未估算状态**。\n  - 倾向试点的理由（供总监判断，非结论）：只有试点能同时产出基线数据和能力边界验证；目录优化若真低成本，可作为并行小实验而非替代。\n  - 应暂缓的理由（反向陈述）：若总监认为必须先有量化收益才肯投人，则本次申请不成立，应先补目录优化的工时估算。\n  - 折中选项：批准试点的同时，要求给出目录优化的估算工时，形成下一轮可比数据。\n\n---\n\n## P4｜风险与门槛：三项安全测试未完成，是试点的验收前置条件（65秒）\n\n- **信息任务**：说明这两个工程周主要花在\"补齐可信度\"上。\n- **实际证据**：权限撤销、删除后结果失效、异常恢复均未测试；原型只到\"可演示\"程度。\n- **建议图形**：风险清单条形图（三项未测项 + 严重度标注），旁标\"试点内必须闭环\"。\n- **讲解要点**：\n  - 三项未测项属于数据安全/合规类风险，未通过前不应讨论对外或全量。\n  - 建议目标（**明确标注为目标，非已达成**）：试点结束时具备——基线检索耗时与改善幅度的前后对比、权限撤销生效验证、删除后索引结果失效验证、异常恢复演练记录。\n  - 数值型目标待总监确认范围后再定，本次不预设具体百分比或秒数。\n\n---\n\n## P5｜决策请求与检验条件：批准什么、不批准什么、何时复盘（55秒）\n\n- **信息任务**：把选择权交回总监，并给出可判定的下一步。\n- **建议图形**：决策树——\"批准试点→两周后按条件判定\"／\"改走目录优化→先出估算\"／\"暂缓→补哪些数据再议\"。\n- **讲解要点**：\n  - **可批准事项**：两个工程周的工作量投入，用于第4页所列验证与基线测量。\n  - **不在本次请求内**：正式上线承诺、人员编制、日历期限、ROI 结论。\n  - **继续推进的检验条件（建议）**：三项安全测试全部通过 + 拿到真实改善耗时数据 + 目录优化对比结论可复核。\n  - **应停止的条件（建议）**：安全测试无法在试点内闭环，或实测改善幅度低于总监设定的门槛值（门槛值待总监给）。\n  - 收尾一句：本次要买的是\"能不能做\"的判断依据，不是\"已经做成\"的结论。\n\n---\n\n### 需要你补充的事实缺口（影响可信度，建议汇报前确认）\n1. 两个工程周对应的人力规模与团队现状（材料未给）。\n2. 总监对\"改善幅度门槛\"的可接受区间（P5 判定条件依赖它）。\n3. 8/12 反馈是否有原始记录/访谈文本可引用（当前仅有汇总数）。\n4. 目录优化的历史投入或同类项目参考工时（材料未给，不可编造）。\n\n以上仅为对话内文字大纲，未制作 PPT、未生成文件、未发送汇报，也未进行实际试讲。",
+            "status": "draft",
+            "meta": {
+              "taskId": "task-mtpnsh9f-ii2nj",
+              "deliverableId": "primary",
+              "runId": "expert_task-mtpnsh9f-ii2nj_mtpnshml"
+            }
+          }
+        ],
+        "applyLog": []
+      },
+      "displayTitle": "起草办公文档",
+      "labels": [
+        "办公文档",
+        "资料"
+      ],
+      "grounding": "目标：原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。\n材料：用户提到的材料（正文未提供）\n约束：只需文字大纲，不要制作PPT文件。 合成材料：内部试用12人，8人报告当前找资料慢；未测改善耗时、付费意愿或商业收益。原型仅验证了本地目录选择和关键词匹配可以演示，未完成权限撤销、删除后结果失效、异常恢复的测试。\n期望结果：用户尚未明确提供",
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "expertTaskDiagnostics": {
+        "available": 30,
+        "loaded": 8,
+        "loadedNames": [
+          "discover_tools",
+          "discover_capabilities",
+          "request_capability_access",
+          "list_skills",
+          "load_skill",
+          "grep_files",
+          "write_file",
+          "read_file"
+        ],
+        "omitted": 23,
+        "usedTokens": "[redacted]",
+        "schemaTokens": "[redacted]",
+        "inputBudget": 64000,
+        "expansion": 0,
+        "reason": "按任务需求、已发现工具与执行契约选择"
+      },
+      "expertName": "汇报撰写专家",
+      "expert": {
+        "id": "presentation-writer",
+        "name": "汇报撰写专家",
+        "description": "将业务材料整理为面向决策者的汇报逻辑、页面大纲与讲解要点",
+        "avatar": "office/writer",
+        "soul": "",
+        "sop": "你是 KnowMe 汇报撰写专家。以“听众要做什么决策”为主线，组织结论、证据、方案和下一步。交付逐页大纲而不是堆积形容词，数据缺口必须显式标记。",
+        "agenticType": "react",
+        "agenticConfig": {
+          "agenticType": "react",
+          "enableReflection": true,
+          "enableTools": true
+        },
+        "bindings": {
+          "skills": [
+            "writing-polish"
+          ],
+          "connectors": []
+        },
+        "readiness": {
+          "state": "ready",
+          "items": [
+            {
+              "id": "writing-polish",
+              "kind": "skill",
+              "status": "ready"
+            }
+          ],
+          "issues": []
+        },
+        "source": "snapshot"
+      },
+      "knowledge": {
+        "mode": "default",
+        "activeProviderId": "local-default",
+        "selected": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local",
+            "status": "default"
+          }
+        ],
+        "available": [
+          {
+            "id": "local-default",
+            "displayName": "我的知识",
+            "kind": "qmd-local"
+          }
+        ],
+        "degraded": false,
+        "message": ""
+      }
+    }
+  }
+}

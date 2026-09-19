@@ -45,7 +45,7 @@ function create(ctx) {
       catch { /* ignore */ }
     }
     // GPU 崩溃：落盘回退并自动重启一次，无需用户配环境变量
-    if (type === 'GPU' && process.platform === 'win32' && !ctx._gpuCrashRelaunching && !isRelaunchedFromGpuCrash) {
+    if (type === 'GPU' && process.platform === 'win32' && process.env.KNOWME_TEST_SEAM !== '1' && !ctx._gpuCrashRelaunching && !isRelaunchedFromGpuCrash) {
       try {
         const { markGpuCrash } = require('../lib/windows-gpu-fallback')
         markGpuCrash(ctx.app.getPath('userData'), ctx.fs, ctx.path)

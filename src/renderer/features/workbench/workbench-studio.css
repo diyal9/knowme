@@ -26,9 +26,9 @@
 }
 .wb-runner.is-daemon-review .wb-runner-actions {
   padding: 10px 14px 12px;
-  border-top: 1px solid var(--wb-border, #e2ded5);
+  border-top: 1px solid var(--wb-border, var(--border-default));
   margin-top: auto;
-  background: var(--wb-surface, #fff);
+  background: var(--wb-surface, var(--surface-page));
   justify-content: flex-end;
   gap: 8px;
 }
@@ -80,7 +80,7 @@
 .wb-daemon-review-identity strong {
   min-width: 0;
   font: var(--type-section);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -107,7 +107,7 @@
   background: currentColor;
 }
 .wb-daemon-review-state.tone-running { color:var(--action-primary); }
-.wb-daemon-review-state.tone-waiting { color:var(--wb-warning, #8a641f); }
+.wb-daemon-review-state.tone-waiting { color:var(--wb-warning, var(--state-warning)); }
 .wb-daemon-review-state.tone-done { color:var(--wb-success); }
 .wb-daemon-review-state.tone-muted { color:var(--text-muted); }
 .wb-daemon-review-progress {
@@ -124,11 +124,11 @@
   justify-content: space-between;
   gap: 10px;
   font: 500 12px/1.35 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-progress-head strong {
   font: 600 12px/1.3 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   letter-spacing: 0;
 }
 .wb-daemon-review-progress-bar {
@@ -141,11 +141,11 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--wb-warning, #8a641f);
+  background: var(--wb-warning, var(--state-warning));
   transition: width .2s ease;
 }
-.wb-daemon-review-progress-bar.is-done > span { background: var(--wb-success, #2d7a63); }
-.wb-daemon-review-progress-bar.is-error > span { background: var(--wb-danger, #a94f45); }
+.wb-daemon-review-progress-bar.is-done > span { background: var(--wb-success, var(--action-primary)); }
+.wb-daemon-review-progress-bar.is-error > span { background: var(--wb-danger, var(--state-danger)); }
 .wb-daemon-review-tabs {
   display: flex;
   align-items: center;
@@ -184,7 +184,7 @@
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
   cursor: pointer;
 }
 .wb-daemon-review-refresh:hover {
@@ -204,17 +204,17 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid var(--wb-border, #e2ded5);
-  background: var(--wb-surface, #fff);
+  border: 1px solid var(--wb-border, var(--border-default));
+  background: var(--wb-surface, var(--surface-page));
   border-radius: 8px;
   padding: 5px 10px;
   font: 600 12px var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   cursor: pointer;
 }
 .wb-daemon-review-workspace:hover {
-  border-color: var(--wb-line-strong, #c9c2b4);
-  background: var(--wb-surface-subtle, #f6f5f1);
+  border-color: var(--wb-line-strong, var(--border-strong));
+  background: var(--wb-surface-subtle, var(--surface-subtle));
 }
 .wb-daemon-review-workspace .ico { width: 14px; height: 14px; }
 .wb-daemon-review-body {
@@ -226,7 +226,7 @@
 .wb-daemon-review-section-title {
   margin: 0 0 8px;
   font: 600 12px/1.3 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   letter-spacing: 0;
 }
 .wb-daemon-review-tip {
@@ -236,13 +236,13 @@
   border-radius: 0;
   background: transparent;
   font: 500 12px/1.4 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-empty {
   display: grid;
   place-items: center;
   min-height: 140px;
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
   font: 500 12px/1.45 var(--ui);
 }
 .wb-daemon-review-empty p { margin: 0; }
@@ -252,9 +252,9 @@
   padding: 24px 16px 28px;
   text-align: center;
   justify-items: center;
-  border: 1px dashed #e1e5e8;
+  border: 1px dashed var(--border-default);
   border-radius: 10px;
-  background: linear-gradient(180deg, #f7f8f9 0%, #fff 72%);
+  background: linear-gradient(180deg, var(--surface-panel) 0%, var(--surface-page) 72%);
 }
 .wb-daemon-review-empty.is-artifacts .wb-daemon-review-empty-icon {
   display: inline-flex;
@@ -263,7 +263,7 @@
   width: 36px;
   height: 36px;
   margin-bottom: 2px;
-  color: #a39e94;
+  color: var(--text-faint);
 }
 .wb-daemon-review-empty.is-artifacts .wb-daemon-review-empty-icon svg {
   width: 28px;
@@ -272,13 +272,13 @@
 }
 .wb-daemon-review-empty.is-artifacts strong {
   font: 600 13px/1.35 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   letter-spacing: 0;
 }
 .wb-daemon-review-empty.is-artifacts p {
   max-width: 280px;
   font: 500 12px/1.5 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-empty.is-artifacts .wb-run-btn {
   margin-top: 4px;
@@ -295,7 +295,7 @@
   gap: 4px;
   margin-bottom: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #efebe3;
+  border-bottom: 1px solid var(--brand-paper);
 }
 .wb-daemon-review-artifacts-head .wb-daemon-review-section-title {
   margin: 0;
@@ -308,13 +308,13 @@
   border: 0;
   background: transparent;
   font: 500 12px/1.5 var(--ui);
-  color: var(--wb-text-muted, #6d6860);
+  color: var(--wb-text-muted, var(--text-secondary));
 }
 .wb-daemon-review-callout strong {
   display: block;
   margin-bottom: 4px;
   font: 600 13px/1.35 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
 }
 .wb-daemon-review-steps {
   display: flex;
@@ -362,7 +362,7 @@
   top: 14px;
   bottom: -1px;
   width: 1.5px;
-  background: #e8e4dc;
+  background: var(--state-warning-border);
 }
 .wb-daemon-review-steps.is-zigzag .wb-daemon-review-step:not(:last-child)::before {
   left: 50%;
@@ -371,7 +371,7 @@
   width: 1.5px;
   transform: translateX(-50%);
 }
-.wb-daemon-review-step.status-done:not(:last-child)::before { background: rgba(47,125,74,.35); }
+.wb-daemon-review-step.status-done:not(:last-child)::before { background: color-mix(in srgb, var(--action-primary-hover) 35%, transparent); }
 .wb-daemon-review-step-mark {
   position: relative;
   z-index: 1;
@@ -379,8 +379,8 @@
   height: 12px;
   margin-top: 7px;
   border-radius: 50%;
-  background: #fff;
-  border: 2px solid #c9c2b4;
+  background: var(--surface-page);
+  border: 2px solid var(--state-warning-border);
   flex-shrink: 0;
   box-sizing: border-box;
 }
@@ -393,15 +393,15 @@
 .wb-daemon-review-step.status-done .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-completed .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-success .wb-daemon-review-step-mark {
-  border-color: var(--wb-success, #2d7a63);
-  background: var(--wb-success, #2d7a63);
+  border-color: var(--wb-success, var(--action-primary));
+  background: var(--wb-success, var(--action-primary));
 }
 .wb-daemon-review-step.status-active .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-running .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-waiting .wb-daemon-review-step-mark,
 .wb-daemon-review-step.is-current .wb-daemon-review-step-mark {
-  border-color: var(--wb-warning, #8a641f);
-  background: var(--wb-warning, #8a641f);
+  border-color: var(--wb-warning, var(--state-warning));
+  background: var(--wb-warning, var(--state-warning));
   box-shadow: none;
 }
 /* 当前节点：外扩脉冲环，表达「流程正在此节点」 */
@@ -413,7 +413,7 @@
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--wb-warning, #8a641f) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--wb-warning, var(--state-warning)) 70%, transparent);
   pointer-events: none;
   animation: wb-daemon-step-pulse 1.6s ease-out infinite;
 }
@@ -444,11 +444,11 @@
 }
 .wb-daemon-review-step.status-error .wb-daemon-review-step-mark,
 .wb-daemon-review-step.status-failed .wb-daemon-review-step-mark {
-  border-color: var(--wb-danger, #a94f45);
-  background: var(--wb-danger, #a94f45);
+  border-color: var(--wb-danger, var(--state-danger));
+  background: var(--wb-danger, var(--state-danger));
 }
 .wb-daemon-review-step.is-current .wb-daemon-review-step-card strong {
-  color: #1f1e1b;
+  color: var(--brand-ink);
 }
 .wb-daemon-review-step.is-zig-left .wb-daemon-review-step-card {
   grid-column: 1;
@@ -475,7 +475,7 @@
   top: 13px;
   width: 12px;
   height: 1.5px;
-  background: #d8d2c6;
+  background: var(--state-warning-border);
   pointer-events: none;
 }
 .wb-daemon-review-steps.is-zigzag .is-zig-left .wb-daemon-review-step-card::after {
@@ -487,16 +487,16 @@
 .wb-daemon-review-steps.is-zigzag .status-done .wb-daemon-review-step-card::after,
 .wb-daemon-review-steps.is-zigzag .status-completed .wb-daemon-review-step-card::after,
 .wb-daemon-review-steps.is-zigzag .status-success .wb-daemon-review-step-card::after {
-  background: rgba(47, 125, 74, .35);
+  background: color-mix(in srgb, var(--action-primary-hover) 35%, transparent);
 }
 .wb-daemon-review-steps.is-zigzag .status-active .wb-daemon-review-step-card::after,
 .wb-daemon-review-steps.is-zigzag .status-running .wb-daemon-review-step-card::after,
 .wb-daemon-review-steps.is-zigzag .is-current .wb-daemon-review-step-card::after {
-  background: color-mix(in srgb, var(--wb-warning, #8a641f) 45%, #d8d2c6);
+  background: color-mix(in srgb, var(--wb-warning, var(--state-warning)) 45%, var(--state-warning-border));
 }
 .wb-daemon-review-steps.is-zigzag .status-error .wb-daemon-review-step-card::after,
 .wb-daemon-review-steps.is-zigzag .status-failed .wb-daemon-review-step-card::after {
-  background: color-mix(in srgb, var(--wb-danger, #a94f45) 40%, #d8d2c6);
+  background: color-mix(in srgb, var(--wb-danger, var(--state-danger)) 40%, var(--state-warning-border));
 }
 .wb-daemon-review-step.is-zig-left .wb-daemon-review-step-head,
 .wb-daemon-review-step.is-zig-left .wb-daemon-review-step-body {
@@ -558,7 +558,7 @@
 .wb-daemon-review-step-card:hover .wb-daemon-review-step-head { background:transparent; }
 .wb-daemon-review-step.is-current .wb-daemon-review-step-card,
 .wb-daemon-review-step.status-active .wb-daemon-review-step-card {
-  border-color:color-mix(in srgb, var(--wb-warning, #8a641f) 38%, var(--border-default));
+  border-color:color-mix(in srgb, var(--wb-warning, var(--state-warning)) 38%, var(--border-default));
   background:transparent;
 }
 .wb-daemon-review-step.is-current .wb-daemon-review-step-head,
@@ -567,7 +567,7 @@
   border-bottom-color: transparent;
 }
 .wb-daemon-review-step.status-error .wb-daemon-review-step-card {
-  border-color:color-mix(in srgb, var(--wb-danger, #a94f45) 34%, var(--border-default));
+  border-color:color-mix(in srgb, var(--wb-danger, var(--state-danger)) 34%, var(--border-default));
   background:transparent;
 }
 .wb-daemon-review-step.status-error .wb-daemon-review-step-head {
@@ -578,7 +578,7 @@
   display: block;
   max-width: 100%;
   font: 600 13px/1.35 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   letter-spacing: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -590,7 +590,7 @@
 .wb-daemon-review-step-output {
   display: block;
   font: 500 12px/1.35 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -601,7 +601,7 @@
   letter-spacing: 0;
 }
 .wb-daemon-review-step-output {
-  color: var(--wb-text-muted, #6d6860);
+  color: var(--wb-text-muted, var(--text-secondary));
 }
 .wb-daemon-review-step-detail {
   position: relative;
@@ -626,14 +626,14 @@
   margin-top: 4px;
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-done {
-  border-color: var(--wb-success, #2d7a63);
-  background: var(--wb-success, #2d7a63);
+  border-color: var(--wb-success, var(--action-primary));
+  background: var(--wb-success, var(--action-primary));
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-active,
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-running,
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-waiting {
-  border-color: var(--wb-warning, #8a641f);
-  background: var(--wb-warning, #8a641f);
+  border-color: var(--wb-warning, var(--state-warning));
+  background: var(--wb-warning, var(--state-warning));
   box-shadow: none;
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-active::after,
@@ -643,7 +643,7 @@
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  border: 2px solid color-mix(in srgb, var(--wb-warning, #8a641f) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--wb-warning, var(--state-warning)) 70%, transparent);
   pointer-events: none;
   animation: wb-daemon-step-pulse 1.6s ease-out infinite;
 }
@@ -658,20 +658,20 @@
   }
 }
 .wb-daemon-review-step-detail-head .wb-daemon-review-step-mark.status-error {
-  border-color: var(--wb-danger, #a94f45);
-  background: var(--wb-danger, #a94f45);
+  border-color: var(--wb-danger, var(--state-danger));
+  background: var(--wb-danger, var(--state-danger));
 }
 .wb-daemon-review-step-detail-head strong {
   display: block;
   font: 600 14px/1.35 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   letter-spacing: 0;
 }
 .wb-daemon-review-step-detail-head small {
   display: block;
   margin-top: 2px;
   font: 500 12px/1.35 var(--ui);
-  color: var(--wb-text-muted, #6d6860);
+  color: var(--wb-text-muted, var(--text-secondary));
 }
 .wb-daemon-review-step-detail-dl {
   display: flex;
@@ -679,9 +679,9 @@
   gap: 8px;
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid #ebe6dc;
+  border: 1px solid var(--state-warning-border);
   border-radius: 10px;
-  background: rgba(255, 255, 255, .5);
+  background: color-mix(in srgb, var(--surface-page) 50%, transparent);
 }
 .wb-daemon-review-step-detail-dl > div {
   display: grid;
@@ -692,12 +692,12 @@
 .wb-daemon-review-step-detail-dl dt {
   margin: 0;
   font: 500 12px/1.4 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-step-detail-dl dd {
   margin: 0;
   font: 500 12px/1.45 var(--ui);
-  color: var(--wb-text, #2c302d);
+  color: var(--wb-text, var(--text-primary));
   word-break: break-word;
 }
 .wb-daemon-review-artifacts,
@@ -750,18 +750,18 @@
   gap: 12px;
   padding: 10px 12px;
   margin: 0 0 8px;
-  border: 1px solid #e4e0d8;
+  border: 1px solid var(--state-warning-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface-page);
   align-items: flex-start;
 }
 .wb-daemon-review-artifact.is-webui:hover {
-  border-color: #cfc9bd;
-  background: #f7f8f9;
+  border-color: var(--border-strong);
+  background: var(--surface-panel);
 }
 .wb-daemon-review-artifact.is-webui .wb-daemon-review-artifact-icon {
   margin-top: 2px;
-  color: var(--wb-accent, #27786a);
+  color: var(--wb-accent, var(--action-primary));
 }
 .wb-daemon-review-artifact-preview {
   flex-shrink: 0;
@@ -769,12 +769,12 @@
   background: transparent;
   padding: 0;
   font: 600 13px/1.3 var(--ui);
-  color: var(--wb-accent, #27786a);
+  color: var(--wb-accent, var(--action-primary));
   cursor: pointer;
 }
 .wb-daemon-review-artifact-preview:hover { text-decoration: underline; }
 .wb-daemon-review-artifact-preview.is-disabled {
-  color: #b0aaa0;
+  color: var(--text-faint);
   cursor: default;
 }
 .wb-daemon-review-artifact-path {
@@ -784,21 +784,21 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 13px/1.35 var(--mono);
-  color: #2a2926;
+  color: var(--text-primary);
 }
 .wb-daemon-review-artifact-size {
   flex-shrink: 0;
   font: 500 12px/1.3 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
   min-width: 3.5em;
   text-align: right;
 }
 .wb-daemon-review-artifact-size.is-empty { min-width: 0; }
 .wb-daemon-review-artifact:hover {
-  background: var(--wb-surface-subtle, #f6f5f1);
+  background: var(--wb-surface-subtle, var(--surface-subtle));
 }
 .wb-daemon-review-artifact.is-webui:hover {
-  background: #f7f8f9;
+  background: var(--surface-panel);
 }
 .wb-daemon-review-artifact:last-child,
 .wb-daemon-review-change:last-child { border-bottom: 0; }
@@ -809,7 +809,7 @@
   justify-content: center;
   width: 18px;
   height: 18px;
-  color: #8a857c;
+  color: var(--text-muted);
 }
 .wb-daemon-review-artifact-icon svg {
   width: 16px;
@@ -831,7 +831,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font: 13px/1.35 var(--ui);
-  color: #2a2926;
+  color: var(--text-primary);
 }
 .wb-daemon-review-artifact-name {
   font: 600 13px/1.35 var(--ui);
@@ -839,7 +839,7 @@
 }
 .wb-daemon-review-artifact-meta {
   font: 500 12px/1.3 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -863,8 +863,8 @@
   letter-spacing: 0;
 }
 .wb-daemon-review-change-status.is-added { background:var(--action-primary-soft); color:var(--wb-success); }
-.wb-daemon-review-change-status.is-deleted { background:var(--wb-danger-soft, #f8ece9); color:var(--wb-danger, #a94f45); }
-.wb-daemon-review-change-status.is-modified { background:var(--wb-warning-soft, #f6f0df); color:var(--wb-warning, #8a641f); }
+.wb-daemon-review-change-status.is-deleted { background:var(--wb-danger-soft, var(--state-danger-soft)); color:var(--wb-danger, var(--state-danger)); }
+.wb-daemon-review-change-status.is-modified { background:var(--wb-warning-soft, var(--state-warning-border)); color:var(--wb-warning, var(--state-warning)); }
 .wb-daemon-review-event {
   padding: 10px 0;
   border: 0;
@@ -908,7 +908,7 @@
   margin: 0;
   flex: 0 0 auto;
   font: 500 12px/1.45 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-logs-block {
   display: flex;
@@ -917,7 +917,7 @@
   border:1px solid var(--border-default);
   border-radius:var(--radius-lg);
   overflow: hidden;
-  background: #fff;
+  background: var(--surface-page);
   box-shadow:none;
 }
 /* 展开区占满剩余高度；收起条贴顶（过程）/贴底（运行日志） */
@@ -963,17 +963,17 @@
   border-radius: 7px;
 }
 .wb-daemon-review-logs-toggle:hover {
-  background: rgba(28, 25, 23, 0.04);
+  background: color-mix(in srgb, var(--brand-ink) 4%, transparent);
 }
 .wb-daemon-review-logs-toggle:focus-visible {
-  outline: 2px solid var(--wb-accent, #2f6f4e);
+  outline: 2px solid var(--wb-accent, var(--action-primary-hover));
   outline-offset: 1px;
 }
 .wb-daemon-review-logs-file {
   width: 14px;
   height: 14px;
   flex: 0 0 auto;
-  color: #6f6a63;
+  color: var(--text-secondary);
 }
 .wb-daemon-review-logs-head strong {
   flex: 1 1 auto;
@@ -988,7 +988,7 @@
   height: 12px;
   flex: 0 0 auto;
   margin-left: auto;
-  color: #8a847c;
+  color: var(--text-muted);
   transform: rotate(90deg);
   transition: transform .14s ease;
 }
@@ -997,17 +997,17 @@
   min-height: 0;
   overflow: auto;
   padding: 12px 14px;
-  background: #fff;
+  background: var(--surface-page);
 }
 .wb-daemon-review-logs-body[data-logs-pane="progress"] {
-  background: #ffffff;
+  background: var(--surface-page);
 }
 .wb-daemon-review-logs-body[data-logs-pane="lines"] {
   background:var(--surface-subtle);
 }
 .wb-daemon-review-logs-empty {
   font: 13px/1.45 var(--ui);
-  color: var(--wb-text-faint, #9a958e);
+  color: var(--wb-text-faint, var(--text-faint));
 }
 .wb-daemon-review-logs-pre {
   margin: 0;
@@ -1017,7 +1017,7 @@
   color:var(--text-primary);
 }
 .wb-daemon-progress-md {
-  color: #2f2c28;
+  color: var(--text-primary);
   font: 13px/1.65 var(--ui);
   overflow-wrap: anywhere;
 }
@@ -1027,7 +1027,7 @@
 .wb-daemon-progress-md h3,
 .wb-daemon-progress-md h4 {
   margin: 0.85em 0 0.4em;
-  color: #1c1a17;
+  color: var(--brand-ink);
   line-height: 1.3;
   font-weight: 700;
   letter-spacing: 0;
@@ -1055,16 +1055,16 @@
 .wb-daemon-progress-md code {
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(28, 25, 23, 0.06);
+  background: color-mix(in srgb, var(--brand-ink) 6%, transparent);
   font: 12px/1.45 var(--mono);
 }
 .wb-daemon-progress-md pre {
   overflow: auto;
   margin: 0.7em 0;
   padding: 10px 12px;
-  border: 1px solid #ece7df;
+  border: 1px solid var(--border-default);
   border-radius: 8px;
-  background: #f3f4f5;
+  background: var(--surface-subtle);
 }
 .wb-daemon-progress-md pre code {
   padding: 0;
@@ -1074,9 +1074,9 @@
   margin: 0.75em 0 0.35em;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  border: 1px solid #e8e2d8;
+  border: 1px solid var(--border-default);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface-page);
 }
 .wb-daemon-progress-md .md-table {
   width: 100%;
@@ -1089,7 +1089,7 @@
 .wb-daemon-progress-md .md-table th,
 .wb-daemon-progress-md .md-table td {
   padding: 8px 10px;
-  border-bottom: 1px solid #efe9e0;
+  border-bottom: 1px solid var(--border-default);
   text-align: left;
   vertical-align: top;
   word-break: break-word;
@@ -1099,17 +1099,17 @@
 .wb-daemon-progress-md .md-table th {
   position: sticky;
   top: 0;
-  background: #f7f3ed;
-  color: #4a463f;
+  background: var(--brand-paper);
+  color: var(--text-primary);
   font-weight: 600;
   letter-spacing: 0;
-  border-bottom-color: #e4ddd2;
+  border-bottom-color: var(--border-default);
 }
 .wb-daemon-progress-md .md-table tbody tr:last-child td {
   border-bottom: 0;
 }
 .wb-daemon-progress-md .md-table tbody tr:nth-child(even) td {
-  background: rgba(28, 25, 23, 0.015);
+  background: color-mix(in srgb, var(--brand-ink) 1.5%, transparent);
 }
 .wb-daemon-progress-md .md-table code {
   white-space: nowrap;
@@ -1132,10 +1132,10 @@
   border-radius: 0;
   background: transparent;
   font: 13px/1.5 var(--ui);
-  color: #2f2c28;
+  color: var(--text-primary);
 }
 .wb-daemon-progress-md ul > li > strong:first-child {
-  color: #6a655c;
+  color: var(--text-secondary);
   font-weight: 600;
   font-size: 12px;
   flex: 0 0 auto;
@@ -1152,15 +1152,15 @@
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  color: #6f6a63;
+  color: var(--text-secondary);
   cursor: pointer;
 }
 .wb-daemon-progress-preview:hover {
-  background: rgba(28, 25, 23, 0.05);
-  color: #1f1e1b;
+  background: color-mix(in srgb, var(--brand-ink) 5%, transparent);
+  color: var(--brand-ink);
 }
 .wb-daemon-progress-preview:focus-visible {
-  outline: 2px solid var(--wb-accent, #2f6f4e);
+  outline: 2px solid var(--wb-accent, var(--action-primary-hover));
   outline-offset: 1px;
 }
 .wb-daemon-progress-preview .ico {
@@ -1179,7 +1179,7 @@
   min-height: 0;
   overflow: auto;
   padding: 12px 16px 16px;
-  background: #ffffff;
+  background: var(--surface-page);
 }
 .wb-daemon-progress-preview-modal-body .wb-daemon-progress-md {
   max-width: none;
@@ -1187,9 +1187,9 @@
 .wb-daemon-progress-preview-modal-body .md-table-wrap {
   margin: 0.75em 0 0.35em;
   overflow: visible;
-  border: 1px solid #e8e2d8;
+  border: 1px solid var(--state-warning-border);
   border-radius: 10px;
-  background: #fff;
+  background: var(--surface-page);
 }
 .wb-daemon-progress-preview-modal-body .md-table {
   min-width: max(100%, 640px);
@@ -1203,7 +1203,7 @@
 }
 .wb-daemon-review-log-line {
   font: 12px/1.5 var(--mono);
-  color: #3a3732;
+  color: var(--text-primary);
   white-space: pre-wrap;
   word-break: break-word;
   padding: 1px 0;

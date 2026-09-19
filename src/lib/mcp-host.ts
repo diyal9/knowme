@@ -2,6 +2,7 @@
 
 const { spawn } = require('child_process')
 const readline = require('readline')
+const { listAllMcpTools } = require('./mcp-tool-pagination')
 let logger = null
 try { logger = require('./logger') } catch { /* logger optional */ }
 
@@ -137,9 +138,7 @@ function createMcpSession(opts = {}) {
   async function listTools() {
     try {
       await ensureStarted()
-      const result = await request('tools/list', {})
-      const tools = Array.isArray(result?.tools) ? result.tools : []
-      return { ok: true, tools }
+      return await listAllMcpTools(async params => ({ ok: true, result: await request('tools/list', params) }))
     } catch (err) {
       return {
         ok: false,
@@ -207,7 +206,8 @@ function projectMcpTools(mcpTools, allowlist = [], connectorId = '') {
   const sanitizedId = sanitizeConnectorId(connectorId)
   return list
     .filter((t) => t && t.name && allow.has(String(t.name)))
-    .slice(0, 32)
+    // Keep the entire authorized execution catalog. Model schema windows are
+    // budgeted separately by selectToolDefinitions, not by connector projection.
     .map((t) => {
       const rawName = String(t.name)
       return {
@@ -291,20 +291,69 @@ function createStreamableHttpSession(opts = {}) {
   const timeoutMs = Number.isFinite(opts.timeoutMs) ? opts.timeoutMs : DEFAULT_TIMEOUT_MS
   const headers = { ...(opts.headers || {}) }
   if (opts.accessToken) headers.Authorization = `Bearer ${opts.accessToken}`
+  let nextId = 1
+  let sessionId = ''
+  let initialized = false
+  let initializing = null
 
-  async function rpc(method, params = {}) {
+  function decodeResponse(raw, contentType, expectedId) {
+    const text = String(raw || '').trim()
+    if (!text) return null
+    const isEventStream = /text\/event-stream/i.test(String(contentType || ''))
+      || text.startsWith('event:') || text.startsWith('data:')
+    if (!isEventStream) return JSON.parse(text)
+    const messages = text.split(/\r?\n\r?\n/).flatMap((block) => {
+      const data = block.split(/\r?\n/)
+        .filter(line => line.startsWith('data:'))
+        .map(line => line.slice(5).trimStart())
+        .join('\n')
+        .trim()
+      if (!data) return []
+      try { return [JSON.parse(data)] } catch { return [] }
+    })
+    return messages.find(message => expectedId != null && message?.id === expectedId)
+      || messages.find(message => message?.id != null)
+      || messages[0]
+      || null
+  }
+
+  async function send(payload, { allowEmpty = false } = {}) {
     if (!baseUrl) return { ok: false, code: 'unconfigured', message: 'MCP HTTP URL 未配置' }
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const res = await fetchImpl(`${baseUrl}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...headers },
-        body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method, params }),
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json, text/event-stream',
+          ...headers,
+          ...(sessionId ? { 'mcp-session-id': sessionId } : {}),
+        },
+        body: JSON.stringify(payload),
         signal: controller.signal,
       })
       clearTimeout(timer)
-      const body = await res.json()
+      if (res?.ok === false) {
+        return { ok: false, code: 'mcp_http_error', message: `MCP HTTP ${res.status || 'error'}` }
+      }
+      sessionId = res?.headers?.get?.('mcp-session-id') || sessionId
+      const contentType = res?.headers?.get?.('content-type') || ''
+      let body
+      if (typeof res?.text === 'function') {
+        const raw = await res.text()
+        if (!String(raw || '').trim()) {
+          if (allowEmpty || [202, 204].includes(Number(res?.status))) return { ok: true, result: null }
+          return { ok: false, code: 'mcp_empty_response', message: 'MCP HTTP 返回空响应' }
+        }
+        body = decodeResponse(raw, contentType, payload?.id)
+      } else if (typeof res?.json === 'function') {
+        body = await res.json()
+      }
+      if (!body) {
+        if (allowEmpty) return { ok: true, result: null }
+        return { ok: false, code: 'mcp_invalid_response', message: 'MCP HTTP 返回无效响应' }
+      }
       if (body.error) {
         return { ok: false, code: 'mcp_error', message: body.error.message || 'MCP HTTP error' }
       }
@@ -315,15 +364,38 @@ function createStreamableHttpSession(opts = {}) {
     }
   }
 
+  function rpc(method, params = {}) {
+    return send({ jsonrpc: '2.0', id: nextId++, method, params })
+  }
+
+  async function ensureInitialized() {
+    if (initialized) return { ok: true }
+    if (initializing) return initializing
+    initializing = (async () => {
+      const init = await rpc('initialize', {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'knowme', version: '0.4.0' },
+      })
+      if (!init.ok) return init
+      const notified = await send({ jsonrpc: '2.0', method: 'notifications/initialized' }, { allowEmpty: true })
+      if (!notified.ok) return notified
+      initialized = true
+      return { ok: true }
+    })()
+    try { return await initializing } finally { initializing = null }
+  }
+
   return {
     transport: 'streamable-http',
     async listTools() {
-      const r = await rpc('tools/list', {})
-      if (!r.ok) return { ok: false, code: r.code, message: r.message, tools: [] }
-      const tools = Array.isArray(r.result?.tools) ? r.result.tools : []
-      return { ok: true, tools }
+      const init = await ensureInitialized()
+      if (!init.ok) return { ...init, tools: [] }
+      return listAllMcpTools(params => rpc('tools/list', params))
     },
     async callTool(name, args = {}) {
+      const init = await ensureInitialized()
+      if (!init.ok) return { ok: false, code: init.code, message: init.message, text: init.message }
       const r = await rpc('tools/call', { name: String(name || ''), arguments: args })
       if (!r.ok) return { ok: false, code: r.code, message: r.message, text: r.message }
       const content = Array.isArray(r.result?.content) ? r.result.content : []
@@ -331,8 +403,8 @@ function createStreamableHttpSession(opts = {}) {
       return { ok: !r.result?.isError, text: text || JSON.stringify(r.result || {}) }
     },
     async healthCheck() {
-      const r = await rpc('ping', {})
-      return { ok: r.ok, transport: 'streamable-http', url: baseUrl }
+      const listed = await this.listTools()
+      return { ok: listed.ok, transport: 'streamable-http', url: baseUrl, toolCount: listed.tools?.length || 0, message: listed.message }
     },
     async close() {},
   }
@@ -489,8 +561,7 @@ function createLegacySseSession(opts = {}) {
     async listTools() {
       try {
         await ensureInitialized()
-        const result = await rpc('tools/list', {})
-        return { ok: true, tools: Array.isArray(result?.tools) ? result.tools : [] }
+        return await listAllMcpTools(async params => ({ ok: true, result: await rpc('tools/list', params) }))
       } catch (error) {
         return { ok: false, code: 'mcp_error', message: String(error?.message || error).slice(0, 400), tools: [] }
       }

@@ -1,0 +1,145 @@
+{
+  "source": {
+    "path": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa26-old-r01-d2-lossless.json",
+    "sha256": "55a10ce583608aee633d2eb59c5f00fe9e76ec873421c4b0852044c483232c7d",
+    "jsonPath": "data"
+  },
+  "taskId": "task-mtpluo03-l436a",
+  "sessionId": "wb-expert-task-mtpluo03-l436a",
+  "runId": "expert_task-mtpluo03-l436a_mtplurqe",
+  "status": "review",
+  "configuration": "old-3.2.0",
+  "agentVersion": "3.2.0",
+  "sop": {
+    "version": "3.2.0",
+    "hash": "dcf7730df6be94b0"
+  },
+  "finalAssistantMessage": {
+    "id": "msg_expert_task-mtpluo03-l436a_mtplurqe_assistant",
+    "role": "assistant",
+    "text": "编辑已完成，图片在成果区预览。实际输出 896×1200 px，与基图一致，无取整差异。\n\n画面核对：杯身已改为哑光黑（低光泽、细颗粒质感），杯盖保持原来的银色金属外观和反光，顶部接缝黑环、单杯数量、左侧位置与占比、墨绿背景、右侧留白和柔和棚拍光照均未被重设计，无文字/Logo/水印。\n\n尚未核查之处：底部底座环随杯身一并变为黑色（原图为银色），这一点不在你明确的改色范围内，如需保留银色底环可再确认；另外哑光表面原有的竖向拉丝纹理已被弱化，属材质替换的正常结果。按授权本次只出这一张，未做额外付费重试。",
+    "runId": "expert_task-mtpluo03-l436a_mtplurqe",
+    "createdAt": "2026-09-06T09:24:54.790Z",
+    "trace": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done"
+      },
+      {
+        "id": "tool_call_0853f2c393294ecd918d3a11",
+        "kind": "tool",
+        "title": "调用工具：generate_image",
+        "status": "done",
+        "summary": "操作已完成",
+        "toolCallId": "call_0853f2c393294ecd918d3a11",
+        "toolName": "generate_image",
+        "durationMs": 24058
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done"
+      }
+    ],
+    "protocolVersion": 2,
+    "answerHash": "b3ce530809abfb33"
+  },
+  "artifacts": [
+    {
+      "id": "image_97c12d88d077bf22",
+      "type": "image",
+      "title": "生成图片 1",
+      "body": "![生成图片 1](D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpluo03-l436a_mtplurqe\\generated-01-97c12d88d077bf22.png)",
+      "status": "draft",
+      "targetPath": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpluo03-l436a_mtplurqe\\generated-01-97c12d88d077bf22.png",
+      "meta": {
+        "image": {
+          "protocol": "knowme.image-metadata/v1",
+          "source": "decoded-file",
+          "width": 896,
+          "height": 1200,
+          "frames": 1,
+          "mimeType": "image/png",
+          "byteLength": 1197559,
+          "sha256": "97c12d88d077bf22b10df3ca6e559720c367ffe2bc32b44bb23e4076b1bf018c"
+        },
+        "taskId": "task-mtpluo03-l436a",
+        "deliverableId": "generated-image",
+        "runId": "expert_task-mtpluo03-l436a_mtplurqe"
+      }
+    }
+  ],
+  "executionEvidence": [
+    {
+      "runId": "expert_task-mtpluo03-l436a_mtplurqe",
+      "deliverableId": "generated-image",
+      "gateStatus": "verified",
+      "verificationPassed": true,
+      "verificationDiagnostics": {
+        "version": 1,
+        "runId": "expert_task-mtpluo03-l436a_mtplurqe",
+        "taskId": "task-mtpluo03-l436a",
+        "candidateHash": "b3ce530809abfb33f84698c62b9e657e02fe9833a60ce35c29092017ebdf3745",
+        "candidateChars": 253,
+        "materialSnapshotHash": "19dedb45290570bef4d7856d6b598bc6875326e77f53b433816b2ecfe5b39896",
+        "materialCount": 1,
+        "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+        "fieldChecks": [],
+        "fieldCheckCount": 0
+      },
+      "toolCalls": [
+        {
+          "id": "call_0853f2c393294ecd918d3a11",
+          "name": "generate_image",
+          "status": "ok",
+          "resultRef": "",
+          "error": "",
+          "durationMs": 24058
+        }
+      ],
+      "evidence": [
+        {
+          "id": "ev_1788686694787_028c74",
+          "status": "ok",
+          "digest": "已生成 1 张图片，预览已附在成果区。 实际图片 image_97c12d88d077bf22：896 × 1200 px，image/png，1 帧，1197559 字节。 尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。 服务返回说明（未核验，不能覆盖上述文件事实）： 已生成 1 张图片（图生图(ref=1), task_id=307053, model=gpt-image-2, n=1, aspect_ratio=3:4, size=896x1200…",
+          "provenance": {
+            "tool": "generate_image",
+            "callId": "call_0853f2c393294ecd918d3a11"
+          }
+        }
+      ],
+      "violations": [],
+      "createdAt": "2026-09-06T09:24:54.893Z"
+    }
+  ],
+  "attention": null,
+  "textFileSerialization": "Exact assistant.text plus one terminal LF (file convention only).",
+  "baseReference": {
+    "artifactId": "image_6c8124d9d8735d9b",
+    "taskId": "task-mtphk5gg-jinbr",
+    "sessionId": "wb-expert-task-mtphk5gg-jinbr",
+    "runId": "expert_task-mtphk5gg-jinbr_mtpi45c0",
+    "path": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+    "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+    "width": 896,
+    "height": 1200,
+    "mimeType": "image/jpeg",
+    "source": "evidence/rqa24-baseline-discovery-v1.json → v1Session.run.artifacts[image_6c8124d9d8735d9b]；冻结时重新计算原图hash一致。"
+  },
+  "limitations": "非盲、可见配置标签、非随机顺序运行；每题每配置 n=1。比较旧整包 3.2.0 与候选整包 3.4.0，不是纯 Skill 因果对照。平台 review/verificationPassed 不等于专业合格；无稳定性或生产资格结论。"
+}

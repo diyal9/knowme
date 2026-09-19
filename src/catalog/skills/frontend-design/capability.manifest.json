@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 3,
+  "id": "frontend-design",
+  "kind": "skill",
+  "name": "前端界面设计",
+  "description": "网站与 Web 系统的布局、排版、组件和响应式视觉实现。",
+  "version": "1.0.0",
+  "permissions": {
+    "connectors": {
+      "allowedConnectorIds": []
+    },
+    "tools": {
+      "allowlist": []
+    },
+    "network": false,
+    "write": false,
+    "externalWrite": false
+  },
+  "provenance": {
+    "source": "curated",
+    "trust": "bundled",
+    "ref": "skills/frontend-design"
+  }
+}

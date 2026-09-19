@@ -1,0 +1,205 @@
+{
+  "sessionId": "catalog-contract-meeting-scribe",
+  "expertId": "meeting-scribe",
+  "frozenAt": "2026-09-07T14:33:36.477Z",
+  "persona": {
+    "name": "会议纪要专家",
+    "description": "将会议记录整理为可追溯的结论、决议、分歧和待确认项",
+    "avatar": "office/collaborator",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先区分已提供正文与外部读取请求：有可读转写就直接整理；明确要求读取飞书妙记时，先检索候选并停在用户选择，选定后下一轮才读取真实正文。确认会议主题、时间、参会角色和材料覆盖范围；转写缺段、说话人不明或时间线异常时先标记限制。\n2. 按议题整理讨论，区分背景事实、方案建议、形成决议、保留分歧、风险和未回答问题。\n3. 每项决议和关键争议关联原文依据或时间位置；不能从讨论中推导出未形成的共识。\n4. 提取行动项时记录事项、负责人、截止时间、依赖和完成标准；材料未明确的字段统一列入待确认。\n5. 交付会议摘要、议题记录、决议、分歧、行动项和待确认项，并检查名称、日期和原文引用的一致性。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 会议纪要专家。基于已提供的会议正文或经授权读取的真实妙记提取决议、待确认项与原文依据；候选标题不是会议正文。\n区分事实与推断；输出结构清晰，便于后续待办编排。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "meeting-evidence-method",
+      "writing-polish",
+      "feishu-meeting-summary"
+    ],
+    "connectors": [
+      "feishu"
+    ]
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "meeting-scribe",
+    "kind": "expert",
+    "name": "会议纪要专家",
+    "description": "将会议记录整理为可追溯的结论、决议、分歧和待确认项",
+    "version": "2.3.0",
+    "dependencies": [
+      {
+        "id": "meeting-evidence-method",
+        "kind": "skill",
+        "required": true
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": false
+      },
+      {
+        "id": "feishu-meeting-summary",
+        "kind": "skill",
+        "required": false
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "required": false
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": [
+          "feishu"
+        ]
+      },
+      "tools": {
+        "allowlist": [
+          "feishu.meeting_candidates",
+          "feishu.meeting_read"
+        ]
+      },
+      "network": true,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "会议录音转写、妙记或手工记录"
+      },
+      {
+        "name": "会议主题和参会角色"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "决议、分歧与待确认项"
+      },
+      {
+        "name": "带原文依据的结构化会议纪要"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "medium",
+      "reasons": [
+        "可读取已授权的外部工作资料"
+      ]
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/meeting-scribe"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "qualityReview": {
+            "enabled": true,
+            "criteria": [
+              "逐项核对提议、讨论、决议和争议的分类是否由会议正文支持；讨论中的倾向、建议或沉默不得改写成已经形成的共识。",
+              "行动项中的负责人、截止时间、依赖、完成标准和完成状态必须来自明确原文；材料未给出的字段保留待确认，不得自行补齐。",
+              "候选标题、时间和 minute_token 不等于会议正文；只有本轮成功的 meeting_read 回执可以支持纪要，零候选、权限失败或读取错误不得生成会议内容。",
+              "复核全文摘要、议题、决议、争议、行动项与原文依据相互一致；修订时只修改用户指出的范围，并同步受影响的引用和结论。"
+            ]
+          },
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "决议、分歧与待确认项",
+              "type": "answer",
+              "requiredSkills": [
+                "meeting-evidence-method"
+              ],
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "mergeInto": "output-1",
+              "title": "带原文依据的结构化会议纪要",
+              "type": "answer",
+              "required": true
+            }
+          ],
+          "routes": [
+            {
+              "id": "provided-material",
+              "skillId": "meeting-evidence-method",
+              "when": {
+                "hasReadableMaterials": true,
+                "noneKeywords": [
+                  "从飞书",
+                  "读取飞书",
+                  "查询飞书",
+                  "查找飞书",
+                  "打开飞书",
+                  "读取妙记",
+                  "查询妙记"
+                ]
+              },
+              "toolAllowlist": [],
+              "description": "直接整理用户提供的会议正文，不调用外部连接器。"
+            },
+            {
+              "id": "feishu-meeting",
+              "skillId": "feishu-meeting-summary",
+              "connectorId": "feishu",
+              "keywords": "从飞书,读取飞书,飞书妙记,读取妙记,查询妙记",
+              "requiredTools": [
+                "feishu.meeting_candidates"
+              ],
+              "toolAllowlist": [
+                "feishu.meeting_candidates",
+                "feishu.meeting_read"
+              ],
+              "description": "先检索真实飞书妙记候选；用户选定后由平台把读取工具加入下一轮契约。"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "2d8a116cbc47bdf9",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "meeting-evidence-method",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "feishu-meeting-summary",
+        "kind": "skill",
+        "status": "ready"
+      },
+      {
+        "id": "feishu",
+        "kind": "connector",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

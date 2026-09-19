@@ -8,12 +8,14 @@
 const { registerOpenExternalIpc } = require('./open-external')
 const { registerSettingsIpc } = require('./settings')
 const { registerSourcesIpc } = require('./sources')
+const { registerProjectsIpc } = require('./projects')
 const { registerMemoryIpc } = require('./memory')
 const { registerProductKnowledgeIpc } = require('./product-knowledge')
 const { registerKnowledgeOsIpc } = require('./knowledge-os')
 const { registerKnowledgeStewardIpc } = require('./knowledge-steward')
 const { registerKnowledgeProviderIpc } = require('./knowledge-provider')
 const { registerFabricIpc } = require('./fabric')
+const { registerBrainIpc } = require('./brain')
 const { registerConnectorsIpc } = require('./connectors')
 const { registerWorkbenchAuthIpc } = require('./workbench-auth')
 const { registerWorkbenchLocalStoresIpc } = require('./workbench-local-stores')
@@ -61,13 +63,15 @@ function registerCoreIpc(ipcMain, groups) {
   registerOpenExternalIpc(ipcMain, pick(groups, 'electron'))
   registerSettingsIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'shell'))
   registerSourcesIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'shell'))
+  registerProjectsIpc(ipcMain, pick(groups, 'electron', 'knowledge', 'shell'))
   registerMemoryIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge'))
   registerProductKnowledgeIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'shell'))
   registerKnowledgeOsIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge'))
   registerKnowledgeStewardIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'agent'))
   registerKnowledgeProviderIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge'))
   registerFabricIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge'))
-  registerConnectorsIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'agent'))
+  registerBrainIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'agent'))
+  registerConnectorsIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'agent', 'workbench'))
   registerWorkbenchAuthIpc(ipcMain, pick(groups, 'paths', 'workbench'))
   registerWorkbenchLocalStoresIpc(ipcMain, pick(groups, 'workbench'))
   registerWorkbenchLaunchIpc(ipcMain, pick(groups, 'workbench'))
@@ -83,7 +87,9 @@ function registerCoreIpc(ipcMain, groups) {
   registerCapabilityPackIpc(ipcMain, pick(groups, 'agent'))
   registerAgentProfileIpc(ipcMain, pick(groups, 'knowledge', 'agent'))
   registerPersonalAgentIpc(ipcMain, pick(groups, 'paths', 'knowledge', 'workbench', 'agent'))
-  registerExpertTaskIpc(ipcMain, pick(groups, 'paths', 'knowledge', 'workbench', 'agent'))
+  // 专家任务需要读取历史生成图片并恢复为可验收成果，故同时注入 Electron
+  // 宿主依赖（app / fs / path）。
+  registerExpertTaskIpc(ipcMain, pick(groups, 'electron', 'paths', 'knowledge', 'workbench', 'agent'))
   registerWorkflowV2Ipc(ipcMain, pick(groups, 'paths', 'workbench', 'agent'))
   registerAgentSessionIpc(ipcMain, pick(groups, ...ALL_DOMAINS))
   registerAgentSessionUiIpc(ipcMain, pick(groups, 'agent'))
@@ -106,12 +112,14 @@ module.exports = {
   registerOpenExternalIpc,
   registerSettingsIpc,
   registerSourcesIpc,
+  registerProjectsIpc,
   registerMemoryIpc,
   registerProductKnowledgeIpc,
   registerKnowledgeOsIpc,
   registerKnowledgeStewardIpc,
   registerKnowledgeProviderIpc,
   registerFabricIpc,
+  registerBrainIpc,
   registerConnectorsIpc,
   registerWorkbenchAuthIpc,
   registerWorkbenchLocalStoresIpc,

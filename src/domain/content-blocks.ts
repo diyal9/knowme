@@ -3,7 +3,7 @@ import { parseInlines, type InlineNode } from './content-inlines'
 export type ContentBlock =
   | { type: 'heading'; level: number; inlines: InlineNode[] }
   | { type: 'paragraph'; inlines: InlineNode[] }
-  | { type: 'list'; ordered: boolean; items: InlineNode[][] }
+  | { type: 'list'; ordered: boolean; start?: number; items: InlineNode[][] }
   | { type: 'code'; text: string }
   | { type: 'quote'; inlines: InlineNode[] }
   | { type: 'table'; headers: InlineNode[][]; alignments: string[]; rows: InlineNode[][][] }
@@ -52,13 +52,18 @@ export function normalizeDisplayCodeTags(src: string): string {
 export function parseContentBlocks(src: string): ContentBlock[] {
   const lines = normalizeDisplayCodeTags(src).replace(/\r\n/g, '\n').split('\n')
   const out: ContentBlock[] = []
-  let list: { ordered: boolean; items: InlineNode[][] } | null = null
+  let list: { ordered: boolean; start?: number; items: InlineNode[][] } | null = null
+  let lastOrderedEnd: number | null = null
+  let canContinueOrdered = false
   let inCode = false
   const code: string[] = []
 
   const flushList = () => {
     if (!list) return
-    out.push({ type: 'list', ordered: list.ordered, items: list.items })
+    out.push({ type: 'list', ordered: list.ordered, ...(list.start ? { start: list.start } : {}), items: list.items })
+    if (list.ordered) {
+      lastOrderedEnd = (list.start || 1) + list.items.length - 1
+    }
     list = null
   }
 
@@ -80,6 +85,19 @@ export function parseContentBlocks(src: string): ContentBlock[] {
       continue
     }
     if (!line.trim()) {
+      // Models commonly put a blank line between consecutive list items.
+      // Keep the list open when the next non-empty line uses the same marker;
+      // otherwise each item becomes a new <ol>/<ul> and ordered lists restart
+      // at 1 with an exaggerated vertical gap between items.
+      if (list) {
+        let next = i + 1
+        while (next < lines.length && !lines[next].trim()) next += 1
+        const nextLine = lines[next] || ''
+        const continues = list.ordered
+          ? /^\s*\d+[.)、．]\s+/.test(nextLine)
+          : /^\s*[-*+○◦•·]\s+/.test(nextLine)
+        if (continues) continue
+      }
       flushList()
       continue
     }
@@ -116,13 +134,18 @@ export function parseContentBlocks(src: string): ContentBlock[] {
       continue
     }
     const ordered = line.match(/^\s*\d+[.)、．]\s+(.*)$/)
-    const unordered = line.match(/^\s*[-*+]\s+(.*)$/)
+    const unordered = line.match(/^\s*[-*+○◦•·]\s+(.*)$/)
     if (ordered) {
       if (!list || !list.ordered) {
         flushList()
-        list = { ordered: true, items: [] }
+        const marker = Number(line.match(/^\s*(\d+)/)?.[1] || 1)
+        const start = canContinueOrdered && marker === 1 && lastOrderedEnd != null
+          ? lastOrderedEnd + 1
+          : marker
+        list = { ordered: true, start, items: [] }
       }
       list.items.push(parseInlines(ordered[1]))
+      canContinueOrdered = false
       continue
     }
     if (unordered) {
@@ -131,8 +154,10 @@ export function parseContentBlocks(src: string): ContentBlock[] {
         list = { ordered: false, items: [] }
       }
       list.items.push(parseInlines(unordered[1]))
+      canContinueOrdered = true
       continue
     }
+    canContinueOrdered = false
     flushList()
     out.push({ type: 'paragraph', inlines: parseInlines(line) })
   }

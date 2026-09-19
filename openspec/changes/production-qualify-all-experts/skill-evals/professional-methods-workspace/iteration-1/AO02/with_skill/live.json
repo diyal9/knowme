@@ -1,0 +1,988 @@
+{
+  "task": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtox1mbq-a3ywx",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "QA-AO-02 局部证据与未触发依赖 [新方法候选]",
+    "expertId": "action-owner",
+    "expertName": "",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "提取承诺范围、完成状态和未触发依赖，区分未证明与未完成",
+    "brief": {
+      "goal": "提取承诺范围、完成状态和未触发依赖，区分未证明与未完成",
+      "plan": {
+        "goal": "提取承诺范围、完成状态和未触发依赖，区分未证明与未完成",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "AO02",
+          "type": "reference",
+          "title": "冻结虚构材料与委托",
+          "ref": "",
+          "content": "仅按以下虚构纪要静态分析，不检索、不创建外部任务。\n[1] 陈青承诺核对字幕1—40行，41行起不在范围。\n[2] 周牧承诺收到陈青“审校完成”确认后24小时内合并修改。\n[3] 当前只有1—20行核对回执，无完成确认。\n[4] 余桐说“有空可提供意见”，未承诺交付。\n请在对话输出精简行动与完成状态表、必要缺口，280字以内，不新增工作。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "output-1",
+          "title": "可追踪的行动项清单",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "action-extraction"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "action-owner",
+      "agentVersion": "2.1.0",
+      "agentHash": "70a0b4c5e5371518",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtox1mbq-a3ywx",
+      "bindings": {
+        "skills": [
+          "action-extraction",
+          "writing-polish"
+        ],
+        "connectors": [
+          "feishu"
+        ]
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": [
+            "feishu"
+          ]
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": true,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "提取承诺范围、完成状态和未触发依赖，区分未证明与未完成",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与证据边界",
+          "按专家SOP给出完整专业交付",
+          "复核事实、规则待定项和验收限制"
+        ],
+        "risks": [
+          "未明确责任或业务规则不可补造",
+          "静态分析不得冒充动态执行"
+        ]
+      },
+      "sop": {
+        "version": "2.1.0",
+        "hash": "70a0b4c5e5371518"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:48.998Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.316Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.327Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.439Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.439Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.439Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:49.445Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "上下文准备完成",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:50.791Z"
+      },
+      {
+        "id": "event-9",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "回答生成完成",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:54.426Z"
+      },
+      {
+        "id": "event-10",
+        "type": "deliverable_ready",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "可追踪的行动项清单",
+        "actorId": "",
+        "createdAt": "2026-09-05T21:49:54.472Z"
+      }
+    ],
+    "attention": null,
+    "progress": {
+      "phase": "review",
+      "label": "成果已生成，等待验收",
+      "detail": "",
+      "startedAt": "2026-09-05T21:49:49.326Z",
+      "updatedAt": "2026-09-05T21:49:54.47Z",
+      "heartbeatAt": "2026-09-05T21:49:54.47Z"
+    },
+    "inputQueue": null,
+    "deliverables": [
+      {
+        "deliverableId": "output-1",
+        "title": "可追踪的行动项清单",
+        "type": "answer",
+        "version": 1,
+        "required": true,
+        "previousVersionId": "",
+        "artifactRef": "wb-expert-task-mtox1mbq-a3ywx#deliverable_expert_task-mtox1mbq-a3ywx_mtox1mo1_output-1",
+        "artifactRefs": [
+          "wb-expert-task-mtox1mbq-a3ywx#deliverable_expert_task-mtox1mbq-a3ywx_mtox1mo1_output-1"
+        ],
+        "executionRef": "agent-run:expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "kind": "deliverable",
+        "source": "expert",
+        "sequence": 1,
+        "evidenceStatus": "verified",
+        "acceptanceStatus": "pending",
+        "comments": [],
+        "createdAt": "2026-09-05T21:49:54.47Z"
+      }
+    ],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "deliverableId": "output-1",
+        "gateStatus": "verified",
+        "verificationPassed": true,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [],
+        "createdAt": "2026-09-05T21:49:54.456Z"
+      }
+    ],
+    "resultSummary": "**行动与完成状态表**\n\n| 事项 | 责任 | 期限/触发 | 依赖 | 状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| 核对字幕1—40行 | 陈青 | 未定 | 无 | **部分执行**：仅1-20行有回执，21-40行无证据（未证明） |\n| 合并修改 | 周牧 | 确认后24h内 | 陈青“审校完成”确认 | **未启动**：前置条件未满足 |\n| 提供意见 | 余桐 | 无 | 无 | **非承诺**：仅为提议，不纳入追踪 |\n\n**必要缺口**\n1. 陈青21-40行核对进度及最终“审校完成”确认时",
+    "status": "review",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtox1mbq-a3ywx"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-05T21:49:48.998Z",
+    "updatedAt": "2026-09-05T21:49:54.472Z"
+  },
+  "session": {
+    "id": "wb-expert-task-mtox1mbq-a3ywx",
+    "agentId": "personal",
+    "sessionKind": "expert-task",
+    "profileId": "",
+    "contextId": "",
+    "projectId": null,
+    "expertId": "action-owner",
+    "personaExpertId": "",
+    "executionPolicy": "tools-allowed",
+    "capabilitySnapshotId": "",
+    "snapshotPath": "",
+    "ephemeral": true,
+    "taskRef": {
+      "id": "task-mtox1mbq-a3ywx",
+      "kind": "expert-task"
+    },
+    "knowledgeRefs": [],
+    "title": "新助手",
+    "createdAt": "2026-09-05T21:49:49.007Z",
+    "updatedAt": "2026-09-05T21:49:54.429Z",
+    "summary": "",
+    "messages": [
+      {
+        "id": "msg_expert_task-mtox1mbq-a3ywx_mtox1mo1_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「action-owner」。\n\n你是 KnowMe 行动项管理员。使用行动提取方法整理可追踪清单，缺失责任、日期和验收标准明确待确认。执行责任与决策责任分开，建议保持建议身份。遵守用户全文长度，在对话中一次交付；可选润色不能覆盖证据状态或强制追加说明。\n\n【必须遵循的 SOP】\n1. 按行动提取方法区分承诺、提议和待确认项，保留来源及明确的版本变更。\n2. 核对责任、期限及触发条件、依赖和完成标准；只记录有据的分工，不为补齐表格强选主责或裁决人。\n3. 检查重复、冲突、覆盖及完成证据；局部结果不代替全量验收，条件未满足不宣称已启动。\n4. 仅按有据的期限、依赖和影响排序，允许不排名；提出最少必要的缺口，不把建议变成既定安排。\n5. 一次交付清单与缺口，复查全文状态、来源和字数；不创建外部任务或发送通知。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：提取承诺范围、完成状态和未触发依赖，区分未证明与未完成\n\n当前时间：2026-09-05T21:49:49.441Z\n\n材料：\n- 冻结虚构材料与委托\n仅按以下虚构纪要静态分析，不检索、不创建外部任务。\n[1] 陈青承诺核对字幕1—40行，41行起不在范围。\n[2] 周牧承诺收到陈青“审校完成”确认后24小时内合并修改。\n[3] 当前只有1—20行核对回执，无完成确认。\n[4] 余桐说“有空可提供意见”，未承诺交付。\n请在对话输出精简行动与完成状态表、必要缺口，280字以内，不新增工作。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：提取承诺范围、完成状态和未触发依赖，区分未证明与未完成\n步骤：\n1. 核对所给材料与证据边界\n2. 按专家SOP给出完整专业交付\n3. 复核事实、规则待定项和验收限制\n风险：未明确责任或业务规则不可补造；静态分析不得冒充动态执行\n\n本轮交付物：可追踪的行动项清单（answer）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "createdAt": "2026-09-05T21:49:50.393Z"
+      },
+      {
+        "id": "msg_expert_task-mtox1mbq-a3ywx_mtox1mo1_assistant",
+        "role": "assistant",
+        "text": "**行动与完成状态表**\n\n| 事项 | 责任 | 期限/触发 | 依赖 | 状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| 核对字幕1—40行 | 陈青 | 未定 | 无 | **部分执行**：仅1-20行有回执，21-40行无证据（未证明） |\n| 合并修改 | 周牧 | 确认后24h内 | 陈青“审校完成”确认 | **未启动**：前置条件未满足 |\n| 提供意见 | 余桐 | 无 | 无 | **非承诺**：仅为提议，不纳入追踪 |\n\n**必要缺口**\n1. 陈青21-40行核对进度及最终“审校完成”确认时间。\n2. 双方约定的具体截止日或验收标准缺失。",
+        "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "createdAt": "2026-09-05T21:49:54.429Z",
+        "trace": [
+          {
+            "id": "stage_prepare",
+            "kind": "stage",
+            "title": "上下文准备完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_generate",
+            "kind": "stage",
+            "title": "回答生成完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_ground",
+            "kind": "stage",
+            "title": "依据核对完成",
+            "status": "done"
+          },
+          {
+            "id": "stage_verify_claims",
+            "kind": "stage",
+            "title": "输出验证通过",
+            "status": "done"
+          }
+        ],
+        "protocolVersion": 2,
+        "answerHash": "4743d055526d7114"
+      }
+    ],
+    "pinned": false,
+    "run": {
+      "goal": "当前工作",
+      "role": "general",
+      "status": "review",
+      "toolsUsed": [],
+      "steps": [
+        {
+          "id": "stage_prepare",
+          "kind": "stage",
+          "title": "上下文准备完成",
+          "status": "done",
+          "at": "2026-09-05T21:49:54.429Z"
+        },
+        {
+          "id": "stage_generate",
+          "kind": "stage",
+          "title": "回答生成完成",
+          "status": "done",
+          "at": "2026-09-05T21:49:54.429Z"
+        },
+        {
+          "id": "stage_ground",
+          "kind": "stage",
+          "title": "依据核对完成",
+          "status": "done",
+          "at": "2026-09-05T21:49:54.429Z"
+        },
+        {
+          "id": "stage_verify_claims",
+          "kind": "stage",
+          "title": "输出验证通过",
+          "status": "done",
+          "at": "2026-09-05T21:49:54.429Z"
+        }
+      ],
+      "artifacts": [
+        {
+          "id": "deliverable_expert_task-mtox1mbq-a3ywx_mtox1mo1_output-1",
+          "type": "answer",
+          "title": "可追踪的行动项清单",
+          "body": "**行动与完成状态表**\n\n| 事项 | 责任 | 期限/触发 | 依赖 | 状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| 核对字幕1—40行 | 陈青 | 未定 | 无 | **部分执行**：仅1-20行有回执，21-40行无证据（未证明） |\n| 合并修改 | 周牧 | 确认后24h内 | 陈青“审校完成”确认 | **未启动**：前置条件未满足 |\n| 提供意见 | 余桐 | 无 | 无 | **非承诺**：仅为提议，不纳入追踪 |\n\n**必要缺口**\n1. 陈青21-40行核对进度及最终“审校完成”确认时间。\n2. 双方约定的具体截止日或验收标准缺失。",
+          "status": "draft",
+          "meta": {
+            "taskId": "task-mtox1mbq-a3ywx",
+            "deliverableId": "output-1",
+            "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1"
+          }
+        }
+      ],
+      "applyLog": []
+    },
+    "displayTitle": "提取承诺范围、完成状态和未触发依赖，区分未证明与未完成",
+    "labels": [
+      "工作"
+    ],
+    "grounding": "目标：提取承诺范围、完成状态和未触发依赖，区分未证明与未完成\n材料：用户尚未提供\n约束：用户尚未提供\n期望结果：用户尚未明确提供",
+    "referenceState": {
+      "version": 1,
+      "refs": [],
+      "activeRefId": null,
+      "pendingSelection": null,
+      "taskFrame": {
+        "workflowId": null,
+        "skillId": null,
+        "requiredTools": [],
+        "requiredEvidence": [],
+        "completionConditions": []
+      }
+    }
+  },
+  "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+  "contextAudit": [
+    {
+      "ts": "2026-09-05T21:49:50.785Z",
+      "level": "info",
+      "category": "system-prompt",
+      "event": "llm-system-prompt",
+      "msg": "构建系统提示词",
+      "scope": "ai-generate",
+      "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "meta": {
+        "model": "qwen3.8-flash",
+        "agentId": "personal",
+        "sessionId": "wb-***wx",
+        "skillRefs": [
+          "action-extraction"
+        ],
+        "capabilityIds": [
+          "suggestion"
+        ],
+        "contextManifest": {
+          "version": 1,
+          "scene": "expert-collaboration",
+          "phase": "execution",
+          "identity": "行动项管理员",
+          "executionPolicy": "tools-allowed",
+          "locale": "zh-CN",
+          "promptPackVersion": "zh-CN@2",
+          "estimatedTokens": 2062,
+          "candidateEstimatedTokens": 2062,
+          "savedEstimatedTokens": 0,
+          "included": [
+            {
+              "id": "core.runtime",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "86bc7ca30d6e2c75",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 88,
+              "chars": 145,
+              "hash": "b836c6cd2b3bf5f6",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.integrity",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "4a48c753df369080",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 296,
+              "chars": 475,
+              "hash": "84750be53e8ee845",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.conversation",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "de56ecb7f5f31b65",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 100,
+              "chars": 175,
+              "hash": "5f1cedc6de6dd6ec",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "core.output",
+              "kind": "core_instruction",
+              "authority": "platform",
+              "trust": "trusted",
+              "sourceTrust": "platform",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "prompt-registry",
+                "idHash": "fb3dedfef7682ab1",
+                "version": "2"
+              },
+              "cachePolicy": "stable",
+              "usedTokens": 80,
+              "chars": 137,
+              "hash": "23b07856eb03bc06",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "data.dynamic.role",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "4b168d88dc872a77",
+                "version": "2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 25,
+              "chars": 39,
+              "hash": "fdc13953b19b93b6",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "scene.expert-execution",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "context-engine",
+                "idHash": "eafcc07cc525c9c7",
+                "version": "1"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 147,
+              "chars": 232,
+              "hash": "d4aa6f0b542a87bf",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "scene.active-identity",
+              "kind": "scene_instruction",
+              "authority": "scene",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "system",
+              "critical": true,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "46db54af2fc05e98"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 32,
+              "chars": 51,
+              "hash": "374632f95c6d0efc",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "per***ld",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "4b5c9987fe05d2eb"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 64,
+              "chars": 131,
+              "hash": "9c4e9cd37b672d21",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "persona.sop",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "4b5c9987fe05d2eb"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 141,
+              "chars": 234,
+              "hash": "3db9783b167173f0",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "persona.attributes",
+              "kind": "persona",
+              "authority": "persona",
+              "trust": "trusted",
+              "sourceTrust": "bundled",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "expert-runtime",
+                "idHash": "4b5c9987fe05d2eb"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 36,
+              "chars": 68,
+              "hash": "d2cb40e4bcd1ce0e",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "dat***or",
+              "kind": "task_fact",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "e296ee3bab1edfa0",
+                "version": "2"
+              },
+              "cachePolicy": "turn",
+              "usedTokens": 63,
+              "chars": 145,
+              "hash": "f780cfc1e6d3c5ee",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "data.dynamic.grounding",
+              "kind": "task_fact",
+              "authority": "data",
+              "trust": "untrusted",
+              "sourceTrust": "external",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "a77e39d1098de82a",
+                "version": "2"
+              },
+              "cachePolicy": "turn",
+              "usedTokens": 45,
+              "chars": 73,
+              "hash": "a207b1629db512ef",
+              "truncated": false,
+              "sensitive": true
+            },
+            {
+              "id": "skill.explicit-content",
+              "kind": "skill",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "skill-runtime",
+                "idHash": "3b283e93debf035e"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 529,
+              "chars": 866,
+              "hash": "185a3c82bd1e32a1",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "skill.auto-summary",
+              "kind": "skill",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "skill-runtime",
+                "idHash": "a410f55f5f7d4421"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 134,
+              "chars": 286,
+              "hash": "7cc7f5c14000c2c0",
+              "truncated": false,
+              "sensitive": false
+            },
+            {
+              "id": "preference.user",
+              "kind": "user_preference",
+              "authority": "data",
+              "trust": "trusted",
+              "sourceTrust": "user",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "settings",
+                "idHash": "d9bb268d29ca18a2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 155,
+              "chars": 258,
+              "hash": "7c8f89fb2b78b354",
+              "truncated": false,
+              "sensitive": true
+            },
+            {
+              "id": "data.dynamic.memory",
+              "kind": "memory",
+              "authority": "data",
+              "trust": "untrusted",
+              "sourceTrust": "external",
+              "projectedRole": "user",
+              "critical": false,
+              "source": {
+                "type": "context-orchestrator",
+                "idHash": "c064fbca9d9de8dd",
+                "version": "2"
+              },
+              "cachePolicy": "session",
+              "usedTokens": 127,
+              "chars": 327,
+              "hash": "f0b9e54c8d0ae1f2",
+              "truncated": false,
+              "sensitive": true
+            }
+          ],
+          "omitted": [],
+          "conflicts": [],
+          "rankings": [
+            {
+              "id": "data.dynamic.memory",
+              "score": 0.1253,
+              "lexicalScore": 0.0095,
+              "vectorScore": 0,
+              "confidenceScore": 0.6,
+              "freshnessScore": 0
+            },
+            {
+              "id": "skill.auto-summary",
+              "score": 0.1097,
+              "lexicalScore": 0.0705,
+              "vectorScore": 0,
+              "confidenceScore": 0,
+              "freshnessScore": 0
+            }
+          ],
+          "semanticSelection": {
+            "version": 1,
+            "mode": "off",
+            "status": "skipped",
+            "reason": "disabled",
+            "providerHash": "",
+            "latencyMs": 0,
+            "candidateCount": 2,
+            "eligibleCount": 0,
+            "cacheHits": 0,
+            "requested": 0,
+            "sensitiveExcluded": 0,
+            "wouldChange": false,
+            "limited": false
+          }
+        }
+      }
+    }
+  ],
+  "runCheckpoint": {
+    "v": 1,
+    "checkpointId": "latest",
+    "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+    "lastSeq": 2,
+    "pendingNodes": [],
+    "completedNodes": [],
+    "idemReceipts": [],
+    "joinState": null,
+    "data": {
+      "referenceState": {
+        "version": 1,
+        "refs": [],
+        "activeRefId": null,
+        "pendingSelection": null,
+        "taskFrame": {
+          "workflowId": null,
+          "skillId": null,
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": []
+        }
+      },
+      "evidenceLedger": {
+        "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+        "entries": []
+      },
+      "toolLedger": {
+        "calls": [],
+        "derivedFacts": []
+      },
+      "runtime": {
+        "runStartedAt": 1788644989441,
+        "remainingMs": null,
+        "wallTimeoutMs": null,
+        "budget": null,
+        "phase": "persist",
+        "updatedAt": "2026-09-05T21:49:54.441Z"
+      },
+      "sessionId": "wb-expert-task-mtox1mbq-a3ywx",
+      "phase": "persist",
+      "metadata": null
+    },
+    "redactedFields": [],
+    "createdAt": "2026-09-05T21:49:54.441Z"
+  },
+  "runEvents": [
+    {
+      "v": 1,
+      "seq": 1,
+      "ts": "2026-09-05T21:49:50.752Z",
+      "type": "run.created",
+      "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "parentRunId": null,
+      "rootRunId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "payload": {
+        "packageRef": null,
+        "status": "queued",
+        "phase": null
+      },
+      "prevHash": "",
+      "recordHash": "911d3fdf2d5d0fc54ad636b51dbb1c48cfd3900499f50248d1441f0660dddd8f"
+    },
+    {
+      "v": 1,
+      "seq": 2,
+      "ts": "2026-09-05T21:49:50.758Z",
+      "type": "run.started",
+      "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "parentRunId": null,
+      "rootRunId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "payload": {
+        "adopted": true,
+        "status": "running",
+        "phase": "RUNNING"
+      },
+      "prevHash": "911d3fdf2d5d0fc54ad636b51dbb1c48cfd3900499f50248d1441f0660dddd8f",
+      "recordHash": "08e3aad07015357879241b54b1c40f2224e197220223a8f32cb51808783cc4fa"
+    },
+    {
+      "v": 1,
+      "seq": 3,
+      "ts": "2026-09-05T21:49:54.45Z",
+      "type": "run.terminal",
+      "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "parentRunId": null,
+      "rootRunId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+      "payload": {
+        "terminal": "completed",
+        "status": "done",
+        "ok": true,
+        "cancelled": false,
+        "summary": "**行动与完成状态表**\n\n| 事项 | 责任 | 期限/触发 | 依赖 | 状态 |\n| :--- | :--- | :--- | :--- | :--- |\n| 核对字幕1—40行 | 陈青 | 未定 | 无 | **部分执行**：仅1-20行有回执，21-40行无证据（未证明） |\n| 合并修改 | 周牧 | 确认后24h内 | 陈青“审校完成”确认 | **未启动**：前置条件未满足 |\n| 提供意见 | 余桐 | 无 | 无 | **非承诺**：仅为提议，不纳入追踪 |\n\n**必要缺口**\n1. 陈青21-40行核对进度及最终“审校完成”确认时间。\n2. 双方约定的具体截止日或验收标准缺失。",
+        "report": {
+          "terminal": "DONE",
+          "runPhases": [
+            "PREPARE",
+            "CONTEXT",
+            "MODEL",
+            "GROUND",
+            "VERIFY_CLAIMS",
+            "PERSIST",
+            "DONE"
+          ],
+          "rounds": 1,
+          "toolCalls": 0,
+          "planEval": {
+            "action": "finalize",
+            "reason": "no_plan",
+            "remaining": 0,
+            "blocked": 0,
+            "done": 0
+          },
+          "durationMs": 3656,
+          "error": null,
+          "cancelled": false,
+          "answerHash": "4743d055526d7114",
+          "protocolVersion": 2
+        },
+        "metrics": {
+          "rounds": 1,
+          "toolCalls": 0,
+          "firstTokenMs": "[REDACTED]",
+          "bufferedDraftsDiscarded": 0,
+          "answerCommitMs": 3636,
+          "bufferMs": 2007,
+          "outputDiagnostics": [
+            {
+              "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+              "round": 1,
+              "phase": "VERIFY_CLAIMS",
+              "code": "answer_committed",
+              "hash": "4743d055526d7114",
+              "length": 304,
+              "timingMs": 3636,
+              "count": 0
+            }
+          ],
+          "usage": {
+            "promptTokens": "[REDACTED]",
+            "completionTokens": "[REDACTED]",
+            "totalTokens": "[REDACTED]",
+            "source": "provider"
+          },
+          "contextTokens": "[REDACTED]",
+          "totalMs": 3656
+        },
+        "stopReason": null,
+        "artifactRefs": [],
+        "evidenceRefs": [],
+        "phase": "RUNNING"
+      },
+      "prevHash": "08e3aad07015357879241b54b1c40f2224e197220223a8f32cb51808783cc4fa",
+      "recordHash": "b4a3f4dfa9a2004c323a7de682435ef8815b51471f2369adc0470afe85a91bc1"
+    }
+  ],
+  "collection": {
+    "capturedAt": "2026-09-05T21:55:06.4462607Z",
+    "method": "read-only exact task id, task.execRef/session.taskRef, unique executionEvidence.runId; same-run log filter",
+    "runId": "expert_task-mtox1mbq-a3ywx_mtox1mo1",
+    "taskId": "task-mtox1mbq-a3ywx",
+    "sessionId": "wb-expert-task-mtox1mbq-a3ywx",
+    "sourceRoot": "D:/UserCaches/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de",
+    "comparisonUnit": "whole expert+method+requiredSkills configuration; not isolated Skill causality"
+  },
+  "professionalScorable": true,
+  "answerAvailability": "Complete delivered answer preserved in same-run assistant message"
+}

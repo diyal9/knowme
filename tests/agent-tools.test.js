@@ -179,6 +179,31 @@ describe('agent-tools', () => {
     assert.equal(result.code, 'unknown_tool')
   })
 
+  it('preserves artifact references returned by a generic tool handler', async () => {
+    const artifactRefs = [{
+      id: 'generated-image-1',
+      type: 'image',
+      targetPath: 'C:/tmp/generated-image-1.png',
+    }]
+    const surface = tools.createToolSurface({
+      extraDefinitions: [{
+        type: 'function',
+        function: { name: 'generate_image_test', description: '生成测试图片', parameters: { type: 'object', properties: {} } },
+      }],
+      handlers: {
+        generate_image_test: async () => ({ ok: true, text: '已生成图片', artifactRefs }),
+      },
+    })
+
+    const result = await surface.createToolExecutor({}).executeToolCall({
+      name: 'generate_image_test',
+      arguments: '{}',
+    })
+
+    assert.equal(result.ok, true)
+    assert.deepEqual(result.artifactRefs, artifactRefs)
+  })
+
   it('returns invalid_args via executor without calling dependency', async () => {
     let called = false
     const { executeToolCall } = tools.createToolExecutor({
@@ -232,14 +257,14 @@ describe('agent-tools extra projection budget', () => {
     assert.equal(surface.isAllowedTool('builtin_0'), true)
   })
 
-  it('drops deferrable orchestration tools before required tools', () => {
+  it('retains the whole authorized catalog, including orchestration and required tools', () => {
     const deferrable = [...tools.DEFERRABLE_TOOLS].map(name => def(name, { source: 'builtin' }))
     const filler = Array.from({ length: tools.EXTRA_TOOL_BUDGET + 8 }, (_, i) => def(`filler_${i}`, { source: 'builtin' }))
     const required = def('feishu.doc_kb_suggest', { source: 'feishu' })
     const extras = normalizedNames([...deferrable, ...filler, required], ['feishu.doc_kb_suggest'])
     assert.ok(extras.includes('feishu.doc_kb_suggest'))
-    assert.ok(extras.length <= tools.EXTRA_TOOL_BUDGET)
-    assert.ok(!extras.includes('spawn_sub_run'))
+    assert.equal(extras.length, deferrable.length + filler.length + 1)
+    assert.ok(extras.includes('spawn_sub_run'))
   })
 
   it('preserves registration order for kept tools', () => {

@@ -1,0 +1,61 @@
+{
+  "method": "PowerShell Copy-Item; source expected SHA256 checked before copy; destination SHA256 checked after copy; no image transformation",
+  "copies": [
+    {
+      "source": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-R01\\with_skill\\outputs\\input-reference.jpg",
+      "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "bytes": 455950,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpllbgi-sw9ph_mtpllfe9\\generated-01-2d1985d4d81a980f.png",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-R01\\with_skill\\outputs\\generated-image.png",
+      "sha256": "2d1985d4d81a980ff194332d5155e771b1223ae5c758731810f41dd300ccc3cb",
+      "bytes": 1149455,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-R01\\old_skill\\outputs\\input-reference.jpg",
+      "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "bytes": 455950,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpluo03-l436a_mtplurqe\\generated-01-97c12d88d077bf22.png",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-R01\\old_skill\\outputs\\generated-image.png",
+      "sha256": "97c12d88d077bf22b10df3ca6e559720c367ffe2bc32b44bb23e4076b1bf018c",
+      "bytes": 1197559,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-H02\\old_skill\\outputs\\input-reference.jpg",
+      "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "bytes": 455950,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpmaqln-tf3ct_mtpmaui5\\generated-01-45d740112bf26255.png",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-H02\\old_skill\\outputs\\generated-image.png",
+      "sha256": "45d740112bf2625537d72a6320719220c1768d144836d277279de13d0b33b720",
+      "bytes": 1254224,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:/USERCA~1/Temp/knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de/generated-images/expert_task-mtphk5gg-jinbr_mtpi45c0/generated-01-6c8124d9d8735d9b.jpg",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-H02\\with_skill\\outputs\\input-reference.jpg",
+      "sha256": "6c8124d9d8735d9b3133e402172fe7096fd3e52a9bbe474c90394aa86582ff33",
+      "bytes": 455950,
+      "sourceAndDestinationMatch": true
+    },
+    {
+      "source": "D:\\USERCA~1\\Temp\\knowme-expert-qualification-e3808573825e42908aef0a0f2d0f20de\\generated-images\\expert_task-mtpmgiwr-ceqif_mtpmgmts\\generated-01-79ef1cbbbcf8825e.png",
+      "destination": "D:\\aispace\\knowme\\openspec\\changes\\production-qualify-all-experts\\skill-evals\\rqa26-image-methods-workspace\\iteration-1\\R26-IP-H02\\with_skill\\outputs\\generated-image.png",
+      "sha256": "79ef1cbbbcf8825edc244d4c5fb317769b24653e6077cf8984e1fcbd5f7e5ffa",
+      "bytes": 1233565,
+      "sourceAndDestinationMatch": true
+    }
+  ]
+}

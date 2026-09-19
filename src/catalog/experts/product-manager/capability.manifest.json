@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 3,
+  "id": "product-manager",
+  "kind": "expert",
+  "name": "产品经理",
+  "description": "以产品定义、用户研究和需求评审三种模式推进产品决策与交付。",
+  "version": "2.6.0",
+  "dependencies": [
+    { "id": "product-definition-method", "kind": "skill", "required": true },
+    { "id": "requirement-review", "kind": "skill", "required": true },
+    { "id": "research-evidence-analysis", "kind": "skill", "required": true },
+    { "id": "writing-polish", "kind": "skill", "required": false }
+  ],
+  "permissions": { "connectors": { "allowedConnectorIds": [] }, "tools": { "allowlist": ["create_artifact", "update_artifact"] }, "network": false, "write": false, "externalWrite": false },
+  "inputs": ["业务目标或待解决的问题", "现有材料、约束与相关反馈"],
+  "outputs": ["产品需求与验收标准", "用户研究结论", "需求评审结论"],
+  "risk": { "level": "low", "reasons": [] },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "experts/product-manager" },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "document-first",
+        "routes": [
+          {
+            "id": "requirement-review",
+            "description": "评审需求完整性、事实边界与可观察验收条件。",
+            "keywords": ["需求评审", "评审需求", "评审 PRD", "评审PRD", "审查 PRD", "审查PRD", "验收评审"],
+            "requiredSkills": ["requirement-review"],
+            "qualityReview": {
+              "enabled": true,
+              "criteria": [
+                "逐项核对冲突、缺口、风险和验收判断是否能回指用户题面、材料或明确约束；没有来源的实现偏好只能删除或标为建议。",
+                "删除题面未要求的 UI、接口、数据库、状态码、缓存、工具、流程节点、时限和阈值等实现设计。",
+                "复核完整答案中的主评审、摘要、修改建议和最终结论，确保已定规则、待决策参数与建议身份一致。",
+                "严格服从用户的字数、长度、格式和精简上限，保留关键冲突与可观察验收条件。"
+              ]
+            }
+          },
+          {
+            "id": "user-research",
+            "description": "从用户材料中提炼可追溯证据、洞察与待验证假设。",
+            "keywords": ["用户研究", "访谈分析", "分析访谈", "用户反馈分析", "研究洞察", "证据分析", "研究问题"],
+            "requiredSkills": ["research-evidence-analysis"],
+            "qualityReview": {
+              "enabled": true,
+              "criteria": [
+                "逐项核对原始记录数、独立参与者数、重复关系、身份映射和比例分母，不把记录条数或提及次数冒充人数。",
+                "区分观察事实、参与者解释、研究者推断、机会和待验证假设，保留关键反例、采集语境与抽样偏差。",
+                "复算配对差值、正负号、呈现顺序和分组方向，并核对表格、摘要、结论与建议是否一致。",
+                "后续研究写清对象、任务终点、中性问题、记录指标、竞争解释，以及哪些可观察结果会改变当前建议。"
+              ]
+            }
+          },
+          {
+            "id": "product-definition",
+            "description": "定义产品问题、范围、规则、异常与可复现验收标准。",
+            "default": true,
+            "requiredSkills": ["product-definition-method"]
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "primary",
+            "title": "产品需求文档",
+            "type": "document",
+            "required": true,
+            "requiredTools": ["create_artifact"],
+            "requiredEvidence": [{ "kind": "tool_result", "tool": "create_artifact" }],
+            "requiredArtifacts": [{ "type": "markdown" }],
+            "minArtifacts": 1,
+            "completionConditions": [{ "type": "tool_success", "tool": "create_artifact" }, { "type": "artifact_present" }],
+            "requiredSections": ["背景与问题", "目标", "范围", "非目标", "用户场景", "核心流程", "业务规则", "异常场景", "验收标准", "风险与待确认事项"]
+          },
+          {
+            "id": "acceptance",
+            "mergeInto": "primary",
+            "title": "验收标准与范围边界",
+            "type": "document",
+            "required": true,
+            "requiredSections": ["验收标准", "范围内", "范围外", "待确认事项", "风险与依赖"]
+          }
+        ],
+        "qualityReview": {
+          "enabled": true,
+          "criteria": [
+            "核对事实权威：只保留题面已有或已定规则必需且可观察的状态与动作；删除模板补出的草稿、待提交、时限、唯一键、接口和技术机制。",
+            "核对状态闭环：不同对象或维度分开建模；范围外或未定义的核销、同步等信号只能标为依赖或待确认，不能驱动声称已闭环的状态。",
+            "核对可追踪验收：每条已定规则及每个异常恢复分支均有 GIVEN、WHEN、唯一可观察的 THEN；不同条件的‘或’分支必须拆开。",
+            "核对全文一致性：角色、动作、状态、权限、范围、量词和验收术语一致；修改轮是完整替换版，保留既有规则并清除旧口径。"
+          ]
+        }
+      }
+    }
+  }
+}

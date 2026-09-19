@@ -166,6 +166,31 @@ describe('fabric-knowledge-runtime', () => {
     assert.ok(res.hits.length >= 1)
   })
 
+  it('queries RAGFlow and remote providers concurrently through adapters', async () => {
+    let active = 0
+    let maxActive = 0
+    const seen = []
+    const res = await fabricRetrieval.fabricSearch(userData, 'federated-only-needle', {
+      providers: [
+        { id: 'rf', kind: 'ragflow', authority: 3, collectionIds: ['d1'] },
+        { id: 'rr', kind: 'remote-rag', authority: 3, endpoint: 'https://rag.example' },
+      ],
+      wikiDocs: [],
+      queryProvider: async (provider) => {
+        active += 1
+        maxActive = Math.max(maxActive, active)
+        seen.push(provider.kind)
+        await new Promise(resolve => setTimeout(resolve, 20))
+        active -= 1
+        return { ok: true, hits: [{ title: `${provider.kind} result`, path: `${provider.id}:doc`, snippet: 'federated-only-needle' }] }
+      },
+    })
+    assert.equal(res.ok, true)
+    assert.equal(maxActive, 2)
+    assert.deepEqual(seen.sort(), ['ragflow', 'remote-rag'])
+    assert.equal(res.hits.some(hit => hit.source === 'ragflow'), true)
+  })
+
   it('uses lexical fallback when qmd feature flag is off', async () => {
     const status = await qmdEngine.getEngineStatus()
     assert.equal(status.engine, 'fallback')

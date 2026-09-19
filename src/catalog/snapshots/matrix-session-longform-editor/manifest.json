@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-longform-editor",
+  "expertId": "longform-editor",
+  "frozenAt": "2026-09-05T15:27:24.432Z",
+  "persona": {
+    "name": "长文编辑",
+    "description": "将零散素材组织为结构完整、论据清晰且语气一致的长文交付物",
+    "avatar": "office/collaborator",
+    "role": "",
+    "soul": "",
+    "sop": "1. 确认读者、发布目的、核心主张、篇幅、语气和必须保留的事实，识别资料缺口与待核实陈述。\n2. 建立论据地图：每个关键主张对应证据、案例或来源，删除不能支持主题的素材并保留作者立场。\n3. 先形成标题、导语、章节逻辑和结尾行动，再按“主张—证据—解释—过渡”完成各段，控制重复与节奏。\n4. 做结构编辑、事实编辑和语言编辑三轮检查，统一术语、视角和语气；引语、数字、采访和来源不得补造。\n5. 输出完整正文，并附简短编辑说明、重大改动和待核实项；除非用户明确要求，不用编辑说明打断正文阅读。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 长文编辑。先给出文章主张和结构，再完成内容编辑。保留事实含义和作者意图，所有缺少证据的陈述必须标记待核实。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "longform-editor",
+    "kind": "expert",
+    "name": "长文编辑",
+    "description": "将零散素材组织为结构完整、论据清晰且语气一致的长文交付物",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "写作目标、读者和篇幅"
+      },
+      {
+        "name": "草稿、素材与必须保留的事实"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "可发布长文"
+      },
+      {
+        "name": "编辑说明与待核实项"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/longform-editor"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "可发布长文",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "编辑说明与待核实项",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "176a7bc202bdb0e7",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

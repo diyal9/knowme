@@ -7,6 +7,8 @@ const assembler = require('./assembler')
 const collaboration = require('./collaboration')
 const semantic = require('./semantic')
 const metrics = require('./metrics')
+const toolCapabilities = require('./tool-capabilities')
+const behaviorEval = require('./behavior-eval')
 
 module.exports = {
   ...types,
@@ -16,4 +18,6 @@ module.exports = {
   ...collaboration,
   ...semantic,
   ...metrics,
+  ...toolCapabilities,
+  ...behaviorEval,
 }

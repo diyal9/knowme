@@ -1,0 +1,91 @@
+{
+  "grading_status": "not_evaluable",
+  "professional_scorable": false,
+  "binding": {
+    "evalId": "RR02",
+    "configuration": "old_skill",
+    "taskId": "task-mtowf07y-5yet0",
+    "sessionId": "wb-expert-task-mtowf07y-5yet0",
+    "runId": "expert_task-mtowf07y-5yet0_mtowf0em",
+    "expertId": "requirement-reviewer",
+    "agentVersion": "2.0.0",
+    "agentHash": "872370944fad2e62",
+    "inputMatchesFrozen": true,
+    "metadataAssertionsMatchFrozen": true,
+    "contextAudit": [
+      {
+        "runId": "expert_task-mtowf07y-5yet0_mtowf0em",
+        "skillRefs": [],
+        "explicitContent": []
+      }
+    ]
+  },
+  "expectations": [
+    {
+      "text": "指出A1不能排除课程遗漏/重复以及周三教师冲突，不误称已执行系统缺陷。",
+      "passed": null,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    },
+    {
+      "text": "课程判据检查指定全周课程身份与各自次数，不以总数或抽样替代。",
+      "passed": null,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    },
+    {
+      "text": "教师判据覆盖全周同一教师时段重叠，不能只检查单日。",
+      "passed": null,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    },
+    {
+      "text": "允许时段保持待定；性能写清规模、计时起止及阈值待定，不凭空制定SLA/周末排课。",
+      "passed": null,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    },
+    {
+      "text": "候选条件贯穿建议与验收，结论不形式通过，无动态执行宣称，全文不超360混合字数。",
+      "passed": null,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    }
+  ],
+  "summary": {
+    "passed": null,
+    "failed": null,
+    "total": 5,
+    "evaluated": 0,
+    "not_evaluated": 5,
+    "pass_rate": null,
+    "score": "N/A",
+    "excluded_from_score_aggregate": true
+  },
+  "claims": [
+    {
+      "claim": "已持久化答复是平台替换文，不是可恢复的专业原正文",
+      "type": "process",
+      "verified": true,
+      "evidence": "N/A：task=task-mtowf07y-5yet0，session=wb-expert-task-mtowf07y-5yet0，run=expert_task-mtowf07y-5yet0_mtowf0em；live.json task.status=needs_input，executionEvidence.gateStatus=blocked，violations=ungrounded_external_fact。同run transcript仅平台替换文；隔离QA该run的events.jsonl/state.json/checkpoints/latest.json及已持久化成果未找到原专业正文，不按拒绝文评分。"
+    }
+  ],
+  "length_audit": {
+    "scope": "Only replacement reply remains; counts below are diagnostic, not a professional length grade",
+    "method": "Han characters individually plus Latin/digit words; punctuation, whitespace and Markdown control marks are not mixed words. Same method as preceding review; raw counts retained.",
+    "regex": "\\p{Script=Han}|[A-Za-z0-9]+(?:[.,/][A-Za-z0-9]+)*",
+    "flags": "gu",
+    "limit": 360,
+    "full_unicode_chars": 36,
+    "non_whitespace_chars": 36,
+    "han_chars": 33,
+    "mixed_words": 33,
+    "punctuation_chars": 3,
+    "professional_length_passed": null
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "本例应单列平台阻断和原正文不可恢复，保留五条未评估断言，不把N/A混成失败或通过。未来证据采集若需保留gate前正文，应另行授权；本次不改变运行时或绕过gate。"
+      }
+    ],
+    "overall": "Professional quality unavailable; do not infer the exact rejected claim or grade the refusal."
+  },
+  "comparison_scope": "Whole expert/SOP/method/requiredSkills bundle changed (2.0.0 -> 2.1.0), not isolated Skill causality. A platform review/verified state is not professional pass; RR02 delivery is not proof of a general claim-gate fix.",
+  "na_representation": "User-required N/A overrides binary grader schema: passed=null for all five unevaluated assertions; never encode missing original output as 0/5."
+}

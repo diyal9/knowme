@@ -9,6 +9,7 @@ import {
 } from '../../../domain/agent-context-usage'
 import { Icon } from '../../app/Icon'
 import { resolveHubIcon } from '../../../domain/capability-hub'
+import type { KnowledgeSelectionOption } from '../../../shared/knowledge-selection'
 
 export type ModelPreset = { id: string; label: string; contextWindow?: number; supportsTools?: boolean; supportsVision?: boolean }
 export type ModelGroup = { id: string; label: string; models: ModelPreset[] }
@@ -120,58 +121,51 @@ export function AgentModelMenu({
 export function AgentKnowledgeMenu({
   knowledge,
   providers = [],
+  options = [],
   refs,
   onToggle,
-  onClear,
 }: {
   knowledge: KnowledgeEntry[]
   /** 知识源 provider（与 wiki/okf 条目并列可选） */
   providers?: Array<{ id: string; displayName?: string; name?: string; kind?: string }>
+  options?: KnowledgeSelectionOption[]
   refs: string[]
   onToggle: (path: string) => void
-  onClear: () => void
 }) {
-  const empty = providers.length === 0 && knowledge.length === 0
+  const items: KnowledgeSelectionOption[] = options.length
+    ? options
+    : providers.map((item) => ({
+      id: item.id,
+      displayName: item.displayName || item.name || item.id,
+      name: item.name || item.displayName || item.id,
+      kind: item.kind,
+      category: item.kind === 'ragflow' || item.kind === 'remote-rag' ? 'RAG 知识库' : '外挂知识库',
+    }))
+  const grouped = ['外挂知识库', 'RAG 知识库'].map((category) => ({
+    category: category as KnowledgeSelectionOption['category'],
+    items: items.filter((item) => item.category === category),
+  })).filter((group) => group.items.length)
+  const empty = items.length === 0
+  const selectedCount = items.filter((item) => refs.includes(item.id)).length
   return (
     <div className="agent-menu agent-knowledge-menu show" data-testid="agent-knowledge-menu" role="menu" aria-label="本次对话知识库">
       <div className="agent-knowledge-menu-head">
-        <strong>本次对话知识库</strong>
-        <span>{refs.length ? `已选 ${refs.length}` : '跟随默认'}</span>
+        <strong>选择知识库</strong>
+        <span>{selectedCount ? `已选 ${selectedCount}` : '未指定外挂库'}</span>
       </div>
       <div className="agent-expert-knowledge-options">
-        <button
-          type="button"
-          className={`agent-expert-knowledge${refs.length ? '' : ' selected'}`}
-          onClick={onClear}
-        >
-          跟随默认 · 系统默认
-        </button>
         {empty ? (
-          <span className="agent-expert-capability limited">暂无知识库条目</span>
+          <span className="agent-expert-capability limited">暂无可选外挂知识库</span>
         ) : null}
-        {providers.map((item) => (
-          <button
-            key={`provider:${item.id}`}
-            type="button"
-            className={`agent-expert-knowledge${refs.includes(item.id) ? ' selected' : ''}`}
-            aria-pressed={refs.includes(item.id)}
-            data-testid="agent-knowledge-provider"
-            onClick={() => onToggle(item.id)}
-          >
-            {item.displayName || item.name || item.id}
-            {item.kind ? ` · ${item.kind}` : ''}
-          </button>
-        ))}
-        {knowledge.map((item) => (
-          <button
-            key={item.path}
-            type="button"
-            className={`agent-expert-knowledge${refs.includes(item.path) ? ' selected' : ''}`}
-            aria-pressed={refs.includes(item.path)}
-            onClick={() => onToggle(item.path)}
-          >
-            {item.title || item.path}
-          </button>
+        {grouped.map((group) => (
+          <section key={group.category} className="agent-knowledge-group">
+            <h4>{group.category}</h4>
+            <div>{group.items.map((item) => (
+              <button key={item.id} type="button" className={`agent-expert-knowledge${refs.includes(item.id) ? ' selected' : ''}`} aria-pressed={refs.includes(item.id)} data-testid="agent-knowledge-provider" onClick={() => onToggle(item.id)}>
+                {item.name}
+              </button>
+            ))}</div>
+          </section>
         ))}
       </div>
     </div>

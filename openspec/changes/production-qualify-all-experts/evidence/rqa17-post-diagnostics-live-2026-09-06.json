@@ -1,0 +1,735 @@
+{
+  "captures": [
+    {
+      "args": {
+        "text": "# 事件接入与派生看板架构评审方案\n\n## 1. 核心结论：团队提议不成立\n**判定：** “加一个消息队列便能保证永不丢失、无重复且60秒内看板可见”的提议在固定配置下**逻辑错误且物理不可行**。\n*   **无重复（Exactly-Once）谬误：** 构件Q明确“不承诺端到端exactly-once”，且允许至少一次投递。去重必须由应用层（计算器或存储层）通过 `eventId` 唯一性约束实现，而非依赖中间件。\n*   **60秒延迟硬伤：** 突发期间到达率2400/s > 处理能力800/s。积压必然产生，导致尾部事件延迟远超60s。除非放宽延迟目标或提升算力（需批准变更），否则该SLA无法达成。\n\n## 2. 容量与延迟验算（基于题面假设）\n\n### 2.1 突发期积压计算\n*   **输入速率：** 2400 events/s\n*   **处理速率：** 800 events/s (固定上限)\n*   **净积压速率：** $2400 - 800 = 1600$ events/s\n*   **持续时间：** 10分钟 = 600秒\n*   **突发结束时总积压量：** $1600 \\times 600 = 960,000$ events\n\n### 2.2 正文存储量估算\n*   **单条大小：** 1 KiB\n*   **峰值瞬时占用（仅正文）：** $960,000 \\times 1 \\text{ KiB} \\approx 937.5 \\text{ MiB}$\n    *   *注：此为纯数据正文。实际磁盘需乘以副本数（Q/D均为3节点多数派，至少x1.5~x3冗余系数）、索引开销及协议头。未计具体硬件规格。*\n\n### 2.3 恢复排空时间\n*   **正常到达率：** 600 events/s\n*   **剩余处理能力用于排空：** $800 - 600 = 200$ events/s\n*   **排空所需时间：** $960,000 / 200 = 4,800$ 秒 = **80分钟**\n*   **最坏情况延迟分析：**\n    *   突发最后一刻进入的事件，需等待前面96万条积压处理完才能被看板计入。\n    *   延迟 $\\approx 80$ 分钟 >> **60秒 SLA**。\n    *   **结论：** 即使选择最快持久化入口，只要算力限制为800/s，**60秒SLA在突发场景下必然违约**。\n\n## 3. 备选方案比较\n\n| 维度 | 方案 A：构件 Q (日志队列) + 外部状态表 | 方案 B：构件 D (数据库) + Outbox 模式 |\n| :--- | :--- | :--- |\n| **ACK 边界** | HTTP进程写入Q成功即ACK。Q落盘由多数节点保证。 | HTTP进程在D中事务提交成功即ACK。D落盘由多数节点保证。 |\n| **去重机制** | **应用层强依赖。** 消费者从Q拉取后，查独立KV/DB判断 `eventId` 是否已处理。若未处理则更新看板并标记。存在“读-改-写”竞态风险，需分布式锁或CAS。 | **数据库原生保证。** 利用D的唯一键约束。插入业务记录时，若 `eventId` 冲突则忽略/报错。Outbox在同一事务中写入待计算指令。天然原子性。 |\n| **一致性/原子性** | **最终一致。** ACK与看板更新解耦。若ACK后Q消费失败，需重试；若重试前崩溃，可能重复投递，依赖下游幂等。 | **强一致（局部）。** 事件持久化与“待计算信号”在同一事务。要么都成功，要么都回滚。看板更新异步但源头无丢失。 |\n| **恢复方式** | Q支持未确认重投。消费者重启后继续拉取未ACK消息。需确保消费者本身无状态或状态可重建。 | D故障切换后，新主库包含所有已ACK事件。Outbox扫描器继续工作。无需额外补偿逻辑。 |\n| **适用前提** | 高吞吐写入，对查询灵活性要求低，已有成熟流处理框架。 | 需要复杂关联查询，或希望简化运维组件数量（复用DB）。 |\n| **主要风险** | 去重逻辑分散在消费者代码中，易出错；Q堆积过多时消费位点管理复杂。 | DB写入热点可能成为瓶颈（虽题面说D写入足够，但需关注索引维护成本）。 |\n\n## 4. 推荐方案：条件性推荐\n\n鉴于**60秒SLA在固定算力下物理不可达**，本方案分为两部分：**技术架构选型**与**产品约束变更申请**。\n\n### 4.1 技术架构推荐：方案 B (构件 D + Outbox)\n**理由：**\n1.  **正确性优先：** 题目强调“不能靠平台自称exactly-once”。方案B利用数据库唯一键和事务，将“持久化”与“去重依据”绑定在同一原子操作中，比方案A的应用层去重更可靠，代码复杂度更低。\n2.  **迁移友好：** 现状是HTTP直接内存队列。改为先写D再ACK，改动最小。旧入口和新入口共存时，两者都指向同一个D实例，天然解决双计问题（唯一键冲突自动丢弃重复）。\n3.  **可观测性：** D提供标准SQL监控，便于排查积压和死锁。\n\n**接口契约：**\n*   **Ingress:** `POST /events` -> 校验Schema -> 开启事务 -> `INSERT INTO raw_events (event_id, payload, status='PENDING')` -> `INSERT INTO outbox (event_id)` -> Commit -> Return 200 ACK.\n*   **Processor:** 轮询 `outbox` 或监听 CDC -> 调用看板计算逻辑 -> 更新看板聚合表 -> 删除/标记 `outbox` 完成。\n*   **Idempotency:** 看板计算函数必须接受 `event_id` 并在内部检查聚合表最后更新时间戳或版本号，防止Outbox重放导致的二次累加（尽管D保证了单次入库，但Outbox消费可能重试）。\n\n### 4.2 关键取舍与待批准变更\n**当前固定配置无法满足全部硬条件。** 必须显式提出以下变更之一供决策：\n1.  **变更算力：** 增加派生计算器至 >2400 events/s（推荐3000+以留余量）。\n2.  **变更SLA：** 将突发期间的看板可见延迟目标放宽至 >80分钟，或定义“尽力而为”指标。\n3.  **变更范围：** 允许在突发期间丢弃非关键事件（违反“不能丢弃”约束，需重新谈判）。\n\n**若不批准上述任何变更，本架构只能满足“不丢失”和“去重”，无法满足“60秒SLA”。**\n\n## 5. 迁移与验证计划\n\n### 5.1 迁移策略（双写过渡）\n1.  **阶段一（影子模式）：** 新入口（D方案）上线，接收流量但不返回ACK给源端（或返回Mock ACK），同时旧入口继续服务。比对两边数据差异。\n2.  **阶段二（灰度切流）：** 按 `source_id` 或百分比，将部分源端流量指向新入口。由于D有唯一键，即使旧入口因网络抖动重发相同 `eventId`，新入口也会安全忽略，不会双计。\n3.  **阶段三（全量切换）：** 切断旧入口写入，保留只读查询一段时间用于对账。\n\n### 5.2 验证计划（刺激-观测-判定）\n\n| 测试项 | 刺激 (Stimulus) | 观测点 (Observation) | 通过判据 (Pass Criteria) |\n| :--- | :--- | :--- | :--- |\n| **持久性故障** | 在ACK返回前瞬间杀死D的一个节点 | 源端收到超时/错误；集群选举新主 | 事件未丢失（在新主上可查到）；源端重试成功后ACK返回。 |\n| **重复注入** | 使用相同 `eventId` 连续发送两次请求 | D表行数；看板计数值 | 第二次请求返回成功（幂等）或特定冲突码；看板计数仅增加1次。 |\n| **积压压力** | 模拟2400/s持续10分钟 | 队列深度；最新事件处理时间戳 | 记录最大积压量（预期~96万）；测量尾部事件延迟（预期>60s，验证SLA缺口）。 |\n| **恢复能力** | 在积压状态下重启处理器 | 处理器重启后消费进度 | 不丢失未处理事件；积压开始下降；无重复计算。 |\n\n## 6. 总结\n*   **团队提议无效：** 消息队列本身不解决去重和算力瓶颈导致的延迟。\n*   **推荐架构：** 采用 **构件D + Outbox** 模式，确保数据持久化和去重的原子性。\n*   **核心风险：** **60秒SLA在现有算力下数学上不可达**。\n*   **行动建议：** 立即提交“增加算力”或“放宽延迟SLA”的变更申请。在未获批准前，系统将在每日突发时段出现约80分钟的看板数据滞后。",
+        "evidenceLedger": {
+          "runId": "expert_task-mtp2li38-xgh19_mtp5ohjx",
+          "entries": []
+        },
+        "toolLedger": {
+          "calls": [],
+          "derivedFacts": []
+        },
+        "referenceState": {
+          "version": 1,
+          "refs": [],
+          "activeRefId": null,
+          "pendingSelection": null,
+          "taskFrame": {
+            "workflowId": null,
+            "skillId": null,
+            "requiredTools": [],
+            "requiredEvidence": [],
+            "completionConditions": []
+          }
+        },
+        "taskFrame": {
+          "requiredTools": [],
+          "requiredEvidence": [],
+          "completionConditions": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0
+        },
+        "providedMaterials": {
+          "version": 1,
+          "kind": "provided_materials",
+          "taskId": "task-mtp2li38-xgh19",
+          "runId": "expert_task-mtp2li38-xgh19_mtp5ohjx",
+          "items": [
+            {
+              "id": "SA-H02",
+              "title": "冻结合成材料与委托",
+              "text": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。\n\n[A1 业务与硬条件]\n正常到达率恒为600事件/秒；每天可能出现一次持续10分钟的2400事件/秒突发，之后立即回到600事件/秒。每条事件存储占用固定1 KiB=1024字节；以下容量只算事件正文，索引、副本、协议和安全余量另计。\n每条有全局唯一 eventId。源端在没有收到成功ACK时可用相同 eventId 重发，包括服务已经持久化但ACK丢失的情况。成功ACK后，即使一个存储节点立即永久故障，事件也不能丢失。未经持久化的事件允许暂不ACK，源端会重试。\n看板必须对每个 eventId 只计入一次，但允许内部至少一次投递与重放；不能靠数据平台自称 exactly-once 替代应用设计。产品同时要求所有已ACK事件的看板可见延迟不超过60秒，包括完整突发期间。\n\n[A2 可用构件与不可偷换条件]\n构件Q：本地三节点持久日志队列，append返回成功表示多数节点已落盘；按本题契约可容忍随后永久丢失一个节点。支持消费者确认与未确认重投，不承诺端到端exactly-once。append容量足够承受2400事件/秒，存储空间需规划。\n构件D：本地三节点数据库，同样在多数节点持久化提交后返回成功并容忍随后永久丢失一个节点。支持事务、eventId唯一键，以及在同一事务写业务记录和outbox。作为接入账本时写入能力足够；派生看板计算总吞吐仍受下一段限制。\n无论选择Q或D作为入口，现有派生计算器总处理能力都是800事件/秒；平时空闲额度不能预先处理未来事件。当前固定配置不能另加计算器，不能丢弃/合并不同eventId，也不能延后成功ACK来重新定义看板延迟起点。要改容量、延迟目标或产品范围，必须显式列为待批准变更，不能假定已获批准。\nA1到达率均指不同eventId的事件，不含重试流量；计算器处理成本已包含通常去重检查。本题不提供价格、磁盘大小、真实p99延迟或人员工期。\n\n[A3 现状与迁移]\n现状HTTP进程收到事件后先ACK，再放入内存队列。进程退出可能丢数据。团队提议“加一个消息队列便能保证永不丢失、无重复且60秒内看板可见”。旧入口和新入口会在一个迁移窗口共存；要避免相同eventId从两入口重放时双计。\n\n请判断团队提议和全部硬条件在固定配置下是否成立。比较至少两种有实质区别的持久接入方案，说明ACK边界、去重与更新原子性、消费确认和恢复方式；允许指出方案只能满足部分条件，不能把不可行方案包装成全满足。复算突发结束时待处理积压、正文存储量及恢复正常到达后排空时间，注明单位与未计开销。给推荐/条件性推荐、迁移切换与可执行的故障/积压验证计划，不填造成本、性能或工期保证。",
+              "contentHash": "fa9c1ccc41da96ded4aadf25ace7a76c5a221f083e97860c316c0db424298c6a",
+              "origin": "user_material",
+              "completeness": "unknown"
+            }
+          ],
+          "snapshotHash": "b7574dbf96601acec276d114c44044d113b22924937a090aee5e773780d29eae"
+        },
+        "toolMessages": []
+      },
+      "result": {
+        "passed": false,
+        "claims": [
+          {
+            "type": "external_fact",
+            "text": "结论："
+          }
+        ],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "claims": [
+              {
+                "label": "结论",
+                "value": "团队提议不成立"
+              },
+              {
+                "label": "结论",
+                "value": "即使选择最快持久化入口，只要算力限制为800/s，60秒SLA在突发场景下必然违约"
+              }
+            ]
+          }
+        ],
+        "metadata": {
+          "evidenceCount": 0,
+          "toolCallCount": 0,
+          "hasSupportingEvidence": false,
+          "fieldChecks": [
+            {
+              "type": "external_fact",
+              "label": "结论",
+              "value": "团队提议不成立",
+              "text": "核心结论：团队提议不成立",
+              "prefix": "核心",
+              "support": "unresolved",
+              "sourceIds": []
+            },
+            {
+              "type": "external_fact",
+              "label": "结论",
+              "value": "即使选择最快持久化入口，只要算力限制为800/s，60秒SLA在突发场景下必然违约",
+              "text": "*   **结论：** 即使选择最快持久化入口，只要算力限制为800/s，**60秒SLA在突发场景下必然违约**",
+              "prefix": "",
+              "support": "unresolved",
+              "sourceIds": []
+            }
+          ],
+          "verificationScope": "execution_receipts_and_labelled_fields_not_semantic_truth"
+        }
+      }
+    }
+  ],
+  "observerRestored": true,
+  "loadedStrictHashTypes": false,
+  "task": {
+    "taskVersion": 2,
+    "activityContractVersion": 1,
+    "id": "task-mtp2li38-xgh19",
+    "projectId": null,
+    "projectSnapshot": null,
+    "kind": "expert",
+    "title": "RQA15-SA-H02",
+    "expertId": "solution-architect",
+    "expertName": "",
+    "workflowId": "",
+    "workflowName": "",
+    "goal": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。",
+    "brief": {
+      "goal": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。",
+      "plan": {
+        "goal": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "requiresMaterials": false,
+      "requiredInputs": [],
+      "materials": [
+        {
+          "id": "SA-H02",
+          "type": "reference",
+          "title": "冻结合成材料与委托",
+          "ref": "",
+          "content": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。\n\n[A1 业务与硬条件]\n正常到达率恒为600事件/秒；每天可能出现一次持续10分钟的2400事件/秒突发，之后立即回到600事件/秒。每条事件存储占用固定1 KiB=1024字节；以下容量只算事件正文，索引、副本、协议和安全余量另计。\n每条有全局唯一 eventId。源端在没有收到成功ACK时可用相同 eventId 重发，包括服务已经持久化但ACK丢失的情况。成功ACK后，即使一个存储节点立即永久故障，事件也不能丢失。未经持久化的事件允许暂不ACK，源端会重试。\n看板必须对每个 eventId 只计入一次，但允许内部至少一次投递与重放；不能靠数据平台自称 exactly-once 替代应用设计。产品同时要求所有已ACK事件的看板可见延迟不超过60秒，包括完整突发期间。\n\n[A2 可用构件与不可偷换条件]\n构件Q：本地三节点持久日志队列，append返回成功表示多数节点已落盘；按本题契约可容忍随后永久丢失一个节点。支持消费者确认与未确认重投，不承诺端到端exactly-once。append容量足够承受2400事件/秒，存储空间需规划。\n构件D：本地三节点数据库，同样在多数节点持久化提交后返回成功并容忍随后永久丢失一个节点。支持事务、eventId唯一键，以及在同一事务写业务记录和outbox。作为接入账本时写入能力足够；派生看板计算总吞吐仍受下一段限制。\n无论选择Q或D作为入口，现有派生计算器总处理能力都是800事件/秒；平时空闲额度不能预先处理未来事件。当前固定配置不能另加计算器，不能丢弃/合并不同eventId，也不能延后成功ACK来重新定义看板延迟起点。要改容量、延迟目标或产品范围，必须显式列为待批准变更，不能假定已获批准。\nA1到达率均指不同eventId的事件，不含重试流量；计算器处理成本已包含通常去重检查。本题不提供价格、磁盘大小、真实p99延迟或人员工期。\n\n[A3 现状与迁移]\n现状HTTP进程收到事件后先ACK，再放入内存队列。进程退出可能丢数据。团队提议“加一个消息队列便能保证永不丢失、无重复且60秒内看板可见”。旧入口和新入口会在一个迁移窗口共存；要避免相同eventId从两入口重放时双计。\n\n请判断团队提议和全部硬条件在固定配置下是否成立。比较至少两种有实质区别的持久接入方案，说明ACK边界、去重与更新原子性、消费确认和恢复方式；允许指出方案只能满足部分条件，不能把不可行方案包装成全满足。复算突发结束时待处理积压、正文存储量及恢复正常到达后排空时间，注明单位与未计开销。给推荐/条件性推荐、迁移切换与可执行的故障/积压验证计划，不填造成本、性能或工期保证。"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "primary",
+          "title": "专业分析答复",
+          "type": "answer",
+          "required": true,
+          "acceptanceCriteria": [],
+          "requiredTools": [],
+          "requiredSkills": [
+            "architecture-decision"
+          ],
+          "requiredConnectorIds": [],
+          "requiredEvidence": [],
+          "requiredArtifacts": [],
+          "minArtifacts": 0,
+          "completionConditions": []
+        }
+      ],
+      "constraints": [],
+      "dueAt": ""
+    },
+    "assignmentSnapshot": {
+      "agentId": "solution-architect",
+      "agentVersion": "2.1.0",
+      "agentHash": "93c0c79f6582bcbb",
+      "profileId": "",
+      "profileVersion": "",
+      "profileHash": "",
+      "snapshotRef": "expert-snapshot:wb-expert-task-mtp2li38-xgh19",
+      "bindings": {
+        "skills": [
+          "architecture-decision",
+          "code-review"
+        ],
+        "connectors": []
+      },
+      "permissions": {
+        "connectors": {
+          "allowedConnectorIds": []
+        },
+        "tools": {
+          "allowlist": []
+        },
+        "network": false,
+        "write": false,
+        "externalWrite": false
+      },
+      "plan": {
+        "goal": "请作为架构师给出一份可评审的事件接入与派生看板方案。全部是合成系统资料，下列能力契约为题面假设，不是任何云厂商承诺。只分析提供的材料，不联网、不调用工具、不部署，不假装已经压测。请直接交付方案，不要仅回复确认。",
+        "deliverables": [],
+        "acceptanceCriteria": [],
+        "capabilityUse": [],
+        "steps": [
+          "核对所给材料与契约",
+          "按专业方法完成分析",
+          "复核交付及边界"
+        ],
+        "risks": [
+          "只进行静态分析，不执行外部操作"
+        ]
+      },
+      "sop": {
+        "version": "2.1.0",
+        "hash": "93c0c79f6582bcbb"
+      }
+    },
+    "visibility": "private",
+    "participants": [],
+    "events": [
+      {
+        "id": "event-1",
+        "type": "created",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 1,
+        "summary": "已确认委托单并开始预检",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:14.708Z"
+      },
+      {
+        "id": "event-2",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 2,
+        "summary": "预检通过",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.169Z"
+      },
+      {
+        "id": "event-3",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 3,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.186Z"
+      },
+      {
+        "id": "event-4",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 4,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.323Z"
+      },
+      {
+        "id": "event-5",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 5,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.323Z"
+      },
+      {
+        "id": "event-6",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 6,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.323Z"
+      },
+      {
+        "id": "event-7",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 7,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:15.332Z"
+      },
+      {
+        "id": "event-8",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 8,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:25:43.198Z"
+      },
+      {
+        "id": "event-9",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 9,
+        "summary": "生成失败",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:26:06.980Z"
+      },
+      {
+        "id": "event-10",
+        "type": "failed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 10,
+        "summary": "模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。",
+        "actorId": "",
+        "createdAt": "2026-09-06T00:26:07.000Z"
+      },
+      {
+        "id": "event-11",
+        "type": "retried",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 11,
+        "summary": "用户重新执行任务",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.320Z"
+      },
+      {
+        "id": "event-12",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 12,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.331Z"
+      },
+      {
+        "id": "event-13",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 13,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.453Z"
+      },
+      {
+        "id": "event-14",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 14,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.453Z"
+      },
+      {
+        "id": "event-15",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 15,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.453Z"
+      },
+      {
+        "id": "event-16",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 16,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:12.463Z"
+      },
+      {
+        "id": "event-17",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 17,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:05:44.380Z"
+      },
+      {
+        "id": "event-18",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 18,
+        "summary": "完整答复已重新生成，正在核对",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:06:16.844Z"
+      },
+      {
+        "id": "event-19",
+        "type": "execution_blocked",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 19,
+        "summary": "当前还没有成功的读取结果，不能声称已完成读取",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:06:16.900Z"
+      },
+      {
+        "id": "event-20",
+        "type": "retried",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 20,
+        "summary": "用户重新执行任务",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.489Z"
+      },
+      {
+        "id": "event-21",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 21,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.500Z"
+      },
+      {
+        "id": "event-22",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 22,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.633Z"
+      },
+      {
+        "id": "event-23",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 23,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.633Z"
+      },
+      {
+        "id": "event-24",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 24,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.633Z"
+      },
+      {
+        "id": "event-25",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 25,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:30:39.642Z"
+      },
+      {
+        "id": "event-26",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 26,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:31:07.719Z"
+      },
+      {
+        "id": "event-27",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 27,
+        "summary": "完整答复已重新生成，正在核对",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:31:40.581Z"
+      },
+      {
+        "id": "event-28",
+        "type": "execution_blocked",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 28,
+        "summary": "还没有可验证的正文证据，不能输出具体议题或责任人",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:31:40.627Z"
+      },
+      {
+        "id": "event-29",
+        "type": "retried",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 29,
+        "summary": "用户重新执行任务",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.657Z"
+      },
+      {
+        "id": "event-30",
+        "type": "preflight_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 30,
+        "summary": "正在检查技能、连接器和工具权限",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.670Z"
+      },
+      {
+        "id": "event-31",
+        "type": "preflight_passed",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 31,
+        "summary": "执行条件检查通过",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.825Z"
+      },
+      {
+        "id": "event-32",
+        "type": "task_started",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 32,
+        "summary": "专家已开始执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.825Z"
+      },
+      {
+        "id": "event-33",
+        "type": "sop_applied",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 33,
+        "summary": "已加载专家 SOP，按最小必要路径执行",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.825Z"
+      },
+      {
+        "id": "event-34",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 34,
+        "summary": "正在准备上下文…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:32.841Z"
+      },
+      {
+        "id": "event-35",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 35,
+        "summary": "正在整理最终答复…",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:51:59.672Z"
+      },
+      {
+        "id": "event-36",
+        "type": "progress",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 36,
+        "summary": "完整答复已重新生成，正在核对",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:52:21.711Z"
+      },
+      {
+        "id": "event-37",
+        "type": "execution_blocked",
+        "kind": "event",
+        "source": "expert",
+        "sequence": 37,
+        "summary": "回复中的「结论」尚未与来源对应，需要重新核对依据",
+        "actorId": "",
+        "createdAt": "2026-09-06T01:52:21.772Z"
+      }
+    ],
+    "attention": {
+      "kind": "evidence_incomplete",
+      "action": "retry",
+      "title": "执行结果需要重新核验",
+      "detail": "回复中的「结论」尚未与来源对应，需要重新核对依据",
+      "field": "",
+      "item": "回复中的「结论」尚未与来源对应，需要重新核对依据",
+      "question": "",
+      "example": "",
+      "options": [],
+      "defaultValue": "",
+      "required": true,
+      "createdAt": "2026-09-06T01:52:21.768Z"
+    },
+    "progress": {
+      "phase": "blocked",
+      "label": "执行结果需要重新核验",
+      "detail": "回复中的「结论」尚未与来源对应，需要重新核对依据",
+      "startedAt": "2026-09-06T01:51:32.666Z",
+      "updatedAt": "2026-09-06T01:52:21.768Z",
+      "heartbeatAt": "2026-09-06T01:52:21.768Z"
+    },
+    "inputQueue": null,
+    "deliverables": [],
+    "executionEvidence": [
+      {
+        "runId": "expert_task-mtp2li38-xgh19_mtp40w7c",
+        "deliverableId": "primary",
+        "gateStatus": "blocked",
+        "verificationPassed": false,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [
+          {
+            "code": "false_execution_claim",
+            "message": "执行态声明无 ToolLedger 支撑",
+            "missingTools": []
+          },
+          {
+            "code": "unsupported_execution_claim",
+            "message": "写入声明没有对应的成功工具证据",
+            "missingTools": []
+          },
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "missingTools": []
+          }
+        ],
+        "createdAt": "2026-09-06T01:06:16.893Z"
+      },
+      {
+        "runId": "expert_task-mtp2li38-xgh19_mtp4xml0",
+        "deliverableId": "primary",
+        "gateStatus": "blocked",
+        "verificationPassed": false,
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "missingTools": []
+          }
+        ],
+        "createdAt": "2026-09-06T01:31:40.621Z"
+      },
+      {
+        "runId": "expert_task-mtp2li38-xgh19_mtp5ohjx",
+        "deliverableId": "primary",
+        "gateStatus": "blocked",
+        "verificationPassed": false,
+        "verificationDiagnostics": {
+          "version": 1,
+          "runId": "expert_task-mtp2li38-xgh19_mtp5ohjx",
+          "taskId": "task-mtp2li38-xgh19",
+          "candidateHash": "b24879cd680cbfcf2a07b15d5f3a50e014d8a2caad70a472de63401a01fa63b8",
+          "candidateChars": 3713,
+          "materialSnapshotHash": "b7574dbf96601acec276d114c44044d113b22924937a090aee5e773780d29eae",
+          "materialCount": 1,
+          "scope": "execution_receipts_and_labelled_fields_not_semantic_truth",
+          "fieldChecks": [
+            {
+              "label": "结论",
+              "valueHash": "4c31bee1d10195edb883b40be8381dd351279880c2f8c2ef92c9a359d7182ecf",
+              "support": "unresolved"
+            },
+            {
+              "label": "结论",
+              "valueHash": "f82726feeb0db26e642ad4c82ad50bc227804860a148a1b6b19943b4bc7767e3",
+              "support": "unresolved"
+            }
+          ],
+          "fieldCheckCount": 2
+        },
+        "toolCalls": [],
+        "evidence": [],
+        "violations": [
+          {
+            "code": "ungrounded_external_fact",
+            "message": "具体字段缺少对应来源片段；材料存在不代表所有声明都有依据",
+            "missingTools": [],
+            "claimLabels": [
+              "结论"
+            ]
+          }
+        ],
+        "createdAt": "2026-09-06T01:52:21.765Z"
+      }
+    ],
+    "resultSummary": "回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。",
+    "status": "needs_input",
+    "execRef": {
+      "kind": "session",
+      "id": "wb-expert-task-mtp2li38-xgh19"
+    },
+    "taskRef": null,
+    "knowledgeRefs": [],
+    "pinned": false,
+    "schedule": {
+      "type": "daily",
+      "dailyTime": "09:00",
+      "intervalValue": 24,
+      "intervalUnit": "hour",
+      "onceAt": "",
+      "cronExpr": ""
+    },
+    "scheduleEnabled": false,
+    "scheduleLabel": "",
+    "nextRunAt": "",
+    "lastScheduledAt": "",
+    "scheduleParentId": "",
+    "legacySchedule": {
+      "scheduleEnabled": false,
+      "schedule": {
+        "type": "daily",
+        "dailyTime": "09:00",
+        "intervalValue": 24,
+        "intervalUnit": "hour",
+        "onceAt": "",
+        "cronExpr": ""
+      },
+      "scheduleLabel": ""
+    },
+    "createdAt": "2026-09-06T00:25:14.708Z",
+    "updatedAt": "2026-09-06T01:52:21.772Z"
+  }
+}

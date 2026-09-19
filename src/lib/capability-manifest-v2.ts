@@ -1,6 +1,7 @@
 'use strict'
 
 const { validateExperienceExtension } = require('./skill-experience')
+const { normalizeExpertRouteDisplay } = require('../shared/expert-display')
 
 const SCHEMA_VERSION = 3
 const READABLE_SCHEMA_VERSIONS = new Set([2, 3])
@@ -211,6 +212,12 @@ function validateAndNormalizeManifest(raw = {}, options = {}) {
   if (raw.metadata && typeof raw.metadata === 'object') {
     manifest.metadata = clonePlain(raw.metadata, {})
     const knowme = manifest.metadata.knowme
+    if (kind === 'expert' && knowme?.execution?.routes !== undefined) {
+      const normalized = normalizeExpertRouteDisplay(knowme.execution.routes)
+      knowme.execution.routes = normalized.routes
+      issues.push(...normalized.issues)
+      warnings.push(...normalized.warnings)
+    }
     if (knowme && typeof knowme === 'object' && knowme.experience != null) {
       const validated = validateExperienceExtension(knowme.experience, { skillId: id })
       manifest.metadata.knowme = {
@@ -233,6 +240,7 @@ function dependenciesForLegacy(kind, raw = {}) {
   if (kind === 'expert') {
     for (const id of uniqueStrings(raw.skills)) deps.push({ id, kind: 'skill', required: true })
     for (const id of uniqueStrings(raw.connectors)) deps.push({ id, kind: 'connector', required: true })
+    for (const id of uniqueStrings(raw.optionalConnectors)) deps.push({ id, kind: 'connector', required: false })
   }
   if (kind === 'pack') {
     if (raw.expert) deps.push({ id: raw.expert, kind: 'expert', required: true })

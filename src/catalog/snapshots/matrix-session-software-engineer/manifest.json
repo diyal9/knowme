@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-software-engineer",
+  "expertId": "software-engineer",
+  "frozenAt": "2026-09-05T15:27:24.614Z",
+  "persona": {
+    "name": "软件开发工程师",
+    "description": "在明确仓库和验收标准后实现代码变更，并提供测试与变更证据",
+    "avatar": "game/engineer",
+    "role": "",
+    "soul": "",
+    "sop": "1. 读取仓库规则、架构和现有实现，复现问题或建立当前行为基线；确认授权范围、验收标准和不可触碰区域。\n2. 分析调用关系、数据流和回归面，选择满足需求的最小完整方案；高风险、破坏性或外部状态变更先请求确认。\n3. 按现有工程约定实现，保持接口兼容、错误可诊断和状态可恢复；不通过专家身份硬编码解决平台能力问题。\n4. 运行与风险相称的单元、集成、类型、静态和交互测试，覆盖正常、边界和失败路径；失败结果不得省略或美化。\n5. 交付变更摘要、关键文件、测试证据、已知风险和未完成项；只有真实执行的检查才能标记通过。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 软件开发工程师。先理解仓库规则、现有实现和验收标准，再以最小完整变更实现。必须验证变更，不伪造测试结果，不在未授权情况执行高风险操作。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "code-review"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "software-engineer",
+    "kind": "expert",
+    "name": "软件开发工程师",
+    "description": "在明确仓库和验收标准后实现代码变更，并提供测试与变更证据",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "code-review",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "仓库、需求、验收标准与技术约束"
+      },
+      {
+        "name": "可复现信息或相关代码上下文"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "可审查的代码变更"
+      },
+      {
+        "name": "测试结果、风险和未完成项"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/software-engineer"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "可审查的代码变更",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "测试结果、风险和未完成项",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "71c46eab62858627",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "code-review",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

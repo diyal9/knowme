@@ -6,6 +6,10 @@
  */
 
 const { formatToolLabelForUser } = require('./agent-grounding-labels')
+const { checkProvidedFieldClaims, executionClaimText } = require('./agent-claim-source-check')
+const { explicitSourceIds } = require('./agent-source-citations')
+const { toolSourceContent } = require('./tool-source-content')
+const { matchesRequiredTool } = require('./agent-tool-requirements')
 const {
   newId,
   createReferenceState,
@@ -41,6 +45,12 @@ void PENDING_OK_RE
 // Requiring a subsequent read (or a purpose-built data tool) prevents a
 // plausible search snippet from being promoted into a fabricated conclusion.
 const DISCOVERY_TOOL_RE = /(?:^|[._-])(search|candidate(?:s)?|suggest(?:ion)?|lookup|find)(?:$|[._-])/i
+const CONTENT_RETRIEVAL_TOOLS = new Set(['search_knowledge', 'fabric_search', 'kb_query'])
+
+function isDiscoveryTool(toolName) {
+  const name = String(toolName || '').trim()
+  return DISCOVERY_TOOL_RE.test(name) && !CONTENT_RETRIEVAL_TOOLS.has(name)
+}
 
 function createEvidenceLedger(seed = {}) {
   return {
@@ -112,20 +122,29 @@ function classifyToolResultQuality(toolName, result = {}) {
   let parsed = null
   try { parsed = JSON.parse(text) } catch { /* ignore */ }
   if (parsed && typeof parsed === 'object') {
-    // Import/verification tools return structured contracts (tokens, counts,
-    // id maps, or verification objects), not a document body. Treat a
-    // successful structured response as usable evidence instead of
-    // misclassifying it as "short body" / truncated content.
-    const structuredImportResult = /^(?:preview_external_project|design_external_workflow_import|import_external_project|verify_imported_workflow)$/.test(String(toolName || ''))
-      && parsed.ok !== false
-      && Boolean(parsed.previewToken || parsed.planToken || parsed.counts || parsed.idMaps || parsed.verification || parsed.plan || parsed.preview)
-    if (structuredImportResult) return { status: 'ok', truncated: false, empty: false }
+    if (parsed.ok === false || parsed.isError === true) return { status: 'fail', truncated: false, empty: false }
+    // A tool result need not be a document. Arrays, measurements, receipts and
+    // structured data are valid evidence regardless of the tool/expert name.
+    if (Array.isArray(parsed)) return { status: parsed.length ? 'ok' : 'empty', truncated: false, empty: !parsed.length }
     const body = String(parsed.body || parsed.content || parsed.plain_text || parsed.summary || '').trim()
     const titleOnly = String(parsed.title || parsed.name || '').trim()
     const thinBody = !body || body.length < 40
     const titleWrapper = thinBody && titleOnly && !parsed.items?.length
     if (titleWrapper) return { status: 'truncated', truncated: true, empty: false, reason: 'title_only' }
-    if (!body && !parsed.items?.length) return { status: 'empty', truncated: false, empty: true }
+    const metadataKeys = new Set(['ok', 'isError', 'status', 'code', 'message', 'title', 'name', 'meta',
+      'query', 'durationMs', 'elapsedMs', 'requestId'])
+    const resultLists = ['results', 'items', 'hits', 'chunks', 'records', 'rows']
+      .filter(key => Array.isArray(parsed[key]))
+    if (resultLists.length && resultLists.every(key => parsed[key].length === 0)) {
+      // A count of zero alongside empty result lists is response metadata,
+      // not source content. Standalone numeric measurements remain valid.
+      if (parsed.total === 0) metadataKeys.add('total')
+      if (parsed.count === 0) metadataKeys.add('count')
+    }
+    const structuredData = Object.entries(parsed).some(([key, value]) => !metadataKeys.has(key)
+      && value != null && value !== '' && (!Array.isArray(value) || value.length > 0)
+      && (typeof value !== 'object' || Object.keys(value).length > 0))
+    if (!body) return { status: structuredData ? 'ok' : 'empty', truncated: false, empty: !structuredData }
     if (body.length < (Number(result.minChars) || 80)) {
       return { status: 'truncated', truncated: true, empty: false, reason: 'short_body' }
     }
@@ -164,6 +183,7 @@ function recordToolCall(ledger, call = {}) {
     error: call.error ? String(call.error).slice(0, 500) : null,
     truncated: call.truncated === true,
     durationMs: Number.isFinite(call.durationMs) ? call.durationMs : null,
+    effects: Array.isArray(call.effects) ? call.effects.filter(effect => effect && typeof effect.type === 'string') : [],
   })
   return next
 }
@@ -176,6 +196,8 @@ function mergeToolResultsIntoLedgers({ toolLedger, evidenceLedger, toolMessages 
       ok: item.status !== 'error',
       text: item.text,
       preview: item.text,
+      truncated: item.truncated === true,
+      meta: item.meta,
     })
     const binding = validateToolResultBinding(item.args || {}, item.text)
     const boundStatus = binding.mismatch ? 'fail' : quality.status
@@ -185,6 +207,12 @@ function mergeToolResultsIntoLedgers({ toolLedger, evidenceLedger, toolMessages 
       status: boundStatus === 'fail' ? 'fail' : 'ok',
       truncated: quality.truncated || binding.mismatch === true,
       durationMs: item.durationMs,
+      args: item.args,
+      // Receipts come from the executed adapter, never from model arguments or
+      // answer text. A save receipt must identify a returned artifact.
+      effects: (Array.isArray(item.receipt?.effects) ? item.receipt.effects : []).filter(effect =>
+        effect?.type !== 'save' || (item.artifactRefs || []).some(artifact =>
+          artifact.id === effect.target && Boolean(artifact.targetPath || artifact.path || artifact.url))),
     })
     el = appendEvidence(el, {
       source: 'tool',
@@ -229,7 +257,8 @@ function isVerifiedCandidatePresentation(text = '', toolLedger) {
 
 function evaluateRequiredTools(taskFrame, toolLedger) {
   const required = taskFrame?.requiredTools || []
-  const missing = required.filter(name => !hasOkToolCall(toolLedger, name))
+  const calls = createToolLedger(toolLedger).calls
+  const missing = required.filter(name => !calls.some(call => call.status === 'ok' && matchesRequiredTool(call.name, name)))
   return { satisfied: missing.length === 0, missing }
 }
 
@@ -238,7 +267,7 @@ function evaluateRequiredEvidence(taskFrame, evidenceLedger) {
   const unmet = []
   for (const rule of rules) {
     const entries = createEvidenceLedger(evidenceLedger).entries.filter(e => {
-      if (rule.tool && e.provenance?.tool !== rule.tool) return false
+      if (rule.tool && !matchesRequiredTool(e.provenance?.tool, rule.tool)) return false
       if (rule.forbidTruncated && (e.status === 'truncated' || e.status === 'empty')) return false
       if (rule.minChars != null && (e.digest || '').length < rule.minChars) return false
       return e.status === 'ok'
@@ -253,7 +282,8 @@ function evaluateCompletionConditions(taskFrame, toolLedger, evidenceLedger) {
   const unmet = []
   for (const cond of conditions) {
     if (cond.type === 'tool_success') {
-      if (!hasOkToolCall(toolLedger, cond.tool)) unmet.push(cond)
+      const calls = createToolLedger(toolLedger).calls
+      if (!calls.some(call => call.status === 'ok' && matchesRequiredTool(call.name, cond.tool))) unmet.push(cond)
     } else if (cond.type === 'evidence_present') {
       const ok = createEvidenceLedger(evidenceLedger).entries.some(e =>
         e.status === 'ok' && (!cond.kind || e.provenance?.kind === cond.kind)
@@ -264,8 +294,8 @@ function evaluateCompletionConditions(taskFrame, toolLedger, evidenceLedger) {
   return { satisfied: unmet.length === 0, unmet }
 }
 
-function extractClaims(text = '') {
-  const src = String(text || '')
+function extractClaims(text = '', userSources = []) {
+  const src = executionClaimText(text, userSources)
   const claims = []
   if (EXECUTION_CLAIM_RE.test(src)) {
     claims.push({ type: 'execution', text: src.match(EXECUTION_CLAIM_RE)?.[0] || 'execution' })
@@ -277,14 +307,61 @@ function extractClaims(text = '') {
 }
 
 const EXECUTION_TOOL_FAMILIES = [
-  { claim: /(已(?:经)?导入|imported)/i, tool: /(import|ingest)/i, label: '导入' },
-  { claim: /(已(?:经)?安装|installed)/i, tool: /(install|import)/i, label: '安装' },
-  { claim: /(已(?:经)?发送)/i, tool: /(send|message|mail)/i, label: '发送' },
-  { claim: /(已(?:经)?发布|published)/i, tool: /(publish|release|deploy)/i, label: '发布' },
-  { claim: /(已(?:经)?删除|deleted)/i, tool: /(delete|remove)/i, label: '删除' },
-  { claim: /(已(?:经)?修改(?:文件|代码)|已(?:经)?写入|已(?:经)?保存)/i, tool: /(write|update|patch|edit|save)/i, label: '写入' },
-  { claim: /(已(?:经)?运行(?:测试|脚本|命令)|tests? passed)/i, tool: /(test|run|shell|python|process|command)/i, label: '运行' },
+  { effect: 'import', claim: /(已(?:经)?导入|imported)/i, tool: /(import|ingest)/i, label: '导入' },
+  { effect: 'install', claim: /(已(?:经)?安装|installed)/i, tool: /(install|import)/i, label: '安装' },
+  { effect: 'send', claim: /(已(?:经)?发送)/i, tool: /(send|message|mail)/i, label: '发送' },
+  { effect: 'publish', claim: /(已(?:经)?发布|published)/i, tool: /(publish|release|deploy)/i, label: '发布' },
+  { effect: 'delete', claim: /(已(?:经)?删除|deleted)/i, tool: /(delete|remove)/i, label: '删除' },
+  { effect: 'write', claim: /(已(?:经)?修改(?:文件|代码)|已(?:经)?写入)/i, tool: /(write|update|patch|edit|save)/i, label: '写入' },
+  { effect: 'save', claim: /已(?:经)?保存/i, tool: /(write|save)/i, label: '保存' },
+  { effect: 'run', claim: /(已(?:经)?运行(?:测试|脚本|命令)|tests? passed)/i, tool: /(test|run|shell|python|process|command)/i, label: '运行' },
 ]
+
+// One projection for verification and answer-only repair. This does not grant
+// new source authority or turn source excerpts into execution receipts.
+function collectGroundingSources({ providedMaterials, evidenceLedger, toolMessages = [] } = {}) {
+  const el = createEvidenceLedger(evidenceLedger)
+  return [
+    ...(Array.isArray(providedMaterials?.items) ? providedMaterials.items : []),
+    ...el.entries.filter(e => e.source === 'user' && e.status === 'ok')
+      .map(e => ({ id: e.refId || e.id, text: e.digest })),
+    ...el.entries.filter(e => e.source === 'tool' && e.status === 'ok' && !isDiscoveryTool(e.provenance?.tool))
+      .flatMap(e => {
+        const message = toolMessages.find(item => item?.status === 'done'
+          && item.toolCallId && item.toolCallId === e.toolCallId
+          && item.toolName === e.provenance?.tool)
+        const body = typeof message?.text === 'string' ? message.text : e.digest
+        const content = toolSourceContent(body)
+        const aliases = Object.entries(e.provenance?.actualSource || {})
+          .filter(([key, value]) => typeof value === 'string' && value
+            && e.provenance?.expectedSource?.[key] === value)
+          .map(([, value]) => value)
+        return [...new Set([e.refId || e.id, ...aliases])].map(id => ({ id, text: content }))
+      }),
+  ]
+}
+
+function expandInlineSourceAliases(sources = []) {
+  const existing = new Set(sources.map(source => String(source?.id || '')).filter(Boolean))
+  const owners = new Map()
+  for (const source of sources) {
+    const aliases = [...String(source?.text || '').matchAll(/^\s*(?:[-*]\s*)?([A-Z]{1,4}\d{1,4}(?:[-_.]\d{1,4})?)\s*[：:]/gmu)]
+      .map(match => match[1])
+    for (const alias of new Set(aliases)) {
+      const matches = owners.get(alias) || []
+      matches.push(source)
+      owners.set(alias, matches)
+    }
+  }
+  const expanded = sources.slice()
+  for (const [alias, matches] of owners) {
+    // A unique, explicitly declared section/rule label is an alias of its
+    // containing material. Ambiguous labels across documents remain unresolved.
+    if (existing.has(alias) || matches.length !== 1) continue
+    expanded.push({ ...matches[0], id: alias, parentSourceId: matches[0].id })
+  }
+  return expanded
+}
 
 function verifyClaims({
   text = '',
@@ -292,12 +369,20 @@ function verifyClaims({
   toolLedger,
   referenceState,
   taskFrame,
+  providedMaterials,
+  toolMessages = [],
 } = {}) {
-  const claims = extractClaims(text)
   const violations = []
   const tl = createToolLedger(toolLedger)
   const el = createEvidenceLedger(evidenceLedger)
   const tf = taskFrame || referenceState?.taskFrame || null
+  const userSources = [
+    ...(Array.isArray(providedMaterials?.items) ? providedMaterials.items : []),
+    ...el.entries.filter(entry => entry.source === 'user' && entry.status === 'ok')
+      .map(entry => ({ id: entry.refId || entry.id, text: entry.digest })),
+  ]
+  const executionText = executionClaimText(text, userSources)
+  const claims = extractClaims(text, userSources)
 
   const requiredTools = evaluateRequiredTools(tf, tl)
   if (!requiredTools.satisfied) {
@@ -326,16 +411,32 @@ function verifyClaims({
     })
   }
 
-  if (EXECUTION_CLAIM_RE.test(text)) {
+  if (EXECUTION_CLAIM_RE.test(executionText)) {
     const execOk = tl.calls.some(c => c.status === 'ok')
-    const readTools = ['feishu.meeting_read', 'feishu.read_doc', 'feishu.get_wiki_node']
+    // Reading is a platform capability, not a Feishu-only capability. Keep
+    // the explicit list conservative so an unrelated successful tool cannot
+    // satisfy a read claim, while allowing the built-in public web reader to
+    // support claims such as “已读取官方页面”.
+    const readTools = [
+      'feishu.meeting_read',
+      'feishu.meeting_candidates',
+      'feishu.today_priority',
+      'feishu.doc_kb_suggest',
+      'feishu.related_chats',
+      'feishu.read_doc',
+      'feishu.get_wiki_node',
+      'fetch_web_page',
+    ]
     const hasRead = readTools.some(name => hasOkToolCall(tl, name))
-    if (!execOk || (/(已读取|读取完成|读取成功)/i.test(text) && !hasRead)) {
+    if (!execOk || (/(已读取|读取完成|读取成功)/i.test(executionText) && !hasRead)) {
       violations.push({ code: 'false_execution_claim', message: '执行态声明无 ToolLedger 支撑' })
     }
     for (const family of EXECUTION_TOOL_FAMILIES) {
-      if (!family.claim.test(text)) continue
-      const supported = tl.calls.some(call => call.status === 'ok' && family.tool.test(String(call.name || '')))
+      if (!family.claim.test(executionText)) continue
+      const supported = tl.calls.some(call => call.status === 'ok' && (
+        (call.effects || []).some(effect => effect.type === family.effect)
+        || family.tool.test(String(call.name || ''))
+      ))
       if (!supported) {
         violations.push({
           code: 'unsupported_execution_claim',
@@ -346,7 +447,7 @@ function verifyClaims({
   }
 
   const hasSupportingEvidence = el.entries.some(e =>
-    e.status === 'ok' && !e.status.includes?.('truncated') && !DISCOVERY_TOOL_RE.test(String(e.provenance?.tool || ''))
+      e.source === 'tool' && e.status === 'ok' && !isDiscoveryTool(e.provenance?.tool)
   )
   const hasOkEvidence = el.entries.some(e => e.status === 'ok')
   const sourceMismatch = el.entries.some(e => e.provenance?.bindingStatus === 'mismatch')
@@ -357,14 +458,27 @@ function verifyClaims({
     })
   }
   const candidatePresentation = isVerifiedCandidatePresentation(text, tl)
-  if (EXTERNAL_FACT_RE.test(text) && !hasSupportingEvidence && !candidatePresentation) {
-    // Planning language alone ("下一步" / "我会") must not launder a
-    // fabricated fact. Only an explicit uncertainty/refusal can pass without
-    // supporting evidence.
-    const explicitUncertainty = /(无法(?:确认|核实|读取)|不能(?:确认|据此)|尚未(?:读取|找到|确认)|未读取到|缺少(?:正文|证据)|证据不足|请(?:提供|补充).*(?:链接|token|正文))/i.test(text)
-    if (!explicitUncertainty) {
-      violations.push({ code: 'ungrounded_external_fact', message: '具体事实没有正文或权威数据证据支撑' })
-    }
+  const materialSources = expandInlineSourceAliases(
+    collectGroundingSources({ providedMaterials, evidenceLedger: el, toolMessages }),
+  )
+  const fieldChecks = checkProvidedFieldClaims(text, materialSources)
+  // Citation identity is checked over the whole answer, independently of
+  // labelled fields or candidate presentation. One real ID cannot launder a
+  // missing ID, and an analytical paragraph is not exempt from source identity.
+  const sourceIds = materialSources.map(source => source.id)
+  const missingSourceIds = explicitSourceIds(text, sourceIds).filter(id => !sourceIds.includes(id))
+  if (missingSourceIds.length) violations.push({
+    code: 'unresolved_source_citation',
+    message: '回复包含无法对应当前材料的来源引用，需要重新核对引用',
+    missingSourceIds: missingSourceIds.slice(0, 32),
+  })
+  if (!candidatePresentation) {
+    const unresolved = fieldChecks.filter(claim => claim.support === 'unresolved')
+    if (unresolved.length) violations.push({
+      code: 'ungrounded_external_fact',
+      message: '具体字段缺少对应来源片段；材料存在不代表所有声明都有依据',
+      claims: unresolved.map(({ label, value }) => ({ label, value })),
+    })
   }
 
   if (parseNumericSelection(text) && !referenceState?.activeRefId && referenceState?.pendingSelection) {
@@ -380,6 +494,8 @@ function verifyClaims({
       evidenceCount: el.entries.length,
       toolCallCount: tl.calls.length,
       hasSupportingEvidence,
+      fieldChecks,
+      verificationScope: 'execution_receipts_and_labelled_fields_not_semantic_truth',
     },
   }
 }
@@ -389,22 +505,26 @@ function buildHonestRefusal(verification, taskFrame) {
     return '工具返回的内容与您指定的文档或资源不一致。为避免误答，我不会使用这份内容；请核对链接/token 后重试。'
   }
   const missingTools = verification.violations.find(v => v.code === 'missing_required_tools')?.missingTools || []
-  const tfTools = taskFrame?.requiredTools || []
-  const tools = missingTools.length ? missingTools : tfTools
-  if (tools.length) {
-    const label = formatToolLabelForUser(tools[0])
-    return `我还未成功读取所需内容，因此不能给出具体会议/文档细节。\n请先允许我完成「${label}」，或重新选择候选。`
+  if (missingTools.length) {
+    const label = missingTools.map(formatToolLabelForUser).join('、')
+    return `当前还没有「${label}」的成功执行结果，不能确认任务已完成。已有需求和材料已保留，可以重试未完成的步骤。`
+  }
+  if (verification.violations.some(v => v.code === 'unsupported_execution_claim')) {
+    return '回复中的部分完成声明缺少对应的成功操作凭据，尚不能确认这些操作已完成。已有需求和执行记录已保留。'
   }
   if (verification.violations.some(v => v.code === 'false_execution_claim')) {
-    return '当前还没有成功的工具读取结果，我不能声称「已读取」。请让我先完成读取，或说明需要哪一场会议/文档。'
+    return '当前没有成功的对应工具结果，不能确认所述操作已完成。已有需求和材料已保留。'
+  }
+  if (verification.violations.some(v => v.code === 'unresolved_source_citation')) {
+    return '回复中的部分来源引用无法对应当前材料，暂不能确认这些引用。已有需求和材料已保留，需要重新核对引用。'
   }
   if (verification.violations.some(v => v.code === 'ungrounded_external_fact')) {
-    return '我还没有拿到可验证的正文证据，因此不能输出具体议题、责任人或日期。请让我先读取来源，或补充更明确的选择。'
+    return '回复中的部分字段尚未与来源对应，暂不能确认这些内容。已有需求和材料已保留，需要重新核对依据。'
   }
   if (verification.violations.some(v => v.code === 'missing_required_evidence')) {
-    return '工具返回的内容不足（可能为空或仅标题），不能据此生成具体事实。请让我重新读取完整正文。'
+    return '工具返回的证据尚未满足任务要求（可能为空、不完整或缺少必要结果）。已有需求和执行记录已保留。'
   }
-  return '当前证据不足，我需要先完成读取或澄清你的选择后再继续。'
+  return '当前证据不足，尚不能确认任务完成。需要先补齐未满足的结果或操作凭据。'
 }
 
 function applyOutputGate({ text = '', verification, taskFrame, regenUsed = false } = {}) {
@@ -440,6 +560,7 @@ function applyOutputGate({ text = '', verification, taskFrame, regenUsed = false
 }
 
 module.exports = {
+  collectGroundingSources,
   createEvidenceLedger,
   createToolLedger,
   digestText,

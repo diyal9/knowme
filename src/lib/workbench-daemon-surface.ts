@@ -452,11 +452,6 @@ function compactDaemonCardSummary(intent = '', cardTitle = '') {
   return ''
 }
 
-/** @deprecated use compactDaemonCardSummary */
-function compactDaemonCardBrief(intent = '', cardTitle = '') {
-  return compactDaemonCardSummary(intent, cardTitle)
-}
-
 const DAEMON_PURPOSE_PREFIX = 'Daemon 阶段 ·'
 const PURPOSE_TITLE_MAX = 24
 
@@ -842,7 +837,6 @@ function buildDaemonLaunchContextFromForm(formState = {}) {
   daemonRunRecordView,
   compactDaemonCardTitle,
   compactDaemonCardSummary,
-  compactDaemonCardBrief,
   DAEMON_PURPOSE_PREFIX,
   PURPOSE_TITLE_MAX,
   resolveDaemonPurposeTitleLocal,

@@ -1,0 +1,117 @@
+{
+  "sessionId": "matrix-session-requirement-reviewer",
+  "expertId": "requirement-reviewer",
+  "frozenAt": "2026-09-05T15:27:24.563Z",
+  "persona": {
+    "name": "需求评审专家",
+    "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论",
+    "avatar": "office/collaborator",
+    "role": "",
+    "soul": "",
+    "sop": "1. 先检查评审输入是否包含用户问题、目标、范围、约束和验收口径；材料不足时明确拒绝做形式化“通过”。\n2. 按目标与指标、角色权限、主流程、状态、规则、数据、异常恢复、依赖、非目标逐项检查完整性。\n3. 检查章节间一致性和边界冲突，识别未定义术语、隐藏假设、循环依赖、不可逆操作和责任空缺。\n4. 将每条验收标准改写为可观察、可复现的 WHEN/THEN 行为，指出无法测试或无法判断完成的表述。\n5. 给出通过、需修改或阻塞结论；每个问题标明位置、影响、优先级和可直接回填的建议，不擅自扩大范围。",
+    "agenticType": "react",
+    "agenticConfig": {
+      "agenticType": "react",
+      "enableReflection": true,
+      "enableTools": true
+    },
+    "systemPrompt": "你是 KnowMe 需求评审专家。逐项检查目标、范围、角色、主流程、异常流程、业务规则、数据口径和验收标准。\n输出通过、需修改或阻塞的明确结论；每个问题附影响和可执行的修改建议。",
+    "capabilities": [],
+    "collaborationStyle": ""
+  },
+  "bindings": {
+    "skills": [
+      "writing-polish"
+    ],
+    "connectors": []
+  },
+  "capabilityManifest": {
+    "schemaVersion": 3,
+    "id": "requirement-reviewer",
+    "kind": "expert",
+    "name": "需求评审专家",
+    "description": "检查需求完整性、可验证性和风险，给出可执行的评审结论",
+    "version": "2.0.0",
+    "dependencies": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "required": true
+      }
+    ],
+    "permissions": {
+      "connectors": {
+        "allowedConnectorIds": []
+      },
+      "tools": {
+        "allowlist": []
+      },
+      "network": false,
+      "write": false,
+      "externalWrite": false
+    },
+    "inputs": [
+      {
+        "name": "产品需求文档草案"
+      },
+      {
+        "name": "已确认的用户证据与业务约束"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "评审结论与阻塞项"
+      },
+      {
+        "name": "可直接回填的修改建议"
+      }
+    ],
+    "actions": [],
+    "risk": {
+      "level": "low",
+      "reasons": []
+    },
+    "provenance": {
+      "source": "curated",
+      "trust": "bundled",
+      "ref": "experts/requirement-reviewer"
+    },
+    "metadata": {
+      "knowme": {
+        "execution": {
+          "strategy": "sop-first",
+          "deliverables": [
+            {
+              "id": "output-1",
+              "title": "评审结论与阻塞项",
+              "type": "answer",
+              "required": true
+            },
+            {
+              "id": "output-2",
+              "title": "可直接回填的修改建议",
+              "type": "answer",
+              "required": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "hashes": {
+    "expert": "872370944fad2e62",
+    "skills": {},
+    "connectors": {}
+  },
+  "readiness": {
+    "state": "ready",
+    "items": [
+      {
+        "id": "writing-polish",
+        "kind": "skill",
+        "status": "ready"
+      }
+    ],
+    "issues": []
+  }
+}

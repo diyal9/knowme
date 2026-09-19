@@ -147,29 +147,59 @@
   }
 
   // Last-resort: model dumps a suggestion object/array with no code fence.
+  function readJsonValueAt(text, start) {
+    const opening = text[start]
+    if (opening !== '{' && opening !== '[') return null
+    const stack = []
+    let inString = false
+    let escaped = false
+    for (let index = start; index < text.length; index++) {
+      const char = text[index]
+      if (inString) {
+        if (escaped) escaped = false
+        else if (char === '\\') escaped = true
+        else if (char === '"') inString = false
+        continue
+      }
+      if (char === '"') {
+        inString = true
+        continue
+      }
+      if (char === '{' || char === '[') {
+        stack.push(char)
+        continue
+      }
+      if (char !== '}' && char !== ']') continue
+      const expected = char === '}' ? '{' : '['
+      if (stack.pop() !== expected) return null
+      if (!stack.length) {
+        const raw = text.slice(start, index + 1)
+        try {
+          return { data: JSON.parse(raw), end: index + 1, raw }
+        } catch {
+          return null
+        }
+      }
+    }
+    return null
+  }
+
   function findBareSuggestionJson(src) {
     const text = String(src || '')
-    const trimmedEnd = text.replace(/\s+$/, '')
     const candidates = []
-    for (let i = 0; i < trimmedEnd.length; i++) {
-      const ch = trimmedEnd[i]
-      if ((ch === '{' || ch === '[') && (i === 0 || trimmedEnd[i - 1] === '\n')) {
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i]
+      if ((ch === '{' || ch === '[') && (i === 0 || text[i - 1] === '\n')) {
         candidates.push(i)
       }
     }
     for (let i = candidates.length - 1; i >= 0; i--) {
       const start = candidates[i]
-      const slice = trimmedEnd.slice(start)
-      let data
-      try {
-        data = JSON.parse(slice)
-      } catch {
-        continue
-      }
-      if (!isSuggestionData(data)) continue
-      const bar = buildBar(slice)
+      const parsed = readJsonValueAt(text, start)
+      if (!parsed || !isSuggestionData(parsed.data)) continue
+      const bar = buildBar(parsed.raw)
       if (!bar) continue
-      return { start, end: trimmedEnd.length, bar }
+      return { start, end: parsed.end, bar }
     }
     return null
   }

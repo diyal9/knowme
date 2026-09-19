@@ -1,0 +1,56 @@
+{
+  "id": "wb-expert-task-mtormme5-n19ca",
+  "run": {
+    "goal": "当前工作",
+    "role": "general",
+    "status": "review",
+    "toolsUsed": [],
+    "steps": [
+      {
+        "id": "stage_prepare",
+        "kind": "stage",
+        "title": "上下文准备完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.678Z"
+      },
+      {
+        "id": "stage_generate",
+        "kind": "stage",
+        "title": "回答生成完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.678Z"
+      },
+      {
+        "id": "stage_ground",
+        "kind": "stage",
+        "title": "依据核对完成",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.678Z"
+      },
+      {
+        "id": "stage_verify_claims",
+        "kind": "stage",
+        "title": "输出验证通过",
+        "status": "done",
+        "at": "2026-09-05T19:18:17.678Z"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": "deliverable_expert_task-mtormme5-n19ca_mtormmpp_output-1",
+        "type": "answer",
+        "title": "核查结果与修正文",
+        "body": "**核查结果（截至2026-05-12，仅依据已提供材料）**\n\n1. **“5月1日正式上线”——错误。** 来源A（团队日志第1行）明确“正式上线日尚未确定”，5月1日仅为原型演示完成日。直接反证，非缺证据。\n2. **“客户CEO说”——错误。** 来源B（访谈摘录第6行）身份仅为客户代表，无姓名、职务或CEO信息；引语逐字为“这个演示挺方便”，被扩大为“行业最佳”。归属与内容均不符。\n3. **“工作效率必然提高50%”——无法确认。** 来源C仅有文件名“效果报告”，正文未读到；标题不构成数据支持。缺证据不等于反证，故不归入错误。\n4. **“故……必然提高”因果——不成立。** 演示好评不能推出效率提升，更无证据支持“必然”。\n\n**修正文（可发布）**\n\n产品于5月1日完成原型演示，正式上线日期以官方公告为准。客户代表评价演示“挺方便”。使用效果尚在评估中，暂无可靠数据支持具体效率提升幅度。\n\n（约290字）",
+        "status": "draft",
+        "meta": {
+          "taskId": "task-mtormme5-n19ca",
+          "deliverableId": "output-1",
+          "runId": "expert_task-mtormme5-n19ca_mtormmpp"
+        }
+      }
+    ],
+    "applyLog": []
+  },
+  "tools": [],
+  "configuration": "candidate"
+}

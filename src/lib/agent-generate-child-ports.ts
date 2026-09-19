@@ -6,18 +6,23 @@
  */
 
 const L = require('./agent-generate-libs')
+const { resolveChildCapabilityState } = require('./agent-child-capability-scope')
+const { guardCapabilityToolSurface } = require('./agent-capability-surface-guard')
+const { createCapabilityExecutionCheck } = require('./agent-capability-execution-check')
+const { sameTaskCapabilityIdentity, taskCapabilityIdentity } = require('./agent-task-capability-grants')
+const { buildChildKnowledgeTools } = require('./agent-child-knowledge-tools')
 
 /** 工厂：为一次子 run 装配 ports；子会话 ephemeral，只继承一条父 system。 */
 function createChildRunPortFactory(env, prepared, surface) {
   const {
     app, path, agentSessions, agentProcessTools, agentArtifactTools, agentOrchestration,
     agentSandbox, agentPlanTools, agentWebTools, resolveToolSurfaceForRun,
-    getSessionCapabilityBindings, mergeExtraTools, connectorToolRuntime, buildProductionRunPorts,
+    mergeExtraTools, connectorToolRuntime, buildProductionRunPorts,
     normalizeAssistantOutput,
   } = L
   const { ensureCapabilityHub, loadAgentSessions, saveAgentSessions, MEMORY_DIR, requestAgentCompletion, getConnectorsApi } = env.deps
   const { runId, signal } = env
-  const { s, url, routedModel, policy, promptCachePolicy, tokenCalKey, modelProfile, queryKnowledge, kbQueryTool, kbGetTool } = prepared
+  const { s, url, routedModel, policy, promptCachePolicy, tokenCalKey, modelProfile } = prepared
   const {
     session, runPermissions, sandboxEnabled, sandboxPermissions, fileTools, sourceRoot,
     orchestrationTools, userDataPath, apiMessages, teamRuntime,
@@ -31,8 +36,41 @@ function createChildRunPortFactory(env, prepared, surface) {
       ephemeral: true,
       role: 'general',
       goal: String(childCtx.prompt || '').slice(0, 2000),
+      projectId: session?.projectId,
     })
-    childSession.run.permissions = runPermissions
+    childSession.run.id = childRunId
+    childSession.run.permissions = JSON.parse(JSON.stringify(runPermissions || {}))
+    childSession.knowledgeRefs = JSON.parse(JSON.stringify(session.knowledgeRefs || []))
+    const parentIdentity = taskCapabilityIdentity(session)
+    const getChildSession = () => loadAgentSessions().find(item => item.id === childSession.id) || null
+    const getChildState = () => {
+      const parent = loadAgentSessions().find(item => item.id === session.id)
+      const current = getChildSession()
+      if (!parent || !sameTaskCapabilityIdentity(parentIdentity, taskCapabilityIdentity(parent))
+        || parent.run?.id !== runId
+        || signal?.aborted || childCtx.signal?.aborted || ['cancelled', 'canceled'].includes(parent.run?.status)) return null
+      const state = resolveChildCapabilityState({ parentSession: parent, childSession: current,
+        expertRuntime: ensureCapabilityHub().expertRuntime(), userData: userDataPath,
+        parentPermissions: runPermissions, parentPolicy: surface.resolvedSurface?.governancePolicy,
+        noTools: surface.noTools })
+      if (state) {
+        // The skill runtime closes over this session object; refresh its ceiling before each dispatch.
+        Object.assign(childSession.run.permissions, {
+          allowedSkillIds: state.scope.allowedSkillIds, allowedKnowledgeIds: state.scope.allowedKnowledgeIds,
+          capabilities: state.ceiling.capabilities,
+        })
+        state.connectors = getConnectorsApi().loadConnectors?.() || []
+        state.availableConnectorIds = state.connectors.filter(conn => conn.enabled !== false).map(conn => conn.id)
+      }
+      return state
+    }
+    saveAgentSessions([...loadAgentSessions(), childSession])
+    const initialChildState = getChildState()
+    if (!initialChildState) throw Object.assign(new Error('父任务或子任务授权已失效'), { code: 'scope_denied' })
+    const validateExecutionApproval = createCapabilityExecutionCheck({ session: childSession, runId: childRunId,
+      signal: childCtx.signal, getSession: getChildSession, getState: getChildState,
+      getConnectors: () => getConnectorsApi().loadConnectors?.() || [],
+    })
     const handoffText = JSON.stringify({
       task: String(childCtx.prompt || ''),
       handoff: childCtx.handoff || null,
@@ -51,7 +89,11 @@ function createChildRunPortFactory(env, prepared, surface) {
       runId: childRunId,
       resolveCwd: () => sourceRoot,
     })
-    const childArtifactTools = agentArtifactTools.buildArtifactTools({ runId: childRunId })
+    const childArtifactTools = agentArtifactTools.buildArtifactTools({
+      runId: childRunId,
+      projectId: childSession.projectId,
+      taskId: childSession.taskRef?.id,
+    })
     const childOrchestrationTools = agentOrchestration.buildOrchestrationTools({
       runId: childRunId,
       runManager: teamRuntime.manager,
@@ -68,7 +110,9 @@ function createChildRunPortFactory(env, prepared, surface) {
       setSession: next => Object.assign(childSession, next),
     })
     const childWebTools = agentWebTools.buildWebTools({ signal: childCtx.signal })
-    const childSkillTools = ensureCapabilityHub().buildSkillToolsForSession(childSession, sandboxPermissions)
+    const childSkillTools = ensureCapabilityHub().buildSkillToolsForSession(childSession, sandboxPermissions, {
+      getCurrentSession: getChildSession, getCapabilityState: getChildState,
+    })
     const childExtraTools = mergeExtraTools(
       fileTools,
       childProcessTools,
@@ -79,7 +123,7 @@ function createChildRunPortFactory(env, prepared, surface) {
       childWebTools,
       childSkillTools,
     )
-    const childBindings = getSessionCapabilityBindings(childSession, ensureCapabilityHub().expertRuntime())
+    const childBindings = initialChildState.scope
     const childExpertSnapshot = childCtx.expertId
       ? ensureCapabilityHub().expertRuntime().loadExpert(childCtx.expertId)
       : null
@@ -89,12 +133,16 @@ function createChildRunPortFactory(env, prepared, surface) {
       parentRunId: childCtx.parentRunId,
       subRunId: childRunId,
       sessionId: childSession.id,
+      executionApprovalRecoveryRunId: require('./agent-execution-approval-recovery')
+        .getHostExecutionApprovalRecoveryRunId(getChildSession()),
       fileAdapter: fileTools?.fileAdapter,
       processTools: childProcessTools,
       artifactTools: childArtifactTools,
       orchestrationTools: childOrchestrationTools,
       extraTools: childExtraTools,
       permissions: runPermissions,
+      governancePolicy: initialChildState.governancePolicy,
+      validateExecutionApproval,
       expertSnapshot: childExpertSnapshot?.ok ? childExpertSnapshot : null,
       allowedConnectorIds: childBindings.allowedConnectorIds,
       signal: childCtx.signal,
@@ -104,12 +152,17 @@ function createChildRunPortFactory(env, prepared, surface) {
         { result: receipt.envelope || receipt },
       ),
       connectorBuild: cOpts => connectorToolRuntime.buildConnectorToolSurface(userDataPath, {
+        executionApprovalContext: { runId: childRunId, sessionId: childSession.id, validateExecutionApproval,
+          signal: childCtx.signal, approvalFileRoot: fileTools?.fileAdapter?.rootPath },
         extraTools: cOpts.extraTools,
         allowedConnectorIds: childBindings.allowedConnectorIds,
         registry: cOpts.registry,
         resolveRuntimeOptions: conn => getConnectorsApi().resolveRuntimeOptions(conn),
       }),
     })
+    const childToolSurface = guardCapabilityToolSurface(childResolvedSurface.surface, getChildState)
+    const childKnowledge = buildChildKnowledgeTools({ libs: L, deps: env.deps, prepared,
+      getSession: getChildSession, getState: getChildState })
     const childPorts = buildProductionRunPorts({
       settings: s,
       signal: childCtx.signal,
@@ -121,12 +174,12 @@ function createChildRunPortFactory(env, prepared, surface) {
       policy,
       promptCachePolicy,
       tokenCalKey,
-      toolSurface: childResolvedSurface.surface,
-      toolExecutor: childResolvedSurface.surface.createToolExecutor({
-        searchKnowledge: queryKnowledge,
-        fabricSearch: queryKnowledge,
-        kbQuery: kbQueryTool,
-        kbGet: kbGetTool,
+      toolSurface: childToolSurface,
+      toolExecutor: childToolSurface.createToolExecutor({
+        searchKnowledge: childKnowledge.queryKnowledge,
+        fabricSearch: childKnowledge.queryKnowledge,
+        kbQuery: childKnowledge.kbQueryTool,
+        kbGet: childKnowledge.kbGetTool,
         signal: childCtx.signal,
       }),
       tier: childCtx.tier || 'agent',
@@ -143,7 +196,7 @@ function createChildRunPortFactory(env, prepared, surface) {
       productMemoryCapture: () => {},
       memoryDir: MEMORY_DIR,
       normalizeAssistantOutput,
-      orchestration: makeOrchestrationPort(childRunId),
+      orchestration: makeOrchestrationPort(env, teamRuntime, runId)(childRunId),
       governancePolicy: childResolvedSurface.governancePolicy,
       budget: teamRuntime.manager.getRun(childRunId).run?.budget || null,
       persistRunCheckpoint: checkpoint => teamRuntime.manager.saveCheckpoint(childRunId, 'latest', checkpoint),

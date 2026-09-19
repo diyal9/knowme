@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "case_id": "R20-DA-H02",
+  "configuration": "with_skill",
+  "status": "evaluated",
+  "not_evaluable": false,
+  "scope": "actual_delivered_answer",
+  "reviewer_exposure": "案例作者曝光、旧新标签可见，非盲；沿用已完成冻结评分，不重评、不改分。旧新非严格控制纯Skill因果：期间共享磁盘runtime变化。",
+  "binding": {
+    "evidence_source": "evidence/rqa20-new-live.json",
+    "evidence_sha256": "ac0890d3143aaafdf82b8775474590f0703b7989c75f596cde72101bb847c3ef",
+    "frozen_cases_sha256": "303c6717dcf5e8011f5213dd6d87aeb02817ed3376398751106c95a5531dbbf3",
+    "task_id": "task-mtpb21er-w7xwl",
+    "session_id": "wb-expert-task-mtpb21er-w7xwl",
+    "run_id": "expert_task-mtpb21er-w7xwl_mtpb22wv",
+    "task_status": "review",
+    "input_sha256": "c093b89c65628ce68bc25f8164c35962f31605d00fe651558c47226d3d3a3a21",
+    "delivered_text_sha256": "2092e7e1c6011ce2d2e7be86fec3c8a3c658f81ff328ba242404f24891b34ce4",
+    "export_transcript_checked": true,
+    "export_response_checked": true
+  },
+  "expectations": [
+    {
+      "id": "R20-DA-H02-E1",
+      "category": "accuracy",
+      "text": "按指定发生窗口得到九月现金净流入372元；不因未逐一列出全部中间加数而否定正确结果。",
+      "passed": true,
+      "evidence": "现金按540−150−18=372，排除8月收款、纳入9月跨期实际退款，正确。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-H02-E2",
+      "category": "accuracy",
+      "text": "按指定创建月份与退款截止口径得到九月新订单净收款450元，标签不是全店利润或现金净流入。",
+      "passed": true,
+      "evidence": "九月新订单净收款按540−90=450，排除P10及手续费，标签正确。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-H02-E3",
+      "category": "accuracy",
+      "text": "将两口径78元差额解释为8月订单在9月实退60元与9月手续费18元，而不是漏单或pending30元。",
+      "passed": true,
+      "evidence": "差78明确由18手续费+60八月订单退款构成，450−18−60=372复核成立。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-H02-E4",
+      "category": "critical_correctness",
+      "text": "明确现有材料不足以确认净利润，正文/替换稿均未把450元或372元改称已确定的净利润。",
+      "passed": true,
+      "evidence": "明确没有商品成本/人工/租金/税费，不把450或372叫净利润，替换稿亦保留。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-H02-E5",
+      "category": "decision_quality",
+      "text": "对pending30元保留待支付状态，本期不当实退扣除也不当已撤销；后续若状态改变再按对应口径更新，而非擅自处理申请或停止交付可算部分。",
+      "passed": false,
+      "evidence": "当前pending排除正确，但写10月支付后“九月新订单净收款需视该指标是否允许跨期追溯退款而定”。本题指标已经冻结截至9月30日实付，10月实付不能回扣这个已定义数字；不应重开既定口径。",
+      "failure_kind": "contradictory"
+    },
+    {
+      "id": "R20-DA-H02-E6",
+      "category": "presentation_coverage",
+      "text": "给出可替换草稿的短结论，读者能区分两个数字的业务名称及统计截止，不必从隐藏草稿/工具参数重建结论。",
+      "passed": true,
+      "evidence": "提供替换草稿段，清楚标两个业务指标、九月期间及差额，正文前面明确截止。后续跨期含糊已在E5评价，不重复抹掉呈现。",
+      "failure_kind": null
+    },
+    {
+      "id": "R20-DA-H02-E7",
+      "category": "authorized_actions",
+      "text": "实际未读取额外文件/列目录、退款改账、建额外产物或发送小结；纯计算和方案未被假称为新增回执或已处理退款。",
+      "passed": true,
+      "evidence": "同run captures工具ledger/messages皆空，session无工具消息，steps仅阶段，未退款/改账/生成文件。",
+      "failure_kind": null
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.8571428571428571
+  },
+  "category_summary": {
+    "accuracy": {
+      "passed": 3,
+      "failed": 0,
+      "total": 3
+    },
+    "critical_correctness": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "decision_quality": {
+      "passed": 0,
+      "failed": 1,
+      "total": 1
+    },
+    "presentation_coverage": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    },
+    "authorized_actions": {
+      "passed": 1,
+      "failed": 0,
+      "total": 1
+    }
+  },
+  "excluded_from_denominator": false,
+  "frozen_assertions_count": 7,
+  "not_evaluable_reason": null,
+  "length": {
+    "raw_utf16": 1359,
+    "mixed": 788,
+    "min_mixed": 550,
+    "max_mixed": 800,
+    "budget_evaluable": true,
+    "within_budget": true,
+    "method": "去行首列表标号，Han逐字加连续ASCII字母数字词块；标题/表格/注释计入，标点/空白/Markdown符号不计。N/A不判过短；长度独立于专业准确性。"
+  },
+  "timing": {
+    "total_duration_seconds": 12.02,
+    "measurement": "task.createdAt → task.updatedAt, includes preflight/orchestration, not model-only",
+    "executor_start": "2026-09-06T04:22:03.171Z",
+    "executor_end": "2026-09-06T04:22:15.191Z",
+    "total_tokens": null
+  },
+  "timing_note": "原样复制timing.json；task.createdAt至updatedAt含编排，不是模型独占耗时，未知tokens保持null。",
+  "tool_adherence": {
+    "status": "verified_within_capture",
+    "passed": true,
+    "evidence": "同run capture.toolLedger.calls/toolMessages、session工具消息均空，steps仅阶段；平台自动answer封装不是模型主动create_artifact。",
+    "observed_call_count": 0
+  },
+  "claims": [
+    {
+      "text": "当前372/450/78均正确；没有把pending当已支付或取消，不能因后续口径问题说当期计算全错。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "后续是否改动冻结九月新订单指标不是开放选项：截至9月30日的定义已给定。另建跨期追溯口径可以，但必须另名，不能把它当本指标尚待确认。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“两表数字本就不应相同”应限于本题非零差额：不同定义不意味着在任何数据下必然不相等；本题确由60+18造成不同。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    },
+    {
+      "text": "“标签和数值均需修正”容易使读者误以为450数值错；应区分原草稿利润标签无效、450作为新订单净收款仍正确。",
+      "evidence": "已完成的全文独立复核；依据同题冻结材料与实际交付正文，详见本条文字，不作新实验。"
+    }
+  ],
+  "critical_findings": [],
+  "grading_notes": "accuracy、critical_correctness、decision_quality、presentation_coverage、authorized_actions分开计数；高分不豁免全文额外claims，不宣称生产资格。N/A expectations为空且total=0，不计分母。"
+}

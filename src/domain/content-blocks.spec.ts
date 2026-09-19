@@ -53,6 +53,32 @@ describe('content-blocks', () => {
     expect(html).not.toContain('**Data')
   })
 
+  it('keeps list items together when models insert blank lines', () => {
+    const blocks = parseContentBlocks('1. 第一项\n\n2. 第二项\n\n3. 第三项')
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0]).toMatchObject({ type: 'list', ordered: true, items: expect.any(Array) })
+    if (blocks[0].type !== 'list') throw new Error('expected list')
+    expect(blocks[0].items).toHaveLength(3)
+  })
+
+  it('continues repeated numbered sections around circle bullets', () => {
+    const blocks = parseContentBlocks([
+      '1. 时间范围界定：',
+      '',
+      '○ “今天”是指本地时间吗？',
+      '',
+      '1. 关注重点偏好：',
+      '',
+      '○ 日程与待办',
+      '',
+      '1. 技能授权状态提示：',
+    ].join('\n'))
+    const lists = blocks.filter((block) => block.type === 'list')
+    expect(lists).toHaveLength(5)
+    expect(lists.filter((block) => block.type === 'list' && block.ordered).map((block) => block.start)).toEqual([1, 2, 3])
+    expect(lists.filter((block) => block.type === 'list' && !block.ordered)).toHaveLength(2)
+  })
+
   it('finds fence-balanced stable prefix ends', () => {
     const src = 'hello\n\nworld\n\nmore'
     expect(findStableContentPrefixEnd(src)).toBe('hello\n\nworld\n\n'.length)

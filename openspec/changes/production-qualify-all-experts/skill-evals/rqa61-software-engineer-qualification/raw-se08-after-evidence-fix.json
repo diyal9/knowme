@@ -1,0 +1,1113 @@
+{
+  "suite": "RQA61",
+  "executedAt": "2026-09-07T05:59:10Z",
+  "results": [
+    {
+      "evalId": "SE08",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "create": {
+        "ok": true,
+        "task": {
+          "taskVersion": 2,
+          "activityContractVersion": 1,
+          "id": "task-mtqtyl1p-2r0in",
+          "projectId": null,
+          "projectSnapshot": null,
+          "kind": "expert",
+          "title": "[RQA61 SE08] 取消后重新执行保持原合同",
+          "expertId": "software-engineer",
+          "expertName": "software-engineer",
+          "workflowId": "",
+          "workflowName": "",
+          "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+          "brief": {
+            "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+            "plan": null,
+            "requiresMaterials": false,
+            "requiredInputs": [],
+            "materials": [
+              {
+                "id": "provided-context",
+                "type": "text",
+                "title": "冻结验收题",
+                "ref": "",
+                "content": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。"
+              }
+            ],
+            "deliverables": [
+              {
+                "id": "primary",
+                "title": "专业答复",
+                "type": "answer",
+                "required": true,
+                "acceptanceCriteria": [],
+                "requiredTools": [],
+                "requiredSkills": [
+                  "software-change-verification"
+                ],
+                "requiredConnectorIds": [],
+                "requiredEvidence": [],
+                "requiredArtifacts": [],
+                "minArtifacts": 0,
+                "completionConditions": []
+              }
+            ],
+            "constraints": [
+              "不得执行外部写入。",
+              "不得调用工具。",
+              "不得声称已运行测试。"
+            ],
+            "dueAt": ""
+          },
+          "assignmentSnapshot": {
+            "agentId": "software-engineer",
+            "agentVersion": "2.2.0",
+            "agentHash": "18bcf4d4e7195931",
+            "hashes": {
+              "expert": "18bcf4d4e7195931",
+              "skills": {
+                "code-review": "17d5214576de2834",
+                "software-change-verification": "829c8afc1a1e3a6a"
+              },
+              "connectors": {}
+            },
+            "profileId": "",
+            "profileVersion": "",
+            "profileHash": "",
+            "snapshotRef": "expert-snapshot:wb-expert-task-mtqtyl1p-2r0in",
+            "bindings": {
+              "skills": [
+                "software-change-verification",
+                "code-review"
+              ],
+              "connectors": []
+            },
+            "permissions": {
+              "connectors": {
+                "allowedConnectorIds": []
+              },
+              "tools": {
+                "allowlist": []
+              },
+              "network": false,
+              "write": false,
+              "externalWrite": false
+            },
+            "plan": null,
+            "sop": {
+              "version": "2.2.0",
+              "hash": "18bcf4d4e7195931"
+            }
+          },
+          "visibility": "private",
+          "participants": [],
+          "events": [
+            {
+              "id": "event-1",
+              "type": "created",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 1,
+              "summary": "已确认委托单并开始预检",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:59:00.877Z"
+            },
+            {
+              "id": "event-2",
+              "type": "preflight_passed",
+              "kind": "event",
+              "source": "expert",
+              "sequence": 2,
+              "summary": "预检通过",
+              "actorId": "",
+              "createdAt": "2026-09-07T05:59:01.546Z"
+            }
+          ],
+          "attention": null,
+          "progress": {
+            "phase": "preflight",
+            "label": "执行条件检查通过",
+            "detail": "",
+            "startedAt": "2026-09-07T05:59:01.526Z",
+            "updatedAt": "2026-09-07T05:59:01.526Z",
+            "heartbeatAt": "2026-09-07T05:59:01.526Z"
+          },
+          "inputQueue": null,
+          "deliverables": [],
+          "executionEvidence": [],
+          "resultSummary": "",
+          "status": "starting",
+          "execRef": {
+            "kind": "session",
+            "id": "wb-expert-task-mtqtyl1p-2r0in"
+          },
+          "taskRef": null,
+          "knowledgeRefs": [],
+          "pinned": false,
+          "schedule": {
+            "type": "daily",
+            "dailyTime": "09:00",
+            "intervalValue": 24,
+            "intervalUnit": "hour",
+            "onceAt": "",
+            "cronExpr": ""
+          },
+          "scheduleEnabled": false,
+          "scheduleLabel": "",
+          "nextRunAt": "",
+          "lastScheduledAt": "",
+          "scheduleParentId": "",
+          "legacySchedule": {
+            "scheduleEnabled": false,
+            "schedule": {
+              "type": "daily",
+              "dailyTime": "09:00",
+              "intervalValue": 24,
+              "intervalUnit": "hour",
+              "onceAt": "",
+              "cronExpr": ""
+            },
+            "scheduleLabel": ""
+          },
+          "createdAt": "2026-09-07T05:59:00.877Z",
+          "updatedAt": "2026-09-07T05:59:01.546Z"
+        },
+        "started": true,
+        "preflightIssues": []
+      },
+      "steps": [
+        {
+          "action": "cancel",
+          "result": {
+            "ok": true,
+            "task": {
+              "taskVersion": 2,
+              "activityContractVersion": 1,
+              "id": "task-mtqtyl1p-2r0in",
+              "projectId": null,
+              "projectSnapshot": null,
+              "kind": "expert",
+              "title": "[RQA61 SE08] 取消后重新执行保持原合同",
+              "expertId": "software-engineer",
+              "expertName": "software-engineer",
+              "workflowId": "",
+              "workflowName": "",
+              "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+              "brief": {
+                "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+                "plan": null,
+                "requiresMaterials": false,
+                "requiredInputs": [],
+                "materials": [
+                  {
+                    "id": "provided-context",
+                    "type": "text",
+                    "title": "冻结验收题",
+                    "ref": "",
+                    "content": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。"
+                  }
+                ],
+                "deliverables": [
+                  {
+                    "id": "primary",
+                    "title": "专业答复",
+                    "type": "answer",
+                    "required": true,
+                    "acceptanceCriteria": [],
+                    "requiredTools": [],
+                    "requiredSkills": [
+                      "software-change-verification"
+                    ],
+                    "requiredConnectorIds": [],
+                    "requiredEvidence": [],
+                    "requiredArtifacts": [],
+                    "minArtifacts": 0,
+                    "completionConditions": []
+                  }
+                ],
+                "constraints": [
+                  "不得执行外部写入。",
+                  "不得调用工具。",
+                  "不得声称已运行测试。"
+                ],
+                "dueAt": ""
+              },
+              "assignmentSnapshot": {
+                "agentId": "software-engineer",
+                "agentVersion": "2.2.0",
+                "agentHash": "18bcf4d4e7195931",
+                "hashes": {
+                  "expert": "18bcf4d4e7195931",
+                  "skills": {
+                    "code-review": "17d5214576de2834",
+                    "software-change-verification": "829c8afc1a1e3a6a"
+                  },
+                  "connectors": {}
+                },
+                "profileId": "",
+                "profileVersion": "",
+                "profileHash": "",
+                "snapshotRef": "expert-snapshot:wb-expert-task-mtqtyl1p-2r0in",
+                "bindings": {
+                  "skills": [
+                    "software-change-verification",
+                    "code-review"
+                  ],
+                  "connectors": []
+                },
+                "permissions": {
+                  "connectors": {
+                    "allowedConnectorIds": []
+                  },
+                  "tools": {
+                    "allowlist": []
+                  },
+                  "network": false,
+                  "write": false,
+                  "externalWrite": false
+                },
+                "plan": null,
+                "sop": {
+                  "version": "2.2.0",
+                  "hash": "18bcf4d4e7195931"
+                }
+              },
+              "visibility": "private",
+              "participants": [],
+              "events": [
+                {
+                  "id": "event-1",
+                  "type": "created",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 1,
+                  "summary": "已确认委托单并开始预检",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:00.877Z"
+                },
+                {
+                  "id": "event-2",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 2,
+                  "summary": "预检通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.546Z"
+                },
+                {
+                  "id": "event-3",
+                  "type": "preflight_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 3,
+                  "summary": "正在检查技能、连接器和工具权限",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.664Z"
+                },
+                {
+                  "id": "event-4",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 4,
+                  "summary": "执行条件检查通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-5",
+                  "type": "task_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 5,
+                  "summary": "专家已开始执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-6",
+                  "type": "sop_applied",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 6,
+                  "summary": "已加载专家 SOP，按最小必要路径执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-7",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 7,
+                  "summary": "正在准备上下文…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.977Z"
+                },
+                {
+                  "id": "event-8",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 8,
+                  "summary": "正在等待模型响应…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:03.181Z"
+                },
+                {
+                  "id": "event-9",
+                  "type": "cancelled",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 9,
+                  "summary": "用户取消任务",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:03.307Z"
+                }
+              ],
+              "attention": null,
+              "progress": {
+                "phase": "failed",
+                "label": "任务已取消",
+                "detail": "",
+                "startedAt": "2026-09-07T05:59:01.640Z",
+                "updatedAt": "2026-09-07T05:59:03.286Z",
+                "heartbeatAt": "2026-09-07T05:59:03.286Z"
+              },
+              "inputQueue": null,
+              "deliverables": [],
+              "executionEvidence": [],
+              "resultSummary": "",
+              "status": "cancelled",
+              "execRef": {
+                "kind": "session",
+                "id": "wb-expert-task-mtqtyl1p-2r0in"
+              },
+              "taskRef": null,
+              "knowledgeRefs": [],
+              "pinned": false,
+              "schedule": {
+                "type": "daily",
+                "dailyTime": "09:00",
+                "intervalValue": 24,
+                "intervalUnit": "hour",
+                "onceAt": "",
+                "cronExpr": ""
+              },
+              "scheduleEnabled": false,
+              "scheduleLabel": "",
+              "nextRunAt": "",
+              "lastScheduledAt": "",
+              "scheduleParentId": "",
+              "legacySchedule": {
+                "scheduleEnabled": false,
+                "schedule": {
+                  "type": "daily",
+                  "dailyTime": "09:00",
+                  "intervalValue": 24,
+                  "intervalUnit": "hour",
+                  "onceAt": "",
+                  "cronExpr": ""
+                },
+                "scheduleLabel": ""
+              },
+              "createdAt": "2026-09-07T05:59:00.877Z",
+              "updatedAt": "2026-09-07T05:59:03.307Z"
+            }
+          }
+        },
+        {
+          "action": "retry",
+          "result": {
+            "ok": true,
+            "task": {
+              "taskVersion": 2,
+              "activityContractVersion": 1,
+              "id": "task-mtqtyl1p-2r0in",
+              "projectId": null,
+              "projectSnapshot": null,
+              "kind": "expert",
+              "title": "[RQA61 SE08] 取消后重新执行保持原合同",
+              "expertId": "software-engineer",
+              "expertName": "software-engineer",
+              "workflowId": "",
+              "workflowName": "",
+              "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+              "brief": {
+                "goal": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
+                "plan": null,
+                "requiresMaterials": false,
+                "requiredInputs": [],
+                "materials": [
+                  {
+                    "id": "provided-context",
+                    "type": "text",
+                    "title": "冻结验收题",
+                    "ref": "",
+                    "content": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。"
+                  }
+                ],
+                "deliverables": [
+                  {
+                    "id": "primary",
+                    "title": "专业答复",
+                    "type": "answer",
+                    "required": true,
+                    "acceptanceCriteria": [],
+                    "requiredTools": [],
+                    "requiredSkills": [
+                      "software-change-verification"
+                    ],
+                    "requiredConnectorIds": [],
+                    "requiredEvidence": [],
+                    "requiredArtifacts": [],
+                    "minArtifacts": 0,
+                    "completionConditions": []
+                  }
+                ],
+                "constraints": [
+                  "不得执行外部写入。",
+                  "不得调用工具。",
+                  "不得声称已运行测试。"
+                ],
+                "dueAt": ""
+              },
+              "assignmentSnapshot": {
+                "agentId": "software-engineer",
+                "agentVersion": "2.2.0",
+                "agentHash": "18bcf4d4e7195931",
+                "hashes": {
+                  "expert": "18bcf4d4e7195931",
+                  "skills": {
+                    "code-review": "17d5214576de2834",
+                    "software-change-verification": "829c8afc1a1e3a6a"
+                  },
+                  "connectors": {}
+                },
+                "profileId": "",
+                "profileVersion": "",
+                "profileHash": "",
+                "snapshotRef": "expert-snapshot:wb-expert-task-mtqtyl1p-2r0in",
+                "bindings": {
+                  "skills": [
+                    "software-change-verification",
+                    "code-review"
+                  ],
+                  "connectors": []
+                },
+                "permissions": {
+                  "connectors": {
+                    "allowedConnectorIds": []
+                  },
+                  "tools": {
+                    "allowlist": []
+                  },
+                  "network": false,
+                  "write": false,
+                  "externalWrite": false
+                },
+                "plan": null,
+                "sop": {
+                  "version": "2.2.0",
+                  "hash": "18bcf4d4e7195931"
+                }
+              },
+              "visibility": "private",
+              "participants": [],
+              "events": [
+                {
+                  "id": "event-1",
+                  "type": "created",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 1,
+                  "summary": "已确认委托单并开始预检",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:00.877Z"
+                },
+                {
+                  "id": "event-2",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 2,
+                  "summary": "预检通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.546Z"
+                },
+                {
+                  "id": "event-3",
+                  "type": "preflight_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 3,
+                  "summary": "正在检查技能、连接器和工具权限",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.664Z"
+                },
+                {
+                  "id": "event-4",
+                  "type": "preflight_passed",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 4,
+                  "summary": "执行条件检查通过",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-5",
+                  "type": "task_started",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 5,
+                  "summary": "专家已开始执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-6",
+                  "type": "sop_applied",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 6,
+                  "summary": "已加载专家 SOP，按最小必要路径执行",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.904Z"
+                },
+                {
+                  "id": "event-7",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 7,
+                  "summary": "正在准备上下文…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:01.977Z"
+                },
+                {
+                  "id": "event-8",
+                  "type": "progress",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 8,
+                  "summary": "正在等待模型响应…",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:03.181Z"
+                },
+                {
+                  "id": "event-9",
+                  "type": "cancelled",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 9,
+                  "summary": "用户取消任务",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:03.307Z"
+                },
+                {
+                  "id": "event-10",
+                  "type": "retried",
+                  "kind": "event",
+                  "source": "expert",
+                  "sequence": 10,
+                  "summary": "用户重新执行任务",
+                  "actorId": "",
+                  "createdAt": "2026-09-07T05:59:03.442Z"
+                }
+              ],
+              "attention": null,
+              "progress": {
+                "phase": "preflight",
+                "label": "正在重新检查执行条件",
+                "detail": "",
+                "startedAt": "2026-09-07T05:59:03.419Z",
+                "updatedAt": "2026-09-07T05:59:03.419Z",
+                "heartbeatAt": "2026-09-07T05:59:03.419Z"
+              },
+              "inputQueue": null,
+              "deliverables": [],
+              "executionEvidence": [],
+              "resultSummary": "",
+              "status": "starting",
+              "execRef": {
+                "kind": "session",
+                "id": "wb-expert-task-mtqtyl1p-2r0in"
+              },
+              "taskRef": null,
+              "knowledgeRefs": [],
+              "pinned": false,
+              "schedule": {
+                "type": "daily",
+                "dailyTime": "09:00",
+                "intervalValue": 24,
+                "intervalUnit": "hour",
+                "onceAt": "",
+                "cronExpr": ""
+              },
+              "scheduleEnabled": false,
+              "scheduleLabel": "",
+              "nextRunAt": "",
+              "lastScheduledAt": "",
+              "scheduleParentId": "",
+              "legacySchedule": {
+                "scheduleEnabled": false,
+                "schedule": {
+                  "type": "daily",
+                  "dailyTime": "09:00",
+                  "intervalValue": 24,
+                  "intervalUnit": "hour",
+                  "onceAt": "",
+                  "cronExpr": ""
+                },
+                "scheduleLabel": ""
+              },
+              "createdAt": "2026-09-07T05:59:00.877Z",
+              "updatedAt": "2026-09-07T05:59:03.442Z"
+            },
+            "started": true
+          }
+        },
+        {
+          "action": "first_delivery",
+          "task": {
+            "id": "task-mtqtyl1p-2r0in",
+            "status": "failed",
+            "resultSummary": "",
+            "deliverables": [],
+            "events": [
+              {
+                "id": "event-1",
+                "type": "created",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 1,
+                "summary": "已确认委托单并开始预检",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:00.877Z"
+              },
+              {
+                "id": "event-2",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 2,
+                "summary": "预检通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.546Z"
+              },
+              {
+                "id": "event-3",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 3,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.664Z"
+              },
+              {
+                "id": "event-4",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 4,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.904Z"
+              },
+              {
+                "id": "event-5",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 5,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.904Z"
+              },
+              {
+                "id": "event-6",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 6,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.904Z"
+              },
+              {
+                "id": "event-7",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 7,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:01.977Z"
+              },
+              {
+                "id": "event-8",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 8,
+                "summary": "正在等待模型响应…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.181Z"
+              },
+              {
+                "id": "event-9",
+                "type": "cancelled",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 9,
+                "summary": "用户取消任务",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.307Z"
+              },
+              {
+                "id": "event-10",
+                "type": "retried",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 10,
+                "summary": "用户重新执行任务",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.442Z"
+              },
+              {
+                "id": "event-11",
+                "type": "preflight_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 11,
+                "summary": "正在检查技能、连接器和工具权限",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.514Z"
+              },
+              {
+                "id": "event-12",
+                "type": "preflight_passed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 12,
+                "summary": "执行条件检查通过",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.750Z"
+              },
+              {
+                "id": "event-13",
+                "type": "task_started",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 13,
+                "summary": "专家已开始执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.750Z"
+              },
+              {
+                "id": "event-14",
+                "type": "sop_applied",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 14,
+                "summary": "已加载专家 SOP，按最小必要路径执行",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.750Z"
+              },
+              {
+                "id": "event-15",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 15,
+                "summary": "正在准备上下文…",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:03.815Z"
+              },
+              {
+                "id": "event-16",
+                "type": "progress",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 16,
+                "summary": "生成失败",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:09.698Z"
+              },
+              {
+                "id": "event-17",
+                "type": "failed",
+                "kind": "event",
+                "source": "expert",
+                "sequence": 17,
+                "summary": "请求超时（120s），请检查网络或 Endpoint",
+                "actorId": "",
+                "createdAt": "2026-09-07T05:59:09.822Z"
+              }
+            ],
+            "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+            "qualificationContext": {
+              "contractVersion": 1,
+              "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+              "complete": true,
+              "missing": [],
+              "agent": {
+                "id": "software-engineer",
+                "version": "2.2.0",
+                "hash": "18bcf4d4e7195931"
+              },
+              "skills": [
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-max",
+                "requestedId": "qwen3.8-max",
+                "label": "Qwen 3.8 Max",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": false,
+              "passed": false,
+              "rewritten": false,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "updatedAt": "2026-09-07T05:59:09.822Z"
+          }
+        }
+      ],
+      "final": {
+        "id": "task-mtqtyl1p-2r0in",
+        "status": "failed",
+        "resultSummary": "",
+        "deliverables": [],
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:00.877Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.546Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.664Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.904Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.904Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.904Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:01.977Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "正在等待模型响应…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.181Z"
+          },
+          {
+            "id": "event-9",
+            "type": "cancelled",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "用户取消任务",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.307Z"
+          },
+          {
+            "id": "event-10",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "用户重新执行任务",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.442Z"
+          },
+          {
+            "id": "event-11",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.514Z"
+          },
+          {
+            "id": "event-12",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.750Z"
+          },
+          {
+            "id": "event-13",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 13,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.750Z"
+          },
+          {
+            "id": "event-14",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 14,
+            "summary": "已加载专家 SOP，按最小必要路径执行",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.750Z"
+          },
+          {
+            "id": "event-15",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 15,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:03.815Z"
+          },
+          {
+            "id": "event-16",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 16,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:09.698Z"
+          },
+          {
+            "id": "event-17",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 17,
+            "summary": "请求超时（120s），请检查网络或 Endpoint",
+            "actorId": "",
+            "createdAt": "2026-09-07T05:59:09.822Z"
+          }
+        ],
+        "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+        "qualificationContext": {
+          "contractVersion": 1,
+          "configurationId": "expert-config-v1:d7899f72e4db95ea15cb59a2c1278814278642ff8f8f5766d63e9160dfc66041",
+          "complete": true,
+          "missing": [],
+          "agent": {
+            "id": "software-engineer",
+            "version": "2.2.0",
+            "hash": "18bcf4d4e7195931"
+          },
+          "skills": [
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-max",
+            "requestedId": "qwen3.8-max",
+            "label": "Qwen 3.8 Max",
+            "autoRouted": false
+          }
+        },
+        "qualityGuardrail": {
+          "mode": "same_model_guardrail",
+          "enabled": false,
+          "passed": false,
+          "rewritten": false,
+          "initialPassed": false,
+          "finalPassed": false
+        },
+        "updatedAt": "2026-09-07T05:59:09.822Z"
+      }
+    }
+  ]
+}

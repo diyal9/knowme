@@ -9,8 +9,12 @@ import {
   HUB_TAB_COPY,
   hubOriginLabel,
   hubSourceLabel,
+  connectorType,
   isCapabilityInstalled,
   isExpertCatalogEntry,
+  isExpertAvailableForNewTask,
+  isExpertQualificationLimited,
+  isExpertRuntimeLimited,
   isUserCreatedExpert,
   myExpertOriginLabel,
   shouldShowHubFeatured,
@@ -31,11 +35,6 @@ const HUB_TABS: { id: CapabilityKind; label: string }[] = [
   { id: 'skill', label: '技能' },
   { id: 'connector', label: '连接器' },
 ]
-
-function hubVersion(item: HubCapabilityItem): string {
-  const version = String(item.version || '').trim()
-  return version ? `v${version}` : 'v0.1.0'
-}
 
 export function CapabilityHubSurface() {
   const tab = useAppStore((s) => s.hubTab)
@@ -126,6 +125,19 @@ export function CapabilityHubSurface() {
   }
 
   function openExpertInWorkbench(item: HubCapabilityItem) {
+    if (!isExpertAvailableForNewTask(item)) {
+      const successor = item.lifecycle?.successors?.[0]
+      showToast(successor ? `该专家已合并，请改用 ${successor.id}` : '该专家仅保留用于历史任务查看')
+      return
+    }
+    if (isExpertQualificationLimited(item)) {
+      showToast('该专家的能力合同尚未就绪，请先修复受限 Skill 或执行依赖')
+      return
+    }
+    if (isExpertRuntimeLimited(item)) {
+      showToast('该专家当前不可执行，请先完成必要 Skill 或连接器的安装与授权')
+      return
+    }
     window.sessionStorage.setItem('knowme.workbench-expert-id', item.id)
     setDetail(null)
     setWorkbenchSurface('taskhome')
@@ -283,18 +295,20 @@ export function CapabilityHubSurface() {
                       }
                     }}
                   >
-                    {item.kind !== 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : null}
                     <div className="hub-card-head">
                       <HubCapabilityIcon item={item} className="hub-card-icon" />
                       <div className="hub-card-meta">
-                        <div className="hub-card-title">{item.name || item.id}</div>
+                        <div className="hub-card-title-line">
+                          <div className="hub-card-title">{item.name || item.id}</div>
+                          {item.kind === 'connector' ? <span className={`hub-card-type hub-card-type-${connectorType(item)}`}>{connectorType(item).toUpperCase()}</span> : null}
+                        </div>
                       </div>
                     </div>
                     <div className="hub-card-desc">{item.description || '暂无描述'}</div>
                     <footer className="hub-card-foot">
                       <HubStatusBadges item={item} omitInstallState={false} omitCategory compact />
                       <div className="hub-card-foot-actions">
-                        {item.kind === 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : <span className="hub-card-version">{hubVersion(item)}</span>}
+                        <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} />
                       </div>
                     </footer>
                   </article>
@@ -349,17 +363,6 @@ export function CapabilityHubSurface() {
               {!loading ? items.map((item, index) => {
                 const origin = hubOriginLabel(item)
                 const sub = [item.category || '未分类', mineFilter ? myExpertOriginLabel(item) : hubSourceLabel(item.source), origin].filter(Boolean).join(' · ')
-                const installed = isCapabilityInstalled(item)
-                const actionLabel = item.kind === 'expert'
-                  ? (mineFilter ? '打开我的专家' : '查看详情')
-                  : item.kind === 'skill'
-                      ? (installed ? '管理技能' : '查看并安装')
-                    : (installed ? '管理连接器' : '查看并安装')
-
-                function openCardAction(event: React.MouseEvent<HTMLButtonElement>) {
-                  event.stopPropagation()
-                  setDetail(item)
-                }
                 return (
                   <article
                     key={item.id}
@@ -376,28 +379,21 @@ export function CapabilityHubSurface() {
                       }
                     }}
                   >
-                    {item.kind !== 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : null}
                     <div className="hub-card-head">
                       <HubCapabilityIcon item={item} className="hub-card-icon" />
                       <div className="hub-card-meta">
-                        <div className="hub-card-title" role="heading" aria-level={3}>{item.name || item.id}</div>
+                        <div className="hub-card-title-line">
+                          <div className="hub-card-title" role="heading" aria-level={3}>{item.name || item.id}</div>
+                          {item.kind === 'connector' ? <span className={`hub-card-type hub-card-type-${connectorType(item)}`}>{connectorType(item).toUpperCase()}</span> : null}
+                        </div>
                         <div className="hub-card-sub">{sub}</div>
                       </div>
                     </div>
                     <div className="hub-card-desc">{item.description || '暂无描述'}</div>
                     <footer className="hub-card-foot">
-                      <HubStatusBadges item={item} compact />
+                      <HubStatusBadges item={item} omitCategory={item.kind === 'connector'} compact />
                       <div className="hub-card-foot-actions">
-                        {item.kind === 'expert' ? <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} /> : <span className="hub-card-version">{hubVersion(item)}</span>}
-                        {item.kind !== 'expert' ? <button
-                          type="button"
-                          className="hub-card-action"
-                          aria-label={`${actionLabel}：${item.name || item.id}`}
-                          onClick={openCardAction}
-                        >
-                          {actionLabel}
-                          <Icon name="chevronRight" />
-                        </button> : null}
+                        <HubFavoriteButton item={item} onToggled={(favorite) => patchItem(item.id, { favorite })} />
                       </div>
                     </footer>
                   </article>

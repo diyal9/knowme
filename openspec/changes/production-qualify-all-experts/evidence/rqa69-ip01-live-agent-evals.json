@@ -1,0 +1,25 @@
+{
+  "suite": "RQA69",
+  "evaluatedAt": "2026-09-07T20:36:17.277Z",
+  "agents": [
+    {
+      "agentId": "image-producer",
+      "currentConfigurationId": "expert-config-v2:4606154a43847354bd4c9249829b5f63f354d17526183d1b089b1dfe094622d6",
+      "tasks": [
+        {
+          "taskId": "task-mtrpatfi-kzggi",
+          "evalId": "IP01",
+          "scenario": "normal",
+          "status": "review",
+          "configurationId": "expert-config-v2:4606154a43847354bd4c9249829b5f63f354d17526183d1b089b1dfe094622d6",
+          "hardFailure": false,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

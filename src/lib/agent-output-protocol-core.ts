@@ -222,6 +222,8 @@ function mapLegacyPayload(legacy = {}, mappedType) {
     runPhase: legacy.runPhase,
     toolCallId: legacy.toolCallId,
     toolName: legacy.toolName,
+    errorCode: legacy.errorCode || null,
+    errorMessage: legacy.errorMessage || null,
     durationMs: legacy.durationMs,
     contextInfo: legacy.contextInfo ? cloneSafe(legacy.contextInfo) : undefined,
     needsPermission: legacy.needsPermission,

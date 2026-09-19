@@ -230,6 +230,29 @@ async function run(input, ports, emit) {
     return buildResult({ error: '请求已取消', cancelled: true, terminal, runPhases, metrics, planEval, runStartedAt, ports })
   }
 
+  const waitForInput = async ({ text, kind, code, draftId, session }) => {
+    // This completes a conversational turn, not the user's deliverable. The
+    // typed attention and blocked evidence must survive to task consumers.
+    const committed = commitCanonicalAnswer(text)
+    const waitingTitle = kind === 'approval_required' ? '等待审批'
+      : kind === 'operation_status_unknown' ? '需要核对操作结果' : '需要确认资源'
+    await ports.session.checkpoint?.({ session, emit: emitV2 })
+    enterPhase(RunPhase.DONE)
+    terminal = RunPhase.DONE
+    emitTerminal(EventType.RUN_COMPLETED, {
+      title: waitingTitle,
+      waiting: true,
+      toolCalls: metrics.toolCalls,
+    }, RunPhase.DONE)
+    return buildResult({
+      text: committed.text, terminal, runPhases, metrics, planEval, runStartedAt, ports, session,
+      attention: { kind, action: 'provide_input', title: waitingTitle,
+        detail: text, question: text, ...(draftId ? { draftId } : {}) },
+      executionEvidence: { gateStatus: 'blocked', verificationPassed: false, violations: [{ code, message: text }] },
+      answerHash: committed.hash, protocolVersion: OUTPUT_PROTOCOL_VERSION,
+    })
+  }
+
   const checkAbort = () => {
     if (signal.aborted) return cancelled()
     return null
@@ -286,6 +309,7 @@ async function run(input, ports, emit) {
       stage,
       emitV2,
       fail,
+      waitForInput,
       cancelled,
       checkAbort,
       upsertTrace,

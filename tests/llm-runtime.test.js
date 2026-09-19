@@ -5,6 +5,72 @@ const assert = require('node:assert')
 const runtime = require('../src/lib/llm-runtime')
 
 describe('llm-runtime', () => {
+  it('does not truncate already affordable context at each model budget gate', () => {
+    const messages = [
+      { role: 'system', content: 'S'.repeat(18000) },
+      { role: 'user', content: '保留可容纳的工具证据' },
+      { role: 'assistant', content: '', tool_calls: [{ id: 'read', function: { name: 'read', arguments: '{}' } }] },
+      { role: 'tool', tool_call_id: 'read', content: 'T'.repeat(20000) },
+      { role: 'user', content: '内部观察：继续整理' },
+    ]
+    const fitted = runtime.fitConversation(messages, 10000, { currentInput: messages[1] })
+    assert.deepEqual(fitted.messages, messages)
+    assert.ok(fitted.usedTokens <= 10000)
+  })
+
+  it('anchors the actual request across internal users and repeated tool batches', () => {
+    const currentInput = { role: 'user', content: '材料'.repeat(4700) + '\nREVISION_END' }
+    const messages = [{ role: 'user', content: 'old '.repeat(9000) }, currentInput]
+    for (const id of ['one', 'two']) {
+      messages.push(
+        { role: 'assistant', content: '', tool_calls: [{ id, type: 'function', function: { name: 'read', arguments: '{}' } }] },
+        { role: 'tool', tool_call_id: id, content: 'source '.repeat(5000) },
+        { role: 'user', content: '内部反思：继续核实' },
+      )
+    }
+    const original = structuredClone(messages)
+    const result = runtime.fitConversation(messages, 8000, { currentInput, preserveHistorySummary: true })
+    assert.ok(result.messages.some(message => message.content === currentInput.content))
+    assert.deepEqual(result.messages.flatMap(message => message.tool_calls || []).map(call => call.id), ['one', 'two'])
+    assert.deepEqual(result.messages.filter(message => message.role === 'tool').map(message => message.tool_call_id), ['one', 'two'])
+    assert.ok(result.usedTokens <= 8000)
+    assert.deepEqual(messages, original)
+    assert.throws(() => runtime.fitConversation(messages.slice(2), 8000, { currentInput }),
+      error => error.code === 'current_input_anchor_missing')
+  })
+
+  it('reserves current tool parameters and images before optional system background', () => {
+    const currentInput = { role: 'user', content: 'U'.repeat(2000) }
+    const call = { id: 'write', type: 'function', function: { name: 'write', arguments: JSON.stringify({ body: 'A'.repeat(3600) }) } }
+    for (const imageCount of [0, 1]) {
+      const messages = [
+        { role: 'system', content: 'S'.repeat(4000) }, currentInput,
+        { role: 'assistant', content: '', tool_calls: [call] },
+        { role: 'tool', tool_call_id: 'write', content: 'ok' },
+        ...(imageCount ? [{ role: 'user', content: [{ type: 'image_url', image_url: { url: 'https://example.test/image.png' } }] }] : []),
+      ]
+      const budget = 2000 + imageCount * 1000
+      const result = runtime.fitConversation(messages, budget, { currentInput })
+      assert.ok(result.messages.some(message => message.content === currentInput.content))
+      assert.deepEqual(result.messages.find(message => message.tool_calls)?.tool_calls, [call])
+      assert.equal(result.messages.filter(message => message.role === 'tool').length, 1)
+      assert.ok(result.usedTokens <= budget)
+      assert.throws(() => runtime.fitConversation(messages, 1400 + imageCount * 1000, { currentInput }),
+        error => error.code === 'current_input_budget_exceeded')
+    }
+  })
+
+  it('counts separators when fitting multipart text at a tiny or calibrated budget', () => {
+    for (const tokenEstimator of [runtime.estimateTokens, text => String(text).length]) {
+      const result = runtime.fitConversation([
+        { role: 'user', content: 'Q' },
+        { role: 'assistant', content: Array.from({ length: 3 }, () => ({ type: 'text', text: 'aaaa' })) },
+      ], 4, { tokenEstimator })
+      assert.ok(result.usedTokens <= 4, `used ${result.usedTokens}`)
+      assert.equal(result.messages[0].content, 'Q')
+    }
+  })
+
   it('never lets the truncation marker exceed a tiny token budget', () => {
     for (const budget of [1, 2, 5, 10, 20]) {
       const fitted = runtime.fitText('中文上下文'.repeat(500), budget)
@@ -83,6 +149,39 @@ describe('llm-runtime', () => {
     assert.equal(kept[0].role, 'user')
   })
 
+  it('keeps the entire current request even above the former per-message cap', () => {
+    const input = 'REQUEST_BEGIN\n' + '材料'.repeat(6000) + '\n只修改负责人，保留其他内容 REQUEST_END'
+    const result = runtime.fitConversation([
+      { role: 'system', content: '保持事实准确', _contextCritical: true },
+      { role: 'user', content: '旧问题'.repeat(6000) },
+      { role: 'assistant', content: '旧回复'.repeat(6000) },
+      { role: 'user', content: input },
+    ], 12000, { preserveHistorySummary: true })
+    assert.equal(result.messages.at(-1).content, input)
+    assert.ok(result.usedTokens <= 12000)
+  })
+
+  it('rejects an oversized current request instead of silently cutting instructions', () => {
+    assert.throws(() => runtime.fitConversation([
+      { role: 'system', content: '保持事实准确', _contextCritical: true },
+      { role: 'user', content: '材料'.repeat(6000) + '\n禁止生成新版本' },
+    ], 1000), error => error?.code === 'current_input_budget_exceeded')
+  })
+
+  it('preserves the full user request while fitting a large tool result', () => {
+    const input = '材料'.repeat(4700) + '\n修改意见：仅修改配色'
+    const result = runtime.fitConversation([
+      { role: 'system', content: '保持事实准确', _contextCritical: true },
+      { role: 'user', content: input },
+      { role: 'assistant', content: '', tool_calls: [{ id: 'one', function: { name: 'read', arguments: '{}' } }] },
+      { role: 'tool', content: '来源内容'.repeat(10000), tool_call_id: 'one' },
+    ], 8500)
+    assert.equal(result.messages.find(message => message.role === 'user').content, input)
+    assert.ok(result.messages.some(message => message.tool_calls?.[0]?.id === 'one'))
+    assert.ok(result.messages.some(message => message.tool_call_id === 'one'))
+    assert.ok(result.usedTokens <= 8500)
+  })
+
   it('protects every leading system block while fitting history', () => {
     const result = runtime.fitConversation([
       { role: 'system', content: '平台规则：保持诚实', _contextCritical: true },
@@ -153,5 +252,41 @@ describe('llm-runtime', () => {
     assert.ok(Array.isArray(out[1].content))
     assert.equal(out[2].content, 'Q')
     assert.equal(out[0].content[0].cache_control.type, 'ephemeral')
+  })
+
+  it('uses a provider tokenizer when available and calibrates fallback estimates', () => {
+    const providerEstimate = runtime.createTokenEstimator({ tokenizer: text => text.length / 2 })
+    assert.equal(providerEstimate('123456'), 3)
+    const calibrated = runtime.createTokenEstimator({ calibrationFactor: 1.5 })
+    assert.ok(calibrated('中文上下文') >= runtime.estimateTokens('中文上下文'))
+  })
+
+  it('never exceeds a calibrated tiny budget when one character is already too expensive', () => {
+    const estimate = runtime.createTokenEstimator({ tokenizer: text => text.length * 2 })
+    const fitted = runtime.fitTextWithEstimator('中文上下文', 1, estimate)
+    assert.equal(fitted, '')
+    assert.ok(estimate(fitted) <= 1)
+  })
+
+  it('adds an extractive history summary only when compaction is explicitly enabled', () => {
+    const messages = [
+      { role: 'system', content: '规则' },
+      { role: 'user', content: '第一轮目标：整理产品计划'.repeat(300) },
+      { role: 'assistant', content: '第一轮结论：确认范围'.repeat(300) },
+      { role: 'user', content: '第二轮目标：列风险'.repeat(300) },
+      { role: 'assistant', content: '第二轮结论：存在依赖'.repeat(300) },
+      { role: 'user', content: '第三轮：继续执行' },
+    ]
+    const compacted = runtime.fitConversation(messages, 700, {
+      preserveHistorySummary: true,
+      historySummaryTokens: 96,
+    })
+    assert.ok(compacted.omittedTurns >= 1)
+    assert.equal(compacted.historyCompaction?.strategy, 'extractive')
+    assert.match(compacted.messages.find(message => /历史压缩摘要/.test(String(message.content)))?.content || '', /历史压缩摘要/)
+
+    const defaultResult = runtime.fitConversation(messages, 700)
+    assert.equal(defaultResult.historyCompaction, null)
+    assert.equal(defaultResult.messages.some(message => /历史压缩摘要/.test(String(message.content))), false)
   })
 })

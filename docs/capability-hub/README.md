@@ -58,15 +58,14 @@ systemPrompt: |
   "kind": "connector",
   "type": "feishu",
   "version": "1.0.0",
-  "mcp": {
-    "command": "npx",
-    "args": ["-y", "@larksuiteoapi/lark-mcp"],
-    "env": {
-      "LARK_APP_SECRET": "env:LARK_APP_SECRET"
-    }
+  "cli": {
+    "command": "lark-cli",
+    "args": []
   }
 }
 ```
+
+飞书连接器由 KnowMe 内置的 `lark-cli` 适配器执行，登录态由 lark-cli 管理；不要在 manifest 中配置第三方 MCP 服务、应用密钥或明文 token。其他通用 MCP 连接器仍可使用 `mcp` 字段。
 
 **Secret 规则**：manifest 中仅允许 `env:VAR_NAME` 占位，禁止明文 token / apiKey。
 

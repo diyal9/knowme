@@ -1,0 +1,7 @@
+{
+  "id": "sentiment-opinion-expert",
+  "kind": "expert",
+  "version": "1.0.0",
+  "skills": ["last30days-cn"],
+  "connectors": []
+}

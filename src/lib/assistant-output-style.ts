@@ -112,7 +112,9 @@ function enforceAssistantOutputGate(text, options = {}) {
   if (!hasToolEnvelope) return { text, blocked: false }
   const results = Array.isArray(parsed?.data?.results) ? parsed.data.results : []
   return {
-    text: results.length ? `已获取到 ${results.length} 条结果，正在整理可读信息。` : '已获取到结构化结果，但当前未生成可读摘要。',
+    text: results.length
+      ? `已获取到 ${results.length} 条结构化结果，但本轮未能生成可读摘要。你可以重新整理本次结果。`
+      : '已获取到结构化结果，但本轮未能生成可读摘要。你可以重新整理本次结果。',
     blocked: true,
   }
 }

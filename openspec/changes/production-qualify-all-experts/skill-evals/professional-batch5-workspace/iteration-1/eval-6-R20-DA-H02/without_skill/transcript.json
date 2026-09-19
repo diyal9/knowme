@@ -1,0 +1,112 @@
+{
+  "caseId": "R20-DA-H02",
+  "taskId": "task-mtpal55n-5xfdv",
+  "status": "failed",
+  "evidence": "D:/aispace/knowme/openspec/changes/production-qualify-all-experts/evidence/rqa20-old-live.json",
+  "rowIndex": 5,
+  "session": {
+    "id": "wb-expert-task-mtpal55n-5xfdv",
+    "agentId": "personal",
+    "sessionKind": "expert-task",
+    "profileId": "",
+    "contextId": "",
+    "projectId": null,
+    "expertId": "data-analyst",
+    "personaExpertId": "",
+    "executionPolicy": "tools-allowed",
+    "capabilitySnapshotId": "",
+    "snapshotPath": "",
+    "ephemeral": true,
+    "taskRef": {
+      "id": "task-mtpal55n-5xfdv"
+    },
+    "knowledgeRefs": [],
+    "title": "新助手",
+    "createdAt": "2026-09-06T04:08:54.913Z",
+    "updatedAt": "2026-09-06T04:08:55.833Z",
+    "summary": "",
+    "messages": [
+      {
+        "id": "msg_expert_task-mtpal55n-5xfdv_mtpal5n0_user",
+        "role": "user",
+        "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师。先确认问题、口径和数据质量，再执行可复核的分析。记录计算口径、假设与异常，缺数据时进入等待输入，绝不编造数字。\n\n【必须遵循的 SOP】\n你是 KnowMe 数据分析师。先确认问题、口径和数据质量，再执行可复核的分析。记录计算口径、假设与异常，缺数据时进入等待输入，绝不编造数字。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：{\"goal\":\"运营想发布九月经营小结，但支付流水和订单表看起来对不上。请用给定小账本核算两个口径，判断草稿能否照发。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成内部分析，不涉及报税或法定会计确认。所有日期按北京时间，窗口为9月1日00:00至10月1日00:00之前，金额单位元。‘九月现金净流入’按本窗口实际收款减实际退款减实际扣费。‘九月新订单净收款’按九月创建订单的收款，减截至9月30日已实际支付的对应退款，不扣支付手续费。这是本题指定的两个业务口径。未提供商品成本、人工、租金或税费。\"},{\"id\":\"订单\",\"text\":\"order_id,created_at,paid_at,paid_amount\\nP10,8月28日,8月28日,240\\nP11,9月4日,9月4日,360\\nP12,9月7日,9月7日,180\"},{\"id\":\"退款\",\"text\":\"refund_id,order_id,status,amount,paid_at\\nR81,P10,paid,60,9月3日\\nR82,P11,paid,90,9月6日\\nR83,P12,pending,30,空白\"},{\"id\":\"M2\",\"text\":\"9月支付手续费实际扣款合计18元，无其他收退款或扣费；上述表格完整且无重复。pending表示尚未实际退款，不代表已取消申请。运营草稿：‘九月赚了450元净利润；两个表数字应相同，不同肯定是漏单。’本次尚未发送经营小结，也未处理pending退款。\"}],\"request\":\"分别核算两个业务口径，解释差额具体来自哪里；说明pending退款如何处理及草稿哪些句子需要改。给一段可以替换草稿的短结论，数字与标签清楚，必要边界说到即可，不要写整套财务SOP或要求重查已经完整的全部表格。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":550,\"maxMixed\":800,\"instruction\":\"550—800字中文，可用算式或短表。不要另交核算文件；原始行数不是本题要求的交付指标。\"},\"authorization\":\"仅分析给定合成账本，可选当前已授权纯计算；不联网、不读取其他文件或列目录、不退款、不改账、不创建额外产物、不发送经营小结。不能宣称已查到新回执或已处理申请。\"}\n\n当前时间：2026-09-06T04:08:55.500Z\n\n材料：\n- M1\n合成内部分析，不涉及报税或法定会计确认。所有日期按北京时间，窗口为9月1日00:00至10月1日00:00之前，金额单位元。‘九月现金净流入’按本窗口实际收款减实际退款减实际扣费。‘九月新订单净收款’按九月创建订单的收款，减截至9月30日已实际支付的对应退款，不扣支付手续费。这是本题指定的两个业务口径。未提供商品成本、人工、租金或税费。\n- 订单\norder_id,created_at,paid_at,paid_amount\nP10,8月28日,8月28日,240\nP11,9月4日,9月4日,360\nP12,9月7日,9月7日,180\n- 退款\nrefund_id,order_id,status,amount,paid_at\nR81,P10,paid,60,9月3日\nR82,P11,paid,90,9月6日\nR83,P12,pending,30,空白\n- M2\n9月支付手续费实际扣款合计18元，无其他收退款或扣费；上述表格完整且无重复。pending表示尚未实际退款，不代表已取消申请。运营草稿：‘九月赚了450元净利润；两个表数字应相同，不同肯定是漏单。’本次尚未发送经营小结，也未处理pending退款。\n\n已确认协作计划（描述目标与约束；具体工具顺序由你依据 SOP 动态决定）：\n目标：{\"goal\":\"运营想发布九月经营小结，但支付流水和订单表看起来对不上。请用给定小账本核算两个口径，判断草稿能否照发。\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成内部分析，不涉及报税或法定会计确认。所有日期按北京时间，窗口为9月1日00:00至10月1日00:00之前，金额单位元。‘九月现金净流入’按本窗口实际收款减实际退款减实际扣费。‘九月新订单净收款’按九月创建订单的收款，减截至9月30日已实际支付的对应退款，不扣支付手续费。这是本题指定的两个业务口径。未提供商品成本、人工、租金或税费。\"},{\"id\":\"订单\",\"text\":\"order_id,created_at,paid_at,paid_amount\\nP10,8月28日,8月28日,240\\nP11,9月4日,9月4日,360\\nP12,9月7日,9月7日,180\"},{\"id\":\"退款\",\"text\":\"refund_id,order_id,status,amount,paid_at\\nR81,P10,paid,60,9月3日\\nR82,P11,paid,90,9月6日\\nR83,P12,pending,30,空白\"},{\"id\":\"M2\",\"text\":\"9月支付手续费实际扣款合计18元，无其他收退款或扣费；上述表格完整且无重复。pending表示尚未实际退款，不代表已取消申请。运营草稿：‘九月赚了450元净利润；两个表数字应相同，不同肯定是漏单。’本次尚未发送经营小结，也未处理pending退款。\"}],\"request\":\"分别核算两个业务口径，解释差额具体来自哪里；说明pending退款如何处理及草稿哪些句子需要改。给一段可以替换草稿的短结论，数字与标签清楚，必要边界说到即可，不要写整套财务SOP或要求重查已经完整的全部表格。\",\"output_format\":{\"language\":\"zh-CN\",\"minMixed\":550,\"maxMixed\":800,\"instruction\":\"550—800字中文，可用算式或短表。不要另交核算文件；原始行数不是本题要求的交付指标。\"},\"authorization\":\"仅分析给定合成账本，可选当前已授权纯计算；不联网、不读取其他文件或列目录、不退款、不改账、不创建额外产物、不发送经营小结。不能宣称已查到新回执或已处理申请。\"}\n步骤：\n1. 核对提供的材料与约束\n2. 按专家方法完成本次分析或方案\n3. 复核事实、推导和交付完整性\n风险：仅使用提供的合成材料，不执行外部操作\n\n本轮交付物：完整专业答复（直接在对话中展示）（answer）\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+        "runId": "expert_task-mtpal55n-5xfdv_mtpal5n0",
+        "createdAt": "2026-09-06T04:08:55.553Z"
+      }
+    ],
+    "pinned": false,
+    "run": {
+      "goal": "当前工作",
+      "role": "general",
+      "status": "active",
+      "toolsUsed": [],
+      "steps": [],
+      "artifacts": [],
+      "applyLog": []
+    },
+    "displayTitle": "{\"goal\":\"运营想发布九月经营小结，但支付流水和订",
+    "labels": [
+      "分析"
+    ],
+    "grounding": "目标：\",\"materials\":[{\"id\":\"M1\",\"text\":\"合成内部分析，不涉及报税或法定会计确认。所有日期按北京时间，窗口为9月1日00:00至10月\n材料：用户尚未提供\n约束：用户尚未提供\n期望结果：用户尚未明确提供",
+    "referenceState": {
+      "version": 1,
+      "refs": [],
+      "activeRefId": null,
+      "pendingSelection": null,
+      "taskFrame": {
+        "workflowId": null,
+        "skillId": null,
+        "requiredTools": [],
+        "requiredEvidence": [],
+        "completionConditions": []
+      }
+    },
+    "expertName": "数据分析师",
+    "expert": {
+      "id": "data-analyst",
+      "name": "数据分析师",
+      "description": "围绕业务问题检查数据、设计指标并输出可复核的分析结论",
+      "avatar": "game/engineer",
+      "soul": "",
+      "sop": "你是 KnowMe 数据分析师。先确认问题、口径和数据质量，再执行可复核的分析。记录计算口径、假设与异常，缺数据时进入等待输入，绝不编造数字。",
+      "agenticType": "react",
+      "agenticConfig": {
+        "agenticType": "react",
+        "enableReflection": true,
+        "enableTools": true
+      },
+      "bindings": {
+        "skills": [],
+        "connectors": []
+      },
+      "readiness": {
+        "state": "ready",
+        "items": [],
+        "issues": []
+      },
+      "source": "snapshot"
+    },
+    "knowledge": {
+      "mode": "default",
+      "activeProviderId": "local-default",
+      "selected": [
+        {
+          "id": "local-default",
+          "displayName": "我的知识",
+          "kind": "qmd-local",
+          "status": "default"
+        }
+      ],
+      "available": [
+        {
+          "id": "local-default",
+          "displayName": "我的知识",
+          "kind": "qmd-local"
+        }
+      ],
+      "degraded": false,
+      "message": ""
+    }
+  }
+}
