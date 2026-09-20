@@ -138,7 +138,8 @@ async function runCandidate({ first = '负责人：候选一私值。', second =
   let modelCalls = 0
   ports.llm.complete = async () => {
     modelCalls++
-    assert.ok(modelCalls <= 2, 'no third model request')
+    const expectedMaxCalls = finish === 'length' ? 3 : 2
+    assert.ok(modelCalls <= expectedMaxCalls, `no more than ${expectedMaxCalls} model requests`)
     return { snapshot: { content: modelCalls === 1 ? first : second,
       finishReason: modelCalls === 1 ? finish : 'stop', toolCalls: [] } }
   }
@@ -149,7 +150,7 @@ async function runCandidate({ first = '负责人：候选一私值。', second =
 for (const finish of ['stop', 'length']) {
   it(`RQA17 executor fingerprints last checked candidate after initial ${finish}, not draft or refusal`, async () => {
     const run = await runCandidate({ finish })
-    assert.equal(run.modelCalls, 2)
+    assert.equal(run.modelCalls, finish === 'length' ? 3 : 2)
     assert.equal(run.result.executionEvidence.gateStatus, 'blocked')
     assert.equal(run.result.executionEvidence.verificationPassed, false)
     const diag = run.result.executionEvidence.verificationDiagnostics

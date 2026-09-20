@@ -11,6 +11,129 @@ function findV2Events(events, type) {
 }
 
 describe('agent-run-executor', () => {
+  it('retains rewrite and re-audit capacity after repairing a length-truncated answer', async () => {
+    const fixture = {
+      input: {
+        prompt: '给出正确答案',
+        tier: 'assist',
+        qualityReview: { enabled: true, criteria: ['答案必须等于 corrected'] },
+      },
+    }
+    const ports = createMockRunPorts(fixture)
+    const audit = (pass, requiredChange = '') => JSON.stringify({
+      pass,
+      userRequirements: {
+        pass,
+        evidence: pass ? '候选稿为 corrected' : '候选稿为 wrong',
+        reason: pass ? '满足用户要求' : '未满足用户要求',
+        ...(pass ? {} : { requiredChange }),
+      },
+      checks: [{
+        criterion: 1,
+        pass,
+        evidence: pass ? '候选稿为 corrected' : '候选稿为 wrong',
+        reason: pass ? '满足标准' : '未满足标准',
+        ...(pass ? {} : { requiredChange }),
+      }],
+    })
+    const responses = [
+      { content: 'truncated', finishReason: 'length' },
+      { content: 'wrong', finishReason: 'stop' },
+      { content: audit(false, '改为 corrected'), finishReason: 'stop' },
+      { content: 'corrected', finishReason: 'stop' },
+      { content: audit(true), finishReason: 'stop' },
+    ]
+    let calls = 0
+    ports.llm.complete = async () => {
+      const snapshot = responses[calls++]
+      return { snapshot: { ...snapshot, toolCalls: [], usage: { prompt_tokens: 1, completion_tokens: 1 } }, streamed: false }
+    }
+
+    const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
+
+    assert.equal(result.terminal, RunPhase.DONE, result.error)
+    assert.equal(result.text, 'corrected')
+    assert.equal(calls, 5)
+    assert.deepEqual(result.metrics.finalizationBudget, {
+      maxModelCalls: 4,
+      usedModelCalls: 4,
+      exhausted: false,
+    })
+    assert.equal(result.metrics.qualityReview.passed, true)
+    assert.equal(result.metrics.qualityReview.rewritten, true)
+  })
+
+  it('repairs a truncated forced finalizer after the tool-round budget is exhausted', async () => {
+    const fixture = {
+      input: { prompt: '汇总四次检索结果', tier: 'assist', forceTools: true },
+      llmScript: [
+        ...[1, 2, 3, 4].map(index => ({
+          response: { toolCalls: [{ name: 'search_knowledge', arguments: { query: `资料 ${index}` } }] },
+        })),
+      ],
+      toolScript: [1, 2, 3, 4].map(index => ({ ok: true, text: `资料 ${index} 命中` })),
+    }
+    const ports = createMockRunPorts(fixture)
+    const complete = ports.llm.complete
+    let calls = 0
+    ports.llm.complete = async args => {
+      calls += 1
+      if (calls <= 4) return complete(args)
+      const snapshot = calls === 5
+        ? { content: '不完整答复', finishReason: 'length' }
+        : { content: '完整汇总：四次检索结果均已纳入。', finishReason: 'stop' }
+      return { snapshot: { ...snapshot, toolCalls: [], usage: { prompt_tokens: 1, completion_tokens: 1 } }, streamed: false }
+    }
+    const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
+
+    assert.equal(result.terminal, RunPhase.DONE, result.error)
+    assert.equal(result.text, '完整汇总：四次检索结果均已纳入。')
+    assert.equal(calls, 6)
+    assert.equal(result.metrics.rounds, 4)
+    assert.deepEqual(result.metrics.finalizationBudget, {
+      maxModelCalls: 4,
+      usedModelCalls: 2,
+      exhausted: false,
+    })
+  })
+
+  it('gives structured professional audits bounded headroom beyond ordinary prose', async () => {
+    const fixture = {
+      input: {
+        prompt: '给出实现',
+        tier: 'assist',
+        qualityReview: { enabled: true, criteria: ['实现必须完整'] },
+      },
+    }
+    const ports = createMockRunPorts(fixture)
+    const build = ports.context.build
+    ports.context.build = async () => {
+      const context = await build()
+      return { ...context, policy: { ...context.policy, maxOutput: 10000 } }
+    }
+    const requests = []
+    ports.llm.complete = async args => {
+      requests.push(args)
+      const snapshot = requests.length === 1
+        ? { content: '完整实现', finishReason: 'stop' }
+        : {
+            content: JSON.stringify({
+              pass: true,
+              userRequirements: { pass: true, evidence: '完整实现', reason: '满足用户要求' },
+              checks: [{ criterion: 1, pass: true, evidence: '完整实现', reason: '实现完整' }],
+            }),
+            finishReason: 'stop',
+          }
+      return { snapshot: { ...snapshot, toolCalls: [], usage: { prompt_tokens: 1, completion_tokens: 1 } }, streamed: false }
+    }
+
+    const result = await AgentRunExecutor.run(fixture.input, ports, () => {})
+
+    assert.equal(result.terminal, RunPhase.DONE, result.error)
+    assert.equal(requests.length, 2)
+    assert.equal(requests[1].policy.outputTokens, 6000)
+  })
+
   it('reserves enough output for a forced file-delivery tool call', async () => {
     const fixture = {
       input: { prompt: '生成单页网页', tier: 'assist', forceTools: true, conversationMode: 'expert-execution' },

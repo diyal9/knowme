@@ -94,7 +94,8 @@ function normalizeKnowledgeRefs(raw) {
 function normalizeTaskRef(raw) {
   if (!raw || typeof raw !== 'object') return null
   const id = text(raw.id, 80)
-  return id ? { id } : null
+  const kind = text(raw.kind, 80)
+  return id ? { id, ...(kind ? { kind } : {}) } : null
 }
 
 function safeRef(value, max = 240) {

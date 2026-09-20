@@ -147,7 +147,7 @@ it('RQA56 linked repository overlays do not hide bundled dependency metadata or 
     ['photoshop-mcp', 'writing-polish'],
   )
   const state = JSON.parse(fs.readFileSync(storePath, 'utf8'))
-  assert.equal(state.entries['image-producer'].version, '4.0.0')
+  assert.equal(state.entries['image-producer'].version, '4.0.2')
   for (const id of skillIds) {
     assert.equal(state.entries[id].source, 'local-repo')
     assert.equal(state.entries[id].version, '1.0.0')

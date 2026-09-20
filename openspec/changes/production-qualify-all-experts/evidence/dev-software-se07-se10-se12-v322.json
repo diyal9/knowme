@@ -1,0 +1,2197 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA61",
+  "purpose": "Complete the remaining lifecycle evidence for the current software-engineer configuration without pooling older configurations.",
+  "generatedAt": "2026-09-20T04:18:35.573Z",
+  "environment": {
+    "userDataMode": "development",
+    "isolatedUserData": null,
+    "developmentUserData": "C:\\Users\\Administrator\\AppData\\Roaming\\KnowMe",
+    "testSeam": true,
+    "productionDataProtected": false,
+    "explicitDevelopmentOptIn": true,
+    "declaredMaxWaitSeconds": 180,
+    "effectiveMaxWaitSeconds": 360,
+    "maxWaitOverridden": true,
+    "suiteDeclaredEnvironment": "isolated KnowMe QA userData",
+    "automaticProfessionalAcceptance": false,
+    "providerSeed": {
+      "requested": false,
+      "copied": false,
+      "reason": "development_data_in_place"
+    },
+    "modelProfile": {
+      "provider": "dashscope",
+      "model": "qwen3.8-flash",
+      "label": "Qwen 3.8 Flash",
+      "maxOutput": 131072
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": false,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [],
+    "configuredConnectors": [],
+    "installed": [],
+    "configured": []
+  },
+  "selectedCases": [
+    "SE07",
+    "SE08",
+    "SE09",
+    "SE10",
+    "SE12"
+  ],
+  "tasks": [
+    {
+      "evalId": "SE07",
+      "expertId": "software-engineer",
+      "title": "TTL 单飞缓存竞态",
+      "scenario": "edge",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "参数校验、每 key 的缓存/in-flight/失效代际状态与接口完整。",
+        "同 key 单飞、不同 key 隔离，undefined 可命中，TTL 从成功完成时计算且到期不返回。",
+        "同步抛错与异步拒绝均清理且不缓存，finally 使用身份或代际保护，不误删新请求。",
+        "invalidate 能阻止失效前旧请求晚到回填，并给出可复现竞态测试。",
+        "说明时间/空间复杂度和未真实运行边界，不虚构回执。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9b3pt0-uqtc9",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "executionRouteSelected": true
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "failed"
+        ],
+        "executionRoutes": [
+          "answer-only-code"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "frontend-design",
+              "hash": "9e8e084e4462bc1f"
+            },
+            {
+              "id": "imagegen-frontend-web",
+              "hash": "0527738cffa2920e"
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9b3pt0-uqtc9",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "3.2.2",
+          "agentHash": "bc3e33e0477ff4f6",
+          "hashes": {
+            "expert": "bc3e33e0477ff4f6",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "code-review": "17d5214576de2834",
+              "frontend-design": "9e8e084e4462bc1f",
+              "imagegen-frontend-web": "0527738cffa2920e",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9b3pt0-uqtc9",
+          "bindings": {
+            "skills": [
+              "frontend-design",
+              "imagegen-frontend-web",
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "read_file",
+                "list_dir",
+                "grep_files",
+                "write_file",
+                "create_file",
+                "apply_patch",
+                "mkdir",
+                "run_task",
+                "start_process",
+                "task_status",
+                "task_logs",
+                "cancel_task"
+              ]
+            },
+            "network": false,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          }
+        },
+        "taskRef": null,
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9b3pt0-uqtc9"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-20T04:18:46.497Z",
+          "updatedAt": "2026-09-20T04:24:29.486Z",
+          "heartbeatAt": "2026-09-20T04:24:29.486Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-20T04:24:29.486Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:44.964Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.397Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.499Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.884Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.884Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.884Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:46.894Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:18:50.101Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:19:45.642Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:29.173Z"
+          },
+          {
+            "id": "event-11",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:29.488Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mu9b3pt0-uqtc9_mu9b3rae",
+            "deliverableId": "primary",
+            "executionRoute": "answer-only-code",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "3.2.2",
+                "hash": "bc3e33e0477ff4f6"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "frontend-design",
+                  "hash": "9e8e084e4462bc1f"
+                },
+                {
+                  "id": "imagegen-frontend-web",
+                  "hash": "0527738cffa2920e"
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-flash",
+                "requestedId": "qwen3.8-flash",
+                "label": "Qwen 3.8 Flash",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-20T04:24:29.486Z"
+          }
+        ],
+        "createdAt": "2026-09-20T04:18:44.964Z",
+        "updatedAt": "2026-09-20T04:24:29.488Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9b3pt0-uqtc9",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n当前时间：2026-09-20T04:18:46.886Z\n\n材料：\n- 冻结认证题\n请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n本轮交付物：TTL 单飞缓存竞态（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9b3pt0-uqtc9_mu9b3rae",
+            "createdAt": "2026-09-20T04:18:46.986Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n当前时间：2026-09-20T04:18:46.886Z\n\n材料：\n- 冻结认证题\n请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。\n\n本轮交付物：TTL 单飞缓存竞态（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+      "elapsedMs": 345270,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    },
+    {
+      "evalId": "SE08",
+      "expertId": "software-engineer",
+      "title": "取消后重新执行保持原合同",
+      "scenario": "retry",
+      "lifecycle": "cancel_then_retry",
+      "expectedStatus": "",
+      "assertions": [
+        "准确区分总尝试次数与重试次数，attempt 从1开始且最后失败不 sleep。",
+        "处理 operation/sleep 同步抛错与 Promise 拒绝，取消与 AbortError 不重试。",
+        "指数退避公式正确并在非安全整数/溢出时于 sleep 前失败 INVALID_DELAY。",
+        "给出成功、耗尽、sleep失败、预取消、执行中取消和溢出测试，且本次取消后重试仍完整回答原合同。",
+        "复杂度和未运行声明诚实。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9bb81i-0ykdn",
+      "checkpoints": {
+        "cancelledStatus": "cancelled",
+        "cancelledTaskId": "task-mu9bb47g-feco9"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "executionRouteSelected": true,
+          "cancelled": true,
+          "retried": true
+        },
+        "events": [
+          "retried",
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "failed"
+        ],
+        "executionRoutes": [
+          "answer-only-code"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "frontend-design",
+              "hash": "9e8e084e4462bc1f"
+            },
+            {
+              "id": "imagegen-frontend-web",
+              "hash": "0527738cffa2920e"
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9bb81i-0ykdn",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "3.2.2",
+          "agentHash": "bc3e33e0477ff4f6",
+          "hashes": {
+            "expert": "bc3e33e0477ff4f6",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "code-review": "17d5214576de2834",
+              "frontend-design": "9e8e084e4462bc1f",
+              "imagegen-frontend-web": "0527738cffa2920e",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9bb81i-0ykdn",
+          "bindings": {
+            "skills": [
+              "frontend-design",
+              "imagegen-frontend-web",
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "read_file",
+                "list_dir",
+                "grep_files",
+                "write_file",
+                "create_file",
+                "apply_patch",
+                "mkdir",
+                "run_task",
+                "start_process",
+                "task_status",
+                "task_logs",
+                "cancel_task"
+              ]
+            },
+            "network": false,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          }
+        },
+        "taskRef": {
+          "id": "task-mu9bb47g-feco9"
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9bb81i-0ykdn"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-20T04:24:36.727Z",
+          "updatedAt": "2026-09-20T04:27:59.805Z",
+          "heartbeatAt": "2026-09-20T04:27:59.805Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-20T04:27:59.805Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "retried",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "基于未完成的委托创建关联重试",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:35.190Z"
+          },
+          {
+            "id": "event-2",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:35.191Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:36.627Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:36.729Z"
+          },
+          {
+            "id": "event-5",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:37.062Z"
+          },
+          {
+            "id": "event-6",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:37.062Z"
+          },
+          {
+            "id": "event-7",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "已按 SOP 路由执行：在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:37.062Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:37.068Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:24:39.596Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:25:12.696Z"
+          },
+          {
+            "id": "event-11",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:27:59.491Z"
+          },
+          {
+            "id": "event-12",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:27:59.807Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mu9bb81i-0ykdn_mu9bb9hk",
+            "deliverableId": "primary",
+            "executionRoute": "answer-only-code",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "3.2.2",
+                "hash": "bc3e33e0477ff4f6"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "frontend-design",
+                  "hash": "9e8e084e4462bc1f"
+                },
+                {
+                  "id": "imagegen-frontend-web",
+                  "hash": "0527738cffa2920e"
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-flash",
+                "requestedId": "qwen3.8-flash",
+                "label": "Qwen 3.8 Flash",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-20T04:27:59.805Z"
+          }
+        ],
+        "createdAt": "2026-09-20T04:24:35.190Z",
+        "updatedAt": "2026-09-20T04:27:59.807Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9bb81i-0ykdn",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。\n\n当前时间：2026-09-20T04:24:37.064Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。\n\n本轮交付物：取消后重新执行保持原合同（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9bb81i-0ykdn_mu9bb9hk",
+            "createdAt": "2026-09-20T04:24:37.158Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。\n\n当前时间：2026-09-20T04:24:37.064Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。\n\n本轮交付物：取消后重新执行保持原合同（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:810:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+      "elapsedMs": 210196,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    },
+    {
+      "evalId": "SE09",
+      "expertId": "software-engineer",
+      "title": "退回修改的精确变更",
+      "scenario": "revision",
+      "lifecycle": "request_changes",
+      "expectedStatus": "",
+      "assertions": [
+        "修订稿仍包含完整可替换实现，而不是只给差异。",
+        "保留 number 正安全整数合同和统一错误。",
+        "按退回意见仅允许首尾 ASCII 空格，拒绝 +1、01、1.0、全角数字和 Unicode 空白。",
+        "测试覆盖原合同与新增语法边界，并明确未真实运行。",
+        "任务真实经历 review→changes_requested/revising→review，且最终内容响应退回意见。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9bfmef-2hgan",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "executionRouteSelected": true,
+          "changesRequested": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "failed"
+        ],
+        "executionRoutes": [
+          "answer-only-code"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "frontend-design",
+              "hash": "9e8e084e4462bc1f"
+            },
+            {
+              "id": "imagegen-frontend-web",
+              "hash": "0527738cffa2920e"
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9bfmef-2hgan",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "3.2.2",
+          "agentHash": "bc3e33e0477ff4f6",
+          "hashes": {
+            "expert": "bc3e33e0477ff4f6",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "code-review": "17d5214576de2834",
+              "frontend-design": "9e8e084e4462bc1f",
+              "imagegen-frontend-web": "0527738cffa2920e",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9bfmef-2hgan",
+          "bindings": {
+            "skills": [
+              "frontend-design",
+              "imagegen-frontend-web",
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "read_file",
+                "list_dir",
+                "grep_files",
+                "write_file",
+                "create_file",
+                "apply_patch",
+                "mkdir",
+                "run_task",
+                "start_process",
+                "task_status",
+                "task_logs",
+                "cancel_task"
+              ]
+            },
+            "network": false,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          }
+        },
+        "taskRef": null,
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9bfmef-2hgan"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-20T04:28:02.054Z",
+          "updatedAt": "2026-09-20T04:29:43.281Z",
+          "heartbeatAt": "2026-09-20T04:29:43.281Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-20T04:29:43.281Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:00.423Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:01.956Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:02.056Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:02.399Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:02.399Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:02.399Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:02.405Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:04.954Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:28:29.580Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:42.957Z"
+          },
+          {
+            "id": "event-11",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:43.283Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mu9bfmef-2hgan_mu9bfnxd",
+            "deliverableId": "primary",
+            "executionRoute": "answer-only-code",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "3.2.2",
+                "hash": "bc3e33e0477ff4f6"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "frontend-design",
+                  "hash": "9e8e084e4462bc1f"
+                },
+                {
+                  "id": "imagegen-frontend-web",
+                  "hash": "0527738cffa2920e"
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-flash",
+                "requestedId": "qwen3.8-flash",
+                "label": "Qwen 3.8 Flash",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-20T04:29:43.281Z"
+          }
+        ],
+        "createdAt": "2026-09-20T04:28:00.423Z",
+        "updatedAt": "2026-09-20T04:29:43.283Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9bfmef-2hgan",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。\n\n当前时间：2026-09-20T04:28:02.401Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。\n\n本轮交付物：退回修改的精确变更（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9bfmef-2hgan_mu9bfnxd",
+            "createdAt": "2026-09-20T04:28:02.507Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。\n\n当前时间：2026-09-20T04:28:02.401Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。\n\n本轮交付物：退回修改的精确变更（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+      "elapsedMs": 103477,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    },
+    {
+      "evalId": "SE10",
+      "expertId": "software-engineer",
+      "title": "完成后重开并保持既有约束",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开修订稿为完整可替换实现，并保留 AbortSignal、maxPages、形状校验、SameValueZero 去重和顺序。",
+        "加入已见游标集合，任意重复 nextCursor 在再次请求前抛 CURSOR_CYCLE。",
+        "正确处理 null 终止、PAGE_LIMIT 与游标环检测优先级，不产生额外请求。",
+        "新增自环、多节点环、正常分页、重复值、取消、非法页和页数上限测试，诚实声明未运行。",
+        "任务真实经历 review→completed→changes_requested/revising→review，并响应重开意见。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9bhu9b-pyv4g",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "executionRouteSelected": true,
+          "accepted": false,
+          "reopened": false,
+          "newVersion": false,
+          "previousVersionLinked": false
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "failed"
+        ],
+        "executionRoutes": [
+          "answer-only-code"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "frontend-design",
+              "hash": "9e8e084e4462bc1f"
+            },
+            {
+              "id": "imagegen-frontend-web",
+              "hash": "0527738cffa2920e"
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "请求已取消",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9bhu9b-pyv4g",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "3.2.2",
+          "agentHash": "bc3e33e0477ff4f6",
+          "hashes": {
+            "expert": "bc3e33e0477ff4f6",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "code-review": "17d5214576de2834",
+              "frontend-design": "9e8e084e4462bc1f",
+              "imagegen-frontend-web": "0527738cffa2920e",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9bhu9b-pyv4g",
+          "bindings": {
+            "skills": [
+              "frontend-design",
+              "imagegen-frontend-web",
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "read_file",
+                "list_dir",
+                "grep_files",
+                "write_file",
+                "create_file",
+                "apply_patch",
+                "mkdir",
+                "run_task",
+                "start_process",
+                "task_status",
+                "task_logs",
+                "cancel_task"
+              ]
+            },
+            "network": false,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          }
+        },
+        "taskRef": null,
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9bhu9b-pyv4g"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "请求已取消",
+          "startedAt": "2026-09-20T04:29:45.505Z",
+          "updatedAt": "2026-09-20T04:32:25.073Z",
+          "heartbeatAt": "2026-09-20T04:32:25.073Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "请求已取消",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-20T04:32:25.073Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:43.919Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.394Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.507Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.853Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.853Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.853Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:45.859Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:29:48.436Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:30:36.735Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:24.762Z"
+          },
+          {
+            "id": "event-11",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "请求已取消",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:25.075Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mu9bhu9b-pyv4g_mu9bhvr3",
+            "deliverableId": "primary",
+            "executionRoute": "answer-only-code",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "3.2.2",
+                "hash": "bc3e33e0477ff4f6"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "frontend-design",
+                  "hash": "9e8e084e4462bc1f"
+                },
+                {
+                  "id": "imagegen-frontend-web",
+                  "hash": "0527738cffa2920e"
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-flash",
+                "requestedId": "qwen3.8-flash",
+                "label": "Qwen 3.8 Flash",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false,
+              "issues": [
+                {
+                  "criterion": 3,
+                  "problem": "实现代码第46-50行：`catch (err) { if (signal?.aborted) { throw new DOMException('Aborted', 'AbortError'); } throw err; }`。：存在逻辑缺陷：若 fetchPage 因网络错误或业务逻辑抛出非 Abort 异常，但此时 signal 恰好被外部 abort（竞态或顺序问题），该代码会将原始错误掩盖并强制抛出 AbortError。这违反了“保持接口兼容/错误透传”的工程原则，且合同仅规定“signal 取消立即停止”，并未授权将其他错误转换为取消错误。测试 T8 仅验证了 fetchPage 主动响应 abort 的情况，未验证 fetchPage 抛错同时 signal aborted 的优先级冲突。",
+                  "requiredChange": "修改 catch 块逻辑，仅在确认是 abort 引起的错误时才转换，或者保留原始错误优先权。建议改为：`catch (err) { if (signal?.aborted && err.name === 'AbortError') throw err; if (signal?.aborted) throw new DOMException('Aborted', 'AbortError'); throw err; }` 或更严谨地判断错误来源。鉴于合同简单性，至少应确保不吞掉非取消类的真实故障。"
+                }
+              ]
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "请求已取消",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-20T04:32:25.073Z"
+          }
+        ],
+        "createdAt": "2026-09-20T04:29:43.919Z",
+        "updatedAt": "2026-09-20T04:32:25.075Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9bhu9b-pyv4g",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。\n\n当前时间：2026-09-20T04:29:45.855Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。\n\n本轮交付物：完成后重开并保持既有约束（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9bhu9b-pyv4g_mu9bhvr3",
+            "createdAt": "2026-09-20T04:29:45.952Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。\n\n当前时间：2026-09-20T04:29:45.855Z\n\n材料：\n- 冻结认证题\n请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。\n\n本轮交付物：完成后重开并保持既有约束（answer）\n\n本轮 SOP 路由：answer-only-code。在用户明确要求只在对话中交付且禁止文件或工具时，给出精炼完整实现、静态推演和决定性测试。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 请求已取消\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+      "elapsedMs": 161898,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    },
+    {
+      "evalId": "SE12",
+      "expertId": "software-engineer",
+      "title": "架构决策路线",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "expectedStatus": "",
+      "assertions": [
+        "进入 architecture-decision 路线，交付可评审的方案比较和明确推荐。",
+        "覆盖任务状态、幂等键、取消与重试边界、重启恢复和不可重复执行不变量。",
+        "把未知吞吐、延迟和容量标记为待测假设，不伪造压测结果。",
+        "说明失败模式、观测指标和验证顺序，避免把架构意见写成已完成实现。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9blb5s-l19fy",
+      "checkpoints": {},
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "executionRouteSelected": true
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "progress",
+          "failed"
+        ],
+        "executionRoutes": [
+          "architecture-decision"
+        ]
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "software-engineer",
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          },
+          "skills": [
+            {
+              "id": "architecture-decision",
+              "hash": "81c14c38049a9d57"
+            },
+            {
+              "id": "code-review",
+              "hash": "17d5214576de2834"
+            },
+            {
+              "id": "frontend-design",
+              "hash": "9e8e084e4462bc1f"
+            },
+            {
+              "id": "imagegen-frontend-web",
+              "hash": "0527738cffa2920e"
+            },
+            {
+              "id": "qa-test-design",
+              "hash": "6ef33e9d83c431e6"
+            },
+            {
+              "id": "software-change-verification",
+              "hash": "829c8afc1a1e3a6a"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 1,
+        "toolCallCount": 0,
+        "violations": [
+          {
+            "code": "execution_failed",
+            "message": "专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "missingTools": []
+          }
+        ]
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9blb5s-l19fy",
+        "expertId": "software-engineer",
+        "status": "failed",
+        "assignmentSnapshot": {
+          "agentId": "software-engineer",
+          "agentVersion": "3.2.2",
+          "agentHash": "bc3e33e0477ff4f6",
+          "hashes": {
+            "expert": "bc3e33e0477ff4f6",
+            "skills": {
+              "architecture-decision": "81c14c38049a9d57",
+              "code-review": "17d5214576de2834",
+              "frontend-design": "9e8e084e4462bc1f",
+              "imagegen-frontend-web": "0527738cffa2920e",
+              "qa-test-design": "6ef33e9d83c431e6",
+              "software-change-verification": "829c8afc1a1e3a6a"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9blb5s-l19fy",
+          "bindings": {
+            "skills": [
+              "frontend-design",
+              "imagegen-frontend-web",
+              "software-change-verification",
+              "architecture-decision",
+              "qa-test-design",
+              "code-review"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "code-review"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "read_file",
+                "list_dir",
+                "grep_files",
+                "write_file",
+                "create_file",
+                "apply_patch",
+                "mkdir",
+                "run_task",
+                "start_process",
+                "task_status",
+                "task_logs",
+                "cancel_task"
+              ]
+            },
+            "network": false,
+            "write": true,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "3.2.2",
+            "hash": "bc3e33e0477ff4f6"
+          }
+        },
+        "taskRef": null,
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9blb5s-l19fy"
+        },
+        "progress": {
+          "phase": "failed",
+          "label": "执行失败",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "startedAt": "2026-09-20T04:32:27.391Z",
+          "updatedAt": "2026-09-20T04:35:11.341Z",
+          "heartbeatAt": "2026-09-20T04:35:11.341Z"
+        },
+        "attention": {
+          "kind": "retryable_failure",
+          "action": "retry",
+          "title": "本次执行未完成",
+          "detail": "专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+          "field": "",
+          "item": "专家执行",
+          "question": "",
+          "example": "",
+          "options": [],
+          "issues": [],
+          "defaultValue": "",
+          "required": true,
+          "createdAt": "2026-09-20T04:35:11.341Z"
+        },
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:25.792Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.290Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.393Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.747Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.747Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：围绕 Web 系统进行 Vue/React、TypeScript、组件、路由、状态与 API 契约设计。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.747Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:27.754Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:30.636Z"
+          },
+          {
+            "id": "event-9",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "正在等待模型响应…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:32:32.248Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:33:27.624Z"
+          },
+          {
+            "id": "event-11",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 11,
+            "summary": "生成失败",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:35:11.024Z"
+          },
+          {
+            "id": "event-12",
+            "type": "failed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 12,
+            "summary": "专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:35:11.343Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [
+          {
+            "runId": "expert_task-mu9blb5s-l19fy_mu9blco6",
+            "deliverableId": "primary",
+            "executionRoute": "architecture-decision",
+            "gateStatus": "failed",
+            "verificationPassed": false,
+            "qualificationContext": {
+              "contractVersion": 2,
+              "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+              "complete": true,
+              "missing": [],
+              "runtime": {
+                "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+              },
+              "agent": {
+                "id": "software-engineer",
+                "version": "3.2.2",
+                "hash": "bc3e33e0477ff4f6"
+              },
+              "skills": [
+                {
+                  "id": "architecture-decision",
+                  "hash": "81c14c38049a9d57"
+                },
+                {
+                  "id": "code-review",
+                  "hash": "17d5214576de2834"
+                },
+                {
+                  "id": "frontend-design",
+                  "hash": "9e8e084e4462bc1f"
+                },
+                {
+                  "id": "imagegen-frontend-web",
+                  "hash": "0527738cffa2920e"
+                },
+                {
+                  "id": "qa-test-design",
+                  "hash": "6ef33e9d83c431e6"
+                },
+                {
+                  "id": "software-change-verification",
+                  "hash": "829c8afc1a1e3a6a"
+                }
+              ],
+              "connectors": [],
+              "model": {
+                "provider": "dashscope",
+                "id": "qwen3.8-flash",
+                "requestedId": "qwen3.8-flash",
+                "label": "Qwen 3.8 Flash",
+                "autoRouted": false
+              }
+            },
+            "qualityGuardrail": {
+              "mode": "same_model_guardrail",
+              "enabled": true,
+              "passed": false,
+              "rewritten": true,
+              "initialPassed": false,
+              "finalPassed": false,
+              "issues": [
+                {
+                  "criterion": 2,
+                  "problem": "4.3.2 节描述了“定期对账任务 (Reconciliation Job)”用于处理“业务副作用已成功执行，但 Worker 在更新 DB 状态为 SUCCESS 前崩溃”的场景。：虽然提出了对账机制，但候选稿在 4.3.2 的“情况 B”中提到“重置状态为 PENDING...允许重新调度”。如果业务副作用是**非幂等**的（例如扣款成功但写回失败，对账因日志缺失判定为未知而重跑），会导致重复扣款。架构设计必须明确：对于非幂等业务，对账失败或未知时应进入“人工介入/隔离队列”而非直接自动重调度，否则违反了“同一任务不能重复执行”的硬约束（在非幂等场景下）。候选稿仅依赖 H2 假设中的“业务侧有去重”，未在架构层面强制区分幂等与非幂等任务的恢复策略，存在逻辑漏洞。",
+                  "requiredChange": "在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进行重调度，必须将任务标记为 SUSPENDED 或 DEAD_LETTER 并触发告警，由人工或更高级别的补偿事务处理，以确保严格的不重复执行语义。"
+                }
+              ]
+            },
+            "toolCalls": [],
+            "evidence": [],
+            "violations": [
+              {
+                "code": "execution_failed",
+                "message": "专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。",
+                "missingTools": []
+              }
+            ],
+            "createdAt": "2026-09-20T04:35:11.341Z"
+          }
+        ],
+        "createdAt": "2026-09-20T04:32:25.792Z",
+        "updatedAt": "2026-09-20T04:35:11.343Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9blb5s-l19fy",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师为一个异步任务服务进行架构设计并给出技术方案决策记录，直接在对话中交付，不访问文件、不调用工具、不声称已部署。约束：任务可取消、网络请求可重试、同一任务不能重复执行、服务重启后要恢复状态；当前没有吞吐和延迟基线。请比较两种方案，明确边界、不变量、失败恢复和待测假设。\n\n当前时间：2026-09-20T04:32:27.750Z\n\n材料：\n- 冻结认证题\n请作为软件工程师为一个异步任务服务进行架构设计并给出技术方案决策记录，直接在对话中交付，不访问文件、不调用工具、不声称已部署。约束：任务可取消、网络请求可重试、同一任务不能重复执行、服务重启后要恢复状态；当前没有吞吐和延迟基线。请比较两种方案，明确边界、不变量、失败恢复和待测假设。\n\n本轮交付物：架构决策路线（answer）\n\n本轮 SOP 路由：architecture-decision。围绕 Web 系统进行 Vue/React、TypeScript、组件、路由、状态与 API 契约设计。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9blb5s-l19fy_mu9blco6",
+            "createdAt": "2026-09-20T04:32:27.860Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「software-engineer」。\n\n你是 KnowMe Web 开发专家，专注网站开发与 Web 系统开发，主要技术为 HTML/CSS、Vue、React、TypeScript。你擅长官网、宣传页、后台管理、数据看板、组件系统、业务表单、路由状态与 API 对接，以及 Web 架构、缺陷诊断、性能与质量验证。你不扮演原生游戏客户端或游戏服务端专家。按当前任务加载 frontend-design、imagegen-frontend-web、software-change-verification、architecture-decision、qa-test-design 或 code-review；只加载需要的方法，纯逻辑实现不加载视觉技能，视觉参考技能不替代网页代码实现。对话代码题以用户合同为唯一验收边界，给一份精炼完整实现与决定性测试；用户明确不访问文件、不调用工具时严格使用无工具路线。交付前逐条手工演算合同、异步时序、错误优先级、缓存/重试/游标状态机和每条测试期望；架构任务补齐长任务租约与完成后写状态失败的恢复闭环；修订时提交无旧规则残留的完整替换版。计划和承诺必须受实际工具及权限约束；工具不足时明确能力缺口并提供有边界的方案，不谎称已生成文件、已运行测试、已生成图片或已部署。遵循用户授权范围，不擅自扩大权限，严格区分专业推演与真实执行证据。\n\n【必须遵循的 SOP】\n1. 判断是网站建设、Web 系统开发、视觉参考、架构选型还是质量验证。目标与交付明确时，品牌色、文案细节、目标受众等偏好采用专业默认值并写入风险，不作为启动前必问项；只有缺少项目目录、目标页面或核心交付类型时才一次询问一个阻塞问题。读取实际能力与授权；能力不足时明确只提供方案或代码建议，不承诺文件落盘、构建、测试、预览或部署。\n2. 依据已有项目选择 HTML/CSS、Vue、React 与 TypeScript；尊重现有栈，简单静态站不无故引入框架。Web 系统明确组件边界、路由、状态、表单、API 契约及加载/空/错误/成功状态。非 Web 专项需求说明范围并建议转交适合的专家。\r\n3. 涉及页面视觉与实现时使用 frontend-design 建立布局、排版、配色、间距、组件和响应式规则。只在需要网页视觉参考图时加载 imagegen-frontend-web，逐分区规划横向参考、保持品牌一致；普通代码修复、表单或接口工作不强制生图。实际图片必须有生图工具回执，无工具时交付明确标注的参考方案。\r\n4. 工程实现使用 software-change-verification，Web 架构使用 architecture-decision；纯 JavaScript/TypeScript 逻辑题不加载视觉技能。根据授权和实际工具逐步修改、运行和验证。保持接口兼容，关注可访问性、内容可读性、键盘操作、移动端溢出与资源加载，不凭空编造品牌数据或用户评价。\n5. 使用 qa-test-design 检查正常、边界和失败路径，可按需使用 code-review。提交代码前逐条重放合同分支、错误优先级、异步完成顺序和每个测试断言，确认测试对正确实现成立且不存在恒真断言；用户只要求对话代码且明确禁止文件/工具时，只交付一份精炼完整实现和决定性测试，不调用写入工具。异步实现必须沿每条返回路径检查外层 Promise、同步抛错、异步拒绝、finally 清理与代际/身份保护；缓存区分 pending 与已完成值并允许 undefined 命中，失效必须阻止旧请求晚到回填；重试区分总尝试次数与重试次数，取消不重试，延迟在 sleep 前验证；分页先处理 null 终止，再在任何下一次请求前检查重复游标，随后判断页数上限。事件与取消测试逐次演算订阅快照、调用次数和错误汇总，只断言用户合同及其必要逻辑后果。\n6. 修订稿必须是完整替换版，并逐项清除被否定的旧实现、旧断言和旧结论，尤其不能用上一版的 trim、正则、游标或重试规则覆盖新合同；若字符串仅允许首尾 ASCII 空格和规范正整数，直接用只包含字面空格的完整匹配（如 `^ *([1-9]\\\\d*) *$`），禁止 trim、`\\\\s`、`+` 和前导零。架构方案必须覆盖长任务的租约续期/异常隔离，以及业务副作用成功但状态更新失败时的幂等结果、事务 Outbox 或对账恢复，不把超时直接当失败重跑。输出真实代码差异、文件和验证记录，区分静态检查、已运行检查及未验证项；代码由自己生成也不能降低验收要求，不把视觉参考图当作可运行网站。设计或测试计划一律使用“待验证/预期/前置条件”描述未执行动作，不把计划写成已完成操作。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为软件工程师为一个异步任务服务进行架构设计并给出技术方案决策记录，直接在对话中交付，不访问文件、不调用工具、不声称已部署。约束：任务可取消、网络请求可重试、同一任务不能重复执行、服务重启后要恢复状态；当前没有吞吐和延迟基线。请比较两种方案，明确边界、不变量、失败恢复和待测假设。\n\n当前时间：2026-09-20T04:32:27.750Z\n\n材料：\n- 冻结认证题\n请作为软件工程师为一个异步任务服务进行架构设计并给出技术方案决策记录，直接在对话中交付，不访问文件、不调用工具、不声称已部署。约束：任务可取消、网络请求可重试、同一任务不能重复执行、服务重启后要恢复状态；当前没有吞吐和延迟基线。请比较两种方案，明确边界、不变量、失败恢复和待测假设。\n\n本轮交付物：架构决策路线（answer）\n\n本轮 SOP 路由：architecture-decision。围绕 Web 系统进行 Vue/React、TypeScript、组件、路由、状态与 API 契约设计。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整结果\n- 除非题目明确要求，否则不得执行外部动作或调用工具\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+      "elapsedMs": 166239,
+      "install": {
+        "ok": true,
+        "id": "software-engineer",
+        "version": ""
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 5,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 0,
+    "lifecycleFailed": 5,
+    "runtimeFailed": 5,
+    "runtimeNeedsInput": 0,
+    "environmentBlocked": 0,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 5,
+    "professionallyQualified": 0
+  }
+}

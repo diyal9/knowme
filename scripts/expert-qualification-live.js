@@ -12,7 +12,10 @@ const TERMINAL_STATUSES = new Set(['review', 'completed', 'failed', 'cancelled',
 const RETRYABLE_STATUSES = new Set(['failed', 'cancelled', 'needs_input', 'starting', 'running', 'revising'])
 
 function parseArgs(argv) {
-  const out = { cases: [], suite: '', userData: '', sourceUserData: '', output: '', headed: false }
+  const out = {
+    cases: [], suite: '', userData: '', sourceUserData: '', output: '',
+    headed: false, allowDevelopmentData: false, maxWaitSeconds: 0,
+  }
   for (let index = 2; index < argv.length; index += 1) {
     const value = argv[index]
     if (value === '--suite') out.suite = String(argv[++index] || '')
@@ -21,6 +24,14 @@ function parseArgs(argv) {
     else if (value === '--source-user-data') out.sourceUserData = String(argv[++index] || '')
     else if (value === '--out') out.output = String(argv[++index] || '')
     else if (value === '--headed') out.headed = true
+    else if (value === '--allow-development-data') out.allowDevelopmentData = true
+    else if (value === '--max-wait-seconds') {
+      const seconds = Number(argv[++index])
+      if (!Number.isSafeInteger(seconds) || seconds < 10 || seconds > 1800) {
+        throw new Error('--max-wait-seconds must be a safe integer from 10 to 1800')
+      }
+      out.maxWaitSeconds = seconds
+    }
     else throw new Error(`Unknown option: ${value}`)
   }
   return out
@@ -31,19 +42,67 @@ function isInside(candidate, parent) {
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
 }
 
-function assertSafeUserData(input, env = process.env) {
+function assertSafeUserData(input, env = process.env, options = {}) {
   if (!String(input || '').trim()) {
     throw new Error('--user-data is required; production qualification must use an explicit isolated QA directory')
   }
   const resolved = path.resolve(input)
   const productionRoot = path.resolve(String(env.APPDATA || ''), 'KnowMe')
   if (env.APPDATA && isInside(resolved, productionRoot)) {
+    const exactDevelopmentRoot = path.relative(productionRoot, resolved) === ''
+    if (options.allowDevelopmentData === true && exactDevelopmentRoot) return resolved
     throw new Error(`Refusing to use production KnowMe userData: ${resolved}`)
+  }
+  if (options.allowDevelopmentData === true) {
+    throw new Error('--allow-development-data only permits the exact APPDATA\\KnowMe development profile')
   }
   if (!/(?:^|[\\/_-])(qa|test|qualification|eval)(?:[\\/_-]|$)/i.test(resolved)) {
     throw new Error('Isolated userData path must contain a qa, test, qualification, or eval marker')
   }
   return resolved
+}
+
+const IMAGE_MIME_BY_EXTENSION = new Map([
+  ['.png', 'image/png'],
+  ['.jpg', 'image/jpeg'],
+  ['.jpeg', 'image/jpeg'],
+  ['.webp', 'image/webp'],
+])
+
+function inheritedImageMaterials(sessionState, artifactRefs = [], userData = '') {
+  const session = sessionState?.session || sessionState
+  const artifacts = Array.isArray(session?.run?.artifacts) ? session.run.artifacts : []
+  const wanted = new Set((Array.isArray(artifactRefs) ? artifactRefs : [])
+    .map(ref => String(ref || '').split('#').at(-1))
+    .filter(Boolean))
+  const root = path.resolve(String(userData || ''))
+  if (!root || !wanted.size) return []
+  return artifacts.filter(item => wanted.has(String(item?.id || '')) && item?.type === 'image')
+    .slice(-3)
+    .map(item => {
+      let dataUrl = [item.body, item.url].find(value => /^data:image\//i.test(String(value || ''))) || ''
+      let mimeType = String(dataUrl).match(/^data:([^;,]+)/i)?.[1] || ''
+      if (!dataUrl) {
+        const source = String(item.targetPath || item.path || item.meta?.path || '').trim()
+        if (!source) return null
+        const resolved = path.resolve(source)
+        if (!isInside(resolved, root)) return null
+        const mime = IMAGE_MIME_BY_EXTENSION.get(path.extname(resolved).toLowerCase())
+        if (!mime) return null
+        const stat = fs.statSync(resolved)
+        if (!stat.isFile() || stat.size > 24 * 1024 * 1024) return null
+        dataUrl = `data:${mime};base64,${fs.readFileSync(resolved).toString('base64')}`
+        mimeType = mime
+      }
+      return {
+        title: `上一版已验收图片：${String(item.title || item.id || '原图')}`,
+        kind: 'image',
+        mimeType,
+        dataUrl,
+        sourceArtifactId: String(item.id || ''),
+      }
+    })
+    .filter(Boolean)
 }
 
 const PROVIDER_SETTINGS_KEYS = [
@@ -58,10 +117,11 @@ const PLAINTEXT_SECRET_SETTINGS_KEYS = [
 
 /**
  * Seed an isolated qualification profile without copying or logging plaintext
- * credentials. Encrypted values remain encrypted and are only useful when the
- * launched Electron process can decrypt them through the OS secure store.
+ * credentials. Legacy Electron safeStorage values also require the encrypted
+ * os_crypt key metadata from Local State; copy only that encrypted metadata,
+ * never the rest of the source browser profile.
  */
-function seedEncryptedProviderSettings(sourceUserData, targetUserData) {
+function seedEncryptedProviderSettings(sourceUserData, targetUserData, connectorIds = []) {
   const source = String(sourceUserData || '').trim()
   if (!source) return { requested: false, copied: false, reason: 'not_requested' }
   const sourceDir = path.resolve(source)
@@ -95,11 +155,75 @@ function seedEncryptedProviderSettings(sourceUserData, targetUserData) {
   for (const key of PLAINTEXT_SECRET_SETTINGS_KEYS) delete next[key]
   fs.mkdirSync(targetDir, { recursive: true })
   fs.writeFileSync(targetFile, `${JSON.stringify(next, null, 2)}\n`, 'utf8')
+  let encryptedKeyMetadataCopied = false
+  const legacySafeStorageKey = Boolean(String(next.apiKeyEnc || '').trim())
+    && !String(next.apiKeyEnc).startsWith('dpapi:')
+  if (legacySafeStorageKey) {
+    try {
+      const sourceLocalState = JSON.parse(fs.readFileSync(path.join(sourceDir, 'Local State'), 'utf8'))
+      const encryptedKey = String(sourceLocalState?.os_crypt?.encrypted_key || '').trim()
+      if (encryptedKey) {
+        let targetLocalState = {}
+        try {
+          const rawTargetState = JSON.parse(fs.readFileSync(path.join(targetDir, 'Local State'), 'utf8'))
+          if (rawTargetState && typeof rawTargetState === 'object' && !Array.isArray(rawTargetState)) {
+            targetLocalState = rawTargetState
+          }
+        } catch { /* Electron may not have created Local State yet */ }
+        targetLocalState.os_crypt = {
+          audit_enabled: sourceLocalState.os_crypt?.audit_enabled !== false,
+          encrypted_key: encryptedKey,
+        }
+        fs.writeFileSync(
+          path.join(targetDir, 'Local State'),
+          `${JSON.stringify(targetLocalState, null, 2)}\n`,
+          'utf8',
+        )
+        encryptedKeyMetadataCopied = true
+      }
+    } catch { /* a DPAPI fallback or a newly configured test key can proceed without legacy metadata */ }
+  }
+  const requestedConnectorIds = [...new Set((Array.isArray(connectorIds) ? connectorIds : [])
+    .map(value => String(value || '').trim())
+    .filter(Boolean))]
+  const encryptedConnectorIds = []
+  if (requestedConnectorIds.length) {
+    try {
+      const sourceSecrets = JSON.parse(fs.readFileSync(path.join(sourceDir, 'connector-secrets.json'), 'utf8'))
+      const sourceConnectors = sourceSecrets?.connectors && typeof sourceSecrets.connectors === 'object'
+        ? sourceSecrets.connectors
+        : {}
+      const targetSecretsFile = path.join(targetDir, 'connector-secrets.json')
+      let targetSecrets = { version: Number(sourceSecrets?.version) || 1, connectors: {} }
+      try {
+        const rawTargetSecrets = JSON.parse(fs.readFileSync(targetSecretsFile, 'utf8'))
+        if (rawTargetSecrets && typeof rawTargetSecrets === 'object' && !Array.isArray(rawTargetSecrets)) {
+          targetSecrets = {
+            ...rawTargetSecrets,
+            connectors: rawTargetSecrets.connectors && typeof rawTargetSecrets.connectors === 'object'
+              ? { ...rawTargetSecrets.connectors }
+              : {},
+          }
+        }
+      } catch { /* the isolated profile may not have connector secrets yet */ }
+      for (const id of requestedConnectorIds) {
+        const encrypted = sourceConnectors[id]
+        if (!encrypted || typeof encrypted !== 'object' || Array.isArray(encrypted)) continue
+        targetSecrets.connectors[id] = encrypted
+        encryptedConnectorIds.push(id)
+      }
+      if (encryptedConnectorIds.length) {
+        fs.writeFileSync(targetSecretsFile, `${JSON.stringify(targetSecrets, null, 2)}\n`, 'utf8')
+      }
+    } catch { /* missing source connector secrets remain an explicit runtime configuration block */ }
+  }
   return {
     requested: true,
     copied: true,
-    source: 'encrypted_settings_only',
+    source: 'encrypted_settings_and_key_metadata',
     encryptedProviderConfigured: Boolean(String(next.apiKeyEnc || '').trim()),
+    encryptedKeyMetadataCopied,
+    encryptedConnectorIds,
   }
 }
 
@@ -188,7 +312,11 @@ function cursorHeaderSecrets(item, server) {
 function suiteConnectorConfigurations(suite, env = process.env) {
   const configs = Array.isArray(suite?.setup?.configureConnectors) ? suite.setup.configureConnectors : []
   return configs.map(item => {
-    const { secretsFromCursorHeaders: _secretsFromCursorHeaders, ...publicItem } = item || {}
+    const {
+      secretsFromCursorHeaders: _secretsFromCursorHeaders,
+      seedSecretsFromSource: _seedSecretsFromSource,
+      ...publicItem
+    } = item || {}
     const mcp = item?.mcp && typeof item.mcp === 'object' ? { ...item.mcp } : undefined
     const cursorServerName = String(mcp?.urlFromCursorServer || '').trim()
     const cursorServer = cursorServerName ? readCursorMcpServer(cursorServerName, env) : null
@@ -198,7 +326,7 @@ function suiteConnectorConfigurations(suite, env = process.env) {
       delete mcp.urlFromEnv
     }
     if (!mcp?.url && cursorServer?.url) mcp.url = String(cursorServer.url).trim()
-    delete mcp.urlFromCursorServer
+    if (mcp) delete mcp.urlFromCursorServer
     return {
       ...publicItem,
       ...(mcp ? { mcp } : {}),
@@ -207,6 +335,14 @@ function suiteConnectorConfigurations(suite, env = process.env) {
         : {}),
     }
   }).filter(item => item?.id)
+}
+
+function suiteSourceConnectorIds(suite) {
+  const configs = Array.isArray(suite?.setup?.configureConnectors) ? suite.setup.configureConnectors : []
+  return [...new Set(configs
+    .filter(item => item?.seedSecretsFromSource === true)
+    .map(item => String(item?.id || '').trim())
+    .filter(Boolean))]
 }
 
 function suiteConnectorConfigurationIssues(suite, env = process.env) {
@@ -353,7 +489,7 @@ function lifecycleCheck(item, task, checkpoints) {
     checks.executionRouteSelected = executionRoutes.includes(String(item.routeId).trim())
   }
   if (item.lifecycle === 'cancel_then_retry') {
-    checks.cancelled = events.includes('cancelled')
+    checks.cancelled = checkpoints.cancelledStatus === 'cancelled' || events.includes('cancelled')
     checks.retried = events.includes('retried') || events.includes('resumed')
   }
   if (item.lifecycle === 'request_changes') {
@@ -362,10 +498,13 @@ function lifecycleCheck(item, task, checkpoints) {
     checks.previousVersionLinked = Boolean(primaryDeliverable(task)?.previousVersionId)
   }
   if (item.lifecycle === 'accept_then_reopen') {
-    checks.accepted = events.includes('deliverable_accepted')
-    checks.reopened = events.includes('changes_requested')
-    checks.newVersion = version > Number(checkpoints.initialVersion || 0)
-    checks.previousVersionLinked = Boolean(primaryDeliverable(task)?.previousVersionId)
+    checks.accepted = checkpoints.acceptedStatus === 'completed' || events.includes('deliverable_accepted')
+    checks.reopened = Boolean(checkpoints.reopenedTaskId)
+    checks.newVersion = version >= 1
+    checks.previousVersionLinked = Boolean(
+      checkpoints.acceptedTaskId
+      && task?.taskRef?.id === checkpoints.acceptedTaskId,
+    )
   }
   return { passed: Object.values(checks).every(Boolean), blocked: false, checks, events, executionRoutes }
 }
@@ -389,6 +528,7 @@ function taskSnapshot(task) {
     expertId: task.expertId,
     status: task.status,
     assignmentSnapshot: task.assignmentSnapshot || null,
+    taskRef: task.taskRef || null,
     execRef: task.execRef || null,
     progress: task.progress || null,
     attention: task.attention || null,
@@ -604,7 +744,7 @@ function blockedQualificationRow(item, block, error = '') {
   }
 }
 
-async function runCase(page, item, suite, timeoutMs, modelProfile) {
+async function runCase(page, item, suite, timeoutMs, modelProfile, userData) {
   const startedAt = Date.now()
   const row = {
     evalId: item.id,
@@ -664,7 +804,9 @@ async function runCase(page, item, suite, timeoutMs, modelProfile) {
       const cancelled = await page.evaluate(id => window.api.expertTaskCancel(id), row.taskId)
       if (!cancelled?.ok) throw new Error(cancelled?.error || 'cancel failed')
       row.checkpoints.cancelledStatus = cancelled.task?.status || ''
-      await retryWhenIdle(page, row.taskId)
+      row.checkpoints.cancelledTaskId = row.taskId
+      const retried = await retryWhenIdle(page, row.taskId)
+      if (retried?.task?.id) row.taskId = retried.task.id
       finalTask = await waitForReview(page, row.taskId, timeoutMs)
     } else {
       const initial = item.expectedStatus && item.expectedStatus !== 'review'
@@ -698,15 +840,42 @@ async function runCase(page, item, suite, timeoutMs, modelProfile) {
         })
         if (!accepted?.ok || accepted.task?.status !== 'completed') throw new Error(accepted?.error || 'accept checkpoint did not complete')
         row.checkpoints.acceptedStatus = accepted.task.status
-        const reopened = await page.evaluate(input => window.api.expertTaskReviewDeliverable(input), {
-          taskId: row.taskId,
-          deliverableId,
-          action: 'changes_requested',
-          decision: 'changes_requested',
-          comment: item.reviewComment,
+        row.checkpoints.acceptedTaskId = row.taskId
+        const acceptedDeliverable = [...(accepted.task.deliverables || [])].reverse()
+          .find(deliverable => deliverable.acceptanceStatus === 'accepted')
+          || (accepted.task.deliverables || []).at(-1)
+        const acceptedArtifactRefs = acceptedDeliverable?.artifactRefs?.length
+          ? acceptedDeliverable.artifactRefs
+          : [acceptedDeliverable?.artifactRef].filter(Boolean)
+        const parentSession = accepted.task.execRef?.id
+          ? await page.evaluate(id => window.api.agentSessionGet(id), accepted.task.execRef.id)
+          : null
+        const inheritedMaterials = inheritedImageMaterials(parentSession, acceptedArtifactRefs, userData)
+        const reopened = await page.evaluate(input => window.api.expertTaskCreateStart(input), {
+          expertId: item.expertId,
+          expertName: item.expertId,
+          title: `[${suite.suite || 'qualification'}] ${item.id} 验收后续改`.trim(),
+          taskRef: { id: row.taskId, kind: 'expert-revision' },
+          brief: {
+            goal: `${item.prompt}\n\n验收后追加修改意见：${item.reviewComment || '请按验收后的新信息修订。'}`,
+            materials: [
+              { title: '冻结认证题', content: item.prompt },
+              { title: '验收后追加意见', content: item.reviewComment || '请按验收后的新信息修订。' },
+              ...inheritedMaterials,
+            ],
+            constraints: item.constraints || [
+              '严格依据已知事实，不得编造',
+              '直接在对话中交付完整修订结果',
+              '明确说明本轮修订如何处理追加意见',
+              ...(inheritedMaterials.length ? ['必须把附带的上一版已验收图片作为编辑基图，不得仅凭文字摘要重绘'] : []),
+            ],
+            deliverables: item.deliverables || [{ id: 'primary', title: item.title || '认证交付', type: 'answer', required: true }],
+          },
         })
-        if (!reopened?.ok || !reopened.started) throw new Error(reopened?.error || 'reopen did not start')
-        finalTask = await waitForReview(page, row.taskId, timeoutMs, row.checkpoints.initialVersion + 1)
+        if (!reopened?.ok || !reopened.started || !reopened.task?.id) throw new Error(reopened?.error || 'linked follow-up did not start')
+        row.checkpoints.reopenedTaskId = reopened.task.id
+        row.taskId = reopened.task.id
+        finalTask = await waitForReview(page, row.taskId, timeoutMs)
         } else {
           finalTask = initial
         }
@@ -760,18 +929,33 @@ async function main(argv = process.argv) {
       'Configure the declared connector endpoint/command and rerun the same suite.',
     ].join('\n'))
   }
-  const userData = assertSafeUserData(options.userData)
+  const developmentData = options.allowDevelopmentData === true
+  const userData = assertSafeUserData(options.userData, process.env, {
+    allowDevelopmentData: developmentData,
+  })
+  if (developmentData && String(options.sourceUserData || '').trim()) {
+    throw new Error('--source-user-data cannot be combined with --allow-development-data')
+  }
   const output = reportPath(root, suite, options.output)
-  const timeoutMs = Math.max(10000, Number(suite.executionPolicy?.maxWaitSeconds || 180) * 1000)
+  const declaredWaitSeconds = Math.max(10, Number(suite.executionPolicy?.maxWaitSeconds || 180))
+  const effectiveWaitSeconds = options.maxWaitSeconds || declaredWaitSeconds
+  const timeoutMs = effectiveWaitSeconds * 1000
   const report = {
     schemaVersion: 1,
     suite: suite.suite || path.basename(path.dirname(suiteFile)),
     purpose: suite.purpose || '',
     generatedAt: new Date().toISOString(),
     environment: {
-      isolatedUserData: userData,
+      userDataMode: developmentData ? 'development' : 'isolated',
+      isolatedUserData: developmentData ? null : userData,
+      developmentUserData: developmentData ? userData : null,
       testSeam: true,
-      productionDataProtected: true,
+      productionDataProtected: !developmentData,
+      explicitDevelopmentOptIn: developmentData,
+      declaredMaxWaitSeconds: declaredWaitSeconds,
+      effectiveMaxWaitSeconds: effectiveWaitSeconds,
+      maxWaitOverridden: effectiveWaitSeconds !== declaredWaitSeconds,
+      suiteDeclaredEnvironment: String(suite.executionPolicy?.environment || ''),
       automaticProfessionalAcceptance: false,
       providerSeed: { requested: false, copied: false, reason: 'not_requested' },
     },
@@ -790,7 +974,13 @@ async function main(argv = process.argv) {
   let app
   let setupEnvironmentBlock = null
   try {
-    report.environment.providerSeed = seedEncryptedProviderSettings(options.sourceUserData, userData)
+    report.environment.providerSeed = developmentData
+      ? { requested: false, copied: false, reason: 'development_data_in_place' }
+      : seedEncryptedProviderSettings(
+          options.sourceUserData,
+          userData,
+          suiteSourceConnectorIds(suite),
+        )
     if (report.environment.providerSeed.requested && !report.environment.providerSeed.copied) {
       const error = new Error('source userData 中没有 settings.json，无法为隔离资格任务提供加密 Provider 配置')
       error.qualificationEnvironmentBlock = qualificationEnvironmentBlock(error.message, {
@@ -858,7 +1048,7 @@ async function main(argv = process.argv) {
     for (let index = 0; index < cases.length; index += 1) {
       const item = cases[index]
       process.stdout.write(`[qualification] ${index + 1}/${cases.length} ${item.id} ${item.expertId}\n`)
-      const row = await runCase(page, item, suite, timeoutMs, report.environment.modelProfile)
+      const row = await runCase(page, item, suite, timeoutMs, report.environment.modelProfile, userData)
       report.tasks.push(row)
       writeReport(output, report)
       const lifecycleState = row.lifecycleEvidence?.blocked
@@ -920,12 +1110,15 @@ module.exports = {
   lifecycleCheck,
   loadSuite,
   readCursorMcpServer,
+  retryWhenIdle,
   suiteConnectorConfigurations,
+  suiteSourceConnectorIds,
   cursorHeaderSecrets,
   suiteConnectorConfigurationIssues,
   parseArgs,
   selectCases,
   statusAfterRunError,
   reviewEvidenceFromSession,
+  inheritedImageMaterials,
   toAgentEvalResults,
 }

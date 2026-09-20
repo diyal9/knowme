@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Qualify the first four prioritized production experts against their current configuration before the remaining three experts.",
+  "requiredScenarios": {
+    "normal": 2,
+    "edge": 1,
+    "retry": 1,
+    "revision": 1,
+    "reopen": 1
+  },
+  "experts": [
+    {
+      "id": "image-producer",
+      "sourceSuites": [
+        "skill-evals/rqa69-image-producer-qualification/evals.json",
+        "skill-evals/rqa76-image-producer-qualification/evals.json"
+      ]
+    },
+    {
+      "id": "operations-data-analyst",
+      "sourceSuites": [
+        "skill-evals/rqa180-operations-data-analyst-qualification/evals.json"
+      ]
+    },
+    {
+      "id": "data-analyst",
+      "sourceSuites": [
+        "skill-evals/rqa72-data-analyst-qualification/evals.json"
+      ]
+    },
+    {
+      "id": "software-engineer",
+      "sourceSuites": [
+        "skill-evals/rqa61-software-engineer-qualification/evals.json",
+        "skill-evals/rqa75-software-engineer-qualification/evals.json",
+        "skill-evals/web-expert-visual-reference/evals.json"
+      ]
+    }
+  ]
+}

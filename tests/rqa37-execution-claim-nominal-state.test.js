@@ -60,4 +60,27 @@ describe('RQA37 nominal deleted-state boundary', () => {
       assert.ok(result.violations.some(item => item.code === 'false_execution_claim'), text)
     }
   })
+
+  it('does not turn planned preflight or test conditions into current execution receipts', () => {
+    for (const text of [
+      '预检：确认依赖已安装，再进入导出步骤。',
+      '执行前检查是否已创建目标目录，否则停止并报告。',
+      '测试前置条件：已保存草稿；动作：模拟请求超时。',
+      '可观察结果：重试脚本已执行一次，且没有第二次调用。',
+    ]) {
+      const result = verify(text)
+      assert.equal(result.passed, true, JSON.stringify(result))
+    }
+  })
+
+  it('still blocks first-person verification of completed operations without receipts', () => {
+    for (const text of [
+      '我已经确认依赖已安装。',
+      '我们本次检查后确认已创建目录。',
+    ]) {
+      const result = verify(text)
+      assert.equal(result.passed, false, text)
+      assert.ok(result.violations.some(item => item.code === 'false_execution_claim'), text)
+    }
+  })
 })

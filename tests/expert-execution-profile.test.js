@@ -77,6 +77,19 @@ describe('expert execution profile', () => {
     assert.equal(brief.deliverables[0].minArtifacts, 1)
   })
 
+  it('keeps an explicit conversational report in chat without inventing a file contract', () => {
+    const snap = snapshot({
+      deliverables: [{ id: 'output-1', title: '分析结论', type: 'answer', required: true }],
+    })
+    const brief = hydrateDeliverableContracts({
+      deliverables: [{ id: 'primary', title: '管理层数据报告', type: 'answer', required: true }],
+    }, snap)
+    assert.equal(brief.deliverables[0].type, 'answer')
+    assert.equal(brief.deliverables[0].minArtifacts, 0)
+    assert.equal(brief.deliverables[0].completionConditions.some(item => item.type === 'artifact_present'), false)
+    assert.equal(expectsArtifact(brief.deliverables[0]), false)
+  })
+
   it('selects a manifest route using declared keywords for arbitrary experts', () => {
     const snap = snapshot({ routes: [
       { id: 'calendar', keywords: ['日程', '今天安排'], requiredTools: ['calendar.read'] },

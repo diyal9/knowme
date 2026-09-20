@@ -13,7 +13,7 @@ it('RQA45 data analyst can use bounded calculation without requiring side effect
   const expert = readJson(path.join(ROOT, 'experts/data-analyst/capability.manifest.json'))
   const route = expert.metadata?.knowme?.execution?.routes?.find(item => item.default)
 
-  assert.equal(expert.version, '2.3.0')
+  assert.equal(expert.version, '2.4.3')
   assert.deepEqual(expert.permissions?.tools?.allowlist, ['calculate'])
   assert.equal(expert.permissions?.network, false)
   assert.equal(expert.permissions?.write, false)
@@ -37,6 +37,7 @@ it('RQA45 data analyst owns a full-response numerical and causal review contract
   assert.match(criteria, /全文|摘要|表格|建议/)
   assert.match(criteria, /未知|零|冲突/)
   assert.match(criteria, /因果|竞争解释|证据强度/)
+  assert.match(criteria, /w_t=.*r_B,t.*r_A,t.*严禁混入上一期分群率/)
 })
 
 it('RQA45 keeps the upgraded data analyst package aligned with the catalog', () => {
@@ -45,7 +46,7 @@ it('RQA45 keeps the upgraded data analyst package aligned with the catalog', () 
   const sidecar = readJson(path.join(ROOT, 'experts/data-analyst/manifest.json'))
   const entry = catalog.find(item => item.id === 'data-analyst' && item.kind === 'expert')
 
-  assert.equal(expert.version, '2.3.0')
+  assert.equal(expert.version, '2.4.3')
   assert.equal(sidecar.version, expert.version)
   assert.equal(entry?.version, expert.version)
 })

@@ -25,6 +25,21 @@
         "说明移动端布局及 Vue/React 实现要点",
         "明确当前未真实生图，不把参考方案当作可运行网站"
       ]
+    },
+    {
+      "id": "WEB-INTERFACE-01",
+      "expertId": "software-engineer",
+      "title": "Web 页面交互实现方案",
+      "scenario": "normal",
+      "lifecycle": "create",
+      "routeId": "web-interface-development",
+      "prompt": "请做一个 Vue 页面开发方案：实现带搜索、加载中、空结果、接口错误和重试状态的客户列表组件。当前不提供项目文件且不允许调用工具，请在对话中给出完整组件边界、状态转换、键盘可访问性、移动端适配和可执行测试设计，明确代码尚未落盘或运行。",
+      "assertions": [
+        "进入 web-interface-development 路线，覆盖组件、状态和 API 交互边界",
+        "搜索、加载、空结果、错误、重试和成功状态之间的转换完整且不互相覆盖",
+        "包含键盘可访问性、焦点反馈和移动端布局约束",
+        "区分静态实现方案与真实文件、构建和测试回执，不虚构执行结果"
+      ]
     }
   ]
 }

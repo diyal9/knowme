@@ -4,8 +4,28 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const agentRun = require('../src/lib/agent-run')
-const { buildQualificationContext, createExpertTaskRuntime } = require('../src/lib/expert-task-runtime')
+const { buildQualificationContext, createExpertTaskRuntime, linkedPreviousVersionId } = require('../src/lib/expert-task-runtime')
 const { createStore } = require('../src/lib/workbench-task-store')
+
+it('links a cross-task expert revision to the accepted parent artifact version', () => {
+  const store = {
+    get: id => ({
+      ok: id === 'parent-task',
+      task: {
+        deliverables: [{
+          acceptanceStatus: 'accepted',
+          artifactRefs: ['parent-session#image-original'],
+        }],
+      },
+    }),
+  }
+  assert.equal(linkedPreviousVersionId(store, {
+    taskRef: { id: 'parent-task', kind: 'expert-revision' },
+  }), 'image-original')
+  assert.equal(linkedPreviousVersionId(store, {
+    taskRef: { id: 'parent-task', kind: 'expert-task' },
+  }), '')
+})
 
 for (const scenario of ['exhausted', 'corrected', 'missing', 'approval']) it(`RQA06 real executor ${scenario} does not turn platform failure into an answer artifact`, async t => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-rqa06-'))

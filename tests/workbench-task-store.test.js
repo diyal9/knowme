@@ -18,11 +18,11 @@ describe('workbench task store', () => {
       expertId: 'writer',
       workflowId: 'meeting-notes',
       workflowName: '会议纪要与待办',
-      taskRef: { id: 'task-1', extra: 'ignored' },
+      taskRef: { id: 'task-1', kind: 'expert-revision', extra: 'ignored' },
       knowledgeRefs: [{ id: 'local-default' }, { id: 'local-default' }, { id: 'kp_a' }],
       execRef: { kind: 'session', id: 'session_abc' },
     })
-    assert.deepEqual(task.taskRef, { id: 'task-1' })
+    assert.deepEqual(task.taskRef, { id: 'task-1', kind: 'expert-revision' })
     assert.deepEqual(task.knowledgeRefs, [{ id: 'local-default' }, { id: 'kp_a' }])
     assert.deepEqual(task.execRef, { kind: 'session', id: 'session_abc' })
     assert.equal(task.workflowId, 'meeting-notes')

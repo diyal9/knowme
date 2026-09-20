@@ -26,7 +26,7 @@
   "kind": "skill",
   "name": "网页视觉参考设计",
   "description": "按网站分区设计横向视觉参考，统一品牌与构图；实际出图需要可用的生图工具。",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source": "curated",
   "trust": "bundled",
   "categories": [
@@ -341,7 +341,7 @@
       "kind": "expert",
       "name": "生图执行专家",
       "description": "从视觉目标、方案设计到真实生图和修改验收，完成端到端图像生产。",
-      "version": "4.0.0",
+      "version": "4.0.2",
       "source": "curated",
       "trust": "bundled",
       "categories": ["视觉创意"],
@@ -352,7 +352,7 @@
     {
       "id": "data-analyst", "kind": "expert", "name": "数据分析师",
       "description": "以数据分析、商业洞察和数据报告三种模式交付可复核的分析与决策依据。",
-      "version": "2.3.0", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
+      "version": "2.4.3", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
       "tags": ["data", "analysis", "business", "insight", "report"], "skills": ["data-analysis-method", "business-metrics-analysis", "business-cause-analysis", "business-insight-report", "data-report-method", "writing-polish"], "featured": true, "bundlePath": "experts/data-analyst"
     },
     {
@@ -378,7 +378,7 @@
   "kind": "expert",
   "name": "Web 开发专家",
   "description": "聚焦网站与 Web 系统，以 HTML/CSS、Vue、React、TypeScript 完成前端设计、实现方案、代码审查与质量验证。",
-  "version": "3.1.0",
+  "version": "3.2.7",
   "source": "curated",
   "trust": "bundled",
   "categories": [
@@ -715,7 +715,7 @@
       "kind": "expert",
       "name": "运营数据分析专家·数据靓仔",
       "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表。",
-      "version": "1.0.0",
+      "version": "1.1.1",
       "source": "curated",
       "trust": "bundled",
       "categories": ["数据分析", "知识研究"],

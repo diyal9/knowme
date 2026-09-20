@@ -4,7 +4,7 @@
   "kind": "expert",
   "name": "运营数据分析专家·数据靓仔",
   "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "dependencies": [
     { "id": "th-bi-analytics-assistant", "kind": "skill", "required": true },
     { "id": "data-analysis-method", "kind": "skill", "required": true },
@@ -120,7 +120,7 @@
             "description": "用数数 builder 生成查询并跑数，再完成口径对账、变化拆解和经营解释。",
             "keywords": ["查数", "DAU", "留存", "ARPU", "付费率", "漏斗", "趋势", "异常", "归因"],
             "requiredConnectorIds": ["thinkingdata-analysis-mcp"],
-            "requiredTools": ["mcp.thinkingdata_analysis_mcp.query_adhoc"],
+            "requiredTools": ["mcp.thinkingdata_analysis_mcp.query_adhoc", "calculate"],
             "toolAllowlist": [
               "search_knowledge",
               "calculate",
@@ -139,7 +139,7 @@
             "id": "event-governance",
             "label": "埋点 / OKF 治理",
             "description": "按盘古协议核验事件、属性、枚举和需求埋点，并对 OKF 冲突做只读诊断。",
-            "keywords": ["盘古", "事件", "事件属性", "枚举", "埋点需求", "ingest", "lint", "冲突"],
+            "keywords": ["盘古", "事件", "事件属性", "枚举", "埋点需求", "埋点治理", "治理审查", "协议冲突", "ingest", "lint", "冲突"],
             "toolAllowlist": [
               "search_knowledge",
               "mcp_load_pango_data_mcp",
@@ -155,7 +155,7 @@
           {
             "id": "report-export",
             "label": "导出 TE 报表",
-            "description": "调用源项目 Playwright CLI 脚本点击 TE 页面导出并保存 CSV。",
+            "description": "仅制定方案或明确禁止写文件时直接交付待执行方案，不调用工具；确认实际执行且运行条件齐备后，才调用源项目 Playwright CLI 脚本点击 TE 页面导出并保存 CSV。",
             "keywords": ["导出", "CSV", "TE 报表", "数数报表", "bi.forevernine.net"],
             "toolAllowlist": ["load_skill", "read_skill_resource", "run_skill_script"],
             "requiredSkills": ["te-report-playwright-export"]
@@ -172,7 +172,7 @@
             "id": "analysis-report",
             "label": "运营分析报告",
             "description": "把已经验证的分析组织为结论、证据、限制和行动项一致的运营报告。",
-            "keywords": ["分析报告", "经营复盘", "周报", "月报", "汇报", "管理摘要"],
+            "keywords": ["分析报告", "运营分析报告", "经营分析", "经营摘要", "经营复盘", "ROAS", "周报", "月报", "汇报", "管理摘要"],
             "toolAllowlist": ["search_knowledge", "calculate"],
             "requiredSkills": ["data-report-method", "business-insight-report"]
           }

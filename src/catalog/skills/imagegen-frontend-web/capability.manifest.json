@@ -4,7 +4,7 @@
   "kind": "skill",
   "name": "网页视觉参考设计",
   "description": "按网站分区设计横向视觉参考，统一品牌与构图；实际出图需要可用的生图工具。",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "permissions": {
     "connectors": {
       "allowedConnectorIds": []

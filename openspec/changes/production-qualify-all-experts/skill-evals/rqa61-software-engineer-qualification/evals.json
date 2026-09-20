@@ -16,6 +16,7 @@
       "title": "有界并发执行器",
       "scenario": "normal",
       "lifecycle": "create",
+      "routeId": "answer-only-code",
       "prompt": "请作为软件工程师实现 JavaScript 函数 runPool(tasks, limit)。只在对话中给出完整实现、复杂度、决定性测试设计；不访问文件、不调用工具，不声称已运行。合同：tasks 必须是函数数组，limit 必须是正安全整数，否则返回的 Promise 拒绝 Error('INVALID_ARGUMENT')；每个任务调用后可返回值或 Promise；任意时刻最多 limit 个任务运行；结果保持输入顺序；空数组解析为 []；首个任务失败后最终 Promise 以该原因拒绝，尚未启动的任务不得再启动，已启动任务允许自然收尾且不得产生未处理拒绝；不得重复调用任务。请解释常见的 Promise.race 补位实现为什么容易在失败路径继续启动任务。",
       "assertions": [
         "完整实现统一参数校验、空数组和同步抛错/异步拒绝归一化。",
@@ -31,6 +32,7 @@
       "title": "TTL 单飞缓存竞态",
       "scenario": "edge",
       "lifecycle": "create",
+      "routeId": "answer-only-code",
       "prompt": "请作为软件工程师静态审查并重写一个异步 TTL 单飞缓存 createLoader({ ttlMs, now })，返回 load(key, fetcher)。只在对话中给出完整 JavaScript 实现、状态不变量和定向测试；不访问文件、不调用工具，不声称已运行。合同：ttlMs 为正安全整数，now 是返回单调毫秒数的函数；同一 key 的并发未完成请求必须共享一次 fetcher 调用，不同 key 隔离；只有成功值可缓存，TTL 从成功完成时开始；到期值绝不返回；同步抛错和异步拒绝都不缓存；旧请求的 finally 不能删除同 key 的新 in-flight；禁止用 truthy 判断命中，undefined 也是合法缓存值；公开 invalidate(key)，失效后旧请求即使晚到也不得重新写入；不得泄漏内部可变 Map。",
       "assertions": [
         "参数校验、每 key 的缓存/in-flight/失效代际状态与接口完整。",
@@ -46,6 +48,7 @@
       "title": "取消后重新执行保持原合同",
       "scenario": "retry",
       "lifecycle": "cancel_then_retry",
+      "routeId": "answer-only-code",
       "prompt": "请作为软件工程师实现 JavaScript 函数 retry(operation, options)。只在对话中给出完整实现、边界说明和定向测试；不访问文件、不调用工具，不声称已运行。options={ attempts, baseDelayMs, sleep, signal }：attempts 为总尝试次数且必须为正安全整数，baseDelayMs 为非负安全整数，sleep(ms, signal) 可注入；operation({attempt, signal}) 的 attempt 从1开始；失败后按 baseDelayMs*2^(attempt-1) 延迟，最后一次失败不 sleep；signal 已取消或期间取消时立即以 signal.reason（缺省 Error('ABORTED')）失败且不再重试；sleep 或 operation 同步抛错也按相同规则处理，但 AbortError/取消原因永不重试；指数溢出必须在调用 sleep 前拒绝 Error('INVALID_DELAY')。",
       "assertions": [
         "准确区分总尝试次数与重试次数，attempt 从1开始且最后失败不 sleep。",
@@ -61,6 +64,7 @@
       "title": "退回修改的精确变更",
       "scenario": "revision",
       "lifecycle": "request_changes",
+      "routeId": "answer-only-code",
       "reviewComment": "请保留原合同和测试，只把输入语法进一步收紧：字符串允许首尾 ASCII 空格，但主体必须是规范十进制正整数；拒绝 +1、01、1.0、全角数字和其他 Unicode 空白。请给出完整替换实现并新增这些决定性测试，不要只描述差异。",
       "prompt": "请作为软件工程师实现 parsePositiveInt(value)。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。初始合同：只接受 number 或 string；number 必须是大于0的安全整数；string 可有首尾空白，去除后必须完整表示大于0的十进制安全整数；其他一律抛 Error('INVALID_POSITIVE_INT')；禁止 parseInt 的部分解析，返回 number。",
       "assertions": [
@@ -77,6 +81,7 @@
       "title": "完成后重开并保持既有约束",
       "scenario": "reopen",
       "lifecycle": "accept_then_reopen",
+      "routeId": "answer-only-code",
       "reviewComment": "验收后发现服务端可能错误返回重复 nextCursor。请在保留 AbortSignal、maxPages、去重和结果顺序合同的前提下重开任务：加入游标环检测，检测到任意重复游标时抛 Error('CURSOR_CYCLE')；给出完整替换实现和新增测试。",
       "prompt": "请作为软件工程师实现 async function collectPages(fetchPage, { maxPages, signal })。只在对话中给出完整 JavaScript 实现和定向测试；不访问文件、不调用工具，不声称已运行。合同：maxPages 为正安全整数；fetchPage({cursor,signal}) 返回 {items,nextCursor}，items 必须为数组；从 cursor=null 开始，nextCursor 为 null 时结束；最多调用 maxPages 次，仍有 nextCursor 则抛 Error('PAGE_LIMIT')；signal 取消立即停止；按页面与页内顺序返回结果，并用 SameValueZero 去重，首次出现优先；响应形状非法统一 Error('INVALID_PAGE')。",
       "assertions": [

@@ -109,13 +109,13 @@ it('RQA23 real L1 loads the entire method below existing 2400-char contract with
   assert.equal(deniedBudget.body, undefined)
 })
 
-it('RQA23 expert 2.3.0 selects core through ordinary route and assembles complete L1', () => {
+it('RQA23 expert 2.4.3 selects core through ordinary route and assembles complete L1', () => {
   const experts = createExpertRuntime({ capabilitiesRoot: root })
   const skills = createSkillRuntime({ capabilitiesRoot: root })
   const session = { id: 'rqa23-source-contract', expertId: 'data-analyst' }
   const persona = experts.getSessionPersona(session.id, session.expertId)
   assert.equal(persona.ok, true, persona.message)
-  assert.equal(persona.capabilityManifest.version, '2.3.0')
+  assert.equal(persona.capabilityManifest.version, '2.4.3')
   const dependencies = persona.capabilityManifest.dependencies.filter(item => item.kind === 'skill')
   assert.deepEqual(dependencies.map(({ id, required }) => ({ id, required })), [
     { id, required: true },

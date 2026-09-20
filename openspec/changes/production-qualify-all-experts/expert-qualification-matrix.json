@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "purpose": "The final six retained experts must have configuration-scoped lifecycle evidence before independent semantic review can qualify them.",
+  "purpose": "The seven production experts must have configuration-scoped lifecycle evidence before independent semantic review can qualify them.",
   "requiredScenarios": {
     "normal": 2,
     "edge": 1,
@@ -45,6 +45,10 @@
         "skill-evals/rqa69-image-producer-qualification/evals.json",
         "skill-evals/rqa76-image-producer-qualification/evals.json"
       ]
+    },
+    {
+      "id": "operations-data-analyst",
+      "sourceSuites": ["skill-evals/rqa180-operations-data-analyst-qualification/evals.json"]
     }
   ]
 }

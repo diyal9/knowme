@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "suite": "RQA72",
+  "purpose": "Determine whether the current data-analyst configuration can produce reproducible, evidence-bounded analysis through the complete task lifecycle.",
+  "generatedAt": "2026-09-20T04:03:32.673Z",
+  "environment": {
+    "userDataMode": "development",
+    "isolatedUserData": null,
+    "developmentUserData": "C:\\Users\\Administrator\\AppData\\Roaming\\KnowMe",
+    "testSeam": true,
+    "productionDataProtected": false,
+    "explicitDevelopmentOptIn": true,
+    "suiteDeclaredEnvironment": "isolated KnowMe QA userData",
+    "automaticProfessionalAcceptance": false,
+    "providerSeed": {
+      "requested": false,
+      "copied": false,
+      "reason": "development_data_in_place"
+    },
+    "modelProfile": {
+      "provider": "dashscope",
+      "model": "qwen3.8-flash",
+      "label": "Qwen 3.8 Flash",
+      "maxOutput": 131072
+    }
+  },
+  "policy": {
+    "environment": "isolated KnowMe QA userData",
+    "externalActionsAllowed": false,
+    "toolsAllowed": true,
+    "maxWaitSeconds": 180
+  },
+  "setup": {
+    "installCapabilities": [
+      "data-analyst"
+    ],
+    "configuredConnectors": [],
+    "installed": [
+      {
+        "id": "data-analyst",
+        "version": ""
+      }
+    ],
+    "configured": []
+  },
+  "selectedCases": [
+    "DA06"
+  ],
+  "tasks": [
+    {
+      "evalId": "DA06",
+      "expertId": "data-analyst",
+      "title": "完成后重开并保持指标口径",
+      "scenario": "reopen",
+      "lifecycle": "accept_then_reopen",
+      "expectedStatus": "",
+      "assertions": [
+        "重开后的完整新版保留原有分子分母、渠道互斥、观察窗及缺少因果证据的限制。",
+        "新增新老用户分层计划，明确样本单位、指标、观察窗和最小可解释条件，不伪造显著性或样本量结果。",
+        "分层结果可能支持、削弱或无法判断原结论，保留反证与停止条件，不把计划写成已完成分析。",
+        "新增内容与原报告摘要、正文和建议保持同一口径，不能把新用户子集冒充总体。",
+        "任务真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。"
+      ],
+      "status": "failed",
+      "taskId": "task-mu9alt61-op9zl",
+      "checkpoints": {
+        "initialVersion": 1,
+        "initialStatus": "review",
+        "acceptedStatus": "completed",
+        "acceptedTaskId": "task-mu9ake0y-xfr0z",
+        "reopenedTaskId": "task-mu9alt61-op9zl"
+      },
+      "lifecycleEvidence": {
+        "passed": false,
+        "blocked": false,
+        "checks": {
+          "endedInExpectedState": false,
+          "hasDeliverable": false,
+          "accepted": true,
+          "reopened": true,
+          "newVersion": false,
+          "previousVersionLinked": true
+        },
+        "events": [
+          "created",
+          "preflight_passed",
+          "preflight_started",
+          "preflight_passed",
+          "task_started",
+          "sop_applied",
+          "progress",
+          "progress",
+          "tool_progress",
+          "progress"
+        ],
+        "executionRoutes": []
+      },
+      "configuration": {
+        "configurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+        "qualificationContext": {
+          "contractVersion": 2,
+          "configurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+          "complete": true,
+          "missing": [],
+          "runtime": {
+            "hash": "bfa80cd34f2338d2555e4d19f03dbbfa2535e4e70ac079939299c30b162a14e2"
+          },
+          "agent": {
+            "id": "data-analyst",
+            "version": "2.4.3",
+            "hash": "d974275ede515f42"
+          },
+          "skills": [
+            {
+              "id": "business-cause-analysis",
+              "hash": "7c682168641059e6"
+            },
+            {
+              "id": "business-insight-report",
+              "hash": "ed3169472ea54e83"
+            },
+            {
+              "id": "business-metrics-analysis",
+              "hash": "3ef3e084c6c28bde"
+            },
+            {
+              "id": "data-analysis-method",
+              "hash": "447bc23b8c56af98"
+            },
+            {
+              "id": "data-report-method",
+              "hash": "41b550a41c5c5254"
+            },
+            {
+              "id": "writing-polish",
+              "hash": "1186da38fb069bbb"
+            }
+          ],
+          "connectors": [],
+          "model": {
+            "provider": "dashscope",
+            "id": "qwen3.8-flash",
+            "requestedId": "qwen3.8-flash",
+            "label": "Qwen 3.8 Flash",
+            "autoRouted": false
+          }
+        },
+        "executionEvidenceCount": 0,
+        "toolCallCount": 0,
+        "violations": [],
+        "identitySource": "persisted_assignment_snapshot+active_model_profile"
+      },
+      "environmentBlock": null,
+      "semanticReview": "pending_independent_review",
+      "hardAssertionsPassed": null,
+      "certificationEligible": false,
+      "task": {
+        "id": "task-mu9alt61-op9zl",
+        "expertId": "data-analyst",
+        "status": "running",
+        "assignmentSnapshot": {
+          "agentId": "data-analyst",
+          "agentVersion": "2.4.3",
+          "agentHash": "d974275ede515f42",
+          "hashes": {
+            "expert": "d974275ede515f42",
+            "skills": {
+              "business-cause-analysis": "7c682168641059e6",
+              "business-insight-report": "ed3169472ea54e83",
+              "business-metrics-analysis": "3ef3e084c6c28bde",
+              "data-analysis-method": "447bc23b8c56af98",
+              "data-report-method": "41b550a41c5c5254",
+              "writing-polish": "1186da38fb069bbb"
+            },
+            "connectors": {}
+          },
+          "profileId": "",
+          "profileVersion": "",
+          "profileHash": "",
+          "snapshotRef": "expert-snapshot:wb-expert-task-mu9alt61-op9zl",
+          "bindings": {
+            "skills": [
+              "data-analysis-method",
+              "business-metrics-analysis",
+              "business-cause-analysis",
+              "business-insight-report",
+              "data-report-method",
+              "writing-polish"
+            ],
+            "connectors": []
+          },
+          "optionalSkillIds": [
+            "writing-polish"
+          ],
+          "permissions": {
+            "connectors": {
+              "allowedConnectorIds": []
+            },
+            "tools": {
+              "allowlist": [
+                "calculate"
+              ]
+            },
+            "network": false,
+            "write": false,
+            "externalWrite": false
+          },
+          "plan": null,
+          "sop": {
+            "version": "2.4.3",
+            "hash": "d974275ede515f42"
+          }
+        },
+        "taskRef": {
+          "id": "task-mu9ake0y-xfr0z",
+          "kind": "expert-revision"
+        },
+        "execRef": {
+          "kind": "session",
+          "id": "wb-expert-task-mu9alt61-op9zl"
+        },
+        "progress": {
+          "phase": "running",
+          "label": "正在整理最终答复…",
+          "detail": "正在整理最终答复…",
+          "startedAt": "2026-09-20T04:04:52.302Z",
+          "updatedAt": "2026-09-20T04:07:53.072Z",
+          "heartbeatAt": "2026-09-20T04:07:57.681Z"
+        },
+        "attention": null,
+        "resultSummary": "",
+        "events": [
+          {
+            "id": "event-1",
+            "type": "created",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 1,
+            "summary": "已确认委托单并开始预检",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:49.513Z"
+          },
+          {
+            "id": "event-2",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 2,
+            "summary": "预检通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.124Z"
+          },
+          {
+            "id": "event-3",
+            "type": "preflight_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 3,
+            "summary": "正在检查技能、连接器和工具权限",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.305Z"
+          },
+          {
+            "id": "event-4",
+            "type": "preflight_passed",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 4,
+            "summary": "执行条件检查通过",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.931Z"
+          },
+          {
+            "id": "event-5",
+            "type": "task_started",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 5,
+            "summary": "专家已开始执行",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.931Z"
+          },
+          {
+            "id": "event-6",
+            "type": "sop_applied",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 6,
+            "summary": "已按 SOP 路由执行：检查数据口径、质量、计算和推理边界，交付可复算分析。",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.931Z"
+          },
+          {
+            "id": "event-7",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 7,
+            "summary": "正在准备上下文…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:52.940Z"
+          },
+          {
+            "id": "event-8",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 8,
+            "summary": "上下文准备完成",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:04:57.748Z"
+          },
+          {
+            "id": "event-9",
+            "type": "tool_progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 9,
+            "summary": "调用工具：calculate",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:05:09.707Z"
+          },
+          {
+            "id": "event-10",
+            "type": "progress",
+            "kind": "event",
+            "source": "expert",
+            "sequence": 10,
+            "summary": "正在整理最终答复…",
+            "actorId": "",
+            "createdAt": "2026-09-20T04:07:00.048Z"
+          }
+        ],
+        "deliverables": [],
+        "executionEvidence": [],
+        "createdAt": "2026-09-20T04:04:49.513Z",
+        "updatedAt": "2026-09-20T04:07:57.684Z"
+      },
+      "transcript": {
+        "sessionId": "wb-expert-task-mu9alt61-op9zl",
+        "messages": [
+          {
+            "role": "user",
+            "text": "你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；聚合与结构分解必须按同一期权重和分群率对账，反推两组权重只用 `w_t=(r_t-r_{B,t})/(r_{A,t}-r_{B,t})`，变量逐项标时期并回代，不能把上一期某组率混入本期公式；同一问题先校验全部时期输入，再把正确算式一次提交 calculate，发现混期即废弃其全部派生结果，不得沿用错误权重继续分析；任何反推权重都显式列出“分群互斥且穷尽全量”等必要假设；人数或金额恒等式不得冒充率的结构分解，人数变化与百分点变化不得混用。分层计划必须统一样本单位、指标、观察窗、最小条件和停止规则。修订稿逐项清除旧数字、旧公式和旧结论。报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。同一问题的相关算式必须先按时期列成检查表并合并为一次 calculate 调用；若发现任一算式混期或录入错误，立即废弃由它派生的全部数值，不得沿用错误权重继续分解，只有工具返回结构性错误时才重试。数据报告模式不得借改写之名重算或补造数据。\n4. 聚合率与结构分解必须先写清每期分群分子分母和权重；本期总体只用本期权重乘本期分群率。两组反推权重必须按同一期公式 `w_t=(r_t-r_{B,t})/(r_{A,t}-r_{B,t})`，逐项标注总体率、A 组率、B 组率和时期，再用同一期三项回代。若总体率位于两组率之间，反推权重应落在 [0,1] 且回代恒等；不满足时先判定公式、时期或录入使用错误，不能直接宣布材料矛盾。反事实分解必须明确基准期权重/率并与总体变化对账；即使代数上可由总体反推权重，只要“分群互斥且穷尽全量”尚未被材料确认，就只能把权重和结论写成依赖该假设的敏感性结果。严格区分人数/金额等总量恒等式与率的组内效应、结构效应：前者按原单位相加，不能冒充后者，也不能用人数变化解释百分点变化；缺少分组数据时明确结构分解不可识别。\n5. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法。分层验证计划统一声明样本单位、指标、观察窗、最小可解释条件和停止规则；预期小样本不得补造显著性或总体结论。\n6. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分。修订时从摘要到表格、正文、建议和限制逐项替换所有受影响数字与方向，删除旧数字、旧公式和被撤回的确定结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n验收后追加修改意见：验收后新增要求：在保留原报告全部口径和限制的基础上，增加按新老用户分层的验证计划。新用户样本预计较小，不能因此补造显著性或整体结论。请交付完整新版，并把分层指标、最小样本说明、停止条件和可能反证加入建议。\n\n当前时间：2026-09-20T04:04:52.934Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n- 验收后追加意见\n验收后新增要求：在保留原报告全部口径和限制的基础上，增加按新老用户分层的验证计划。新用户样本预计较小，不能因此补造显著性或整体结论。请交付完整新版，并把分层指标、最小样本说明、停止条件和可能反证加入建议。\n\n本轮交付物：完成后重开并保持指标口径（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整修订结果\n- 明确说明本轮修订如何处理追加意见\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。",
+            "runId": "expert_task-mu9alt61-op9zl_mu9alvt2",
+            "createdAt": "2026-09-20T04:04:53.106Z"
+          }
+        ],
+        "text": "user: 你是组织内专业 Agent「data-analyst」。\n\n你是 KnowMe 数据分析师，统一承担数据分析、商业洞察和数据报告。根据委托选择对应方法，只加载当前模式所需技能。遵守材料和工具授权，区分计算、相关观察、竞争解释与因果结论；聚合与结构分解必须按同一期权重和分群率对账，反推两组权重只用 `w_t=(r_t-r_{B,t})/(r_{A,t}-r_{B,t})`，变量逐项标时期并回代，不能把上一期某组率混入本期公式；同一问题先校验全部时期输入，再把正确算式一次提交 calculate，发现混期即废弃其全部派生结果，不得沿用错误权重继续分析；任何反推权重都显式列出“分群互斥且穷尽全量”等必要假设；人数或金额恒等式不得冒充率的结构分解，人数变化与百分点变化不得混用。分层计划必须统一样本单位、指标、观察窗、最小条件和停止规则。修订稿逐项清除旧数字、旧公式和旧结论。报告只组织已验证结果。用户未要求文件时在对话中展示结果，绝不把工具成功或写下算式当成正确性的证明。\n\n【必须遵循的 SOP】\n1. 先识别本次是通用数据分析、商业洞察还是数据报告；确认问题、决策对象、分析单位、时间窗口、字段含义、读者和授权范围。\n2. 数据分析模式用 data-analysis-method 检查实体集合、重复、冲突、缺失和计算口径；商业洞察模式组合 business-metrics-analysis、business-cause-analysis 与 business-insight-report；数据报告模式只用 data-report-method 组织已经验证的分析。\n3. 需要计算时使用可复算的筛选、总数、分母和算式；复杂或影响决策的算式优先使用授权的只读计算工具。同一问题的相关算式必须先按时期列成检查表并合并为一次 calculate 调用；若发现任一算式混期或录入错误，立即废弃由它派生的全部数值，不得沿用错误权重继续分解，只有工具返回结构性错误时才重试。数据报告模式不得借改写之名重算或补造数据。\n4. 聚合率与结构分解必须先写清每期分群分子分母和权重；本期总体只用本期权重乘本期分群率。两组反推权重必须按同一期公式 `w_t=(r_t-r_{B,t})/(r_{A,t}-r_{B,t})`，逐项标注总体率、A 组率、B 组率和时期，再用同一期三项回代。若总体率位于两组率之间，反推权重应落在 [0,1] 且回代恒等；不满足时先判定公式、时期或录入使用错误，不能直接宣布材料矛盾。反事实分解必须明确基准期权重/率并与总体变化对账；即使代数上可由总体反推权重，只要“分群互斥且穷尽全量”尚未被材料确认，就只能把权重和结论写成依赖该假设的敏感性结果。严格区分人数/金额等总量恒等式与率的组内效应、结构效应：前者按原单位相加，不能冒充后者，也不能用人数变化解释百分点变化；缺少分组数据时明确结构分解不可识别。\n5. 检查结果适用范围、比较口径、竞争解释和证据强度；商业洞察保留反证和最小验证办法。分层验证计划统一声明样本单位、指标、观察窗、最小可解释条件和停止规则；预期小样本不得补造显著性或总体结论。\n6. 直接交付完整分析、洞察或报告以及限制、风险和建议；缺口存在时仍给可靠部分。修订时从摘要到表格、正文、建议和限制逐项替换所有受影响数字与方向，删除旧数字、旧公式和被撤回的确定结论，不制造文件或虚报已运行。\n\n这是单 Agent 正式任务。禁止调用或模拟其他 Agent；信息不足时明确列出缺口，不得臆造。\n\n目标：请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n\n验收后追加修改意见：验收后新增要求：在保留原报告全部口径和限制的基础上，增加按新老用户分层的验证计划。新用户样本预计较小，不能因此补造显著性或整体结论。请交付完整新版，并把分层指标、最小样本说明、停止条件和可能反证加入建议。\n\n当前时间：2026-09-20T04:04:52.934Z\n\n材料：\n- 冻结认证题\n请作为数据分析师整理一份虚构落地页复盘，不生成文件。上周总体注册率 9.2%，本周 3.9%；搜索从 10% 到 12%，展示从 2% 到 3%；渠道互斥且两期完整观察，但没有用户级新老标签、费用、收入、留存和同期对照。请交付可复核结论、限制和不执行任何外部动作的验证建议。\n- 验收后追加意见\n验收后新增要求：在保留原报告全部口径和限制的基础上，增加按新老用户分层的验证计划。新用户样本预计较小，不能因此补造显著性或整体结论。请交付完整新版，并把分层指标、最小样本说明、停止条件和可能反证加入建议。\n\n本轮交付物：完成后重开并保持指标口径（answer）\n\n本轮 SOP 路由：data-analysis-method。检查数据口径、质量、计算和推理边界，交付可复算分析。\n\n能力适配提醒：当前目标未命中专门 SOP 路由，暂使用专家声明的默认通用路由。执行前快速核对目标、交付类型和所需能力是否匹配，不匹配时先说明边界。\n\n约束：\n- 严格依据已知事实，不得编造\n- 直接在对话中交付完整修订结果\n- 明确说明本轮修订如何处理追加意见\n\n用正常对话交付结果。是否生成文件由用户需求和 Agent 交付契约决定，不要把状态、错误或普通回复包装成文档。工具返回的成果由平台统一预览，回复不重复嵌入图片或本地文件路径。\n\n尊重用户确认的数量与范围；达到要求后交付，不因看不到平台预览而重复调用已成功的生成操作。若质量检查需要额外付费生成，应先解释原因并征求用户同意。缺少事实时说明缺口，不得编造。"
+      },
+      "error": "Error: waiting for review v1 timed out after 180s (last status: running)\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:404:9)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:871:21)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1039:19)",
+      "elapsedMs": 256320,
+      "install": {
+        "ok": true,
+        "id": "data-analyst",
+        "version": ""
+      },
+      "cleanup": {
+        "attempted": true,
+        "ok": true,
+        "status": "cancelled",
+        "reason": "qualification_harness_timeout_or_failure"
+      },
+      "reviewEvidence": {
+        "artifacts": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "lifecyclePassed": 0,
+    "lifecycleBlocked": 0,
+    "lifecycleFailed": 1,
+    "runtimeFailed": 1,
+    "runtimeNeedsInput": 0,
+    "environmentBlocked": 0,
+    "runtimeCancelled": 0,
+    "semanticReviewPending": 1,
+    "professionallyQualified": 0
+  }
+}

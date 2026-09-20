@@ -103,7 +103,15 @@ function markdownCitationProse(text, { includeCode = false, knownSourceIds = [] 
 // Link definitions inside code cannot change the interpretation of real prose.
 function explicitSourceIds(text = '', knownSourceIds = []) {
   const known = new Set(knownSourceIds)
-  return [...new Set([...markdownCitationProse(text, { knownSourceIds: known }).matchAll(/\[([A-Za-z0-9_.-]+)\]/gu)]
+  const prose = markdownCitationProse(text, { knownSourceIds: known })
+  return [...new Set([...prose.matchAll(/\[([A-Za-z0-9_.-]+)\]/gu)]
+    // JavaScript prose commonly contains cache[key] or rows[index] outside a
+    // fenced block. A lowercase identifier immediately attached to another
+    // ASCII identifier is an index expression, not a source citation. Keep
+    // standalone and registered IDs strict, including lowercase [r1].
+    .filter(match => known.has(match[1])
+      || !(/^[a-z_$][a-z0-9_$]*$/u.test(match[1])
+        && /[A-Za-z0-9_$.)\]]/u.test(prose[match.index - 1] || '')))
     .map(match => match[1])
     // Unregistered punctuation-only blanks are form/template placeholders.
     // A real registered punctuation ID still binds to its own source; unknown

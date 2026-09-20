@@ -19,6 +19,8 @@ const USER_HISTORY_ATTRIBUTION = /(?:(?:根据|按照|按)(?:你|用户)(?:所)?
 const CURRENT_AGENT_ACTOR = /(?:(?:我|我们)(?:刚刚|本次)?|本次(?:执行|操作)|刚刚)\s*$/u
 const NON_AGENT_EXECUTION_ACTOR = /(?:服务端|客户端|系统|设备|账号|用户|工作区|文档|正文|缓存|索引|许可|授权|版本|任务|结果|数据|记录|资源|文件|流程|迁移|回退)\s*$/u
 const HYPOTHETICAL_EXECUTION_CONTEXT = /(?:如果|若|即使|假设|当|待|一旦|仅当|在.+(?:前|后)|完成后|回退时|迁移时)[^。！？!?；;\n]*$/u
+const PLANNED_VERIFICATION_CONTEXT = /(?:前置条件|预检|执行前|写入前|导出前|部署前|发布前|测试步骤|测试设计|测试用例|可观察结果|预期结果|验证方法|验收条件|检查|核验|校验|验证|确保|等待|待办)[^。！？!?；;\n]{0,48}$/u
+const EXPLICIT_AGENT_VERIFICATION = /(?:我|我们)(?:已(?:经)?|刚刚|本次)[^。！？!?；;\n]{0,48}(?:确认|检查|核验|校验|验证)[^。！？!?；;\n]{0,48}$/u
 const HISTORICAL_EXECUTION_STATES = [
   { claim: /已(?:经)?读取|已完成读取|已成功读取|读取完成|读取成功/giu, source: /已(?:经)?读取|读取(?:完成|成功)/iu, replacement: '历史读取状态' },
   { claim: /已(?:经)?创建(?:文件|目录|文档)/giu, source: /已(?:经)?创建(?:文件|目录|文档)|(?:文件|目录|文档)创建成功/iu, replacement: '历史创建状态' },
@@ -157,8 +159,10 @@ function maskNonAgentExecutionState(text) {
     const offset = args.at(-2)
     const source = args.at(-1)
     const clause = source.slice(Math.max(0, source.lastIndexOf('。', offset) + 1), offset)
-    if (CURRENT_AGENT_ACTOR.test(clause)) return match
-    if (NON_AGENT_EXECUTION_ACTOR.test(clause) || HYPOTHETICAL_EXECUTION_CONTEXT.test(clause)) {
+    if (CURRENT_AGENT_ACTOR.test(clause) || EXPLICIT_AGENT_VERIFICATION.test(clause)) return match
+    if (NON_AGENT_EXECUTION_ACTOR.test(clause)
+      || HYPOTHETICAL_EXECUTION_CONTEXT.test(clause)
+      || PLANNED_VERIFICATION_CONTEXT.test(clause)) {
       return '外部或条件状态'
     }
     return match

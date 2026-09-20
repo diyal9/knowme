@@ -4,6 +4,7 @@ const crypto = require('crypto')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const sharp = require('sharp')
 const { validateImageBytes, imageFailure, MAX_IMAGE_BYTES, IMAGE_MIME_EXTENSIONS } = require('./image-validation')
 const { downloadImageBytes } = require('./image-download')
 const { describeImageMetadata } = require('./image-artifact-metadata')
@@ -47,6 +48,15 @@ const IMAGE_TOOL_DEFS = [
             description: '参考图：使用本轮图片旁提供的 attachment:image_<完整SHA256> 附件引用，或当前会话的 artifact:资源ID；原样复制已提供的引用，不自行编造，也不以附件名称或路径代替附件引用。仍支持已登记的图片成果路径、HTTPS URL 或 data URL。修改现有图片时必须传入对应原图。',
           },
           include_cos_urls: { type: 'boolean', description: '是否同时返回云端预览链接，默认 true。' },
+          solid_background: {
+            type: 'object',
+            description: '仅当用户明确要求精确纯色背景时使用。平台会在生图返回后，把边界连通的原背景确定性归一化为指定颜色，并以实际像素回执验收；不会把此内部参数发送给生图服务。',
+            properties: {
+              color: { type: 'string', pattern: '^#[0-9A-Fa-f]{6}$', description: '目标背景色，例如 #F2F3F5。' },
+            },
+            required: ['color'],
+            additionalProperties: false,
+          },
         },
         required: ['prompt'],
         additionalProperties: false,
@@ -200,15 +210,137 @@ function imagePayload(block) {
   return { mimeType, base64: value }
 }
 
+function solidBackgroundRequest(value) {
+  if (value == null) return null
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+  const match = String(value.color || '').trim().match(/^#([0-9a-f]{6})$/i)
+  if (!match || Object.keys(value).some(key => key !== 'color')) return false
+  const hex = match[1].toUpperCase()
+  return {
+    color: `#${hex}`,
+    rgb: [0, 2, 4].map(offset => Number.parseInt(hex.slice(offset, offset + 2), 16)),
+  }
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b)
+  return sorted[Math.floor(sorted.length / 2)] || 0
+}
+
+async function normalizeSolidBackground(buffer, request, opts = {}) {
+  if (!request) return { ok: true, buffer, mimeType: '', evidence: null }
+  if (opts.signal?.aborted) return imageFailure('image_cancelled')
+  try {
+    sharp.cache(false)
+    const decoded = await sharp(buffer, { animated: false, failOn: 'warning', limitInputPixels: 32 * 1024 * 1024 })
+      .rotate()
+      .toColourspace('srgb')
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+    if (opts.signal?.aborted) return imageFailure('image_cancelled')
+    const { width, height, channels } = decoded.info
+    if (!width || !height || channels !== 4) return imageFailure('image_background_normalization_failed')
+    const pixels = decoded.data
+    const border = []
+    const addBorder = index => border.push([pixels[index], pixels[index + 1], pixels[index + 2]])
+    for (let x = 0; x < width; x += 1) {
+      addBorder(x * channels)
+      if (height > 1) addBorder(((height - 1) * width + x) * channels)
+    }
+    for (let y = 1; y < height - 1; y += 1) {
+      addBorder((y * width) * channels)
+      if (width > 1) addBorder((y * width + width - 1) * channels)
+    }
+    const seed = [0, 1, 2].map(channel => median(border.map(pixel => pixel[channel])))
+    const toleranceSquared = 96 * 96
+    const candidate = pixelIndex => {
+      const offset = pixelIndex * channels
+      if (pixels[offset + 3] === 0) return true
+      const dr = pixels[offset] - seed[0]
+      const dg = pixels[offset + 1] - seed[1]
+      const db = pixels[offset + 2] - seed[2]
+      return dr * dr + dg * dg + db * db <= toleranceSquared
+    }
+    const total = width * height
+    const visited = new Uint8Array(total)
+    const queue = new Uint32Array(total)
+    let head = 0
+    let tail = 0
+    const enqueue = index => {
+      if (visited[index] || !candidate(index)) return
+      visited[index] = 1
+      queue[tail++] = index
+    }
+    for (let x = 0; x < width; x += 1) {
+      enqueue(x)
+      enqueue((height - 1) * width + x)
+    }
+    for (let y = 1; y < height - 1; y += 1) {
+      enqueue(y * width)
+      enqueue(y * width + width - 1)
+    }
+    while (head < tail) {
+      const index = queue[head++]
+      const x = index % width
+      const y = Math.floor(index / width)
+      if (x > 0) enqueue(index - 1)
+      if (x + 1 < width) enqueue(index + 1)
+      if (y > 0) enqueue(index - width)
+      if (y + 1 < height) enqueue(index + width)
+    }
+    const ratio = tail / total
+    if (ratio < 0.05 || ratio > 0.95) return imageFailure('image_background_not_detected')
+    for (let index = 0; index < total; index += 1) {
+      if (!visited[index]) continue
+      const offset = index * channels
+      pixels[offset] = request.rgb[0]
+      pixels[offset + 1] = request.rgb[1]
+      pixels[offset + 2] = request.rgb[2]
+      pixels[offset + 3] = 255
+    }
+    const output = await sharp(pixels, { raw: { width, height, channels } }).png().toBuffer()
+    return {
+      ok: true,
+      buffer: output,
+      mimeType: 'image/png',
+      evidence: {
+        protocol: 'knowme.solid-background/v1',
+        source: 'deterministic-border-connected-pixels',
+        color: request.color,
+        replacedPixels: tail,
+        replacedRatio: Number(ratio.toFixed(6)),
+        verified: true,
+      },
+    }
+  } catch {
+    return imageFailure(opts.signal?.aborted ? 'image_cancelled' : 'image_background_normalization_failed')
+  }
+}
+
 async function saveValidatedImage(buffer, mimeType, index, opts = {}) {
-  const validated = await validateImageBytes(buffer, mimeType, opts)
+  let outputBuffer = buffer
+  let outputMimeType = mimeType
+  let backgroundEvidence = null
+  const initial = await validateImageBytes(outputBuffer, outputMimeType, opts)
+  if (!initial.ok) return initial
+  if (opts.solidBackground) {
+    const normalized = await normalizeSolidBackground(outputBuffer, opts.solidBackground, opts)
+    if (!normalized.ok) return normalized
+    outputBuffer = normalized.buffer
+    outputMimeType = normalized.mimeType
+    backgroundEvidence = normalized.evidence
+  }
+  const validated = opts.solidBackground
+    ? await validateImageBytes(outputBuffer, outputMimeType, opts)
+    : initial
   if (!validated.ok) return validated
   if (opts.signal?.aborted) return imageFailure('image_cancelled')
   if (!opts.userData || !path.isAbsolute(String(opts.userData))) return imageFailure('image_save_failed')
   const safeRunId = String(opts.runId || 'image-run').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 100)
   const outputDir = path.join(String(opts.userData), 'generated-images', safeRunId)
   const extension = IMAGE_MIME_EXTENSIONS[validated.mimeType]
-  const digest = crypto.createHash('sha256').update(buffer).digest('hex').slice(0, 16)
+  const digest = crypto.createHash('sha256').update(outputBuffer).digest('hex').slice(0, 16)
   const file = path.join(outputDir, `generated-${String(index + 1).padStart(2, '0')}-${digest}${extension}`)
   let temp = ''
   let ownsTemp = false
@@ -216,14 +348,14 @@ async function saveValidatedImage(buffer, mimeType, index, opts = {}) {
     fs.mkdirSync(outputDir, { recursive: true })
     if (fs.existsSync(file)) {
       const stat = fs.lstatSync(file)
-      if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== buffer.length || !fs.readFileSync(file).equals(buffer)) {
+      if (!stat.isFile() || stat.isSymbolicLink() || stat.size !== outputBuffer.length || !fs.readFileSync(file).equals(outputBuffer)) {
         return imageFailure('image_save_failed')
       }
     } else {
       temp = `${file}.${crypto.randomBytes(8).toString('hex')}.tmp`
       const handle = fs.openSync(temp, 'wx')
       ownsTemp = true
-      try { fs.writeFileSync(handle, buffer) } finally { fs.closeSync(handle) }
+      try { fs.writeFileSync(handle, outputBuffer) } finally { fs.closeSync(handle) }
       fs.renameSync(temp, file)
     }
     return { ok: true, artifact: {
@@ -237,8 +369,9 @@ async function saveValidatedImage(buffer, mimeType, index, opts = {}) {
       meta: { image: {
         protocol: 'knowme.image-metadata/v1', source: 'decoded-file',
         width: validated.displayWidth, height: validated.displayHeight,
-        frames: validated.pages, mimeType: validated.mimeType, byteLength: buffer.length,
-        sha256: crypto.createHash('sha256').update(buffer).digest('hex'),
+        frames: validated.pages, mimeType: validated.mimeType, byteLength: outputBuffer.length,
+        sha256: crypto.createHash('sha256').update(outputBuffer).digest('hex'),
+        ...(backgroundEvidence ? { solidBackground: backgroundEvidence } : {}),
       } },
     } }
   } catch {
@@ -334,6 +467,11 @@ function buildImageTools(opts = {}) {
     generate_image: async (args = {}) => {
       const prompt = String(args.prompt || '').trim()
       if (!prompt) return createPreDispatchFailure('invalid_args', 'generate_image 需要完整 prompt')
+      const solidBackground = solidBackgroundRequest(args.solid_background)
+      if (solidBackground === false) {
+        return createPreDispatchFailure('invalid_args', 'solid_background 需要且只接受 #RRGGBB color')
+      }
+      const { solid_background: _solidBackground, ...providerArgs } = args
       let references = args.reference_images
       if (Array.isArray(references) && references.length && opts.resolveMediaReference) {
         try {
@@ -343,15 +481,18 @@ function buildImageTools(opts = {}) {
         }
       }
       const called = await callPangoTool(resolveConfig(), 'generate_image', {
-        ...args,
+        ...providerArgs,
         ...(references ? { reference_images: references } : {}),
         prompt,
         n: Math.max(1, Math.min(4, Math.floor(Number(args.n) || 1))),
         include_cos_urls: args.include_cos_urls !== false,
       }, opts)
       if (!called.ok) return { ...called, text: called.message }
-      const persisted = await persistImageBlocks(called.result?.content, opts)
-      const imageResult = persisted.code === 'pango_no_image' ? await persistImageUrls(called.result?.content, opts) : persisted
+      const persistenceOptions = { ...opts, ...(solidBackground ? { solidBackground } : {}) }
+      const persisted = await persistImageBlocks(called.result?.content, persistenceOptions)
+      const imageResult = persisted.code === 'pango_no_image'
+        ? await persistImageUrls(called.result?.content, persistenceOptions)
+        : persisted
       if (!imageResult.ok) return { ...imageResult, text: imageResult.message }
       const count = imageResult.artifactRefs.length
       const providerNote = withoutImageUrls(resultText(called.result))
@@ -359,6 +500,7 @@ function buildImageTools(opts = {}) {
         ok: true,
         text: [`已生成 ${count} 张图片，预览已附在成果区。`,
           ...imageResult.artifactRefs.map(describeImageMetadata),
+          ...(solidBackground ? [`已确定性归一化边界连通背景为 ${solidBackground.color}；颜色与像素范围记录在图片回执中。`] : []),
           '尺寸和格式来自实际文件解码，不是请求参数；不代表画面内容已通过验收。',
           imageResult.rejectedImages?.length ? `${imageResult.rejectedImages.length} 张图片因校验、下载或保存失败而未保存。` : '',
           providerNote ? `服务返回说明（未核验，不能覆盖上述文件事实）：\n${providerNote}` : '',

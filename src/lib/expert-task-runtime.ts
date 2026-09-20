@@ -277,6 +277,19 @@ function buildQualificationContext(task, snapshot, contextInfo = {}) {
   }
 }
 
+function linkedPreviousVersionId(store, task) {
+  if (text(task?.taskRef?.kind, 80) !== 'expert-revision') return ''
+  const parentId = text(task?.taskRef?.id, 200)
+  if (!parentId || !store?.get) return ''
+  const parent = store.get(parentId)
+  if (!parent?.ok || !parent.task) return ''
+  const deliverables = Array.isArray(parent.task.deliverables) ? parent.task.deliverables : []
+  const previous = [...deliverables].reverse().find(item => item.acceptanceStatus === 'accepted')
+    || deliverables.at(-1)
+  const ref = previous?.artifactRefs?.[0] || previous?.artifactRef || ''
+  return text(ref, 500).split('#').at(-1) || ''
+}
+
 function qualityGuardrailEvidence(result) {
   const review = result?.metrics?.qualityReview || {}
   const rawIssues = Array.isArray(review.finalIssues) && review.finalIssues.length
@@ -1120,7 +1133,8 @@ function createExpertTaskRuntime(deps) {
       }
       deps.saveAgentSessions(ensuredAfterRun.sessions.map(item => item.id === session.id ? session : item))
       const artifact = session.run.artifacts.find(item => artifactRefs[0]?.endsWith(`#${item.id}`)) || session.run.artifacts.at(-1)
-      const nextVersion = revision?.version || 1
+      const linkedPreviousVersion = linkedPreviousVersionId(store, task)
+      const nextVersion = revision?.version || (linkedPreviousVersion ? 2 : 1)
       const latest = store.get(task.id)
       const latestEvents = latest.ok ? latest.task.events : task.events
       const completedToolEvents = (executionEvidence.toolCalls || [])
@@ -1134,7 +1148,7 @@ function createExpertTaskRuntime(deps) {
         required: outputSpec.required !== false,
         version: nextVersion,
         createdAt: new Date().toISOString(),
-        previousVersionId: revision ? previousArtifactId : undefined,
+        previousVersionId: revision ? previousArtifactId : (linkedPreviousVersion || undefined),
         artifactRef: artifactRefs[0] || `${session.id}#${artifact.id}`,
         artifactRefs,
         executionRef: `agent-run:${result.runId || runId}`,
@@ -1746,4 +1760,4 @@ function createExpertTaskRuntime(deps) {
   return { preparePlanConfirmation, createStart, provideInput, reviewDeliverable, cancel, retry, execute, recoverQueuedTasks, get: reconcileTask, controllers }
 }
 
-module.exports = { buildQualificationContext, createExpertTaskRuntime }
+module.exports = { buildQualificationContext, createExpertTaskRuntime, linkedPreviousVersionId }

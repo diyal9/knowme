@@ -20,6 +20,8 @@ const IMAGE_ERRORS = {
   image_download_failed: '图片下载失败，请检查网络后重试。',
   image_download_timeout: '图片下载超时，未保存该图片，请稍后重试。',
   image_download_blocked: '图片链接指向不安全地址或重定向不符合安全限制，已拒绝下载。',
+  image_background_not_detected: '未能安全识别足够的边界连通背景，未应用纯色归一化，也未保存该图片。',
+  image_background_normalization_failed: '纯色背景归一化未能完成，未保存未经核验的图片。',
 }
 
 function imageFailure(code) {

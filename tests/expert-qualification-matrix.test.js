@@ -127,6 +127,8 @@ test('retained route qualification prompts select their declared catalog routes'
     'rqa74-research-qualification',
     'rqa61-software-engineer-qualification',
     'rqa72-data-analyst-qualification',
+    'web-expert-visual-reference',
+    'rqa180-operations-data-analyst-qualification',
   ]
   for (const suiteDir of suiteDirs) {
     const suite = JSON.parse(fs.readFileSync(path.join(

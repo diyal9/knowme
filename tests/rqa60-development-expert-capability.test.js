@@ -41,18 +41,26 @@ it('RQA60 software engineer integrates implementation, architecture and independ
   const manifest = json(path.join(ROOT, 'experts/software-engineer/capability.manifest.json'))
   const sidecar = json(path.join(ROOT, 'experts/software-engineer/manifest.json'))
   const routes = manifest.metadata.knowme.execution.routes
-  assert.equal(manifest.version, '3.1.0')
+  assert.equal(manifest.version, '3.2.7')
   assert.equal(manifest.name, 'Web 开发专家')
   assert.equal(sidecar.version, manifest.version)
   assert.equal(manifest.permissions.write, true)
   assert.ok(manifest.permissions.tools.allowlist.includes('write_file'))
   assert.ok(manifest.permissions.tools.allowlist.includes('run_task'))
   assert.deepEqual(routes.map(item => item.id), [
-    'web-visual-reference', 'architecture-decision', 'software-change-verification', 'quality-verification',
+    'answer-only-code', 'web-visual-reference', 'architecture-decision', 'web-interface-development', 'software-change-verification', 'quality-verification',
   ])
+  const answerOnly = profile.selectExecutionRoute({
+    goal: '只在对话中给出完整 JavaScript 实现；不访问文件、不调用工具。', brief: {},
+  }, { capabilityManifest: manifest })
   const architecture = profile.selectExecutionRoute({ goal: '评审架构边界与迁移策略', brief: {} }, { capabilityManifest: manifest })
   const quality = profile.selectExecutionRoute({ goal: '设计回归测试并给出发布判断', brief: {} }, { capabilityManifest: manifest })
   assert.deepEqual(architecture.requiredSkills, ['architecture-decision'])
   assert.deepEqual(quality.requiredSkills, ['qa-test-design'])
+  assert.equal(answerOnly.id, 'answer-only-code')
+  assert.deepEqual(answerOnly.toolAllowlist, [])
+  assert.match(answerOnly.qualityReview.criteria.join('\n'), /onAbort.*正常完成.*失败.*移除/)
+  assert.match(answerOnly.qualityReview.criteria.join('\n'), /TTL.*完成后到期前命中.*到期时才重新获取/)
+  assert.match(answerOnly.qualityReview.criteria.join('\n'), /测试运行器.*审查者偏好/)
   assert.match(quality.qualityReview.criteria.join('\n'), /测试设计不能冒充测试通过|发布结论必须由实际证据支持/)
 })

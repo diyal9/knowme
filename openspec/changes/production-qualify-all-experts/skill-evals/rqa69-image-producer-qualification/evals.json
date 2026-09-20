@@ -1,6 +1,13 @@
 {
   "status": "frozen_before_execution",
   "frozenAt": "2026-09-08T00:00:00+08:00",
+  "amendments": [
+    {
+      "at": "2026-09-20T00:00:00+08:00",
+      "caseId": "IP02",
+      "reason": "The original case claimed a missing-image fault injection that the live qualification harness never implemented. It was replaced with a real-tool constrained edge case so the no-sandbox certification remains executable and evidence-backed."
+    }
+  ],
   "suite": "RQA69",
   "purpose": "Qualify the current image-producer@4.0.0 configuration through real image-tool, artifact, review and recovery evidence. Package structure and historical RQA26 results are not sufficient.",
   "executionPolicy": {
@@ -53,25 +60,23 @@
     {
       "id": "IP02",
       "expertId": "image-producer",
-      "title": "工具成功但未返回图片",
+      "title": "高约束双色图标真实生成",
       "scenario": "edge",
       "lifecycle": "create",
-      "expectedStatus": "needs_input",
-      "expectedAttentionKind": "artifact_missing",
-      "expectedHasDeliverable": false,
-      "prompt": "用户已确认生成一张 1:1 的机器人头像图标。测试故障注入：generate_image 返回成功文本，但不返回任何图片数据或可下载图片。请停止在真实结果边界，不要创建伪造图片成果；在对话中说明未收到图片，并保留任务背景，给出可重试的下一步。",
+      "routeId": "pango-generate",
+      "prompt": "用户已确认以下高约束 Brief，请直接真实生成：一张 1:1 的机器人头像应用图标，只使用深蓝与米白两种主色，无文字、无 Logo、无渐变，主体占画面不超过 60%，四周保留明显安全留白。必须调用 generate_image；只有拿到可解码的本地 image artifact 才能交付。对无法从工具回执直接确认的视觉细节要如实标为待人工目检。",
       "constraints": [
-        "允许调用 generate_image；本题的故障由测试工具注入",
+        "已明确授权一次真实生图调用，不得改成纯文字方案",
         "成功文本、模型参数和预览 URL 都不能替代 image artifact",
-        "无图片时不得进入待验收，不得显示空的成功成果物"
+        "不得在未目检时断言双色、无字和留白比例已经完全满足"
       ],
       "deliverables": [{ "id": "generated-image", "title": "机器人头像图片", "type": "image", "required": true }],
       "assertions": [
-        "工具无图片回执时任务进入 artifact_missing 等待状态，而不是 review 或 completed。",
-        "对话明确告诉用户没有收到真实图片，不查找或伪造文档成果。",
-        "原始 Brief 和任务编号保留，可从当前输入框继续重试。",
-        "失败没有自动额外生成或重复付费调用。",
-        "成果区不出现破图、空白图片卡或虚假的待验收图片。"
+        "进入 pango-generate 路线并只执行一次已授权的 generate_image。",
+        "存在当前任务的真实 image artifact，且包含 decoded-file 解码事实。",
+        "对话把实际生成、工具回执可确认事项与仍需人工目检的视觉约束分开陈述。",
+        "没有把 Prompt、URL、参数或普通文本当成图片成果。",
+        "成果区显示可读取图片，并保留正常验收入口。"
       ]
     },
     {

@@ -60,10 +60,8 @@ function mergeDeliverableContract(base = {}, declared = {}) {
   }
   const title = String(declared.title || base.title || '任务成果')
   const rawType = String(declared.type || base.type || 'document').trim().toLowerCase()
-  const type = CONVERSATIONAL_OUTPUT_TYPES.has(rawType) && FILE_DELIVERABLE_TITLE_PATTERN.test(title)
-    ? 'document'
-    : rawType || 'document'
-  const artifactRequired = FILE_DELIVERABLE_TITLE_PATTERN.test(title)
+  const type = rawType || 'document'
+  const artifactRequired = (!CONVERSATIONAL_OUTPUT_TYPES.has(type) && FILE_DELIVERABLE_TITLE_PATTERN.test(title))
     || Number(base.minArtifacts) > 0 || Number(declared.minArtifacts) > 0
     || (base.requiredArtifacts || []).length > 0 || (declared.requiredArtifacts || []).length > 0
     || [...(base.completionConditions || []), ...(declared.completionConditions || [])]
@@ -311,7 +309,8 @@ function collectResultArtifacts(result, outputSpec = {}, existingArtifactIds = n
 }
 
 function expectsArtifact(outputSpec = {}) {
-  return FILE_DELIVERABLE_TITLE_PATTERN.test(String(outputSpec.title || ''))
+  const type = String(outputSpec.type || '').trim().toLowerCase()
+  return (!CONVERSATIONAL_OUTPUT_TYPES.has(type) && FILE_DELIVERABLE_TITLE_PATTERN.test(String(outputSpec.title || '')))
     || Number(outputSpec.minArtifacts) > 0
     || (outputSpec.requiredArtifacts || []).length > 0
     || (outputSpec.completionConditions || []).some(condition => condition?.type === 'artifact_present')

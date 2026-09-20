@@ -181,7 +181,7 @@ it('tool-budget FINALIZE with length is not DONE or an acceptable deliverable', 
     { text: 'A budget-finalized but incomplete answer.', finishReason: 'length' },
   ], { tools: true, budget: { maxRounds: 1, maxToolCalls: 1 } })
   assert.equal(run.calls.length, 1)
-  assert.equal(run.requests.length, 2)
+  assert.equal(run.requests.length, 3)
   assertRepairRequest(run.requests[1])
   assertNotAccepted(run)
 })

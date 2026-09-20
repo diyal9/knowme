@@ -51,7 +51,7 @@ function assertImageContract(spec) {
   assert.equal(profile.expectsArtifact(spec), true)
 }
 
-it('RQA26 image-producer EXPERT, legacy, canonical and catalog versions agree at 4.0.0', () => {
+it('RQA26 image-producer EXPERT, legacy, canonical and catalog versions agree at 4.0.2', () => {
   const expert = parseExpertFrontmatter(fs.readFileSync(path.join(directory, 'EXPERT.md'), 'utf8'))
   assert.equal(expert.ok, true)
   const entries = readJson(path.join(root, 'catalog.json')).entries
@@ -62,7 +62,7 @@ it('RQA26 image-producer EXPERT, legacy, canonical and catalog versions agree at
     legacy: readJson(path.join(directory, 'manifest.json')).version,
     canonical: readJson(path.join(directory, 'capability.manifest.json')).version,
     catalog: entries[0].version,
-  }, { expert: '4.0.0', legacy: '4.0.0', canonical: '4.0.0', catalog: '4.0.0' })
+  }, { expert: '4.0.2', legacy: '4.0.2', canonical: '4.0.2', catalog: '4.0.2' })
 })
 
 it('RQA26 actual expert and canonical packages pass their real validators', () => {

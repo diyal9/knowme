@@ -23,7 +23,7 @@ function expertPackage(id) {
 describe('RQA56 image producer deserves end-to-end professional depth', () => {
   it('owns visual direction, brief compilation and real image generation in one package', () => {
     const { expert, legacy, canonical } = expertPackage('image-producer')
-    assert.deepEqual([expert.frontmatter.version, legacy.version, canonical.version], ['4.0.0', '4.0.0', '4.0.0'])
+    assert.deepEqual([expert.frontmatter.version, legacy.version, canonical.version], ['4.0.2', '4.0.2', '4.0.2'])
     assert.equal(validateAndNormalizeManifest(canonical, { id: 'image-producer', kind: 'expert' }).ok, true)
     for (const id of ['creative-concept-method', 'visual-brief-prompt', 'th-art-intake', 'th-art-prompt-enrich', 'th-art-pango-generate']) {
       assert.equal(canonical.dependencies.find(item => item.id === id)?.required, true, id)
@@ -49,13 +49,14 @@ describe('RQA56 image producer deserves end-to-end professional depth', () => {
 
   it('image producer owns evidence-based generation and revision review', () => {
     const { expert, legacy, canonical } = expertPackage('image-producer')
-    assert.deepEqual([expert.frontmatter.version, legacy.version, canonical.version], ['4.0.0', '4.0.0', '4.0.0'])
+    assert.deepEqual([expert.frontmatter.version, legacy.version, canonical.version], ['4.0.2', '4.0.2', '4.0.2'])
     assert.equal(validateAndNormalizeManifest(canonical, { id: 'image-producer', kind: 'expert' }).ok, true)
     const review = canonical.metadata.knowme.execution.qualityReview
     assert.equal(review.enabled, true)
     const body = review.criteria.join('\n')
     assert.match(body, /generate_image.*image artifact.*解码/s)
     assert.match(body, /实际可见图像.*构图.*文字.*品牌/s)
+    assert.match(body, /knowme\.solid-background\/v1.*边界连通背景/s)
     assert.match(body, /变更集.*保留集.*基图/s)
     assert.match(body, /失败.*未知.*重试.*付费/s)
     assert.deepEqual(canonical.permissions.tools.allowlist, ['list_paint_models', 'generate_image'])

@@ -1,0 +1,26 @@
+{
+  "suite": "RQA72",
+  "evaluatedAt": "2026-09-20T04:03:32.673Z",
+  "agents": [
+    {
+      "agentId": "data-analyst",
+      "currentConfigurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+      "tasks": [
+        {
+          "taskId": "task-mu9alt61-op9zl",
+          "evalId": "DA06",
+          "scenario": "reopen",
+          "status": "failed",
+          "configurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 timed out after 180s (last status: running)\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:404:9)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:871:21)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1039:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

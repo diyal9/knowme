@@ -1,0 +1,65 @@
+{
+  "reviewer": {
+    "kind": "model",
+    "id": "codex-gpt5-independent-review",
+    "model": "gpt-5",
+    "provider": "openai",
+    "independent": true,
+    "method": "separate_model_assertion_review"
+  },
+  "reviews": [
+    {
+      "evalId": "DA06",
+      "pass": true,
+      "summary": "最终修订稿按同一期公式得到本周搜索权重 10%，完整保留证据边界并加入可执行但未冒充已完成的新老用户分层验证计划；结构化生命周期证据也满足重开与版本关联要求。",
+      "userRequirements": {
+        "pass": true,
+        "evidence": "修订稿直接交付完整复盘与新增分层方案；本周权重使用本周总体 3.9%、搜索 12%、展示 3% 计算，并明确不生成文件、不执行外部动作。",
+        "reason": "覆盖原始复盘、限制、建议以及验收后新增的新老用户分层要求，没有把计划写成已完成结果。",
+        "evidenceQuote": "本周：`w_TW_S = (3.9 − 3) / (12 − 3) = 0.9 / 9 = 0.10` → 搜索占 10%、展示占 90%"
+      },
+      "checks": [
+        {
+          "criterion": 1,
+          "assertion": "重开后的完整新版保留原有分子分母、渠道互斥、观察窗及缺少因果证据的限制。",
+          "pass": true,
+          "evidence": "正文逐期列出总体率、搜索率、展示率和权重并回代；限制部分保留渠道穷尽假设、两期窗口和无同期对照的因果边界。",
+          "reason": "原口径、必要假设和不可识别边界均未在重开修订中丢失。",
+          "evidenceQuote": "**无因果识别设计**：没有同期对照、没有随机分流，无法区分“结构迁移的自然波动”“投放预算重分配”“落地页改版”三类竞争解释。"
+        },
+        {
+          "criterion": 2,
+          "assertion": "新增新老用户分层计划，明确样本单位、指标、观察窗和最小可解释条件，不伪造显著性或样本量结果。",
+          "pass": true,
+          "evidence": "分层计划明确 UV 样本单位、注册率主指标、至少两个完整周观察窗、四格交叉维度，并把样本量与 MDE 标成参考和待验证条件。",
+          "reason": "计划可执行且明确小样本时只报告点估计和区间，不把未检出当成等效或安全。",
+          "evidenceQuote": "样本单位：独立访客（UV），以设备/账号去重后的首次访问为准"
+        },
+        {
+          "criterion": 3,
+          "assertion": "分层结果可能支持、削弱或无法判断原结论，保留反证与停止条件，不把计划写成已完成分析。",
+          "pass": true,
+          "evidence": "正文列出四种可能反证和四条预先停止条件，并在分层章节开头声明拿到标签后才可分析。",
+          "reason": "同时覆盖支持、削弱和不可判断路径，没有把未来验证描述成已经发生。",
+          "evidenceQuote": "当前无用户级新老标签，本节是“拿到标签后怎么分析”的计划，不是已有结论。"
+        },
+        {
+          "criterion": 4,
+          "assertion": "新增内容与原报告摘要、正文和建议保持同一口径，不能把新用户子集冒充总体。",
+          "pass": true,
+          "evidence": "核心结论始终限定在总体和渠道结构；新老用户段落均以待补标签的分层验证计划呈现，并禁止外推总体。",
+          "reason": "没有使用新用户子集替换总体口径，也没有基于缺失标签作归因。",
+          "evidenceQuote": "**不得补造显著性、不得外推为整体结论、不得用“未检出”宣称等效或安全**"
+        },
+        {
+          "criterion": 5,
+          "assertion": "任务真实经历 review、completed、changes_requested/revising、review，并产生带 previousVersionId 的新版。",
+          "pass": true,
+          "evidence": "资格报告的结构化检查 endedInExpectedState、hasDeliverable、accepted、reopened、newVersion、previousVersionLinked 全部为 true；最终文本也明确标为修订版 v2。",
+          "reason": "生命周期证据证明初稿验收后完成，再建立关联重开任务并生成新版本进入 review。",
+          "evidenceQuote": "落地页注册率复盘（修订版 v2）"
+        }
+      ]
+    }
+  ]
+}

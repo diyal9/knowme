@@ -39,7 +39,10 @@ const {
 // candidate may need a length repair, a professional audit, or one verified
 // rewrite, but these answer-only calls must never grow without a task-level
 // bound. Three calls allow audit → rewrite → re-audit for a normal candidate.
-const MAX_FINALIZATION_MODEL_CALLS = 3
+// One complete-answer recovery may precede professional audit. Keep enough
+// bounded capacity for audit -> rewrite -> independent re-audit after that
+// recovery, without reopening the ordinary model/tool loop.
+const MAX_FINALIZATION_MODEL_CALLS = 4
 
 function artifactType(value) {
   if (!value || typeof value !== 'object') return ''
@@ -292,6 +295,7 @@ async function runModelToolLoop(deps) {
   referenceState = groundingRuntime.setTaskFrame(referenceState, ctxBundle.taskFrame)
 
   let finalizationModelCalls = 0
+  let incompleteFinalizationUsed = false
   const takeFinalizationBudget = (purpose) => {
     if (finalizationModelCalls >= MAX_FINALIZATION_MODEL_CALLS) {
       metrics.finalizationBudget = {
@@ -336,7 +340,10 @@ async function runModelToolLoop(deps) {
           { role: 'user', content: buildQualityAuditInstruction(input?.qualityReview?.criteria) },
         ),
         tools: undefined,
-        policy: { ...policy, outputTokens: Math.min(policy.maxOutput || 2400, 2400) },
+        // The audit is strict JSON with one evidence row per package criterion.
+        // Real reasoning models may spend substantially more than 2400 tokens
+        // before closing that object; truncation is not a professional failure.
+        policy: { ...policy, outputTokens: Math.min(policy.maxOutput || 6000, 6000) },
         stream: false,
         finalize: true,
       })
@@ -389,6 +396,9 @@ async function runModelToolLoop(deps) {
     if (reason === 'quality') {
       if (loopState.qualityReviewUsed) return { error: '专业质量复核请求已使用' }
       loopState.qualityReviewUsed = true
+    } else if (reason === 'incomplete') {
+      if (incompleteFinalizationUsed) return { error: '不完整答复修复请求已使用' }
+      incompleteFinalizationUsed = true
     } else {
       if (loopState.finalizationUsed) return { error: '最终答复收敛请求已使用' }
       loopState.finalizationUsed = true
@@ -1349,9 +1359,21 @@ async function runModelToolLoop(deps) {
         clearRoundDraft(assembler)
         continue
       }
-      const finalized = await finalizeResponse(repeatedToolCall ? 'repeated' : 'budget')
+      let finalized = await finalizeResponse(repeatedToolCall ? 'repeated' : 'budget')
       if (finalized.cancelled) return finalized
-      if (finalized.code === 'model_response_incomplete' || /budget_exceeded$/.test(finalized.code || '')) return fail(finalized.error)
+      if (finalized.code === 'model_response_incomplete') {
+        const repaired = await finalizeResponse('incomplete')
+        if (repaired.cancelled) return repaired
+        if (repaired.error) return fail(repaired.error)
+        finalized = repaired
+        if (input?.qualityReview?.enabled === true
+          && Array.isArray(input.qualityReview.criteria)
+          && input.qualityReview.criteria.length > 0) {
+          const reviewed = await finalizeResponse('quality')
+          if (reviewed.cancelled) return reviewed
+          if (reviewed.error) return fail(reviewed)
+        }
+      } else if (/budget_exceeded$/.test(finalized.code || '')) return fail(finalized.error)
       if (finalized.error && !lastModelText.trim()) return fail(finalized.error)
       if (!fullText.trim()) fullText = lastModelText
       const partialNote = agentVerify.buildPartialFinalizeNote(planEval)

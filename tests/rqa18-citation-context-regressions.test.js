@@ -110,3 +110,9 @@ it('RQA18 source identity remains exact and case-sensitive, unlike Markdown refe
   assert.equal(verification.passed, false)
   assert.ok(verification.violations.some(item => item.code === 'unresolved_source_citation'))
 })
+
+it('RQA18 does not mistake attached JavaScript index expressions for source citations', () => {
+  assert.deepEqual(explicitSourceIds('缓存读取 cache[key]，并检查 rows[index] 与 matrix[i][j]。'), [])
+  assert.deepEqual(explicitSourceIds('材料[r1]。'), ['r1'])
+  assert.deepEqual(explicitSourceIds('参见[R1][MISSING]。'), ['R1', 'MISSING'])
+})

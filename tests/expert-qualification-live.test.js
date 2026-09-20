@@ -11,8 +11,10 @@ const {
   lifecycleCheck,
   loadSuite,
   readCursorMcpServer,
+  retryWhenIdle,
   parseArgs,
   suiteConnectorConfigurations,
+  suiteSourceConnectorIds,
   suiteConnectorConfigurationIssues,
   statusAfterRunError,
   selectCases,
@@ -21,15 +23,40 @@ const {
   seedEncryptedProviderSettings,
   blockedQualificationRow,
   reviewEvidenceFromSession,
+  inheritedImageMaterials,
 } = require('../scripts/expert-qualification-live')
 
+test('reopen qualification inherits only selected image artifacts inside isolated userData', t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-qualification-image-'))
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }))
+  const imagePath = path.join(root, 'generated-images', 'original.png')
+  fs.mkdirSync(path.dirname(imagePath), { recursive: true })
+  fs.writeFileSync(imagePath, Buffer.from([0x89, 0x50, 0x4e, 0x47]))
+  const materials = inheritedImageMaterials({ run: { artifacts: [
+    { id: 'selected', type: 'image', title: '原图', targetPath: imagePath },
+    { id: 'ignored', type: 'image', title: '其他图', targetPath: imagePath },
+  ] } }, ['session#selected'], root)
+  assert.equal(materials.length, 1)
+  assert.equal(materials[0].kind, 'image')
+  assert.equal(materials[0].sourceArtifactId, 'selected')
+  assert.match(materials[0].dataUrl, /^data:image\/png;base64,/)
+})
+
 test('live qualification CLI parses repeatable cases without starting Electron', () => {
-  const parsed = parseArgs(['node', 'script', '--suite', 'suite.json', '--case', 'A,B', '--case', 'C', '--user-data', 'qa-data', '--source-user-data', 'production-data', '--out', 'out.json'])
+  const parsed = parseArgs(['node', 'script', '--suite', 'suite.json', '--case', 'A,B', '--case', 'C', '--user-data', 'qa-data', '--source-user-data', 'production-data', '--out', 'out.json', '--allow-development-data', '--max-wait-seconds', '360'])
   assert.deepEqual(parsed.cases, ['A', 'B', 'C'])
   assert.equal(parsed.suite, 'suite.json')
   assert.equal(parsed.userData, 'qa-data')
   assert.equal(parsed.sourceUserData, 'production-data')
   assert.equal(parsed.output, 'out.json')
+  assert.equal(parsed.allowDevelopmentData, true)
+  assert.equal(parsed.maxWaitSeconds, 360)
+})
+
+test('live qualification CLI bounds explicit wait overrides', () => {
+  assert.throws(() => parseArgs(['node', 'script', '--max-wait-seconds', '9']), /10 to 1800/)
+  assert.throws(() => parseArgs(['node', 'script', '--max-wait-seconds', '1801']), /10 to 1800/)
+  assert.throws(() => parseArgs(['node', 'script', '--max-wait-seconds', '12.5']), /10 to 1800/)
 })
 
 test('qualification seeds only encrypted provider settings into isolated userData', () => {
@@ -42,19 +69,77 @@ test('qualification seeds only encrypted provider settings into isolated userDat
     apiKeyEnc: 'encrypted-value',
     apiKey: 'plaintext-must-not-copy',
   }))
+  fs.writeFileSync(path.join(source, 'Local State'), JSON.stringify({
+    os_crypt: { audit_enabled: true, encrypted_key: 'encrypted-master-key' },
+    unrelatedBrowserState: { mustNotCopy: true },
+  }))
   fs.writeFileSync(path.join(target, 'settings.json'), JSON.stringify({ temperature: 0.2 }))
+  fs.writeFileSync(path.join(target, 'Local State'), JSON.stringify({
+    os_crypt: { encrypted_key: 'wrong-test-key' },
+    targetState: { keep: true },
+  }))
+  fs.writeFileSync(path.join(source, 'connector-secrets.json'), JSON.stringify({
+    version: 1,
+    connectors: {
+      'thinkingdata-analysis-mcp': { THINKINGDATA_ACCESS_TOKEN: 'encrypted-test-token' },
+      'unrelated-connector': { ACCESS_TOKEN: 'must-not-copy' },
+    },
+  }))
 
-  const result = seedEncryptedProviderSettings(source, target)
+  const result = seedEncryptedProviderSettings(source, target, ['thinkingdata-analysis-mcp'])
   const settings = JSON.parse(fs.readFileSync(path.join(target, 'settings.json'), 'utf8'))
+  const localState = JSON.parse(fs.readFileSync(path.join(target, 'Local State'), 'utf8'))
+  const connectorSecrets = JSON.parse(fs.readFileSync(path.join(target, 'connector-secrets.json'), 'utf8'))
   assert.deepEqual(result, {
     requested: true,
     copied: true,
-    source: 'encrypted_settings_only',
+    source: 'encrypted_settings_and_key_metadata',
     encryptedProviderConfigured: true,
+    encryptedKeyMetadataCopied: true,
+    encryptedConnectorIds: ['thinkingdata-analysis-mcp'],
   })
   assert.equal(settings.apiKeyEnc, 'encrypted-value')
   assert.equal(Object.hasOwn(settings, 'apiKey'), false)
   assert.equal(settings.temperature, 0.2)
+  assert.deepEqual(localState.os_crypt, {
+    audit_enabled: true,
+    encrypted_key: 'encrypted-master-key',
+  })
+  assert.deepEqual(localState.targetState, { keep: true })
+  assert.equal(Object.hasOwn(localState, 'unrelatedBrowserState'), false)
+  assert.deepEqual(connectorSecrets.connectors['thinkingdata-analysis-mcp'], {
+    THINKINGDATA_ACCESS_TOKEN: 'encrypted-test-token',
+  })
+  assert.equal(Object.hasOwn(connectorSecrets.connectors, 'unrelated-connector'), false)
+})
+
+test('qualification requires an explicit suite opt-in before seeding connector secrets', () => {
+  const suite = {
+    setup: {
+      configureConnectors: [
+        { id: 'thinkingdata-analysis-mcp', seedSecretsFromSource: true },
+        { id: 'pango-image-mcp' },
+      ],
+    },
+  }
+
+  assert.deepEqual(suiteSourceConnectorIds(suite), ['thinkingdata-analysis-mcp'])
+  assert.equal(Object.hasOwn(suiteConnectorConfigurations(suite)[0], 'seedSecretsFromSource'), false)
+})
+
+test('qualification retry follows the replacement task created for a cancelled run', async () => {
+  const calls = []
+  const page = {
+    evaluate: async (_fn, taskId) => {
+      calls.push(taskId)
+      if (calls.length === 1) return { ok: false, error: '任务仍在清理' }
+      return { ok: true, started: true, task: { id: 'replacement-task', status: 'starting' } }
+    },
+  }
+
+  const result = await retryWhenIdle(page, 'cancelled-task', 2000)
+  assert.equal(result.task.id, 'replacement-task')
+  assert.deepEqual(calls, ['cancelled-task', 'cancelled-task'])
 })
 
 test('live qualification rejects production and unmarked userData paths', () => {
@@ -64,6 +149,21 @@ test('live qualification rejects production and unmarked userData paths', () => 
   assert.equal(
     assertSafeUserData(path.join(os.tmpdir(), 'knowme-qualification-run'), { APPDATA: appData }),
     path.resolve(os.tmpdir(), 'knowme-qualification-run'),
+  )
+})
+
+test('live qualification permits only the exact development profile after explicit opt-in', () => {
+  const env = { APPDATA: path.join('C:', 'Users', 'qa', 'AppData', 'Roaming') }
+  const development = path.join(env.APPDATA, 'KnowMe')
+  assert.throws(() => assertSafeUserData(development, env), /Refusing to use production/)
+  assert.equal(assertSafeUserData(development, env, { allowDevelopmentData: true }), path.resolve(development))
+  assert.throws(
+    () => assertSafeUserData(path.join(development, 'nested'), env, { allowDevelopmentData: true }),
+    /Refusing to use production/,
+  )
+  assert.throws(
+    () => assertSafeUserData(path.join('D:', 'qualification'), env, { allowDevelopmentData: true }),
+    /only permits the exact/,
   )
 })
 
@@ -189,6 +289,22 @@ test('lifecycle evidence is structural and never implies semantic certification'
     deliverables: [{ deliverableId: 'primary', version: 2, previousVersionId: 'primary#v1' }],
   }
   const result = lifecycleCheck({ lifecycle: 'request_changes' }, task, { initialVersion: 1 })
+  assert.equal(result.passed, true)
+  assert.equal(result.checks.previousVersionLinked, true)
+})
+
+test('reopen lifecycle accepts an immutable completed task followed by a linked commission', () => {
+  const task = {
+    status: 'review',
+    taskRef: { id: 'accepted-task' },
+    events: [{ type: 'created' }],
+    deliverables: [{ deliverableId: 'primary', version: 1 }],
+  }
+  const result = lifecycleCheck({ lifecycle: 'accept_then_reopen' }, task, {
+    acceptedStatus: 'completed',
+    acceptedTaskId: 'accepted-task',
+    reopenedTaskId: 'follow-up-task',
+  })
   assert.equal(result.passed, true)
   assert.equal(result.checks.previousVersionLinked, true)
 })

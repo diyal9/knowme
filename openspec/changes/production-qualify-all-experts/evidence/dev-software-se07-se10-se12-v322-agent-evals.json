@@ -1,0 +1,82 @@
+{
+  "suite": "RQA61",
+  "evaluatedAt": "2026-09-20T04:18:35.573Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+      "tasks": [
+        {
+          "taskId": "task-mu9b3pt0-uqtc9",
+          "evalId": "SE07",
+          "scenario": "edge",
+          "status": "failed",
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        },
+        {
+          "taskId": "task-mu9bb81i-0ykdn",
+          "evalId": "SE08",
+          "scenario": "retry",
+          "status": "failed",
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:810:19)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        },
+        {
+          "taskId": "task-mu9bfmef-2hgan",
+          "evalId": "SE09",
+          "scenario": "revision",
+          "status": "failed",
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，复核未返回可验证的完整通过结论。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        },
+        {
+          "taskId": "task-mu9bhu9b-pyv4g",
+          "evalId": "SE10",
+          "scenario": "reopen",
+          "status": "failed",
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 请求已取消\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        },
+        {
+          "taskId": "task-mu9blb5s-l19fy",
+          "evalId": "SE12",
+          "scenario": "normal",
+          "status": "failed",
+          "configurationId": "expert-config-v2:f18e705292f9d6f579e1cb13dfe1a19d87587bcc3f63549ea5a5c1e1cf86dc69",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 4,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，需修正：在 4.3.2 节中补充：针对非幂等业务操作，当对账结果不确定时，严禁自动重置为 PENDING 进。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

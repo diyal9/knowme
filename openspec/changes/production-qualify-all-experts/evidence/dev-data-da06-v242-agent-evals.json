@@ -1,0 +1,26 @@
+{
+  "suite": "RQA72",
+  "evaluatedAt": "2026-09-20T03:19:42.445Z",
+  "agents": [
+    {
+      "agentId": "data-analyst",
+      "currentConfigurationId": "expert-config-v2:003c08f83c55e4f6cf2c437e118c88a878700c686f5199abdbaa046239683a31",
+      "tasks": [
+        {
+          "taskId": "task-mu991vea-3zm68",
+          "evalId": "DA06",
+          "scenario": "reopen",
+          "status": "failed",
+          "configurationId": "expert-config-v2:003c08f83c55e4f6cf2c437e118c88a878700c686f5199abdbaa046239683a31",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 模型未能返回完整答复，已保留任务材料和已完成操作；未将不完整内容提交验收。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:399:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:871:21)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1039:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

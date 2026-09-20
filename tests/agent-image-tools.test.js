@@ -4,6 +4,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const sharp = require('sharp')
 const { describe, it } = require('node:test')
 
 const { buildImageTools, resolvePangoMcpConfig } = require('../src/lib/agent-image-tools')
@@ -94,6 +95,59 @@ describe('agent image tools', () => {
     assert.equal(result.artifactRefs[0].mimeType, 'image/png')
     assert.deepEqual(fs.readFileSync(result.artifactRefs[0].targetPath), bytes)
     assert.match(result.text, /已生成 1 张图片/)
+  })
+
+  it('normalizes an explicitly requested solid background locally and never forwards the wrapper option', async () => {
+    const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-solid-background-'))
+    const width = 9
+    const height = 9
+    const pixels = Buffer.alloc(width * height * 4)
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        const offset = (y * width + x) * 4
+        const isSubject = x >= 3 && x <= 5 && y >= 3 && y <= 5
+        const shade = 230 + x + y
+        pixels[offset] = isSubject ? 20 : shade
+        pixels[offset + 1] = isSubject ? 55 : shade
+        pixels[offset + 2] = isSubject ? 100 : shade
+        pixels[offset + 3] = 255
+      }
+    }
+    const source = await sharp(pixels, { raw: { width, height, channels: 4 } }).png().toBuffer()
+    let providerArguments
+    const result = await buildImageTools({
+      runId: 'solid-background',
+      userData,
+      config: { url: 'https://pango.example.test/mcp' },
+      fetchImpl: async (_url, request) => {
+        providerArguments = JSON.parse(request.body).params.arguments
+        return { ok: true, json: async () => ({ result: { content: [
+          { type: 'image', mimeType: 'image/png', data: source.toString('base64') },
+        ] } }) }
+      },
+    }).handlers.generate_image({
+      prompt: 'preserve the subject and make the background exact',
+      solid_background: { color: '#F2F3F5' },
+    })
+
+    assert.equal(result.ok, true)
+    assert.equal(Object.hasOwn(providerArguments, 'solid_background'), false)
+    const artifact = result.artifactRefs[0]
+    assert.equal(artifact.mimeType, 'image/png')
+    assert.deepEqual(artifact.meta.image.solidBackground, {
+      protocol: 'knowme.solid-background/v1',
+      source: 'deterministic-border-connected-pixels',
+      color: '#F2F3F5',
+      replacedPixels: 72,
+      replacedRatio: 0.888889,
+      verified: true,
+    })
+    const output = await sharp(fs.readFileSync(artifact.targetPath)).ensureAlpha().raw().toBuffer()
+    const pixel = (x, y) => [...output.subarray((y * width + x) * 4, (y * width + x) * 4 + 4)]
+    assert.deepEqual(pixel(0, 0), [242, 243, 245, 255])
+    assert.deepEqual(pixel(8, 8), [242, 243, 245, 255])
+    assert.deepEqual(pixel(4, 4), [20, 55, 100, 255])
+    assert.match(result.text, /已确定性归一化边界连通背景为 #F2F3F5/)
   })
 
   it('does not accept a text-only generation response as an image result', async () => {

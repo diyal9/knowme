@@ -1,0 +1,40 @@
+{
+  "suite": "RQA61",
+  "evaluatedAt": "2026-09-20T05:31:24.751Z",
+  "agents": [
+    {
+      "agentId": "software-engineer",
+      "currentConfigurationId": "expert-config-v2:289e60933aa1f5dc6180f1453eb7d60e2058d1c0d7873e35a6ca65ea65360ff0",
+      "tasks": [
+        {
+          "taskId": "task-mu9dpj0a-rt3lh",
+          "evalId": "SE07",
+          "scenario": "edge",
+          "status": "failed",
+          "configurationId": "expert-config-v2:289e60933aa1f5dc6180f1453eb7d60e2058d1c0d7873e35a6ca65ea65360ff0",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 专家答复在自动修订后仍未通过专业质量复核，需修正：在 T4 中增加断言：syncThrow 导致 reject 后，再次 load 同 key 时使用；补充测试：(1) TTL 从完成时起算——设置 ttlMs=50，fetcher 内 advance。未提交为待验收成果；任务材料和已完成操作均已保留，可直接重试。\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:814:11)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        },
+        {
+          "taskId": "task-mu9dtv6y-lg6jr",
+          "evalId": "SE10",
+          "scenario": "reopen",
+          "status": "failed",
+          "configurationId": "expert-config-v2:289e60933aa1f5dc6180f1453eb7d60e2058d1c0d7873e35a6ca65ea65360ff0",
+          "hardFailure": true,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "Error: waiting for review v1 stopped at failed: 请求已取消\n    at waitForTask (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:406:15)\n    at async runCase (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:878:21)\n    at async main (D:\\aispace\\knowme\\scripts\\expert-qualification-live.js:1051:19)",
+          "summary": ""
+        }
+      ]
+    }
+  ]
+}

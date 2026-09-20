@@ -1,7 +1,9 @@
 {
+  "id": "operations-data-analyst",
+  "kind": "expert",
   "name": "运营数据分析专家·数据靓仔",
   "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "skills": [
     "th-bi-analytics-assistant",
     "data-analysis-method",

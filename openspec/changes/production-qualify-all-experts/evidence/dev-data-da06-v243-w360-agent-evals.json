@@ -1,0 +1,26 @@
+{
+  "suite": "RQA72",
+  "evaluatedAt": "2026-09-20T04:11:03.131Z",
+  "agents": [
+    {
+      "agentId": "data-analyst",
+      "currentConfigurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+      "tasks": [
+        {
+          "taskId": "task-mu9aw9nt-xe4tn",
+          "evalId": "DA06",
+          "scenario": "reopen",
+          "status": "review",
+          "configurationId": "expert-config-v2:1e08500a743e50f03b174045f92aa6169b1a60ca4fcb6cc05eda16f378d38894",
+          "hardFailure": false,
+          "blockedReason": null,
+          "hardAssertionsPassed": null,
+          "assertionsPassed": 0,
+          "assertionsTotal": 5,
+          "failureSummary": "",
+          "summary": "Lifecycle evidence captured; independent semantic review remains pending."
+        }
+      ]
+    }
+  ]
+}

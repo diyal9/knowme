@@ -20,6 +20,7 @@ describe('operations data analyst capability', () => {
     assert.equal(expert.name, '运营数据分析专家·数据靓仔')
     assert.match(expert.soul, /数据靓仔/)
     assert.match(expert.sop, /builder.*query_adhoc/i)
+    assert.match(expert.sop, /calculate.*round/)
     assert.match(expert.sop, /盘古/)
     assert.match(expert.sop, /冲突/)
     assert.ok(expert.skills.includes('th-bi-analytics-assistant'))
@@ -64,7 +65,7 @@ describe('operations data analyst capability', () => {
       'business-cause-analysis',
     ])
     assert.deepEqual(outputSpec.requiredConnectorIds, ['thinkingdata-analysis-mcp'])
-    assert.deepEqual(outputSpec.requiredTools, ['mcp.thinkingdata_analysis_mcp.query_adhoc'])
+    assert.deepEqual(outputSpec.requiredTools, ['mcp.thinkingdata_analysis_mcp.query_adhoc', 'calculate'])
     const entries = outputSpec.requiredSkills.map(id => ({
       id,
       name: id,
@@ -72,6 +73,14 @@ describe('operations data analyst capability', () => {
     }))
     const block = buildSkillL1Block(entries)
     assert.ok(block.length <= L1_BUDGET, `${block.length}/${L1_BUDGET}`)
+  })
+
+  it('keeps report and governance requests out of broader query routes', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(expertRoot, 'capability.manifest.json'), 'utf8'))
+    const route = goal => resolveOutputSpec({ goal, brief: { goal } }, { capabilityManifest: manifest }).executionRoute
+    assert.equal(route('交付渠道经营分析报告，计算付费率与 ROAS，保留留存缺口'), 'analysis-report')
+    assert.equal(route('做只读埋点治理审查，对比盘古协议冲突，不修改知识库'), 'event-governance')
+    assert.equal(route('在对话中交付经营摘要，比较净收入与 ROAS'), 'analysis-report')
   })
 
   it('ships source skills, CLI scripts and connector policies', () => {

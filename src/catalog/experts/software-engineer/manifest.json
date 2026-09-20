@@ -1,7 +1,7 @@
 {
   "id": "software-engineer",
   "kind": "expert",
-  "version": "3.1.0",
+  "version": "3.2.7",
   "skills": [
     "frontend-design",
     "imagegen-frontend-web",

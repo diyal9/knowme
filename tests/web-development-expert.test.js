@@ -15,7 +15,7 @@ it('installs the specialized Web expert and real design skills into a fresh runt
   assert.equal(installed.ok, true, JSON.stringify(installed))
   const loaded = hub.expertRuntime().loadExpert('software-engineer')
   assert.equal(loaded.name, 'Web 开发专家')
-  assert.equal(loaded.manifest.version, '3.1.0')
+  assert.equal(loaded.manifest.version, '3.2.7')
   for (const name of ['HTML', 'Vue', 'React', 'TypeScript']) assert.ok(loaded.systemPrompt.includes(name))
   for (const id of ['frontend-design', 'imagegen-frontend-web']) {
     assert.ok(loaded.skills.includes(id))
@@ -23,7 +23,16 @@ it('installs the specialized Web expert and real design skills into a fresh runt
     assert.ok(record, id)
     assert.equal(hub.skillRuntime().isSkillEnabled(id), true)
     const content = fs.readFileSync(path.join(userData, 'capabilities/skills', id, 'SKILL.md'), 'utf8')
-    assert.ok(content.length > 3000)
+    assert.ok(content.length > 2000, id)
+    if (id === 'imagegen-frontend-web') {
+      const playbook = fs.readFileSync(path.join(
+        userData,
+        'capabilities/skills',
+        id,
+        'references/art-direction-playbook.md',
+      ), 'utf8')
+      assert.ok(playbook.length > 10000)
+    }
   }
   const made = hub.expertRuntime().createSessionSnapshot('web-expert-check', 'software-engineer')
   assert.equal(made.ok, true)
