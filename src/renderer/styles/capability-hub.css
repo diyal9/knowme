@@ -2677,6 +2677,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 }
 .hub-card .hub-badge.icon-only.installed {
   color: var(--text-muted);
+  top: calc(50% + var(--space-1));
   transform: translateY(-50%);
 }
 .hub-card:hover .hub-badge.icon-only.installed,
