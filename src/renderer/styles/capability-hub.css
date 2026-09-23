@@ -2618,3 +2618,44 @@ body.hub-detail-only .hub-drawer-backdrop.open {
     transform: none;
   }
 }
+
+/* Footer rail: keep status on the left and reveal the low-frequency control cluster on the right. */
+.hub-card-foot {
+  position: relative;
+}
+.hub-card-foot-actions {
+  gap: var(--space-1);
+}
+.hub-card .hub-badge.icon-only.installed {
+  position: absolute;
+  top: 50%;
+  right: calc(var(--control-sm) + var(--space-1));
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transform: translateY(calc(-50% + 2px));
+}
+.hub-card:hover .hub-badge.icon-only.installed,
+.hub-card:focus-visible .hub-badge.icon-only.installed,
+.hub-card:focus-within .hub-badge.icon-only.installed {
+  background: var(--surface-subtle);
+  transform: translateY(-50%);
+}
+.hub-card:hover .hub-card-foot-actions .hub-card-fav,
+.hub-card:focus-visible .hub-card-foot-actions .hub-card-fav,
+.hub-card:focus-within .hub-card-foot-actions .hub-card-fav {
+  border-color: var(--border-subtle);
+  background: var(--surface-subtle);
+}
+@media (hover: none) {
+  .hub-card .hub-badge.icon-only.installed {
+    transform: translateY(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hub-card .hub-badge.icon-only.installed {
+    transform: translateY(-50%);
+  }
+}
