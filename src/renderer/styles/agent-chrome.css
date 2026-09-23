@@ -2939,3 +2939,108 @@
   margin-top:.9em;
   margin-bottom:.36em;
 }
+
+/* Conversation reading surface: use a restrained rhythm so long tool runs,
+   prose and the composer read as one calm workspace rather than a stack of
+   equally loud panels. */
+.conversation-surface .agent-chat-log {
+  background: var(--surface-page);
+  padding-top: var(--space-6);
+}
+.conversation-surface .agent-virtuoso-row {
+  padding-bottom: var(--space-5);
+}
+.conversation-surface .agent-execution {
+  margin-bottom: var(--space-5);
+  padding-left: var(--space-3);
+  border-left: 2px solid color-mix(in srgb, var(--action-primary) 13%, transparent);
+}
+.conversation-surface .agent-execution-summary {
+  min-height: 34px;
+  padding: 5px var(--space-3) 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-subtle);
+}
+.conversation-surface .agent-execution-summary:hover {
+  border-color: var(--border-default);
+  background: var(--surface-panel);
+}
+.conversation-surface .agent-execution-list {
+  padding: var(--space-3) 0 var(--space-1);
+}
+.conversation-surface .agent-trace-row {
+  min-height: 26px;
+  padding: 3px var(--space-2) 3px 0;
+}
+.conversation-surface .agent-trace-row.done {
+  color: var(--text3);
+}
+.conversation-surface .agent-trace-meta,
+.conversation-surface .agent-trace-time {
+  color: var(--text-faint);
+}
+.conversation-surface .agent-execution-commentary {
+  margin-bottom: var(--space-5);
+  color: var(--text-secondary);
+  line-height: 1.68;
+}
+.conversation-surface .agent-response-body .agent-md {
+  color: var(--text);
+  line-height: 1.7;
+}
+.conversation-surface .agent-response-body .agent-md p {
+  margin-bottom: var(--space-3);
+}
+.conversation-surface .agent-response-body .agent-md .md-table-wrap {
+  margin: var(--space-3) 0 var(--space-4);
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--surface-panel);
+  box-shadow: var(--surface-shadow);
+}
+.conversation-surface .agent-response-body .agent-md .md-table {
+  font-size: var(--font-sm);
+}
+.conversation-surface .agent-response-body .agent-md .md-table th,
+.conversation-surface .agent-response-body .agent-md .md-table td {
+  border-color: var(--border-subtle);
+  padding: var(--space-2) var(--space-3);
+}
+.conversation-surface .agent-response-body .agent-md .md-table th {
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+.conversation-surface .agent-message-actions button {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+.conversation-surface .agent-message-actions button:hover {
+  border-color: var(--border-subtle);
+  background: var(--surface-subtle);
+}
+.conversation-surface .agent-col-foot {
+  padding-top: var(--space-3);
+  background: var(--surface-page);
+}
+.conversation-surface .agent-composer {
+  border-color: var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--surface-shadow);
+}
+.conversation-surface .agent-composer:focus-within {
+  border-color: color-mix(in srgb, var(--action-primary) 46%, var(--border-default));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--action-primary) 10%, transparent), var(--surface-shadow);
+}
+.conversation-surface .agent-attach,
+.conversation-surface .agent-go,
+.conversation-surface .agent-menu-trigger {
+  color: var(--text-muted);
+}
+.conversation-surface .agent-attach:hover,
+.conversation-surface .agent-go:hover,
+.conversation-surface .agent-menu-trigger:hover {
+  color: var(--text);
+  background: var(--surface-subtle);
+}

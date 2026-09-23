@@ -2662,3 +2662,26 @@ body.hub-detail-only .hub-drawer-backdrop.open {
     transform: translateY(-50%);
   }
 }
+
+/* The two low-frequency footer actions share one optical box and one quiet
+   neutral tone. This keeps the action rail calm while preserving the gold
+   favorite state. */
+.hub-card-foot-actions .hub-card-fav,
+.hub-card .hub-badge.icon-only.installed {
+  box-sizing: border-box;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  align-self: center;
+  display: inline-grid;
+  place-items: center;
+}
+.hub-card .hub-badge.icon-only.installed {
+  color: var(--text-muted);
+  transform: translateY(-50%);
+}
+.hub-card:hover .hub-badge.icon-only.installed,
+.hub-card:focus-visible .hub-badge.icon-only.installed,
+.hub-card:focus-within .hub-badge.icon-only.installed {
+  color: var(--text-muted);
+  transform: translateY(-50%);
+}
