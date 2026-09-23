@@ -2626,6 +2626,9 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-card-foot-actions {
   gap: var(--space-1);
 }
+.hub-card-foot-actions .hub-card-fav {
+  margin: 0;
+}
 .hub-card .hub-badge.icon-only.installed {
   position: absolute;
   top: 50%;
