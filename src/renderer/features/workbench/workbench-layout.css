@@ -4147,3 +4147,143 @@
 .wb-auto-field select,
 .wb-task-composer input,
 .wb-task-composer textarea { font:var(--type-body); }
+
+/* 工作台任务首页：让入口卡片、筛选和任务收件箱形成同一条安静的阅读节奏。 */
+.wb-workbench-home-surface {
+  padding-left: var(--space-7);
+  padding-right: var(--space-7);
+  padding-bottom: var(--space-8);
+}
+.wb-task-home > .wb-task-quick {
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wb-task-home > .wb-task-recent {
+  padding-top: var(--space-6);
+  padding-bottom: 0;
+}
+.wb-task-recent.wb-section-gradient-divider::before {
+  width: 100%;
+  background: var(--border-subtle);
+}
+.wb-task-quick > .wb-task-home-head {
+  align-items: baseline;
+  margin-bottom: var(--space-4);
+}
+.wb-task-quick .wb-task-home-link {
+  min-height: var(--control-md);
+  padding: 0 var(--space-2);
+  border-color: transparent;
+  background: transparent;
+  color: var(--action-primary);
+  font-weight: var(--weight-medium);
+}
+.wb-task-quick .wb-task-home-link:hover {
+  border-color: var(--action-primary-soft);
+  background: var(--action-primary-subtle);
+}
+.wb-task-home .wb-expert-filters {
+  margin-bottom: var(--space-4);
+}
+.wb-task-quick-grid {
+  gap: var(--space-3);
+}
+.wb-task-quick-card {
+  min-height: 156px;
+  padding: var(--space-4);
+  border-color: var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: none;
+}
+.wb-task-quick-card:hover {
+  border-color: color-mix(in srgb, var(--action-primary) 30%, var(--border-default));
+  background: var(--surface-page);
+  box-shadow: var(--shadow-rest);
+  transform: translateY(-1px);
+}
+.wb-task-quick-card:focus-visible {
+  outline-color: var(--focus-ring);
+  outline-offset: 3px;
+}
+.wb-task-quick-head {
+  gap: var(--space-3);
+}
+.wb-task-quick-desc {
+  line-height: var(--line-relaxed);
+}
+.wb-task-quick-foot {
+  min-height: var(--control-sm);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+}
+.wb-task-quick-start {
+  min-height: var(--control-sm);
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.wb-task-quick-start:hover {
+  background: var(--action-primary-subtle);
+}
+.wb-task-quick > .wb-list-toggle {
+  margin-top: var(--space-3);
+  min-height: var(--control-md);
+}
+.wb-task-inbox {
+  gap: var(--space-3);
+}
+.wb-task-inbox-toolbar {
+  min-height: var(--control-lg);
+}
+.wb-task-inbox-filters {
+  gap: var(--space-5);
+}
+.wb-task-inbox-shell {
+  border-color: var(--border-default);
+  border-radius: var(--radius-panel);
+  background: var(--surface-panel);
+  box-shadow: var(--shadow-rest);
+}
+.wb-task-inbox-columns {
+  min-height: var(--control-lg);
+  padding-inline: var(--space-4);
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+  letter-spacing: .01em;
+}
+.wb-task-inbox-row {
+  background: var(--surface-page);
+}
+.wb-task-inbox-row .wb-task-inbox-row-main {
+  min-height: 72px;
+  padding-inline: var(--space-4);
+}
+.wb-task-inbox-row .wb-task-name {
+  font-size: var(--font-md);
+  line-height: 1.4;
+}
+.wb-task-inbox-row .wb-task-card-content {
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: var(--line-normal);
+}
+.wb-task-inbox-expert {
+  font-size: var(--font-sm);
+}
+.wb-task-inbox-row .wb-task-inbox-state {
+  min-height: var(--control-sm);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--surface-subtle);
+}
+.wb-task-inbox-row .wb-task-inbox-state.is-done {
+  background: var(--action-primary-subtle);
+}
+.wb-task-inbox-row .wb-task-inbox-state.is-attention {
+  background: var(--state-warning-soft);
+}
+.wb-task-inbox-row .wb-task-inbox-state.is-failed {
+  background: var(--state-danger-soft);
+}
