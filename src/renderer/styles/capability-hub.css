@@ -429,7 +429,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-count {
   padding: 3px 8px;
   border: 1px solid var(--hub-div);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: color-mix(in srgb, var(--surface-page) 66%, transparent);
   color: var(--hub-text3);
   font: 500 12px/1.3 var(--ui);
@@ -490,7 +490,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   top: calc(100% + 9px);
   right: 0;
   z-index: 30;
-  width: min(440px, calc(100vw - 36px));
+  width: min(520px, calc(100vw - 36px));
   padding: 7px;
   border: 1px solid color-mix(in srgb, var(--action-primary) 18%, var(--hub-div));
   border-radius: 12px;
@@ -514,7 +514,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   gap: 9px;
   padding: 0 11px;
   border-color: var(--hub-div);
-  border-radius: 9px;
+  border-radius: var(--radius-md);
   background: var(--surface-panel);
   transition: border-color 180ms var(--hub-ease), box-shadow 180ms var(--hub-ease), background 180ms var(--hub-ease);
 }
@@ -616,9 +616,13 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   box-shadow: none;
   border: 0;
   color: var(--brand-ink);
-  font-weight: 600;
+  font-weight: 700;
 }
-.hub-app .hub-tab.active::after { transform: scaleX(1); }
+.hub-app .hub-tab.active::after {
+  height: 3px;
+  background: var(--brand-ink);
+  transform: scaleX(1);
+}
 .hub-app .hub-tab:active { transform: translateY(1px); }
 
 /* 三类能力共用同一条 Tab 底线；筛选行不再重复绘制顶线。 */
@@ -699,19 +703,19 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-chip {
   flex: 0 0 auto;
   padding: 6px 10px;
-  border-color: transparent;
-  border-radius: 7px;
-  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: var(--surface-page);
   color: var(--hub-text2);
   font: 500 12px/1 var(--ui);
   white-space: nowrap;
   transition: color 160ms var(--hub-ease), background 160ms var(--hub-ease), transform 160ms var(--hub-ease);
 }
-.hub-chip:hover { border-color: transparent; background: var(--hub-accent-bg); }
+.hub-chip:hover { border-color: var(--border-strong); background: var(--surface-panel); }
 .hub-chip.active {
-  border-color: transparent;
-  background: var(--hub-accent-bg);
-  color: var(--hub-accent);
+  border-color: var(--brand-ink);
+  background: var(--brand-ink);
+  color: var(--text-inverse);
   font-weight: 600;
 }
 .hub-chip:active { transform: scale(0.96); }
@@ -766,7 +770,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   height: 32px;
   padding: 0 7px;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--hub-text2);
   font: 500 12px/1 var(--ui);
@@ -805,6 +809,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-body { background: var(--hub-bg); }
 .hub-main {
   padding: 22px 28px 42px;
+  background: var(--surface-panel);
   scroll-behavior: smooth;
 }
 .hub-main::-webkit-scrollbar { width: 11px; }
@@ -2348,12 +2353,24 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   min-height: 156px;
   padding: var(--space-3) var(--space-4);
 }
-.hub-card:hover { background: var(--surface-panel); }
+.hub-card:hover {
+  border-color: color-mix(in srgb, var(--action-primary) 32%, var(--border-default));
+  background: var(--surface-page);
+  box-shadow: var(--shadow-rest);
+  transform: translateY(-1px);
+}
 .hub-card-head { gap: var(--space-3); }
-.hub-card-icon { width: var(--control-xl); height: var(--control-xl); }
+.hub-card-icon {
+  width: var(--control-xl);
+  height: var(--control-xl);
+  border-color: var(--border-subtle);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  color: var(--text-secondary);
+}
 .hub-card-title { font: var(--weight-semibold) var(--font-md)/1.35 var(--ui); }
-.hub-card-sub { margin-top: 2px; font: var(--weight-regular) var(--font-xs)/1.4 var(--ui); }
-.hub-card-desc { font: var(--type-support); }
+.hub-card-sub { margin-top: 3px; font: var(--weight-regular) var(--font-xs)/1.4 var(--ui); }
+.hub-card-desc { font: var(--font-sm)/1.6 var(--ui); color: var(--text-secondary); }
 .hub-card-foot { min-height: 20px; }
 .hub-card-foot-actions .hub-card-fav {
   width: 28px;
@@ -2376,6 +2393,25 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 }
 .hub-badge.icon-only .ico { margin-right: 0; }
 .hub-badge.icon-only .ico svg { width: 8px; height: 8px; }
+
+/* Catalog cards: quieter surfaces, clearer title rhythm, and a more deliberate directory feel. */
+.hub-card {
+  border-color: var(--border-default);
+  transition: border-color 180ms var(--hub-ease), box-shadow 180ms var(--hub-ease), transform 180ms var(--hub-ease);
+}
+.hub-card-fav {
+  color: var(--text-muted);
+}
+.hub-card-fav:hover {
+  border-color: color-mix(in srgb, var(--state-warning) 18%, transparent);
+  background: color-mix(in srgb, var(--state-warning) 10%, transparent);
+}
+.hub-badge {
+  border-color: var(--border-subtle);
+  border-radius: 6px;
+  background: var(--surface-subtle);
+  color: var(--text-muted);
+}
 
 /* Skill cards: keep featured and catalog cards on one predictable information rhythm. */
 .hub-card {
