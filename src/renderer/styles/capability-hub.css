@@ -2568,3 +2568,53 @@ body.hub-detail-only .hub-drawer-backdrop.open {
   color: currentColor;
 }
 .hub-badge.icon-only.verified .ico svg { width: 18px; height: 18px; }
+
+/* Low-frequency card controls stay quiet until the card is being inspected. */
+.hub-card .hub-card-fav,
+.hub-card .hub-badge.icon-only.installed {
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity var(--motion-micro) var(--hub-ease), transform var(--motion-micro) var(--hub-ease), color var(--motion-micro) var(--hub-ease), background var(--motion-micro) var(--hub-ease);
+}
+.hub-card .hub-card-fav {
+  pointer-events: none;
+}
+.hub-card .hub-badge.icon-only.installed {
+  color: var(--text-muted);
+}
+.hub-card.is-fav .hub-card-fav,
+.hub-card:hover .hub-card-fav,
+.hub-card:focus-visible .hub-card-fav,
+.hub-card:focus-within .hub-card-fav,
+.hub-card:hover .hub-badge.icon-only.installed,
+.hub-card:focus-visible .hub-badge.icon-only.installed,
+.hub-card:focus-within .hub-badge.icon-only.installed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hub-card.is-fav .hub-card-fav,
+.hub-card:hover .hub-card-fav,
+.hub-card:focus-visible .hub-card-fav,
+.hub-card:focus-within .hub-card-fav {
+  pointer-events: auto;
+}
+.hub-card:hover .hub-badge.icon-only.installed,
+.hub-card:focus-visible .hub-badge.icon-only.installed,
+.hub-card:focus-within .hub-badge.icon-only.installed {
+  color: var(--action-primary);
+}
+@media (hover: none) {
+  .hub-card .hub-card-fav,
+  .hub-card .hub-badge.icon-only.installed {
+    opacity: 1;
+    transform: none;
+  }
+  .hub-card .hub-card-fav { pointer-events: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hub-card .hub-card-fav,
+  .hub-card .hub-badge.icon-only.installed {
+    transition: none;
+    transform: none;
+  }
+}
