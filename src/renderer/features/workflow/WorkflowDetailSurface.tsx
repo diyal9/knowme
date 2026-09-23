@@ -437,6 +437,7 @@ export function WorkflowDetailSurface({
   const [previewStep, setPreviewStep] = useState(-1)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [canvasZoom, setCanvasZoom] = useState(.82)
+  const [autoFit, setAutoFit] = useState(true)
   const dagScrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -457,6 +458,7 @@ export function WorkflowDetailSurface({
     setPreviewStep(-1)
     setSelectedNodeId(null)
     setCanvasZoom(.82)
+    setAutoFit(true)
   }, [card.id])
 
   const nodes = useMemo(() => nodeRows(pkg, card), [pkg, card])
@@ -470,6 +472,36 @@ export function WorkflowDetailSurface({
     () => workflowDagLayout(canvasGraph.nodes, canvasGraph.edges),
     [canvasGraph],
   )
+  // Fit the occupied graph, not the empty margins of the saved editing canvas.
+  const canvasBounds = useMemo(() => {
+    if (!dag.nodes.length) return { width:dag.width, height:dag.height, x:0, y:0 }
+    const left = Math.min(...dag.nodes.map((node) => node.x))
+    const top = Math.min(...dag.nodes.map((node) => node.y))
+    return {
+      width:Math.max(...dag.nodes.map((node) => node.x + node.width)) - left + DAG_CANVAS_PADDING * 2,
+      height:Math.max(...dag.nodes.map((node) => node.y + node.height)) - top + DAG_CANVAS_PADDING * 2,
+      x:DAG_CANVAS_PADDING - left,
+      y:DAG_CANVAS_PADDING - top,
+    }
+  }, [dag])
+
+  useEffect(() => {
+    const scroll = dagScrollRef.current
+    if (!scroll || !autoFit) return
+    const fit = () => {
+      if (!scroll.clientWidth || !scroll.clientHeight) return
+      const zoom = Math.min(1, (scroll.clientWidth - 16) / canvasBounds.width,
+        (scroll.clientHeight - 48) / canvasBounds.height)
+      setCanvasZoom(Math.max(.1, zoom))
+      scroll.scrollLeft = 0
+      scroll.scrollTop = 0
+    }
+    fit()
+    if (typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(fit)
+    observer.observe(scroll)
+    return () => observer.disconnect()
+  }, [autoFit, canvasBounds])
   const dagMarkerId = `workflow-dag-arrow-${useId().replace(/:/g, '')}`
   const executableNodeCount = nodes.filter((node) => EXECUTABLE_NODE_TYPES.has(node.type)).length
   const immutable = card.provenanceKind === 'team'
@@ -521,17 +553,18 @@ export function WorkflowDetailSurface({
     const focusId = dag.order[focusIndex]
     const focusNode = dag.nodes.find((node) => node.id === focusId)
     if (!focusNode) return
-    const targetLeft = (focusNode.x + focusNode.width / 2) * canvasZoom - scroll.clientWidth / 2
-    const targetTop = (focusNode.y + focusNode.height / 2) * canvasZoom - scroll.clientHeight / 2
+    const tipOnLeft = focusNode.x + canvasBounds.x + focusNode.width / 2 > canvasBounds.width / 2
+    const targetLeft = (focusNode.x + canvasBounds.x + focusNode.width / 2 + (tipOnLeft ? -116 : 116)) * canvasZoom - scroll.clientWidth / 2
+    const targetTop = (focusNode.y + canvasBounds.y + focusNode.height / 2) * canvasZoom - scroll.clientHeight / 2
     const left = Math.max(0, Math.min(targetLeft, scroll.scrollWidth - scroll.clientWidth))
     const top = Math.max(0, Math.min(targetTop, scroll.scrollHeight - scroll.clientHeight))
     if (typeof scroll.scrollTo === 'function') {
-      scroll.scrollTo({ left, top, behavior: 'smooth' })
+      scroll.scrollTo({ left, top, behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
     } else {
       scroll.scrollLeft = left
       scroll.scrollTop = top
     }
-  }, [canvasZoom, dag.nodes, dag.order, previewFinished, previewStep])
+  }, [canvasZoom, canvasBounds, dag.nodes, dag.order, previewFinished, previewStep])
 
   return (
     <article className="wb-workflow-detail" data-testid="workflow-detail">
@@ -619,7 +652,14 @@ export function WorkflowDetailSurface({
                 aria-label={previewing
                   ? (nextPreviewNode ? `下一步：${nextPreviewNode.name}` : '完成预览')
                   : undefined}
-                onClick={previewing ? advancePreview : startPreview}
+                onClick={() => {
+                  if (!previewing) {
+                    setAutoFit(false)
+                    setCanvasZoom(1)
+                  }
+                  if (previewing) advancePreview()
+                  else startPreview()
+                }}
               >
                 <Icon name={previewing ? 'chevronRight' : 'play'} />
                 {previewing
@@ -641,12 +681,12 @@ export function WorkflowDetailSurface({
             <div ref={dagScrollRef} className="wb-workflow-dag-scroll" role="region" aria-label="工作流编排预览" tabIndex={0}>
               <div
                 className="wb-workflow-dag-viewport"
-                style={{ width: dag.width * canvasZoom, height: dag.height * canvasZoom }}
+                style={{ width: canvasBounds.width * canvasZoom, height: canvasBounds.height * canvasZoom }}
               >
               <div
                 className={`wb-workflow-dag${previewing ? ' is-previewing' : ''}`}
                 data-testid="workflow-dag"
-                style={{ width: dag.width, height: dag.height, transform: `scale(${canvasZoom})` }}
+                style={{ width: dag.width, height: dag.height, transform: `scale(${canvasZoom}) translate(${canvasBounds.x}px, ${canvasBounds.y}px)` }}
               >
                 <svg viewBox={`0 0 ${dag.width} ${dag.height}`} aria-hidden="true">
                   <defs>
@@ -737,6 +777,12 @@ export function WorkflowDetailSurface({
                           id={`workflow-node-tip-${node.id}`}
                           className="wb-workflow-node-tip"
                           role="tooltip"
+                          style={{
+                            left:node.x + canvasBounds.x + node.width / 2 > canvasBounds.width / 2 ? 'auto' : undefined,
+                            right:node.x + canvasBounds.x + node.width / 2 > canvasBounds.width / 2 ? 'calc(100% + 12px)' : undefined,
+                            top:node.y + canvasBounds.y > canvasBounds.height / 2 ? 'auto' : undefined,
+                            bottom:node.y + canvasBounds.y > canvasBounds.height / 2 ? 0 : undefined,
+                          }}
                         >
                           <span>节点说明 · {kind.label}</span>
                           <strong>{node.name}</strong>
@@ -754,10 +800,16 @@ export function WorkflowDetailSurface({
               </div>
             </div>
             <span className="wb-workflow-zoom-controls" aria-label="画布缩放控制">
-              <button type="button" aria-label="缩小画布" onClick={() => setCanvasZoom((value) => Math.max(.55, value - .1))}>−</button>
+              <button type="button" aria-label="缩小画布" onClick={() => { setAutoFit(false); setCanvasZoom((value) => Math.max(.1, value - .1)) }}>−</button>
               <output aria-label="当前缩放比例">{Math.round(canvasZoom * 100)}%</output>
-              <button type="button" aria-label="放大画布" onClick={() => setCanvasZoom((value) => Math.min(1.25, value + .1))}>+</button>
-              <button type="button" aria-label="适应画布" onClick={() => setCanvasZoom(.82)}>适应</button>
+              <button type="button" aria-label="放大画布" onClick={() => { setAutoFit(false); setCanvasZoom((value) => Math.min(1.25, value + .1)) }}>+</button>
+              <button type="button" aria-label="适应画布" onClick={() => {
+                setAutoFit(true)
+                if (dagScrollRef.current) {
+                  dagScrollRef.current.scrollLeft = 0
+                  dagScrollRef.current.scrollTop = 0
+                }
+              }}>适应</button>
             </span>
             </div>
           ) : <div className="wb-workflow-dag-empty">尚未编排节点</div>}
