@@ -1101,7 +1101,7 @@
 /* ── 任务首页（任务 Tab） ── */
 .wb-workbench-home-surface {
   width:min(1280px, 100%); margin:0 auto; display:flex; flex-direction:column;
-  padding:0 22px 32px;
+  padding:0 26px 36px;
   /* 展开目录完整显示三行卡片；短窗口按可视区收缩，不足三行时保持内容高度。 */
   --wb-home-expanded-grid-max:min(68dvh, 38rem);
 }
@@ -1111,7 +1111,7 @@
 .wb-task-home-panel {
   border:0; border-bottom:1px solid var(--border-default,var(--wb-line)); border-radius:0;
   background:transparent;
-  padding:22px 0 24px; box-shadow:none;
+  padding:24px 0 28px; box-shadow:none;
 }
 .wb-task-home-panel:last-child { border-bottom:0; }
 .wb-task-recent { border-bottom:0; }
@@ -1148,8 +1148,8 @@
 }
 .wb-task-home-link .ico { width:14px; height:14px; flex:0 0 auto; opacity:.85; }
 .wb-task-home-link:hover { border-color:var(--border-strong); background:var(--surface-hover); }
-.wb-task-quick > .wb-task-home-head { margin-bottom:18px; }
-.wb-expert-filters { margin-bottom:18px; }
+.wb-task-quick > .wb-task-home-head { margin-bottom:16px; }
+.wb-expert-filters { margin-bottom:20px; }
 .wb-task-home-link.wb-task-home-icon {
   width:34px; height:34px; padding:0; justify-content:center; border-radius:10px;
 }
@@ -1180,9 +1180,9 @@
 /* 与专家库 hub-card 对齐：头像 + 标题副标 + 描述 + 徽章/版本 */
 .wb-task-quick-card {
   position:relative; min-width:0; min-height:142px; text-align:left; cursor:pointer;
-  padding:15px 16px; border:1px solid var(--border-default); border-radius:10px;
-  background:var(--surface-page); display:flex; flex-direction:column; gap:10px;
-  transition:border-color 220ms ease, transform 220ms ease, background 220ms ease;
+  padding:16px 17px; border:1px solid var(--border-subtle); border-radius:10px;
+  background:var(--surface-panel); display:flex; flex-direction:column; gap:11px;
+  transition:border-color 180ms ease, transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 .wb-task-quick-start {
   border:0; background:transparent; cursor:pointer; font:600 12px/1.3 var(--ui); padding:4px 0;
@@ -1198,7 +1198,8 @@
   background:transparent; transition:background 220ms ease;
 }
 .wb-task-quick-card:hover {
-  transform:translateY(-1px); border-color:var(--border-strong); background:var(--surface-page);
+  transform:translateY(-1px); border-color:color-mix(in srgb, var(--action-primary) 28%, var(--border-default)); background:var(--surface-page);
+  box-shadow:var(--shadow-rest);
 }
 .wb-task-quick-card:hover::before { background:var(--wb-accent, var(--action-primary)); }
 .wb-task-quick-card:active { transform:translateY(0) scale(0.992); }
@@ -1206,7 +1207,7 @@
 .wb-task-quick-head { display:flex; align-items:flex-start; gap:11px; min-width:0; }
 .wb-task-quick-icon {
   width:38px; height:38px; flex:0 0 auto; display:grid; place-items:center;
-  border:1px solid var(--border-default); border-radius:9px; background:var(--surface-subtle); color:var(--text-muted); overflow:hidden;
+  border:1px solid var(--border-subtle); border-radius:9px; background:var(--surface-page); color:var(--text-muted); overflow:hidden;
 }
 .wb-task-quick-icon .ico { width:17px; height:17px; }
 .wb-task-quick-icon.has-photo { padding:0; border-color:transparent; background:transparent; }
@@ -1231,7 +1232,7 @@
 .wb-task-quick-badges { display:flex; flex-wrap:wrap; gap:5px; min-width:0; }
 .wb-task-quick-badge {
   padding:3px 7px; border:1px solid color-mix(in srgb, var(--text-primary) 5.5%, transparent); border-radius:6px;
-  background:var(--brand-paper); color:var(--text-muted); font:600 12px/1.1 var(--ui); letter-spacing:0;
+  background:var(--surface-muted); color:var(--text-muted); font:600 12px/1.1 var(--ui); letter-spacing:0;
 }
 .wb-task-quick-badge.installed {
   border-color:color-mix(in srgb, var(--action-primary) 9%, transparent); background:var(--action-primary-soft); color:var(--action-primary);
@@ -1246,8 +1247,8 @@
   .wb-task-quick-card:hover, .wb-task-quick-card:active { transform:none; }
 }
 .wb-task-quick-empty {
-  grid-column:1 / -1; padding:26px; text-align:center; color:var(--text-faint); font:12px var(--ui);
-  border:1px dashed var(--border-default); border-radius:12px;
+  grid-column:1 / -1; padding:28px; text-align:center; color:var(--text-muted); font:12px/1.5 var(--ui);
+  border:1px dashed var(--border-default); border-radius:10px; background:var(--surface-panel);
 }
 .wb-task-recent-list {
   display:grid;
@@ -1441,7 +1442,7 @@
 .wb-task-inbox { display:grid; gap:10px; min-width:0; }
 .wb-task-inbox-toolbar {
   min-height:34px; display:flex; align-items:flex-end; justify-content:space-between; gap:16px;
-  border-bottom:1px solid var(--border-default,var(--wb-line));
+  border-bottom:1px solid var(--border-subtle,var(--wb-line));
 }
 .wb-task-inbox-filters { min-width:0; display:flex; align-items:flex-end; gap:24px; overflow-x:auto; scrollbar-width:none; }
 .wb-task-inbox-filters::-webkit-scrollbar { display:none; }
@@ -1457,12 +1458,12 @@
 .wb-task-inbox-filters > button:hover { color:var(--text-primary); }
 .wb-task-inbox-filters > button:focus-visible { outline:2px solid var(--action-primary); outline-offset:2px; border-radius:4px; }
 .wb-task-inbox-filters > button.is-active { color:var(--text-primary); font-weight:600; }
-.wb-task-inbox-filters > button.is-active::after { background:var(--text-primary); }
+.wb-task-inbox-filters > button.is-active::after { background:var(--action-primary); }
 .wb-task-inbox-filters > button b {
   min-width:18px; height:18px; display:grid; place-items:center; padding:0 5px; border-radius:6px;
   background:var(--surface-subtle); color:var(--text-muted); font:600 12px/1 var(--mono);
 }
-.wb-task-inbox-filters > button.is-active b { background:var(--surface-muted); color:var(--text-secondary); }
+.wb-task-inbox-filters > button.is-active b { background:var(--action-primary-soft); color:var(--action-primary); }
 .wb-task-inbox-manage {
   width:28px; height:28px; margin:0 0 5px; display:grid; place-items:center; flex:0 0 28px;
   border:1px solid var(--border-default); border-radius:8px; background:var(--surface-page); padding:0; color:var(--text-muted); cursor:pointer;
@@ -1472,7 +1473,8 @@
 .wb-task-inbox-manage:hover { border-color:var(--border-strong); color:var(--state-danger); background:var(--surface-subtle); }
 .wb-task-inbox-manage:focus-visible { outline:2px solid var(--action-primary); outline-offset:2px; }
 .wb-task-inbox-shell {
-  min-width:0; overflow:hidden; border:1px solid var(--border-default); border-radius:10px; background:var(--surface-page);
+  min-width:0; overflow:hidden; border:1px solid var(--border-subtle); border-radius:10px; background:var(--surface-page);
+  box-shadow:var(--shadow-rest);
 }
 .wb-task-inbox-columns,
 .wb-task-inbox-row-main {
@@ -1481,7 +1483,7 @@
 }
 .wb-task-inbox-columns {
   min-height:34px; padding:0 16px; border-bottom:1px solid color-mix(in srgb, var(--text-primary) 8%, transparent);
-  background:var(--surface-panel); color:var(--text-faint); font:500 12px/1.2 var(--ui);
+  background:var(--surface-subtle); color:var(--text-faint); font:500 12px/1.2 var(--ui);
 }
 .wb-task-inbox-columns span:last-child { text-align:right; padding-right:1px; }
 .wb-task-inbox-list { display:grid; min-width:0; }
@@ -1492,7 +1494,7 @@
 .wb-task-inbox-row:last-child { border-bottom:0; }
 .wb-task-inbox-row:hover { border-color:color-mix(in srgb, var(--text-primary) 7.5%, transparent); background:var(--action-primary-subtle); box-shadow:none; transform:none; }
 .wb-task-inbox-row .wb-task-inbox-row-main {
-  min-height:66px; padding:9px 16px; gap:18px; background:transparent;
+  min-height:68px; padding:10px 16px; gap:18px; background:transparent;
 }
 .wb-task-inbox-row .wb-task-inbox-row-main:focus-visible { outline:2px solid var(--action-primary); outline-offset:-2px; }
 .wb-task-inbox-task { min-width:0; display:grid; grid-column:1; gap:3px; }
@@ -1520,8 +1522,8 @@
 .wb-task-inbox-row .wb-task-inbox-state.is-attention { color:var(--state-warning); }
 .wb-task-inbox-row .wb-task-inbox-state.is-failed { color:var(--state-danger); }
 .wb-task-inbox-empty {
-  min-height:92px; display:flex; align-items:center; justify-content:center; padding:18px;
-  color:var(--text-faint); font:12px/1.45 var(--ui); text-align:center;
+  min-height:104px; display:flex; align-items:center; justify-content:center; padding:24px;
+  color:var(--text-muted); font:12px/1.5 var(--ui); text-align:center; background:var(--surface-panel);
 }
 .wb-task-inbox > .wb-list-toggle { margin-top:0; }
 @media (max-width: 980px) {
