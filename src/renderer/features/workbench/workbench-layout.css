@@ -4325,9 +4325,6 @@
 .wb-task-recent > .wb-task-home-head {
   margin-bottom: var(--space-3);
 }
-.wb-task-recent > .wb-task-home-head h2 {
-  letter-spacing: -0.01em;
-}
 
 /* 让卡片的图像、文字与底部动作形成稳定的垂直节拍；只在聚焦时提升层次。 */
 .wb-task-quick-card:focus-within {

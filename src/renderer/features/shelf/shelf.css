@@ -130,10 +130,10 @@
   max-height:var(--wb-home-expanded-grid-max, min(68dvh, 38rem));
   overflow-y:auto;
   overflow-x:hidden;
-  padding-right:2px;
+  padding-right:0;
   align-content:start;
   overscroll-behavior:contain;
-  scrollbar-gutter:stable;
+  scrollbar-gutter:auto;
 }
 .wb-shelf-grid {
   display:grid; gap:10px;
@@ -1050,3 +1050,122 @@
 .wb-workflow-detail-title p,
 .wb-shelf-card-desc,
 .wb-workflow-card-desc { font:var(--type-support); }
+
+/* 工作流首页：入口、交付与运行记录共用稳定的阅读节奏。 */
+.wb-shelf > .wb-shelf-catalog-section {
+  gap:var(--space-4);
+  padding-bottom:var(--space-6);
+  border-bottom:1px solid var(--border-subtle);
+}
+.wb-shelf > .wb-shelf-run-board {
+  padding-top:var(--space-6);
+}
+.wb-shelf > .wb-shelf-run-board::before { content:none; }
+.wb-shelf .wb-shelf-intro { flex-wrap:wrap; gap:var(--space-3); }
+.wb-shelf .wb-shelf-intro-actions { gap:var(--space-3); }
+.wb-shelf .wb-shelf-manage {
+  min-height:var(--control-lg);
+  padding-inline:var(--space-3);
+  border-radius:var(--radius-md);
+  border-color:var(--border-subtle);
+  background:var(--surface-page);
+  color:var(--text-secondary);
+}
+.wb-shelf .wb-shelf-manage:hover {
+  background:var(--surface-subtle);
+  border-color:var(--border-default);
+  color:var(--text-primary);
+}
+.wb-shelf .wb-shelf-grid { gap:var(--space-4); }
+.wb-shelf .wb-shelf-grid > .wb-shelf-card {
+  min-width:0;
+  min-height:176px;
+  padding:var(--space-4);
+  gap:var(--space-3);
+  border-radius:var(--radius-panel);
+  background:var(--surface-page);
+  box-shadow:var(--shadow-rest);
+}
+.wb-shelf .wb-shelf-grid > .wb-shelf-card:is(:hover, :focus-visible) {
+  border-color:var(--border-strong);
+  box-shadow:var(--shadow-raised);
+}
+.wb-shelf .wb-shelf-grid > .wb-shelf-card::before { content:none; }
+.wb-shelf .wb-shelf-grid > .wb-shelf-card .wb-shelf-card-top {
+  gap:var(--space-3);
+  align-items:center;
+}
+.wb-shelf .wb-shelf-card-top > .wb-shelf-mark { margin-top:0; }
+.wb-shelf .wb-shelf-card:not(.blocked) .wb-shelf-mark {
+  background:var(--surface-subtle);
+  color:var(--text-secondary);
+  border:1px solid var(--border-subtle);
+}
+.wb-shelf .wb-shelf-card h3 { font:var(--type-card); }
+.wb-shelf .wb-shelf-card-sub {
+  font:var(--type-meta);
+  color:var(--text-muted);
+}
+.wb-shelf .wb-shelf-delivery { gap:var(--space-2); }
+.wb-shelf .wb-shelf-delivery > span {
+  font:var(--type-support);
+  color:var(--text-muted);
+}
+.wb-shelf .wb-shelf-delivery > span .ico { display:none; }
+.wb-shelf .wb-shelf-delivery > strong {
+  font:var(--type-support);
+  color:var(--text-secondary);
+  min-height:calc(2em * var(--line-normal));
+}
+.wb-shelf .wb-shelf-card-summary {
+  min-height:var(--control-md);
+  padding-top:var(--space-2);
+  border-top:1px solid var(--border-subtle);
+}
+.wb-shelf .wb-shelf-card-detail {
+  min-height:var(--control-sm);
+  font:var(--type-meta);
+  gap:var(--space-1);
+}
+.wb-shelf .wb-shelf-run-board > .wb-task-home-head {
+  align-items:center;
+  flex-wrap:wrap;
+  gap:var(--space-3);
+  margin-bottom:var(--space-3);
+}
+.wb-shelf .project-scope-switch { flex-wrap:wrap; row-gap:var(--space-2); }
+.wb-shelf .project-scope-switch > span {
+  font:var(--type-meta);
+  margin-right:var(--space-2);
+  color:var(--text-muted);
+}
+.wb-shelf .project-scope-switch button {
+  min-height:var(--control-md);
+  border-color:var(--border-default);
+  background:var(--surface-page);
+  color:var(--text-secondary);
+  font-weight:var(--weight-medium);
+}
+.wb-shelf .project-scope-switch button.active {
+  border-color:var(--border-strong);
+  background:var(--action-primary-soft);
+  color:var(--action-primary);
+}
+.wb-shelf .project-scope-switch button:hover { background:var(--surface-hover); }
+.wb-shelf .project-scope-switch button:focus-visible {
+  outline:2px solid var(--action-primary);
+  outline-offset:2px;
+}
+.wb-shelf .wb-task-inbox-empty {
+  min-height:144px;
+  padding:var(--space-6);
+  color:var(--text-secondary);
+  font:var(--type-support);
+  text-align:center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-shelf .wb-shelf-grid > .wb-shelf-card,
+  .wb-shelf .wb-shelf-card-detail .ico { transition:none; }
+  .wb-shelf .wb-shelf-grid > .wb-shelf-card:hover,
+  .wb-shelf .wb-shelf-card:hover .wb-shelf-card-detail .ico { transform:none; }
+}
