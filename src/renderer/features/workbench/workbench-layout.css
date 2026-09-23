@@ -4287,3 +4287,47 @@
 .wb-task-inbox-row .wb-task-inbox-state.is-failed {
   background: var(--state-danger-soft);
 }
+
+/* 展开常用专家时保持同一条空间边界，避免滚动槽把卡片列悄悄挤窄。 */
+.wb-task-quick-grid.is-expanded {
+  width: 100%;
+  padding-right: 0;
+  scrollbar-gutter: auto;
+  row-gap: var(--space-4);
+}
+.wb-task-quick-grid.is-expanded .wb-task-quick-card {
+  min-width: 0;
+}
+
+/* 展开/收起是同一组内容的折叠动作，给控制点一个轻而明确的落脚处。 */
+.wb-task-quick.expanded > .wb-list-toggle {
+  margin-top: var(--space-4);
+  color: var(--action-primary);
+  background: var(--action-primary-subtle);
+}
+.wb-task-quick.expanded > .wb-list-toggle:hover {
+  background: var(--action-primary-soft);
+}
+
+/* 让卡片的图像、文字与底部动作形成稳定的垂直节拍；只在聚焦时提升层次。 */
+.wb-task-quick-card:focus-within {
+  border-color: color-mix(in srgb, var(--action-primary) 30%, var(--border-default));
+  background: var(--surface-page);
+  box-shadow: var(--shadow-rest);
+}
+.wb-task-quick-icon {
+  border-color: var(--border-default);
+  background: var(--surface-subtle);
+}
+.wb-task-quick-icon.has-photo {
+  border-color: transparent;
+  background: transparent;
+}
+
+/* 任务收件箱保留一层柔和的行间呼吸，减少连续横线带来的疲劳感。 */
+.wb-task-inbox-row + .wb-task-inbox-row {
+  border-top-color: color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+.wb-task-inbox-row:hover .wb-task-inbox-state {
+  background: var(--surface-page);
+}
