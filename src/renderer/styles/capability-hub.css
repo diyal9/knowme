@@ -809,7 +809,7 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-body { background: var(--hub-bg); }
 .hub-main {
   padding: 22px 28px 42px;
-  background: var(--surface-panel);
+  background: var(--surface-subtle);
   scroll-behavior: smooth;
 }
 .hub-main::-webkit-scrollbar { width: 11px; }
@@ -2397,6 +2397,8 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 /* Catalog cards: quieter surfaces, clearer title rhythm, and a more deliberate directory feel. */
 .hub-card {
   border-color: var(--border-default);
+  background: var(--surface-page);
+  box-shadow: var(--shadow-raised);
   transition: border-color 180ms var(--hub-ease), box-shadow 180ms var(--hub-ease), transform 180ms var(--hub-ease);
 }
 .hub-card-fav {
@@ -2405,6 +2407,9 @@ body.hub-detail-only .hub-drawer-backdrop.open {
 .hub-card-fav:hover {
   border-color: color-mix(in srgb, var(--state-warning) 18%, transparent);
   background: color-mix(in srgb, var(--state-warning) 10%, transparent);
+}
+.hub-card-foot {
+  border-top-color: color-mix(in srgb, var(--hub-div) 54%, transparent);
 }
 .hub-badge {
   border-color: var(--border-subtle);
