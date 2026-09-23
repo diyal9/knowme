@@ -46,17 +46,17 @@ function clone(value) {
 }
 
 function renameWithRetrySync(fsImpl, source, target) {
-  const delays = [15, 40, 80, 160]
   let lastError
-  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+  for (let attempt = 0; attempt <= 4; attempt += 1) {
     try {
       fsImpl.renameSync(source, target)
       return
     } catch (error) {
       lastError = error
       const retryable = ['EPERM', 'EACCES', 'EBUSY'].includes(error?.code)
-      if (!retryable || attempt >= delays.length) break
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delays[attempt])
+      if (!retryable || attempt >= 4) break
+      // This persistence helper runs during agent activity; synchronous waits
+      // here freeze the Electron event loop. Keep only bounded immediate tries.
     }
   }
   throw lastError

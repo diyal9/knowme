@@ -30,7 +30,7 @@ describe('capability integration wiring', () => {
       ...IPC_CHANNELS.expert,
       ...IPC_CHANNELS.connector,
     ]
-    assert.equal(all.length, 31)
+    assert.equal(all.length, 37)
     assert.ok(all.includes('capability-favorite-list'))
     assert.ok(all.includes('capability-favorite-toggle'))
     assert.ok(all.includes('capability-list'))
@@ -42,6 +42,12 @@ describe('capability integration wiring', () => {
     assert.ok(all.includes('skill-task-list'))
     assert.ok(all.includes('expert-try-chat'))
     assert.ok(all.includes('expert-delete'))
+    assert.ok(all.includes('agent-registry-verify'))
+    assert.ok(all.includes('agent-registry-preview'))
+    assert.ok(all.includes('agent-registry-commit'))
+    assert.ok(all.includes('agent-registry-revisions'))
+    assert.ok(all.includes('agent-registry-draft-get'))
+    assert.ok(all.includes('agent-registry-draft-save'))
     assert.ok(all.includes('connector-save-allowlist'))
   })
 
@@ -54,6 +60,10 @@ describe('capability integration wiring', () => {
     assert.match(preload, /skill-task-list/)
     assert.match(preload, /expert-try-chat/)
     assert.match(preload, /expert-delete/)
+    assert.match(preload, /agent-registry-preview/)
+    assert.match(preload, /agent-registry-commit/)
+    assert.match(preload, /agent-registry-draft-get/)
+    assert.match(preload, /agent-registry-draft-save/)
     assert.match(preload, /connector-health/)
     assert.match(preload, /capabilityList:/)
   })
@@ -65,6 +75,7 @@ describe('capability integration wiring', () => {
     assert.match(agentRuntimeSource, /KNOWME_TEST_API_KEY/)
     assert.match(agentRuntimeSource, /KNOWME_TEST_API_ENDPOINT/)
     assert.match(agentRuntimeSource, /KNOWME_TEST_MODEL/)
+    assert.match(agentRuntimeSource, /canStartExpert\?\.\(expertId\)/)
     assert.match(mainSource, /\.join\((?:scope\.|ctx\.)?app\.getPath\('appData'\),\s*'KnowMe'\)/)
   })
 
@@ -185,15 +196,54 @@ describe('capability integration wiring', () => {
   })
 
   it('createMinimalPackage builds skill/expert/connector stubs', () => {
-    const skill = createMinimalPackage('skill', { id: 'my-skill', name: 'My Skill' })
+    const skill = createMinimalPackage('skill', {
+      id: 'my-skill',
+      name: 'My Skill',
+      description: 'Reusable workflow',
+      instructions: '1. Inspect the input.\n2. Return a concise result.',
+    })
     assert.equal(skill.ok, true)
     assert.ok(skill.files['SKILL.md'].includes('My Skill'))
+    assert.ok(skill.files['SKILL.md'].includes('1. Inspect the input.'))
 
     const expert = createMinimalPackage('expert', { id: 'my-expert', name: 'Expert', systemPrompt: 'Be helpful' })
     assert.ok(expert.files['EXPERT.md'].includes('Be helpful'))
 
     const conn = createMinimalPackage('connector', { id: 'my-conn', name: 'Conn' })
     assert.ok(conn.files['manifest.json'].includes('"kind": "connector"'))
+  })
+
+  it('creates a user skill through the custom import lifecycle and lists it as installed', async () => {
+    const userData = tmpDir()
+    try {
+      const hub = createCapabilityHubService({
+        getUserData: () => userData,
+        getKnowledgeDir: () => path.join(userData, 'knowledge'),
+        getConnectorsApi: () => null,
+        bundledRoot: path.join(__dirname, '../src/catalog'),
+      })
+      const created = await hub.importCapability({
+        source: 'custom',
+        kind: 'skill',
+        id: 'weekly-report',
+        name: '周报整理',
+        description: '把零散进展整理成周报',
+        slash: 'weekly',
+        instructions: '提取进展、风险和下周计划。',
+        trustConfirmed: true,
+        riskConfirmed: true,
+      })
+      assert.equal(created.ok, true)
+      const skillFile = path.join(userData, 'capabilities', 'skills', 'weekly-report', 'SKILL.md')
+      assert.match(fs.readFileSync(skillFile, 'utf8'), /提取进展、风险和下周计划/)
+
+      const listed = await hub.listCapabilities({ kind: 'skill' })
+      const skill = listed.items.find(item => item.id === 'weekly-report')
+      assert.equal(skill?.installed, true)
+      assert.equal(skill?.source, 'custom')
+    } finally {
+      fs.rmSync(userData, { recursive: true, force: true })
+    }
   })
 
   it('installs an expert with its declared Skill dependency closure', async () => {
@@ -207,14 +257,13 @@ describe('capability integration wiring', () => {
       })
 
       const installed = await hub.installCapability({
-        id: 'product-manager',
+        id: 'agent-operations',
         enabled: true,
         riskConfirmed: true,
       })
       assert.equal(installed.ok, true)
       assert.deepEqual(installed.dependencyUpdates.map(item => item.id).sort(), [
-        'product-definition-method', 'requirement-review',
-        'research-evidence-analysis',
+        'agent-registry-operations',
       ].sort())
 
       const store = JSON.parse(fs.readFileSync(path.join(userData, 'capabilities', 'install-store.json'), 'utf8'))
@@ -222,7 +271,7 @@ describe('capability integration wiring', () => {
         assert.equal(store.entries[skillId]?.kind, 'skill')
         assert.equal(store.entries[skillId]?.enabled, true)
       }
-      assert.equal(store.entries['product-manager']?.kind, 'expert')
+      assert.equal(store.entries['agent-operations']?.kind, 'expert')
     } finally {
       fs.rmSync(userData, { recursive: true, force: true })
     }
@@ -237,24 +286,24 @@ describe('capability integration wiring', () => {
         getConnectorsApi: () => null,
         bundledRoot: path.join(__dirname, '../src/catalog'),
       })
-      const installed = await hub.installCapability({ id: 'product-manager', enabled: true, riskConfirmed: true })
+      const installed = await hub.installCapability({ id: 'agent-operations', enabled: true, riskConfirmed: true })
       assert.equal(installed.ok, true)
 
       const installFile = path.join(userData, 'capabilities', 'install-store.json')
       const store = JSON.parse(fs.readFileSync(installFile, 'utf8'))
-      store.entries['product-definition-method'] = {
-        ...store.entries['product-definition-method'],
+      store.entries['agent-registry-operations'] = {
+        ...store.entries['agent-registry-operations'],
         source: 'custom',
         version: '9.0.0',
       }
       fs.writeFileSync(installFile, JSON.stringify(store, null, 2))
 
-      const reinstalled = await hub.installCapability({ id: 'product-manager', enabled: true, riskConfirmed: true })
+      const reinstalled = await hub.installCapability({ id: 'agent-operations', enabled: true, riskConfirmed: true })
       assert.equal(reinstalled.ok, true)
       assert.ok(reinstalled.warnings.some(item => item.code === 'dependency_update_not_managed'))
       const after = JSON.parse(fs.readFileSync(installFile, 'utf8'))
-      assert.equal(after.entries['product-definition-method'].source, 'custom')
-      assert.equal(after.entries['product-definition-method'].version, '9.0.0')
+      assert.equal(after.entries['agent-registry-operations'].source, 'custom')
+      assert.equal(after.entries['agent-registry-operations'].version, '9.0.0')
     } finally {
       fs.rmSync(userData, { recursive: true, force: true })
     }
@@ -382,19 +431,19 @@ systemPrompt: "你是配置协作助手。"
   it('keeps a curated expert on its catalog display name during backfill', () => {
     const userData = tmpDir()
     const store = createCapabilityStore({ userData })
-    const expertDir = path.join(userData, 'capabilities', 'experts', 'office-partner')
+    const expertDir = path.join(userData, 'capabilities', 'experts', 'agent-operations')
     fs.mkdirSync(expertDir, { recursive: true })
     fs.writeFileSync(path.join(expertDir, 'EXPERT.md'), `---
-name: "office-partner"
-description: "日常办公多能力专家：写作润色与飞书协作。"
+name: "agent-operations"
+description: "专业 Agent 的创建、调优、评估与生命周期管理。"
 avatar: ""
 skills: []
 connectors: []
-systemPrompt: "你是办公伙伴。"
+systemPrompt: "你是 Agent 管理专家。"
 ---
 `, 'utf8')
     store.upsertEntry({
-      id: 'office-partner',
+      id: 'agent-operations',
       kind: 'expert',
       source: 'curated',
       status: 'enabled',
@@ -548,6 +597,8 @@ systemPrompt: "你是配置协作助手。"
     assert.ok(installStore.entries['my-self-expert'], 'install store receives published expert')
     assert.equal(installStore.entries['my-self-expert'].source, 'local')
     assert.equal(installStore.entries['my-self-expert'].enabled, true)
+    assert.equal(installStore.entries['my-self-expert'].qualification.state, 'ready')
+    assert.equal(installStore.entries['my-self-expert'].qualification.verification, 'definition-only')
 
     const listed = await hub.listCapabilities({ kind: 'expert' })
     assert.equal(listed.ok, true)
@@ -565,7 +616,7 @@ systemPrompt: "你是配置协作助手。"
       false,
       'expert package directory removed',
     )
-    const blocked = hub.deleteExpert({ id: 'office-partner', source: 'curated' })
+    const blocked = hub.deleteExpert({ id: 'agent-operations', source: 'curated' })
     assert.equal(blocked.ok, false)
     assert.equal(blocked.code, 'readonly_bundled_expert')
 

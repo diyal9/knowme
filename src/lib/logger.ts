@@ -43,6 +43,9 @@ let state = {
 }
 const pending = []
 const MAX_PENDING = 500
+const writeQueue = []
+const MAX_WRITE_QUEUE = 2000
+let drainPromise = null
 
 function normalizeCategory(category) {
   const c = String(category || '').trim().toLowerCase()
@@ -117,11 +120,11 @@ function nextRolledFile() {
   return candidate
 }
 
-function rotateIfNeeded(file, incomingBytes = 0) {
+async function rotateIfNeeded(file, incomingBytes = 0) {
   try {
-    const stat = fs.statSync(file)
+    const stat = await fs.promises.stat(file)
     if (stat.size + incomingBytes <= state.maxBytes) return false
-    fs.renameSync(file, nextRolledFile())
+    await fs.promises.rename(file, nextRolledFile())
     return true
   } catch { return false /* file may not exist yet */ }
 }
@@ -166,15 +169,62 @@ function pruneOldFiles() {
   state.totalBytes = total
 }
 
-function writeEntry(entry) {
+async function writeEntry(entry) {
   const file = currentFile()
   const line = JSON.stringify(entry) + '\n'
   const lineBytes = Buffer.byteLength(line, 'utf8')
-  const rotated = rotateIfNeeded(file, lineBytes)
-  fs.appendFileSync(file, line, 'utf8')
+  const rotated = await rotateIfNeeded(file, lineBytes)
+  await fs.promises.appendFile(file, line, 'utf8')
   state.totalBytes += lineBytes
   // 文件数只会在轮转时增长；总量则每次写入都必须执行硬限制。
   if (rotated || state.totalBytes > state.maxTotalBytes) pruneOldFiles()
+}
+
+function yieldToEventLoop() {
+  return new Promise(resolve => {
+    if (typeof setImmediate === 'function') setImmediate(resolve)
+    else setTimeout(resolve, 0)
+  })
+}
+
+async function drainWriteQueue() {
+  while (writeQueue.length) {
+    const entry = writeQueue.shift()
+    try { await writeEntry(entry) } catch { /* logging must never affect the run */ }
+    // Keep a burst of renderer/diagnostic logs from monopolising the main loop.
+    await yieldToEventLoop()
+  }
+}
+
+function scheduleWriteDrain() {
+  if (drainPromise) return drainPromise
+  drainPromise = new Promise(resolve => {
+    setImmediate(async () => {
+      try { await drainWriteQueue() }
+      finally {
+        drainPromise = null
+        resolve()
+        if (writeQueue.length) scheduleWriteDrain()
+      }
+    })
+  })
+  return drainPromise
+}
+
+function enqueueWrite(entry) {
+  if (writeQueue.length >= MAX_WRITE_QUEUE) {
+    // Preserve the newest diagnostics and avoid an unbounded memory spike when
+    // a renderer enters a logging loop or the disk becomes unavailable.
+    writeQueue.shift()
+  }
+  writeQueue.push(entry)
+  scheduleWriteDrain()
+}
+
+/** Wait for queued entries to reach the filesystem; useful for shutdown/tests. */
+function flush() {
+  if (!writeQueue.length && !drainPromise) return Promise.resolve()
+  return (drainPromise || scheduleWriteDrain()).then(() => flush())
 }
 
 function isBrokenPipe(error) {
@@ -238,7 +288,7 @@ function emit(entry) {
     if (pending.length > MAX_PENDING) pending.shift()
     return
   }
-  try { writeEntry(entry) } catch { /* never throw from logging */ }
+  enqueueWrite(entry)
 }
 
 /** 初始化：注入落盘目录。可多次调用（覆盖配置）。 */
@@ -255,9 +305,7 @@ function init(opts = {}) {
   state.ready = true
   pruneOldFiles()
   const backlog = pending.splice(0, pending.length)
-  for (const entry of backlog) {
-    try { writeEntry(entry) } catch { /* ignore */ }
-  }
+  for (const entry of backlog) enqueueWrite(entry)
   return true
 }
 
@@ -312,7 +360,8 @@ function readFilesForDate(date) {
  * @returns {{ entries: object[], total: number, date: string, dates: string[] }}
  */
 function query(opts = {}) {
-  const dates = listDatesForDir()
+  const queuedDates = writeQueue.map(entry => dateStamp(new Date(entry.ts)))
+  const dates = [...new Set([...(listDatesForDir() || []), ...queuedDates])].sort().reverse()
   const date = opts.date && /^\d{4}-\d{2}-\d{2}$/.test(opts.date) ? opts.date : (dates[0] || dateStamp())
   const category = opts.category && CATEGORIES.includes(opts.category) ? opts.category : ''
   const level = opts.level && LEVELS.includes(opts.level) ? opts.level : ''
@@ -331,6 +380,11 @@ function query(opts = {}) {
       try { obj = JSON.parse(t) } catch { continue }
       entries.push(obj)
     }
+  }
+  // The write path is deliberately asynchronous. Include entries still in
+  // memory so the log viewer and tests remain read-after-write consistent.
+  for (const entry of writeQueue) {
+    if (dateStamp(new Date(entry.ts)) === date) entries.push(entry)
   }
   entries.sort((a, b) => String(b.ts || '').localeCompare(String(a.ts || '')))
   const filtered = entries.filter(e => {
@@ -364,6 +418,9 @@ function counts(date) {
 }
 
 function clear(date) {
+  for (let i = writeQueue.length - 1; i >= 0; i -= 1) {
+    if (!date || dateStamp(new Date(writeQueue[i].ts)) === date) writeQueue.splice(i, 1)
+  }
   const files = date ? readFilesForDate(date) : (state.dir ? readFilesForDate('') : [])
   let removed = 0
   const targets = date
@@ -378,6 +435,7 @@ function clear(date) {
   for (const f of targets) {
     try { fs.unlinkSync(f); removed++ } catch { /* ignore */ }
   }
+  if (!date) state.totalBytes = 0
   return { ok: true, removed }
 }
 
@@ -396,6 +454,7 @@ function _reset() {
     brokenPipes: { stdout: false, stderr: false },
   }
   pending.length = 0
+  writeQueue.length = 0
 }
 
 module.exports = {
@@ -418,6 +477,7 @@ module.exports = {
   query,
   counts,
   clear,
+  flush,
   redact,
   isBrokenPipe,
   disableBrokenPipe,

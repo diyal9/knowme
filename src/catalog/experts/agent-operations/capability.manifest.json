@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 3,
+  "id": "agent-operations",
+  "kind": "expert",
+  "name": "能力管家",
+  "description": "负责 KnowMe Agent 与 Skill 的创建、优化、测试、评估、发布和生命周期治理。",
+  "version": "1.4.1",
+  "dependencies": [
+    { "id": "agent-registry-operations", "kind": "skill", "required": true }
+  ],
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": {
+      "allowlist": [
+        "list_manageable_agents",
+        "get_agent_definition",
+        "get_agent_draft",
+        "update_agent_draft",
+        "verify_agent_definition",
+        "preview_agent_change",
+        "commit_agent_change",
+        "list_agent_revisions",
+        "list_manageable_skills",
+        "get_skill_definition",
+        "verify_skill_definition",
+        "publish_skill_definition",
+        "check_agent_eval_runtime",
+        "setup_agent_eval_runtime",
+        "save_agent_eval_suite",
+        "run_agent_eval",
+        "get_agent_eval_report"
+      ]
+    },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "inputs": ["Agent 草稿 ID、Skill ID，或新能力目标与使用场景", "代表性测试材料、成功标准和权限边界"],
+  "outputs": ["通过结构校验的 Agent 或 Skill 定义", "静态校验、真实评估与生命周期变更结果"],
+  "risk": {
+    "level": "medium",
+    "reasons": ["可以修改 KnowMe 用户数据目录中的 Agent 草稿或用户自建 Skill，在用户批准后提交生命周期变更或调用已配置的 DeepEval 裁判模型"]
+  },
+  "provenance": { "source": "curated", "trust": "bundled", "ref": "experts/agent-operations" },
+  "metadata": {
+    "knowme": {
+      "execution": {
+        "strategy": "draft-first",
+        "routes": [
+          {
+            "id": "agent-lifecycle",
+            "label": "能力全生命周期治理",
+            "description": "读取 Agent 草稿或 Skill 定义，完成调优、评估、审批发布与版本治理。",
+            "default": true,
+            "keywords": ["创建专家", "调优专家", "测试专家", "评估专家", "发布专家", "回滚专家", "下架专家", "创建技能", "新建技能", "优化技能", "评估技能", "管理技能", "创建 Skill", "优化 Skill", "评估 Skill"],
+            "requiredSkills": ["agent-registry-operations"],
+            "requiredTools": [
+              "list_manageable_agents",
+              "get_agent_definition",
+              "get_agent_draft",
+              "update_agent_draft",
+              "verify_agent_definition",
+              "preview_agent_change",
+              "commit_agent_change",
+              "list_agent_revisions",
+              "list_manageable_skills",
+              "get_skill_definition",
+              "verify_skill_definition",
+              "publish_skill_definition",
+              "check_agent_eval_runtime",
+              "setup_agent_eval_runtime",
+              "save_agent_eval_suite",
+              "run_agent_eval",
+              "get_agent_eval_report"
+            ],
+            "toolAllowlist": [
+              "list_manageable_agents",
+              "get_agent_definition",
+              "get_agent_draft",
+              "update_agent_draft",
+              "verify_agent_definition",
+              "preview_agent_change",
+              "commit_agent_change",
+              "list_agent_revisions",
+              "list_manageable_skills",
+              "get_skill_definition",
+              "verify_skill_definition",
+              "publish_skill_definition",
+              "check_agent_eval_runtime",
+              "setup_agent_eval_runtime",
+              "save_agent_eval_suite",
+              "run_agent_eval",
+              "get_agent_eval_report"
+            ]
+          }
+        ],
+        "deliverables": [
+          {
+            "id": "governance-result",
+            "title": "能力优化与治理结果",
+            "type": "answer",
+            "required": true,
+            "requiredSkills": ["agent-registry-operations"]
+          }
+        ],
+        "qualityReview": {
+          "enabled": true,
+          "criteria": [
+            "确认目标职责确实需要 Agent，而不是可以由 Skill、工作流或伙伴直接承担。",
+            "逐项核对定义、依赖、工具白名单、Connector、知识、风险和实际可用权限一致。",
+            "Skill 必须明确触发场景、步骤、输入输出、边界和失败处理；内置或外部安装的只读 Skill 不得原地覆盖。",
+            "把结构校验、试运行、场景评估和专业认证分别报告，不用较低层证据冒充较高层资格。",
+            "评估报告绑定当前配置 hash，明确区分端到端、组件和轨迹范围；缺少真实 observation、DeepEval 或 trace 时保持阻断。",
+            "所有发布、更新、回滚和下架均能回指当前预览、用户确认、revision 与生命周期结果。"
+          ]
+        }
+      }
+    }
+  }
+}

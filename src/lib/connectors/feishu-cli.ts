@@ -23,6 +23,7 @@ module.exports = {
   runLarkCli: core.runLarkCli,
   sanitizeCliArgs: core.sanitizeCliArgs,
   executeFeishuRead: core.executeFeishuRead,
+  executeMeetingInventory: meetings.executeMeetingInventory,
   executeMeetingCandidates: meetings.executeMeetingCandidates,
   executeMeetingRead: meetings.executeMeetingRead,
   executeRelatedChats: im.executeRelatedChats,

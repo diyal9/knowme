@@ -30,6 +30,8 @@ const ORIGIN_PRIORITY = Object.freeze({
 })
 
 const HIDDEN_VISIBILITY = new Set(['deprecated', 'internal'])
+const RETIRED_DAEMON_WORKFLOW_IDS = new Set(['daily-summary', 'feishu-daily'])
+const RETIRED_DAEMON_WORKFLOW_NAMES = new Set(['飞书日常总结'])
 
 function text(value) {
   return String(value == null ? '' : value).trim()
@@ -139,9 +141,11 @@ function collectDaemon(daemon) {
   for (const item of list(daemon?.workflows)) {
     const id = text(item?.id || item?.workflow)
     if (!id) continue
+    const name = text(item.name || item.title || id)
+    if (RETIRED_DAEMON_WORKFLOW_IDS.has(id) || RETIRED_DAEMON_WORKFLOW_NAMES.has(name)) continue
     const candidate = candidateFrom({
       id,
-      name: item.name || item.title || id,
+      name,
       description: item.description || item.summary || '',
       source: 'official',
       status: 'published',
@@ -384,6 +388,7 @@ function buildWorkflowSupply(input = {}) {
 module.exports = {
   MAX_REPO_WORKFLOWS,
   AGENT_ALIASES,
+  RETIRED_DAEMON_WORKFLOW_IDS,
   resolveAgentId,
   graphFromDefinition,
   buildWorkflowSupply,

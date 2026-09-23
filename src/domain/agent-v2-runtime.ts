@@ -93,39 +93,46 @@ export function normalizeV2StreamEvent(event: Record<string, unknown>): Record<s
   }
 }
 
-function applyCommittedFallback(message: ChatMessage, event: Record<string, unknown>): ChatMessage {
-  const type = String(event.type || '')
-  const payload = event.payload && typeof event.payload === 'object'
-    ? event.payload as Record<string, unknown>
-    : {}
-  if (type === 'answer.committed') {
-    const text = String(payload.text || '').trim()
-    if (!text) return message
-    const recovered = extractStructuredChoiceFromText(text)
-    return stampStreamTiming({
-      ...message,
-      text: recovered?.text || text,
-      structuredUi: recovered?.bars || message.structuredUi,
-      answerHash: String(payload.hash || message.answerHash || ''),
-      v2AnswerCommitted: true,
-      thinking: false,
-      protocolVersion: 2,
-    })
-  }
-  return stampStreamTiming(applyAssistantStreamEvent(message, event))
-}
-
 export function applyRuntimeStreamEvent(message: ChatMessage, event: Record<string, unknown>): ChatMessage {
   if (!isV2StreamEvent(event)) return stampStreamTiming(applyAssistantStreamEvent(message, event))
   const normalized = normalizeV2StreamEvent(event)
   try {
     if (typeof reducer.reduceMessageEvent !== 'function' || typeof reducer.applyStateToMessage !== 'function') {
-      return applyCommittedFallback(message, normalized)
+      // A V2 envelope is owned by the protocol reducer. If the reducer is
+      // unavailable, fail closed instead of silently routing the event through
+      // the legacy compatibility path (which can duplicate or overwrite an
+      // answer that was already rendered).
+      return stampStreamTiming(message)
     }
     const runId = String(message.runId || normalized.runId || 'run')
+    const isAnswerCommit = String(normalized.type || '') === 'answer.committed'
+    const alreadyCommitted = Boolean(
+      message.v2AnswerCommitted
+      || (message.protocolVersion === 2 && message.answerHash && String(message.text || '').trim()),
+    )
+    if (isAnswerCommit && alreadyCommitted) {
+      return stampStreamTiming({
+        ...message,
+        streaming: false,
+        thinking: false,
+        protocolVersion: 2,
+        v2AnswerCommitted: true,
+      })
+    }
     const state = message.messageState || reducer.createMessageState?.(runId)
     const reduced = reducer.reduceMessageEvent(state, normalized)
-    if (!reduced?.changed) return applyCommittedFallback(message, normalized)
+    if (!reduced?.changed) {
+      // A V2 event that the reducer rejects is not a legacy stream event.
+      // Project the reducer state for diagnostics/counters, but never let the
+      // rejected payload mutate the visible answer through the compatibility
+      // fallback (which would duplicate or overwrite a committed response).
+      if (reduced?.ignored) {
+        const rejected: ChatMessage = { ...message, messageState: reduced.state, protocolVersion: 2 }
+        reducer.applyStateToMessage(rejected, reduced.state)
+        return stampStreamTiming(rejected)
+      }
+      return stampStreamTiming(message)
+    }
     const next: ChatMessage = { ...message, messageState: reduced.state, protocolVersion: 2, thinking: false }
     reducer.applyStateToMessage(next, reduced.state)
     const ui = (next as ChatMessage & { ui?: unknown }).ui
@@ -133,7 +140,9 @@ export function applyRuntimeStreamEvent(message: ChatMessage, event: Record<stri
     if (structured.length) next.structuredUi = structured
     return stampStreamTiming(next)
   } catch {
-    return stampStreamTiming(applyCommittedFallback(message, normalized))
+    // A V2 envelope must fail closed if its reducer cannot process it. The
+    // legacy fallback is reserved for events without a V2 envelope.
+    return stampStreamTiming(message)
   }
 }
 

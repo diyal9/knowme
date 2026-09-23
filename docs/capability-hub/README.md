@@ -11,6 +11,8 @@ capabilities/
   skills/<id>/SKILL.md
   experts/<id>/EXPERT.md
   connectors/<id>/manifest.json
+  agent-registry/<id>/index.json
+  agent-registry/<id>/revisions/<revision>.json
   imports/staging/
   snapshots/<sessionId>/
 ```
@@ -35,20 +37,28 @@ disable-model-invocation: false
 
 ```markdown
 ---
-name: office-partner
-description: 日常办公多能力专家
+name: product-manager
+description: 产品定义、用户研究与需求评审专家
 version: 1.0.0
-avatar: office
+avatar: product
 skills:
-  - writing-polish
+  - product-requirement-analysis
 connectors:
-  - feishu
+  - mcp-generic
 systemPrompt: |
-  你是 KnowMe 办公伙伴...
+  你是 KnowMe 产品经理...
 ---
 ```
 
 配套 `manifest.json` 记录绑定关系与版本快照元数据。
+
+## Runtime Agent Registry（v0.5.0）
+
+运行时创建专家不再要求向 `src/catalog/` 写代码。伙伴或 Agent 运维 Skill 提交完整专业 Definition，经 `verify → preview → 用户确认/宿主审批 → commit` 后，复用 Expert Runtime 写入 `%APPDATA%\\KnowMe\\capabilities\\experts/<id>/`，并在 `agent-registry/` 保存不可变 revision。
+
+Definition 至少包含职责、Soul、SOP、方法型 Skill、适用场景、边界、输入输出、执行路线、交付物、质量复核、权限与风险。下架只关闭新任务并清理入口，保留专家包、历史任务快照和 revision；恢复与回滚同样必须先预览，回滚生成新 revision 而不覆盖历史。
+
+四个通用受控操作为 `verify_agent_definition`、`preview_agent_change`、`commit_agent_change`、`list_agent_revisions`。其中 commit 是宿主审批写操作；模型参数不能代替用户确认或授予权限。
 
 ## Connector manifest
 
@@ -85,4 +95,4 @@ systemPrompt: |
 - `capability-catalog.js` — bundled seed + overlay 合并
 - `capability-import.js` — 安全导入与 curated 安装
 
-IPC 层将在后续 task 中接入，Renderer 不得直接读写 capabilities 目录。
+IPC 由 Capability Hub 主进程统一注册，Renderer 不得直接读写 capabilities 目录。

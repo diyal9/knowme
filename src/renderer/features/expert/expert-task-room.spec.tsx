@@ -657,6 +657,41 @@ describe('expert task review collaboration', () => {
     expect(screen.getByRole('textbox')).toBeInTheDocument()
   })
 
+  it('does not repeat a persisted provide-input reply as a second action turn', async () => {
+    const question = '在继续执行前，请补充需要分析的平台范围。'
+    const actualGoal = '分析近一周 AI Native 舆情'
+    const task = {
+      ...reviewTask(),
+      title: '我想处理「主题舆情分析」。请严格按当前专',
+      goal: actualGoal,
+      brief: { ...reviewTask().brief, goal: actualGoal },
+      status: 'needs_input',
+      deliverables: [],
+      execRef: { kind: 'session', id: 'session-needs-input' },
+      attention: {
+        kind: 'missing_information', action: 'provide_input', question, required: true,
+      },
+    } as WorkbenchTask
+    useAppStore.setState({
+      expertRoom: {
+        ...useAppStore.getState().expertRoom!, taskId: task.id, expertId: task.expertId, goal: actualGoal,
+      },
+    })
+    mockApi({
+      expertTaskGet: async () => ({ ok: true, task }),
+      agentSessionGet: async (id: string) => ({ ok: true, session: {
+        id,
+        messages: [{ id: 'executor-question', role: 'assistant', text: question, createdAt: '2026-09-21T17:48:47.242Z' }],
+      } }),
+    })
+
+    render(<AppShell />)
+
+    await waitFor(() => expect(screen.getAllByText(question)).toHaveLength(1))
+    expect(screen.queryByTestId('expert-action-turn')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: actualGoal })).toBeInTheDocument()
+  })
+
   it('uses the approval card as the only action while a file operation awaits approval', async () => {
     const task = {
       ...reviewTask(),
@@ -819,7 +854,7 @@ describe('expert task review collaboration', () => {
   })
 
   it('shows the current plan status and submits the expert-authored structured plan', async () => {
-    const createTask = vi.fn(async (payload: { brief?: WorkbenchTask['brief'] }) => ({
+    const createTask = vi.fn(async (payload: { title?: string; brief?: WorkbenchTask['brief'] }) => ({
       ok: true,
       task: {
         id: 'task-dynamic-plan', kind: 'expert', status: 'running', title: '分析上周会议',
@@ -831,6 +866,7 @@ describe('expert task review collaboration', () => {
       expertRoom: {
         id: 'office-partner', expertId: 'office-partner', name: '办公协作专家', goal: '', log: [],
         messages: [
+          { id: 'route-prompt', role: 'user', text: '我想处理「会议行动项」。请严格按当前专家 SOP 的「meeting-actions」路由规划本次协作，先确认必要范围，再给出待确认计划，不要执行。' },
           { id: 'user-goal', role: 'user', text: '分析上周会议并整理行动项' },
           {
             id: 'expert-plan', role: 'assistant',
@@ -859,6 +895,11 @@ describe('expert task review collaboration', () => {
     fireEvent.click(screen.getByRole('button', { name: '确认计划并执行' }))
     await waitFor(() => expect(createTask).toHaveBeenCalled())
     const submitted = createTask.mock.calls[0]?.[0]
+    expect(submitted?.title).toBe('分析上周会议')
+    expect(submitted?.brief?.goal).toBe('分析上周会议')
+    const clarificationRecord = submitted?.brief?.materials?.find(item => item.id === 'clarification-record')
+    expect(clarificationRecord?.content).toBe('分析上周会议并整理行动项')
+    expect(clarificationRecord?.content).not.toContain('不要执行')
     expect(submitted?.brief?.materials).toEqual(expect.arrayContaining([
       expect.objectContaining({
         id: 'confirmed-plan',
@@ -1148,7 +1189,28 @@ describe('expert task review collaboration', () => {
     expect(screen.queryByRole('heading', { name: /补做读取|等待补充/ })).not.toBeInTheDocument()
   })
 
-  it('condenses repeated progress into one expert update with expandable work evidence', async () => {
+  it('explains an unknown operation result instead of asking for an unspecified supplement', async () => {
+    const task = {
+      ...reviewTask(),
+      status: 'needs_input',
+      attention: {
+        kind: 'operation_status_unknown',
+        action: 'provide_input',
+        title: '需要核对操作结果',
+        detail: '请求可能已经提交，但当前无法确认是否成功。',
+      },
+      deliverables: [],
+    } as WorkbenchTask
+    mockApi({ expertTaskGet: async () => ({ ok: true, task }) })
+
+    render(<AppShell />)
+
+    const reply = await screen.findByTestId('expert-action-turn')
+    expect(within(reply).getByText(/请求可能已经提交.*请先核对目标端是否已有结果/)).toBeInTheDocument()
+    expect(within(reply).queryByText(/补充「本次操作」/)).not.toBeInTheDocument()
+  })
+
+  it('shows repeated progress as one open chronological execution turn', async () => {
     const task = reviewTask()
     task.status = 'running'
     task.deliverables = []
@@ -1168,10 +1230,51 @@ describe('expert task review collaboration', () => {
     expect(processItems).toHaveLength(1)
     expect(processItems[0]).toHaveTextContent('执行记录 9')
     expect(processItems[0]).toHaveClass('is-active')
-    expect(within(room).getByText('查看已完成的工作（9）')).toBeInTheDocument()
+    const execution = within(room).getByTestId('expert-execution-turn')
+    expect(execution).toHaveAttribute('open')
+    expect(within(execution).getByText(/已处理/)).toBeInTheDocument()
+    expect(within(room).queryByText('查看已完成的工作（9）')).not.toBeInTheDocument()
     expect(within(room).queryByText('任务系统')).not.toBeInTheDocument()
     expect(within(room).queryByRole('button', { name: /展开全部|收起到一屏/ })).not.toBeInTheDocument()
     expect(within(screen.getByTestId('expert-room')).queryByText('当前操作')).not.toBeInTheDocument()
+  })
+
+  it('folds a completed execution into its duration row and keeps the final answer below', async () => {
+    const task = {
+      ...reviewTask(),
+      status: 'completed',
+      progress: {
+        phase: 'review',
+        startedAt: '2026-08-19T14:00:00.000Z',
+        updatedAt: '2026-08-19T14:02:00.000Z',
+      },
+      events: [
+        { id: 'progress-1', type: 'progress', summary: '我先核对当前材料。', createdAt: '2026-08-19T14:00:00.000Z' },
+        { id: 'tool-1', type: 'tool_completed', summary: '已读取工作区文件', createdAt: '2026-08-19T14:01:00.000Z' },
+        { id: 'progress-2', type: 'progress', summary: '核对完成，正在整理结论。', createdAt: '2026-08-19T14:02:00.000Z' },
+      ],
+      deliverables: [],
+    } as WorkbenchTask
+    useAppStore.setState({
+      expertRoom: {
+        ...useAppStore.getState().expertRoom!,
+        taskId: task.id,
+        expertId: task.expertId,
+        messages: [
+          { id: 'user-goal', role: 'user', text: task.goal || '', createdAt: '2026-08-19T13:59:00.000Z' },
+          { id: 'final-answer', role: 'assistant', text: '最终结论：当前材料已经核对完成。', createdAt: '2026-08-19T14:02:01.000Z' },
+        ],
+      },
+    })
+    mockApi({ expertTaskGet: async () => ({ ok: true, task }) })
+
+    render(<AppShell />)
+
+    const execution = await screen.findByTestId('expert-execution-turn')
+    await waitFor(() => expect(execution).not.toHaveAttribute('open'))
+    expect(within(execution).getByText('用时 2分钟 0秒')).toBeInTheDocument()
+    const finalAnswer = screen.getByText('最终结论：当前材料已经核对完成。')
+    expect(execution.compareDocumentPosition(finalAnswer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 
   it('requires actionable feedback and shows the return trip to the expert', async () => {
@@ -1365,7 +1468,9 @@ describe('expert task review collaboration', () => {
     const genericUserTurn = within(room).getByText('只处理本周收到的消息。').closest('li')
     expect(genericUserTurn).toHaveClass('is-user')
     expect(within(room).queryByText('我会先整理消息，再按紧急程度核对负责人。')).not.toBeInTheDocument()
-    expect(within(room).getByText('查看执行依据')).toBeInTheDocument()
+    expect(within(room).getAllByTestId('expert-execution-turn').length).toBeGreaterThan(0)
+    expect(within(room).getByText('已完成消息去重，正在核对截止时间。')).toBeInTheDocument()
+    expect(within(room).queryByText('查看执行依据')).not.toBeInTheDocument()
     expect(within(room).queryByText('执行计划')).not.toBeInTheDocument()
     expect(within(room).queryByText('用户补充')).not.toBeInTheDocument()
     expect(within(room).queryByText('任务系统')).not.toBeInTheDocument()

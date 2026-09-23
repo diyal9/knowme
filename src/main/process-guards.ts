@@ -7,9 +7,14 @@
 
 /** 在 workbench.create 之后注册，避免 logger/app 尚未挂上。 */
 function create(ctx) {
+  const { startMainEventLoopMonitor } = require('../lib/main-event-loop-monitor')
+  ctx.mainEventLoopMonitor = startMainEventLoopMonitor({ logger: ctx.logger })
   const isRelaunchedFromGpuCrash = process.argv.includes('--gpu-crash-relaunched')
   ctx.app.on('window-all-closed', () => { })
-  ctx.app.on('before-quit', () => { ctx.isQuitting = true })
+  ctx.app.on('before-quit', () => {
+    ctx.isQuitting = true
+    ctx.mainEventLoopMonitor?.stop?.()
+  })
   ctx.app.on('will-quit', () => ctx.globalShortcut.unregisterAll())
   process.on('uncaughtException', err => {
     if (ctx.logger.isBrokenPipe?.(err)) {

@@ -17,6 +17,7 @@ const {
   buildDraftMinutePermission,
   applyFeishuWrite,
   executeFeishuRead,
+  executeMeetingInventory,
   executeMeetingCandidates,
   executeMeetingRead,
   executeRelatedChats,
@@ -72,6 +73,7 @@ function meetingWorkflowSpawn(handler = {}) {
     identity = IDENTITY_ME,
     onVcSearch,
     detailForId = (id) => vcDetail({ meeting_id: id, topic: `会议-${id}`, start_time: '2026-07-28 16:50', note_id: `note_${id}`, minute_token: `mt_${id}` }),
+    minutesForToken = (token) => ({ data: { minutes: [{ minute_token: token, title: `会议-${token}`, artifacts: { summary: `会议纪要：${token} 的结论`, todo: `待办：跟进 ${token}` } }] } }),
   } = handler
   let vcSearchCalls = 0
   return spawnJson((argv) => {
@@ -86,6 +88,10 @@ function meetingWorkflowSpawn(handler = {}) {
     if (argv[0] === 'vc' && argv[1] === '+detail') {
       const idIdx = argv.indexOf('--meeting-ids')
       return detailForId(String(argv[idIdx + 1] || ''))
+    }
+    if (argv[0] === 'minutes' && argv[1] === '+detail') {
+      const tokenIdx = argv.indexOf('--minute-tokens')
+      return minutesForToken(String(argv[tokenIdx + 1] || ''))
     }
     return { data: {} }
   })
@@ -216,6 +222,7 @@ describe('feishu-cli allowlist builders', () => {
 
   it('exports read tool defs', () => {
     assert.ok(FEISHU_READ_TOOL_DEFS.some((d) => d.function.name === 'feishu.read_doc'))
+    assert.ok(FEISHU_READ_TOOL_DEFS.some((d) => d.function.name === 'feishu.meeting_inventory'))
     assert.ok(FEISHU_READ_TOOL_DEFS.some((d) => d.function.name === 'feishu.meeting_candidates'))
     assert.ok(FEISHU_READ_TOOL_DEFS.some((d) => d.function.name === 'feishu.meeting_read'))
     assert.ok(FEISHU_READ_TOOL_DEFS.some((d) => d.function.name === 'feishu.related_chats'))
@@ -646,6 +653,24 @@ describe('feishu-cli allowlist builders', () => {
     assert.equal(searches.some(argv => argv.includes('--participant-ids')), false)
   })
 
+  it('reads multiple recent meeting bodies through one inventory tool call', async () => {
+    const result = await executeMeetingInventory({ days: 3, max_meetings: 2 }, {
+      spawnImpl: meetingWorkflowSpawn({
+        onVcSearch: () => ({ data: { items: [
+          { id: 'm1', display_info: '产品周会\n今天 10:00 | 组织者：A', meta_data: {} },
+          { id: 'm2', display_info: '研发周会\n昨天 15:00 | 组织者：B', meta_data: {} },
+        ] } }),
+        detailForId: (id) => vcDetail({ meeting_id: id, topic: id === 'm1' ? '产品周会' : '研发周会', start_time: '2026-09-21 10:00', minute_token: `mt_${id}` }),
+      }),
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.meta.workflow, 'meeting_inventory')
+    assert.equal(result.meta.readCount, 2)
+    assert.match(result.text, /产品周会/)
+    assert.match(result.text, /研发周会/)
+    assert.match(result.text, /待办：跟进 mt_m1/)
+  })
+
   it('surfaces the associated meeting-notes Docx when note +detail provides one', async () => {
     const result = await executeMeetingCandidates({ days: 3 }, {
       spawnImpl: spawnJson((argv) => {
@@ -1008,6 +1033,7 @@ describe('feishu draft write review', () => {
       feishu: { spawnImpl: () => { throw new Error('should not spawn for definition build') } },
     })
     const names = runtime.surface.getToolDefinitions().map((d) => d.function.name)
+    assert.ok(names.includes('feishu.meeting_inventory'))
     assert.ok(names.includes('feishu.meeting_candidates'))
     assert.ok(names.includes('feishu.meeting_read'))
   assert.ok(names.includes('feishu.related_chats'))

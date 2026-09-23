@@ -20,16 +20,14 @@ const BUILTIN_MODES = Object.freeze({
     icon: 'office',
     accent: '#5c6b5a',
     professionalCapabilities: Object.freeze([
-      { id: 'local-agent', label: '本地 Agent', status: 'available' },
+      { id: 'local-agent', label: 'KnowMe 伙伴', status: 'available' },
       { id: 'feishu-suite', label: '飞书协作能力', status: 'setup_required' },
     ]),
     providers: Object.freeze([
-      { id: 'local-agent', label: '本机 Agent', kind: 'local', status: 'available' },
+      { id: 'local-agent', label: 'KnowMe 伙伴', kind: 'local', status: 'available' },
       { id: 'feishu-connector', label: '飞书连接器', kind: 'connector', status: 'setup_required' },
     ]),
-    suggestedRoles: Object.freeze([
-      { id: 'office-assistant', label: '办公助手' },
-    ]),
+    suggestedRoles: Object.freeze([]),
   }),
   engineering: Object.freeze({
     id: 'engineering',
@@ -133,9 +131,6 @@ function readJson(file, fsImpl = fs) {
 
 function renameWithRetrySync(src, dest, options = {}) {
   const retries = Number.isInteger(options.retries) ? Math.max(0, options.retries) : 4
-  const delays = Array.isArray(options.delays) && options.delays.length
-    ? options.delays
-    : [20, 50, 100, 200]
   const renameSync = typeof options.renameSync === 'function' ? options.renameSync : fs.renameSync
   let lastError = null
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -146,10 +141,8 @@ function renameWithRetrySync(src, dest, options = {}) {
       lastError = error
       const retryable = ['EPERM', 'EACCES', 'EBUSY'].includes(error?.code)
       if (!retryable || attempt >= retries) break
-      const delay = Number(delays[Math.min(attempt, delays.length - 1)]) || 0
-      if (delay > 0) {
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay)
-      }
+      // This is called from the Electron main process. Never block the event
+      // loop with Atomics.wait; the retry count is intentionally bounded.
     }
   }
   return { ok: false, error: lastError }

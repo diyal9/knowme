@@ -12,7 +12,9 @@ const agentWebTools = require('./agent-web-tools')
 const { buildCalculationTools } = require('./agent-calculation-tools')
 const {
   CAPABILITY_IMPORT_DEFINITIONS,
+  AGENT_REGISTRY_DEFINITIONS,
   requiresCapabilityImportTools,
+  requiresAgentRegistryTools,
 } = require('./agent-provider-tool-contracts')
 
 function buildHostBuiltinBundles({ signal, noTools = false, includeWeb = true } = {}) {
@@ -28,6 +30,7 @@ function buildHostBuiltinDefinitions({ signal, requiredTools = [], noTools = fal
     ...(bundles.calculationTools?.definitions || []),
     ...(bundles.webTools?.definitions || []),
     ...(requiresCapabilityImportTools(requiredTools) ? CAPABILITY_IMPORT_DEFINITIONS : []),
+    ...(requiresAgentRegistryTools(requiredTools) ? AGENT_REGISTRY_DEFINITIONS : []),
   ]
   return { ...bundles, definitions }
 }

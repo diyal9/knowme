@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "policy": "non-regression",
+  "description": "Initial ceilings are replaced with the measured baseline in this change. Lower them as each surface migrates; never raise them to make CI pass.",
+  "maximums": {
+    "hardcodedFontPx": 1878,
+    "hardcodedRadiusDeclarations": 1022,
+    "uniqueRadiusValues": 41,
+    "uniqueShadowValues": 208,
+    "hardcodedSpacingDeclarations": 4308,
+    "importantCount": 345
+  },
+  "targets": {
+    "hardcodedFontPx": 50,
+    "tokenizedFontSharePercent": 90,
+    "uniqueRadiusValues": 6,
+    "uniqueShadowValues": 10,
+    "hardcodedSpacingSharePercent": 15,
+    "importantCount": 30
+  }
+}

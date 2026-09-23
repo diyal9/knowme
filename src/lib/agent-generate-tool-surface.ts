@@ -15,12 +15,17 @@ const { buildCapabilityAccessTools, listHostCapabilityCatalog } = require('./age
 const { guardCapabilityToolSurface } = require('./agent-capability-surface-guard')
 const { createCapabilityExecutionCheck } = require('./agent-capability-execution-check')
 const { taskCapabilityIdentity, sameTaskCapabilityIdentity } = require('./agent-task-capability-grants')
-const { IMAGE_PROVIDER_ADAPTER, requiresCapabilityImportTools } = require('./agent-provider-tool-contracts')
+const { IMAGE_PROVIDER_ADAPTER, requiresCapabilityImportTools, requiresAgentRegistryTools } = require('./agent-provider-tool-contracts')
 const {
   persistSessionProjectBinding,
   guardFileAdapterForProjectBinding,
   guardToolBundleForProjectBinding,
 } = require('./project-session-binding')
+
+function yieldToEventLoop() {
+  if (typeof setImmediate !== 'function') return Promise.resolve()
+  return new Promise(resolve => setImmediate(resolve))
+}
 
 function shouldProjectProviderAdapter(input, adapter) {
   const requiredTools = new Set(Array.isArray(input?.requiredTools) ? input.requiredTools : [])
@@ -33,7 +38,7 @@ function shouldProjectProviderAdapter(input, adapter) {
 async function buildRunToolSurface(env, prepared) {
   const {
     app, path, agentTools, agentSandbox, agentPlanTools, agentProcessTools,
-    agentArtifactTools, agentImageTools, agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, isToolSurfaceV1,
+    agentArtifactTools, agentImageTools, agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, agentRegistryTools, isToolSurfaceV1,
     resolveToolSurfaceForRun, getSessionCapabilityBindings, mergeExtraTools, researchRouting,
     groundingRuntime, feishuGrounding, resolveGroundingRuntimeMode, connectorToolRuntime, contextEngine, logger,
   } = L
@@ -139,6 +144,7 @@ async function buildRunToolSurface(env, prepared) {
       ]
     }
   }
+  await yieldToEventLoop()
   const sourceRoot = fileTools?.sourceRoot || (candidateProjectId ? null : getActiveSourceRoot())
   let processTools = needsConnectorTools && isToolSurfaceV1() && sourceRoot
     && (!candidateProjectId || projectContext?.workspace?.writable)
@@ -266,6 +272,7 @@ async function buildRunToolSurface(env, prepared) {
     summary: String(reason || '').slice(0, 500),
     stopReason: String(reason || 'run_failed').slice(0, 200),
   })
+  await yieldToEventLoop()
   const orchestrationTools = needsConnectorTools && isToolSurfaceV1() && teamRuntime.enabled
     ? agentOrchestration.buildOrchestrationTools({
       runId,
@@ -327,6 +334,9 @@ async function buildRunToolSurface(env, prepared) {
   const capabilityImportTools = requiresCapabilityImportTools(groundingTaskFrame?.requiredTools || [])
     ? agentCapabilityImportTools.buildCapabilityImportTools({ hub: ensureCapabilityHub() })
     : null
+  const registryTools = requiresAgentRegistryTools(groundingTaskFrame?.requiredTools || [])
+    ? agentRegistryTools.buildAgentRegistryTools({ hub: ensureCapabilityHub() })
+    : null
   const capabilityAccessTools = needsConnectorTools && !noTools ? buildCapabilityAccessTools({
     userData: userDataPath, runId, getSession: currentSession, getScope: resolveScope,
     getCatalog: () => listHostCapabilityCatalog(env.deps),
@@ -344,8 +354,10 @@ async function buildRunToolSurface(env, prepared) {
     skillTools,
     stewardTools,
     capabilityImportTools,
+    registryTools,
     imageTools,
   )
+  await yieldToEventLoop()
   // V1 registers file/process/artifact/orchestration groups through their
   // dedicated registry slots below. Passing them again via extraTools creates
   // tool_conflict issues (for example read_file and await_sub_run), which
@@ -359,6 +371,7 @@ async function buildRunToolSurface(env, prepared) {
     skillTools,
     stewardTools,
     capabilityImportTools,
+    registryTools,
     imageTools,
   )
   const recoverySession = currentSession()
@@ -545,6 +558,7 @@ async function buildRunToolSurface(env, prepared) {
     skillTools,
     stewardTools,
     capabilityImportTools,
+    registryTools,
     extraTools,
     userDataPath,
     resolvedSurface,

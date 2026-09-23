@@ -41,4 +41,13 @@ describe('expert collaboration feed', () => {
     )
     expect(feed.map((item) => item.kind === 'event' ? item.event.id : '')).toEqual(['first', 'second'])
   })
+
+  it('does not render a task event again when it references a canonical message', () => {
+    const feed = buildExpertCollabFeed(
+      [{ id: 'assistant-1', role: 'assistant', text: '唯一结果', createdAt: '2026-08-27T10:01:00.000Z' }],
+      [{ id: 'event-1', type: 'answer_committed', messageId: 'assistant-1', summary: '唯一结果', createdAt: '2026-08-27T10:01:01.000Z' }],
+      [],
+    )
+    expect(feed.map((item) => item.kind)).toEqual(['message'])
+  })
 })

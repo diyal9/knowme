@@ -10,6 +10,7 @@ const { persistSessionRunIdentity } = require('./agent-session-run-identity')
 const { providedMaterialsFromInput } = require('./provided-materials')
 const { resolveFeishuExecutionIntent } = require('./agent-execution-intent')
 const { resolvePersonalAgentSettings } = require('./personal-agent-runtime-profile')
+const { resolveClarificationTurn } = require('./agent-clarification-gate')
 const { parseKnowledgeCollectionRef } = require('../shared/knowledge-selection')
 const { commonExpertIds, projectCommonExperts, buildCommonExpertContext } = require('./personal-expert-roster')
 const {
@@ -18,6 +19,13 @@ const {
   upsertConversationMessage,
   withConversationIdentity,
 } = require('./agent-conversation-log')
+
+function yieldToEventLoop() {
+  // Electron's main process exposes setImmediate. Keep a microtask fallback
+  // for deterministic VM/unit-test sandboxes that intentionally omit timers.
+  if (typeof setImmediate !== 'function') return Promise.resolve()
+  return new Promise(resolve => setImmediate(resolve))
+}
 
 const DYNAMIC_BLOCK_CONFIG = Object.freeze({
   role: { kind: 'scene_instruction', authority: 'scene', trust: 'trusted', optional: false, sensitive: false },
@@ -117,15 +125,16 @@ async function prepareAgentGenerate(env) {
   const fail = (error) => ({ early: env.fail(error) })
   const cancelled = () => fail('请求已取消')
   const {
-    prompt, displayPrompt, context, history, noteId, category, skillRefs, taskId: rawTaskId,
+    prompt: rawPrompt, displayPrompt, context, history, noteId, category, skillRefs, taskId: rawTaskId,
     sessionId, agentId, contentGrounding, memoryToggles, role: payloadRole, expertId, surface, taskRef,
     hasImage, conversationMode, expertDiscussionContext,
   } = payload
+  let prompt = String(rawPrompt || '')
   const collaborationOnly = conversationMode === 'expert-planning'
     || conversationMode === 'expert-discussion'
   const expertExecution = conversationMode === 'expert-execution'
 
-  stage('stage_prepare', '正在准备上下文…'); await new Promise((resolve) => setImmediate(resolve))
+  stage('stage_prepare', '正在准备上下文…'); await yieldToEventLoop()
   const s = loadSettings()
   llmUsage.importCalibrations(s.tokenCalibrations || {})
   if (!s.apiKey) return fail('未填写 API Key，请托盘右键 → API 设置')
@@ -193,6 +202,7 @@ async function prepareAgentGenerate(env) {
   }
   const runIdentity = persistSessionRunIdentity(session, runId, { loadAgentSessions, saveAgentSessions })
   if (!runIdentity.ok) return fail(runIdentity.error || '无法建立本轮运行身份')
+  await yieldToEventLoop()
   const personalizationSettings = resolvePersonalAgentSettings(s, session, getAgentProfileStore)
   const personalSession = session?.agentId === 'personal' || session?.sessionKind === 'personal-topic'
   const workflowConversation = workflowReact.shouldForceWorkflowReact(session)
@@ -233,7 +243,7 @@ async function prepareAgentGenerate(env) {
     const userMessage = withConversationIdentity({
       id: turnIdentity.userMessageId,
       role: 'user',
-      text: String(prompt || '').slice(0, 12000),
+      text: String(rawPrompt || '').slice(0, 12000),
       runId,
       createdAt: turnIdentity.userCreatedAt,
     }, { sessionId: session.id })
@@ -248,6 +258,56 @@ async function prepareAgentGenerate(env) {
       createdAt: new Date().toISOString(),
     }, { sessionId: session.id })
     session.messages = upsertConversationMessage(session.messages, assistantMessage)
+  }
+
+  // Session reconciliation/compaction can touch a large transcript. Let the
+  // window process paint and accept cancellation before prompt assembly starts.
+  await yieldToEventLoop()
+
+  // Honor an explicit user-authored sequence ("先确认…，确认后再执行") before
+  // retrieval or a model call. The next turn resumes the original instruction
+  // with the user's confirmation while keeping the raw reply in the transcript.
+  const clarificationTurn = resolveClarificationTurn(session, prompt)
+  if (clarificationTurn.action === 'clarify') {
+    session.pendingClarification = clarificationTurn.pending
+    upsertCurrentUser()
+    upsertImmediateAssistant(clarificationTurn.question)
+    session.updatedAt = new Date().toISOString()
+    persistSession()
+    stage('stage_prepare', '等待前置确认', 'done')
+    emit({ type: 'done', title: '需要确认' })
+    activeAgentRuns.delete(runId)
+    return {
+      early: {
+        text: clarificationTurn.question,
+        runId,
+        sessionId: session.id,
+        toolCalls: 0,
+        attention: {
+          kind: 'missing_information',
+          action: 'provide_input',
+          title: '需要前置确认',
+          item: '执行条件',
+          question: clarificationTurn.question,
+          required: true,
+        },
+      },
+    }
+  }
+  if (clarificationTurn.action === 'cancel') {
+    session.pendingClarification = undefined
+    upsertCurrentUser()
+    upsertImmediateAssistant('已取消上一项请求。')
+    session.updatedAt = new Date().toISOString()
+    persistSession()
+    stage('stage_prepare', '已取消', 'done')
+    emit({ type: 'done', title: '已取消' })
+    activeAgentRuns.delete(runId)
+    return { early: { text: '已取消上一项请求。', runId, sessionId: session.id, toolCalls: 0 } }
+  }
+  if (clarificationTurn.action === 'resume') {
+    session.pendingClarification = undefined
+    prompt = clarificationTurn.prompt
   }
 
   const ctxRole = (surface !== 'workbench' && (session?.run?.role === 'steward' || session?.agentId === 'steward'))
@@ -323,6 +383,7 @@ async function prepareAgentGenerate(env) {
       return { retrievalScope: scope, knowledgePolicy: resolveAgentKnowledgePolicy(currentSession, getAgentProfileStore, scope.providers || []), projectId: currentSession.projectId || null }
     },
   })
+  await yieldToEventLoop()
 
   let wikiCtx = ''
   if (!collaborationOnly && tier === 'retrieval' && !todayPriorityFactsOnly && String(prompt || '').trim()) {
@@ -426,6 +487,7 @@ async function prepareAgentGenerate(env) {
     : ''
   const workMemoryContext = contextPacketLib.formatForPrompt(workPacket)
   const memCtx = [baseMemCtx, workMemoryContext].filter(Boolean).join('\n\n')
+  await yieldToEventLoop()
   const routedModel = llmModelCatalog.resolveRuntimeModel(s, {
     tier,
     prompt,
@@ -492,6 +554,7 @@ async function prepareAgentGenerate(env) {
     '',
     { taskId: requestedTaskId },
   )
+  await yieldToEventLoop()
   const declaredExecutionContract = payload.executionContract && typeof payload.executionContract === 'object'
     ? groundingRuntime.mergeGroundingContracts([payload.executionContract])
     : null
@@ -517,12 +580,21 @@ async function prepareAgentGenerate(env) {
         completionConditions: [{ type: 'tool_success', tool: 'feishu.related_chats' }],
       }
     : null
+  const meetingInventoryGrounding = !expertExecution && feishuIntent.asksMinutes
+    && !feishuIntent.directDocRead && !capAssemblyGrounding?.requiredTools?.length
+    ? {
+        requiredTools: ['feishu.meeting_inventory'],
+        requiredEvidence: [{ kind: 'tool_result', tool: 'feishu.meeting_inventory', minChars: 40, forbidTruncated: true }],
+        completionConditions: [{ type: 'tool_success', tool: 'feishu.meeting_inventory' }],
+      }
+    : null
   let effectiveGrounding = collaborationOnly
     ? null
     : groundingRuntime.mergeGroundingContracts([
         capAssemblyGrounding,
         directDocGrounding,
         relatedChatsGrounding,
+        meetingInventoryGrounding,
       ].filter(Boolean))
   let effectivePrompt = String(prompt || '')
   const researchPrompt = researchRouting.selectResearchPrompt({ prompt, displayPrompt })
@@ -691,8 +763,13 @@ async function prepareAgentGenerate(env) {
     locale: contextPolicy.locale,
   })
   const skillPrompt = promptRouter.buildSkillPrompt(slashRefs, { locale: contextPolicy.locale })
+  const conversationOutputStyleBlock = promptRouter.buildConversationOutputStyleBlock({
+    surface: promptLayerPolicy.surface,
+    locale: contextPolicy.locale,
+  })
   const contextBlocks = [
     ...sceneBlocks,
+    ...(conversationOutputStyleBlock ? [conversationOutputStyleBlock] : []),
     ...(workflowReact.shouldForceWorkflowReact(session) ? [{
       id: 'scene.workflow-react',
       kind: 'scene_instruction',
@@ -832,7 +909,7 @@ async function prepareAgentGenerate(env) {
   return {
     session, s, url, slashRefs, ctxRole, grounding, writingTask, tier, embedFn, queryKnowledge,
     kbQueryTool, kbGetTool, effectivePersonalization, tokenCalKey, tokenCalBefore, routedModel,
-    modelProfile, policy, promptCachePolicy, groundingTaskFrame, apiMessages: [], contextInfo: contextInfoBase, contextDraft, prompt, researchPrompt,
+    modelProfile, policy, promptCachePolicy, groundingTaskFrame, apiMessages: [], contextInfo: contextInfoBase, contextDraft, prompt: effectivePrompt, researchPrompt,
     executionPolicy,
     providedMaterials,
   }

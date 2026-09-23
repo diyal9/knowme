@@ -41,6 +41,10 @@ function registerBuildFinalPromptIpc(ipcMain, deps) {
       personalSession: true,
       tier: previewTier,
     })
+    const conversationOutputStyleBlock = promptRouter.buildConversationOutputStyleBlock({
+      surface: promptLayerPolicy.surface,
+      locale,
+    })
     const userPrompt = promptRouter.buildUserPrompt(s, promptMode, {
       locale,
       includeUserPrompt: promptLayerPolicy.includeUserPrompt,
@@ -66,6 +70,10 @@ function registerBuildFinalPromptIpc(ipcMain, deps) {
           sourceTrust: 'bundled',
           source: { type: 'assistant-prompt-router', id: scene, version: '2' },
         },
+        conversationOutputStyleBlock ? {
+          ...conversationOutputStyleBlock,
+          sourceTrust: 'bundled',
+        } : null,
         userPrompt ? {
           id: 'preference.user-preview',
           kind: 'user_preference',

@@ -20,7 +20,7 @@ function createChildRunPortFactory(env, prepared, surface) {
     mergeExtraTools, connectorToolRuntime, buildProductionRunPorts,
     normalizeAssistantOutput,
   } = L
-  const { ensureCapabilityHub, loadAgentSessions, saveAgentSessions, MEMORY_DIR, requestAgentCompletion, getConnectorsApi } = env.deps
+  const { ensureCapabilityHub, loadAgentSessions, saveAgentSessions, saveAgentSessionsAsync, MEMORY_DIR, requestAgentCompletion, getConnectorsApi } = env.deps
   const { runId, signal } = env
   const { s, url, routedModel, policy, promptCachePolicy, tokenCalKey, modelProfile } = prepared
   const {
@@ -193,6 +193,7 @@ function createChildRunPortFactory(env, prepared, surface) {
       ctxBundle: { contextInfo: { isolatedSubRun: true }, taskFrame: null },
       loadAgentSessions,
       saveAgentSessions,
+      saveAgentSessionsAsync,
       productMemoryCapture: () => {},
       memoryDir: MEMORY_DIR,
       normalizeAssistantOutput,

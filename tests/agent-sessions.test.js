@@ -296,6 +296,7 @@ assert.deepEqual(AGENTS.map(a => a.name), ['智能伙伴', '通用', '知识管�
     const message = session.messages[0]
     assert.equal(message.protocolVersion, 2)
     assert.equal(message.answerHash, 'hash_1')
+    assert.equal(message.v2AnswerCommitted, true)
     assert.equal(message.ui[0].items[0].action, 'send')
     assert.equal(message.trace[0].requiresApproval, true)
     assert.equal(message.trace[0].draftStatus, 'pending_review')

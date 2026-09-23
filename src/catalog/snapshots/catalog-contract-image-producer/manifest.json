@@ -1,7 +1,7 @@
 {
   "sessionId": "catalog-contract-image-producer",
   "expertId": "image-producer",
-  "frozenAt": "2026-09-20T08:36:40.006Z",
+  "frozenAt": "2026-09-23T03:59:14.553Z",
   "persona": {
     "name": "生图执行专家",
     "description": "从视觉目标、方案设计到真实生图和修改验收，完成端到端图像生产",

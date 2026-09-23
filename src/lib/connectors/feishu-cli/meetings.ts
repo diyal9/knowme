@@ -135,6 +135,20 @@ function formatMeetingCandidates(items = [], days = 3, identity = null) {
   return lines.join('\n')
 }
 
+async function mapLimit(items = [], limit = 3, mapper) {
+  const list = Array.isArray(items) ? items : []
+  const results = new Array(list.length)
+  let cursor = 0
+  const workers = Array.from({ length: Math.min(Math.max(1, limit), list.length) }, async () => {
+    while (cursor < list.length) {
+      const index = cursor++
+      results[index] = await mapper(list[index], index)
+    }
+  })
+  await Promise.all(workers)
+  return results
+}
+
 async function resolveAssociatedNoteDocToken(noteId, opts = {}) {
   const id = String(noteId || '').trim()
   if (!id) return ''
@@ -211,22 +225,21 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
     pageToken = nextToken
   }
 
-  const candidates = []
-  for (const meeting of meetings.slice(0, 20)) {
+  const hydrated = await mapLimit(meetings.slice(0, 20), 4, async (meeting) => {
     const detail = await runLarkCliWithRetry(buildVcDetailArgs(meeting.id), opts, { retries: 1 })
-    if (!detail.ok) continue
+    if (!detail.ok) return null
     const dp = parseCliJsonOutput(detail.text)
     const row = Array.isArray(dp?.data?.meetings)
       ? dp.data.meetings[0]
       : (dp?.data && typeof dp.data === 'object' ? dp.data : null)
-    if (!row) continue
+    if (!row) return null
     const minuteToken = String(row.minute_token || '').trim()
     const noteId = String(row.note_id || '').trim()
     // VC meetings may have both a recording and a separate AI meeting-notes
     // Docx. Resolve note_id -> note_doc_token while building candidates so the
     // displayed link points to the actual meeting record when it exists.
     const noteDocToken = noteId ? await resolveAssociatedNoteDocToken(noteId, opts) : ''
-    candidates.push({
+    return {
       meetingId: meeting.id,
       title: String(row.topic || meeting.topic || '').trim() || '(未命名会议)',
       meetingTime: String(row.start_time || meeting.timeText || '').trim(),
@@ -238,8 +251,9 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
       // shown. Prefer the associated Docx; fall back to the minutes page.
       url: noteDocToken ? `${DOC_DOMAIN}${noteDocToken}` : (minuteToken ? `${MINUTES_DOMAIN}${minuteToken}` : ''),
       appLink: meeting.appLink || '',
-    })
-  }
+    }
+  })
+  const candidates = hydrated.filter(Boolean)
   const top = candidates.slice(0, 10)
   return {
     ok: true,
@@ -419,6 +433,74 @@ async function executeMeetingRead(args = {}, opts = {}) {
   }
 }
 
+/** Enumerate and read a bounded meeting set in one host tool call. */
+async function executeMeetingInventory(args = {}, opts = {}) {
+  const days = Math.max(1, Math.min(30, Math.floor(Number(args.days || 3) || 3)))
+  const maxMeetings = Math.max(1, Math.min(10, Math.floor(Number(args.max_meetings || 5) || 5)))
+  const discovered = await executeMeetingCandidates({ days }, opts)
+  if (!discovered.ok) return discovered
+  const candidates = Array.isArray(discovered.meta?.candidates)
+    ? discovered.meta.candidates.slice(0, maxMeetings)
+    : []
+  if (!candidates.length) {
+    return {
+      ...discovered,
+      meta: { ...(discovered.meta || {}), workflow: 'meeting_inventory', readCount: 0, failureCount: 0, turnComplete: true },
+    }
+  }
+
+  const reads = await mapLimit(candidates, 3, async (candidate, index) => {
+    const locator = candidate.minuteToken
+      ? { minute_token: candidate.minuteToken }
+      : candidate.noteDocToken
+        ? { doc_token: candidate.noteDocToken }
+        : candidate.url
+          ? { url: candidate.url }
+          : null
+    if (!locator) {
+      return { index, candidate, result: { ok: false, code: 'missing_locator', text: '该会议没有可读取的纪要链接。' } }
+    }
+    return { index, candidate, result: await executeMeetingRead(locator, opts) }
+  })
+  const successful = reads.filter(item => item.result?.ok)
+  const failures = reads.filter(item => !item.result?.ok)
+  const sections = reads.map(({ candidate, result }, index) => {
+    const heading = `## ${index + 1}. ${candidate.title || '未命名会议'}`
+    const meta = [candidate.meetingTime, candidate.organizer ? `组织者：${candidate.organizer}` : '', candidate.url || '']
+      .filter(Boolean).join('｜')
+    const body = result?.ok
+      ? String(result.text || '').trim().slice(0, 3500)
+      : `读取失败：${String(result?.message || result?.text || result?.code || '未知错误').trim().slice(0, 500)}`
+    return [heading, meta, body].filter(Boolean).join('\n')
+  })
+  const text = [
+    `# 最近 ${days} 个自然日会议正文（${successful.length}/${candidates.length} 场读取成功）`,
+    '',
+    ...sections.flatMap(section => [section, '']),
+  ].join('\n').trim()
+  if (!successful.length) {
+    return {
+      ok: false,
+      code: failures[0]?.result?.code || 'meeting_inventory_read_failed',
+      message: failures[0]?.result?.message || '已找到会议，但未能读取任何会议正文。',
+      text,
+      meta: { workflow: 'meeting_inventory', days, candidates, readCount: 0, failureCount: failures.length },
+    }
+  }
+  return {
+    ok: true,
+    text,
+    meta: {
+      workflow: 'meeting_inventory',
+      days,
+      candidates,
+      readCount: successful.length,
+      failureCount: failures.length,
+      partial: failures.length > 0,
+    },
+  }
+}
+
 module.exports = {
   MINUTES_DOMAIN,
   buildVcSearchArgs,
@@ -431,6 +513,8 @@ module.exports = {
   normalizeDocumentBody,
   extractDocParticipants,
   docContainsParticipant,
+  mapLimit,
   executeMeetingCandidates,
   executeMeetingRead,
+  executeMeetingInventory,
 }

@@ -163,6 +163,21 @@ describe('surface CSS contract', () => {
     expect(css).toMatch(/--hub-bg:\s*var\(--surface-page/)
   })
 
+  it('keeps the capability hub toolbar compact and removes the add-capability surface', () => {
+    const css = read('styles/capability-hub.css')
+    const surface = read('features/capability-hub/CapabilityHubSurface.tsx')
+    expect(css).toMatch(/\.hub-nav \.hub-search-wrap\s*\{[^}]*flex:\s*0 1 214px[^}]*max-width:\s*214px/s)
+    expect(css).toMatch(/\.hub-installed-toggle-mark\s*\{/)
+    expect(css).not.toMatch(/\.hub-nav-add-btn/)
+    expect(surface).not.toMatch(/HubAddDialog|hubBtnAdd|setAddOpen/)
+  })
+
+  it('centers capability dialogs in the workspace below the native titlebar', () => {
+    const css = read('styles/capability-hub.css')
+    expect(css).toMatch(/\.hub-dialog-mask\s*\{[^}]*inset:\s*var\(--titlebar-height,\s*0px\) 0 0/s)
+    expect(css).toMatch(/\.hub-expert-dialog\s*\{[^}]*max-height:\s*min\(calc\(100vh - var\(--titlebar-height,\s*0px\) - 48px\), 860px\)/s)
+  })
+
   it('workflow detail uses the shared neutral canvas and inset surface tokens', () => {
     const css = read('features/shelf/shelf.css')
     expect(css).toMatch(/\.wb-workflow-detail\s*\{[^}]*background:var\(--bg-card, var\(--surface-page\)\)/s)

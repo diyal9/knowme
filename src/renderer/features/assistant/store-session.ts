@@ -14,7 +14,7 @@ import type { AppState, SessionSlice, StoreGet, StoreSet } from '../../app/store
 import { api } from '../../app/store-types'
 
 export function emptySessionSlice(): SessionSlice {
-  return { messages: [], composer: '', attachments: [] }
+  return { messages: [], composer: '', attachments: [], skillRefs: [] }
 }
 
 export function getSessionSlice(states: Record<string, SessionSlice>, id: string): SessionSlice {
@@ -99,8 +99,12 @@ let streamChunkTimer: ReturnType<typeof setTimeout> | null = null
 let pendingStreamEvents: Record<string, unknown>[] = []
 let streamEventRafId: number | null = null
 let streamEventTimer: ReturnType<typeof setTimeout> | null = null
+let lateStreamDetachTimer: ReturnType<typeof setTimeout> | null = null
 
 const STREAM_CHUNK_FLUSH_MS = 32
+const MAX_PENDING_STREAM_EVENTS = 240
+const MAX_STREAM_EVENTS_PER_FLUSH = 40
+const TERMINAL_STREAM_EVENT_TYPES = new Set(['answer.committed', 'error', 'cancelled', 'done'])
 
 function cancelStreamChunkSchedule() {
   if (streamChunkRafId != null) {
@@ -158,10 +162,11 @@ function scheduleStreamChunkFlush() {
   }, STREAM_CHUNK_FLUSH_MS)
 }
 
-function flushStreamEventBuffer() {
+function flushStreamEventBuffer(options: { drainAll?: boolean } = {}) {
   cancelStreamEventSchedule()
-  const events = pendingStreamEvents
-  pendingStreamEvents = []
+  const events = options.drainAll
+    ? pendingStreamEvents.splice(0, pendingStreamEvents.length)
+    : pendingStreamEvents.splice(0, MAX_STREAM_EVENTS_PER_FLUSH)
   const set = streamChunkSet
   if (!events.length || !set) return
   set((state: AppState) => {
@@ -215,6 +220,7 @@ function flushStreamEventBuffer() {
     }
     return next
   })
+  if (pendingStreamEvents.length) scheduleStreamEventFlush()
 }
 
 function scheduleStreamEventFlush() {
@@ -261,27 +267,62 @@ function enqueueStreamEvent(event: Record<string, unknown>) {
   // 终态/落字立即 flush，避免与 stage 合批造成「先过程再整段替换」的闪一下
   if (type === 'answer.committed' || type === 'error' || type === 'cancelled' || type === 'done') {
     pendingStreamEvents.push(event)
-    flushStreamEventBuffer()
+    flushStreamEventBuffer({ drainAll: true })
     return
+  }
+  if (pendingStreamEvents.length >= MAX_PENDING_STREAM_EVENTS) {
+    // Drop the oldest ordinary progress event so an event storm cannot turn
+    // one animation frame into an unbounded reducer pass.
+    const dropIndex = pendingStreamEvents.findIndex((item) =>
+      !TERMINAL_STREAM_EVENT_TYPES.has(String(item.type || '')))
+    if (dropIndex >= 0) pendingStreamEvents.splice(dropIndex, 1)
+    else return
   }
   pendingStreamEvents.push(event)
   scheduleStreamEventFlush()
 }
 
-export function detachStreamListener() {
+export function detachStreamListener(options: { preserveLateEvents?: boolean } = {}) {
   if (streamChunkSet && pendingStreamText != null) flushStreamChunkBuffer()
-  if (streamChunkSet && pendingStreamEvents.length) flushStreamEventBuffer()
+  if (streamChunkSet && pendingStreamEvents.length) flushStreamEventBuffer({ drainAll: true })
   cancelStreamChunkSchedule()
   cancelStreamEventSchedule()
+  if (lateStreamDetachTimer != null) {
+    clearTimeout(lateStreamDetachTimer)
+    lateStreamDetachTimer = null
+  }
+  if (options.preserveLateEvents) {
+    // The IPC invoke may resolve before webContents.send delivers the final
+    // envelope. Keep the listener and the active identity briefly so a late
+    // answer.committed can still update the exact assistant bubble. Events
+    // for another run are rejected by the runId check in the reducer path.
+    lateStreamDetachTimer = setTimeout(() => {
+      lateStreamDetachTimer = null
+      detachStreamListener()
+    }, 250)
+    return
+  }
+  const unsubscribeChunk = streamUnsub
+  const unsubscribeEvent = streamEventUnsub
   pendingStreamText = null
   pendingStreamEvents = []
   streamChunkSet = null
-  streamUnsub?.()
   streamUnsub = null
-  streamEventUnsub?.()
   streamEventUnsub = null
   activeStreamAssistantId = null
   activeStreamSessionId = null
+  // Listener teardown belongs to bridge code and must never keep the composer in
+  // the global generating state. Clear our state first, then isolate each callback.
+  try {
+    unsubscribeChunk?.()
+  } catch {
+    // The local stream state is already detached; a bridge cleanup failure is non-fatal.
+  }
+  try {
+    unsubscribeEvent?.()
+  } catch {
+    // Keep the next turn usable even when one external listener tears down badly.
+  }
 }
 
 /** ipcMain.handle 回包常早于同轮 webContents.send；短 flush 让 v2 envelope 先归约。 */
@@ -317,6 +358,10 @@ export function attachStreamListener(set: StoreSet) {
 }
 
 export function beginAssistantStream(assistantId: string, sessionId: string, set: StoreSet) {
+  if (lateStreamDetachTimer != null) {
+    clearTimeout(lateStreamDetachTimer)
+    lateStreamDetachTimer = null
+  }
   if (streamChunkSet && pendingStreamText != null) flushStreamChunkBuffer()
   if (streamChunkSet && pendingStreamEvents.length) flushStreamEventBuffer()
   activeStreamAssistantId = assistantId

@@ -90,13 +90,13 @@ describe('workbench-manage-surface', () => {
     const connected = screen.getByText('本机已连接').closest('.wb-daemon-link')
     expect(connected).toHaveClass('is-online')
     expect(connected?.querySelector('.wb-daemon-pulse')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+    expect(screen.queryByRole('button', { name: /搜索：/ })).not.toBeInTheDocument()
     expect(screen.queryByText('服务可用')).not.toBeInTheDocument()
     expect(screen.getAllByText('办公交付').length).toBeGreaterThan(0)
     expect(screen.queryByText('工作模式')).not.toBeInTheDocument()
     expect(screen.queryByText('每日简报')).not.toBeInTheDocument()
     act(() => useAppStore.setState({ route: 'workbench', workbenchSurface: 'shelf', managePanel: 'daemon' }))
-    await waitFor(() => expect(screen.getByPlaceholderText('搜索想要的结果')).toBeVisible())
+    await waitFor(() => expect(screen.getByRole('button', { name: '搜索：工作流' })).toBeVisible())
     useAppStore.setState({ route: 'automation', workbenchSurface: 'manage', managePanel: 'automation' })
     await waitFor(() => expect(screen.getByText('每日简报')).toBeInTheDocument())
     expect(screen.getByText('会议跟进')).toBeInTheDocument()
@@ -233,6 +233,15 @@ describe('workbench-manage-surface', () => {
         ok: true,
         daemon: { online: true, workflows: [{ id: 'wf-office', name: '办公交付' }], tasks: [] },
       }),
+      projectsList: async () => ({
+        ok: true,
+        activeProjectId: 'project-office',
+        projects: [{ id: 'project-office', name: '办公项目', workspaceSourceId: 'source-office', status: 'active' }],
+      }),
+      sourcesList: async () => ({
+        activeSourceId: 'source-office',
+        sources: [{ id: 'source-office', type: 'local', displayName: '办公项目', rootPath: 'D:/office' }],
+      }),
       workbenchLaunchStart: launch,
     })
     resetAppStore()
@@ -245,6 +254,9 @@ describe('workbench-manage-surface', () => {
     await waitFor(() => expect(screen.getByTestId('daemon-compose-submit')).not.toBeDisabled())
     fireEvent.click(screen.getByTestId('daemon-compose-submit'))
     await waitFor(() => expect(launch).toHaveBeenCalled())
+    expect(launch).toHaveBeenCalledWith(expect.objectContaining({
+      intent: expect.objectContaining({ returnState: { projectId: 'project-office' } }),
+    }))
   })
 
   it('opens pipeline review instead of workflow dialogue from all-runs', async () => {
@@ -488,7 +500,7 @@ describe('workbench-manage-surface', () => {
       const headerActions = document.getElementById('wbHeadDetailActions')
       expect(headerActions).toBeTruthy()
       expect(within(headerActions as HTMLElement).getByRole('button', { name: '返回工作流' })).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+      expect(screen.queryByRole('button', { name: /搜索：/ })).not.toBeInTheDocument()
     })
     expect(screen.getAllByRole('button', { name: '返回工作流' })).toHaveLength(1)
     fireEvent.click(screen.getByTestId('workflow-edit-my-fork'))

@@ -8,6 +8,22 @@ const FEISHU_READ_TOOL_DEFS = [
   {
     type: 'function',
     function: {
+      name: 'feishu.meeting_inventory',
+      description: 'List the authorized user\'s recent meetings and read a bounded set of their Smart Minutes bodies in one call. Use this for requests that summarize or compare multiple recent meetings; it replaces repeated meeting_candidates + meeting_read calls and returns explicit partial failures.',
+      parameters: {
+        type: 'object',
+        properties: {
+          days: { type: 'number', minimum: 1, maximum: 30 },
+          max_meetings: { type: 'number', minimum: 1, maximum: 10 },
+        },
+        additionalProperties: false,
+      },
+    },
+    _knowme: { source: 'feishu', tier: 'L1', requiresApproval: false },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'feishu.meeting_candidates',
       description: 'Deterministic Feishu meeting workflow: list meetings the authorized user attended in the recent 3 natural days via vc +search (already identity-scoped), then hydrate each via vc +detail to get topic/time/minute_token. Returns candidates only; does not summarize bodies.',
       parameters: {

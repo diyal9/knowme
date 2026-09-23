@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "purpose": "The seven production experts must have configuration-scoped lifecycle evidence before independent semantic review can qualify them.",
+  "purpose": "The focused production expert roster must have configuration-scoped lifecycle evidence before independent semantic review can qualify it.",
   "requiredScenarios": {
     "normal": 2,
     "edge": 1,
@@ -9,36 +9,6 @@
     "reopen": 1
   },
   "experts": [
-    {
-      "id": "product-manager",
-      "sourceSuites": ["skill-evals/rqa62-product-manager-qualification/evals.json"]
-    },
-    {
-      "id": "office-partner",
-      "sourceSuites": [
-        "skill-evals/rqa41-office-qualification/evals.json",
-        "skill-evals/rqa73-office-qualification/evals.json"
-      ]
-    },
-    {
-      "id": "research-analyst",
-      "sourceSuites": [
-        "skill-evals/product-research-methods-workspace/evals.json",
-        "skill-evals/rqa74-research-qualification/evals.json"
-      ]
-    },
-    {
-      "id": "software-engineer",
-      "sourceSuites": [
-        "skill-evals/rqa61-software-engineer-qualification/evals.json",
-        "skill-evals/rqa75-software-engineer-qualification/evals.json",
-        "skill-evals/web-expert-visual-reference/evals.json"
-      ]
-    },
-    {
-      "id": "data-analyst",
-      "sourceSuites": ["skill-evals/rqa72-data-analyst-qualification/evals.json"]
-    },
     {
       "id": "image-producer",
       "sourceSuites": [
@@ -49,6 +19,10 @@
     {
       "id": "operations-data-analyst",
       "sourceSuites": ["skill-evals/rqa180-operations-data-analyst-qualification/evals.json"]
+    },
+    {
+      "id": "agent-operations",
+      "sourceSuites": ["skill-evals/rqa181-agent-operations-qualification/evals.json"]
     }
   ]
 }

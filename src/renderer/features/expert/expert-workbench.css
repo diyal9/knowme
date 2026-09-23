@@ -190,9 +190,6 @@
   --content-body-size:14px; --content-body-leading:1.78;
   max-width:68ch; margin:0 auto; color:var(--text-primary, var(--text-primary));
 }
-.wb-artifact-content h1 { margin-bottom:.8em; font:600 25px/1.3 var(--display); letter-spacing:0; }
-.wb-artifact-content h2 { margin-top:1.65em; font:600 19px/1.4 var(--display); }
-.wb-artifact-content h3 { font:600 15px/1.48 var(--ui); }
 .wb-artifact-content p { margin-bottom:.9em; }
 .wb-artifact-content .md-table-wrap { margin:1.15em 0 1.4em; border-radius:3px; }
 .wb-artifact-content .md-table th,
@@ -520,24 +517,13 @@
 }
 
 .wb-expert-review-pane .wb-artifact-content > h1 {
-  margin: 0 0 1.25em;
   padding-bottom: .75em;
   border-bottom: 1px solid color-mix(in srgb, var(--brand-ink) 10%, transparent);
-  font: 600 22px/1.35 var(--display);
-  letter-spacing: 0;
 }
 
 .wb-expert-review-pane .wb-artifact-content > h2 {
-  margin: 2.5em 0 .8em;
   padding-top: 1.2em;
   border-top: 1px solid color-mix(in srgb, var(--brand-ink) 9%, transparent);
-  font: 600 18px/1.45 var(--display);
-  letter-spacing: 0;
-}
-
-.wb-expert-review-pane .wb-artifact-content > h3 {
-  margin: 2em 0 .7em;
-  font: 600 16px/1.5 var(--ui);
 }
 
 .wb-expert-review-pane .wb-artifact-content > p {
@@ -1687,12 +1673,12 @@
 .wb-expert-dialogue-turn header strong { color:var(--text-secondary, var(--text-secondary)); font:600 12px/1.35 var(--ui); }
 .wb-expert-dialogue-turn.is-user header,
 .wb-expert-dialogue-turn.is-expert > article > header { display:none; }
-.wb-expert-dialogue-turn p { margin:0; color:var(--text-primary, var(--text-primary)); font:400 13px/1.7 var(--ui); white-space:pre-wrap; overflow-wrap:anywhere; }
+.wb-expert-dialogue-turn p { margin:0; color:var(--text-primary, var(--text-primary)); font:400 var(--conversation-body-size, 14px)/var(--conversation-body-leading, 1.72) var(--ui); white-space:pre-wrap; overflow-wrap:anywhere; }
 .wb-expert-dialogue-turn small { display:block; margin-top:7px; color:var(--text-muted, var(--text-muted)); font:400 12px/1.4 var(--ui); }
 .wb-expert-dialogue-turn .km-content {
   color:var(--text-primary, var(--text-primary));
-  font-size:13px;
-  line-height:1.7;
+  font-size:var(--conversation-body-size, 14px);
+  line-height:var(--conversation-body-leading, 1.72);
 }
 .wb-expert-dialogue-turn .km-content > :first-child { margin-top:0; }
 .wb-expert-dialogue-turn .km-content > :last-child { margin-bottom:0; }
@@ -1703,7 +1689,7 @@
 .wb-expert-dialogue-turn .km-content h4 { margin:1.2em 0 .48em; }
 .wb-expert-dialogue-turn .km-content ul,
 .wb-expert-dialogue-turn .km-content ol { margin:.34em 0 .72em; padding-left:1.55em; }
-.wb-expert-dialogue-turn .km-content li { margin:.2em 0; }
+.wb-expert-dialogue-turn .km-content li { margin:.24em 0; }
 .wb-expert-dialogue-turn .km-content .md-table th:first-child,
 .wb-expert-dialogue-turn .km-content .md-table td:first-child,
 .wb-expert-inline-result .km-content .md-table th:first-child,
@@ -1764,6 +1750,99 @@
 }
 .wb-expert-judgement dt { color:var(--text-muted,var(--text-muted)); font:400 12px/1.55 var(--ui); }
 .wb-expert-judgement dd { margin:0; color:var(--text-secondary,var(--text-secondary)); font:400 12px/1.6 var(--ui); }
+
+/* One expert run is presented as a Codex-style process disclosure. While the
+   run is live its narrative and action receipts stay open; after completion
+   the same history folds into the elapsed-time row and the final answer keeps
+   its own reading surface below. */
+.wb-expert-dialogue-turn.wb-expert-execution-turn {
+  display:block;
+}
+.wb-expert-dialogue-turn.wb-expert-execution-turn > article {
+  width:100%;
+  padding:0;
+}
+.wb-expert-execution-disclosure {
+  width:100%;
+  min-width:0;
+  color:var(--text-primary);
+}
+.wb-expert-execution-disclosure > summary {
+  display:flex;
+  min-height:34px;
+  align-items:center;
+  gap:7px;
+  padding:0 0 9px;
+  border-bottom:1px solid var(--border-subtle);
+  color:var(--text-muted);
+  cursor:pointer;
+  list-style:none;
+  font:400 12px/1.5 var(--ui);
+  font-variant-numeric:tabular-nums;
+  user-select:none;
+}
+.wb-expert-execution-disclosure > summary::-webkit-details-marker { display:none; }
+.wb-expert-execution-disclosure > summary:hover { color:var(--text-secondary); }
+.wb-expert-execution-disclosure > summary:focus-visible {
+  border-radius:4px;
+  outline:2px solid color-mix(in srgb, var(--action-primary) 32%, transparent);
+  outline-offset:3px;
+}
+.wb-expert-execution-disclosure > summary > i {
+  width:6px;
+  height:6px;
+  border-right:1.5px solid currentColor;
+  border-bottom:1.5px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);
+  transition:transform .18s ease;
+}
+.wb-expert-execution-disclosure[open] > summary > i {
+  transform:translateY(1px) rotate(225deg);
+}
+.wb-expert-execution-timeline {
+  display:grid;
+  gap:14px;
+  padding:16px 0 3px;
+}
+.wb-expert-execution-activity {
+  min-width:0;
+}
+.wb-expert-execution-activity > p {
+  margin:0;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.wb-expert-execution-activity.is-commentary > p {
+  max-width:72ch;
+  color:var(--text-primary);
+  font:400 var(--conversation-body-size, 14px)/var(--conversation-body-leading, 1.72) var(--ui);
+  text-wrap:pretty;
+}
+.wb-expert-execution-activity.is-action {
+  display:grid;
+  grid-template-columns:16px minmax(0, 1fr);
+  align-items:start;
+  gap:10px;
+  color:var(--text-muted);
+}
+.wb-expert-execution-activity.is-action > p {
+  color:inherit;
+  font:400 13px/1.55 var(--ui);
+}
+.wb-expert-execution-action-mark {
+  width:14px;
+  height:14px;
+  margin-top:3px;
+  background:
+    radial-gradient(circle at 3px 3px, currentColor 0 1.5px, transparent 1.75px),
+    radial-gradient(circle at 11px 3px, currentColor 0 1.5px, transparent 1.75px),
+    radial-gradient(circle at 3px 11px, currentColor 0 1.5px, transparent 1.75px),
+    radial-gradient(circle at 11px 11px, currentColor 0 1.5px, transparent 1.75px);
+  opacity:.72;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wb-expert-execution-disclosure > summary > i { transition:none; }
+}
 .wb-expert-room-loading { min-height:260px; display:grid; place-content:center; justify-items:center; gap:10px; color:var(--text-muted, var(--text-muted)); }
 .wb-expert-room-loading > span { width:22px; height:22px; border:2px solid color-mix(in srgb, var(--action-primary) 16%, transparent); border-top-color:var(--action-primary); border-radius:50%; animation:wb-expert-spin .8s linear infinite; }
 .wb-expert-room-loading strong { font:500 12px/1.4 var(--ui); }
@@ -1833,7 +1912,7 @@
 .wb-expert-contract dl { display:grid; gap:9px; margin:0; }
 .wb-expert-contract dl > div { display:grid; grid-template-columns:38px minmax(0, 1fr); gap:10px; }
 .wb-expert-contract dt { color:var(--text-muted, var(--text-muted)); font:500 12px/1.55 var(--ui); }
-.wb-expert-contract dd { display:-webkit-box; margin:0; overflow:hidden; color:var(--text-secondary, var(--text-secondary)); font:400 12px/1.55 var(--ui); -webkit-box-orient:vertical; -webkit-line-clamp:3; }
+.wb-expert-contract dd { display:-webkit-box; margin:0; overflow:hidden; overflow-wrap:anywhere; color:var(--text-secondary, var(--text-secondary)); font:400 12px/1.55 var(--ui); -webkit-box-orient:vertical; -webkit-line-clamp:3; }
 .wb-expert-sidebar-status {
   min-height:32px;
   display:flex;
@@ -2089,8 +2168,8 @@
 
 /* 需求澄清动作卡与专家消息共用核心阅读轨，不延伸到整列空白区域。 */
 .wb-expert-pane-content > .wb-expert-draft-room {
-  width: min(920px, 100%);
-  max-width: 920px;
+  width: min(var(--conversation-track-max, 760px), 100%);
+  max-width: var(--conversation-track-max, 760px);
   margin-inline: auto;
 }
 .wb-expert-pane-content > .wb-expert-draft-room > .wb-expert-plan-guidance { width:auto; max-width:none; margin-inline:73px 28px; }
@@ -2143,7 +2222,7 @@
 .wb-expert-pane-content,
 .wb-expert-composer-dock,
 .wb-expert-execution-status-dock {
-  --wb-expert-dialogue-width: min(920px, 100%);
+  --wb-expert-dialogue-width: min(var(--conversation-track-max, 760px), 100%);
 }
 .wb-expert-composer-dock {
   width: var(--wb-expert-dialogue-width);
@@ -2169,7 +2248,7 @@
 @media (min-width:761px) {
   .wb-expert-workspace.has-edge-scroll {
     --expert-edge-details:clamp(276px, 22vw, 320px);
-    --expert-edge-inset:max(clamp(18px, 3vw, 42px), calc((100% - var(--expert-edge-details) - 920px) / 2));
+    --expert-edge-inset:max(clamp(18px, 3vw, 42px), calc((100% - var(--expert-edge-details) - var(--conversation-track-max, 760px)) / 2));
     position:relative;
     display:block;
     overflow:hidden;
@@ -2371,6 +2450,7 @@
 @media (prefers-reduced-motion: reduce) {
   .wb-expert-task-goal.is-confirmed > .km-marquee-text-content { animation:none; }
 }
+
 .wb-expert-profile-avatar { width:44px; height:44px; }
 .wb-expert-expert-card > .wb-expert-capability-launcher { margin-top: 14px; }
 .wb-expert-expert-card > .wb-expert-capability-launcher,
@@ -2661,8 +2741,8 @@
 .wb-expert-pane-content,
 .wb-expert-composer-dock,
 .wb-expert-execution-status-dock {
-  /* 对话、计划和输入框使用同一条 920px 阅读轨。 */
-  --wb-expert-dialogue-width: min(920px, 100%);
+  /* 对话、计划和输入框使用同一条共享阅读轨。 */
+  --wb-expert-dialogue-width: min(var(--conversation-track-max, 760px), 100%);
 }
 
 .wb-expert-pane-content > .wb-expert-draft-room,
@@ -2718,7 +2798,7 @@
     --expert-edge-details: clamp(276px, 22vw, 320px);
     --expert-edge-gap: 24px;
     /* 阅读列左侧留白稍大于右侧：正文不会贴近导航，且更靠近右侧信息栏。 */
-    --expert-edge-inset: max(72px, calc((100% - var(--expert-edge-details) - var(--expert-edge-gap) - 920px) / 2));
+    --expert-edge-inset: max(72px, calc((100% - var(--expert-edge-details) - var(--expert-edge-gap) - var(--conversation-track-max, 760px)) / 2));
   }
 
   .has-edge-scroll .wb-expert-pane-content {
@@ -2915,7 +2995,7 @@
 @media (min-width: 761px) {
   /* 正文与输入框从同一个 x 坐标开始，并采用完全相同的可用宽度。 */
   .wb-expert-workspace.has-edge-scroll {
-    --wb-expert-rail-width: min(920px, calc(100% - var(--expert-edge-details) - var(--expert-edge-gap) - var(--expert-edge-inset) - 32px));
+    --wb-expert-rail-width: min(var(--conversation-track-max, 760px), calc(100% - var(--expert-edge-details) - var(--expert-edge-gap) - var(--expert-edge-inset) - 32px));
   }
 
   .has-edge-scroll .wb-expert-pane-content > .wb-expert-draft-room,
@@ -3134,8 +3214,8 @@
 /* 专家消息直接复用伙伴对话的 AgentMessageBubble。专家模式只负责任务语义，
    不再定义另一套气泡、Markdown 或结构化选择的视觉轨道。 */
 .wb-expert-conversation-timeline {
-  --agent-message-track: min(780px, 100%);
-  --agent-reading-track: min(760px, 100%);
+  --agent-message-track: min(var(--conversation-track-max, 760px), 100%);
+  --agent-reading-track: var(--agent-message-track);
 }
 .wb-expert-conversation-timeline > .agent-virtuoso-row.wb-expert-message-row {
   display: flex;

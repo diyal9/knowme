@@ -17,6 +17,16 @@ const setPackRuntimeForTests = setPackRuntime
 
 const MODE_IDS = ['general', 'steward', 'writing', 'coding']
 const SCENE_IDS = ['assistant', 'work', 'knowledge', 'writing', 'coding']
+const CONVERSATION_OUTPUT_SURFACES = new Set([
+  'partner-chat',
+  'partner-work',
+  'assistant-chat',
+  'assistant-work',
+  'expert-planning',
+  'expert-discussion',
+  'expert-execution',
+  'workflow',
+])
 
 const MODE_LABELS = {
   general: '通用办公',
@@ -127,6 +137,16 @@ function buildScenePrompt({
   return lines.join('\n')
 }
 
+function buildConversationOutputStyleBlock({ surface = '', locale = 'zh-CN' } = {}) {
+  if (!CONVERSATION_OUTPUT_SURFACES.has(String(surface || '').trim())) return null
+  const block = getPromptBlock('scene.conversation-output-style', locale)
+  if (!block) return null
+  return {
+    ...block,
+    source: { type: 'assistant-prompt-router', id: block.id, version: '1' },
+  }
+}
+
 function buildUserPrompt(settings = {}, mode = 'general', options = {}) {
   const includeUserPrompt = options.includeUserPrompt !== false
   const includeAgentPersona = options.includeAgentPersona !== false
@@ -235,6 +255,7 @@ module.exports = {
   resolveScene,
   sceneLabel,
   buildScenePrompt,
+  buildConversationOutputStyleBlock,
   buildUserPrompt,
   buildSkillPrompt,
 }

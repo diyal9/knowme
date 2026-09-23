@@ -29,9 +29,9 @@ describe('expert portfolio governance', () => {
       governance.entries.filter(item => item.disposition === disposition).length,
     ]))
     assert.deepEqual(totals, {
-      keep: 7,
-      merge_to_expert: 12,
-      skill_only: 3,
+      keep: 3,
+      merge_to_expert: 2,
+      skill_only: 18,
       workflow_only: 1,
       deferred: 2,
     })
@@ -54,7 +54,7 @@ describe('expert portfolio governance', () => {
     const gates = governance.policy.deletionGate.join('\n')
     assert.match(gates, /工作流.*模式绑定.*用户入口/)
     assert.match(gates, /自定义.*绝不自动删除/)
-    assert.match(gates, /安装记录.*任务记录.*目录包.*删除/)
+    assert.match(gates, /安装记录.*目录包.*删除.*历史任务.*只读/)
     assert.match(gates, /保留专家.*安装.*升级.*重开验证/)
   })
 })

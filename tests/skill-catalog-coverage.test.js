@@ -57,10 +57,4 @@ describe('skill catalog coverage', () => {
     assert.ok(refs.includes('visual-brief-prompt'))
     assert.ok(!refs.some(id => id.includes('th-art')))
   })
-
-  it('official requirement workflow references writing-polish', () => {
-    const requirement = listOfficialWorkflowPackages().find(p => p.id === 'official-product-requirement')
-    assert.ok(requirement)
-    assert.ok(requirement.skillRefs.some(r => r.id === 'writing-polish'))
-  })
 })

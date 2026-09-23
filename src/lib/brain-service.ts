@@ -18,6 +18,7 @@ const knowledgeProvider = require('./knowledge-provider')
 const queryCache = require('./brain-query-cache')
 const growthLedger = require('./growth-ledger')
 const brainTaxonomy = require('./brain-taxonomy')
+const brainQueryScope = require('./brain-query-scope')
 const { createCognitionRuntime } = require('./brain-cognition-runtime')
 
 const MIGRATION_VERSION = 3
@@ -519,12 +520,18 @@ function createService(deps = {}) {
     }
   }
 
-  function localQuery(data, text, request = {}) {
+  async function localQuery(data, text, request = {}) {
     const policy = normalizePolicy(request.policy || request.knowledgePolicy)
-    data = require('./brain-query-scope').scopeBrainQueryData(data, policy, request)
+    data = await brainQueryScope.scopeBrainQueryDataAsync(data, policy, request)
     const evidenceById = new Map(data.evidence.map(item => [item.id, item]))
     const claimsByNode = new Map()
-    for (const claim of data.claims) {
+    const yieldToEventLoop = () => new Promise(resolve => {
+      if (typeof setImmediate === 'function') setImmediate(resolve)
+      else setTimeout(resolve, 0)
+    })
+    for (let claimIndex = 0; claimIndex < data.claims.length; claimIndex += 1) {
+      const claim = data.claims[claimIndex]
+      if ((claimIndex + 1) % 128 === 0) await yieldToEventLoop()
       if (!(claim.evidenceRefs || []).some(id => evidenceById.has(id))) continue
       for (const id of [claim.subjectId, claim.objectNodeId].filter(Boolean)) {
         if (!claimsByNode.has(id)) claimsByNode.set(id, [])
@@ -533,23 +540,29 @@ function createService(deps = {}) {
     }
     const kinds = new Set(Array.isArray(request.kinds) ? request.kinds : [])
     const statuses = new Set(Array.isArray(request.statuses) ? request.statuses : [])
-    const docs = data.nodes
-      .filter(node => !brainTaxonomy.isTaxonomyNode(node))
-      .filter(node => !kinds.size || kinds.has(node.kind))
-      .filter(node => policy.brainScopes.includes(node.scope || 'global'))
-      .filter(node => policy.allowPersonalMemory || (!['self', 'preference', 'person', 'goal'].includes(node.kind) && !(node.tags || []).includes('memory')))
-      .filter(node => !statuses.size || (claimsByNode.get(node.id) || []).some(claim => statuses.has(claim.status)))
-      .map(node => {
+    const docs = []
+    for (let nodeIndex = 0; nodeIndex < data.nodes.length; nodeIndex += 1) {
+      const node = data.nodes[nodeIndex]
+      if ((nodeIndex + 1) % 128 === 0) await yieldToEventLoop()
+      if (brainTaxonomy.isTaxonomyNode(node)
+        || (kinds.size && !kinds.has(node.kind))
+        || !policy.brainScopes.includes(node.scope || 'global')
+        || (!policy.allowPersonalMemory && ['self', 'preference', 'person', 'goal'].includes(node.kind))
+        || (!policy.allowPersonalMemory && (node.tags || []).includes('memory'))
+        || (statuses.size && !(claimsByNode.get(node.id) || []).some(claim => statuses.has(claim.status)))) continue
         const related = claimsByNode.get(node.id) || []
         const content = [
           node.summary,
           ...(node.tags || []),
           ...related.filter(claim => !statuses.size || statuses.has(claim.status)).map(claim => `${claim.predicate} ${claim.value ?? ''}`),
-        ].filter(Boolean).join('\n')
-        return { title: node.label, path: node.id, content }
-      })
+      ].filter(Boolean).join('\n')
+      docs.push({ title: node.label, path: node.id, content })
+    }
     const topK = Number(request.topK) || DEFAULT_TOP_K
-    let ranked = knowledgeRank.rankHits(text, docs, { topK: Math.min(40, topK * 4) })
+    let ranked = await knowledgeRank.rankHitsAsync(text, docs, {
+      topK: Math.min(40, topK * 4),
+      signal: request.signal,
+    })
     if (!ranked.length && (kinds.size || statuses.size)) {
       ranked = docs.slice(0, Math.min(40, topK * 4)).map((doc, index) => ({
         title: doc.title,
@@ -638,7 +651,9 @@ function createService(deps = {}) {
     const data = snapshot(userData, { includeInactive: wantsInactive }, ctx)
     const policy = normalizePolicy(request.knowledgePolicy)
     const mode = ['local', 'external', 'mixed'].includes(request.mode) ? request.mode : 'local'
-    const localHits = mode === 'external' ? [] : localQuery(data, text, { ...localRequest, policy })
+    const localHits = mode === 'external'
+      ? []
+      : await localQuery(data, text, { ...localRequest, policy, signal: ctx.signal })
     let externalHits = []
     let externalAttempted = false
     const shouldExternal = mode !== 'local'

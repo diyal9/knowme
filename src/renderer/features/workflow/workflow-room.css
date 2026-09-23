@@ -314,7 +314,7 @@
 .wb-workflow-delivery-preview > header strong { overflow:hidden; color:var(--wb-text); font:600 13px/1.35 var(--ui); white-space:nowrap; text-overflow:ellipsis; }
 .wb-workflow-delivery-preview > header > span { flex:0 0 auto; color:var(--wb-accent); font:600 12px/1.3 var(--ui); }
 .wb-workflow-delivery-document { margin:14px; padding:28px 30px 36px; min-height:250px; border:1px solid var(--border-subtle); border-radius:8px; background:var(--surface-page); box-shadow:0 12px 30px -28px color-mix(in srgb, var(--brand-ink) 42%, transparent); }
-.wb-workflow-delivery-content { color:var(--wb-text); font:13px/1.72 var(--ui); }
+.wb-workflow-delivery-content { color:var(--wb-text); font:var(--conversation-body-size, 14px)/var(--conversation-body-leading, 1.72) var(--ui); }
 .wb-workflow-delivery-content > :first-child { margin-top:0; }
 .wb-workflow-delivery-content > :last-child { margin-bottom:0; }
 .wb-workflow-delivery-empty { flex:1; min-height:280px; display:flex; align-items:center; justify-content:center; gap:12px; padding:24px; border:1px dashed var(--wb-line-strong); border-radius:12px; color:var(--wb-text-muted); text-align:left; }

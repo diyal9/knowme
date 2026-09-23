@@ -25,6 +25,7 @@ const { buildMissingResourceHint } = require('./agent-run-executor/hints')
 const { runPrepareContext } = require('./agent-run-executor/phases-prepare-context')
 const { runModelToolLoop } = require('./agent-run-executor/phases-model-tool')
 const { runGroundAndPersist } = require('./agent-run-executor/phases-ground-persist')
+const { MAX_ASSISTANT_MESSAGE_CHARS } = require('./agent-conversation-log')
 
 /**
  * @param {object} input — ai-generate payload
@@ -67,6 +68,7 @@ async function run(input, ports, emit) {
   let planEval = null
   let errorInfo = null
   let canonicalMeta = null
+  let answerEventEmitted = false
   let modelRound = 0
   let fullText = ''
   let lastModelText = ''
@@ -161,9 +163,24 @@ async function run(input, ports, emit) {
     emitV2(event)
   }
 
-  const commitCanonicalAnswer = (text) => {
+  const emitCanonicalAnswerCommitted = (meta) => {
+    if (!meta || answerEventEmitted) return
+    outputEmitter.emit(EventType.ANSWER_COMMITTED, {
+      text: meta.text,
+      hash: meta.hash,
+    }, { phase: RunPhase.PERSIST, round: modelRound }, emit)
+    if (meta.ui?.length) {
+      outputEmitter.emit(EventType.CHOICE_READY, {
+        ui: meta.ui,
+        hash: meta.hash,
+      }, { phase: RunPhase.PERSIST, round: modelRound }, emit)
+    }
+    answerEventEmitted = true
+  }
+
+  const commitCanonicalAnswer = (text, options = {}) => {
     if (answerCommitted) return canonicalMeta
-    canonicalMeta = canonicalize(text, assembler)
+    canonicalMeta = canonicalize(String(text || '').slice(0, MAX_ASSISTANT_MESSAGE_CHARS), assembler)
     fullText = canonicalMeta.text
     const commitAt = ports.clock?.now?.() || Date.now()
     const commitMetrics = buildCommitMetrics({
@@ -185,16 +202,7 @@ async function run(input, ports, emit) {
       timingMs: metrics.answerCommitMs,
       count: metrics.outputDiagnostics.length,
     })
-    outputEmitter.emit(EventType.ANSWER_COMMITTED, {
-      text: canonicalMeta.text,
-      hash: canonicalMeta.hash,
-    }, { phase: RunPhase.PERSIST, round: modelRound }, emit)
-    if (canonicalMeta.ui?.length) {
-      outputEmitter.emit(EventType.CHOICE_READY, {
-        ui: canonicalMeta.ui,
-        hash: canonicalMeta.hash,
-      }, { phase: RunPhase.PERSIST, round: modelRound }, emit)
-    }
+    if (!options.deferEvent) emitCanonicalAnswerCommitted(canonicalMeta)
     answerCommitted = true
     return canonicalMeta
   }
@@ -233,10 +241,11 @@ async function run(input, ports, emit) {
   const waitForInput = async ({ text, kind, code, draftId, session }) => {
     // This completes a conversational turn, not the user's deliverable. The
     // typed attention and blocked evidence must survive to task consumers.
-    const committed = commitCanonicalAnswer(text)
+    const committed = commitCanonicalAnswer(text, { deferEvent: true })
     const waitingTitle = kind === 'approval_required' ? '等待审批'
       : kind === 'operation_status_unknown' ? '需要核对操作结果' : '需要确认资源'
     await ports.session.checkpoint?.({ session, emit: emitV2 })
+    emitCanonicalAnswerCommitted(committed)
     enterPhase(RunPhase.DONE)
     terminal = RunPhase.DONE
     emitTerminal(EventType.RUN_COMPLETED, {
@@ -276,6 +285,7 @@ async function run(input, ports, emit) {
       cancelled,
       checkAbort,
       commitCanonicalAnswer,
+      emitCanonicalAnswerCommitted,
       buildResult,
       runPhases,
       metrics,
@@ -352,6 +362,7 @@ async function run(input, ports, emit) {
       stage,
       emitV2,
       commitCanonicalAnswer,
+      emitCanonicalAnswerCommitted,
       buildResult,
       emitTerminal,
       runPhases,

@@ -214,6 +214,24 @@ function normalizeExpertPlan(raw) {
   return plan.goal || plan.steps.length ? plan : null
 }
 
+function normalizeManagedAgentTarget(raw) {
+  if (!raw || typeof raw !== 'object') return null
+  const id = text(raw.id || raw.agentId, 160)
+  if (!id) return null
+  const ownership = ['system', 'organization', 'user'].includes(String(raw.ownership || ''))
+    ? String(raw.ownership)
+    : 'user'
+  return {
+    id,
+    name: text(raw.name, 160) || id,
+    source: text(raw.source, 80) || 'custom',
+    ownership,
+    version: text(raw.version, 80),
+    contentHash: text(raw.contentHash || raw.hash, 180),
+    editable: raw.editable !== false,
+  }
+}
+
 function normalizeBrief(source) {
   const brief = source.brief && typeof source.brief === 'object' ? source.brief : {}
   const plan = normalizeExpertPlan(brief.plan || source.plan)
@@ -241,6 +259,7 @@ function normalizeBrief(source) {
     constraints: (Array.isArray(brief.constraints || source.constraints) ? (brief.constraints || source.constraints) : [])
       .map(value => text(value, 400)).filter(Boolean).slice(0, 24),
     dueAt: text(brief.dueAt || source.dueAt, 40),
+    agentTarget: normalizeManagedAgentTarget(brief.agentTarget || source.agentTarget),
   }
 }
 
@@ -289,7 +308,7 @@ function normalizeParticipants(raw) {
 function normalizeEvents(raw, fallbackBase, fallbackSource = 'system') {
   const values = Array.isArray(raw) ? raw : []
   const offset = Math.max(0, values.length - 200)
-  return values.slice(-200).map((value, index) => {
+  const normalized = values.slice(-200).map((value, index) => {
     const item = value && typeof value === 'object' ? value : {}
     const legacyIndex = offset + index
     const type = text(item.type, 80) || 'updated'
@@ -309,11 +328,20 @@ function normalizeEvents(raw, fallbackBase, fallbackSource = 'system') {
       type,
       kind: text(item.kind, 80) || (userActivity ? (reviewActivity ? 'review' : 'message') : 'event'),
       source,
+      ...(text(item.messageId, 180) ? { messageId: text(item.messageId, 180) } : {}),
+      ...(text(item.requestId, 180) ? { requestId: text(item.requestId, 180) } : {}),
       sequence: sequence(item.sequence, legacyIndex + 1),
       summary: text(item.summary, 500),
       actorId,
       createdAt: text(item.createdAt, 40) || stableLegacyIso(fallbackBase, legacyIndex),
     }
+  })
+  const seenNeedsInput = new Set()
+  return normalized.filter(item => {
+    if (item.type !== 'needs_input' || !item.requestId) return true
+    if (seenNeedsInput.has(item.requestId)) return false
+    seenNeedsInput.add(item.requestId)
+    return true
   })
 }
 
@@ -327,6 +355,8 @@ function normalizeTaskAttention(raw) {
     action,
     ...(text(raw.draftId, 160) ? { draftId: text(raw.draftId, 160) } : {}),
     ...(text(raw.runId, 160) ? { runId: text(raw.runId, 160) } : {}),
+    ...(text(raw.messageId, 180) ? { messageId: text(raw.messageId, 180) } : {}),
+    ...(text(raw.requestId, 180) ? { requestId: text(raw.requestId, 180) } : {}),
     title: text(raw.title, 180),
     detail: text(raw.detail, 800),
     field: text(raw.field, 120),
@@ -732,6 +762,7 @@ module.exports = {
   normalizeTaskRef,
   normalizeExecRef,
   normalizeBrief,
+  normalizeManagedAgentTarget,
   normalizeExpertPlan,
   normalizeAssignmentSnapshot,
   normalizeDeliverables,

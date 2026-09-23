@@ -375,7 +375,7 @@ function createStreamableHttpSession(opts = {}) {
       const init = await rpc('initialize', {
         protocolVersion: '2024-11-05',
         capabilities: {},
-        clientInfo: { name: 'knowme', version: '0.4.0' },
+        clientInfo: { name: 'knowme', version: '0.5.0' },
       })
       if (!init.ok) return init
       const notified = await send({ jsonrpc: '2.0', method: 'notifications/initialized' }, { allowEmpty: true })

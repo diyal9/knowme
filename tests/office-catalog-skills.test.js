@@ -28,10 +28,6 @@ const OFFICE_SKILL_IDS = [
   'feishu-meeting-summary',
   'feishu-today-priority',
   'feishu-doc-kb',
-  'office-requirement-doc',
-  'office-document',
-  'office-outline-draft',
-  'office-document-finalize',
 ]
 
 const EXPECTED_TASKS = {
@@ -67,30 +63,6 @@ const EXPECTED_TASKS = {
     requiredTools: ['feishu.doc_kb_suggest'],
     templateDays: 30,
     modes: ['general'],
-  },
-  writingRequirementsDoc: {
-    skillId: 'office-requirement-doc',
-    title: '写需求文档',
-    preflightType: 'material',
-    modes: ['writing'],
-  },
-  writingOfficeDoc: {
-    skillId: 'office-document',
-    title: '写办公文档',
-    preflightType: 'material',
-    modes: ['writing'],
-  },
-  writingOutlineDraft: {
-    skillId: 'office-outline-draft',
-    title: '按提纲成稿',
-    preflightType: 'material',
-    modes: ['writing'],
-  },
-  writingFinalize: {
-    skillId: 'office-document-finalize',
-    title: '排版定稿',
-    preflightType: 'material',
-    modes: ['writing'],
   },
 }
 
@@ -143,17 +115,6 @@ describe('office catalog skills (tasks 5.1–5.3)', () => {
     assert.deepEqual(meeting.contract.requiredTools, ['feishu.meeting_candidates'])
   })
 
-  it('writing skills have no requiredTools in sidecar or frontmatter', () => {
-    const writingIds = OFFICE_SKILL_IDS.filter((id) => id.startsWith('office-'))
-    for (const id of writingIds) {
-      const { skillMd, sidecar } = readOfficeSkill(id)
-      const task = sidecar.metadata.knowme.experience.tasks[0]
-      assert.ok(!task.requiredTools?.length, `${id} sidecar requiredTools`)
-      const grounding = parseSkillGroundingFromContent(skillMd)
-      assert.equal(grounding.contract.requiredTools.length, 0, `${id} frontmatter requiredTools`)
-    }
-  })
-
   it('experience tasks match legacy titles, preflight and requiredTools', () => {
     for (const [taskId, expected] of Object.entries(EXPECTED_TASKS)) {
       const { sidecar } = readOfficeSkill(expected.skillId)
@@ -168,10 +129,6 @@ describe('office catalog skills (tasks 5.1–5.3)', () => {
         assert.equal(task.preflight.type, 'connector-auth')
         assert.equal(task.preflight.connector, expected.preflightConnector)
         assert.match(task.preflight.message, /设置 → 连接器/)
-      }
-      if (expected.preflightType === 'material') {
-        assert.equal(task.preflight.type, 'material')
-        assert.ok(task.preflight.message.length > 10)
       }
       if (expected.requiredTools) {
         assert.deepEqual(task.requiredTools, expected.requiredTools)
@@ -201,7 +158,7 @@ describe('office-partner pack skill references (task 5.4)', () => {
   const gameScenes = JSON.parse(fs.readFileSync(path.join(ROOT, 'src', 'packs', 'game-studio', 'scenes.json'), 'utf8'))
 
   it('office-partner pack.json lists office/feishu skills with bundled catalogRoot', () => {
-    assert.equal(officePack.skills.length, 13)
+    assert.equal(officePack.skills.length, 9)
     assert.equal(officePack.bundledCapabilities.catalogRoot, '../../catalog')
     for (const id of OFFICE_SKILL_IDS) {
       assert.ok(officePack.skills.includes(id), `missing ${id}`)
@@ -261,7 +218,7 @@ describe('office-partner pack skill references (task 5.4)', () => {
     fs.rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('skill runtime emits 8 office dynamic tasks from pack sources', () => {
+  it('skill runtime emits 4 Feishu dynamic tasks from pack sources', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-office-runtime-tasks-'))
     const packRt = createCapabilityPackRuntime({
       userData: tmpDir,

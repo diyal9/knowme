@@ -43,6 +43,20 @@ describe('knowledge-rank', () => {
     assert.deepEqual(rank.rankHits('', [{ title: 't', path: 'p', content: 'c' }]), [])
   })
 
+  it('async ranking preserves results while yielding to the event loop', async () => {
+    const docs = Array.from({ length: 12 }, (_, index) => ({
+      title: index === 11 ? '目标文档' : `文档 ${index}`,
+      path: `${index}.md`,
+      content: index === 11 ? '目标内容' : '其他内容',
+    }))
+    let timerFired = false
+    setTimeout(() => { timerFired = true }, 0)
+    const asyncHits = await rank.rankHitsAsync('目标', docs, { topK: 1, yieldEvery: 1 })
+    assert.equal(asyncHits[0].path, '11.md')
+    assert.equal(timerFired, true)
+    assert.deepEqual(asyncHits, rank.rankHits('目标', docs, { topK: 1 }))
+  })
+
   it('computes cosine similarity with zero-vector safety', () => {
     assert.equal(rank.cosineSimilarity([1, 0], [1, 0]), 1)
     assert.ok(Math.abs(rank.cosineSimilarity([1, 0], [0, 1])) < 1e-9)

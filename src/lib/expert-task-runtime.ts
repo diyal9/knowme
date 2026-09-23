@@ -21,6 +21,7 @@ const { projectExpertTaskDiagnostics } = require('../domain/expert-task-diagnost
 const { readExpertApprovalRecovery, prepareExpertApprovalRecovery } = require('./expert-task-approval-recovery')
 const { analyzeExpertPlanningReply } = require('../shared/expert-planning-contract')
 const { classifyExpertTaskComplexity, minimumPlanStepsFor } = require('../domain/expert-task-complexity')
+const { runtimeMessageId } = require('./agent-conversation-log')
 
 const QUALIFICATION_CONTRACT_VERSION = 2
 const ACTIVE_TASK_STATUSES = new Set(['starting', 'running', 'revising'])
@@ -57,6 +58,29 @@ function isPlaceholderGoal(value) {
   return !normalized || PLACEHOLDER_GOAL_PATTERN.test(normalized)
 }
 
+const EXPERT_PLANNING_ROUTE_PROMPT_PATTERN = /^我想处理「[^」]+」[。.!！]?\s*请严格按当前专/u
+
+function sanitizeExpertClarificationMaterial(item) {
+  const content = String(item?.content || '').trim()
+  if (item?.id !== 'clarification-record' || !content) return content
+  return content
+    .split(/\n{2,}/u)
+    .map(part => part.trim())
+    .filter(part => part && !EXPERT_PLANNING_ROUTE_PROMPT_PATTERN.test(part))
+    .join('\n\n')
+}
+
+function formatExpertTaskMaterials(rawMaterials) {
+  return (Array.isArray(rawMaterials) ? rawMaterials : [])
+    .map(item => {
+      const content = sanitizeExpertClarificationMaterial(item)
+      if (item?.id === 'clarification-record' && !content && item?.kind !== 'image') return ''
+      return `- ${item.title}${item.ref ? `（${item.ref}）` : ''}${item.kind === 'image' ? '\n[图片材料已作为视觉附件传入]' : content ? `\n${content}` : ''}`
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+
 function confirmedTaskGoal(task) {
   return [task?.brief?.goal, task?.brief?.plan?.goal, task?.goal].map(taskText)
     .find(value => !isPlaceholderGoal(value)) || taskText(task?.brief?.goal || task?.goal)
@@ -83,6 +107,8 @@ function expertAttention(kind, action, input = {}) {
     action,
     ...(text(input.draftId, 160) ? { draftId: text(input.draftId, 160) } : {}),
     ...(text(input.runId, 160) ? { runId: text(input.runId, 160) } : {}),
+    ...(text(input.messageId, 180) ? { messageId: text(input.messageId, 180) } : {}),
+    ...(text(input.requestId, 180) ? { requestId: text(input.requestId, 180) } : {}),
     title: text(input.title, 180),
     detail: text(input.detail, 800),
     field: text(input.field, 120),
@@ -95,6 +121,23 @@ function expertAttention(kind, action, input = {}) {
     required: input.required !== false,
     createdAt: new Date().toISOString(),
   }
+}
+
+function attentionRequestId(taskId, attention = {}) {
+  const fingerprint = [
+    text(taskId, 160),
+    text(attention.kind, 80),
+    text(attention.action, 80),
+    text(attention.question || attention.detail || attention.item || attention.title, 600),
+  ].join('\0')
+  return `input_${crypto.createHash('sha256').update(fingerprint).digest('hex').slice(0, 20)}`
+}
+
+function appendNeedsInputEvent(events, event) {
+  const list = Array.isArray(events) ? events : []
+  const requestId = text(event?.requestId, 180)
+  if (requestId && list.some(item => item?.type === 'needs_input' && item?.requestId === requestId)) return list
+  return [...list, event]
 }
 
 function expertProgress(phase, label, input = {}) {
@@ -194,7 +237,7 @@ function executionAttention(violation, failedToolCall) {
 function isInsufficientProvidedInput(value) {
   const input = text(value, 1000).replace(/[\s，,。.!！?？、；;：:]+/g, '')
   if (!input) return true
-  return /^(?:确认|继续|好的?|可以|没问题|开始|执行|重试|不知道|不清楚)$/.test(input)
+  return /^(?:确认|继续|好的?|可以|没问题|开始|执行|重试|不知道|不清楚|(?:要|需)?补充什么|补充哪(?:些|个)|怎么核对|如何核对|什么意思)$/.test(input)
 }
 
 function reviewMaterials(raw) {
@@ -412,9 +455,7 @@ function createExpertTaskRuntime(deps) {
   }
 
   function buildPrompt(task, snapshot, outputSpec, revision = null, transitionNote = '', approvalReceipts = []) {
-    const materials = (task.brief?.materials || [])
-      .map(item => `- ${item.title}${item.ref ? `（${item.ref}）` : ''}${item.kind === 'image' ? '\n[图片材料已作为视觉附件传入]' : item.content ? `\n${item.content}` : ''}`)
-      .join('\n')
+    const materials = formatExpertTaskMaterials(task.brief?.materials)
     const requiredTools = Array.isArray(outputSpec?.requiredTools) ? outputSpec.requiredTools : []
     const requiredSections = Array.isArray(outputSpec?.requiredSections) ? outputSpec.requiredSections : []
     const personaInstructions = [
@@ -731,20 +772,25 @@ function createExpertTaskRuntime(deps) {
         'secure_storage_unavailable',
         'decrypt_failed',
       ].includes(apiKeyStatus?.state);
+      const attention = expertAttention('configuration_required', 'open_settings', {
+        title: secureStorageBlocked ? '需要解锁 AI 配置' : '需要完成 AI 配置',
+        item: secureStorageBlocked ? '系统安全存储' : 'AI 接口',
+        detail: secureStorageBlocked
+          ? 'Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。'
+          : '尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。',
+      })
+      const requestId = attentionRequestId(task.id, attention)
+      const attentionWithId = { ...attention, requestId }
       return store.update(task.id, {
         status: 'needs_input',
-        attention: expertAttention('configuration_required', 'open_settings', {
-          title: secureStorageBlocked ? '需要解锁 AI 配置' : '需要完成 AI 配置',
-          item: secureStorageBlocked ? '系统安全存储' : 'AI 接口',
-          detail: secureStorageBlocked
-            ? 'Provider API Key 已保存，但当前系统安全存储不可用或无法解密。请在支持系统安全存储的环境中重启，或前往设置重新配置。'
-            : '尚未配置可用的 AI 接口，补充任务文字无法解决这个问题。',
-        }),
+        attention: attentionWithId,
         progress: expertProgress('blocked', secureStorageBlocked ? '等待解锁 AI 配置' : '等待 AI 配置'),
-        events: [...task.events, {
+        events: appendNeedsInputEvent(task.events, {
           type: 'needs_input',
+          requestId,
+          messageId: attention.messageId,
           summary: secureStorageBlocked ? '已保存的 AI 配置无法解锁' : '需要先配置 AI 接口',
-        }],
+        }),
       })
     }
 
@@ -1011,19 +1057,27 @@ function createExpertTaskRuntime(deps) {
         // Preserve typed executor checkpoints (including unknown operation
         // outcomes). Only legacy/untyped results become missing information.
         const kind = typeof result.attention.kind === 'string' ? text(result.attention.kind, 80) : ''
-        const attention = expertAttention(kind || 'missing_information', result.attention.action, result.attention)
+        const attention = expertAttention(kind || 'missing_information', result.attention.action, {
+          ...result.attention,
+          runId: result.runId || result.attention.runId || activeRunId || runId,
+          messageId: runtimeMessageId(result.runId || result.attention.runId || activeRunId || runId, 'assistant'),
+        })
+        const requestId = attentionRequestId(task.id, attention)
+        const attentionWithId = { ...attention, requestId }
         const latest = store.get(task.id)
         return store.update(task.id, {
           status: 'needs_input',
-          attention,
-          progress: expertProgress('blocked', attention.title || '等待确认', {
+          attention: attentionWithId,
+          progress: expertProgress('blocked', attentionWithId.title || '等待确认', {
             startedAt: executionStartedAt,
-            detail: attention.question || attention.detail,
+            detail: attentionWithId.question || attentionWithId.detail,
           }),
-          events: [...(latest.ok ? latest.task.events : task.events), {
+          events: appendNeedsInputEvent(latest.ok ? latest.task.events : task.events, {
             type: 'needs_input',
-            summary: attention.question || attention.detail || '需要确认具体对象',
-          }],
+            requestId,
+            messageId: attentionWithId.messageId,
+            summary: attentionWithId.question || attentionWithId.detail || '需要确认具体对象',
+          }),
         })
       }
       const output = text(result.text, 24000)
@@ -1174,7 +1228,15 @@ function createExpertTaskRuntime(deps) {
         resultSummary: output.slice(0, 280),
         deliverables: nextDeliverables,
         executionEvidence: [...((latest.ok ? latest.task.executionEvidence : task.executionEvidence) || []), executionEvidence],
-        events: [...latestEvents, ...completedToolEvents, { type: revision ? 'revision_ready' : 'deliverable_ready', summary: outputSpec.title || task.title },
+        events: [...latestEvents, ...completedToolEvents, {
+          type: revision ? 'revision_ready' : 'deliverable_ready',
+          summary: outputSpec.title || task.title,
+          // The successful execution already committed the assistant response
+          // in the bound Session. Keep the task activity as metadata for that
+          // canonical message so the collaboration feed cannot render it as a
+          // second answer.
+          messageId: runtimeMessageId(result.runId || runId, 'assistant'),
+        },
           ...(nextStatus === 'review' ? [{ type: 'awaiting_confirmation', summary: '本轮交付已就绪，等待用户确认结果或继续调整。' }] : []),
           ...(nextStatus === 'completed' ? [{ type: 'automatically_completed', summary: '已按委托策略自动完成。' }] : [])],
       })
@@ -1284,6 +1346,16 @@ function createExpertTaskRuntime(deps) {
       : item)
     const store = deps.getWorkbenchTaskStore?.()
     const existing = store && input.taskId ? store.get(input.taskId) : { ok: false }
+    const lifecycleGate = deps.ensureCapabilityHub?.()?.canStartExpert?.(expertId)
+    if (lifecycleGate && !lifecycleGate.ok) {
+      return {
+        ok: false,
+        started: false,
+        code: lifecycleGate.code || 'expert_unavailable',
+        error: lifecycleGate.error || lifecycleGate.message || '该 Agent 当前不能创建新任务',
+        lifecycle: lifecycleGate.lifecycle,
+      }
+    }
     const requiresPlanConfirmation = existing.ok && existing.task.status === 'draft'
     const planConfirmation = Array.isArray(input.brief?.materials)
       ? input.brief.materials.find(item => item?.id === 'user-plan-confirmation')
@@ -1431,6 +1503,9 @@ function createExpertTaskRuntime(deps) {
               example: '可以粘贴正文、提供文件或链接；仅回复“确认”不会启动任务。',
             })
             : null)
+      const attentionWithId = attention
+        ? { ...attention, requestId: attentionRequestId(created.task.id, attention) }
+        : null
       const routedBrief = {
         ...hydratedBrief,
         materials: latestCreated.task.brief.materials,
@@ -1473,19 +1548,23 @@ function createExpertTaskRuntime(deps) {
           || materialBlocked
           ? 'needs_input'
           : 'starting',
-        attention,
-        progress: attention
-          ? expertProgress('blocked', attention.title, { detail: attention.detail || attention.question })
+        attention: attentionWithId,
+        progress: attentionWithId
+          ? expertProgress('blocked', attentionWithId.title, { detail: attentionWithId.detail || attentionWithId.question })
           : expertProgress('preflight', '执行条件检查通过'),
-        events: [...latestCreated.task.events, {
-          type: preflightBlocked
-            || materialBlocked
-            ? 'needs_input'
-            : 'preflight_passed',
-          summary: preflightBlocked
-            ? preflightSummary
-            : (materialBlocked ? attention.question : '预检通过'),
-        }],
+        events: attentionWithId && (preflightBlocked || materialBlocked)
+          ? appendNeedsInputEvent(latestCreated.task.events, {
+              type: 'needs_input',
+              requestId: attentionWithId.requestId,
+              messageId: attentionWithId.messageId,
+              summary: preflightBlocked
+                ? preflightSummary
+                : (attentionWithId.question || '需要提供任务材料'),
+            })
+          : [...latestCreated.task.events, {
+              type: 'preflight_passed',
+              summary: '预检通过',
+            }],
       })
       const shouldStart = prepared.ok && prepared.task.status === 'starting'
       if (shouldStart) {
@@ -1544,11 +1623,13 @@ function createExpertTaskRuntime(deps) {
     const incomingMaterials = validated.materials
     if (!incomingMaterials.length && isInsufficientProvidedInput(note)) {
       const question = text(attention?.question, 500)
+      const detail = text(attention?.detail, 500)
+      const nextStep = text(attention?.nextStep, 500)
       const example = text(attention?.example, 500)
       return {
         ok: false,
         task: current.task,
-        error: [question || `还需要补充「${attention?.item || '任务信息'}」。`, example].filter(Boolean).join(' '),
+        error: [question || detail || `还需要补充「${attention?.item || '任务信息'}」。`, nextStep, example].filter(Boolean).join(' '),
       }
     }
     const materials = [
@@ -1760,4 +1841,4 @@ function createExpertTaskRuntime(deps) {
   return { preparePlanConfirmation, createStart, provideInput, reviewDeliverable, cancel, retry, execute, recoverQueuedTasks, get: reconcileTask, controllers }
 }
 
-module.exports = { buildQualificationContext, createExpertTaskRuntime, linkedPreviousVersionId }
+module.exports = { buildQualificationContext, createExpertTaskRuntime, formatExpertTaskMaterials, linkedPreviousVersionId }

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 3,
+  "id": "agent-registry-operations",
+  "kind": "skill",
+  "name": "能力治理",
+  "description": "以专业定义、分层评估、预览确认和审批发布统一管理运行时 Agent 与 Skill。",
+  "version": "1.5.0",
+  "permissions": {
+    "connectors": { "allowedConnectorIds": [] },
+    "tools": {
+      "allowlist": [
+        "list_manageable_agents",
+        "get_agent_definition",
+        "get_agent_draft",
+        "update_agent_draft",
+        "verify_agent_definition",
+        "preview_agent_change",
+        "commit_agent_change",
+        "list_agent_revisions",
+        "list_manageable_skills",
+        "get_skill_definition",
+        "verify_skill_definition",
+        "publish_skill_definition",
+        "check_agent_eval_runtime",
+        "setup_agent_eval_runtime",
+        "save_agent_eval_suite",
+        "run_agent_eval",
+        "get_agent_eval_report"
+      ]
+    },
+    "network": true,
+    "write": true,
+    "externalWrite": false
+  },
+  "risk": {
+    "level": "medium",
+    "reasons": ["提交操作会在 KnowMe 用户数据目录中创建或改变 Agent 或用户自建 Skill；语义评估经用户批准后可调用本地配置的裁判模型"]
+  },
+  "metadata": {
+    "knowme": {
+      "operation": "runtime-agent-skill-governance"
+    }
+  }
+}

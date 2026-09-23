@@ -42,7 +42,7 @@ describe('capability pack runtime', () => {
     assert.equal(scenes.length, 0)
   })
 
-  it('installs office-partner pack with today priority and feishu empty-state scenes', () => {
+  it('installs the office skill pack with partner-owned Feishu scenes', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-pack-office-'))
     const rt = createCapabilityPackRuntime({ userData: tmpDir })
     const installed = rt.installPack('office-partner', 'bundled')
@@ -55,6 +55,7 @@ describe('capability pack runtime', () => {
       'feishu-meeting',
       'feishu-chats',
     ])
+    assert.equal(scenes.every(scene => !scene.expertId), true)
   })
 
   it('ensureDefaultPacks enables only the production office pack', () => {
@@ -66,7 +67,7 @@ describe('capability pack runtime', () => {
     assert.ok(rt.isPackEnabled('office-partner'))
   })
 
-  it('ensureDefaultPacks installs pack-declared experts via hook', () => {
+  it('ensureDefaultPacks does not install an office expert for the skill-only pack', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-pack-experts-'))
     const installed = []
     const rt = createCapabilityPackRuntime({
@@ -82,7 +83,7 @@ describe('capability pack runtime', () => {
     const ensured = rt.ensureDefaultPacks()
     assert.equal(ensured.ok, true)
     assert.ok(!installed.includes('game-studio-partner'))
-    assert.ok(installed.includes('office-partner'))
+    assert.equal(installed.includes('office-partner'), false)
     assert.ok(!fs.existsSync(path.join(tmpDir, 'capabilities', 'experts', 'game-studio-partner', 'EXPERT.md')))
   })
 

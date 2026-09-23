@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { AgentContextInfo, CapabilityItem } from '../../../shared/api'
 import { parseConfiguredQuickActions } from '../../../domain/agent-quick-commands'
 import { buildIntelligentRecommendations, buildMemoryCapabilityRecommendations, buildMemoryTopicRecommendations, type IntelligentRecommendation } from '../../../domain/assistant-recommendations'
@@ -13,6 +13,37 @@ import type { KnowledgeSelectionOption } from '../../../shared/knowledge-selecti
 
 export type ModelPreset = { id: string; label: string; contextWindow?: number; supportsTools?: boolean; supportsVision?: boolean }
 export type ModelGroup = { id: string; label: string; models: ModelPreset[] }
+export type AgentSlashNavigationTarget =
+  | { kind: 'category'; category: string }
+  | { kind: 'item'; category: string; itemIndex: number }
+
+export type AgentSlashMenuGroup = {
+  category: string
+  items: Array<{ item: CapabilityItem; index: number }>
+}
+
+export function buildAgentSlashMenuGroups(items: CapabilityItem[]): AgentSlashMenuGroup[] {
+  const groups = new Map<string, AgentSlashMenuGroup['items']>()
+  items.forEach((item, index) => {
+    const category = String(item.category || '').trim() || '其他'
+    const group = groups.get(category) || []
+    group.push({ item, index })
+    groups.set(category, group)
+  })
+  return Array.from(groups, ([category, groupItems]) => ({ category, items: groupItems }))
+}
+
+export function buildAgentSlashNavigationTargets(
+  groups: AgentSlashMenuGroup[],
+  expandedCategory: string,
+): AgentSlashNavigationTarget[] {
+  return groups.flatMap((group) => [
+    { kind: 'category' as const, category: group.category },
+    ...(group.category === expandedCategory
+      ? group.items.map(({ index }) => ({ kind: 'item' as const, category: group.category, itemIndex: index }))
+      : []),
+  ])
+}
 
 type KnowledgeEntry = { path: string; title?: string }
 
@@ -300,47 +331,151 @@ export function AgentQuickMenu({
 export function AgentSlashMenu({
   items,
   onPick,
+  mode = 'skill',
   query = '',
   onQueryChange,
-  activeIndex = 0,
-  onActiveChange,
+  activeTarget,
+  expandedCategory,
+  onActiveTargetChange,
+  onExpandedCategoryChange,
+  onNavigateKey,
 }: {
   items: CapabilityItem[]
   onPick: (item: CapabilityItem) => void
+  mode?: 'skill' | 'agent'
   query?: string
   onQueryChange?: (query: string) => void
-  activeIndex?: number
-  onActiveChange?: (index: number) => void
+  activeTarget?: AgentSlashNavigationTarget | null
+  expandedCategory: string
+  onActiveTargetChange?: (target: AgentSlashNavigationTarget) => void
+  onExpandedCategoryChange?: (category: string) => void
+  onNavigateKey?: (key: string) => boolean
 }) {
+  const menuRef = useRef<HTMLDivElement>(null)
+  const isAgentMode = mode === 'agent'
+  const noun = isAgentMode ? 'Agent' : '技能'
+
+  useLayoutEffect(() => {
+    const menu = menuRef.current
+    const anchor = menu?.parentElement
+    if (!menu || !anchor) return
+
+    const updatePlacement = () => {
+      const anchorRect = anchor.getBoundingClientRect()
+      let clipTop = 8
+      let clipBottom = window.innerHeight - 8
+      let ancestor = anchor.parentElement
+
+      while (ancestor) {
+        const overflowY = window.getComputedStyle(ancestor).overflowY
+        if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'hidden' || overflowY === 'clip') {
+          const rect = ancestor.getBoundingClientRect()
+          if (rect.height > 0) {
+            clipTop = Math.max(clipTop, rect.top + 8)
+            clipBottom = Math.min(clipBottom, rect.bottom - 8)
+          }
+        }
+        ancestor = ancestor.parentElement
+      }
+
+      const roomAbove = Math.max(0, anchorRect.top - clipTop - 6)
+      const roomBelow = Math.max(0, clipBottom - anchorRect.bottom - 6)
+      const placement = roomAbove >= 180 || roomAbove >= roomBelow ? 'top' : 'bottom'
+      const available = placement === 'top' ? roomAbove : roomBelow
+
+      menu.dataset.placement = placement
+      menu.style.setProperty('--agent-slash-menu-max-height', `${Math.max(96, Math.min(368, Math.floor(available)))}px`)
+    }
+
+    updatePlacement()
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updatePlacement)
+    observer?.observe(anchor)
+    window.addEventListener('resize', updatePlacement)
+    return () => {
+      observer?.disconnect()
+      window.removeEventListener('resize', updatePlacement)
+    }
+  }, [])
+
+  useEffect(() => {
+    menuRef.current
+      ?.querySelector<HTMLElement>('[data-slash-active="true"]')
+      ?.scrollIntoView?.({ block: 'nearest' })
+  }, [activeTarget, expandedCategory])
+
+  const groupedItems = buildAgentSlashMenuGroups(items)
+
   return (
-    <div className="agent-slash-menu show" data-testid="agent-slash-menu" role="listbox" aria-label="已安装技能">
+    <div
+      ref={menuRef}
+      className={`agent-slash-menu show${isAgentMode ? ' agent-target-menu' : ''}`}
+      data-testid={isAgentMode ? 'agent-target-menu' : 'agent-slash-menu'}
+      role="dialog"
+      aria-label={isAgentMode ? '选择要训练或优化的 Agent' : '选择已安装技能'}
+    >
       <label className="agent-skill-search">
         <Icon name="search" />
         <input
+          type="search"
           value={query}
-          placeholder="搜索已安装技能…"
-          aria-label="搜索已安装技能"
+          placeholder={isAgentMode ? '搜索已添加的 Agent…' : '搜索已安装技能…'}
+          aria-label={isAgentMode ? '搜索已添加的 Agent' : '搜索已安装技能'}
           onChange={(e) => onQueryChange?.(e.target.value)}
           onKeyDown={(e) => {
-            if (!items.length) return
-            if (e.key === 'ArrowDown') { e.preventDefault(); onActiveChange?.((activeIndex + 1) % items.length) }
-            if (e.key === 'ArrowUp') { e.preventDefault(); onActiveChange?.((activeIndex - 1 + items.length) % items.length) }
-            if (e.key === 'Enter') { e.preventDefault(); onPick(items[activeIndex]) }
+            if (onNavigateKey?.(e.key)) e.preventDefault()
           }}
         />
       </label>
-      {items.length === 0 ? (
-        <div className="agent-pop-empty">没有匹配的已安装技能</div>
-      ) : items.map((item, index) => (
-        <button key={item.id} type="button" className={`agent-slash-item${index === activeIndex ? ' active' : ''}`} aria-selected={index === activeIndex} onMouseEnter={() => onActiveChange?.(index)} onMouseDown={(e) => { e.preventDefault(); onPick(item) }}>
-          <Icon name={item.icon || resolveHubIcon(item as never)} />
-          <span className="slash-copy">
-            <strong>{item.name || item.id}</strong>
-            <small>{item.description || '已安装技能'}</small>
-          </span>
-          <span className="slash-origin">{item.category || '个人'}</span>
-        </button>
-      ))}
+      <div className="agent-slash-results" role="tree" aria-label={isAgentMode ? '可管理的 Agent' : '已安装技能'}>
+        {items.length === 0 ? (
+          <div className="agent-pop-empty" role="status">
+            {query
+              ? `没有匹配的${noun}`
+              : isAgentMode ? '暂无可管理的 Agent' : '暂无收藏或当前专家技能，输入关键词搜索全部已安装技能'}
+          </div>
+        ) : groupedItems.map(({ category, items: groupItems }) => {
+          const expanded = category === expandedCategory
+          const categoryActive = activeTarget?.kind === 'category' && activeTarget.category === category
+          return (
+          <div key={category} className={`agent-slash-group${expanded ? ' expanded' : ''}`}>
+            <button
+              type="button"
+              role="treeitem"
+              className={`agent-slash-group-title${categoryActive ? ' active' : ''}`}
+              aria-expanded={expanded}
+              aria-selected={categoryActive}
+              data-slash-active={categoryActive ? 'true' : undefined}
+              onMouseEnter={() => onActiveTargetChange?.({ kind: 'category', category })}
+              onMouseDown={(e) => {
+                e.preventDefault()
+                onActiveTargetChange?.({ kind: 'category', category })
+                onExpandedCategoryChange?.(category)
+              }}
+            >
+              <span className="agent-slash-group-caret" aria-hidden="true">›</span>
+              <strong>{category}</strong>
+              <span className="agent-slash-group-count">{groupItems.length}</span>
+            </button>
+            {expanded ? (
+              <div role="group" aria-label={isAgentMode ? category : `${category}${noun}`}>
+                {groupItems.map(({ item, index }) => {
+                  const itemActive = activeTarget?.kind === 'item' && activeTarget.itemIndex === index
+                  return (
+                  <button key={item.id} type="button" role="treeitem" className={`agent-slash-item${itemActive ? ' active' : ''}`} aria-selected={itemActive} data-slash-active={itemActive ? 'true' : undefined} onMouseEnter={() => onActiveTargetChange?.({ kind: 'item', category, itemIndex: index })} onMouseDown={(e) => { e.preventDefault(); onPick(item) }}>
+                    <Icon name={item.icon || resolveHubIcon(item as never)} />
+                    <span className="slash-copy">
+                      <strong>{item.name || item.id}</strong>
+                      <small>{item.description || (isAgentMode ? '已添加 Agent' : '已安装技能')}</small>
+                    </span>
+                  </button>
+                  )
+                })}
+              </div>
+            ) : null}
+          </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -44,12 +44,23 @@ describe('assistant chat', () => {
     fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     expect(screen.getByText('你好')).toBeInTheDocument()
-    expect(screen.getByTestId('agent-thinking-status')).toHaveTextContent('正在整理相关内容')
-    expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument()
+    expect(screen.getByTestId('agent-execution-timeline')).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText('你好，我是知我。需要我帮你做什么？')).toBeInTheDocument()
     })
     expect(screen.queryByText('未能收到完整答复，请重试。')).not.toBeInTheDocument()
+
+    const composer = screen.getByPlaceholderText(/Ctrl \+ k智能推荐/)
+    expect(composer).toHaveAttribute('data-empty', 'true')
+    // Electron/Chromium may leave a filler node after clearing contentEditable.
+    // A completed reply must still restore a genuinely empty, reusable editor.
+    composer.append(document.createElement('br'))
+    fireEvent.focus(composer)
+    expect(composer).toHaveTextContent('')
+    composer.textContent = '继续追问'
+    fireEvent.input(composer)
+    expect(composer).toHaveValue('继续追问')
+    expect(composer).toHaveAttribute('data-empty', 'false')
   })
 
   it('applies late v2 answer.committed after invoke returns', async () => {
@@ -59,11 +70,13 @@ describe('assistant chat', () => {
         emit = cb
         return () => undefined
       },
-      aiGenerate: async () => {
+      aiGenerate: async (input) => {
+        const runId = String(input?.runId || '')
         await new Promise((r) => setTimeout(r, 5))
         setTimeout(() => {
           emit?.({
             version: '2',
+            runId,
             seq: '1',
             type: 'answer.committed',
             payload: { text: '迟到的完整答复', hash: 'h-late' },
@@ -299,20 +312,153 @@ describe('assistant chat', () => {
         groups: [{ id: 'openai', label: 'OpenAI', models: [{ id: 'gpt', label: 'GPT', contextWindow: 128000 }] }],
       }),
       llmProfile: async () => ({ model: 'gpt' }),
+      agentSessionList: async () => ({
+        sessions: [{ id: 's1', title: '新助手', expertId: 'expert-a' }],
+        ui: { openSessionIds: ['s1'], activeSessionId: 's1' },
+      }),
       capabilityList: async ({ kind }: { kind?: string } = {}) => (
         kind === 'skill'
-          ? { ok: true, items: [{ id: 'sk1', kind: 'skill' as const, name: 'summarize', description: '总结' }] }
-          : { ok: true, items: [] }
+          ? { ok: true, items: [
+            { id: 'sk1', kind: 'skill' as const, name: 'meeting notes', description: '整理会议纪要', category: '日常办公', favorite: true },
+            { id: 'sk2', kind: 'skill' as const, name: 'summarize', description: '总结', category: '知识研究' },
+            { id: 'sk3', kind: 'skill' as const, name: 'email handoff', description: '生成办公交付', category: '日常办公' },
+            { id: 'sk4', kind: 'skill' as const, name: 'code checker', description: '检查代码', category: '软件研发' },
+          ] }
+          : kind === 'expert'
+            ? { ok: true, items: [{ id: 'expert-a', kind: 'expert' as const, installed: true, enabled: true, skills: ['sk2', 'sk3'] }] }
+            : { ok: true, items: [] }
       ),
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByTestId('agent-model-btn')).toHaveTextContent('GPT'))
+    await waitFor(() => expect(useAppStore.getState().assistantSkillIdsByExpert['expert-a']).toEqual(['sk2', 'sk3']))
     fireEvent.click(screen.getByTestId('agent-model-btn'))
     expect(screen.getByTestId('agent-model-menu')).toHaveTextContent('GPT')
-    fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '/' } })
-    await waitFor(() => expect(screen.getByTestId('agent-slash-menu')).toHaveTextContent('summarize'))
-    fireEvent.keyDown(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { key: 'Escape' })
+    const composer = screen.getByPlaceholderText(/Ctrl \+ k智能推荐/)
+    composer.textContent = '/'
+    const slashRange = document.createRange()
+    slashRange.selectNodeContents(composer)
+    slashRange.collapse(false)
+    window.getSelection()?.removeAllRanges()
+    window.getSelection()?.addRange(slashRange)
+    fireEvent.input(composer)
+    expect(composer).toHaveTextContent('/')
+    expect(composer).not.toHaveTextContent('//')
+    await waitFor(() => expect(screen.getByTestId('agent-slash-menu')).toHaveTextContent('meeting notes'))
+    const search = screen.getByRole('searchbox', { name: '搜索已安装技能' })
+    expect(screen.getByTestId('agent-slash-menu')).not.toHaveTextContent('code checker')
+    fireEvent.change(search, { target: { value: '代码' } })
+    expect(screen.getByTestId('agent-slash-menu')).toHaveTextContent('code checker')
+    fireEvent.change(search, { target: { value: '' } })
+    const dailyCategory = screen.getByRole('treeitem', { name: /日常办公/ })
+    const researchCategory = screen.getByRole('treeitem', { name: /知识研究/ })
+    expect(dailyCategory).toHaveAttribute('aria-expanded', 'true')
+    expect(researchCategory).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByRole('treeitem', { name: /meeting notes/ })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('treeitem', { name: /email handoff/ })).toBeInTheDocument()
+    expect(screen.queryByRole('treeitem', { name: /summarize/ })).not.toBeInTheDocument()
+
+    fireEvent.keyDown(composer, { key: 'ArrowUp' })
+    expect(dailyCategory).toHaveAttribute('aria-selected', 'true')
+    fireEvent.keyDown(composer, { key: 'ArrowDown' })
+    fireEvent.keyDown(composer, { key: 'ArrowDown' })
+    fireEvent.keyDown(composer, { key: 'ArrowDown' })
+    expect(researchCategory).toHaveAttribute('aria-selected', 'true')
+    fireEvent.keyDown(composer, { key: 'ArrowRight' })
+    expect(researchCategory).toHaveAttribute('aria-expanded', 'true')
+    expect(dailyCategory).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('treeitem', { name: /meeting notes/ })).not.toBeInTheDocument()
+    fireEvent.keyDown(composer, { key: 'ArrowRight' })
+    expect(screen.getByRole('treeitem', { name: /summarize/ })).toHaveAttribute('aria-selected', 'true')
+    fireEvent.keyDown(composer, { key: 'ArrowLeft' })
+    expect(researchCategory).toHaveAttribute('aria-selected', 'true')
+
+    fireEvent.change(search, { target: { value: '会议' } })
+    expect(screen.getByTestId('agent-slash-menu')).toHaveTextContent('meeting notes')
+    expect(screen.getByTestId('agent-slash-menu')).not.toHaveTextContent('summarize')
+    fireEvent.keyDown(screen.getByRole('searchbox', { name: '搜索已安装技能' }), { key: 'Enter' })
+    expect(composer).toHaveValue('/meeting notes ')
+    expect(screen.getByTestId('agent-selected-skill-sk1')).toHaveTextContent('meeting notes')
+    expect(useAppStore.getState().sessionStates.s1.skillRefs).toEqual(['sk1'])
     expect(screen.queryByTestId('agent-slash-menu')).not.toBeInTheDocument()
+
+    composer.append(document.createTextNode('继续处理'))
+    fireEvent.input(composer)
+    expect(composer).toHaveValue('/meeting notes 继续处理')
+    expect(screen.getByTestId('agent-selected-skill-sk1')).toHaveTextContent('meeting notes')
+  })
+
+  it('shows a removable skill toggle and sends the canonical skill id', async () => {
+    const generate = vi.fn(async () => ({ text: '已完成' }))
+    mockApi({
+      aiGenerate: generate,
+      capabilityList: async ({ kind }: { kind?: string } = {}) => (
+        kind === 'skill'
+          ? { ok: true, items: [
+            { id: 'lark-sheet-fill', kind: 'skill' as const, name: '飞书数据填表', description: '写入飞书表格', category: '数据分析', favorite: true },
+            { id: 'meeting-notes', kind: 'skill' as const, name: '会议纪要整理', description: '整理会议行动项', category: '日常办公', favorite: true },
+          ] }
+          : { ok: true, items: [] }
+      ),
+    })
+    render(<AppShell />)
+
+    const composer = screen.getByPlaceholderText(/Ctrl \+ k智能推荐/)
+    fireEvent.change(composer, { target: { value: '请使用 /飞书' } })
+    const skill = await screen.findByRole('treeitem', { name: /飞书数据填表/ })
+    fireEvent.mouseDown(skill)
+
+    expect(composer).toHaveValue('请使用 /飞书数据填表 ')
+    const richComposer = screen.getByRole('textbox', { name: /Ctrl \+ k智能推荐/ })
+    const toggle = screen.getByRole('button', { name: '已选择技能 飞书数据填表，点击移除' })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    expect(toggle.parentElement).toBe(richComposer)
+    expect(toggle.previousSibling?.textContent).toBe('请使用 ')
+    expect(screen.queryByRole('group', { name: '已选技能' })).not.toBeInTheDocument()
+    expect(useAppStore.getState().sessionStates.s1.skillRefs).toEqual(['lark-sheet-fill'])
+
+    fireEvent.click(toggle)
+    expect(composer).toHaveValue('请使用 ')
+    expect(screen.queryByTestId('agent-selected-skill-lark-sheet-fill')).not.toBeInTheDocument()
+    expect(useAppStore.getState().sessionStates.s1.skillRefs).toEqual([])
+
+    fireEvent.change(composer, { target: { value: '' } })
+    fireEvent.change(composer, { target: { value: '/飞书' } })
+    fireEvent.mouseDown(await screen.findByRole('treeitem', { name: /飞书数据填表/ }))
+    fireEvent.change(composer, { target: { value: '/飞书数据填表 把分析结果写入本周数据表' } })
+    expect(screen.queryByTestId('agent-slash-menu')).not.toBeInTheDocument()
+
+    composer.append(document.createTextNode(' /'))
+    const endRange = document.createRange()
+    endRange.selectNodeContents(composer)
+    endRange.collapse(false)
+    window.getSelection()?.removeAllRanges()
+    window.getSelection()?.addRange(endRange)
+    fireEvent.input(composer)
+    expect(composer).toHaveValue('/飞书数据填表 把分析结果写入本周数据表 /')
+    expect(await screen.findByTestId('agent-slash-menu')).toBeInTheDocument()
+    fireEvent.mouseDown(screen.getByRole('treeitem', { name: /日常办公/ }))
+    fireEvent.mouseDown(screen.getByRole('treeitem', { name: /会议纪要整理/ }))
+    expect(screen.queryByTestId('agent-slash-menu')).not.toBeInTheDocument()
+    expect(composer).toHaveValue('/飞书数据填表 把分析结果写入本周数据表 /会议纪要整理 ')
+    expect(screen.getByTestId('agent-selected-skill-meeting-notes')).toHaveTextContent('会议纪要整理')
+    expect(useAppStore.getState().sessionStates.s1.skillRefs).toEqual(['lark-sheet-fill', 'meeting-notes'])
+
+    fireEvent.click(screen.getByRole('button', { name: '发送' }))
+
+    await waitFor(() => expect(generate).toHaveBeenCalled())
+    expect(generate).toHaveBeenCalledWith(expect.objectContaining({
+      prompt: expect.stringContaining('/飞书数据填表 把分析结果写入本周数据表 /会议纪要整理'),
+      displayPrompt: '/飞书数据填表 把分析结果写入本周数据表 /会议纪要整理',
+      skillRefs: ['lark-sheet-fill', 'meeting-notes'],
+    }))
+    expect(screen.queryByTestId('agent-selected-skill-lark-sheet-fill')).not.toBeInTheDocument()
+    const sentMessage = screen.getByTestId('msg-user')
+    expect(sentMessage).toHaveTextContent('/飞书数据填表 把分析结果写入本周数据表 /会议纪要整理')
+    expect(sentMessage).not.toHaveTextContent('lark-sheet-fill')
+    expect(within(sentMessage).getByLabelText('技能 飞书数据填表')).toHaveClass('agent-user-skill-ref')
+    expect(within(sentMessage).getByLabelText('技能 会议纪要整理')).toHaveClass('agent-user-skill-ref')
+    expect(sentMessage.querySelectorAll('.agent-user-skill-ref .agent-skill-toggle-icon')).toHaveLength(2)
   })
 
   it('shows execution timeline from stream events and opens image viewer', async () => {
@@ -332,7 +478,7 @@ describe('assistant chat', () => {
     render(<AppShell />)
     fireEvent.change(screen.getByPlaceholderText(/Ctrl \+ k智能推荐/), { target: { value: '你好' } })
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
-    await waitFor(() => expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument())
+    await waitFor(() => expect(screen.getByTestId('agent-execution-timeline')).toBeInTheDocument())
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     expect(screen.queryByText('返回工作台')).not.toBeInTheDocument()
     useAppStore.setState({
@@ -499,6 +645,7 @@ describe('assistant chat', () => {
     })
     await waitFor(() => expect(screen.getByTestId('agent-topic-nav')).toBeInTheDocument())
     expect(screen.getByTestId('agent-topic-nav')).not.toHaveAttribute('hidden')
+    expect(screen.getByTestId('agent-topic-nav')).toHaveStyle({ left: '28px' })
     expect(screen.getByLabelText(/主题 1：主题一/)).toBeInTheDocument()
     expect(screen.getByTestId('msg-user')).toHaveAttribute('data-user-msg-idx', '0')
     expect(screen.getByTestId('agent-chat-log').contains(screen.getByTestId('agent-topic-nav'))).toBe(false)
@@ -520,8 +667,7 @@ describe('assistant chat', () => {
     fireEvent.click(screen.getByRole('button', { name: '发送' }))
     expect(screen.getByTestId('msg-user')).toHaveTextContent('你好')
     expect(screen.queryByTestId('msg-user')?.textContent).not.toMatch(/feishu\.meeting_read/)
-    expect(screen.getByTestId('agent-thinking-status')).toHaveTextContent('正在整理相关内容')
-    expect(screen.queryByTestId('agent-execution-timeline')).not.toBeInTheDocument()
+    expect(screen.getByTestId('agent-execution-timeline')).toBeInTheDocument()
     expect(screen.queryByTestId('agent-stream-bar')).not.toBeInTheDocument()
     await waitFor(() => expect(generate).toHaveBeenCalled())
   })

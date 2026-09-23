@@ -29,16 +29,19 @@ function tempUserData(t, prefix) {
 }
 
 describe('focused production expert migration', () => {
-  it('keeps seven production experts and never auto-removes user-owned experts', () => {
-    assert.equal(MIGRATION_ID, 'focused-expert-roster-v10')
-    assert.equal(RETAINED_EXPERT_IDS.length, 7)
+  it('keeps three production experts and never auto-removes user-owned experts', () => {
+    assert.equal(MIGRATION_ID, 'focused-expert-roster-v13')
+    assert.equal(RETAINED_EXPERT_IDS.length, 3)
     assert.deepEqual(PRODUCTION_EXPERT_IDS, RETAINED_EXPERT_IDS)
     assert.deepEqual(new Set(RETAINED_EXPERT_IDS), new Set([
-      'product-manager', 'office-partner', 'research-analyst',
-      'software-engineer', 'data-analyst', 'image-producer',
-      'operations-data-analyst',
+      'image-producer', 'operations-data-analyst', 'agent-operations',
     ]))
-    assert.equal(REMOVED_BUNDLED_EXPERT_IDS.length, 16)
+    assert.equal(REMOVED_BUNDLED_EXPERT_IDS.length, 21)
+    assert.ok(REMOVED_BUNDLED_EXPERT_IDS.includes('product-manager'))
+    assert.ok(REMOVED_BUNDLED_EXPERT_IDS.includes('research-analyst'))
+    assert.ok(REMOVED_BUNDLED_EXPERT_IDS.includes('software-engineer'))
+    assert.ok(REMOVED_BUNDLED_EXPERT_IDS.includes('office-partner'))
+    assert.ok(REMOVED_BUNDLED_EXPERT_IDS.includes('data-analyst'))
     assert.ok(RETIRED_EXPERT_IDS.includes('visual-designer'))
     assert.equal(shouldRemoveExpert('visual-designer', { source: 'curated' }), true)
     assert.equal(shouldRemoveExpert('visual-designer', { source: 'custom' }), false)
@@ -52,8 +55,12 @@ describe('focused production expert migration', () => {
     assert.equal(shouldRemoveWorkflow('client-flow', {
       name: '客户周报', graph: { nodes: [{ id: 'n1' }] }, agentRefs: [{ id: 'office-partner' }],
     }), false)
+    assert.equal(shouldRemoveWorkflow('official-daily-office', { source: 'official' }), true)
+    assert.equal(shouldRemoveWorkflow('official-product-requirement', { source: 'official' }), true)
+    assert.equal(shouldRemoveWorkflow('daily-summary', { source: 'daemon' }), true)
     assert.equal(shouldRemoveTask({ id: 'task-1', goal: '三元礼包' }), true)
     assert.equal(shouldRemoveTask({ id: 'task-2', goal: '整理本周真实会议', expertId: 'office-partner' }), false)
+    assert.equal(shouldRemoveTask({ id: 'task-3', goal: '复核历史分析', expertId: 'data-analyst' }), false)
   })
 
   it('upgrades the image expert with visual planning and real generation capabilities', async (t) => {
@@ -110,10 +117,10 @@ describe('focused production expert migration', () => {
   it('upgrades only curated retained experts and preserves disabled state', async (t) => {
     const userData = tempUserData(t, 'knowme-retained-expert-upgrade-')
     const entries = Object.fromEntries(RETAINED_EXPERT_IDS.map(id => [id, {
-      id, kind: 'expert', source: 'curated', version: '0.1.0', enabled: id !== 'office-partner', status: 'enabled',
+      id, kind: 'expert', source: 'curated', version: '0.1.0', enabled: true, status: 'enabled',
     }]))
-    entries['research-analyst'] = {
-      id: 'research-analyst', kind: 'expert', source: 'custom', version: '9.0.0', enabled: true, status: 'enabled',
+    entries['agent-operations'] = {
+      id: 'agent-operations', kind: 'expert', source: 'custom', version: '9.0.0', enabled: true, status: 'enabled',
     }
     entries['visual-designer'] = {
       id: 'visual-designer', kind: 'expert', source: 'curated', version: '2.0.0', enabled: true, status: 'enabled',
@@ -126,9 +133,8 @@ describe('focused production expert migration', () => {
       hub: { installCapability: async payload => { installed.push(payload); return { ok: true } } },
     })
 
-    assert.deepEqual(result.updated.sort(), RETAINED_EXPERT_IDS.filter(id => id !== 'research-analyst').sort())
-    assert.deepEqual(result.ignored, [{ id: 'research-analyst', reason: 'user_owned' }])
-    assert.equal(installed.find(item => item.id === 'office-partner').enabled, false)
+    assert.deepEqual(result.updated.sort(), RETAINED_EXPERT_IDS.filter(id => id !== 'agent-operations').sort())
+    assert.deepEqual(result.ignored, [{ id: 'agent-operations', reason: 'user_owned' }])
     assert.equal(installed.some(item => item.id === 'visual-designer'), false)
   })
 
@@ -152,6 +158,71 @@ describe('focused production expert migration', () => {
 
     assert.deepEqual(result.updated, RETAINED_EXPERT_IDS)
     assert.deepEqual(result.updatedDetails, RETAINED_EXPERT_IDS.map(id => ({ id, reason: 'content_changed' })))
+  })
+
+  it('updates already-installed curated packages instead of routing them through first-install validation', async (t) => {
+    const userData = tempUserData(t, 'knowme-retained-expert-update-api-')
+    const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/catalog/catalog.json'), 'utf8'))
+    const catalogById = new Map(catalog.entries.map(item => [item.id, item]))
+    const entries = Object.fromEntries(['agent-operations', 'agent-registry-operations'].map(id => {
+      const catalogEntry = catalogById.get(id)
+      return [id, {
+        id,
+        kind: catalogEntry.kind,
+        source: 'curated',
+        version: catalogEntry.version,
+        enabled: true,
+        status: 'enabled',
+        contentHash: 'sha256:stale-before-current-package',
+      }]
+    }))
+    fs.writeFileSync(path.join(userData, 'capabilities', 'install-store.json'), JSON.stringify({ version: 1, entries }))
+
+    const updated = []
+    const result = await syncRetainedExpertCapabilities({
+      userData,
+      hub: {
+        installCapability: async () => { throw new Error('existing curated packages must use updateCapability') },
+        updateCapability: async payload => { updated.push(payload); return { ok: true } },
+      },
+    })
+
+    assert.equal(result.ok, true)
+    assert.deepEqual(updated.map(item => item.id), ['agent-registry-operations', 'agent-operations'])
+  })
+
+  it('never overwrites a user-managed dependency while syncing a retained curated expert', async (t) => {
+    const userData = tempUserData(t, 'knowme-retained-expert-user-dependency-')
+    const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/catalog/catalog.json'), 'utf8'))
+    const imageEntry = catalog.entries.find(item => item.id === 'image-producer')
+    fs.writeFileSync(path.join(userData, 'capabilities', 'install-store.json'), JSON.stringify({
+      version: 1,
+      entries: {
+        'image-producer': {
+          id: 'image-producer', kind: 'expert', source: 'curated', version: imageEntry.version,
+          enabled: true, status: 'enabled', contentHash: hashDirectory(path.join(__dirname, '../src/catalog', imageEntry.bundlePath)),
+        },
+        'th-art-intake': {
+          id: 'th-art-intake', kind: 'skill', source: 'local-repo', version: '99.0.0',
+          enabled: true, status: 'enabled', contentHash: 'sha256:user-owned',
+        },
+      },
+    }))
+
+    const installed = []
+    const updated = []
+    const result = await syncRetainedExpertCapabilities({
+      userData,
+      hub: {
+        installCapability: async payload => { installed.push(payload); return { ok: true } },
+        updateCapability: async payload => { updated.push(payload); return { ok: true } },
+      },
+    })
+
+    assert.equal(result.ok, true)
+    assert.equal(installed.some(item => item.id === 'th-art-intake'), false)
+    assert.equal(updated.some(item => item.id === 'th-art-intake'), false)
+    assert.ok(result.ignored.some(item => item.id === 'th-art-intake' && item.reason === 'user_owned_dependency'))
   })
 
   it('installs missing required dependencies even when retained expert packages are current', async (t) => {
@@ -212,7 +283,7 @@ describe('focused production expert migration', () => {
     ])
   })
 
-  it('deletes retired curated expert installs and all of their historical tasks', async (t) => {
+  it('deletes retired curated expert installs while preserving office and data task history', async (t) => {
     const userData = tempUserData(t, 'knowme-focused-roster-cleanup-')
     const capabilityRoot = path.join(userData, 'capabilities')
     const entries = Object.fromEntries(REMOVED_BUNDLED_EXPERT_IDS.map(id => [id, {
@@ -227,7 +298,7 @@ describe('focused production expert migration', () => {
           id: `retired-${index + 1}`, kind: 'expert', expertId,
           goal: `旧任务 ${expertId}`, status: 'completed',
         })),
-        { id: 'keep-1', kind: 'expert', expertId: 'product-manager', goal: '保留任务', status: 'completed' },
+        { id: 'remove-product-extra', kind: 'expert', expertId: 'product-manager', goal: '旧产品任务', status: 'completed' },
       ],
     }))
 
@@ -242,11 +313,12 @@ describe('focused production expert migration', () => {
 
     assert.equal(result.ok, true)
     assert.deepEqual(removed.sort(), [...REMOVED_BUNDLED_EXPERT_IDS].sort())
-    assert.equal(result.removedTasks.length, REMOVED_BUNDLED_EXPERT_IDS.length)
+    assert.equal(result.removedTasks.length, REMOVED_BUNDLED_EXPERT_IDS.length - 1)
     assert.equal('backupRoot' in result, false)
     const store = createTaskStore(taskFile)
-    assert.equal(store.list().tasks.length, 1)
-    assert.equal(store.list().tasks[0].id, 'keep-1')
+    assert.equal(store.list().tasks.length, 2)
+    assert.ok(store.list().tasks.some(task => task.expertId === 'office-partner'))
+    assert.ok(store.list().tasks.some(task => task.expertId === 'data-analyst'))
   })
 
   it('preserves a custom expert and its task even when its id matches a retired bundled id', async (t) => {

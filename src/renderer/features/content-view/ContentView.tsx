@@ -108,11 +108,13 @@ function blockKey(block: ContentBlock, index: number): string {
 export function ContentView({
   source,
   className = '',
+  presentation = 'document',
   caret = null,
   streaming = false,
 }: {
   source: string
   className?: string
+  presentation?: 'conversation' | 'document'
   caret?: ReactNode
   streaming?: boolean
 }) {
@@ -125,7 +127,7 @@ export function ContentView({
   if (pending) {
     return (
       <div
-        className={`km-content agent-md agent-md-fallback agent-md-loading ${className}`.trim()}
+        className={`km-content agent-md agent-md-fallback agent-md-loading is-${presentation} ${className}`.trim()}
         data-testid="content-view"
         data-content-pending="1"
         aria-busy="true"
@@ -138,7 +140,7 @@ export function ContentView({
 
   const last = blocks.length - 1
   return (
-    <div className={`km-content agent-md ${className}`.trim()} data-testid="content-view">
+    <div className={`km-content agent-md is-${presentation} ${className}`.trim()} data-testid="content-view">
       {blocks.map((block, index) => {
         const end = index === last ? caret : null
         const key = blockKey(block, index)

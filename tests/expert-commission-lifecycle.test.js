@@ -48,6 +48,25 @@ async function waitTask(store, id, status) {
 
 const brief = { goal: '根据给定材料整理结果', deliverables: [{ id: 'one', type: 'answer', title: '结果', required: true }] }
 
+test('a retired Agent is rejected before a task or session is created', async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-retired-agent-'))
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
+  const store = createStore(path.join(dir, 'tasks.json'))
+  let sessionCreated = false
+  const runtime = createExpertTaskRuntime({
+    getWorkbenchTaskStore: () => store,
+    ensureCapabilityHub: () => ({
+      canStartExpert: () => ({ ok: false, code: 'agent_retired', error: 'Agent 已下架' }),
+    }),
+    ensureAgentSession: () => { sessionCreated = true; return { session: {}, sessions: [] } },
+  })
+  const result = await runtime.createStart({ expertId: 'retired-agent', brief })
+  assert.equal(result.ok, false)
+  assert.equal(result.code, 'agent_retired')
+  assert.equal(sessionCreated, false)
+  assert.equal(store.list().tasks.length, 0)
+})
+
 test('a new commission waits across reload until the user confirms', async t => {
   const f = fixture(t)
   const created = await f.runtime.createStart({ expertId: 'custom-expert', brief })

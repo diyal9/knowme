@@ -26,12 +26,7 @@ function createDraftId() {
   return `draft_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`
 }
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms))
-}
-
 function renameWithRetry(src, dest, retries = 3) {
-  const delays = [50, 100, 200]
   let lastErr
   for (let i = 0; i <= retries; i++) {
     try {
@@ -40,8 +35,7 @@ function renameWithRetry(src, dest, retries = 3) {
     } catch (err) {
       lastErr = err
       if (err.code === 'EPERM' && i < retries) {
-        const start = Date.now()
-        while (Date.now() - start < delays[i]) { /* spin */ }
+        // Keep retries bounded but never spin/sleep on the main thread.
         continue
       }
       break

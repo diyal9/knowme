@@ -27,9 +27,19 @@ export function buildExpertCollabFeed(
   events: NonNullable<WorkbenchTask['events']>,
   deliverables: NonNullable<WorkbenchTask['deliverables']>,
 ): ExpertCollabFeedItem[] {
+  const canonicalMessageIds = new Set(
+    (Array.isArray(messages) ? messages : [])
+      .map((message) => String(message?.id || '').trim())
+      .filter(Boolean),
+  )
   const items: ExpertCollabFeedItem[] = [
     ...(Array.isArray(messages) ? messages : []).map((message, index) => ({ kind: 'message' as const, message, index })),
-    ...(Array.isArray(events) ? events : []).map((event, index) => ({ kind: 'event' as const, event, index })),
+    ...(Array.isArray(events) ? events : [])
+      // A task event with a canonical message reference is metadata for that
+      // message, not a second conversation turn. Keep legacy events without a
+      // reference visible for backward compatibility.
+      .filter((event) => !event?.messageId || !canonicalMessageIds.has(String(event.messageId).trim()))
+      .map((event, index) => ({ kind: 'event' as const, event, index })),
     ...(Array.isArray(deliverables) ? deliverables : []).map((deliverable, index) => ({ kind: 'deliverable' as const, deliverable, index })),
   ]
   return items.sort((a, b) => {

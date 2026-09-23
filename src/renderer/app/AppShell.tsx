@@ -3,7 +3,7 @@
  * Workbench CSS is registered statically in a deterministic cascade before
  * any lazy workbench surface is rendered.
  */
-import { Suspense, useEffect, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { studioReturnLabel } from '../../domain/rail'
 import type { KnowledgePage } from '../../domain/knowledge-surface'
 import { resolveWorkbenchTaskKind } from '../../domain/workbench-task-room'
@@ -35,17 +35,19 @@ import { AssistantPane } from '../features/assistant/AssistantPane'
 import { StudioHeadNav } from '../features/workbench/StudioHeadNav'
 import { resolveWorkbenchTabMode, workbenchHeadTitle } from '../features/workbench/workbench-head'
 import { WorkspaceOverlays } from './WorkspaceOverlays'
+import { ProjectContextSwitcher } from './ProjectContextSwitcher'
 
 /** Visible chrome copy; escapes keep CJK intact under Windows encoding tools. */
 const T = {
   collab: '\u4e13\u5bb6\u534f\u4f5c',
   workflow: '\u5de5\u4f5c\u6d41',
   daemon: '\u7ba1\u7ebf\u670d\u52a1',
-  files: '\u6587\u4ef6\u4e2d\u5fc3',
+  files: '\u9879\u76ee\u7a7a\u95f4',
   workbench: '\u5de5\u4f5c\u53f0',
   wbViews: '\u5de5\u4f5c\u53f0\u89c6\u56fe',
-  searchWf: '\u641c\u7d22\u5de5\u4f5c\u6d41',
-  searchPh: '\u641c\u7d22\u60f3\u8981\u7684\u7ed3\u679c',
+  search: '\u641c\u7d22',
+  searchExpertPh: '\u641c\u7d22\u4e13\u5bb6\u6216\u4efb\u52a1',
+  searchWorkflowPh: '\u641c\u7d22\u5de5\u4f5c\u6d41',
   reload: '\u5237\u65b0',
   reloadWb: '\u5237\u65b0\u5de5\u4f5c\u53f0',
   shelf: '\u5de5\u4f5c\u6d41\u8d27\u67b6',
@@ -79,7 +81,11 @@ export function AppShell() {
   const leaveStudio = useAppStore((s) => s.leaveStudio)
   const linkPreview = useAppStore((s) => s.linkPreview)
   const linkFullscreen = useAppStore((s) => s.linkFullscreen)
+  const [searchOpen, setSearchOpen] = useState(false)
   const shellRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLDivElement>(null)
+  const searchTriggerRef = useRef<HTMLButtonElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   useKnowMeIcons(route + surfaceId + String(filesOpen) + String(!!linkPreview) + String(linkFullscreen), shellRef)
 
   useEffect(() => bindAttentionEvents(useAppStore.getState), [])
@@ -102,16 +108,39 @@ export function AppShell() {
   }, [filesOpen])
 
   const isStudio = surfaceId === 'studio'
-  const workflowManageActive = surfaceId === 'manage' && managePanel === 'workflows'
-  const daemonManageActive = surfaceId === 'manage' && managePanel === 'daemon'
   const showModeTabs = route === 'workbench'
     && managePanel !== 'automation'
     && ['taskhome', 'shelf', 'manage'].includes(surfaceId)
   const showAutomationTab = route === 'automation'
   const showTopTabs = showModeTabs || showAutomationTab
+  const searchAvailable = route === 'workbench' && (surfaceId === 'taskhome' || surfaceId === 'shelf')
+  const searchPlaceholder = surfaceId === 'shelf' ? T.searchWorkflowPh : T.searchExpertPh
   const activeTabMode = resolveWorkbenchTabMode(surfaceId, managePanel)
   const backLabel = studioReturnLabel(studioReturnSurface)
   const headTitle = workbenchHeadTitle(route, surfaceId)
+
+  useEffect(() => {
+    if (!searchAvailable) setSearchOpen(false)
+  }, [searchAvailable])
+
+  useEffect(() => {
+    if (!searchOpen) return undefined
+    searchInputRef.current?.focus()
+    function closeSearch(event: PointerEvent) {
+      if (!searchRef.current?.contains(event.target as Node)) setSearchOpen(false)
+    }
+    function closeSearchOnEscape(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      setSearchOpen(false)
+      searchTriggerRef.current?.focus()
+    }
+    document.addEventListener('pointerdown', closeSearch)
+    document.addEventListener('keydown', closeSearchOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', closeSearch)
+      document.removeEventListener('keydown', closeSearchOnEscape)
+    }
+  }, [searchOpen])
   const taskKind = resolveWorkbenchTaskKind({ expertRoom: hasExpertRoom, lane: runLane })
 
   const mode = route === 'workbench' ? 'workbench' : route === 'knowledge' ? 'knowledge' : route === 'capabilities' ? 'capabilities' : route === 'automation' ? 'automation' : route === 'settings' ? 'settings' : 'agent'
@@ -215,17 +244,39 @@ export function AppShell() {
                 })}
               </div>
               <div className="wb-head-tools">
-                <label className="wb-sr-only" htmlFor="wbShelfSearch">{T.searchWf}</label>
-                <input
-                  type="search"
-                  className="wb-shelf-search"
-                  id="wbShelfSearch"
-                  placeholder={T.searchPh}
-                  autoComplete="off"
-                  hidden={isStudio || workflowManageActive || daemonManageActive}
-                  value={shelfQuery}
-                  onChange={(e) => setShelfQuery(e.target.value)}
-                />
+                {searchAvailable ? (
+                  <div className="wb-head-search" ref={searchRef}>
+                    <button
+                      ref={searchTriggerRef}
+                      type="button"
+                      className={`wb-search-trigger${searchOpen ? ' is-open' : ''}${shelfQuery.trim() ? ' has-query' : ''}`}
+                      aria-label={`${T.search}\uff1a${searchPlaceholder.replace(/^\u641c\u7d22/, '')}`}
+                      aria-expanded={searchOpen}
+                      aria-controls="wbSearchPopover"
+                      onClick={() => setSearchOpen((open) => !open)}
+                    >
+                      <Icon name="searchLine" />
+                    </button>
+                    {searchOpen ? (
+                      <div className="wb-search-popover" id="wbSearchPopover" role="search" aria-label={searchPlaceholder}>
+                        <label className="wb-search-field" htmlFor="wbShelfSearch">
+                          <Icon name="searchLine" />
+                          <input
+                            ref={searchInputRef}
+                            type="search"
+                            className="wb-shelf-search"
+                            id="wbShelfSearch"
+                            placeholder={searchPlaceholder}
+                            autoComplete="off"
+                            value={shelfQuery}
+                            onChange={(event) => setShelfQuery(event.target.value)}
+                          />
+                        </label>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+                {route === 'workbench' ? <ProjectContextSwitcher /> : null}
                 <div className="wb-head-detail-actions" id="wbHeadDetailActions" />
                 <BackButton
                   label={backLabel}

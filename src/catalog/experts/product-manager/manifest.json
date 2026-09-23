@@ -1,7 +1,0 @@
-{
-  "id": "product-manager",
-  "kind": "expert",
-  "version": "2.6.0",
-  "skills": ["product-definition-method", "requirement-review", "research-evidence-analysis", "writing-polish"],
-  "connectors": []
-}

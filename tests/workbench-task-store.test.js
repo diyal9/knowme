@@ -40,6 +40,20 @@ describe('workbench task store', () => {
     assert.equal(normalizeTask({ resultSummary: 'x'.repeat(400) }).resultSummary.length, 280)
   })
 
+  it('deduplicates repeated needs_input events by requestId', () => {
+    const task = normalizeTask({
+      goal: '需要补充材料',
+      events: [
+        { type: 'needs_input', requestId: 'input_same', summary: '请补充材料' },
+        { type: 'needs_input', requestId: 'input_same', summary: '请补充材料（重试）' },
+        { type: 'preflight_passed', summary: '预检通过' },
+      ],
+    })
+    assert.equal(task.events.filter(item => item.type === 'needs_input').length, 1)
+    assert.equal(task.events[0].requestId, 'input_same')
+    assert.equal(task.events[1].type, 'preflight_passed')
+  })
+
   it('uses a confirmed plan goal instead of a legacy collaboration placeholder', () => {
     const task = normalizeTask({
       goal: '与生图执行专家协作（待填写目标）',

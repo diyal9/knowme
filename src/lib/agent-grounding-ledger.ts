@@ -312,8 +312,8 @@ const EXECUTION_TOOL_FAMILIES = [
   { effect: 'send', claim: /(已(?:经)?发送)/i, tool: /(send|message|mail)/i, label: '发送' },
   { effect: 'publish', claim: /(已(?:经)?发布|published)/i, tool: /(publish|release|deploy)/i, label: '发布' },
   { effect: 'delete', claim: /(已(?:经)?删除|deleted)/i, tool: /(delete|remove)/i, label: '删除' },
-  { effect: 'write', claim: /(已(?:经)?修改(?:文件|代码)|已(?:经)?写入)/i, tool: /(write|update|patch|edit|save)/i, label: '写入' },
-  { effect: 'save', claim: /已(?:经)?保存/i, tool: /(write|save)/i, label: '保存' },
+  { effect: 'write', claim: /(已(?:经)?修改(?:文件|代码)|已(?:经)?写入)/i, tool: /(write|update|patch|edit|save|(?:create|export)_artifact)/i, label: '写入' },
+  { effect: 'save', claim: /已(?:经)?保存/i, tool: /(write|save|(?:create|update|export)_artifact)/i, label: '保存' },
   { effect: 'run', claim: /(已(?:经)?运行(?:测试|脚本|命令)|tests? passed)/i, tool: /(test|run|shell|python|process|command)/i, label: '运行' },
 ]
 

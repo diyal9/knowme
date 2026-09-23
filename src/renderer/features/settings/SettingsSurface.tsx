@@ -205,8 +205,13 @@ export function SettingsSurface({
         </main>
       </div>
 
+      {!showSaveFooter && toast ? (
+        <div className={`settings-floating-toast settings-toast${toastKind ? ` ${toastKind}` : ''}`} role="status" aria-live="polite">
+          {toast}
+        </div>
+      ) : null}
       {showSaveFooter ? <footer className="settings-footer">
-        <span className={`settings-toast${toastKind ? ` ${toastKind}` : ''}`}>{toast || (dirty ? '有未保存的修改' : '')}</span>
+        <span className={`settings-toast${toastKind ? ` ${toastKind}` : ''}`} role={toast ? 'status' : undefined} aria-live="polite">{toast || (dirty ? '有未保存的修改' : '')}</span>
         <button type="button" className="settings-btn primary" disabled={saving || !dirty} onClick={() => void save()}>
           {saving ? '保存中…' : '保存设置'}
         </button>

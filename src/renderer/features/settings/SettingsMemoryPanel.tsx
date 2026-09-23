@@ -43,8 +43,12 @@ export function SettingsMemoryPanel({ flash }: Props) {
     } catch { flash('保存失败', 'err') } finally { setSaving(false) }
   }
   const clearMemory = async () => {
-    const result = await window.api?.memoryClear?.() as { ok?: boolean; error?: string } | undefined
-    if (result?.ok === false) flash(result.error || '清除失败', 'err'); else flash('协作记忆已清除')
+    try {
+      const result = await window.api?.memoryClear?.() as { ok?: boolean; error?: string } | undefined
+      if (!result?.ok) flash(result?.error || '清除失败', 'err'); else flash('协作记忆已清除')
+    } catch (error) {
+      flash(error instanceof Error ? error.message : '清除失败', 'err')
+    }
   }
 
   return <div className="memory-center memory-privacy-center">

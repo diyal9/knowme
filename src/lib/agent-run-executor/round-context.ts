@@ -33,7 +33,21 @@ function buildRoundInstructions(contract, activations) {
 
 /** Budget the actual schema payload and conversation together on EVERY request. */
 function fitToolRoundRequest(request, { currentInput, tokenEstimator, instructions = [], protectedToolCallIds = new Set() }) {
-  const estimate = tokenEstimator || llmRuntime.estimateTokens
+  const estimateBase = tokenEstimator || llmRuntime.estimateTokens
+  // fitConversation asks for the same message text several times while it
+  // computes source, turn, fixed and tail costs. Token estimation is a
+  // character-by-character scan, so memoize string inputs for this request to
+  // prevent large tool results from being rescanned on every accounting pass.
+  const estimateCache = new Map()
+  const estimate = value => {
+    const isCacheable = typeof value === 'string' || value == null || typeof value === 'number'
+    if (!isCacheable) return estimateBase(value)
+    const key = value == null ? '' : String(value)
+    if (estimateCache.has(key)) return estimateCache.get(key)
+    const result = estimateBase(value)
+    if (estimateCache.size < 512) estimateCache.set(key, result)
+    return result
+  }
   const tools = [...(request.tools || [])]
   const messages = request.messages
   // Reserve full restricted data separately so the conversation fitter cannot

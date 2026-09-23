@@ -1,7 +1,7 @@
 /**
  * 助理消息列表：≤40 条直渲；更长时用 Virtuoso 只挂载视口附近气泡。
  */
-import { forwardRef, useLayoutEffect, useState, type ReactNode } from 'react'
+import { forwardRef, memo, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso'
 import type { ChatMessage } from '../../../shared/api'
 import type { AssistantModeId } from '../../../domain/assistant-modes'
@@ -49,17 +49,18 @@ export type AssistantMessageVirtuosoProps = {
 function renderMessageRow(
   m: ChatMessage,
   index: number,
-  ctx: Omit<AssistantMessageVirtuosoProps, 'messages' | 'chatLogRef' | 'footer'> & { messagesBefore: ChatMessage[] },
+  ctx: Omit<AssistantMessageVirtuosoProps, 'messages' | 'chatLogRef' | 'footer'> & {
+    priorUser: ChatMessage | null
+    isFirstAssistantReply: boolean
+  },
 ) {
   const images = extractImageUrls(m.text)
   const displayText = images.length ? removeExtractedImageReferences(m.text, images) : m.text
   const userIdx = m.role === 'user' ? index : undefined
   const role = m.role === 'user' ? 'user' : 'assistant'
   const isLastAssistant = m.id === ctx.lastAssistantId && m.role === 'assistant'
-  const userIndex = ctx.messagesBefore.map((item) => item.role).lastIndexOf('user')
-  const priorUser = userIndex >= 0 ? ctx.messagesBefore[userIndex] : null
-  const isFirstAssistantReply = m.role === 'assistant' && !m.streaming && Boolean(priorUser)
-    && !ctx.messagesBefore.slice(userIndex + 1).some((item) => item.role === 'assistant')
+  const priorUser = ctx.priorUser
+  const isFirstAssistantReply = ctx.isFirstAssistantReply
   const userInput = priorUser?.text || ''
   return (
     <div className="agent-virtuoso-row" data-message-index={index}>
@@ -100,6 +101,34 @@ function renderMessageRow(
   )
 }
 
+type AssistantMessageRowProps = {
+  message: ChatMessage
+  index: number
+  rowCtx: Omit<AssistantMessageVirtuosoProps, 'messages' | 'chatLogRef' | 'footer'> & {
+    priorUser: ChatMessage | null
+    isFirstAssistantReply: boolean
+  }
+}
+
+// Progress events update the active message while all earlier messages remain
+// identical. Memoize each row so a live run does not re-scan and re-normalize
+// every historical answer on every status tick.
+const AssistantMessageRow = memo(function AssistantMessageRow({ message, index, rowCtx }: AssistantMessageRowProps) {
+  return renderMessageRow(message, index, rowCtx)
+}, (prev, next) => {
+  if (prev.message !== next.message || prev.index !== next.index) return false
+  const a = prev.rowCtx
+  const b = next.rowCtx
+  return a.lastAssistantId === b.lastAssistantId
+    && a.isGenerating === b.isGenerating
+    && a.modeId === b.modeId
+    && a.onFollowUp === b.onFollowUp
+    && a.onStructuredPick === b.onStructuredPick
+    && a.onImageOpen === b.onImageOpen
+    && a.priorUser === b.priorUser
+    && a.isFirstAssistantReply === b.isFirstAssistantReply
+})
+
 export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMessageVirtuosoProps>(
   function AssistantMessageVirtuoso(props, ref) {
     const {
@@ -122,6 +151,27 @@ export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMess
       onStructuredPick,
       onImageOpen,
     }
+    const rowMeta = useMemo(() => {
+      const meta: Array<{ priorUser: ChatMessage | null; isFirstAssistantReply: boolean }> = []
+      let priorUser: ChatMessage | null = null
+      let assistantSinceUser = false
+      for (const message of messages) {
+        meta.push({
+          priorUser,
+          isFirstAssistantReply: message.role === 'assistant'
+            && !message.streaming
+            && Boolean(priorUser)
+            && !assistantSinceUser,
+        })
+        if (message.role === 'user') {
+          priorUser = message
+          assistantSinceUser = false
+        } else if (message.role === 'assistant') {
+          assistantSinceUser = true
+        }
+      }
+      return meta
+    }, [messages])
 
     useLayoutEffect(() => {
       setScrollParent(chatLogRef.current)
@@ -133,7 +183,9 @@ export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMess
       return (
         <div className="agent-chat-static-list" data-testid="agent-message-static-list">
           {messages.map((m, index) => (
-            <div key={m.id}>{renderMessageRow(m, index, { ...rowCtx, messagesBefore: messages.slice(0, index) })}</div>
+            <div key={m.id}>
+              <AssistantMessageRow message={m} index={index} rowCtx={{ ...rowCtx, ...rowMeta[index] }} />
+            </div>
           ))}
           {footer}
         </div>
@@ -156,7 +208,9 @@ export const AssistantMessageVirtuoso = forwardRef<VirtuosoHandle, AssistantMess
         components={{
           Footer: footer ? () => <>{footer}</> : undefined,
         }}
-        itemContent={(index, m) => renderMessageRow(m, index, { ...rowCtx, messagesBefore: messages.slice(0, index) })}
+          itemContent={(index, m) => (
+            <AssistantMessageRow message={m} index={index} rowCtx={{ ...rowCtx, ...rowMeta[index] }} />
+          )}
       />
     )
   },

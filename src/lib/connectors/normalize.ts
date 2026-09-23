@@ -10,7 +10,7 @@ const MCP_TRANSPORTS = new Set(['stdio', 'streamable-http', 'sse'])
 const FULL_FEISHU_ALLOWLIST = [
   'feishu.search_docs', 'feishu.read_doc', 'feishu.query_bitable',
   'feishu.list_wiki_spaces', 'feishu.list_wiki_nodes', 'feishu.get_wiki_node',
-  'feishu.meeting_candidates', 'feishu.meeting_read', 'feishu.related_chats',
+  'feishu.meeting_inventory', 'feishu.meeting_candidates', 'feishu.meeting_read', 'feishu.related_chats',
   'feishu.today_priority', 'feishu.doc_kb_suggest', 'feishu.draft_write_doc',
   'feishu.draft_minute_permission', 'feishu.draft_send_message', 'feishu.draft_create_task',
   'feishu.draft_update_doc', 'feishu.draft_calendar_event', 'feishu.draft_drive_upload',
@@ -103,6 +103,7 @@ function projectFeishuToolNames(list) {
   const canRunTodayPriority = canRunRelatedChats || allow.has('feishu.today_priority')
   const canRunDocKbSuggest = canRunMeetingWorkflow || allow.has('feishu.doc_kb_suggest')
   if (canRunMeetingWorkflow) {
+    projected.add('feishu.meeting_inventory')
     projected.add('feishu.meeting_candidates')
     projected.add('feishu.meeting_read')
   }
@@ -122,6 +123,7 @@ function feishuToolNeedsUserIdentity(name) {
     'feishu.list_wiki_spaces',
     'feishu.list_chats',
     'feishu.search_chats',
+    'feishu.meeting_inventory',
     'feishu.meeting_candidates',
     'feishu.meeting_read',
     'feishu.related_chats',

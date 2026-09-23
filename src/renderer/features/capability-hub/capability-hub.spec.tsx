@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../../app/AppShell'
 import { useAppStore } from '../../app/store'
 import { mockApi, renderApp, resetAppStore } from '../../test/helpers'
+import type { CapabilityItem } from '../../../shared/api'
 
 const catalog = {
   ok: true,
@@ -35,17 +36,17 @@ describe('capability hub overlay', () => {
     expect(expertTab).toHaveAttribute('aria-selected', 'true')
     expect(expertTab).toHaveClass('hub-tab')
     expect(within(hub).getByRole('tablist', { name: '能力类型' })).toHaveClass('hub-tabs')
+    const topNav = hub.querySelector('.hub-nav') as HTMLElement
+    expect(within(topNav).getByRole('button', { name: '展开搜索' })).toBeInTheDocument()
+    expect(within(hub).queryByRole('searchbox', { name: '搜索能力' })).not.toBeInTheDocument()
+    expect(within(topNav).queryByRole('switch', { name: '只看已添加' })).not.toBeInTheDocument()
+    expect(hub.querySelector('.hub-header .hub-search-wrap')).toBeNull()
     expect(hub.querySelector('.hub-nav-title')).toBeTruthy()
     expect(hub.querySelector('#hubBtnClose')).toBeNull()
     expect(within(hub).queryByRole('button', { name: '关闭' })).not.toBeInTheDocument()
     expect(within(hub).getByRole('button', { name: '我的专家' })).toBeInTheDocument()
-    expect(within(hub).getAllByRole('button', { name: '添加能力' })).toHaveLength(1)
-    const addButton = within(hub).getByRole('button', { name: '添加能力' })
-    expect(addButton.closest('.hub-nav')).toBeTruthy()
-    expect(addButton).toHaveAttribute('title', '添加能力')
-    expect(addButton).toHaveAttribute('data-tooltip', '添加能力')
-    expect(addButton.querySelector('[data-icon="component"]')).toBeTruthy()
-    expect(hub.querySelector('.hub-command-actions #hubBtnAdd')).toBeNull()
+    expect(within(hub).queryByRole('button', { name: '添加能力' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hub-add-dialog')).not.toBeInTheDocument()
     expect(within(hub).queryByRole('group', { name: '专家来源' })).not.toBeInTheDocument()
     expect(within(hub).queryByRole('button', { name: '官方' })).not.toBeInTheDocument()
     expect(within(hub).queryByText('精选')).not.toBeInTheDocument()
@@ -57,7 +58,7 @@ describe('capability hub overlay', () => {
     expect(within(hub).queryByText('分类')).not.toBeInTheDocument()
   })
 
-  it('keeps the import entry in the top bar when a capability list is empty', async () => {
+  it('keeps an empty capability list free of secondary add actions', async () => {
     mockApi({
       capabilityList: async (opts) => ({ ok: true, items: opts?.kind === 'expert' ? catalog.items.filter((item) => item.kind === 'expert') : [] }),
     })
@@ -65,7 +66,7 @@ describe('capability hub overlay', () => {
     const hub = await screen.findByTestId('capability-hub-surface')
     fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
     await waitFor(() => expect(within(hub).getByText('还没有技能')).toBeInTheDocument())
-    expect(within(hub).getAllByRole('button', { name: '添加能力' })).toHaveLength(1)
+    expect(within(hub).queryByRole('button', { name: '添加能力' })).not.toBeInTheDocument()
     expect(hub.querySelector('.hub-state .hub-btn')).toBeNull()
   })
 
@@ -107,13 +108,18 @@ describe('capability hub overlay', () => {
     expect(within(featured).getAllByRole('button', { name: /查看精选推荐：/ })).toHaveLength(3)
   })
 
-  it('focuses search from Ctrl K', async () => {
+  it('opens and focuses search from Ctrl K, then closes it with Escape', async () => {
     mockApi({ capabilityList: async () => catalog })
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
-    const search = within(hub).getByRole('searchbox', { name: '搜索能力' })
+    expect(within(hub).queryByRole('searchbox', { name: '搜索能力' })).not.toBeInTheDocument()
     fireEvent.keyDown(document, { key: 'k', code: 'KeyK', ctrlKey: true })
-    expect(search).toHaveFocus()
+    const search = within(hub).getByRole('searchbox', { name: '搜索能力' })
+    await waitFor(() => expect(search).toHaveFocus())
+    expect(search.closest('.hub-search-panel')?.closest('.hub-nav')).toBeTruthy()
+    fireEvent.keyDown(document, { key: 'Escape', code: 'Escape' })
+    expect(within(hub).queryByRole('searchbox', { name: '搜索能力' })).not.toBeInTheDocument()
+    expect(within(hub).getByRole('button', { name: '展开搜索' })).toHaveFocus()
   })
 
   it('opens an expert card as a visible fixed detail dialog', async () => {
@@ -179,10 +185,85 @@ describe('capability hub overlay', () => {
       expect(within(hub).getByRole('heading', { name: '写纪要' })).toBeInTheDocument()
       expect(within(hub).queryByRole('heading', { name: '产品经理' })).not.toBeInTheDocument()
     })
+    const topNav = hub.querySelector('.hub-nav') as HTMLElement
+    expect(within(topNav).getByRole('button', { name: '我的技能' })).toBeInTheDocument()
+    expect(within(topNav).queryByRole('switch', { name: '只看已安装' })).not.toBeInTheDocument()
     expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('产品与研究')
     expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('软件研发')
     expect(within(hub).queryByText('精选')).not.toBeInTheDocument()
     expect(within(hub).queryByText('能力目录')).not.toBeInTheDocument()
+  })
+
+  it('shows installed skills in My Skills using the same management pattern as My Experts', async () => {
+    const update = vi.fn(async () => ({ ok: true }))
+    const uninstall = vi.fn(async () => ({ ok: true }))
+    const skills = [
+      { id: 'installed-skill', kind: 'skill' as const, name: '已添加技能', description: '用于管理', category: '日常办公', source: 'curated', installed: true, enabled: true },
+      { id: 'catalog-skill', kind: 'skill' as const, name: '技能库条目', description: '尚未添加', category: '日常办公', source: 'curated' },
+    ]
+    mockApi({
+      capabilityList: async (opts) => ({
+        ok: true,
+        items: opts?.kind === 'skill' ? skills : [],
+      }),
+      capabilityUpdate: update,
+      capabilityUninstall: uninstall,
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
+    await waitFor(() => expect(within(hub).getByRole('heading', { name: '技能库条目' })).toBeInTheDocument())
+
+    const mySkills = within(hub).getByRole('button', { name: '我的技能' })
+    fireEvent.click(mySkills)
+
+    await waitFor(() => expect(within(hub).queryByRole('heading', { name: '技能库条目' })).not.toBeInTheDocument())
+    expect(mySkills).toHaveAttribute('aria-pressed', 'true')
+    expect(within(hub).getByRole('heading', { name: '我的技能' })).toBeInTheDocument()
+    expect(within(hub).getByText('你添加的技能')).toBeInTheDocument()
+    expect(within(hub).getByRole('button', { name: '新建技能' })).toBeInTheDocument()
+    expect(within(hub).getByRole('button', { name: '管理我的技能：已添加技能' })).toBeInTheDocument()
+
+    fireEvent.click(within(hub).getByRole('button', { name: '管理我的技能：已添加技能' }))
+    const drawer = screen.getByTestId('hub-detail-drawer')
+    expect(within(drawer).getByText('新会话默认启用')).toBeInTheDocument()
+    expect(within(drawer).getByRole('button', { name: '优化与评估' })).toBeInTheDocument()
+    fireEvent.click(within(drawer).getByRole('button', { name: '更新技能' }))
+    await waitFor(() => expect(update).toHaveBeenCalledWith({ id: 'installed-skill' }))
+    fireEvent.click(within(drawer).getByRole('button', { name: '卸载技能' }))
+    await waitFor(() => expect(uninstall).toHaveBeenCalledWith({ id: 'installed-skill' }))
+    await waitFor(() => expect(screen.queryByTestId('hub-detail-drawer')).not.toBeInTheDocument())
+  })
+
+  it('opens the Agent and Skill governance expert instead of a direct Skill form', async () => {
+    const installOperations = vi.fn(async () => ({ ok: true }))
+    const createTask = vi.fn(async () => ({ ok: true, task: { id: 'task-skill-create-1', status: 'draft' } }))
+    mockApi({
+      capabilityList: async () => ({ ok: true, items: [] }),
+      capabilityInstall: installOperations,
+      workbenchTaskCreate: createTask,
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
+    fireEvent.click(within(hub).getByRole('button', { name: '我的技能' }))
+    fireEvent.click(await within(hub).findByRole('button', { name: '新建技能' }))
+
+    await waitFor(() => expect(installOperations).toHaveBeenCalledWith({ id: 'agent-operations', kind: 'expert' }))
+    expect(screen.queryByRole('dialog', { name: '创建技能' })).not.toBeInTheDocument()
+    expect(createTask).toHaveBeenCalledWith(expect.objectContaining({
+      title: '创建新的 Skill',
+      expertId: 'agent-operations',
+      expertName: '能力管家',
+      status: 'draft',
+    }))
+    await waitFor(() => expect(useAppStore.getState().expertRoom).toEqual(expect.objectContaining({
+      taskId: 'task-skill-create-1',
+      expertId: 'agent-operations',
+        name: '能力管家',
+    })))
+    expect(useAppStore.getState().route).toBe('workbench')
+    expect(useAppStore.getState().workbenchSurface).toBe('run')
   })
 
   it('opens a skill from its visible action and completes install management', async () => {
@@ -212,6 +293,45 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(drawer).getByRole('button', { name: '安装' }))
     await waitFor(() => expect(install).toHaveBeenCalledWith({ id: 's1', kind: 'skill' }))
     await waitFor(() => expect(within(screen.getByTestId('hub-detail-drawer')).getByText('新会话默认启用')).toBeInTheDocument())
+  })
+
+  it('shows connector search and My Connectors beside the connector tab', async () => {
+    const connectors = [
+      { id: 'feishu', kind: 'connector' as const, name: '飞书', description: '办公协作连接器', category: '办公协作', source: 'curated', installed: true, enabled: true },
+      { id: 'gitlab', kind: 'connector' as const, name: 'GitLab', description: '代码托管连接器', category: '研发工具', source: 'curated' },
+    ]
+    mockApi({
+      capabilityList: async (opts) => ({
+        ok: true,
+        items: opts?.kind === 'connector' ? connectors : [],
+      }),
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    fireEvent.click(within(hub).getByRole('tab', { name: '连接器' }))
+    await waitFor(() => expect(within(hub).getByRole('heading', { name: 'GitLab' })).toBeInTheDocument())
+
+    const topNav = hub.querySelector('.hub-nav') as HTMLElement
+    const myConnectors = within(topNav).getByRole('button', { name: '我的连接器' })
+    expect(within(topNav).getByRole('button', { name: '展开搜索' })).toBeInTheDocument()
+    expect(within(topNav).queryByRole('switch', { name: '只看已安装' })).not.toBeInTheDocument()
+    expect(myConnectors.querySelector('[data-icon="network"]')).toBeTruthy()
+
+    fireEvent.click(within(topNav).getByRole('button', { name: '展开搜索' }))
+    const search = within(hub).getByRole('searchbox', { name: '搜索能力' })
+    await waitFor(() => expect(search).toHaveFocus())
+    fireEvent.change(search, { target: { value: 'GitLab' } })
+    await waitFor(() => expect(within(hub).queryByRole('heading', { name: '飞书' })).not.toBeInTheDocument())
+    expect(within(hub).getByRole('heading', { name: 'GitLab' })).toBeInTheDocument()
+
+    fireEvent.change(search, { target: { value: '' } })
+    fireEvent.click(myConnectors)
+    await waitFor(() => expect(within(hub).queryByRole('heading', { name: 'GitLab' })).not.toBeInTheDocument())
+    expect(myConnectors).toHaveAttribute('aria-pressed', 'true')
+    expect(within(hub).getByRole('heading', { name: '我的连接器' })).toBeInTheDocument()
+    expect(within(hub).getByText('你添加的连接器')).toBeInTheDocument()
+    expect(within(hub).getByRole('button', { name: '管理我的连接器：飞书' })).toBeInTheDocument()
+    expect(within(hub).queryByRole('button', { name: '新建连接器' })).not.toBeInTheDocument()
   })
 
   it('configures, tests and authorizes an installed MCP connector in the hub', async () => {
@@ -303,7 +423,7 @@ describe('capability hub overlay', () => {
     const precheck = vi.fn(async () => ({
       ok: true,
       preview: {
-        name: '运营数据分析专家·数据靓仔',
+        name: '数据靓仔',
         risk: {
           level: 'high',
           reasons: ['可访问公司数据服务', '飞书填表属于外部写入且必须逐次确认'],
@@ -324,7 +444,7 @@ describe('capability hub overlay', () => {
         items: [{
           id: 'operations-data-analyst',
           kind: 'expert' as const,
-          name: '运营数据分析专家·数据靓仔',
+          name: '数据靓仔',
           description: '运营数据分析',
           category: '数据分析',
           source: 'curated',
@@ -342,7 +462,7 @@ describe('capability hub overlay', () => {
 
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
-    fireEvent.click(await within(hub).findByRole('button', { name: '查看详情：运营数据分析专家·数据靓仔' }))
+    fireEvent.click(await within(hub).findByRole('button', { name: '查看详情：数据靓仔' }))
     fireEvent.click(within(screen.getByTestId('hub-detail-drawer')).getByRole('button', { name: '召唤专家' }))
 
     const confirmation = await screen.findByTestId('hub-summon-confirm')
@@ -517,6 +637,7 @@ describe('capability hub overlay', () => {
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument())
+    fireEvent.click(within(hub).getByRole('button', { name: '展开搜索' }))
     fireEvent.change(within(hub).getByLabelText('搜索能力'), { target: { value: '飞书' } })
     fireEvent.click(within(hub).getByRole('tab', { name: '连接器' }))
     await waitFor(() => {
@@ -524,8 +645,7 @@ describe('capability hub overlay', () => {
     })
   })
 
-  it('opens chips, featured, detail drawer and add/import paths', async () => {
-    const imported = vi.fn(async () => ({ ok: true }))
+  it('opens chips, featured and the detail drawer without an add-capability path', async () => {
     mockApi({
       capabilityList: async () => ({
         ok: true,
@@ -534,17 +654,13 @@ describe('capability hub overlay', () => {
           { id: 'e2', kind: 'expert' as const, name: '测试专家', description: '质量', category: '软件研发', status: 'featured' },
         ],
       }),
-      capabilityPickLocalFolder: async () => ({ ok: true, path: 'D:/pack' }),
-      capabilityImport: imported,
     })
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('heading', { name: '产品经理' })).toBeInTheDocument())
     expect(within(hub).getByTestId('hub-chips')).toHaveTextContent('产品与研究')
     expect(within(hub).getByTestId('hub-featured')).toHaveTextContent('测试专家')
-    fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
-    expect(within(hub).queryByText('测试专家')).not.toBeInTheDocument()
-    fireEvent.click(within(hub).getByRole('checkbox', { name: '只看已添加' }))
+    expect(within(hub).queryByRole('switch', { name: '只看已添加' })).not.toBeInTheDocument()
     expect(hub.querySelector('.hub-badge.official[aria-label="官方"]')).toBeTruthy()
     expect(hub.querySelector('.hub-badge.verified')).toBeFalsy()
     fireEvent.click(within(hub).getByRole('heading', { name: '产品经理' }))
@@ -553,17 +669,8 @@ describe('capability hub overlay', () => {
     expect(drawer.querySelector('.hub-badge.installed.icon-only[aria-label="已添加"]')).toBeTruthy()
     expect(within(drawer).getByRole('button', { name: '已召唤' })).toBeDisabled()
     fireEvent.click(within(drawer).getByRole('button', { name: '关闭详情' }))
-    fireEvent.click(within(hub).getByRole('tab', { name: '技能' }))
-    fireEvent.click(within(hub).getByRole('button', { name: '添加能力' }))
-    fireEvent.click(screen.getByRole('button', { name: '选择文件夹' }))
-    await waitFor(() => expect(screen.getByTestId('hub-import-preview')).toBeInTheDocument())
-    expect(imported).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByTestId('hub-import-confirm'))
-    await waitFor(() => expect(imported).toHaveBeenCalledWith(expect.objectContaining({
-      source: 'local',
-      path: 'D:/pack',
-      trustConfirmed: true,
-    })))
+    expect(within(hub).queryByRole('button', { name: '添加能力' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hub-add-dialog')).not.toBeInTheDocument()
   })
 
   it('opens hub picker for skills in expert dialog', async () => {
@@ -578,8 +685,15 @@ describe('capability hub overlay', () => {
     expect(within(hub).getByText('你拥有的私人 Agent')).toBeInTheDocument()
     expect(within(hub).getByText(/只有你能管理和使用/)).toBeInTheDocument()
     fireEvent.click(within(hub).getByRole('button', { name: '创建专家' }))
+    expect(screen.queryByRole('listbox', { name: '专家头像' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '选择头像' }))
     expect(screen.getByRole('listbox', { name: '专家头像' })).toBeInTheDocument()
-    expect(screen.getByLabelText('AgenticType')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('option', { name: '游戏制作' }))
+    expect(screen.queryByRole('listbox', { name: '专家头像' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '更换头像，当前游戏制作' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('AgenticType')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '创建专家' })).toBeInTheDocument()
+    expect(screen.queryByText('这里只建立草稿')).not.toBeInTheDocument()
     fireEvent.click(screen.getByTestId('hub-open-picker-skills'))
     expect(screen.getByTestId('hub-picker-dialog')).toBeInTheDocument()
   })
@@ -602,22 +716,30 @@ describe('capability hub overlay', () => {
 
   it('blocks save when name is empty and highlights the field', async () => {
     const save = vi.fn(async () => ({ ok: true }))
-    mockApi({ capabilityList: async () => catalog, expertSave: save })
+    mockApi({ capabilityList: async () => catalog, agentRegistryDraftSave: save })
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
     await waitFor(() => expect(within(hub).getByRole('button', { name: '我的专家' })).toBeInTheDocument())
     fireEvent.click(within(hub).getByRole('button', { name: '我的专家' }))
     fireEvent.click(within(hub).getByRole('button', { name: '创建专家' }))
-    fireEvent.click(screen.getByRole('button', { name: '保存专家' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存并调优' }))
     expect(save).not.toHaveBeenCalled()
     expect(screen.getByText('请填写名称')).toBeInTheDocument()
   })
 
-  it('saves a custom expert from the hub dialog', async () => {
-    const save = vi.fn(async () => ({ ok: true }))
+  it('saves an expert draft and opens the Agent Ops collaboration room', async () => {
+    const saveDraft = vi.fn(async () => ({ ok: true }))
+    const installOperations = vi.fn(async () => ({ ok: true }))
+    const createTask = vi.fn(async (payload) => ({
+      ok: true,
+      task: { id: 'task-agent-ops-1', status: String(payload?.status || 'draft') },
+    }))
     mockApi({
       capabilityList: async () => catalog,
-      expertSave: save,
+      agentRegistryDraftSave: saveDraft,
+      capabilityInstall: installOperations,
+      workbenchTaskCreate: createTask,
+      workbenchTaskList: async () => ({ items: [] }),
     })
     await renderApp(<AppShell />)
     const hub = await screen.findByTestId('capability-hub-surface')
@@ -625,11 +747,63 @@ describe('capability hub overlay', () => {
     fireEvent.click(within(hub).getByRole('button', { name: '我的专家' }))
     fireEvent.click(within(hub).getByRole('button', { name: '创建专家' }))
     fireEvent.change(screen.getByLabelText('专家名称'), { target: { value: '值班助手' } })
-    fireEvent.click(screen.getByRole('button', { name: '保存专家' }))
-    await waitFor(() => expect(save).toHaveBeenCalledWith(expect.objectContaining({
-      name: '值班助手',
-      description: '',
-      agenticType: 'react',
+    fireEvent.change(screen.getByLabelText('专家 persona'), { target: { value: '负责汇总值班信息并标记风险' } })
+    fireEvent.change(screen.getByLabelText('主要场景'), { target: { value: '生成交接摘要' } })
+    fireEvent.change(screen.getByLabelText('能力边界'), { target: { value: '不替代负责人做事故定级' } })
+    fireEvent.change(screen.getByLabelText('主要输入'), { target: { value: '值班记录' } })
+    fireEvent.change(screen.getByLabelText('预期交付物'), { target: { value: '结构化交接报告' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存并调优' }))
+
+    await waitFor(() => expect(saveDraft).toHaveBeenCalledWith(expect.objectContaining({
+      intent: 'create',
+      draft: expect.objectContaining({
+        name: '值班助手',
+        description: '负责汇总值班信息并标记风险',
+        avatar: '',
+        useCases: ['生成交接摘要'],
+        boundaries: ['不替代负责人做事故定级'],
+      }),
     })))
+    expect(createTask).toHaveBeenCalledWith(expect.objectContaining({
+      expertId: 'agent-operations',
+      expertName: '能力管家',
+      status: 'draft',
+    }))
+    expect(installOperations).toHaveBeenCalledWith({ id: 'agent-operations', kind: 'expert' })
+    await waitFor(() => expect(useAppStore.getState().expertRoom).toEqual(expect.objectContaining({
+      taskId: 'task-agent-ops-1',
+      expertId: 'agent-operations',
+        name: '能力管家',
+    })))
+    expect(useAppStore.getState().route).toBe('workbench')
+    expect(useAppStore.getState().workbenchSurface).toBe('run')
+  })
+
+  it('keeps the saved draft recoverable when Agent Ops installation fails', async () => {
+    const saveDraft = vi.fn(async () => ({ ok: true }))
+    const createTask = vi.fn()
+    mockApi({
+      capabilityList: async () => catalog,
+      agentRegistryDraftSave: saveDraft,
+      capabilityInstall: async () => ({ ok: false, error: '能力管家依赖安装失败' }),
+      workbenchTaskCreate: createTask,
+    })
+    await renderApp(<AppShell />)
+    const hub = await screen.findByTestId('capability-hub-surface')
+    await waitFor(() => expect(within(hub).getByRole('button', { name: '我的专家' })).toBeInTheDocument())
+    fireEvent.click(within(hub).getByRole('button', { name: '我的专家' }))
+    fireEvent.click(within(hub).getByRole('button', { name: '创建专家' }))
+    fireEvent.change(screen.getByLabelText('专家名称'), { target: { value: '风险助手' } })
+    fireEvent.change(screen.getByLabelText('专家 persona'), { target: { value: '负责识别项目风险并形成核查清单' } })
+    fireEvent.change(screen.getByLabelText('主要场景'), { target: { value: '项目风险审查' } })
+    fireEvent.change(screen.getByLabelText('能力边界'), { target: { value: '不代替负责人审批' } })
+    fireEvent.change(screen.getByLabelText('主要输入'), { target: { value: '项目计划' } })
+    fireEvent.change(screen.getByLabelText('预期交付物'), { target: { value: '风险清单' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存并调优' }))
+
+    await waitFor(() => expect(screen.getByText('能力管家依赖安装失败')).toBeInTheDocument())
+    expect(saveDraft).toHaveBeenCalledTimes(1)
+    expect(createTask).not.toHaveBeenCalled()
+    expect(screen.getByTestId('hub-expert-dialog')).toBeInTheDocument()
   })
 })

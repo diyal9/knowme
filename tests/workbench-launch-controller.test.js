@@ -49,7 +49,6 @@ describe('workbench-launch-controller', () => {
   it('blocks a vertical pipeline until its real dependencies are ready', () => {
     const facts = consoleModel.buildVerticalPipelineFacts({
       localTeamEnabled: true,
-      availableExpertIds: ['office-assistant'],
       connectors: [],
     })
     const result = controller.chooseBackend({
@@ -64,7 +63,6 @@ describe('workbench-launch-controller', () => {
   it('allows a vertical pipeline after its dependencies become ready', () => {
     const facts = consoleModel.buildVerticalPipelineFacts({
       localTeamEnabled: true,
-      availableExpertIds: ['office-assistant'],
       connectors: [{ id: 'feishu', kind: 'connector', enabled: true, ready: true }],
     })
     const result = controller.chooseBackend({

@@ -78,6 +78,7 @@ export function resetAppStore() {
     assistantModelGroups: [],
     assistantModelId: '',
     assistantSkills: [],
+    assistantSkillIdsByExpert: {},
     assistantStatus: '',
     assistantProcessFeed: '',
     assistantContextInfo: null,

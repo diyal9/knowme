@@ -66,13 +66,13 @@ export function SideRail() {
           type="button"
           className="rail-btn"
           id="btnToggleSide"
-          title="展开文件列表"
-          aria-label="收起或展开左侧文件栏"
+          title="展开项目空间"
+          aria-label="收起或展开项目栏"
           aria-pressed={filesOpen}
           onClick={toggleFiles}
         >
           <Icon name="sidePanel" />
-          <span className="rail-label">文件</span>
+          <span className="rail-label">项目</span>
         </button>
         {railBtn('assistant')}
         {railBtn('workbench')}

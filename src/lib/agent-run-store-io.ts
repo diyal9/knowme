@@ -13,7 +13,6 @@ const DEFAULT_TERMINAL_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const DEFAULT_MAX_RUNS = 500
 const DEFAULT_RECEIPT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const MAX_EVENT_LOG_BYTES = 50 * 1024 * 1024
-const RENAME_DELAYS_MS = [50, 100, 200]
 
 const SECRET_KEY_PATTERN = /token|authorization|password|secret|apikey|api_key|credential|bearer/i
 
@@ -37,8 +36,9 @@ function renameWithRetry(src, dest, fsImpl = fs, retries = 3) {
     } catch (err) {
       lastErr = err
       if (['EPERM', 'EACCES', 'EBUSY'].includes(err.code) && i < retries) {
-        const start = Date.now()
-        while (Date.now() - start < RENAME_DELAYS_MS[i]) { /* spin */ }
+        // Avoid busy-waiting in the Electron main process while a Windows file
+        // lock is transient. Retry immediately; persistent locks are returned
+        // to the caller instead of freezing the window for hundreds of ms.
         continue
       }
       break

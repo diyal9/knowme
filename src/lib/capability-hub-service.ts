@@ -18,6 +18,8 @@ const { createUnifiedConnectorStore } = require('./connectors/unified-store')
 const { createCapabilityRuntime } = require('./capability-hub/runtime')
 const { createCapabilityLifecycle } = require('./capability-hub/lifecycle')
 const { createCapabilityExperts } = require('./capability-hub/experts')
+const { createRuntimeAgentRegistry } = require('./runtime-agent-registry')
+const { createAgentEvaluationService } = require('./agent-evaluation')
 const { createCapabilitySessionContext } = require('./capability-hub/session-context')
 const { IPC_CHANNELS, registerCapabilityHubIpc } = require('./capability-hub/ipc')
 const map = require('./capability-hub/map')
@@ -110,6 +112,22 @@ function createCapabilityHubService(deps = {}) {
     onExpertUninstalled,
   })
 
+  const agentRegistry = createRuntimeAgentRegistry({
+    store,
+    catalogApi,
+    expertRuntime: runtime.expertRuntime,
+    saveExpertForHub: experts.saveExpertForHub,
+    onExpertUninstalled,
+    isAgentAdmin: deps.isAgentAdmin,
+  })
+
+  const agentEvaluation = createAgentEvaluationService({
+    store,
+    registry: agentRegistry,
+    deepEvalBridge: deps.deepEvalBridge,
+    pythonCmd: deps.pythonCmd,
+  })
+
   const sessionContext = createCapabilitySessionContext({
     getUserData,
     getCurrentSession: typeof deps.loadAgentStore === 'function'
@@ -148,6 +166,7 @@ function createCapabilityHubService(deps = {}) {
       expertRuntime: runtime.expertRuntime,
       saveExpertForHub: experts.saveExpertForHub,
       deleteExpertForHub: experts.deleteExpertForHub,
+      agentRegistry,
       unifiedConnectors,
       getConnectorsApi,
     }, handlers)
@@ -162,6 +181,15 @@ function createCapabilityHubService(deps = {}) {
     toggleCapabilityFavorite: lifecycle.toggleCapabilityFavorite,
     saveExpert: experts.saveExpertForHub,
     deleteExpert: experts.deleteExpertForHub,
+    agentRegistry,
+    agentEvaluation,
+    getAgentDraft: agentRegistry.getAgentDraft,
+    saveAgentDraft: agentRegistry.saveAgentDraft,
+    verifyAgentDefinition: agentRegistry.verifyAgentDefinition,
+    previewAgentChange: agentRegistry.previewAgentChange,
+    commitAgentChange: agentRegistry.commitAgentChange,
+    listAgentRevisions: agentRegistry.listAgentRevisions,
+    canStartExpert: agentRegistry.canStartExpert,
     installCapability: lifecycle.installCapability,
     precheckInstallCapability: lifecycle.precheckInstallCapability,
     uninstallCapability: lifecycle.uninstallCapability,

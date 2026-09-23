@@ -17,10 +17,10 @@ const VERTICAL_PIPELINE_SEEDS = Object.freeze([
     goalTypes: ['office', 'meeting', 'minutes'],
     inputs: [{ id: 'meeting-materials', label: '会议资料', required: true }],
     outputs: [{ id: 'minutes', label: '会议纪要' }, { id: 'actions', label: '决策与待办' }],
-    agentRefs: [{ id: 'office-assistant' }],
+    agentRefs: [],
     executionBackends: ['local-team'],
     qualityGates: [{ id: 'owner-and-deadline', label: '待办必须包含负责人和截止时间' }],
-    provenance: { kind: 'vertical-slice', domain: 'office', blockedBy: 'office-agent-or-connector' },
+    provenance: { kind: 'vertical-slice', domain: 'office', blockedBy: 'office-connector' },
   },
   {
     id: 'engineering-delivery',
@@ -50,7 +50,6 @@ const VERTICAL_PIPELINE_SEEDS = Object.freeze([
   },
 ])
 
-const OFFICE_EXPERT_IDS = Object.freeze(['office-assistant', 'office-partner'])
 const ENGINEERING_EXPERT_IDS = Object.freeze(['producer', 'developer', 'tester'])
 const VISUAL_EXPERT_IDS = Object.freeze(['designer', 'copywriter'])
 const OFFICE_CONNECTOR_IDS = Object.freeze(['feishu'])

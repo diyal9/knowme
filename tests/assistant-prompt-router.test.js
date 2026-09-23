@@ -7,6 +7,7 @@ const {
   normalizeMode,
   resolveScene,
   buildScenePrompt,
+  buildConversationOutputStyleBlock,
   buildUserPrompt,
   buildSkillPrompt,
   setPackRuntimeForTests,
@@ -38,6 +39,18 @@ describe('assistant-prompt-router', () => {
     assert.equal(resolveScene({ mode: 'general', tier: 'assist' }), 'work')
     assert.equal(resolveScene({ mode: 'general', tier: 'chat', hasNoteContext: true }), 'work')
     assert.match(buildScenePrompt({ scene: 'work' }), /成功标准/)
+  })
+
+  it('adds shared product formatting guidance to every user-facing conversation surface', () => {
+    for (const surface of ['partner-chat', 'partner-work', 'assistant-chat', 'assistant-work', 'expert-planning', 'expert-discussion', 'expert-execution', 'workflow']) {
+      const block = buildConversationOutputStyleBlock({ surface, locale: 'zh-CN' })
+      assert.equal(block.id, 'scene.conversation-output-style')
+      assert.equal(block.kind, 'scene_instruction')
+      assert.match(block.content, /简短回答通常不加标题/)
+      assert.match(block.content, /用户要求报告、文档及指定标题格式/)
+    }
+    const english = buildConversationOutputStyleBlock({ surface: 'partner-chat', locale: 'en-US' })
+    assert.match(english.content, /Short answers usually need no headings/)
   })
 
   it('prioritizes knowledge retrieval over generic work', () => {

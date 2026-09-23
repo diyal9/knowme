@@ -218,6 +218,10 @@ export interface WorkbenchTaskEvent {
   type?: string
   kind?: WorkbenchActivityKind
   source?: WorkbenchActivitySource
+  /** Canonical Session message represented by this derived task activity. */
+  messageId?: string
+  /** Stable id for a needs_input request; repeated emissions must converge. */
+  requestId?: string
   sequence?: number
   summary?: string
   actorId?: string
@@ -257,6 +261,10 @@ export interface ExpertTaskAttention {
   /** Host-bound operation checkpoint; never authorization supplied by the renderer. */
   draftId?: string
   runId?: string
+  /** Canonical Session message represented by this attention checkpoint. */
+  messageId?: string
+  /** Stable id for this input request across retries/re-hydration. */
+  requestId?: string
   title?: string
   detail?: string
   field?: string
@@ -378,6 +386,8 @@ export interface WorkbenchTask {
     }[]
     constraints?: string[]
     dueAt?: string
+  /** 能力管家当前绑定的 Agent 治理对象；普通专家任务不使用。 */
+    agentTarget?: ManagedAgentTarget
   }
   assignmentSnapshot?: Record<string, unknown>
   knowledgeRefs?: { id?: string; name?: string; path?: string }[] | string[]
@@ -420,6 +430,20 @@ export interface WorkbenchTask {
     violations?: { code?: string; message?: string; missingTools?: string[] }[]
     createdAt?: string
   }[]
+}
+
+export type AgentManagementRole = 'admin' | 'user'
+export type ManagedAgentOwnership = 'system' | 'organization' | 'user'
+
+/** Agent 管理协作所需的最小、可持久化目标快照。 */
+export interface ManagedAgentTarget {
+  id: string
+  name: string
+  source: string
+  ownership: ManagedAgentOwnership
+  version?: string
+  contentHash?: string
+  editable: boolean
 }
 
 export interface WorkbenchModeBinding {
@@ -1016,7 +1040,13 @@ export interface CapabilityItem {
   status?: string
   enabled?: boolean
   installed?: boolean
+  /** User-selected shortcut visibility; supplied by the capability store. */
+  favorite?: boolean
   type?: string
+  version?: string
+  source?: string
+  contentHash?: string
+  provenance?: { ref?: string; source?: string; trust?: string; ownerPackId?: string }
   /** Explicit package qualification. Missing means legacy/unassessed, not failed. */
   qualification?: CapabilityQualification
   /** Current runtime dependency readiness. Missing means legacy/unassessed, not failed. */

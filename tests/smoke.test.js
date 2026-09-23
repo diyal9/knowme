@@ -44,7 +44,7 @@ describe('release materials', () => {
 
   it('package version matches release target', () => {
     const pkg = require('../package.json');
-    assert.equal(pkg.version, '0.4.0');
+    assert.equal(pkg.version, '0.5.0');
   });
 
   it('tokens.css comments do not close early', () => {

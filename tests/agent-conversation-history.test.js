@@ -6,6 +6,7 @@ const {
   reconcileConversationLog,
   resolveTurnIdentity,
   upsertConversationMessage,
+  upsertCanonicalAssistantMessage,
 } = require('../src/lib/agent-conversation-log')
 
 describe('agent conversation log', () => {
@@ -83,5 +84,19 @@ describe('agent conversation log', () => {
       [{ id: 'm1', role: 'user', text: 'hi' }],
       { id: 'm1', role: 'assistant', text: '冲突' },
     ), /conversation_message_role_conflict/)
+  })
+
+  it('makes canonical assistant commits idempotent and rejects cross-run overwrite', () => {
+    const first = { id: 'a1', role: 'assistant', text: '最终答复', runId: 'run_1', answerHash: 'h1' }
+    const once = upsertCanonicalAssistantMessage([], first)
+    const retry = upsertCanonicalAssistantMessage(once.messages, { ...first })
+    assert.equal(retry.ok, true)
+    assert.equal(retry.idempotent, true)
+    const conflict = upsertCanonicalAssistantMessage(once.messages, {
+      id: 'a1', role: 'assistant', text: '另一份答复', runId: 'run_2', answerHash: 'h2',
+    })
+    assert.equal(conflict.ok, false)
+    assert.equal(conflict.code, 'canonical_answer_conflict')
+    assert.equal(conflict.messages[0].text, '最终答复')
   })
 })

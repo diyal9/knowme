@@ -83,6 +83,7 @@ describe('connectors normalize', () => {
     assert.deepEqual(names, [
       'feishu.search_docs',
       'feishu.read_doc',
+      'feishu.meeting_inventory',
       'feishu.meeting_candidates',
       'feishu.meeting_read',
       'feishu.related_chats',
@@ -214,6 +215,7 @@ describe('connectors api', () => {
     assert.deepEqual(api.getProjectedAllowlist(), [
       'feishu.search_docs',
       'feishu.read_doc',
+      'feishu.meeting_inventory',
       'feishu.meeting_candidates',
       'feishu.meeting_read',
       'feishu.related_chats',

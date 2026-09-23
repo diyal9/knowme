@@ -1,4 +1,4 @@
-import type { WorkbenchTask } from '../../../shared/api'
+import type { ManagedAgentTarget, WorkbenchTask } from '../../../shared/api'
 import type { ReviewTabId } from '../../../domain/daemon-review-tabs'
 import { shelfLockHint, toShelfCard, type ShelfCardModel, type ShelfLayout } from '../../../domain/shelf'
 import {
@@ -172,6 +172,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
           expertId: task.expertId,
           name: task.expertName || task.title || task.id,
           goal: task.brief?.goal || task.goal,
+          managedAgentTarget: task.brief?.agentTarget,
         })
         return
       }
@@ -560,9 +561,12 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
       set({ route: 'workbench', workbenchSurface: 'taskhome', managePanel: 'daemon' })
     },
 
-    openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string }) => {
+    openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string; managedAgentTarget?: ManagedAgentTarget }) => {
       const goal = String(room.goal || '').trim()
-      const intro = room.taskId || goal
+      const expertId = room.expertId || (room.taskId ? undefined : room.id)
+      const intro = expertId === 'agent-operations' && !room.taskId && !goal
+        ? '请选择要评估或优化的 Agent 或 Skill；要创建新的能力，也可以直接描述目标与使用场景。'
+        : room.taskId || goal
         ? `我已接手这项协作。接下来会沿着已确认的目标推进，并在需要你判断时停下来。`
         : '请补充目标或材料，我会据此继续。'
       set({
@@ -573,7 +577,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
           id: room.id,
           taskId: room.taskId,
           taskStatus: room.taskStatus,
-          expertId: room.expertId || (room.taskId ? undefined : room.id),
+          expertId,
           name: room.name,
           goal,
           log: [intro],
@@ -581,6 +585,7 @@ export function createWorkbenchSlice(set: StoreSet, get: StoreGet) {
           skills: [],
           connectors: [],
           knowledgeRefs: [],
+          managedAgentTarget: room.managedAgentTarget,
         },
       })
       void get().loadHubCapabilities()

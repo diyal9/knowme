@@ -13,6 +13,8 @@ const { mergeArtifactRefs } = require('./hints')
 const {
   resolveTurnIdentity,
   upsertConversationMessage,
+  upsertCanonicalAssistantMessage,
+  MAX_ASSISTANT_MESSAGE_CHARS,
   withConversationIdentity,
 } = require('../agent-conversation-log')
 const {
@@ -37,6 +39,11 @@ async function runGroundAndPersist(deps) {
     stage,
     emitV2,
     commitCanonicalAnswer,
+    // Keep the phase callable by older in-memory fixtures that predate the
+    // separate answer-commit event projection. The production executor always
+    // supplies the emitter; a no-op preserves the phase's persistence contract
+    // for direct callers without reintroducing duplicate events.
+    emitCanonicalAnswerCommitted = () => {},
     buildResult,
     emitTerminal,
     runPhases,
@@ -217,6 +224,10 @@ async function runGroundAndPersist(deps) {
     displayName: input.assistantDisplayName,
   })
 
+  // Publish the canonical answer before the durable session write. This keeps
+  // the stream honest when persistence fails: the renderer can show the
+  // committed answer alongside the single terminal failure instead of waiting
+  // forever for an event that was intentionally deferred past the failing I/O.
   const committed = commitCanonicalAnswer(fullText)
   fullText = committed.text
 
@@ -236,7 +247,7 @@ async function runGroundAndPersist(deps) {
   const assistantMessage = withConversationIdentity({
     id: turnIdentity.assistantMessageId,
     role: 'assistant',
-    text: fullText.slice(0, 12000),
+    text: fullText.slice(0, MAX_ASSISTANT_MESSAGE_CHARS),
     runId: input.runId,
     createdAt: new Date().toISOString(),
     trace,
@@ -244,7 +255,9 @@ async function runGroundAndPersist(deps) {
     answerHash: committed.hash,
     ui: committed.ui,
   }, { sessionId: session.id })
-  session.messages = upsertConversationMessage(persistedMessages, assistantMessage)
+  const canonicalUpsert = upsertCanonicalAssistantMessage(persistedMessages, assistantMessage)
+  if (!canonicalUpsert.ok) throw new Error(canonicalUpsert.code)
+  session.messages = canonicalUpsert.messages
   session.updatedAt = new Date().toISOString()
   ports.session.set?.(session)
 
@@ -282,7 +295,6 @@ async function runGroundAndPersist(deps) {
       }))
       : [],
   })
-
   const finalPhase = hasRules(effectiveContract)
     && (outputGateStatus === 'blocked' || verification?.passed === false)
     ? RunPhase.ERROR : RunPhase.DONE

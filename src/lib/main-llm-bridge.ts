@@ -53,6 +53,11 @@ function createIpv4FirstLookup() {
 const FIRST_BYTE_TIMEOUT_MS = 15000
 const FIRST_BYTE_RETRY_LIMIT = 1
 const STREAM_IDLE_TIMEOUT_MS = 120000
+// Providers may emit dozens of tiny SSE chunks per frame. Rebuilding the
+// accumulated answer and publishing it to the renderer for every chunk can
+// monopolize Electron's main event loop. Keep parsing lossless, but coalesce
+// snapshots to roughly one frame at a time.
+const STREAM_SNAPSHOT_INTERVAL_MS = 32
 const PROBE_TIMEOUT_MS = 8000
 
 function llmCallMeta(url, body, extra = {}) {
@@ -184,9 +189,17 @@ function requestAgentCompletion({
     let timeouts
     let settled = false
     let abortHandler
+    let snapshotTimer = null
+    const cancelSnapshotTimer = () => {
+      if (snapshotTimer !== null) {
+        clearTimeout(snapshotTimer)
+        snapshotTimer = null
+      }
+    }
     const finish = result => {
       if (settled) return
       settled = true
+      cancelSnapshotTimer()
       if (abortHandler) signal?.removeEventListener('abort', abortHandler)
       try {
         const failed = Boolean(result.error && !result.cancelled)
@@ -220,13 +233,15 @@ function requestAgentCompletion({
     }, res => {
       timeouts?.markFirstByte()
       let raw = ''
+      const rawLimit = 64 * 1024
       let sawSse = String(res.headers['content-type'] || '').includes('text/event-stream')
       let lastContent = ''
       let reasoningReported = false
       const accumulator = agentStream.createStreamAccumulator()
       const publishSnapshot = () => {
         if (signal?.aborted || settled) return
-        const snapshot = agentStream.getStreamSnapshot(accumulator)
+        const publishStartedAt = Date.now()
+        const snapshot = agentStream.getStreamSnapshot(accumulator, { parseTextTools: false })
         if (snapshot.hasReasoning && !reasoningReported) {
           reasoningReported = true
           onSnapshot?.({ ...snapshot, reasoningStarted: true })
@@ -235,17 +250,47 @@ function requestAgentCompletion({
           lastContent = snapshot.content
           onSnapshot?.(snapshot)
         }
+        const publishDurationMs = Date.now() - publishStartedAt
+        if (publishDurationMs >= 250) {
+          try {
+            logger.warn('llm', 'stream-snapshot-slow', '流式快照处理耗时过长', {
+              durationMs: publishDurationMs,
+              contentChars: String(accumulator.content || '').length,
+            })
+          } catch { /* diagnostics must never affect streaming */ }
+        }
+      }
+      const scheduleSnapshot = () => {
+        if (signal?.aborted || settled || typeof onSnapshot !== 'function' || snapshotTimer !== null) return
+        snapshotTimer = setTimeout(() => {
+          snapshotTimer = null
+          publishSnapshot()
+        }, STREAM_SNAPSHOT_INTERVAL_MS)
       }
 
       res.on('data', chunk => {
         if (signal?.aborted || settled) return
         const piece = chunk.toString()
         raw += piece
-        if (!sawSse && (raw.startsWith('data:') || piece.includes('\ndata:'))) sawSse = true
+        if (!sawSse && (raw.startsWith('data:') || piece.includes('\ndata:'))) {
+          sawSse = true
+          raw = raw.slice(0, rawLimit)
+        } else if (sawSse && raw.length > rawLimit) raw = raw.slice(0, rawLimit)
         if (!sawSse) return
         try {
+          const feedStartedAt = Date.now()
           agentStream.feedSse(accumulator, piece)
-          publishSnapshot()
+          const feedDurationMs = Date.now() - feedStartedAt
+          if (feedDurationMs >= 250) {
+            try {
+              logger.warn('llm', 'stream-parse-slow', '流式响应解析耗时过长', {
+                durationMs: feedDurationMs,
+                chunkChars: piece.length,
+                contentChars: String(accumulator.content || '').length,
+              })
+            } catch { /* diagnostics must never affect streaming */ }
+          }
+          scheduleSnapshot()
         } catch (err) {
           req.destroy()
           finish({ error: err.message || '流式响应解析失败', status: res.statusCode })
@@ -269,9 +314,10 @@ function requestAgentCompletion({
           } else {
             agentStream.applyCompletionJson(accumulator, JSON.parse(raw))
           }
+          cancelSnapshotTimer()
           publishSnapshot()
           finish({
-            snapshot: agentStream.getStreamSnapshot(accumulator),
+            snapshot: agentStream.getStreamSnapshot(accumulator, { parseTextTools: true }),
             streamed: sawSse,
             status: res.statusCode,
           })

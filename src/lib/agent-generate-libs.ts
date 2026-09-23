@@ -47,6 +47,7 @@ const agentImageTools = require('./agent-image-tools')
 const agentOrchestration = require('./agent-orchestration')
 const knowledgeStewardTools = require('./knowledge-steward-tools')
 const agentCapabilityImportTools = require('./agent-capability-import-tools')
+const agentRegistryTools = require('./agent-registry-tools')
 const { isToolSurfaceV1 } = require('./tool-contract-registry')
 const { resolveToolSurfaceForRun } = require('./tool-surface-builder')
 const { getSessionCapabilityBindings } = require('./agent-context-assembly')
@@ -269,7 +270,7 @@ module.exports = {
   buildProductionRunPorts, llmRuntime, llmModelCatalog, llmUsage, knowledgeOs, fabricRetrieval, brainService,
   chatIntent, researchRouting, contextCache, contextOrchestrator, contextPacketLib,
   feishuGrounding, writingWorkflow, connectorToolRuntime, agentProcessTools, agentArtifactTools, agentImageTools,
-  agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, isToolSurfaceV1, resolveToolSurfaceForRun,
+  agentOrchestration, knowledgeStewardTools, agentCapabilityImportTools, agentRegistryTools, isToolSurfaceV1, resolveToolSurfaceForRun,
   getSessionCapabilityBindings, buildTemporalAnchorContext, mergeExtraTools, logger,
   createKnowledgeTools,
 }

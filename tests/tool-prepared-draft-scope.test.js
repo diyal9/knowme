@@ -82,6 +82,7 @@ test('file task draft cannot apply under a different active source root', async 
   const f = await prepared(t, 'file')
   const result = await approveToolDraft(f.userData, f.result.draftId, { ...f.ctx, fileAdapter: { rootPath: path.join(f.userData, 'source-b') } })
   assert.equal(result.code, 'approval_mismatch')
+  assert.equal(result.executionStarted, false)
   assert.equal(f.effects(), 0)
 })
 

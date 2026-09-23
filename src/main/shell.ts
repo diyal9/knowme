@@ -732,6 +732,21 @@ ctx.createWorkspaceWindow = function createWorkspaceWindow() {
             }
         }, 280);
     });
+    ctx.workspaceWin.on('unresponsive', () => {
+        try {
+            ctx.logger.warn('system', 'workspace-unresponsive', '工作台窗口未响应', {
+                window: 'workspace',
+                runIds: [...(ctx.activeAgentRuns?.keys?.() || [])].slice(0, 8),
+            });
+        }
+        catch { /* telemetry must never affect recovery */ }
+    });
+    ctx.workspaceWin.on('responsive', () => {
+        try {
+            ctx.logger.info('system', 'workspace-responsive', '工作台窗口恢复响应', { window: 'workspace' });
+        }
+        catch { /* telemetry must never affect recovery */ }
+    });
     ctx.workspaceWin.on('close', e => {
         if (ctx.isQuitting)
             return;

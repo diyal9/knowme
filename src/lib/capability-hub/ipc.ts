@@ -43,6 +43,12 @@ const IPC_CHANNELS = Object.freeze({
     'expert-delete',
     'expert-try-chat',
     'expert-snapshot',
+    'agent-registry-verify',
+    'agent-registry-preview',
+    'agent-registry-commit',
+    'agent-registry-revisions',
+    'agent-registry-draft-get',
+    'agent-registry-draft-save',
   ],
   connector: [
     'connector-health',
@@ -74,6 +80,7 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
     expertRuntime,
     saveExpertForHub,
     deleteExpertForHub,
+    agentRegistry,
     unifiedConnectors,
     getConnectorsApi,
   } = deps
@@ -214,17 +221,41 @@ function registerCapabilityHubIpc(deps, handlers = {}) {
   ipcMain.handle('expert-delete', (_e, payload = {}) => deleteExpertForHub(payload || {}))
 
   ipcMain.handle('expert-snapshot', (_e, payload = {}) => {
+    const expertId = String(payload.expertId || '').trim()
+    const lifecycleGate = agentRegistry.canStartExpert(expertId)
+    if (!lifecycleGate.ok) return lifecycleGate
     const result = expertRuntime().createSessionSnapshot(
       String(payload.sessionId || '').trim(),
-      String(payload.expertId || '').trim(),
+      expertId,
     )
     return result.ok ? ok(result) : result
   })
 
   ipcMain.handle('expert-try-chat', (_e, payload = {}) => {
-    const result = expertRuntime().buildTryChatSession(String(payload.expertId || '').trim(), payload)
+    const expertId = String(payload.expertId || '').trim()
+    const lifecycleGate = agentRegistry.canStartExpert(expertId)
+    if (!lifecycleGate.ok) return lifecycleGate
+    const result = expertRuntime().buildTryChatSession(expertId, payload)
     return result.ok ? ok({ session: result.session, ephemeral: true }) : result
   })
+
+  ipcMain.handle('agent-registry-verify', (_e, payload = {}) =>
+    agentRegistry.verifyAgentDefinition(payload || {}))
+
+  ipcMain.handle('agent-registry-preview', (_e, payload = {}) =>
+    agentRegistry.previewAgentChange(payload || {}))
+
+  ipcMain.handle('agent-registry-commit', (_e, payload = {}) =>
+    agentRegistry.commitAgentChange(payload || {}))
+
+  ipcMain.handle('agent-registry-revisions', (_e, payload = {}) =>
+    agentRegistry.listAgentRevisions(payload || {}))
+
+  ipcMain.handle('agent-registry-draft-get', (_e, payload = {}) =>
+    agentRegistry.getAgentDraft(payload || {}))
+
+  ipcMain.handle('agent-registry-draft-save', (_e, payload = {}) =>
+    agentRegistry.saveAgentDraft(payload || {}))
 
   ipcMain.handle('connector-health', async (_e, payload = {}) => {
     const connectorId = String(payload.connectorId || payload.id || '').trim()

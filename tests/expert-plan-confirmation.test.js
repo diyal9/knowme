@@ -5,7 +5,7 @@ const assert = require('node:assert')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { createExpertTaskRuntime } = require('../src/lib/expert-task-runtime')
+const { createExpertTaskRuntime, formatExpertTaskMaterials } = require('../src/lib/expert-task-runtime')
 const { createStore } = require('../src/lib/workbench-task-store')
 const { confirmedDeliveryIssues, requiresFileDelivery } = require('../src/lib/expert-confirmed-delivery')
 
@@ -19,6 +19,20 @@ const plan = {
 }
 
 describe('expert plan confirmation host gate', () => {
+  it('removes only the host-authored planning route from legacy clarification material', () => {
+    const materials = formatExpertTaskMaterials([
+      {
+        id: 'clarification-record', title: '需求澄清记录', type: 'text',
+        content: '我想处理「主题舆情分析」。请严格按当前专家 SOP 的「topic-sentiment」路由规划本次协作，先确认必要范围，再给出待确认计划，不要执行。\n\n近一周关于 AI Native 的舆情',
+      },
+      { id: 'source-note', title: '用户材料', type: 'text', content: '不要执行公开网络搜索，只分析附件。' },
+    ])
+
+    assert.doesNotMatch(materials, /请严格按当前专家 SOP/)
+    assert.match(materials, /近一周关于 AI Native 的舆情/)
+    assert.match(materials, /不要执行公开网络搜索，只分析附件/)
+  })
+
   it('refuses to issue a receipt for a plan that still asks for input', () => {
     const runtime = createExpertTaskRuntime({})
     const result = runtime.preparePlanConfirmation({

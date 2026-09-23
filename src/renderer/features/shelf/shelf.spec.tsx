@@ -152,6 +152,44 @@ describe('workbench-workflow-shelf', () => {
     expect(within(board).getByText('视觉产物运行')).toBeInTheDocument()
   })
 
+  it('uses the active project for workflow history and keeps all projects as a history-only scope', async () => {
+    mockApi({
+      workbenchLoad: async () => fixture,
+      projectsList: async () => ({
+        ok: true,
+        activeProjectId: 'p1',
+        projects: [
+          { id: 'p1', name: '产品项目', workspaceSourceId: 's1', status: 'active' },
+          { id: 'p2', name: '研发项目', workspaceSourceId: 's2', status: 'active' },
+        ],
+      }),
+      sourcesList: async () => ({
+        activeSourceId: 's1',
+        sources: [
+          { id: 's1', type: 'local', displayName: '产品项目', rootPath: 'D:/product' },
+          { id: 's2', type: 'local', displayName: '研发项目', rootPath: 'D:/engineering' },
+        ],
+      }),
+      workbenchTaskList: async () => ({ items: [
+        { id: 'workflow-p1', projectId: 'p1', kind: 'workflow', title: '产品需求流', status: 'running', workflowId: 'product-flow' },
+        { id: 'workflow-p2', projectId: 'p2', kind: 'workflow', title: '研发交付流', status: 'running', workflowId: 'engineering-flow' },
+      ] }),
+    })
+    resetAppStore()
+    useAppStore.setState({ route: 'workbench', workbenchSurface: 'shelf' })
+    render(<AppShell />)
+
+    const board = await screen.findByTestId('wbWorkflowRun-board')
+    await waitFor(() => expect(within(board).getByText('产品需求流')).toBeInTheDocument())
+    expect(within(board).queryByText('研发交付流')).not.toBeInTheDocument()
+
+    const projectScope = screen.getByRole('group', { name: '工作流项目范围' })
+    expect(within(projectScope).getByText('产品项目')).toBeInTheDocument()
+    fireEvent.click(within(projectScope).getByRole('button', { name: '全部项目' }))
+    expect(within(board).getByText('产品需求流')).toBeInTheDocument()
+    expect(within(board).getByText('研发交付流')).toBeInTheDocument()
+  })
+
   it('keeps home cards compact and leaves detailed descriptions and paths to the detail page', async () => {
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('会议闭环')).toBeInTheDocument())
@@ -239,7 +277,8 @@ describe('workbench-workflow-shelf', () => {
       const headerActions = document.getElementById('wbHeadDetailActions')
       expect(headerActions).toBeTruthy()
       expect(within(headerActions as HTMLElement).getByRole('button', { name: '返回工作流' })).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+      expect(screen.getByRole('button', { name: '搜索：工作流' })).toBeVisible()
+      expect(screen.queryByRole('search')).not.toBeInTheDocument()
       expect(screen.getByRole('tab', { name: '专家协作', hidden: true })).not.toBeVisible()
       expect(screen.getByRole('tab', { name: '工作流', hidden: true })).not.toBeVisible()
       expect(screen.getByRole('tab', { name: '管线服务', hidden: true })).not.toBeVisible()

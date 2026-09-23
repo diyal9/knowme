@@ -39,10 +39,16 @@ export function ShelfSurface() {
   const loading = useAppStore((s) => s.shelfLoading)
   const shelfCards = useAppStore((s) => s.shelfCards)
   const tasks = useAppStore((s) => s.tasks)
+  const projects = useAppStore((s) => s.projects)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
   const daemonOnline = useAppStore((s) => s.shelfDaemonOnline)
   const catalogCards = filterShelfCards(shelfCards, '', 'all')
   const cards = filterShelfCards(shelfCards, query, domain)
-  const recentRuns = useMemo(() => workflowShelfTasks(tasks), [tasks])
+  const [projectScope, setProjectScope] = useState<'current' | 'all'>('current')
+  const recentRuns = useMemo(() => workflowShelfTasks(tasks).filter((task) => (
+    projectScope === 'all' || !activeProjectId || task.projectId === activeProjectId
+  )), [activeProjectId, projectScope, tasks])
+  const activeProject = projects.find((project) => project.id === activeProjectId) || null
   const lockHint = shelfLockHint(daemonOnline)
   const runnable = catalogCards.filter((card) => !card.blocked).length
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string | null>(null)
@@ -91,6 +97,13 @@ export function ShelfSurface() {
       >
         <div className="wb-task-home-head">
           <h1 className="wb-workbench-page-title" id="wbShelfRecentTitle">运行记录</h1>
+          {activeProject ? (
+            <div className="project-scope-switch" role="group" aria-label="工作流项目范围">
+              <span title={activeProject.name}><Icon name="folder" />{activeProject.name}</span>
+              <button type="button" className={projectScope === 'current' ? 'active' : ''} aria-pressed={projectScope === 'current'} onClick={() => setProjectScope('current')}>当前项目</button>
+              <button type="button" className={projectScope === 'all' ? 'active' : ''} aria-pressed={projectScope === 'all'} onClick={() => setProjectScope('all')}>全部项目</button>
+            </div>
+          ) : null}
         </div>
         <div id="wbShelfRecentList" data-testid="shelf-recent-list">
           <TaskBoard

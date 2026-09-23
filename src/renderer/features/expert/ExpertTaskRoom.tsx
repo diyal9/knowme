@@ -33,6 +33,12 @@ import { chatMessagesFromSession } from '../../../domain/agent-session'
 import { workbenchExpertDiscussionSessionId } from '../../../domain/dialogue-lanes'
 import { ArtifactPreview } from '../artifact/ArtifactPreview'
 import { projectWorkbenchTaskAction } from '../../../domain/workbench-task-action'
+import type { ManagedAgentTarget } from '../../../shared/api'
+import {
+  AGENT_MANAGEMENT_EXPERT_ID,
+  CURRENT_AGENT_MANAGEMENT_ROLE,
+  manageableAgentTargets,
+} from '../../../domain/agent-management-target'
 
 /** 任务专用卡片仍是对话中的一条助手消息，统一复用伙伴消息气泡。 */
 function ExpertTaskConversationTurn({
@@ -103,6 +109,20 @@ function comparableReplyText(value: unknown) {
     .replace(/\r\n/g, '\n')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/**
+ * Route buttons send an app-authored planning instruction through the normal
+ * chat lane so the expert can produce a plan.  It is visible conversation,
+ * but it is not part of the user's execution brief: carrying "不要执行" into
+ * the formal run makes the executor ask for the same confirmation again.
+ */
+function isExpertPlanningRoutePrompt(value: unknown) {
+  const text = comparableReplyText(value)
+  return /^我想处理「[^」]+」[。.!！]?\s*请严格按当前专/u.test(text)
+    || (text.includes('请严格按当前专家 SOP')
+      && text.includes('先确认必要范围')
+      && text.includes('不要执行'))
 }
 
 function isAnswerAlreadyShown(messages: ChatMessage[], body: string) {
@@ -363,6 +383,7 @@ export function ExpertTaskRoom() {
         taskId: current.taskId || task.id,
         taskStatus: task.status,
         expertId: current.expertId || task.expertId || current.id,
+        managedAgentTarget: current.managedAgentTarget || task.brief?.agentTarget,
         discussionContext,
       },
     })
@@ -441,9 +462,16 @@ export function ExpertTaskRoom() {
     || (expertRoom.taskId ? '专家' : expertRoom.name))
   const expertItem = { ...hubExpert, id: expertId, name: expertName, kind: 'expert',
     description: hubExpert?.description || currentExpertDetail?.description || '' } as CapabilityItem
+  const isAgentManagementRoom = expertId === AGENT_MANAGEMENT_EXPERT_ID
+  const managedAgentTarget = expertRoom.managedAgentTarget || task?.brief?.agentTarget || null
+  const availableManagedAgentTargets = isAgentManagementRoom
+    ? manageableAgentTargets(hubItems, CURRENT_AGENT_MANAGEMENT_ROLE)
+    : []
   const userMessages = expertRoom.messages.filter((message) => message.role === 'user' && String(message.text || '').trim())
+  const clarificationMessages = userMessages.filter((message) => !isExpertPlanningRoutePrompt(message.text))
   const firstUserMessage = userMessages[0]
-  const draftGoal = String(expertRoom.goal || firstUserMessage?.text || '').trim()
+  const firstClarificationMessage = clarificationMessages[0]
+  const draftGoal = String(expertRoom.goal || firstClarificationMessage?.text || firstUserMessage?.text || '').trim()
   const isImageDeliverableRecord = (item: NonNullable<WorkbenchTask['deliverables']>[number], artifact?: AgentRunArtifact | null) => (
     expertArtifactKind(item.type) === 'image'
       || expertArtifactKind(artifact?.type) === 'image'
@@ -476,8 +504,9 @@ export function ExpertTaskRoom() {
   const goal = isDraft
     ? clarifiedGoal || persistedGoal || draftGoal
     : persistedGoal || clarifiedGoal || draftGoal
+  const persistedTitle = String(task?.title || '').trim()
   const collaborationTitle = collaborationTitleOverride
-    || String(task?.title || '').trim()
+    || (!isExpertPlanningRoutePrompt(persistedTitle) ? persistedTitle : '')
     || collaborationRoomTitle(goal)
   const goalConfirmed = Boolean(clarifiedGoal || task?.brief?.goal)
   const dynamicPlanSteps = dynamicPlan?.steps || []
@@ -566,6 +595,14 @@ export function ExpertTaskRoom() {
     buildExpertCollabFeed(expertRoom.messages, processEvents, deliverables),
     status,
   )
+  const timedProcessEvents = processEvents.filter((event) => Number.isFinite(Date.parse(String(event.createdAt || ''))))
+  const executionStartedAt = task?.progress?.startedAt
+    || timedProcessEvents.find((event) => ['preflight_started', 'task_started', 'started', 'stage_prepare', 'progress'].includes(String(event.type || '')))?.createdAt
+    || timedProcessEvents[0]?.createdAt
+    || task?.createdAt
+  const executionEndedAt = activeExecution
+    ? undefined
+    : task?.progress?.updatedAt || timedProcessEvents.at(-1)?.createdAt || task?.updatedAt
   const isImageGenerationTask = deliverables.some((item) => isImageDeliverableRecord(item, item.artifactRef ? artifacts[item.artifactRef] : null))
     || Boolean(expertDetail?.outputs.some((item) => expertArtifactKind(item.type) === 'image'))
   const hasImageArtifact = deliverables.some((item) => (
@@ -581,7 +618,7 @@ export function ExpertTaskRoom() {
   // 过程性系统事件可以折叠，但专家写给用户的正常对话必须完整保留。
   // 唯一需要隐藏的是：任务已经失败且没有图片证据时，历史消息仍声称生成成功。
   const visibleCollabFeed = collabFeed.filter((item) => (
-    item.kind !== 'moment' || item.moment.role === 'user' || item.moment.active
+    item.kind !== 'moment' || item.moment.role === 'user' || item.moment.active || Boolean(item.moment.execution)
   ))
   const turnDividerForFeed = (feedIndex: number) => {
     const current = visibleCollabFeed[feedIndex]
@@ -670,17 +707,41 @@ export function ExpertTaskRoom() {
   // Structured controls are rendered inside the same dialogue turn as in
   //伙伴模式. Their payload follows the current task lane; selecting an item
   // never creates a second, parallel interaction surface.
-  function handleStructuredPick(payload: string, needsInput: boolean) {
+  async function handleStructuredPick(payload: string, needsInput: boolean) {
     const value = String(payload || '').trim()
     if (!value) return
-    setWorkbenchComposer(value)
+    const normalizedTarget = value.replace(/^#/, '').trim().toLowerCase()
+    const structuredTarget = isAgentManagementRoom
+      ? availableManagedAgentTargets.find((item) => (
+        item.id.toLowerCase() === normalizedTarget || item.name.toLowerCase() === normalizedTarget
+      )) || null
+      : null
+    if (structuredTarget) await selectManagedAgentTarget(structuredTarget)
+    const submittedValue = structuredTarget ? `#${structuredTarget.name}` : value
+    setWorkbenchComposer(submittedValue)
     if (needsInput) {
       queueMicrotask(() => document.getElementById('agentInput')?.focus())
       return
     }
-    if (isDraft) return sendClarifyingPrompt(value)
-    if (status === 'needs_input') return void provideInput(value)
-    return sendTaskDiscussion(value)
+    if (isDraft) return sendClarifyingPrompt(submittedValue)
+    if (status === 'needs_input') return void provideInput(submittedValue)
+    return sendTaskDiscussion(submittedValue)
+  }
+
+  async function selectManagedAgentTarget(target: ManagedAgentTarget | null) {
+    const room = useAppStore.getState().expertRoom
+    if (!room || !isAgentManagementRoom) return
+    useAppStore.setState({ expertRoom: { ...room, managedAgentTarget: target || undefined } })
+    if (!task?.id || !window.api?.workbenchTaskUpdate) return
+    const result = await window.api.workbenchTaskUpdate(task.id, {
+      brief: { ...(task.brief || {}), agentTarget: target || undefined },
+    }).catch(() => null)
+    if (!result?.ok || !result.task) {
+      showToast(result?.error || '管理对象已选择，但未能同步到任务记录')
+      return
+    }
+    setTask(result.task)
+    publishTaskUpdate(result.task)
   }
 
   function sendSopRoutePrompt(route: NonNullable<ExpertWorkbenchDetail['routes']>[number]) {
@@ -721,18 +782,19 @@ export function ExpertTaskRoom() {
     if (!room || !isDraft || !draftGoal || startingPlan || isGenerating
       || planningClarifying) return
     const expertId = String(room.expertId || room.id)
+    const executionGoal = String(dynamicPlan?.goal || draftGoal).trim()
     const rawOutputs = expertDetail?.outputs?.length
       ? expertDetail.outputs
       : [{ id: 'primary', label: '可验收的专业成果' }]
     const outputs = collapseExpertDocumentOutputs(rawOutputs)
-    const conversation = userMessages.map((message) => String(message.text || '').trim()).filter(Boolean).join('\n\n')
-    const requestContext = `${draftGoal}\n${conversation}`
+    const conversation = clarificationMessages.map((message) => String(message.text || '').trim()).filter(Boolean).join('\n\n')
+    const requestContext = `${executionGoal}\n${conversation}`
     const requestedOutputs = outputs.map((item) => ({
       ...item,
       type: resolveExpertOutputType(item.type, requestContext, item.label),
     }))
     const planToRun = dynamicPlan || {
-      goal: draftGoal,
+      goal: executionGoal,
       deliverables: [],
       acceptanceCriteria: [],
       capabilityUse: [],
@@ -778,13 +840,13 @@ export function ExpertTaskRoom() {
       const result = await window.api?.expertTaskCreateStart?.({
         taskId: room.taskId,
         planConfirmationToken: receipt.token,
-        title: draftGoal.replace(/\s+/g, ' ').slice(0, 20),
+        title: executionGoal.replace(/\s+/g, ' ').slice(0, 20),
         expertId,
         expertName,
         knowledgeRefs: room.knowledgeRefs,
         brief: {
           completionPolicy: 'review',
-          goal: draftGoal,
+          goal: executionGoal,
           materials: [
             ...(conversation ? [{ id: 'clarification-record', type: 'text', title: '需求澄清记录', content: conversation }] : []),
             ...(planMaterial ? [{ id: 'confirmed-plan', type: 'text', title: '已确认的执行计划', content: planMaterial }] : []),
@@ -795,12 +857,13 @@ export function ExpertTaskRoom() {
           constraints: [],
           plan: confirmedPlan,
           deliverables: requestedOutputs.map((item) => ({ id: item.id, title: item.label, type: item.type || 'answer', required: true })),
+          ...(managedAgentTarget ? { agentTarget: managedAgentTarget } : {}),
         },
       })
       if (!result?.ok || !result.task?.id) throw new Error(result?.error || '任务未能开始')
       const didStart = ['starting', 'running', 'revising'].includes(String(result.task.status || ''))
       const blockedNeed = result.task.status === 'needs_input'
-        ? describeExpertInputNeed(result.task.events?.at(-1)?.summary, draftGoal, result.task.attention)
+        ? describeExpertInputNeed(result.task.events?.at(-1)?.summary, executionGoal, result.task.attention)
         : null
       const launchText = didStart
         ? '计划已确认，任务已启动；实际操作和成果以执行记录为准。'
@@ -818,7 +881,7 @@ export function ExpertTaskRoom() {
           taskId: result.task.id,
           taskStatus: result.task.status,
           expertId,
-          goal: draftGoal,
+          goal: executionGoal,
           messages: currentMessages.map((message) => message.id === launchMessageId
             ? { ...message, text: launchText }
             : message),
@@ -1119,14 +1182,31 @@ export function ExpertTaskRoom() {
             ? `当前缺少「${inputNeed.item}」的运行配置。完成设置后，可以直接回到这里重新执行。`
           : inputNeed?.action === 'open_workspace'
             ? `「${inputNeed.item}」是 KnowMe 内置工具。请确认当前项目目录可写，然后重新执行。`
-            : (inputNeed?.question || `继续处理前，我还需要你补充「${inputNeed?.item || '任务所需的信息'}」。`)
+            : (inputNeed?.question
+              || (inputNeed?.kind === 'execution'
+                ? [inputNeed.detail, inputNeed.nextStep].filter(Boolean).join(' ')
+                : `继续处理前，我还需要你补充「${inputNeed?.item || '任务所需的信息'}」。`))
         : status === 'completed'
           ? '我已经完成本次协作，成果和相关记录都已整理好。'
           : status === 'cancelled'
             ? '本次协作已取消，已有材料和过程记录仍会保留。'
             : status === 'failed'
-              ? failureNeed?.detail || '本次协作未完成，已有材料和修改意见均已保留。'
-              : '本次协作状态已更新。'
+               ? failureNeed?.detail || '本次协作未完成，已有材料和修改意见均已保留。'
+               : '本次协作状态已更新。'
+
+    const hasInteractionControls = Boolean(
+      reviewNotice
+      || status === 'completed'
+      || status === 'cancelled'
+      || status === 'failed'
+      || status === 'revising'
+      || hasPendingReview
+      || (status === 'needs_input' && inputNeed?.action !== 'provide_input'),
+    )
+    // The executor's assistant message is already restored from its session.
+    // A plain provide-input attention repeats that same body; without controls
+    // it must not become a second synthetic assistant turn.
+    if (!hasInteractionControls && isAnswerAlreadyShown(expertRoom?.messages || [], interactionMessage)) return null
 
     return (
         <ExpertTaskConversationTurn
@@ -1306,7 +1386,14 @@ export function ExpertTaskRoom() {
                         </Fragment>
                       }
                       if (feedItem.kind === 'moment') {
-                        return <ExpertNarrativeMomentView key={feedItem.moment.id} moment={feedItem.moment} expert={expertItem} expertName={expertName} />
+                        return <ExpertNarrativeMomentView
+                          key={feedItem.moment.id}
+                          moment={feedItem.moment}
+                          expert={expertItem}
+                          expertName={expertName}
+                          executionStartedAt={executionStartedAt}
+                          executionEndedAt={executionEndedAt}
+                        />
                       }
                       const item = feedItem.deliverable
                       const artifact = item.artifactRef ? artifacts[item.artifactRef] : null
@@ -1450,9 +1537,15 @@ export function ExpertTaskRoom() {
                 placeholder={hasPendingReview
                   ? '直接告诉专家需要修改的地方… @ 选文件'
                   : isDraft && planningState.phase === 'clarifying' && planningState.question
-                    ? '补充信息或回答上方问题… @ 选文件'
+                    ? isAgentManagementRoom && !managedAgentTarget
+                      ? '回答上方问题，或输入 # 选择 Agent… @ 选文件'
+                      : '补充信息或回答上方问题… @ 选文件'
                     : isDraft
-                      ? '回答专家的问题，或补充目标和材料… @ 选文件'
+                      ? isAgentManagementRoom
+                        ? managedAgentTarget
+                          ? `说明要如何评估或优化「${managedAgentTarget.name}」… @ 选文件`
+                          : '输入 # 选择已有 Agent，或直接描述要创建的新 Agent… @ 选文件'
+                        : '回答专家的问题，或补充目标和材料… @ 选文件'
                       : activeExecution
                         ? '可补充方向或材料；当前步骤完成后会自动继续… @ 选文件'
                         : status === 'failed' ? '询问失败原因或讨论调整方案… @ 选文件'
@@ -1470,6 +1563,9 @@ export function ExpertTaskRoom() {
                       : isDraft ? submitDraftMessage : () => useAppStore.getState().sendWorkbenchMessage()}
                 allowSubmitWhileGenerating={activeExecution}
                 allowEmptySubmit={hasPendingReview}
+                agentTargets={availableManagedAgentTargets}
+                selectedAgentTarget={managedAgentTarget}
+                onAgentTargetChange={isAgentManagementRoom ? selectManagedAgentTarget : undefined}
               />
             </div>
           ) : null}

@@ -11,10 +11,10 @@ const { buildWorkflowSupply } = require('../src/lib/workflow-supply')
 const { workflowDisplayName } = require('../src/lib/workflow-display-name')
 
 describe('official-workflows catalog', () => {
-  it('ships exactly three official multi-stage expert packages with gates', () => {
+  it('ships the remaining professional multi-stage expert package with a gate', () => {
     const packages = listOfficialWorkflowPackages()
-    assert.equal(packages.length, 3)
-    assert.equal(OFFICIAL_WORKFLOWS.length, 3)
+    assert.equal(packages.length, 1)
+    assert.equal(OFFICIAL_WORKFLOWS.length, 1)
 
     for (const pkg of packages) {
       assert.equal(pkg.source, 'official')
@@ -35,41 +35,19 @@ describe('official-workflows catalog', () => {
 
   it('exposes required expert ids covering all agent refs', () => {
     const ids = requiredExpertIds()
-    assert.ok(ids.includes('product-manager'))
+    assert.equal(ids.includes('product-manager'), false)
     assert.equal(ids.includes('user-researcher'), false)
     assert.equal(ids.includes('requirement-reviewer'), false)
     assert.equal(ids.includes('meeting-scribe'), false)
     assert.equal(ids.includes('action-owner'), false)
     assert.equal(ids.includes('creative-director'), false)
     assert.ok(ids.includes('image-producer'))
-    assert.ok(ids.includes('office-partner'))
+    assert.equal(ids.includes('office-partner'), false)
     for (const pkg of OFFICIAL_WORKFLOWS) {
       for (const ref of pkg.agentRefs) {
         assert.ok(ids.includes(ref.id), `missing ${ref.id}`)
       }
     }
-  })
-
-  it('runs product discovery as three declared modes of the retained product manager', () => {
-    const product = listOfficialWorkflowPackages().find(item => item.id === 'official-product-requirement')
-    const stages = product.graph.nodes.filter(node => node.type === 'agent')
-    assert.deepEqual(product.agentRefs.map(ref => ref.id), ['product-manager'])
-    assert.deepEqual(stages.map(node => node.agentPackageId), [
-      'product-manager', 'product-manager', 'product-manager',
-    ])
-    assert.match(stages[0].intent, /用户研究模式/)
-    assert.match(stages[2].intent, /需求评审模式/)
-  })
-
-  it('runs daily office as three declared modes of the retained office partner', () => {
-    const office = listOfficialWorkflowPackages().find(item => item.id === 'official-daily-office')
-    const stages = office.graph.nodes.filter(node => node.type === 'agent')
-    assert.deepEqual(office.agentRefs.map(ref => ref.id), ['office-partner'])
-    assert.deepEqual(stages.map(node => node.agentPackageId), [
-      'office-partner', 'office-partner', 'office-partner',
-    ])
-    assert.match(stages[0].intent, /会议纪要模式/)
-    assert.match(stages[1].intent, /行动项模式/)
   })
 
   it('marks legacy demo seed ids without listing them as official packages', () => {
@@ -82,24 +60,14 @@ describe('official-workflows catalog', () => {
 
   it('uses short display names for official ids', () => {
     assert.equal(
-      workflowDisplayName({ id: 'official-product-requirement', name: '写产品需求' }),
-      '写产品需求',
-    )
-    assert.equal(
       workflowDisplayName({ id: 'official-art-image-production', name: '美术生图' }),
       '美术生图',
-    )
-    assert.equal(
-      workflowDisplayName({ id: 'official-daily-office', name: '日常办公' }),
-      '日常办公',
     )
   })
 
   it('keeps official card blurbs as short value props without step chains', () => {
     const expected = {
-      'official-product-requirement': '把业务想法整理成有证据、可评审、可验收的产品需求。',
       'official-art-image-production': '从传播目标到候选图片、参数记录和人工选版的完整生图流程。',
-      'official-daily-office': '把会议材料转成正式纪要、行动项和可发送的同步稿。',
     }
     for (const pkg of listOfficialWorkflowPackages()) {
       assert.equal(pkg.description, expected[pkg.id], `${pkg.id} description`)
@@ -140,8 +108,8 @@ describe('official-workflows catalog', () => {
       repoActive: false,
       localTeamEnabled: true,
     })
-    assert.equal(result.packages.filter(item => item.source === 'official').length, 3)
-    assert.equal(result.stats.byOrigin.official, 3)
+    assert.equal(result.packages.filter(item => item.source === 'official').length, 1)
+    assert.equal(result.stats.byOrigin.official, 1)
     for (const pkg of result.packages.filter(item => item.source === 'official')) {
       assert.equal(pkg.readiness.runnable, true, `${pkg.id} should be runnable`)
       assert.equal(pkg.origin, 'official')

@@ -23,7 +23,7 @@ describe('expert collaboration narrative', () => {
     })
   })
 
-  it('merges consecutive progress into one update with expandable evidence', () => {
+  it('keeps consecutive progress as one chronological execution turn', () => {
     const feed = buildExpertCollabFeed([], [
       { id: 'one', type: 'progress', summary: '正在准备上下文…', createdAt: '2026-09-02T10:00:00.000Z' },
       { id: 'two', type: 'progress', summary: '已完成环境核对，正在检查兼容性。', createdAt: '2026-09-02T10:00:01.000Z' },
@@ -38,7 +38,14 @@ describe('expert collaboration narrative', () => {
       moment: {
         body: '正在读取版本信息',
         active: true,
-        disclosure: { label: '查看已完成的工作（3）' },
+        execution: {
+          status: 'running',
+          activities: [
+            expect.objectContaining({ kind: 'commentary', body: '我正在整理完成这项工作所需的背景和材料。' }),
+            expect.objectContaining({ kind: 'commentary', body: '已完成环境核对，正在检查兼容性。' }),
+            expect.objectContaining({ kind: 'action', body: '正在读取版本信息' }),
+          ],
+        },
       },
     })
   })
@@ -61,7 +68,15 @@ describe('expert collaboration narrative', () => {
     expect(narrative).toHaveLength(1)
     expect(narrative[0]).toMatchObject({
       kind: 'moment',
-      moment: { body: '正在写入页面文件', disclosure: { label: '查看已完成的工作（2）' } },
+      moment: {
+        body: '正在写入页面文件',
+        execution: {
+          activities: [
+            expect.objectContaining({ kind: 'action', body: '已创建工作目录' }),
+            expect.objectContaining({ kind: 'action', body: '正在写入页面文件' }),
+          ],
+        },
+      },
     })
   })
 
@@ -81,7 +96,12 @@ describe('expert collaboration narrative', () => {
       moment: {
         body: '上下文准备完成',
         active: true,
-        disclosure: { label: '查看已完成的工作（2）' },
+        execution: {
+          activities: [
+            expect.objectContaining({ kind: 'commentary', body: '我正在整理完成这项工作所需的背景和材料。' }),
+            expect.objectContaining({ kind: 'commentary', body: '上下文准备完成' }),
+          ],
+        },
       },
     })
   })
@@ -168,7 +188,13 @@ describe('expert collaboration narrative', () => {
       kind: 'moment',
       moment: {
         body: '执行已开始，我正在推进第一项工作。',
-        disclosure: { label: '查看执行进度' },
+        execution: {
+          status: 'running',
+          activities: [expect.objectContaining({
+            kind: 'commentary',
+            body: '执行已开始，我正在推进第一项工作。',
+          })],
+        },
       },
     })
   })

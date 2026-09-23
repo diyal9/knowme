@@ -13,34 +13,6 @@ const agentRun = require('../src/lib/agent-run')
 const methodIds = ['business-metrics-analysis', 'business-cause-analysis', 'business-insight-report']
 const catalogRoot = path.join(__dirname, '../src/catalog')
 
-it('fact checking remains a read-only route of the retained research analyst', () => {
-  const { parseExpertFrontmatter } = require('../src/lib/expert-runtime')
-  const dir = path.join(catalogRoot, 'experts/research-analyst')
-  const canonical = JSON.parse(fs.readFileSync(path.join(dir, 'capability.manifest.json'), 'utf8'))
-  const legacy = JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8'))
-  const source = fs.readFileSync(path.join(dir, 'EXPERT.md'), 'utf8')
-  const expert = parseExpertFrontmatter(source)
-  assert.ok(expert.skills.includes('evidence-verification'))
-  assert.deepEqual(legacy.skills, expert.skills)
-  assert.ok(canonical.dependencies.some(dep => dep.kind === 'skill' && dep.id === 'evidence-verification'))
-  assert.equal(legacy.version, canonical.version)
-  assert.equal(source.match(/^version:\s*(\S+)/m)?.[1], canonical.version)
-  const route = canonical.metadata.knowme.execution.routes.find(item => item.id === 'provided-fact-check')
-  assert.equal(route.skillId, 'evidence-verification')
-  assert.equal(executionProfile.declaredDeliverables({ capabilityManifest: canonical }).length, 1)
-  assert.deepEqual(route.toolAllowlist, [])
-  for (const key of ['write', 'externalWrite']) assert.equal(canonical.permissions[key], false)
-  const skills = createSkillRuntime({ capabilitiesRoot: catalogRoot })
-  const method = skills.loadSkillL1('evidence-verification')
-  assert.equal(method.ok, true)
-  assert.equal(method.truncated, false)
-  const assembled = assembleCapabilityContext({ session: {}, prompt: '核查给定来源', tier: 'assist',
-    slashRefs: ['evidence-verification'], skillRuntime: skills,
-    expertRuntime: { getSessionPersona: () => ({ ok: true, persona: { name: expert.name }, bindings: { skills: expert.skills, connectors: [] } }) },
-  })
-  assert.ok(assembled.skillL1Block.includes(method.body))
-})
-
 for (const mode of ['required', 'optional', 'unbound']) it(`passes only declared required methods to real L1 assembly (${mode})`, async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-required-methods-'))
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }))
@@ -87,28 +59,25 @@ for (const mode of ['required', 'optional', 'unbound']) it(`passes only declared
   assert.equal(result.task.status, mode === 'unbound' ? 'needs_input' : 'review', JSON.stringify(result.task.attention || result.task.events?.at(-1)))
 })
 
-it('business insight remains a coherent route of the retained data analyst', () => {
-  const capabilityManifest = JSON.parse(fs.readFileSync(path.join(catalogRoot, 'experts/data-analyst/capability.manifest.json'), 'utf8'))
+it('business insight methods remain bound to the retained 数据靓仔 Agent', () => {
+  const capabilityManifest = JSON.parse(fs.readFileSync(path.join(catalogRoot, 'experts/operations-data-analyst/capability.manifest.json'), 'utf8'))
   const snapshot = { capabilityManifest }
   const deliverables = executionProfile.declaredDeliverables(snapshot)
   assert.equal(deliverables.length, 1)
   assert.equal(deliverables[0].type, 'answer')
-  const route = capabilityManifest.metadata.knowme.execution.routes.find(item => item.id === 'business-insight')
-  assert.deepEqual(route.requiredSkills, methodIds)
-  assert.deepEqual(capabilityManifest.permissions.tools.allowlist, ['calculate'])
-  assert.equal(capabilityManifest.permissions.network, false)
-  assert.equal(capabilityManifest.permissions.write, false)
-  assert.equal(capabilityManifest.permissions.externalWrite, false)
+  const route = capabilityManifest.metadata.knowme.execution.routes.find(item => item.id === 'analysis-report')
+  assert.deepEqual(route.requiredSkills, ['data-report-method', 'business-insight-report'])
+  assert.ok(capabilityManifest.permissions.tools.allowlist.includes('calculate'))
+  for (const id of methodIds) {
+    assert.ok(capabilityManifest.dependencies.some(dep => dep.id === id && dep.kind === 'skill' && dep.required === true))
+  }
 })
 
 it('route-required Skills are part of the retained expert install closure', () => {
   const expertIds = [
-    'product-manager',
     'image-producer',
-    'data-analyst',
-    'office-partner',
-    'research-analyst',
-    'software-engineer',
+    'operations-data-analyst',
+    'agent-operations',
   ]
   for (const expertId of expertIds) {
     const manifest = JSON.parse(fs.readFileSync(

@@ -511,7 +511,17 @@ export function HubDetailDrawer({ item, isMine = false, onClose, onChanged, onEd
               ) : null}
             </>
           ) : installed && item.kind === 'skill' ? (
-            <button type="button" className="hub-btn primary" onClick={() => onManageSkill(item)}>管理技能装备</button>
+            <>
+              <button type="button" className="hub-btn primary" onClick={() => onManageSkill(item)}>优化与评估</button>
+              {item.source === 'curated' ? (
+                <button type="button" className="hub-btn" disabled={!!busy} onClick={() => void run('update')}>
+                  {busy === 'update' ? '正在更新…' : '更新技能'}
+                </button>
+              ) : null}
+              <button type="button" className="hub-btn danger" disabled={!!busy} onClick={() => void run('uninstall')}>
+                {busy === 'uninstall' ? '正在卸载…' : '卸载技能'}
+              </button>
+            </>
           ) : installed ? (
             <button type="button" className="hub-btn" onClick={() => void run('uninstall')}>卸载</button>
           ) : (

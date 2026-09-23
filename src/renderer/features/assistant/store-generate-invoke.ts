@@ -60,7 +60,12 @@ export async function invokeStreamingGenerate(input: {
     resultError = err instanceof Error ? err.message : '发送失败，请稍后重试'
   }
   await waitForStreamFlush()
-  detachStreamListener()
+  // A successful IPC response already carries the canonical text; tear down
+  // listeners immediately so a slow/throwing bridge cleanup cannot keep the
+  // shared composer in a half-live state. Keep the short late-event grace only
+  // for responses that did not include text (the v2 envelope may still arrive
+  // on the event channel after invoke resolves).
+  detachStreamListener({ preserveLateEvents: !resultText })
   if (input.get().generateRunId !== input.runId) {
     return { cancelled: true, resultError: '', resultText: '' }
   }

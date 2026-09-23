@@ -15,14 +15,37 @@ describe('workspace file tree', () => {
     mockApi({ sourcesList: async () => ({ sources: [], activeSourceId: null }) })
     render(<AppShell />)
     await waitFor(() => {
-      expect(screen.getByText('前往设置添加本地文件夹或 Git 仓库。')).toBeInTheDocument()
+      expect(screen.getByText('打开本地文件夹或克隆 Git 仓库，创建第一个项目。')).toBeInTheDocument()
     })
     expect(screen.getByRole('toolbar', { name: '文件中心操作' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '添加内容源' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: '管理内容源' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '项目菜单' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '刷新文件中心' })).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('搜索文件…')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '项目文件' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'KnowMe 归档' })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('搜索项目文件…')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '新建或打开项目' })).not.toBeInTheDocument()
+  })
+
+  it('moves project creation and settings into the project menu', async () => {
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [{ id: 'p1', name: 'KnowMe', workspaceSourceId: 's1', status: 'active', workspace: { id: 's1', sourceId: 's1', type: 'local', displayName: 'KnowMe', rootPath: 'D:/knowme' } }],
+        activeProjectId: 'p1',
+      }),
+      sourcesList: async () => ({ sources: [{ id: 's1', type: 'local', displayName: 'KnowMe', rootPath: 'D:/knowme' }], activeSourceId: 's1' }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByRole('button', { name: '项目菜单' })).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('button', { name: '项目菜单' }))
+    const menu = screen.getByRole('menu', { name: '项目菜单' })
+    expect(within(menu).getByRole('menuitem', { name: '打开本地项目' })).toBeInTheDocument()
+    expect(within(menu).getByRole('menuitem', { name: '克隆 Git 项目' })).toBeInTheDocument()
+    fireEvent.click(within(menu).getByRole('menuitem', { name: '项目设置' }))
+
+    const dialog = screen.getByRole('dialog', { name: '项目设置' })
+    expect(within(dialog).getByText('KnowMe 归档目录')).toBeInTheDocument()
   })
 
   it('renders file tree from active source', async () => {
@@ -43,7 +66,7 @@ describe('workspace file tree', () => {
     await waitFor(() => {
       expect(screen.getByText('readme.md')).toBeInTheDocument()
     })
-    expect(screen.getByText('Docs')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: '项目文件' })).toHaveAttribute('aria-selected', 'true')
   })
 
   it('filters visible files by search query', async () => {
@@ -90,7 +113,10 @@ describe('workspace file tree', () => {
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('readme.md')).toBeInTheDocument())
-    fireEvent.change(screen.getByLabelText('切换内容源'), { target: { value: 'legacy-project:s2' } })
+    fireEvent.click(screen.getByRole('button', { name: '工作台' }))
+    const trigger = await screen.findByRole('button', { name: '当前项目：Docs' })
+    fireEvent.click(trigger)
+    fireEvent.click(screen.getByRole('menuitemradio', { name: /Repo/ }))
     await waitFor(() => expect(screen.getByText('main.ts')).toBeInTheDocument())
   })
 
@@ -154,9 +180,9 @@ describe('workspace file tree', () => {
     await waitFor(() => expect(screen.getByText('a.md')).toBeInTheDocument())
     fireEvent.click(screen.getByText('a.md'))
     await waitFor(() => expect(screen.getByTestId('files-preview-panel')).toHaveTextContent('main-a'))
-    fireEvent.click(screen.getByLabelText('文件操作'))
-    expect(screen.getByRole('menu', { name: '文件操作菜单' })).toBeInTheDocument()
-    expect(screen.getByRole('menuitem', { name: '打开源目录' })).toBeInTheDocument()
+    fireEvent.click(screen.getByLabelText('项目菜单'))
+    expect(screen.getByRole('menu', { name: '项目菜单' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: '打开项目目录' })).toBeInTheDocument()
     expect(screen.queryByRole('menuitem', { name: '归档项目（保留文件）' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('menuitem', { name: '分屏预览' }))
     fireEvent.click(screen.getByText('b.md'))
@@ -192,10 +218,10 @@ describe('workspace file tree', () => {
     })
     render(<AppShell />)
     await waitFor(() => expect(screen.getByText('project-a.md')).toBeInTheDocument())
-    const sourceSwitcher = screen.getByLabelText('切换内容源')
-    expect(within(sourceSwitcher).getByRole('option', { name: 'Folder A' })).toHaveValue('p1')
-    expect(within(sourceSwitcher).getByRole('option', { name: 'Folder B' })).toHaveValue('p2')
-    fireEvent.change(sourceSwitcher, { target: { value: 'p2' } })
+    fireEvent.click(screen.getByRole('button', { name: '工作台' }))
+    const projectSwitcher = await screen.findByRole('button', { name: '当前项目：产品项目' })
+    fireEvent.click(projectSwitcher)
+    fireEvent.click(screen.getByRole('menuitemradio', { name: /研发项目/ }))
     await waitFor(() => expect(screen.getByText('project-b.md')).toBeInTheDocument())
     expect(useAppStore.getState().activeProjectId).toBe('p2')
     expect(useAppStore.getState().activeSourceId).toBe('s2')
@@ -241,9 +267,39 @@ describe('workspace file tree', () => {
     })
     render(<AppShell />)
 
+    fireEvent.click(await screen.findByRole('tab', { name: 'KnowMe 归档' }))
     const recent = await screen.findByTestId('project-recent-artifacts')
     expect(within(recent).getByText('项目方案')).toBeInTheDocument()
     fireEvent.click(within(recent).getByText('项目方案'))
     expect(await screen.findByTestId('files-preview-panel')).toHaveTextContent('Project plan')
+  })
+
+  it('shows generated project files in the KnowMe archive view', async () => {
+    mockApi({
+      projectsList: async () => ({
+        ok: true,
+        projects: [{ id: 'p1', name: 'KnowMe', workspaceSourceId: 's1', status: 'active', outputPolicy: { deliverablesDir: 'outputs' } }],
+        activeProjectId: 'p1',
+      }),
+      sourcesList: async () => ({ sources: [{ id: 's1', type: 'local', displayName: 'KnowMe' }], activeSourceId: 's1' }),
+      sourcesTree: async () => ({
+        ok: true,
+        nodes: [
+          { type: 'dir', name: 'outputs', path: 'outputs', depth: 0 },
+          { type: 'file', name: 'source.md', path: 'source.md', depth: 0 },
+        ],
+      }),
+      sourcesTreeChildren: async () => ({
+        ok: true,
+        nodes: [{ type: 'file', name: 'report.md', path: 'outputs/report.md', depth: 1 }],
+      }),
+    })
+    render(<AppShell />)
+    await waitFor(() => expect(screen.getByText('source.md')).toBeInTheDocument())
+
+    fireEvent.click(screen.getByRole('tab', { name: 'KnowMe 归档' }))
+    await waitFor(() => expect(screen.getByText('report.md')).toBeInTheDocument())
+    expect(screen.queryByText('source.md')).not.toBeInTheDocument()
+    expect(screen.getByPlaceholderText('搜索归档文件…')).toBeInTheDocument()
   })
 })

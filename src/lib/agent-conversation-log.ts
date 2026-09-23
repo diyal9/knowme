@@ -5,6 +5,7 @@ const crypto = require('crypto')
 const CHAT_ROLES = new Set(['user', 'assistant'])
 const MESSAGE_ROLES = new Set(['user', 'assistant', 'tool'])
 const MAX_MESSAGE_ID_CHARS = 180
+const MAX_ASSISTANT_MESSAGE_CHARS = 12000
 
 function cleanId(value) {
   return String(value || '').trim().slice(0, MAX_MESSAGE_ID_CHARS)
@@ -99,6 +100,32 @@ function upsertConversationMessage(messages, message) {
   return list
 }
 
+function upsertCanonicalAssistantMessage(messages, message) {
+  const list = Array.isArray(messages) ? [...messages] : []
+  if (!message || typeof message !== 'object') return { ok: false, code: 'message_required', messages: list }
+  const id = cleanId(message.id)
+  if (!id) return { ok: false, code: 'conversation_message_id_required', messages: list }
+  const index = list.findIndex(item => cleanId(item?.id) === id)
+  if (index < 0) return { ok: true, idempotent: false, messages: [...list, message], message }
+  const existing = list[index]
+  if (existing?.role !== 'assistant' || message?.role !== 'assistant') {
+    return { ok: false, code: 'conversation_message_role_conflict', messages: list, message: existing }
+  }
+  const existingText = messageText(existing)
+  const incomingText = messageText(message)
+  const sameCanonical = existingText && incomingText
+    && existingText === incomingText
+    && String(existing.answerHash || '') === String(message.answerHash || '')
+    && String(existing.runId || '') === String(message.runId || '')
+  if (sameCanonical) return { ok: true, idempotent: true, messages: list, message: existing }
+  if (!existingText && incomingText) {
+    const next = [...list]
+    next[index] = { ...existing, ...message, id }
+    return { ok: true, idempotent: false, messages: next, message: next[index] }
+  }
+  return { ok: false, code: 'canonical_answer_conflict', messages: list, message: existing }
+}
+
 function sameVisibleTurn(a, b) {
   return a?.role === b?.role && messageText(a) === messageText(b)
 }
@@ -190,12 +217,14 @@ function projectConversationHistory(messages, options = {}) {
 module.exports = {
   CHAT_ROLES,
   MESSAGE_ROLES,
+  MAX_ASSISTANT_MESSAGE_CHARS,
   cleanId,
   legacyMessageId,
   runtimeMessageId,
   resolveTurnIdentity,
   withConversationIdentity,
   upsertConversationMessage,
+  upsertCanonicalAssistantMessage,
   reconcileConversationLog,
   projectConversationHistory,
 }

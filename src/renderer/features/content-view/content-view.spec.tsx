@@ -22,11 +22,19 @@ describe('ContentView', () => {
 
   it('renders feishu documents as branded inline links', () => {
     render(<ContentView source={'见 [纪要](https://sample.feishu.cn/docx/abc123)'} />)
+    expect(screen.getByTestId('content-view')).toHaveClass('is-document')
     const link = screen.getByTestId('feishu-doc-link')
     expect(link).toHaveTextContent('纪要')
     expect(link).toHaveAttribute('data-resource-type', 'doc')
     expect(link).toHaveAttribute('href', 'https://sample.feishu.cn/docx/abc123')
     expect(screen.queryByTestId('feishu-resource-card')).toBeNull()
+  })
+
+  it('marks conversation content separately while preserving the same markdown semantics', () => {
+    render(<ContentView source={'## 简短说明\n\n正文'} presentation="conversation" />)
+    const view = screen.getByTestId('content-view')
+    expect(view).toHaveClass('is-conversation')
+    expect(view.querySelector('h2')).toHaveTextContent('简短说明')
   })
 
   it('turns URLs wrapped in inline code into clickable links', () => {

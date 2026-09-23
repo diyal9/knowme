@@ -40,7 +40,6 @@ describe('workbench-automation-store', () => {
     const store = createStore(file, {
       resolveLaunch: (job) => buildAutomationLaunchRequest(job, buildVerticalPipelineFacts({
         connectors: [{ id: 'feishu', enabled: true, ready: true, kind: 'connector' }],
-        availableExperts: ['office-assistant'],
       })),
     })
     const created = store.create({ name: '未绑定', prompt: '只做提醒' })
@@ -52,7 +51,6 @@ describe('workbench-automation-store', () => {
   it('returns structured launch request when bound and pipeline is ready', () => {
     const facts = buildVerticalPipelineFacts({
       connectors: [{ id: 'feishu', enabled: true, ready: true, kind: 'connector' }],
-      availableExperts: ['office-assistant'],
     })
     const store = createStore(file, {
       resolveLaunch: (job) => buildAutomationLaunchRequest(job, facts),

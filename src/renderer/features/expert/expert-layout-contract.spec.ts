@@ -108,6 +108,16 @@ describe('expert collaboration layout contract', () => {
     expect(room).toMatch(/status=\{showStatusFocus \? \{ title: statusFocus\.title, waiting: waitingForProgress, canCancel: canCancelExecution, onCancel:/)
   })
 
+  it('keeps managed Agent selection in the conversation composer instead of the top bar', () => {
+    expect(room).not.toContain('AgentManagementTargetBar')
+    expect(room).not.toMatch(/<DialogueStatusBar[\s\S]*context=/)
+    expect(room).toMatch(/<AgentComposer[\s\S]*agentTargets=\{availableManagedAgentTargets\}/)
+    expect(room).toMatch(/selectedAgentTarget=\{managedAgentTarget\}/)
+    expect(room).toMatch(/onAgentTargetChange=\{isAgentManagementRoom \? selectManagedAgentTarget : undefined\}/)
+    expect(room).toContain('输入 # 选择已有 Agent')
+    expect(css).not.toContain('.wb-agent-space-switcher')
+  })
+
   it('uses a compact, non-wrapping number row in the commission summary', () => {
     expect(css).toMatch(/\.wb-expert-contract dl > div\s*\{[^}]*grid-template-columns:\s*38px minmax\(0, 1fr\);/s)
     expect(css).toMatch(/\.wb-expert-task-number\s*\{[^}]*text-overflow:\s*ellipsis;[^}]*white-space:\s*nowrap;/s)

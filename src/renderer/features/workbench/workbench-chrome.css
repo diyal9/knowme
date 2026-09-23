@@ -17,6 +17,131 @@
 .wb-head[hidden] { display: none !important; }
 .workbench > .wb-head { border-bottom-color: color-mix(in srgb, var(--wb-line, var(--border-default)) 52%, transparent); }
 
+.wb-project-context {
+  position: relative;
+  z-index: 8;
+  flex: 0 0 auto;
+}
+.wb-project-trigger {
+  min-width: 0;
+  max-width: 230px;
+  min-height: 34px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--wb-text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .18s ease, background .18s ease, transform .12s ease;
+}
+.wb-project-trigger:hover,
+.wb-project-trigger.is-open {
+  border-color: color-mix(in srgb, var(--wb-line) 70%, transparent);
+  background: var(--surface-muted);
+}
+.wb-project-trigger:active { transform: translateY(1px); }
+.wb-project-trigger:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.wb-project-trigger > .ico { width: 15px; height: 15px; color: var(--wb-text-muted); }
+.wb-project-trigger > .ico:last-child { width: 12px; height: 12px; color: var(--wb-text-faint); transform: rotate(90deg); }
+.wb-project-trigger.is-open > .ico:last-child { transform: rotate(-90deg); }
+.wb-project-trigger-copy { min-width: 72px; flex: 1; display: block; }
+.wb-project-trigger-copy strong { display: block; overflow: hidden; color: var(--brand-ink); font: 600 13px/1.2 var(--ui); text-overflow: ellipsis; white-space: nowrap; }
+.wb-project-trigger-meta { color: var(--wb-text-faint); font: 500 12px/1 var(--ui); white-space: nowrap; }
+.wb-project-trigger.has-warning .wb-project-trigger-meta { color: var(--danger); }
+
+.wb-project-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: min(276px, calc(100vw - 28px));
+  padding: 6px;
+  border: 1px solid var(--wb-line);
+  border-radius: 10px;
+  background: var(--surface-page);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--brand-ink) 12%, transparent);
+}
+.wb-project-menu-heading { padding: 7px 9px 6px; color: var(--wb-text-faint); font: 600 12px/1 var(--ui); }
+.wb-project-menu-list { max-height: 220px; overflow: auto; }
+.wb-project-menu-list > button {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 9px;
+  display: grid;
+  grid-template-columns: 6px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--wb-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background .16s ease, transform .12s ease;
+}
+.wb-project-menu-list > button:hover { background: var(--surface-muted); }
+.wb-project-menu-list > button.is-active { background: color-mix(in srgb, var(--wb-accent) 7%, transparent); }
+.wb-project-menu-list > button:active { transform: translateY(1px); }
+.wb-project-menu-list > button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+.wb-project-menu-list strong { overflow: hidden; font: 600 13px/1.15 var(--ui); text-overflow: ellipsis; white-space: nowrap; }
+.wb-project-menu-dot { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--wb-line) 82%, transparent); }
+.wb-project-menu-list > button.is-active .wb-project-menu-dot { background: var(--wb-accent); }
+.wb-project-menu-current { color: var(--wb-text-faint); font: 500 12px/1 var(--ui); }
+.wb-project-menu-list > button.is-active .wb-project-menu-current { color: var(--wb-accent); }
+.wb-project-menu-empty { margin: 0; padding: 10px 9px 12px; color: var(--wb-text-muted); font: 400 12px/1.5 var(--ui); }
+.wb-project-manager-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--brand-ink) 18%, transparent);
+}
+.wb-project-manager {
+  width: min(680px, 92vw);
+  max-height: min(620px, 88vh);
+  overflow: hidden;
+  border: 1px solid var(--wb-line);
+  border-radius: 12px;
+  background: var(--surface-page);
+  box-shadow: 0 22px 56px color-mix(in srgb, var(--brand-ink) 16%, transparent);
+}
+.wb-project-manager > header { min-height: 56px; padding: 0 16px 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--wb-line); }
+.wb-project-manager > header h2 { margin: 0; color: var(--brand-ink); font: 600 16px/1.2 var(--ui); }
+.wb-project-manager > header > button { width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: var(--wb-text-muted); font-size: 20px; cursor: pointer; }
+.wb-project-manager > header > button:hover { background: var(--surface-muted); color: var(--brand-ink); }
+.wb-project-manager-body { min-height: 340px; display: grid; grid-template-columns: 184px minmax(0, 1fr); }
+.wb-project-manager-body > nav { padding: 8px; overflow: auto; border-right: 1px solid var(--wb-line); background: color-mix(in srgb, var(--surface-muted) 35%, transparent); }
+.wb-project-manager-body > nav button { width: 100%; min-height: 42px; padding: 0 10px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; border: 0; border-radius: 6px; background: transparent; color: var(--wb-text); cursor: pointer; text-align: left; }
+.wb-project-manager-body > nav button:hover { background: var(--surface-muted); }
+.wb-project-manager-body > nav button.is-active { background: var(--surface-muted); box-shadow: inset 2px 0 0 var(--wb-accent); color: var(--brand-ink); }
+.wb-project-manager-body > nav span { overflow: hidden; font: 600 12px/1.2 var(--ui); text-overflow: ellipsis; white-space: nowrap; }
+.wb-project-manager-body > nav small { color: var(--wb-text-faint); font: 500 12px/1 var(--ui); white-space: nowrap; }
+.wb-project-manager form { padding: 18px 22px 16px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+.wb-project-manager form > label { display: flex; flex-direction: column; gap: 6px; color: var(--wb-text-muted); font: 600 12px/1 var(--ui); }
+.wb-project-manager input,
+.wb-project-manager textarea { width: 100%; padding: 8px 10px; border: 1px solid var(--wb-line); border-radius: 7px; background: var(--surface-page); color: var(--wb-text); font: 400 13px/1.45 var(--ui); resize: vertical; }
+.wb-project-manager input { min-height: 38px; }
+.wb-project-manager textarea { min-height: 76px; }
+.wb-project-manager input:focus,
+.wb-project-manager textarea:focus { outline: none; border-color: var(--wb-accent); box-shadow: 0 0 0 3px var(--wb-accent-soft); }
+.wb-project-manager label > small,
+.wb-project-manager-note { margin: 0; color: var(--wb-text-faint); font: 400 12px/1.5 var(--ui); }
+.wb-project-manager-workspace { min-height: 38px; padding: 0 10px; display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 8px; border-radius: 7px; background: var(--surface-muted); }
+.wb-project-manager-workspace span { color: var(--wb-text-faint); font: 600 12px/1.35 var(--ui); }
+.wb-project-manager-workspace strong { overflow: hidden; color: var(--wb-text-muted); font: 500 12px/1.35 var(--mono, monospace); text-overflow: ellipsis; white-space: nowrap; }
+.wb-project-manager-actions { margin-top: 2px; padding-top: 12px; display: flex; align-items: center; gap: 6px; border-top: 1px solid color-mix(in srgb, var(--wb-line) 72%, transparent); }
+.wb-project-manager-actions button { min-height: 32px; padding: 0 10px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--wb-text-muted); font: 600 12px/1 var(--ui); cursor: pointer; }
+.wb-project-manager-actions button:hover { border-color: color-mix(in srgb, var(--wb-accent) 32%, var(--wb-line)); color: var(--wb-accent); }
+.wb-project-manager-actions button.primary { margin-left: auto; border-color: var(--wb-accent); background: var(--wb-accent); color: white; }
+.wb-project-manager-actions button.danger { color: var(--danger); }
+.wb-project-manager-actions button:disabled { opacity: .5; cursor: default; }
+.wb-project-manager-empty { display: grid; place-items: center; color: var(--wb-text-faint); font: 500 12px/1 var(--ui); }
+
 .workbench > .wb-body {
   flex:1 1 auto;
   min-height:0;
@@ -122,32 +247,110 @@
 .wb-head-detail-actions { display:flex; align-items:center; }
 .wb-head-detail-actions:empty { display:none; }
 .wb-detail-header-back { margin:0; }
-.workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-shelf-search { display:none; }
+.workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-head-search { display:none; }
 .workbench:has(.wb-expert-detail, .wb-workflow-detail) .wb-mode-tabs { display:none; }
 
-/* 搜索框属于 AppShell 常驻顶栏，必须随 chrome 静态加载。 */
-.wb-shelf-search {
-  width: clamp(180px, 26vw, 300px);
-  min-height: 30px;
-  padding: 0 11px;
-  border: 1px solid var(--wb-line);
+/* 搜索入口属于 AppShell 常驻顶栏，展开层必须随 chrome 静态加载。 */
+.wb-head-search {
+  display: flex;
+  align-items: center;
+}
+.wb-search-trigger {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
   border-radius: 8px;
+  background: transparent;
+  color: var(--wb-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, transform 120ms ease;
+}
+.wb-search-trigger .ico { width: 17px; height: 17px; }
+.wb-search-trigger:hover,
+.wb-search-trigger.is-open,
+.wb-search-trigger.has-query {
+  background: color-mix(in srgb, var(--wb-accent) 9%, transparent);
+  color: var(--wb-accent);
+}
+.wb-search-trigger:active { transform: translateY(1px); }
+.wb-search-trigger:focus-visible {
+  outline: 2px solid var(--wb-accent);
+  outline-offset: 2px;
+}
+.wb-search-popover {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 40;
+  width: min(340px, calc(100vw - 28px));
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--wb-line) 84%, transparent);
+  border-radius: 10px;
   background: var(--surface-page);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--brand-ink) 14%, transparent);
+  animation: wb-search-enter 140ms ease-out;
+}
+.wb-search-field {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--wb-line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface-page) 92%, var(--wb-accent-soft));
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  color: var(--wb-text-faint);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.wb-search-field .ico { width: 16px; height: 16px; }
+.wb-search-field:focus-within {
+  border-color: var(--wb-accent);
+  background: var(--surface-page);
+  box-shadow: 0 0 0 3px var(--wb-accent-soft);
+  color: var(--wb-accent);
+}
+.wb-shelf-search {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--wb-text);
   font: 400 13px var(--ui);
 }
 .wb-shelf-search::placeholder { color: var(--wb-text-faint); }
 .wb-shelf-search:focus {
   outline: none;
-  border-color: var(--wb-accent);
-  box-shadow: 0 0 0 3px var(--wb-accent-soft);
+  box-shadow: none;
+}
+@keyframes wb-search-enter {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 900px) {
-  .wb-shelf-search { width: 100%; order: -1; }
+  .wb-project-trigger { max-width: 180px; }
+  .wb-project-trigger-meta { display: none; }
   .wb-head-tools { flex-wrap: wrap; }
   .wb-mode-tabs { order: 1; width: 100%; height: 44px; }
   .wb-mode-tab { min-height: 44px; }
+  .wb-project-manager-body { grid-template-columns: 160px minmax(0, 1fr); }
+}
+
+@media (max-width: 680px) {
+  .wb-project-manager { width: min(520px, 94vw); }
+  .wb-project-manager-body { display: block; min-height: 0; }
+  .wb-project-manager-body > nav { max-height: 104px; border-right: 0; border-bottom: 1px solid var(--wb-line); }
+  .wb-project-manager form { max-height: calc(88vh - 160px); }
+  .wb-project-manager-actions { flex-wrap: wrap; }
+  .wb-project-manager-actions button.primary { margin-left: 0; }
 }
 
 /* 全应用详情页 / 任务间共用的返回控件。放在静态 chrome，避免懒加载面退回浏览器默认样式。 */

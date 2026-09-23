@@ -122,13 +122,10 @@ test('qualification matrix requires evidence for every conditional execution rou
 test('retained route qualification prompts select their declared catalog routes', () => {
   const root = path.join(__dirname, '..')
   const suiteDirs = [
-    'rqa62-product-manager-qualification',
-    'rqa73-office-qualification',
-    'rqa74-research-qualification',
-    'rqa61-software-engineer-qualification',
-    'rqa72-data-analyst-qualification',
-    'web-expert-visual-reference',
+    'rqa69-image-producer-qualification',
+    'rqa76-image-producer-qualification',
     'rqa180-operations-data-analyst-qualification',
+    'rqa181-agent-operations-qualification',
   ]
   for (const suiteDir of suiteDirs) {
     const suite = JSON.parse(fs.readFileSync(path.join(

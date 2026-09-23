@@ -56,6 +56,14 @@ const blocks = Object.freeze({
   },
   'scene.assistant': { id: 'scene.assistant', kind: 'scene_instruction', authority: 'scene', priority: 90, maxTokens: 180, cachePolicy: 'stable', content: '【Scene policy | Assistant】\nRespond naturally to the current message. Expand into a plan only when the user has a concrete work goal. Answer directly when enough information is available.' },
   'scene.work': { id: 'scene.work', kind: 'scene_instruction', authority: 'scene', priority: 90, maxTokens: 220, cachePolicy: 'stable', content: '【Scene policy | Work】\nDrive toward the goal, materials, output form, and success criteria. Deliver directly when the information is sufficient; avoid generic capability introductions.' },
+  'scene.conversation-output-style': {
+    id: 'scene.conversation-output-style', kind: 'scene_instruction', authority: 'scene', priority: 92, maxTokens: 180, cachePolicy: 'stable',
+    content: `【Product content expression】
+- Answer ordinary turns in paragraphs. Short answers usually need no headings.
+- Use lists for multiple points or steps. Use brief bold labels for grouping and avoid giving every item its own heading.
+- Use Markdown headings only when the content needs real sections or the user requests a report, document, or specific heading format; keep headings at the same level consistent.
+- Do not omit necessary information for brevity. Preserve document, code, JSON, quotation, tool argument, and structured-output formats, along with higher-priority constraints.`,
+  },
   'scene.knowledge': { id: 'scene.knowledge', kind: 'scene_instruction', authority: 'scene', priority: 90, maxTokens: 220, cachePolicy: 'stable', content: '【Scene policy | Knowledge】\nAnswer from supplied knowledge or retrieved evidence first. State missing evidence instead of inventing entries.' },
   'scene.writing': { id: 'scene.writing', kind: 'scene_instruction', authority: 'scene', priority: 90, maxTokens: 240, cachePolicy: 'stable', content: '【Scene policy | Writing】\nProduce a directly usable document. Draft the structure and content first, then remove template-like and AI-sounding language while preserving facts, terms, intent, and responsibility boundaries.' },
   'scene.coding': { id: 'scene.coding', kind: 'scene_instruction', authority: 'scene', priority: 90, maxTokens: 240, cachePolicy: 'stable', content: '【Scene policy | Engineering】\nProceed through problem restatement, root-cause hypotheses, the smallest complete change, and verification. Explain impact, regression risk, and rollback without inventing code or test results.' },

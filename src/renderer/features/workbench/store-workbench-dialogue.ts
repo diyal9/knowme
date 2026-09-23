@@ -25,6 +25,11 @@ import {
 import { invokeStreamingGenerate } from '../assistant/store-generate-invoke'
 import { beginAssistantStream, patchLiveAssistantMessage } from '../assistant/store-session'
 import type { ChatMessage } from '../../../shared/api'
+import {
+  AGENT_MANAGEMENT_EXPERT_ID,
+  buildAgentManagementPrompt,
+  formatAgentManagementTargetContext,
+} from '../../../domain/agent-management-target'
 
 function daemonResultOk(raw: unknown): boolean {
   if (!raw || typeof raw !== 'object') return false
@@ -44,6 +49,11 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
   return {
     setWorkbenchComposer: (composer: string) => {
       set({ workbenchDialogue: { ...get().workbenchDialogue, composer } })
+    },
+
+    setWorkbenchSkillRefs: (skillRefs: string[]) => {
+      const normalized = [...new Set(skillRefs.map((item) => String(item || '').trim()).filter(Boolean))]
+      set({ workbenchDialogue: { ...get().workbenchDialogue, skillRefs: normalized } })
     },
 
     addWorkbenchAttachment: (file: { name: string; text?: string }) => {
@@ -66,6 +76,7 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
       const slice = get().workbenchDialogue
       const text = slice.composer.trim()
       const attachment = slice.attachments[0]
+      const skillRefs = [...new Set((slice.skillRefs || []).map((item) => String(item || '').trim()).filter(Boolean))]
       if ((!text && !attachment) || get().isGenerating) return
 
       const displayText = text || (attachment ? `（附件：${attachment.name}）` : '')
@@ -227,6 +238,10 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
         : workbenchWorkflowSessionId(run?.slug || run?.workflowId || 'run')
       const assistant = seedStreamingAssistant(assistantId, runId, userCreatedAt)
       const priorHistory = historyTurns(expertRoom?.messages || run?.dialogueMessages || [])
+      const managementTarget = expertRoom && expertIdentity === AGENT_MANAGEMENT_EXPERT_ID
+        ? expertRoom.managedAgentTarget
+        : null
+      const modelPrompt = buildAgentManagementPrompt(managementTarget, text)
 
       if (expertRoom) {
         set({
@@ -260,7 +275,7 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
         const result = await invokeStreamingGenerate({
           get,
           runId,
-          prompt: text,
+          prompt: modelPrompt,
           displayPrompt: displayText,
           sessionId,
           agentId: expertRoom ? 'general' : role,
@@ -279,7 +294,15 @@ export function createWorkbenchDialogueActions(set: StoreSet, get: StoreGet) {
             userCreatedAt,
           },
           attachment,
-          task: get().run ? { intent: get().run?.brief || get().run?.workflowName, slug: get().run?.slug } : null,
+          skillRefs,
+          task: managementTarget
+            ? {
+                intent: `管理 Agent：${managementTarget.name}`,
+                factualBrief: formatAgentManagementTargetContext(managementTarget),
+              }
+            : get().run
+              ? { intent: get().run?.brief || get().run?.workflowName, slug: get().run?.slug }
+              : null,
         })
         if (get().generateRunId !== runId) return
 

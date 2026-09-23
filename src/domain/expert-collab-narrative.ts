@@ -6,12 +6,23 @@ export type ExpertNarrativeDetail = {
   value: string
 }
 
+export type ExpertNarrativeActivity = {
+  id: string
+  kind: 'commentary' | 'action'
+  body: string
+  createdAt?: string
+}
+
 export type ExpertNarrativeMoment = {
   id: string
   role: 'expert' | 'user'
   body: string
   createdAt?: string
   active?: boolean
+  execution?: {
+    status: string
+    activities: ExpertNarrativeActivity[]
+  }
   disclosure?: {
     label: string
     details: ExpertNarrativeDetail[]
@@ -117,15 +128,17 @@ function progressBody(summary: unknown) {
   return value
 }
 
-function progressDetails(events: WorkbenchTaskEvent[]): ExpertNarrativeDetail[] {
+function progressDetails(events: WorkbenchTaskEvent[]): ExpertNarrativeActivity[] {
   const seen = new Set<string>()
-  return events.flatMap((event) => {
+  return events.flatMap((event, index) => {
     const value = progressBody(event.summary)
     if (!value || seen.has(value)) return []
     seen.add(value)
     return [{
-      label: event.type === 'tool_progress' || event.type === 'tool_completed' ? '执行' : '进展',
-      value,
+      id: eventId(event, index),
+      kind: event.type === 'tool_progress' || event.type === 'tool_completed' ? 'action' as const : 'commentary' as const,
+      body: value,
+      createdAt: event.createdAt,
     }]
   })
 }
@@ -168,7 +181,7 @@ export function buildExpertCollabNarrative(
   function flushProgress() {
     if (!progress.length) return
     const latest = progress.at(-1)!
-    const details = progressDetails(progress.map((item) => item.event))
+    const activities = progressDetails(progress.map((item) => item.event))
     result.push({
       kind: 'moment',
       index: latest.index,
@@ -178,11 +191,10 @@ export function buildExpertCollabNarrative(
         body: progressBody(latest.event.summary),
         createdAt: latest.event.createdAt,
         active: ['starting', 'running', 'revising'].includes(status),
-        disclosure: details.length > 1
-          ? { label: `查看已完成的工作（${details.length}）`, details }
-          : details.length === 1
-            ? { label: '查看执行依据', details }
-            : undefined,
+        execution: {
+          status,
+          activities,
+        },
       },
     })
     progress = []
@@ -315,22 +327,14 @@ export function buildExpertCollabNarrative(
         role: 'expert',
         body,
         active: true,
-        disclosure: status === 'revising'
-          ? undefined
-          : {
-              label: '查看执行进度',
-              details: status === 'starting'
-                ? [
-                    { label: '方案', value: '已确认' },
-                    { label: '当前', value: '正在检查所需能力和材料是否可用' },
-                    { label: '下一步', value: '检查通过后立即按已确认方案执行' },
-                  ]
-                : [
-                    { label: '方案', value: '已确认并进入执行' },
-                    { label: '当前', value: '正在等待首个可展示的执行进展' },
-                    { label: '同步', value: '关键判断和工具进展会继续更新在本对话中' },
-                  ],
-            },
+        execution: {
+          status,
+          activities: [{
+            id: 'expert-active-work-status',
+            kind: 'commentary',
+            body,
+          }],
+        },
       },
     })
   }

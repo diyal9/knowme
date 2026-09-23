@@ -90,7 +90,7 @@ describe('workbench-console-model', () => {
     assert.equal(projection.runs[0].recoverable, false)
   })
 
-  it('requires both an office Agent and meeting connector without faking readiness', () => {
+  it('uses the built-in partner for legacy office launches and only requires the meeting connector', () => {
     const blocked = resolveVerticalPipeline(
       { id: 'office-meeting-to-actions', provenance: { domain: 'office' }, executionBackends: ['local-team'] },
       buildVerticalPipelineFacts({ modes: { modes: [{ id: 'office', providers: [] }] } }),
@@ -104,7 +104,6 @@ describe('workbench-console-model', () => {
       { id: 'office-meeting-to-actions', provenance: { domain: 'office' }, executionBackends: ['local-team'] },
       buildVerticalPipelineFacts({
         connectors: [{ id: 'feishu', kind: 'connector', enabled: true, ready: true }],
-        availableExperts: ['office-assistant'],
       }),
     )
     assert.equal(ready.package.status, 'published')
@@ -158,7 +157,6 @@ describe('workbench-console-model', () => {
   it('returns structured launch request for bound automation when pipeline is ready', () => {
     const facts = buildVerticalPipelineFacts({
       connectors: [{ id: 'feishu', kind: 'connector', enabled: true, ready: true }],
-      availableExperts: ['office-assistant'],
     })
     const launch = buildAutomationLaunchRequest({
       id: 'auto-1',

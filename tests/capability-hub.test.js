@@ -33,7 +33,7 @@ describe('skill hub domain categories', () => {
     assert.ok(feishu.categories.includes('日常办公'))
     assert.ok(feishu.categories.includes('能力包'))
 
-    const office = mapPackSkillToHub({ id: 'office-document', name: '办公文档', ownerPackId: 'game-studio' })
+    const office = mapPackSkillToHub({ id: 'writing-polish', name: '写作润色', ownerPackId: 'game-studio' })
     assert.equal(office.category, '内容写作')
 
     const game = mapPackSkillToHub({ id: 'game-qa-acceptance', name: '游戏测试验收', ownerPackId: 'game-studio' })

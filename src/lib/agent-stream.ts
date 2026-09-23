@@ -149,13 +149,16 @@ function getToolCalls(accumulator) {
   return structured.length ? structured : parseTextToolCalls(accumulator.content)
 }
 
-function getStreamSnapshot(accumulator) {
+function getStreamSnapshot(accumulator, options = {}) {
+  // Text-encoded tool calls are only actionable after a complete response.
+  // Avoid running a regex over the growing answer on every SSE chunk.
+  const parseTextTools = options.parseTextTools !== false
   return {
     content: accumulator.content,
     hasReasoning: accumulator.hasReasoning,
     finishReason: accumulator.finishReason,
     usage: accumulator.usage ? { ...accumulator.usage } : null,
-    toolCalls: getToolCalls(accumulator),
+    toolCalls: parseTextTools ? getToolCalls(accumulator) : toolCallsToArray(accumulator.toolCalls),
   }
 }
 

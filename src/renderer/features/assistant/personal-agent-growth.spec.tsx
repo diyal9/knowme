@@ -6,6 +6,52 @@ import { PersonalAgentGrowthPanel } from './PersonalAgentGrowthPanel'
 describe('personal-agent growth', () => {
   afterEach(() => cleanup())
 
+  it('releases saving state and allows retry after a rejected save', async () => {
+    const save = vi.fn()
+      .mockRejectedValueOnce(new Error('安全存储暂时不可用'))
+      .mockResolvedValueOnce({
+        ok: true,
+        profile: {
+          profileVersion: 3,
+          id: 'my-knowme',
+          agentId: 'personal',
+          profileKind: 'personal' as const,
+          identity: { displayName: '小知', avatar: 'other/partner' },
+          contexts: [],
+          taskPreferences: { domainCapabilities: '产品分析', selfDriveLevel: 'balanced' },
+        },
+      })
+    mockApi({
+      personalAgentGet: async () => ({
+        ok: true,
+        profile: {
+          profileVersion: 3,
+          id: 'my-knowme',
+          agentId: 'personal',
+          profileKind: 'personal',
+          identity: { displayName: '小知', avatar: 'other/partner' },
+          contexts: [],
+          taskPreferences: { domainCapabilities: '产品分析', selfDriveLevel: 'balanced' },
+        },
+      }),
+      personalAgentGrowthList: async () => ({ ok: true, events: [], proposals: [] }),
+      memoryOverview: async () => ({ patterns: [], recent: [], stats: {} }),
+      personalAgentSave: save,
+    })
+    render(<PersonalAgentGrowthPanel onClose={() => undefined} />)
+    await waitFor(() => expect(screen.getByTestId('personal-preview-capabilities')).toHaveTextContent('产品分析'))
+    fireEvent.click(screen.getByRole('button', { name: '编辑工作侧重' }))
+    fireEvent.change(screen.getByLabelText('工作侧重'), { target: { value: '产品分析\n会议总结' } })
+
+    fireEvent.click(screen.getByRole('button', { name: '保存更改' }))
+    await waitFor(() => expect(screen.getByText('安全存储暂时不可用')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: '保存更改' })).toBeEnabled()
+
+    fireEvent.click(screen.getByRole('button', { name: '保存更改' }))
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(screen.getByText('伙伴档案已保存')).toBeInTheDocument())
+  })
+
   it('configures partner soul, capabilities, collaboration and self-drive', async () => {
     const save = vi.fn(async (_payload: Record<string, unknown>) => ({
       ok: true,
@@ -93,5 +139,38 @@ describe('personal-agent growth', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '前往记忆与变更' }))
     expect(screen.getByTestId('personal-memory-pattern').closest('section')).not.toHaveClass('personal-tab-inactive')
+  })
+
+  it('keeps memory review usable when the bridge rejects', async () => {
+    mockApi({
+      personalAgentGet: async () => ({
+        ok: true,
+        profile: {
+          profileVersion: 3,
+          id: 'my-knowme',
+          agentId: 'personal',
+          profileKind: 'personal',
+          identity: { displayName: '小知', avatar: 'other/partner' },
+          contexts: [],
+          taskPreferences: {},
+        },
+      }),
+      personalAgentGrowthList: async () => ({ ok: true, events: [], proposals: [] }),
+      memoryOverview: async () => ({
+        patterns: [
+          { id: 'p1', kind: 'preference', summary: '喜欢简洁回答', prompt_state: 'pending', count: 3, review_ready: true },
+        ],
+        recent: [],
+        stats: {},
+      }),
+      memoryReviewPattern: async () => { throw new Error('记忆服务暂时不可用') },
+    })
+
+    render(<PersonalAgentGrowthPanel onClose={() => undefined} initialTab="memory" />)
+    const confirm = await screen.findByRole('button', { name: '确认记住' })
+    fireEvent.click(confirm)
+
+    await waitFor(() => expect(screen.getByText('记忆服务暂时不可用')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: '确认记住' })).toBeEnabled()
   })
 })

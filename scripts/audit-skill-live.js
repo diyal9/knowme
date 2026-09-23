@@ -17,10 +17,9 @@ const PROMPTS = {
   'feishu-meeting-summary': '不要读取私人内容；给出会议总结应输出的最小结构。',
   'feishu-related-chats': '不要读取私人内容；说明检索相关聊天时如何限定范围并避免越权。',
   'feishu-today-priority': '不要读取私人内容；给出生成今日优先级时需要汇总的来源和排序规则。',
-  'office-document': '将“周五下午三点评审新版本，请产品和研发参加”写成简短会议通知。',
-  'office-document-finalize': '把“结论：周五发布。风险：接口波动。”整理成可发送的定稿格式。',
-  'office-outline-draft': '按“背景、问题、方案、下一步”提纲写一份不超过 180 字的短稿。',
-  'office-requirement-doc': '把“任务失败后允许一键重试”写成包含目标、范围、验收标准的简版需求。',
+  'office-collaboration-method': '将“周五下午三点评审新版本，请产品和研发参加”整理成可直接发送的会议通知。',
+  'meeting-evidence-method': '从“产品建议周五发布，研发确认接口仍有波动，负责人李明周四复测”中区分提议、风险和行动项。',
+  'action-extraction': '从“李明周四复测接口，结果发群里；发布日待确认”中提取责任、期限和待确认项。',
 }
 
 async function main() {

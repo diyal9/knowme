@@ -24,6 +24,7 @@ import type {
   KnowledgeHit,
   KnowledgeLintIssue,
   KnowledgeProviderItem,
+  ManagedAgentTarget,
   ProjectRef,
   WorkbenchAutomationJob,
   WorkbenchAutomationTemplate,
@@ -90,6 +91,8 @@ export interface ExpertRoomState {
   skills: string[]
   connectors: string[]
   knowledgeRefs: string[]
+  /** 能力管家当前绑定的 Agent 治理对象。 */
+  managedAgentTarget?: ManagedAgentTarget
   /** 正式任务讨论所依据的当前任务与成果快照；不用于驱动任务执行。 */
   discussionContext?: ExpertDiscussionContext
 }
@@ -97,6 +100,8 @@ export interface ExpertRoomState {
 export interface WorkbenchDialogueSlice {
   composer: string
   attachments: ComposerAttachment[]
+  /** Canonical capability ids selected from the slash picker for the next turn. */
+  skillRefs?: string[]
 }
 
 export interface DaemonOverviewCache {
@@ -139,6 +144,8 @@ export interface SessionSlice {
   messages: ChatMessage[]
   composer: string
   attachments: ComposerAttachment[]
+  /** Canonical capability ids selected from the slash picker for the next turn. */
+  skillRefs?: string[]
 }
 
 export interface ComposerAttachment {
@@ -213,6 +220,8 @@ export interface AppState {
   /** Stable partner label loaded before empty-home identity text is shown. */
   assistantPartnerName: string
   assistantSkills: CapabilityItem[]
+  /** Installed skill ids keyed by expert id; used to scope the slash picker. */
+  assistantSkillIdsByExpert: Record<string, string[]>
   assistantStatus: string
   assistantProcessFeed: string
   assistantContextInfo: AgentContextInfo | null
@@ -333,11 +342,12 @@ export interface AppState {
   archiveTasks: (ids: string[]) => Promise<void>
   openAutomationCenter: () => void
   openWorkbenchRail: () => void
-  openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string }) => void
+  openExpertRoom: (room: { id: string; taskId?: string; taskStatus?: string; expertId?: string; name: string; goal?: string; managedAgentTarget?: ManagedAgentTarget }) => void
   closeExpertRoom: () => void
   setExpertRoomGoal: (goal: string) => void
   patchExpertRoomBindings: (patch: Partial<Pick<ExpertRoomState, 'skills' | 'connectors' | 'knowledgeRefs'>>) => void
   setWorkbenchComposer: (v: string) => void
+  setWorkbenchSkillRefs: (refs: string[]) => void
   addWorkbenchAttachment: (file: ComposerAttachment) => void
   removeWorkbenchAttachment: (name: string) => void
   sendWorkbenchMessage: () => void
@@ -349,6 +359,7 @@ export interface AppState {
   openDaemonTaskSlug: (slug: string, meta?: { name?: string }) => Promise<void>
   updateStudioNodeFields: (nodeId: string, patch: Record<string, unknown>) => void
   setComposer: (v: string) => void
+  setComposerSkillRefs: (refs: string[]) => void
   sendMessage: (overrideText?: string) => void
   stopGenerate: () => void
   newSession: () => void

@@ -29,6 +29,7 @@ async function runPrepareContext(deps) {
     cancelled,
     checkAbort,
     commitCanonicalAnswer,
+    emitCanonicalAnswerCommitted,
     buildResult,
     runPhases,
     metrics,
@@ -66,7 +67,7 @@ async function runPrepareContext(deps) {
       runPhase: RunPhase.VERIFY_CLAIMS,
     })
     enterPhase(RunPhase.PERSIST)
-    const blockedCanonical = commitCanonicalAnswer(blockedText)
+    const blockedCanonical = commitCanonicalAnswer(blockedText, { deferEvent: true })
     const turnIdentity = resolveTurnIdentity(input, runId)
     const assistantMessage = withConversationIdentity({
       id: turnIdentity.assistantMessageId,
@@ -93,6 +94,7 @@ async function runPrepareContext(deps) {
       protocolVersion: OUTPUT_PROTOCOL_VERSION,
       ui: blockedCanonical.ui,
     })
+    emitCanonicalAnswerCommitted(blockedCanonical)
     enterPhase(RunPhase.DONE)
     emitTerminal(EventType.RUN_COMPLETED, {
       title: '执行完成',

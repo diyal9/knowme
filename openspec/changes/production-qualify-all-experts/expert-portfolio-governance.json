@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "status": "active",
-  "updatedAt": "2026-09-19",
-  "objective": "只保留少量职责独立、具备工具与验证闭环的专家，并对其进行生产资格认证；退出角色的历史任务和兼容包直接清理。Crawl4AI专家与舆情专家暂缓纳入当前认证批次，保留能力包供后续重新启用。",
+  "updatedAt": "2026-09-20",
+  "objective": "只保留少量职责独立、具备工具与验证闭环的专家，并对其进行生产资格认证；日常办公由智能伙伴调用 Skill 完成。退出角色的历史任务保留为只读记录，内置专家包退出目录。Crawl4AI专家与舆情专家暂缓纳入当前认证批次，保留能力包供后续重新启用。",
   "policy": {
     "expertEligibility": [
       "需要持续上下文和多轮专业判断",
@@ -19,116 +19,108 @@
       "工作流、模式绑定和用户入口已迁移",
       "原专业方法已由目标专家 Skill 或平台工作流承接",
       "自定义或用户管理专家绝不自动删除",
-      "退出内置专家的安装记录、任务记录和目录包均已删除",
+      "退出内置专家的安装记录和目录包已删除，历史任务保留为只读记录",
       "保留专家及其工作流完成安装、升级和重开验证"
     ]
   },
   "targetSummary": {
-    "keep": 7,
-    "merge_to_expert": 12,
-    "skill_only": 3,
+    "keep": 3,
+    "merge_to_expert": 2,
+    "skill_only": 18,
     "workflow_only": 1,
     "deferred": 2,
-    "totalBundledExperts": 25
+    "totalBundledExperts": 26
   },
   "entries": [
     {
       "id": "product-manager",
       "category": "product-discovery",
-      "disposition": "keep",
-      "reason": "需要跨轮维护事实、规则、状态、验收和版本连续性。",
+      "disposition": "skill_only",
+      "reason": "移除内置专家；产品定义、需求评审和研究方法保留为 Skill，后续专业 Agent 统一由 Agent 管理专家创建。",
       "retainedCapabilities": ["product-definition-method", "requirement-review", "research-evidence-analysis"]
     },
     {
       "id": "requirement-reviewer",
       "category": "product-discovery",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "product-manager",
-      "reason": "需求评审是产品定义生命周期中的评审模式，不需要独立身份。",
+      "disposition": "skill_only",
+      "reason": "需求评审是可组合的产品方法，不保留独立专家身份；后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["requirement-review"]
     },
     {
       "id": "user-researcher",
       "category": "product-discovery",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "product-manager",
-      "reason": "当前能力主要是材料分析和访谈设计，尚无独立招募、研究执行或证据工具闭环。",
+      "disposition": "skill_only",
+      "reason": "材料分析和访谈设计保留为研究 Skill，后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["research-evidence-analysis"]
     },
     {
       "id": "office-partner",
       "category": "office-operations",
-      "disposition": "keep",
-      "reason": "具有飞书路由、办公上下文和多类协作任务的持续执行边界。",
+      "disposition": "skill_only",
+      "reason": "日常办公与智能伙伴的基础职责重叠，飞书读取、会议整理和行动项提取作为可组合 Skill 提供。",
       "retainedCapabilities": ["office-collaboration-method", "meeting-evidence-method", "action-extraction"]
     },
     {
       "id": "meeting-scribe",
       "category": "office-operations",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "office-partner",
-      "reason": "会议纪要是办公协作的证据化路由，连接器和上下文与办公专家重叠。",
+      "disposition": "skill_only",
+      "reason": "会议纪要由智能伙伴按需调用证据化会议与飞书 Skill，不保留独立专家身份。",
       "retainedCapabilities": ["meeting-evidence-method", "feishu-meeting-summary"]
     },
     {
       "id": "action-owner",
       "category": "office-operations",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "office-partner",
-      "reason": "行动项提取与跟踪属于办公协作结果处理，不构成独立专家身份。",
+      "disposition": "skill_only",
+      "reason": "行动项提取属于智能伙伴的日常办公处理，通过独立 Skill 保留方法边界。",
       "retainedCapabilities": ["action-extraction"]
     },
     {
       "id": "research-analyst",
       "category": "research-knowledge",
-      "disposition": "keep",
-      "reason": "需要来源规划、原文读取、证据冲突判断和研究结论迭代。",
+      "disposition": "skill_only",
+      "reason": "移除内置专家；研究综合、证据核查和知识治理保留为 Skill，后续专业 Agent 统一由 Agent 管理专家创建。",
       "retainedCapabilities": ["research-synthesis-method", "evidence-verification", "knowledge-curation-method", "knowledge-steward"]
     },
     {
       "id": "fact-checker",
       "category": "research-knowledge",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "research-analyst",
-      "reason": "事实核查是研究分析中的严格证据模式，共享来源、工具和可信度模型。",
+      "disposition": "skill_only",
+      "reason": "事实核查保留为严格证据 Skill，后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["evidence-verification"]
     },
     {
       "id": "knowledge-curator",
       "category": "research-knowledge",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "research-analyst",
-      "reason": "当前知识治理能力以材料整理和知识方法为主，先作为研究分析师的知识策展模式，不保留独立专家身份。",
+      "disposition": "skill_only",
+      "reason": "材料整理和知识治理保留为知识策展 Skill，后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["knowledge-curation-method", "knowledge-steward"]
     },
     {
       "id": "software-engineer",
       "category": "software-delivery",
-      "disposition": "keep",
-      "reason": "需要代码上下文、真实编辑、测试验证、失败恢复和可审查变更闭环。",
+      "disposition": "skill_only",
+      "reason": "移除内置专家；软件变更、架构决策、测试和审查能力保留为 Skill，后续专业 Agent 统一由 Agent 管理专家创建。",
       "retainedCapabilities": ["software-change-verification", "architecture-decision", "qa-test-design", "code-review"]
     },
     {
       "id": "solution-architect",
       "category": "software-delivery",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "software-engineer",
-      "reason": "当前只有方案文本能力，缺少独立架构资产和验证工具；先作为开发专家的架构模式。",
+      "disposition": "skill_only",
+      "reason": "架构决策保留为软件交付 Skill，后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["architecture-decision"]
     },
     {
       "id": "qa-engineer",
       "category": "software-delivery",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "software-engineer",
-      "reason": "当前没有独立测试执行基础设施，先作为软件开发工程师的质量验证模式；方法边界与独立证据要求继续保留。",
+      "disposition": "skill_only",
+      "reason": "测试设计和代码审查保留为质量验证 Skill，后续按需由 Agent 管理专家装配。",
       "retainedCapabilities": ["qa-test-design", "code-review"]
     },
     {
       "id": "data-analyst",
       "category": "data-decision",
-      "disposition": "keep",
-      "reason": "需要数据质量、计算、分析限制、因果边界和决策建议的完整闭环。",
+      "disposition": "skill_only",
+      "reason": "通用数据分析主要由可组合方法与只读计算组成，改由智能伙伴按需调用 Skill；真实运营数据闭环由数据靓仔承担。",
       "retainedCapabilities": ["data-analysis-method", "business-metrics-analysis", "business-cause-analysis", "data-report-method"]
     },
     {
@@ -141,17 +133,15 @@
     {
       "id": "business-insight-analyst",
       "category": "data-decision",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "data-analyst",
-      "reason": "商业洞察是数据分析的解释与决策模式，共享指标、因果和证据边界。",
+      "disposition": "skill_only",
+      "reason": "商业洞察是可组合的数据解释方法，由智能伙伴按需调用；手游运营闭环由数据靓仔承担。",
       "retainedCapabilities": ["business-metrics-analysis", "business-cause-analysis", "business-insight-report"]
     },
     {
       "id": "data-report-editor",
       "category": "data-decision",
-      "disposition": "merge_to_expert",
-      "targetExpertId": "data-analyst",
-      "reason": "数据报告是分析结果的表达阶段，不需要独立任务身份。",
+      "disposition": "skill_only",
+      "reason": "数据报告是分析结果的表达方法，由智能伙伴按需调用，不需要独立专家身份。",
       "retainedCapabilities": ["data-report-method"]
     },
     {
@@ -182,21 +172,21 @@
       "category": "content-expression",
       "disposition": "skill_only",
       "reason": "当前只生成汇报叙事和逐页大纲，没有真实演示文稿制作与校验闭环。",
-      "retainedCapabilities": ["decision-presentation-method", "writing-polish"]
+      "retainedCapabilities": ["writing-polish"]
     },
     {
       "id": "content-strategist",
       "category": "content-expression",
       "disposition": "skill_only",
       "reason": "当前属于一次性内容策略变换，没有独立工具、权限或持续执行状态。",
-      "retainedCapabilities": ["content-strategy-method", "writing-polish"]
+      "retainedCapabilities": ["writing-polish"]
     },
     {
       "id": "longform-editor",
       "category": "content-expression",
       "disposition": "skill_only",
       "reason": "长文编辑是可复用写作方法，当前没有独立发布、版本或事实核验工具闭环。",
-      "retainedCapabilities": ["longform-editing-method", "writing-polish"]
+      "retainedCapabilities": ["writing-polish"]
     },
     {
       "id": "external-capability-importer",
@@ -204,7 +194,14 @@
       "disposition": "workflow_only",
       "targetWorkflowId": "capability-import",
       "reason": "能力导入是平台管理流程，应由能力中心提供预检、确认、执行和回滚，不应人格化为专家。",
-      "retainedCapabilities": ["capability-import-assurance"]
+      "retainedCapabilities": ["capability-import"]
+    },
+    {
+      "id": "agent-operations",
+      "category": "platform-governance",
+      "disposition": "keep",
+      "reason": "承担专业 Agent 的草稿建档、定义调优、真实测试、独立评估、受控发布和版本回滚，具有独立的 Agent Registry 权限与生命周期状态闭环。",
+      "retainedCapabilities": ["agent-registry-operations"]
     },
     {
       "id": "crawl4ai-expert",

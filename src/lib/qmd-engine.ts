@@ -95,7 +95,13 @@ function fallbackQuery(queryText, docs = [], opts = {}) {
 }
 
 async function fallbackQueryAsync(queryText, docs, opts = {}) {
-  let hits = fallbackQuery(queryText, docs, opts).hits
+  // The fallback scorer is pure CPU work over every document. Keep its
+  // semantics identical to fallbackQuery, but yield between batches so a
+  // large local knowledge base cannot freeze Electron's main event loop.
+  let hits = await knowledgeRank.rankHitsAsync(queryText, docs, {
+    ...opts,
+    topK: Number.isFinite(opts.topK) ? opts.topK : DEFAULT_TOPK,
+  })
   if (typeof opts.embed === 'function' && hits.length >= 2) {
     try {
       hits = await knowledgeRank.rerankHits(hits, {

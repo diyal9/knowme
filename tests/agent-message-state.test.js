@@ -79,9 +79,11 @@ describe('agent-message-state', () => {
     state = reduceMessageEvent(state, evt(2, 'stage', { id: 's2', title: 'B', status: 'pending' })).state
     const dup = reduceMessageEvent(state, evt(2, 'stage', { id: 's2b', title: 'B2', status: 'pending' }))
     assert.equal(dup.changed, false)
+    assert.equal(dup.decision, 'duplicate')
     assert.equal(state.counters.duplicate, 1)
     const late = reduceMessageEvent(state, evt(1, 'stage', { id: 's0', title: 'Z', status: 'pending' }))
     assert.equal(late.changed, false)
+    assert.equal(late.decision, 'late')
     assert.equal(state.counters.late, 1)
   })
 

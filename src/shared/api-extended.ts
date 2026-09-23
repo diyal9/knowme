@@ -415,6 +415,12 @@ export interface KnowMeExtendedApi {
   expertGet?: (expertId: string) => Promise<unknown>
   expertSave?: (payload: Record<string, unknown>) => Promise<unknown>
   expertDelete?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryVerify?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryPreview?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryCommit?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryRevisions?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryDraftGet?: (payload: Record<string, unknown>) => Promise<unknown>
+  agentRegistryDraftSave?: (payload: Record<string, unknown>) => Promise<unknown>
   checkForUpdates?: () => Promise<unknown>
   attentionNotify?: (payload: AttentionPayload) => Promise<unknown>
   attentionFocusState?: () => Promise<unknown>

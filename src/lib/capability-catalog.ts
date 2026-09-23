@@ -34,6 +34,7 @@ function normalizeCatalogEntry(raw = {}) {
     originName: String(raw.originName || '').trim(),
     nameSource: String(raw.nameSource || '').trim(),
     description: String(raw.description || '').trim(),
+    avatar: String(raw.avatar || '').trim(),
     version: String(raw.version || '1.0.0').trim(),
     source: String(raw.source || 'curated').trim(),
     trust: String(raw.trust || 'bundled').trim(),
@@ -49,12 +50,16 @@ function normalizeCatalogEntry(raw = {}) {
     outputs: Array.isArray(raw.outputs) ? raw.outputs : [],
     skills: Array.isArray(raw.skills) ? raw.skills : [],
     connectors: Array.isArray(raw.connectors) ? raw.connectors : [],
+    optionalConnectors: Array.isArray(raw.optionalConnectors) ? raw.optionalConnectors : [],
     knowledgeRefs: Array.isArray(raw.knowledgeRefs) ? raw.knowledgeRefs : [],
     sop: String(raw.sop || '').trim(),
     useCases: Array.isArray(raw.useCases) ? raw.useCases.map(String) : [],
     boundaries: Array.isArray(raw.boundaries) ? raw.boundaries.map(String) : [],
     risk: raw.risk && typeof raw.risk === 'object' ? raw.risk : { level: 'low', reasons: [] },
     provenance: raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : {},
+    qualification: raw.qualification && typeof raw.qualification === 'object'
+      ? raw.qualification
+      : raw.manifest?.metadata?.knowme?.qualification,
     lifecycle: raw.lifecycle && typeof raw.lifecycle === 'object'
       ? {
           state: String(raw.lifecycle.state || 'active').trim() || 'active',

@@ -268,11 +268,17 @@ export function extractImageUrls(text: string): string[] {
   const source = String(text || '')
     .replace(/\\([()])/g, '$1')
   const found = new Set<string>()
-  const markdown = /!?\[[^\]]*\]\(([^)\s]+)\)/g
+  const markdown = /(!?)\[[^\]]*\]\(([^)\s]+)\)/g
   const html = /<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi
   const bare = /https?:\/\/[^\s)]+\.(?:png|jpe?g|gif|webp|svg)(?:\?[^\s)]*)?/gi
   let match: RegExpExecArray | null
-  while ((match = markdown.exec(source))) found.add(match[1])
+  while ((match = markdown.exec(source))) {
+    const href = match[2]
+    const explicitImage = match[1] === '!'
+    const imageLikeTarget = /^(?:data:image\/|blob:)/i.test(href)
+      || /\.(?:png|jpe?g|gif|webp|svg)(?:[?#].*)?$/i.test(href)
+    if (explicitImage || imageLikeTarget) found.add(href)
+  }
   while ((match = html.exec(source))) found.add(match[1])
   while ((match = bare.exec(source))) found.add(match[0])
   return [...found].filter((url) => /^(?:https?:\/\/|data:image\/|blob:|file:|[A-Za-z]:[\\/]|\.\.?[\\/]|\/)/i.test(url))

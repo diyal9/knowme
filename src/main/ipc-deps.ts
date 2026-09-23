@@ -153,6 +153,7 @@ function agentDeps(ctx) {
     localTitleFromParagraph: ctx.localTitleFromParagraph,
     ensureAgentSession: ctx.ensureAgentSession,
     saveAgentSessions: ctx.saveAgentSessions,
+    saveAgentSessionsAsync: ctx.saveAgentSessionsAsync,
     loadAgentSessions: ctx.loadAgentSessions,
     buildEmbedFn: ctx.buildEmbedFn,
     requestAgentCompletion: ctx.requestAgentCompletion,

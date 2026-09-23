@@ -19,7 +19,7 @@ describe('expert portfolio retirement', () => {
     const exiting = governance.entries.filter((entry) => (
       ['merge_to_expert', 'skill_only', 'workflow_only'].includes(entry.disposition)
     ))
-    assert.equal(exiting.length, 16)
+    assert.equal(exiting.length, 21)
 
     for (const decision of exiting) {
       const item = catalog.find((entry) => entry.kind === 'expert' && entry.id === decision.id)
@@ -33,13 +33,13 @@ describe('expert portfolio retirement', () => {
     const retainedIds = governance.entries.filter((entry) => entry.disposition === 'keep').map((entry) => entry.id).sort()
     const eligibleIds = catalog.filter(isExpertAvailableForNewTask).map((entry) => entry.id).sort()
     assert.deepEqual(eligibleIds, retainedIds)
-    assert.equal(retainedIds.length, 7)
+    assert.equal(retainedIds.length, 3)
   })
 
   it('routes skill-only and workflow-only roles to generic capability surfaces', () => {
     const catalog = loadBundledCatalog(ROOT).entries
     const skillOnly = governance.entries.filter((entry) => entry.disposition === 'skill_only')
-    assert.equal(skillOnly.length, 3)
+    assert.equal(skillOnly.length, 18)
     for (const decision of skillOnly) {
       const successorId = decision.retainedCapabilities[0]
       const successor = catalog.find((entry) => entry.kind === 'skill' && entry.id === successorId)
@@ -61,9 +61,11 @@ describe('expert portfolio retirement', () => {
     const items = loadBundledCatalog(ROOT).entries.filter((entry) => entry.kind === 'expert')
     const modes = [{ id: 'all', bindings: items.map((entry) => ({ expertId: entry.id })) }]
     const visible = workbenchHomeExperts(items, modes)
-    assert.equal(visible.length, 7)
+    assert.equal(visible.length, 3)
+    assert.equal(visible.some((entry) => entry.id === 'office-partner'), false)
+    assert.equal(visible.some((entry) => entry.id === 'data-analyst'), false)
     assert.equal(visible.some((entry) => entry.id === 'requirement-reviewer'), false)
-    assert.equal(visible.some((entry) => entry.id === 'product-manager'), true)
+    assert.equal(visible.some((entry) => entry.id === 'product-manager'), false)
     assert.equal(visible.some((entry) => entry.id === 'crawl4ai-expert'), false)
     assert.equal(visible.some((entry) => entry.id === 'sentiment-opinion-expert'), false)
   })

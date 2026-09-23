@@ -30,11 +30,40 @@ type CloseTabResult = {
   createdSessionId?: string | null
 }
 
+function parseExpertSkillBindings(raw: unknown): Record<string, string[]> {
+  const result = raw && typeof raw === 'object' && !Array.isArray(raw)
+    ? raw as { items?: unknown }
+    : {}
+  const items = Array.isArray(result.items) ? result.items : []
+  const bindings: Record<string, string[]> = {}
+  for (const value of items) {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) continue
+    const item = value as { id?: unknown; installed?: unknown; enabled?: unknown; skills?: unknown }
+    const id = String(item.id || '').trim()
+    if (!id || item.installed === false || item.enabled === false || !Array.isArray(item.skills)) continue
+    bindings[id] = [...new Set(item.skills.map((skill) => {
+      if (typeof skill === 'string') return skill.trim()
+      if (skill && typeof skill === 'object' && !Array.isArray(skill)) {
+        return String((skill as { id?: unknown }).id || '').trim()
+      }
+      return ''
+    }).filter(Boolean))]
+  }
+  return bindings
+}
+
 export function createAssistantSlice(set: StoreSet, get: StoreGet) {
   return {
     ...createAssistantModeActions(set, get),
     setComposer: (composer: string) => {
       set((state) => ({ sessionStates: patchSession(state.sessionStates, get().activeSessionId, { composer }) }))
+    },
+
+    setComposerSkillRefs: (skillRefs: string[]) => {
+      const normalized = [...new Set(skillRefs.map((item) => String(item || '').trim()).filter(Boolean))]
+      set((state) => ({
+        sessionStates: patchSession(state.sessionStates, get().activeSessionId, { skillRefs: normalized }),
+      }))
     },
 
     addComposerAttachment: (file: { name: string; kind?: 'text' | 'image'; text?: string; mimeType?: string; dataUrl?: string }) => {
@@ -231,11 +260,12 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
 
     loadAssistantChrome: async () => {
       try {
-        const [models, profile, partnerResult, skills, providers] = await Promise.all([
+        const [models, profile, partnerResult, skills, experts, providers] = await Promise.all([
           api()?.llmModels?.(),
           api()?.llmProfile?.(),
           api()?.personalAgentGet?.(),
           api()?.capabilityList?.({ kind: 'skill' }),
+          api()?.capabilityList?.({ kind: 'expert' }),
           api()?.knowledgeProviderList?.().catch(() => null),
         ])
         const { groups, presets, defaultModelId } = parseAssistantModelCatalog(models)
@@ -250,6 +280,7 @@ export function createAssistantSlice(set: StoreSet, get: StoreGet) {
           assistantModelId: parseAssistantProfileModel(profile, defaultModelId),
           assistantPartnerName,
           assistantSkills: parseAssistantSkills(skills),
+          assistantSkillIdsByExpert: parseExpertSkillBindings(experts),
           ...(providerList.length ? {
             knowledgeProviders: providerList,
             knowledgeActiveProviderId: providers?.activeProviderId || providerList[0]?.id || get().knowledgeActiveProviderId,

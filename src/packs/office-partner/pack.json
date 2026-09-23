@@ -1,10 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "office-partner",
-  "name": "智能办公能力包",
-  "description": "日常办公场景：文档写作、飞书协作、今日优先级，绑定办公 Expert 与飞书连接器。",
-  "version": "1.2.0",
-  "expert": "office-partner",
+  "name": "日常办公技能包",
+  "description": "为智能伙伴提供文档写作、会议整理、行动项和飞书协作 Skills。",
+  "version": "1.4.0",
   "skills": [
     "office-collaboration-method",
     "meeting-evidence-method",
@@ -14,10 +13,6 @@
     "feishu-meeting-summary",
     "feishu-today-priority",
     "feishu-doc-kb",
-    "office-requirement-doc",
-    "office-document",
-    "office-outline-draft",
-    "office-document-finalize",
     "visual-brief-prompt"
   ],
   "connectors": ["feishu"],
@@ -34,11 +29,10 @@
   },
   "ui": {
     "emptyStateKicker": "智能办公",
-    "emptyStateHero": "KnowMe 办公伙伴",
-    "emptyStateSub": "从今日优先级与飞书连接开始；写作任务与文档润色一键开工。"
+    "emptyStateHero": "我的 KnowMe",
+    "emptyStateSub": "由伙伴直接处理今日优先级、飞书信息、会议整理与文档写作。"
   },
   "bundledCapabilities": {
-    "expert": "office-partner",
     "catalogRoot": "../../catalog"
   }
 }

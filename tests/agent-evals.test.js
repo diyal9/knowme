@@ -33,7 +33,7 @@ test('AgentEvals scores only the focused production expert roster', () => {
   assert.ok(report.agents.every(item => item.expertTitle.state === 'pending_evidence' && item.expertTitle.eligible === false))
   assert.deepEqual(report.expertTitleSummary, { eligible: 0, notEligible: 0, pendingEvidence: report.total })
   assert.equal(report.agents.find(item => item.agentId === 'image-producer')?.dimensions.skills, 100)
-  assert.equal(report.agents.find(item => item.agentId === 'product-manager')?.dimensions.skills, 100)
+  assert.equal(report.agents.find(item => item.agentId === 'agent-operations')?.dimensions.skills, 100)
   assert.equal(report.averageOverallScore, null)
   assert.equal(report.version, '3.2.0')
 })

@@ -130,9 +130,6 @@ function readJson(file) {
 
 function renameWithRetrySync(src, dest, options = {}) {
   const retries = Number.isInteger(options.retries) ? Math.max(0, options.retries) : 4
-  const delays = Array.isArray(options.delays) && options.delays.length
-    ? options.delays
-    : [20, 50, 100, 200]
   const renameSync = typeof options.renameSync === 'function' ? options.renameSync : fs.renameSync
   let lastError = null
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -143,10 +140,9 @@ function renameWithRetrySync(src, dest, options = {}) {
       lastError = error
       const retryable = ['EPERM', 'EACCES', 'EBUSY'].includes(error?.code)
       if (!retryable || attempt >= retries) break
-      const delay = Number(delays[Math.min(attempt, delays.length - 1)]) || 0
-      if (delay > 0) {
-        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay)
-      }
+      // Never sleep synchronously here: this helper is used from the Electron
+      // main process and Atomics.wait blocks the event loop. The bounded retry
+      // loop still handles a lock that clears between attempts.
     }
   }
   return { ok: false, error: lastError }
@@ -237,6 +233,7 @@ function normalizeEntry(raw = {}) {
       originName: String(raw.originName || '').trim(),
       nameSource: String(raw.nameSource || '').trim(),
       description: String(raw.description || '').trim(),
+      avatar: String(raw.avatar || '').trim(),
       manifest,
       dependencies: manifest?.dependencies || (Array.isArray(raw.dependencies) ? raw.dependencies : []),
       permissions: manifest?.permissions || (raw.permissions && typeof raw.permissions === 'object' ? raw.permissions : {}),
@@ -244,6 +241,17 @@ function normalizeEntry(raw = {}) {
       outputs: manifest?.outputs || (Array.isArray(raw.outputs) ? raw.outputs : []),
       risk: manifest?.risk || (raw.risk && typeof raw.risk === 'object' ? raw.risk : { level: 'low', reasons: [] }),
       provenance: manifest?.provenance || (raw.provenance && typeof raw.provenance === 'object' ? raw.provenance : {}),
+      skills: Array.isArray(raw.skills) ? raw.skills.map(String) : [],
+      connectors: Array.isArray(raw.connectors) ? raw.connectors.map(String) : [],
+      optionalConnectors: Array.isArray(raw.optionalConnectors) ? raw.optionalConnectors.map(String) : [],
+      knowledgeRefs: Array.isArray(raw.knowledgeRefs) ? raw.knowledgeRefs.map(String) : [],
+      sop: String(raw.sop || '').trim(),
+      useCases: Array.isArray(raw.useCases) ? raw.useCases.map(String) : [],
+      boundaries: Array.isArray(raw.boundaries) ? raw.boundaries.map(String) : [],
+      lifecycle: raw.lifecycle && typeof raw.lifecycle === 'object' ? raw.lifecycle : undefined,
+      qualification: raw.qualification && typeof raw.qualification === 'object'
+        ? raw.qualification
+        : manifest?.metadata?.knowme?.qualification,
     },
   }
 }

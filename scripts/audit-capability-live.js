@@ -5,7 +5,6 @@ const path = require('path')
 const { _electron: electron } = require('playwright')
 
 const CASES = [
-  ['office-partner', '把“周三完成首页评审，李明负责，风险是接口延期”整理成可直接发送的工作同步，控制在 160 字内。'],
   ['product-manager', '为“专家任务支持一键重试”写一份极简需求说明，包含目标、范围和两条验收标准。'],
   ['creative-director', '为 KnowMe 专家协作功能提出一个克制的发布传播概念，给出核心概念和一句主文案。'],
   ['presentation-writer', '把“本周完成专家安装和任务闭环，下周验证工作流”整理成三页汇报提纲。'],
@@ -18,7 +17,6 @@ const CASES = [
   ['fact-checker', '核查陈述“所有桌面 AI 产品都默认上传本地文件”，列出核查步骤并标注当前能否下结论。'],
   ['visual-designer', '为 KnowMe 专家详情页给出简洁的视觉方案：层级、色彩和间距各一条。'],
   ['data-report-editor', '把“新增 120，流失 30，净增 90，环比 +12%”写成三句话的数据摘要。'],
-  ['data-analyst', '根据“转化率 A=18%，B=22%，样本各 100”说明能得出的结论及局限。'],
   ['action-owner', '把“周五前完成冒烟测试，负责人小周；发布前确认回滚方案，负责人小陈”整理为行动项。'],
   ['requirement-reviewer', '评审“增加导出按钮”这条需求，列出三个必须补充的信息和一个主要风险。'],
   ['research-analyst', '为“团队为何不使用 AI 工作流”给出一个包含对象、问题和证据的最小研究方案。'],

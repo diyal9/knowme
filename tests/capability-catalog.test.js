@@ -26,7 +26,8 @@ describe('capability-catalog', () => {
     assert.ok(bundled.entries.length >= 5)
     assert.ok(bundled.entries.some((item) => item.id === 'writing-polish' && item.kind === 'skill'))
     assert.ok(bundled.entries.some((item) => item.id === 'code-review' && item.kind === 'skill'))
-    assert.ok(bundled.entries.some((item) => item.id === 'office-partner' && item.kind === 'expert'))
+    assert.equal(bundled.entries.some((item) => item.id === 'office-partner' && item.kind === 'expert'), false)
+    assert.ok(bundled.entries.some((item) => item.id === 'office-collaboration-method' && item.kind === 'skill'))
     assert.ok(bundled.entries.some((item) => item.id === 'feishu' && item.kind === 'connector'))
     assert.ok(bundled.entries.some((item) => item.id === 'mcp-generic' && item.kind === 'connector'))
   })
@@ -34,8 +35,11 @@ describe('capability-catalog', () => {
   it('publishes only active focused experts while defaulting custom entries to active', () => {
     const bundled = catalog.loadBundledCatalog(BUNDLED_ROOT)
     const removed = bundled.entries.find((item) => item.id === 'requirement-reviewer')
-    const active = bundled.entries.find((item) => item.id === 'product-manager')
+    const active = bundled.entries.find((item) => item.id === 'agent-operations')
     assert.equal(removed, undefined)
+    assert.equal(bundled.entries.some((item) => item.id === 'product-manager'), false)
+    assert.equal(bundled.entries.some((item) => item.id === 'software-engineer'), false)
+    assert.equal(bundled.entries.some((item) => item.id === 'research-analyst'), false)
     assert.deepEqual(active.lifecycle, { state: 'active', newTasks: true, successors: [] })
 
     catalog.upsertOverlayEntry(userData, {

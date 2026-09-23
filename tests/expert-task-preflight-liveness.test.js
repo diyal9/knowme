@@ -410,6 +410,9 @@ for (const kind of ['operation_status_unknown', 'resource_unavailable', undefine
     }
     assert.equal(f.runtime.retry('rqa03').ok, false)
     assert.equal(f.runtime.provideInput({ taskId: 'rqa03', note: '确认' }).ok, false)
+    const clarification = f.runtime.provideInput({ taskId: 'rqa03', note: '补充什么？' })
+    assert.equal(clarification.ok, false)
+    assert.match(clarification.error, /请先核对是否已完成/)
     assert.equal(result.task.deliverables.some(item => item.version > 0), false)
     assert.equal(generated, 1)
   })

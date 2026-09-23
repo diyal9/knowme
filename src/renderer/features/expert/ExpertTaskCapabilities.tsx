@@ -403,8 +403,8 @@ export function ExpertTaskCapabilities({
         </div>
         <dl>
           <div><dt>No.</dt><dd className="wb-expert-task-number" title={task?.id || undefined}><MarqueeText title={task?.id || undefined}>{taskNumber || '创建后生成'}</MarqueeText></dd></div>
-          <div><dt>目标</dt><dd className={`wb-expert-task-goal${goalConfirmed ? ' is-confirmed' : ''}`} data-testid="expert-task-goal" aria-live={goalConfirmed ? 'polite' : undefined}><MarqueeText key={goalLabel} title={goalLabel}>{goalLabel}</MarqueeText></dd></div>
-          <div><dt>交付</dt><dd><MarqueeText title={outputLabel}>{outputLabel}</MarqueeText></dd></div>
+          <div><dt>目标</dt><dd className={`wb-expert-task-goal${goalConfirmed ? ' is-confirmed' : ''}`} data-testid="expert-task-goal" aria-live={goalConfirmed ? 'polite' : undefined} title={goalLabel}>{goalLabel}</dd></div>
+          <div><dt>交付</dt><dd title={outputLabel}>{outputLabel}</dd></div>
         </dl>
       </section>
       {status ? (

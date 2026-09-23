@@ -6,7 +6,7 @@ const crypto = require('crypto')
 const { LEGACY_DEMO_SEED_IDS } = require('./official-workflows')
 const { hashDirectory } = require('./capability-store')
 
-const MIGRATION_ID = 'focused-expert-roster-v10'
+const MIGRATION_ID = 'focused-expert-roster-v13'
 const IMAGE_PRODUCER_CAPABILITY_IDS = Object.freeze([
   'creative-concept-method',
   'visual-brief-prompt',
@@ -17,12 +17,13 @@ const IMAGE_PRODUCER_CAPABILITY_IDS = Object.freeze([
   'image-producer',
 ])
 const RETAINED_EXPERT_IDS = Object.freeze([
-  'product-manager', 'office-partner', 'research-analyst',
-  'software-engineer', 'data-analyst', 'image-producer',
-  'operations-data-analyst',
+  'image-producer', 'operations-data-analyst', 'agent-operations',
 ])
 const PRODUCTION_EXPERT_IDS = RETAINED_EXPERT_IDS
 const REMOVED_BUNDLED_EXPERT_IDS = Object.freeze([
+  'product-manager', 'research-analyst', 'software-engineer',
+  'office-partner',
+  'data-analyst',
   'requirement-reviewer', 'user-researcher',
   'meeting-scribe', 'action-owner',
   'fact-checker', 'knowledge-curator',
@@ -35,6 +36,11 @@ const REMOVED_BUNDLED_EXPERT_IDS = Object.freeze([
 const RETIRED_EXPERT_IDS = Object.freeze([
   'producer', 'developer', 'tester', 'copywriter', 'game-studio-partner',
   ...REMOVED_BUNDLED_EXPERT_IDS,
+])
+const PRESERVED_RETIRED_TASK_EXPERT_IDS = Object.freeze(['office-partner', 'data-analyst'])
+const RETIRED_SYSTEM_WORKFLOW_IDS = Object.freeze([
+  'official-product-requirement',
+  'official-daily-office', 'daily-summary', 'feishu-daily',
 ])
 const TEST_ID_RE = /^(?:demo|test|qa[-_.]?copy)(?:[-_.]|$)/i
 
@@ -123,6 +129,7 @@ function isEmptyShell(pkg = {}) {
 function shouldRemoveWorkflow(id, pkg = {}) {
   const key = String(id || '').trim()
   const parentId = String(pkg.parentRef?.id || '').trim()
+  if (RETIRED_SYSTEM_WORKFLOW_IDS.includes(key)) return true
   if (LEGACY_DEMO_SEED_IDS.includes(key)) return true
   if (LEGACY_DEMO_SEED_IDS.includes(parentId) && pkg.status === 'archived') return true
   if (TEST_ID_RE.test(key) || /(?:测试流程|演示流程|demo workflow)/i.test(String(pkg.name || ''))) return true
@@ -162,7 +169,7 @@ function shouldRemoveTask(task = {}, removedExpertIds = RETIRED_EXPERT_IDS) {
   return goal === '三元礼包'
     || TEST_ID_RE.test(String(task.id || ''))
     || /(?:测试任务|演示任务|demo task)/i.test(`${title} ${goal}`)
-    || removedExpertIds.includes(expertId)
+    || (removedExpertIds.includes(expertId) && !PRESERVED_RETIRED_TASK_EXPERT_IDS.includes(expertId))
 }
 
 function pruneTasks(file, removedExpertIds = RETIRED_EXPERT_IDS) {
@@ -302,15 +309,31 @@ async function syncRetainedExpertCapabilities(options = {}) {
     const dependencies = loadBundledDependencies(bundledEntry)
     for (const dependency of dependencies.filter(item => item?.required === true && item.id)) {
       const currentDependency = installed[dependency.id]
+      if (currentDependency?.source && currentDependency.source !== 'curated') {
+        ignored.push({ id: dependency.id, expertId, reason: 'user_owned_dependency' })
+        continue
+      }
+      const bundledDependency = bundledEntries.get(dependency.id) || {}
+      const targetVersion = String(bundledDependency.version || '')
+      const targetHash = bundledContentHash(bundledRoot, bundledDependency)
+      const versionChanged = Boolean(targetVersion && String(currentDependency?.version || '') !== targetVersion)
+      const contentChanged = Boolean(
+        currentDependency && targetHash && String(currentDependency.contentHash || '') !== targetHash,
+      )
       const ready = currentDependency
         && currentDependency.enabled === true
         && !['removed', 'failed', 'available'].includes(currentDependency.status)
+        && !versionChanged
+        && !contentChanged
       if (ready) continue
-      const result = await hub.installCapability({
-        id: dependency.id,
-        enabled: true,
-        riskConfirmed: true,
-      })
+      const result = currentDependency?.source === 'curated'
+        && typeof hub.updateCapability === 'function'
+        ? await hub.updateCapability({ id: dependency.id, riskConfirmed: true })
+        : await hub.installCapability({
+          id: dependency.id,
+          enabled: true,
+          riskConfirmed: true,
+        })
       if (!result?.ok) {
         return {
           ok: false,
@@ -318,10 +341,17 @@ async function syncRetainedExpertCapabilities(options = {}) {
           error: result?.error || `安装专家依赖失败：${dependency.id}`,
         }
       }
-      dependencyUpdates.push({ expertId, id: dependency.id, kind: dependency.kind || 'skill' })
+      dependencyUpdates.push({
+        expertId,
+        id: dependency.id,
+        kind: dependency.kind || 'skill',
+        reason: versionChanged ? 'version_changed' : contentChanged ? 'content_changed' : 'not_ready',
+      })
       installed[dependency.id] = {
         id: dependency.id,
         kind: dependency.kind || 'skill',
+        version: targetVersion,
+        contentHash: targetHash,
         enabled: true,
         status: 'enabled',
       }
@@ -356,11 +386,13 @@ async function syncRetainedExpertCapabilities(options = {}) {
       && targetHash
       && String(current.contentHash || '') !== targetHash
     if (targetVersion && String(current.version || '') === targetVersion && !sameVersionContentChanged) continue
-    const result = await hub.installCapability({
-      id,
-      enabled: current.enabled !== false,
-      riskConfirmed: true,
-    })
+    const result = typeof hub.updateCapability === 'function'
+      ? await hub.updateCapability({ id, riskConfirmed: true })
+      : await hub.installCapability({
+        id,
+        enabled: current.enabled !== false,
+        riskConfirmed: true,
+      })
     if (!result?.ok) {
       return {
         ok: false,
@@ -450,7 +482,8 @@ async function migrateProductionCatalog(options = {}) {
 
 module.exports = {
   MIGRATION_ID, IMAGE_PRODUCER_CAPABILITY_IDS, RETAINED_EXPERT_IDS, PRODUCTION_EXPERT_IDS,
-  REMOVED_BUNDLED_EXPERT_IDS, RETIRED_EXPERT_IDS, TEST_ID_RE,
+  REMOVED_BUNDLED_EXPERT_IDS, RETIRED_EXPERT_IDS, PRESERVED_RETIRED_TASK_EXPERT_IDS,
+  RETIRED_SYSTEM_WORKFLOW_IDS, TEST_ID_RE,
   shouldRemoveExpert, isEmptyShell, shouldRemoveWorkflow, shouldRemoveTask,
   taskExpertIds, boundExpertIds, autoInstalledCatalogIds, migrateProductionCatalog,
   syncImageProducerCapabilities, syncRetainedExpertCapabilities,

@@ -8,6 +8,7 @@ const fs = require('fs')
 const path = require('path')
 const {
   parseSuggestionBlock,
+  inferPlainTextChoice,
   hasIncompleteSuggestionFence,
   resolveOpenTarget,
   payloadNeedsUserEdit,
@@ -188,6 +189,48 @@ describe('agent-suggestion', () => {
     const text = '看这段配置：\n```json\n{"port": 8080, "host": "local"}\n```'
     const { bar } = parseSuggestionBlock(text)
     assert.equal(bar, null)
+  })
+
+  it('turns an explicit prose single-choice question into structured options', () => {
+    const text = [
+      '【待澄清】',
+      '',
+      'Agent 全生命周期包含多个独立阶段，各阶段所需输入和交付物不同。',
+      '问题：您希望本次规划聚焦于哪个具体阶段？',
+      '',
+      '选项：1. **定义与调优**（针对已有草稿完善边界） ； 2. **测试与评估**（验证执行与失败场景） ； 3. **发布与版本治理**（上架、更新或回滚） ； 4. **全流程梳理**（输出标准 SOP）',
+      '',
+      '回答示例：选 1，目标是优化现有草稿',
+    ].join('\n')
+    const parsed = inferPlainTextChoice(text)
+    assert.ok(parsed?.bar)
+    assert.equal(parsed.bar.title, '您希望本次规划聚焦于哪个具体阶段？')
+    assert.equal(parsed.bar.items.length, 4)
+    assert.equal(parsed.bar.items[0].label, '定义与调优')
+    assert.equal(parsed.bar.items[0].description, '针对已有草稿完善边界')
+    assert.match(parsed.bar.items[0].payload, /定义与调优/)
+    assert.ok(parsed.bodyWithoutBlock.includes('Agent 全生命周期'))
+    assert.ok(!parsed.bodyWithoutBlock.includes('回答示例'))
+    assert.ok(!parsed.bodyWithoutBlock.includes('选项：'))
+  })
+
+  it('keeps ordinary numbered explanations as prose', () => {
+    const text = '处理流程如下：\n1. 收集资料\n2. 分析问题\n3. 输出结论'
+    assert.equal(inferPlainTextChoice(text), null)
+    assert.equal(parseSuggestionBlock(text).bar, null)
+  })
+
+  it('does not force a multi-select prompt into the single-choice component', () => {
+    const text = '问题：请选择所有适用项（可多选）\n选项：1. 邮件；2. 日历；3. 文档'
+    assert.equal(inferPlainTextChoice(text), null)
+  })
+
+  it('marks a free-form alternative as fill and supports a refined next question', () => {
+    const first = parseSuggestionBlock('问题：你想先处理哪个方向？\n选项：1. 性能优化；2. 稳定性治理；3. 其他（请补充你的方向）')
+    assert.equal(first.bar.items[2].action, 'fill')
+    const refined = parseSuggestionBlock('问题：稳定性治理里优先看哪一块？\n选项：1. 错误恢复；2. 边界测试')
+    assert.equal(refined.bar.title, '稳定性治理里优先看哪一块？')
+    assert.deepEqual(refined.bar.items.map(item => item.label), ['错误恢复', '边界测试'])
   })
 
   it('detects incomplete suggestion fence', () => {

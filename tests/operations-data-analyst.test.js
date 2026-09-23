@@ -17,7 +17,7 @@ describe('operations data analyst capability', () => {
     const source = fs.readFileSync(path.join(expertRoot, 'EXPERT.md'), 'utf8')
     const expert = parseExpertFrontmatter(source)
     assert.equal(validateExpertPackage(expert).ok, true)
-    assert.equal(expert.name, '运营数据分析专家·数据靓仔')
+    assert.equal(expert.name, '数据靓仔')
     assert.match(expert.soul, /数据靓仔/)
     assert.match(expert.sop, /builder.*query_adhoc/i)
     assert.match(expert.sop, /calculate.*round/)

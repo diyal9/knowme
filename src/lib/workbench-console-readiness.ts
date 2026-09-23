@@ -17,10 +17,10 @@ const VERTICAL_PIPELINE_SEEDS = Object.freeze([
     goalTypes: ['office', 'meeting', 'minutes'],
     inputs: [{ id: 'meeting-materials', label: '会议资料', required: true }],
     outputs: [{ id: 'minutes', label: '会议纪要' }, { id: 'actions', label: '决策与待办' }],
-    agentRefs: [{ id: 'office-assistant' }],
+    agentRefs: [],
     executionBackends: ['local-team'],
     qualityGates: [{ id: 'owner-and-deadline', label: '待办必须包含负责人和截止时间' }],
-    provenance: { kind: 'vertical-slice', domain: 'office', blockedBy: 'office-agent-or-connector' },
+    provenance: { kind: 'vertical-slice', domain: 'office', blockedBy: 'office-connector' },
   },
   {
     id: 'engineering-delivery',
@@ -50,7 +50,6 @@ const VERTICAL_PIPELINE_SEEDS = Object.freeze([
   },
 ])
 
-const OFFICE_EXPERT_IDS = Object.freeze(['office-assistant', 'office-partner'])
 const ENGINEERING_EXPERT_IDS = Object.freeze(['producer', 'developer', 'tester'])
 const VISUAL_EXPERT_IDS = Object.freeze(['designer', 'copywriter'])
 const OFFICE_CONNECTOR_IDS = Object.freeze(['feishu'])
@@ -213,9 +212,8 @@ function officeConnectorReady(facts) {
 }
 
 function officeAgentReady(facts) {
-  const mode = modeByDomain(facts, 'office')
-  if (OFFICE_EXPERT_IDS.some(id => facts.availableExperts.has(id))) return true
-  return list(mode?.bindings).some(binding => isReadyStatus(binding.status))
+  // 兼容旧调用名：日常办公现由内置伙伴执行，不再依赖独立办公专家。
+  return facts.localTeamEnabled !== false
 }
 
 function engineeringRuntimeReady(facts) {
@@ -249,18 +247,18 @@ function visualCapabilityReady(facts) {
 
 function resolveOfficeReadiness(facts) {
   const blockers = []
-  const agentReady = officeAgentReady(facts)
+  const partnerReady = officeAgentReady(facts)
   const connectorReady = officeConnectorReady(facts)
-  const ready = facts.localTeamEnabled && agentReady && connectorReady
-  if (!agentReady) {
-    blockers.push({ id: 'office-agent', label: '办公或会议 Agent', kind: 'agent', status: 'missing' })
+  const ready = partnerReady && connectorReady
+  if (!partnerReady) {
+    blockers.push({ id: 'partner-runtime', label: 'KnowMe 伙伴', kind: 'runtime', status: 'offline' })
   }
   if (!connectorReady) {
     blockers.push({ id: 'office-connector', label: '会议/文档连接器', kind: 'connector', status: 'setup_required' })
   }
   const repairAction = !ready
     ? (connectorReady
-      ? { id: 'install-office-agent', label: '安装并启用办公 Agent', target: 'capability-hub:expert' }
+      ? { id: 'enable-partner-runtime', label: '启用 KnowMe 伙伴', target: 'settings:runtime' }
       : { id: 'configure-feishu', label: '配置飞书连接器', target: 'settings:connectors:feishu' })
     : null
   return {

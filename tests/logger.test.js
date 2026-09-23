@@ -100,10 +100,11 @@ describe('logger', () => {
     assert.equal(fs.existsSync(expired), false)
   })
 
-  it('rotates before a write would exceed the configured per-file limit', () => {
+  it('rotates before a write would exceed the configured per-file limit', async () => {
     logger._reset()
     logger.init({ dir, level: 'debug', mirrorConsole: false, maxBytes: 300 })
     for (let i = 0; i < 10; i += 1) logger.operation(`event-${i}`, 'x'.repeat(80))
+    await logger.flush()
     const sizes = fs.readdirSync(dir)
       .filter(name => name.startsWith('knowme-'))
       .map(name => fs.statSync(path.join(dir, name)).size)

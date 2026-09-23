@@ -29,7 +29,6 @@ export function TaskHomeSurface() {
   const loadHub = useAppStore((s) => s.loadHubCapabilities)
   const loadModes = useAppStore((s) => s.loadWorkbenchModes)
   const tasks = useAppStore((s) => s.tasks)
-  const projects = useAppStore((s) => s.projects)
   const activeProjectId = useAppStore((s) => s.activeProjectId)
   const hubItems = useAppStore((s) => s.hubItems)
   const modes = useAppStore((s) => s.modes)
@@ -48,20 +47,18 @@ export function TaskHomeSurface() {
   const [selectedExpertId, setSelectedExpertId] = useState('')
   const [quickExpanded, setQuickExpanded] = useState(false)
   const [quickDomain, setQuickDomain] = useState<ExpertHomeDomain>('all')
-  const [projectScope, setProjectScope] = useState<'current' | 'all'>('current')
   const openTaskManage = useAppStore((s) => s.openTaskManage)
   const expertRoom = useAppStore((s) => s.expertRoom)
   const expertTasks = useMemo(() => {
     const list = expertHomeTasks(tasks).filter((task) => (
-      projectScope === 'all' || !activeProjectId || task.projectId === activeProjectId
+      !activeProjectId || task.projectId === activeProjectId
     ))
     return filterByWorkbenchQuery(list.map((item) => ({
       ...item,
       id: String(item.id || ''),
       name: String(item.title || ''),
     })), shelfQuery)
-  }, [activeProjectId, projectScope, tasks, shelfQuery])
-  const activeProject = projects.find((project) => project.id === activeProjectId) || null
+  }, [activeProjectId, tasks, shelfQuery])
   const filteredExperts = useMemo(
     () => filterByWorkbenchQuery(experts.map((item) => ({ ...item, id: item.id, name: item.name })), shelfQuery),
     [experts, shelfQuery],
@@ -159,16 +156,9 @@ export function TaskHomeSurface() {
             <div className="wb-task-home-title-copy">
               <h2 className="wb-workbench-page-title" id="wbTaskRecentTitle">专家任务</h2>
             </div>
-            {activeProject ? (
-              <div className="project-scope-switch" role="group" aria-label="任务项目范围">
-                <span title={activeProject.name}><Icon name="folder" />{activeProject.name}</span>
-                <button type="button" className={projectScope === 'current' ? 'active' : ''} aria-pressed={projectScope === 'current'} onClick={() => setProjectScope('current')}>当前项目</button>
-                <button type="button" className={projectScope === 'all' ? 'active' : ''} aria-pressed={projectScope === 'all'} onClick={() => setProjectScope('all')}>全部项目</button>
-              </div>
-            ) : null}
           </div>
           {expertTasks.length === 0 ? (
-            <div className="wb-task-recent-empty" id="wbTaskRecentEmpty" data-testid="wbTaskRecentEmpty">{projectScope === 'current' && activeProject ? '当前项目还没有专家任务。可切换到“全部项目”查看历史任务。' : '还没有专家任务。选择一位专家，说明目标后即可开始。'}</div>
+            <div className="wb-task-recent-empty" id="wbTaskRecentEmpty" data-testid="wbTaskRecentEmpty">{activeProjectId ? '当前项目还没有专家任务。选择一位专家即可开始。' : '还没有专家任务。选择一位专家，说明目标后即可开始。'}</div>
           ) : (
             <TaskBoard
               tasks={expertTasks}

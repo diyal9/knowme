@@ -12,6 +12,15 @@ afterEach(cleanup)
 const expert = { id: 'software-engineer', kind: 'expert' as const, name: '软件开发工程师', skills: ['code-review'], connectors: ['feishu'], status: 'enabled', permissions: { network: false, tools: { allowlist: [] } }, risk: { level: 'low' } }
 
 describe('expert display regressions', () => {
+  it('renders the full task goal as wrapping text instead of a clipped marquee', () => {
+    mockApi()
+    const goal = '分析近一周 AI Native 在多个平台上的舆情，并给出带来源的证据摘要'
+    render(<ExpertTaskCapabilities task={{ id: 'display-task', expertId: expert.id } as WorkbenchTask} stageLabel="执行中" goal={goal} sop="" />)
+    const goalNode = screen.getByTestId('expert-task-goal')
+    expect(goalNode).toHaveTextContent(goal)
+    expect(goalNode.querySelector('.km-marquee-text')).toBeNull()
+  })
+
   it.each(['pending', 'accepted'])('keeps the confirmed delivery contract for %s text deliverables', acceptanceStatus => {
     mockApi()
     const task = { id: 'display-task', expertId: expert.id, status: 'review', brief: { deliverables: [{ id: 'primary', title: '代码审查结论' }] }, deliverables: [{ deliverableId: 'primary', title: '代码审查结论', type: 'answer', acceptanceStatus }] } as WorkbenchTask

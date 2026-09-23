@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-16T13:39:30.933Z",
+  "generatedAt": "2026-09-21T09:49:02.753Z",
   "requiredScenarios": {
     "normal": 2,
     "edge": 1,
@@ -112,145 +112,6 @@
           "lifecycle": "create",
           "routeId": "user-research",
           "assertions": 4
-        }
-      ]
-    },
-    {
-      "expertId": "office-partner",
-      "sourceSuites": [
-        "skill-evals/rqa41-office-qualification/evals.json",
-        "skill-evals/rqa73-office-qualification/evals.json"
-      ],
-      "caseCount": 12,
-      "scenarioCounts": {
-        "normal": 8,
-        "edge": 1,
-        "retry": 1,
-        "revision": 1,
-        "reopen": 1
-      },
-      "missingScenarios": [],
-      "coveredRouteIds": [
-        "today-priority",
-        "meeting-summary",
-        "doc-kb",
-        "related-chats"
-      ],
-      "missingRoutes": [],
-      "suiteErrors": [],
-      "contract": {
-        "skipped": false,
-        "errors": [],
-        "warnings": [],
-        "skillCount": 8,
-        "connectorCount": 1,
-        "capabilityDependencyCount": 9,
-        "deliverableCount": 1,
-        "routeCount": 9,
-        "conditionalRouteIds": [
-          "today-priority",
-          "meeting-summary",
-          "doc-kb",
-          "related-chats"
-        ]
-      },
-      "state": "ready_for_live_execution",
-      "cases": [
-        {
-          "id": "OP04",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP05",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP06",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 3
-        },
-        {
-          "id": "OP07",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP08",
-          "expertId": "office-partner",
-          "scenario": "edge",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP09",
-          "expertId": "office-partner",
-          "scenario": "retry",
-          "lifecycle": "cancel_then_retry",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP10",
-          "expertId": "office-partner",
-          "scenario": "revision",
-          "lifecycle": "request_changes",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP11",
-          "expertId": "office-partner",
-          "scenario": "reopen",
-          "lifecycle": "accept_then_reopen",
-          "routeId": "",
-          "assertions": 4
-        },
-        {
-          "id": "OP12",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "today-priority",
-          "assertions": 3
-        },
-        {
-          "id": "OP13",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "meeting-summary",
-          "assertions": 3
-        },
-        {
-          "id": "OP14",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "doc-kb",
-          "assertions": 3
-        },
-        {
-          "id": "OP15",
-          "expertId": "office-partner",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "related-chats",
-          "assertions": 3
         }
       ]
     },
@@ -374,9 +235,9 @@
         "skill-evals/rqa75-software-engineer-qualification/evals.json",
         "skill-evals/web-expert-visual-reference/evals.json"
       ],
-      "caseCount": 9,
+      "caseCount": 10,
       "scenarioCounts": {
-        "normal": 5,
+        "normal": 6,
         "edge": 1,
         "retry": 1,
         "revision": 1,
@@ -384,9 +245,11 @@
       },
       "missingScenarios": [],
       "coveredRouteIds": [
+        "answer-only-code",
         "architecture-decision",
         "quality-verification",
-        "web-visual-reference"
+        "web-visual-reference",
+        "web-interface-development"
       ],
       "missingRoutes": [],
       "suiteErrors": [],
@@ -398,10 +261,12 @@
         "connectorCount": 0,
         "capabilityDependencyCount": 6,
         "deliverableCount": 2,
-        "routeCount": 4,
+        "routeCount": 6,
         "conditionalRouteIds": [
+          "answer-only-code",
           "web-visual-reference",
           "architecture-decision",
+          "web-interface-development",
           "quality-verification"
         ]
       },
@@ -412,7 +277,7 @@
           "expertId": "software-engineer",
           "scenario": "normal",
           "lifecycle": "create",
-          "routeId": "",
+          "routeId": "answer-only-code",
           "assertions": 5
         },
         {
@@ -420,7 +285,7 @@
           "expertId": "software-engineer",
           "scenario": "edge",
           "lifecycle": "create",
-          "routeId": "",
+          "routeId": "answer-only-code",
           "assertions": 5
         },
         {
@@ -428,7 +293,7 @@
           "expertId": "software-engineer",
           "scenario": "retry",
           "lifecycle": "cancel_then_retry",
-          "routeId": "",
+          "routeId": "answer-only-code",
           "assertions": 5
         },
         {
@@ -436,7 +301,7 @@
           "expertId": "software-engineer",
           "scenario": "revision",
           "lifecycle": "request_changes",
-          "routeId": "",
+          "routeId": "answer-only-code",
           "assertions": 5
         },
         {
@@ -444,7 +309,7 @@
           "expertId": "software-engineer",
           "scenario": "reopen",
           "lifecycle": "accept_then_reopen",
-          "routeId": "",
+          "routeId": "answer-only-code",
           "assertions": 5
         },
         {
@@ -478,107 +343,13 @@
           "lifecycle": "create",
           "routeId": "web-visual-reference",
           "assertions": 4
-        }
-      ]
-    },
-    {
-      "expertId": "data-analyst",
-      "sourceSuites": [
-        "skill-evals/rqa72-data-analyst-qualification/evals.json"
-      ],
-      "caseCount": 8,
-      "scenarioCounts": {
-        "normal": 4,
-        "edge": 1,
-        "retry": 1,
-        "revision": 1,
-        "reopen": 1
-      },
-      "missingScenarios": [],
-      "coveredRouteIds": [
-        "data-report",
-        "business-insight"
-      ],
-      "missingRoutes": [],
-      "suiteErrors": [],
-      "contract": {
-        "skipped": false,
-        "errors": [],
-        "warnings": [],
-        "skillCount": 6,
-        "connectorCount": 0,
-        "capabilityDependencyCount": 6,
-        "deliverableCount": 2,
-        "routeCount": 3,
-        "conditionalRouteIds": [
-          "data-report",
-          "business-insight"
-        ]
-      },
-      "state": "ready_for_live_execution",
-      "cases": [
+        },
         {
-          "id": "DA01",
-          "expertId": "data-analyst",
+          "id": "WEB-INTERFACE-01",
+          "expertId": "software-engineer",
           "scenario": "normal",
           "lifecycle": "create",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA02",
-          "expertId": "data-analyst",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA03",
-          "expertId": "data-analyst",
-          "scenario": "edge",
-          "lifecycle": "create",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA04",
-          "expertId": "data-analyst",
-          "scenario": "retry",
-          "lifecycle": "cancel_then_retry",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA05",
-          "expertId": "data-analyst",
-          "scenario": "revision",
-          "lifecycle": "request_changes",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA06",
-          "expertId": "data-analyst",
-          "scenario": "reopen",
-          "lifecycle": "accept_then_reopen",
-          "routeId": "",
-          "assertions": 5
-        },
-        {
-          "id": "DA07",
-          "expertId": "data-analyst",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "data-report",
-          "assertions": 4
-        },
-        {
-          "id": "DA08",
-          "expertId": "data-analyst",
-          "scenario": "normal",
-          "lifecycle": "create",
-          "routeId": "business-insight",
+          "routeId": "web-interface-development",
           "assertions": 4
         }
       ]
@@ -631,7 +402,7 @@
           "expertId": "image-producer",
           "scenario": "edge",
           "lifecycle": "create",
-          "routeId": "",
+          "routeId": "pango-generate",
           "assertions": 5
         },
         {
@@ -665,6 +436,180 @@
           "lifecycle": "create",
           "routeId": "",
           "assertions": 5
+        }
+      ]
+    },
+    {
+      "expertId": "operations-data-analyst",
+      "sourceSuites": [
+        "skill-evals/rqa180-operations-data-analyst-qualification/evals.json"
+      ],
+      "caseCount": 6,
+      "scenarioCounts": {
+        "normal": 2,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "live-analysis",
+        "analysis-report",
+        "event-governance",
+        "report-export",
+        "sheet-fill"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 9,
+        "connectorCount": 3,
+        "capabilityDependencyCount": 12,
+        "deliverableCount": 1,
+        "routeCount": 6,
+        "conditionalRouteIds": [
+          "live-analysis",
+          "event-governance",
+          "report-export",
+          "sheet-fill",
+          "analysis-report"
+        ]
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "ODA01",
+          "expertId": "operations-data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "live-analysis",
+          "assertions": 5
+        },
+        {
+          "id": "ODA02",
+          "expertId": "operations-data-analyst",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "analysis-report",
+          "assertions": 5
+        },
+        {
+          "id": "ODA03",
+          "expertId": "operations-data-analyst",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "event-governance",
+          "assertions": 5
+        },
+        {
+          "id": "ODA04",
+          "expertId": "operations-data-analyst",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "report-export",
+          "assertions": 5
+        },
+        {
+          "id": "ODA05",
+          "expertId": "operations-data-analyst",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "sheet-fill",
+          "assertions": 5
+        },
+        {
+          "id": "ODA06",
+          "expertId": "operations-data-analyst",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "analysis-report",
+          "assertions": 5
+        }
+      ]
+    },
+    {
+      "expertId": "agent-operations",
+      "sourceSuites": [
+        "skill-evals/rqa181-agent-operations-qualification/evals.json"
+      ],
+      "caseCount": 6,
+      "scenarioCounts": {
+        "normal": 2,
+        "edge": 1,
+        "retry": 1,
+        "revision": 1,
+        "reopen": 1
+      },
+      "missingScenarios": [],
+      "coveredRouteIds": [
+        "agent-lifecycle"
+      ],
+      "missingRoutes": [],
+      "suiteErrors": [],
+      "contract": {
+        "skipped": false,
+        "errors": [],
+        "warnings": [],
+        "skillCount": 1,
+        "connectorCount": 0,
+        "capabilityDependencyCount": 1,
+        "deliverableCount": 1,
+        "routeCount": 1,
+        "conditionalRouteIds": []
+      },
+      "state": "ready_for_live_execution",
+      "cases": [
+        {
+          "id": "AOP01",
+          "expertId": "agent-operations",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "agent-lifecycle",
+          "assertions": 4
+        },
+        {
+          "id": "AOP02",
+          "expertId": "agent-operations",
+          "scenario": "normal",
+          "lifecycle": "create",
+          "routeId": "agent-lifecycle",
+          "assertions": 3
+        },
+        {
+          "id": "AOP03",
+          "expertId": "agent-operations",
+          "scenario": "edge",
+          "lifecycle": "create",
+          "routeId": "agent-lifecycle",
+          "assertions": 4
+        },
+        {
+          "id": "AOP04",
+          "expertId": "agent-operations",
+          "scenario": "retry",
+          "lifecycle": "cancel_then_retry",
+          "routeId": "agent-lifecycle",
+          "assertions": 3
+        },
+        {
+          "id": "AOP05",
+          "expertId": "agent-operations",
+          "scenario": "revision",
+          "lifecycle": "request_changes",
+          "routeId": "agent-lifecycle",
+          "assertions": 3
+        },
+        {
+          "id": "AOP06",
+          "expertId": "agent-operations",
+          "scenario": "reopen",
+          "lifecycle": "accept_then_reopen",
+          "routeId": "agent-lifecycle",
+          "assertions": 3
         }
       ]
     }

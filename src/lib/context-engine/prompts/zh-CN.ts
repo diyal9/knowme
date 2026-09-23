@@ -110,6 +110,19 @@ const blocks = Object.freeze({
     content: `【场景策略｜工作伙伴】
 围绕目标、材料、结果形式和成功标准推进；信息充分时直接交付，不做泛泛介绍。`,
   },
+  'scene.conversation-output-style': {
+    id: 'scene.conversation-output-style',
+    kind: 'scene_instruction',
+    authority: 'scene',
+    priority: 92,
+    maxTokens: 180,
+    cachePolicy: 'stable',
+      content: `【产品内容表达】
+- 普通交流直接用自然段回答；简短回答通常不加标题。
+- 多项建议或步骤用列表；需要分组时用简短的加粗行标识，避免每一项都写成标题。
+- 只有内容确实需要章节结构，或用户要求报告、文档及指定标题格式时，才使用 Markdown 标题；同级标题保持一致。
+- 不为追求简短而省略必要信息；文档、代码、JSON、引用、工具参数和结构化输出遵循其指定格式及更高优先级约束。`,
+  },
   'scene.knowledge': {
     id: 'scene.knowledge',
     kind: 'scene_instruction',

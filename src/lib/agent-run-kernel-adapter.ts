@@ -14,6 +14,7 @@ const { buildMediaObservation } = require('./agent-media-resources')
 const { resolveProfile } = require('./llm-model-catalog')
 const { upsertConversationMessage, withConversationIdentity } = require('./agent-conversation-log')
 const { bindRunRuntimeContext, unbindRunRuntimeContext } = require('./tool-contract-registry')
+const logger = require('./logger')
 
 const DEFAULT_CANCEL_BUDGET_MS = 3000
 
@@ -41,6 +42,7 @@ function buildProductionRunPorts(state) {
     ctxBundle = {},
     loadAgentSessions,
     saveAgentSessions,
+    saveAgentSessionsAsync,
     productMemoryCapture,
     memoryDir,
     normalizeAssistantOutput,
@@ -108,12 +110,27 @@ function buildProductionRunPorts(state) {
     return { latestSessions, merged }
   }
 
-  const saveMergedSession = (incomingSession, options = {}) => {
+  const saveMergedSession = async (incomingSession, options = {}) => {
+    const saveStartedAt = Date.now()
     const { latestSessions, merged } = mergeWithLatestSession(incomingSession, options)
     const next = latestSessions.some(item => item.id === merged.id)
       ? latestSessions.map(item => item.id === merged.id ? merged : item)
       : [...latestSessions, merged]
-    saveAgentSessions(next)
+    if (typeof saveAgentSessionsAsync === 'function') {
+      await saveAgentSessionsAsync(next)
+    } else {
+      saveAgentSessions(next)
+    }
+    const saveDurationMs = Date.now() - saveStartedAt
+    if (saveDurationMs >= 250) {
+      try {
+        logger.warn('system', 'session-save-slow', '会话检查点保存耗时过长', {
+          durationMs: saveDurationMs,
+          sessionCount: next.length,
+          messageCount: Array.isArray(merged.messages) ? merged.messages.length : 0,
+        })
+      } catch { /* diagnostics must never affect generation */ }
+    }
     return merged
   }
 
@@ -298,7 +315,7 @@ function buildProductionRunPorts(state) {
         if (incomingSession) session = incomingSession
         try {
           await persistLedgersCheckpoint({ phase: 'session', emit: emitFn, ...rest })
-          session = saveMergedSession(session)
+          session = await saveMergedSession(session)
           const plan = session?.run?.plan
           if (plan?.items?.length) {
             emitFn?.({
@@ -334,7 +351,7 @@ function buildProductionRunPorts(state) {
           (session.messages || []).map(item => String(item?.id || '')).filter(Boolean),
         )
         const compacted = agentSessions.compactSession(session).session
-        session = saveMergedSession(compacted, { replaceKnownMessageIds: preCompactMessageIds })
+        session = await saveMergedSession(compacted, { replaceKnownMessageIds: preCompactMessageIds })
         try {
           await persistLedgersCheckpoint({ phase: 'persist', metrics, answerHash, protocolVersion })
           const plan = compacted?.run?.plan

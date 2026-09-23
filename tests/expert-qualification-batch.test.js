@@ -39,17 +39,13 @@ test('expert qualification batch parses explicit isolated execution options', ()
 
 test('expert qualification batch builds one isolated suite plan for the retained roster', () => {
   const plan = buildBatchPlan({ root, matrixFile })
-  assert.equal(plan.totalExperts, 7)
-  assert.equal(plan.totalSuites, 12)
-  assert.equal(plan.totalCases, 59)
+  assert.equal(plan.totalExperts, 3)
+  assert.equal(plan.totalSuites, 4)
+  assert.equal(plan.totalCases, 18)
   assert.deepEqual(plan.expertIds, [
-    'product-manager',
-    'office-partner',
-    'research-analyst',
-    'software-engineer',
-    'data-analyst',
     'image-producer',
     'operations-data-analyst',
+    'agent-operations',
   ])
   assert.equal(new Set(plan.suites.map(item => item.file)).size, plan.totalSuites)
   assert.equal(plan.suites.every(item => item.caseCount > 0 && item.expertIds.length > 0), true)

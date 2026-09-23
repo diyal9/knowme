@@ -103,7 +103,7 @@ function buildChatPostProcessHint(prompt, toolMessages, fullText, context = {}) 
   const intent = feishuGrounding.detectFeishuIntent(prompt)
   if (!intent.mentioned) return ''
   const messages = Array.isArray(toolMessages) ? toolMessages : []
-  const readTools = new Set(['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read'])
+  const readTools = new Set(['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read', 'feishu.meeting_inventory'])
   const reads = messages.filter(item => readTools.has(item?.toolName))
   // A successful transport status is not necessarily a qualified body. Reuse
   // the ledger's quality and document-binding checks for candidate decisions.

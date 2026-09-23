@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import '../../../secondary-dialog.css'
 import type { AgentRunArtifact } from '../../../shared/api'
-import { fileTreeNodeIcon, filterVisibleNodes, sourceKindLabel } from '../../../domain/file-tree'
+import { fileTreeNodeIcon, filterVisibleNodes, sourceDirKey } from '../../../domain/file-tree'
 import { Icon } from '../../app/Icon'
+import { ProjectManagerDialog } from '../../app/ProjectManagerDialog'
 import { useAppStore } from '../../app/store'
 import { TreeIcon } from './TreeIcon'
 
@@ -19,6 +20,7 @@ export function FilesPane() {
   const collapsed = useAppStore((s) => s.fileTreeCollapsed)
   const setQuery = useAppStore((s) => s.setFileTreeQuery)
   const loadFileTree = useAppStore((s) => s.loadFileTree)
+  const loadProjects = useAppStore((s) => s.loadProjects)
   const selectProject = useAppStore((s) => s.selectProject)
   const relinkProject = useAppStore((s) => s.relinkProject)
   const toggleFileDir = useAppStore((s) => s.toggleFileDir)
@@ -28,7 +30,10 @@ export function FilesPane() {
   const openSourceRoot = useAppStore((s) => s.openSourceRoot)
   const showToast = useAppStore((s) => s.showToast)
   const setAssistantApplyTarget = useAppStore((s) => s.setAssistantApplyTarget)
-  const [fileMenu, setFileMenu] = useState(false)
+  const [projectMenu, setProjectMenu] = useState(false)
+  const [projectManagerOpen, setProjectManagerOpen] = useState(false)
+  const [projectBusy, setProjectBusy] = useState(false)
+  const [view, setView] = useState<'files' | 'archive'>('files')
   const [previewPath, setPreviewPath] = useState<string | null>(null)
   const [previewText, setPreviewText] = useState('')
   const [previewLoading, setPreviewLoading] = useState(false)
@@ -36,29 +41,43 @@ export function FilesPane() {
   const [splitText, setSplitText] = useState('')
   const [splitLoading, setSplitLoading] = useState(false)
   const [pickingSplit, setPickingSplit] = useState(false)
+  const projectMenuRef = useRef<HTMLDivElement>(null)
+
+  const activeProject = useMemo(
+    () => projects.find((project) => project.id === activeProjectId) || null,
+    [projects, activeProjectId],
+  )
+  const archiveRoot = useMemo(
+    () => String(activeProject?.outputPolicy?.deliverablesDir || 'outputs')
+      .replace(/\\/g, '/')
+      .replace(/^\/+|\/+$/g, '') || 'outputs',
+    [activeProject],
+  )
+  const scopedNodes = useMemo(() => {
+    if (view === 'files') return fileTreeNodes
+    const rootDepth = Math.max(0, archiveRoot.split('/').length - 1)
+    return fileTreeNodes
+      .filter((node) => node.path.startsWith(`${archiveRoot}/`))
+      .map((node) => ({
+        ...node,
+        depth: Math.max(0, (node.depth ?? node.path.split('/').length - 1) - rootDepth - 1),
+      }))
+  }, [archiveRoot, fileTreeNodes, view])
 
   const visibleNodes = useMemo(() => {
     if (!activeSourceId) return []
-    return filterVisibleNodes(fileTreeNodes, {
+    return filterVisibleNodes(scopedNodes, {
       query,
       sourceId: activeSourceId,
       collapsed: new Set(Object.keys(collapsed)),
     })
-  }, [activeSourceId, collapsed, fileTreeNodes, query])
+  }, [activeSourceId, collapsed, query, scopedNodes])
 
   const activeSource = useMemo(
     () => sources.find((s) => s.id === activeSourceId) || null,
     [sources, activeSourceId],
   )
 
-  const activeProject = useMemo(
-    () => projects.find((project) => project.id === activeProjectId) || null,
-    [projects, activeProjectId],
-  )
-  const visibleProjects = useMemo(
-    () => projects.filter((project) => project.status !== 'archived'),
-    [projects],
-  )
   const recentArtifacts = useMemo(() => {
     const seen = new Set<string>()
     return sessions.flatMap((session) => (session.run?.artifacts || []).map((artifact) => ({
@@ -78,6 +97,65 @@ export function FilesPane() {
   useEffect(() => {
     void loadFileTree()
   }, [loadFileTree])
+
+  useEffect(() => {
+    if (!projectMenu) return undefined
+    function close(event: PointerEvent) {
+      if (!projectMenuRef.current?.contains(event.target as Node)) setProjectMenu(false)
+    }
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setProjectMenu(false)
+    }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('pointerdown', close)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [projectMenu])
+
+  useEffect(() => {
+    if (view !== 'archive' || !activeSourceId) return
+    const parts = archiveRoot.split('/').filter(Boolean)
+    const prefixes = parts.map((_, index) => parts.slice(0, index + 1).join('/'))
+    const nextDir = prefixes.find((path) =>
+      fileTreeNodes.some((node) => node.type === 'dir' && node.path === path)
+      && collapsed[sourceDirKey(activeSourceId, path)],
+    )
+    if (nextDir) void toggleFileDir(activeSourceId, nextDir)
+  }, [activeSourceId, archiveRoot, collapsed, fileTreeNodes, toggleFileDir, view])
+
+  async function addLocalProject() {
+    setProjectBusy(true)
+    try {
+      const result = await window.api?.sourcesAddLocal?.()
+      if (!result || result.canceled) return
+      if (result.ok === false) {
+        showToast(result.error || '无法打开项目目录')
+        return
+      }
+      const listed = await window.api?.projectsList?.()
+      const sourceId = String(result.source?.id || '')
+      const project = listed?.projects?.find((item) => item.workspaceSourceId === sourceId)
+      if (project) await selectProject(project.id)
+      else {
+        await loadProjects()
+        await loadFileTree()
+      }
+      showToast(project ? `已切换到“${project.name}”` : '项目已添加')
+      setProjectMenu(false)
+    } catch {
+      showToast('无法打开项目目录')
+    } finally {
+      setProjectBusy(false)
+    }
+  }
+
+  function openRepositorySettings() {
+    setProjectMenu(false)
+    openSettingsSurface('sources')
+    window.api?.openSettings?.('sources')
+  }
 
   async function openFilePreview(path: string, target: 'main' | 'split' = 'main') {
     if (!activeSourceId) return
@@ -127,43 +205,6 @@ export function FilesPane() {
     setPreviewLoading(false)
   }
 
-  function renderProjectSwitcher() {
-    if (!activeProject || !activeSource) return null
-    const meta = activeProject.status === 'missing'
-      ? '目录不可用'
-      : activeProject.status === 'readonly'
-        ? '只读'
-        : sourceKindLabel(activeSource)
-    const title = activeSource.rootPath || activeSource.displayName || ''
-    if (visibleProjects.length > 1) {
-      return (
-        <label className="source-switcher files-source-switch" title={title}>
-          <div className="source-switcher-text">
-            <select
-              className="source-switcher-select"
-              aria-label="切换内容源"
-              value={activeProjectId || ''}
-              onChange={(e) => void selectProject(e.target.value)}
-            >
-              {visibleProjects.map((project) => (
-                <option key={project.id} value={project.id}>{sources.find((source) => source.id === project.workspaceSourceId)?.displayName || project.name || project.id}</option>
-              ))}
-            </select>
-            <span className="source-switcher-meta">{meta}</span>
-          </div>
-        </label>
-      )
-    }
-    return (
-      <div className="source-switcher" title={title}>
-        <div className="source-switcher-text">
-          <span className="source-switcher-name">{activeSource.displayName || '未命名目录'}</span>
-          <span className="source-switcher-meta">{meta}</span>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div data-testid="files-pane">
       <div className="side-head">
@@ -171,18 +212,49 @@ export function FilesPane() {
           <Icon name="chevronLeftLine" />
         </button>
         <div className="side-actions" role="toolbar" aria-label="文件中心操作">
-          <button className="side-btn" type="button" title="添加内容源" aria-label="添加内容源" onClick={() => {
-              openSettingsSurface('sources')
-              window.api?.openSettings?.('sources')
-            }}>
-            <Icon name="obsidianFolderPlus" />
-          </button>
-          <button className="side-btn" type="button" title="管理内容源" aria-label="管理内容源" onClick={() => {
-              openSettingsSurface('sources')
-              window.api?.openSettings?.('sources')
-            }}>
-            <Icon name="settingsLine" />
-          </button>
+          <div className="side-action-menu-wrap" ref={projectMenuRef}>
+            <button
+              className={`side-btn${projectMenu ? ' active' : ''}`}
+              type="button"
+              title="项目菜单"
+              aria-label="项目菜单"
+              aria-haspopup="menu"
+              aria-expanded={projectMenu}
+              onClick={() => setProjectMenu((open) => !open)}
+            >
+              <Icon name="obsidianFolderPlus" />
+            </button>
+            {projectMenu ? (
+              <div className="side-action-menu project-action-menu" role="menu" aria-label="项目菜单">
+                <button className="side-menu-item" type="button" role="menuitem" disabled={projectBusy} onClick={() => void addLocalProject()}>
+                  <Icon name="obsidianFolderPlus" /><span>{projectBusy ? '正在打开…' : '打开本地项目'}</span>
+                </button>
+                <button className="side-menu-item" type="button" role="menuitem" onClick={openRepositorySettings}>
+                  <Icon name="gitFork" /><span>克隆 Git 项目</span>
+                </button>
+                <button className="side-menu-item" type="button" role="menuitem" disabled={!projects.length} onClick={() => {
+                  setProjectMenu(false)
+                  setProjectManagerOpen(true)
+                }}>
+                  <Icon name="settingsLine" /><span>项目设置</span>
+                </button>
+                <div className="side-menu-separator" role="separator" />
+                <button className="side-menu-item" type="button" role="menuitem" disabled={!activeSource} onClick={() => { setProjectMenu(false); void createSourceFile() }}>
+                  <Icon name="obsidianNewNote" /><span>新建文件</span>
+                </button>
+                <button className="side-menu-item" type="button" role="menuitem" disabled={!activeSource} onClick={() => { setProjectMenu(false); void openSourceRoot() }}>
+                  <Icon name="externalLink" /><span>打开项目目录</span>
+                </button>
+                <button className="side-menu-item" type="button" role="menuitem" disabled={!activeSource} onClick={() => {
+                  setProjectMenu(false)
+                  setPickingSplit(true)
+                  showToast('再点一个文件，打开只读分屏预览')
+                }}>
+                  <Icon name="obsidianPanel" /><span>分屏预览</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
           <button className="side-btn" type="button" title="刷新文件中心" aria-label="刷新文件中心" onClick={() => void loadFileTree()}>
             <Icon name="refresh" />
           </button>
@@ -196,46 +268,18 @@ export function FilesPane() {
           >
             <Icon name="obsidianCollapse" />
           </button>
-          <div className="side-action-menu-wrap" id="fileActionsWrap" hidden={!activeSource}>
-            <button
-              className="side-btn"
-              type="button"
-              title="文件操作"
-              aria-label="文件操作"
-              aria-expanded={fileMenu}
-              onClick={() => setFileMenu((open) => !open)}
-            >
-              <Icon name="moreHorizontal" />
-            </button>
-            {fileMenu ? (
-              <div className="side-action-menu" role="menu" aria-label="文件操作菜单">
-                <button className="side-menu-item" type="button" role="menuitem" onClick={() => { setFileMenu(false); void createSourceFile() }}>
-                  <Icon name="obsidianNewNote" /><span>新建文件</span>
-                </button>
-                <button className="side-menu-item" type="button" role="menuitem" onClick={() => { setFileMenu(false); void openSourceRoot() }}>
-                  <Icon name="externalLink" /><span>打开源目录</span>
-                </button>
-                <button className="side-menu-item" type="button" role="menuitem" onClick={() => {
-                  setFileMenu(false)
-                  setPickingSplit(true)
-                  showToast('再点一个文件，打开只读分屏预览')
-                }}>
-                  <Icon name="obsidianPanel" /><span>分屏预览</span>
-                </button>
-                <button className="side-menu-item side-menu-item-disabled" type="button" role="menuitem" disabled title="版本对比依赖已退役的独立编辑器，当前仅支持只读预览">
-                  <Icon name="obsidianSort" /><span>版本对比（未接入）</span>
-                </button>
-              </div>
-            ) : null}
-          </div>
         </div>
         <span className="side-title" id="sideTitle" />
+      </div>
+      <div className="files-view-switch" role="tablist" aria-label="项目内容">
+        <button type="button" role="tab" aria-selected={view === 'files'} className={view === 'files' ? 'active' : ''} onClick={() => { setView('files'); setQuery('') }}>项目文件</button>
+        <button type="button" role="tab" aria-selected={view === 'archive'} className={view === 'archive' ? 'active' : ''} onClick={() => { setView('archive'); setQuery('') }}>KnowMe 归档</button>
       </div>
       <div className="side-search">
         <span className="ico search-ico" data-icon="searchLine" aria-hidden="true" />
         <input
           type="search"
-          placeholder="搜索文件…"
+          placeholder={view === 'archive' ? '搜索归档文件…' : '搜索项目文件…'}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-label="搜索文件"
@@ -245,9 +289,8 @@ export function FilesPane() {
       <div className="tree" id="tree">
         {loading ? <div className="tree-empty">加载文件树…</div> : null}
         {!loading && projects.length === 0 ? (
-          <div className="tree-empty">前往设置添加本地文件夹或 Git 仓库。</div>
+          <div className="tree-empty">打开本地文件夹或克隆 Git 仓库，创建第一个项目。</div>
         ) : null}
-        {!loading && activeProject && activeSource ? renderProjectSwitcher() : null}
         {!loading && activeProject?.status === 'missing' ? (
           <div className="tree-empty">
             文件目录不可用。<button type="button" className="link-btn" onClick={() => void relinkProject(activeProject.id)}>重新定位</button>
@@ -256,7 +299,7 @@ export function FilesPane() {
         {!loading && activeProject?.status === 'readonly' ? (
           <div className="tree-empty tiny">此目录为只读，Agent 不会写入文件。</div>
         ) : null}
-        {!loading && recentArtifacts.length ? (
+        {!loading && view === 'archive' && recentArtifacts.length ? (
           <section className="project-recent-artifacts" aria-label="最近成果" data-testid="project-recent-artifacts">
             <header><span>最近成果</span><small>来自 Agent 与工作流</small></header>
             {recentArtifacts.map((artifact) => (
@@ -268,9 +311,13 @@ export function FilesPane() {
             ))}
           </section>
         ) : null}
-        {!loading && activeSource && visibleNodes.length === 0 ? (
+        {!loading && activeSource && visibleNodes.length === 0 && (view !== 'archive' || recentArtifacts.length === 0) ? (
           <div className="tree-empty">
-            {query.trim() ? '没有匹配的文件。' : '此源下暂无可显示的文件。'}
+            {query.trim()
+              ? '没有匹配的文件。'
+              : view === 'archive'
+                ? `“${archiveRoot}”中还没有 KnowMe 归档文件。`
+                : '项目中暂无可显示的文件。'}
           </div>
         ) : null}
         {!loading && visibleNodes.length > 0 ? (
@@ -361,6 +408,11 @@ export function FilesPane() {
           </div>
         ) : null}
       </div>
+      <ProjectManagerDialog
+        open={projectManagerOpen}
+        initialProjectId={activeProjectId}
+        onClose={() => setProjectManagerOpen(false)}
+      />
     </div>
   )
 }

@@ -32,17 +32,11 @@ function contentOffsetForTopic(
   return estimateTopicOffset(userMsgIdx, messageCount, log.scrollHeight)
 }
 
-/** 钉在侧栏与正文/输入框左缘之间空白的水平中点 */
+/** 像 Codex 一样贴近左侧栏，避免目录漂到正文附近。 */
 function placeRailInLeftGutter(nav: HTMLElement) {
   const col = nav.closest('.agent-col')
   if (!(col instanceof HTMLElement)) return
-  const content =
-    col.querySelector('.agent-composer') ||
-    col.querySelector('.agent-bubble') ||
-    col.querySelector('.agent-chat-body')
-  if (!(content instanceof HTMLElement)) return
-  const gutter = content.getBoundingClientRect().left - col.getBoundingClientRect().left
-  nav.style.left = `${Math.max(20, gutter / 2)}px`
+  nav.style.left = '28px'
 }
 
 export function AssistantTopicNav({ messages, chatLogRef, requestScrollToUserMsg }: Props) {

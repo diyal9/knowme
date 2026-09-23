@@ -53,7 +53,7 @@ describe('workbench-taskhome-surface', () => {
     expect(screen.getByText('状态')).toBeInTheDocument()
   })
 
-  it('filters tasks by the active project without changing their stored ownership', async () => {
+  it('follows the active project without showing a second project selector', async () => {
     mockApi({
       projectsList: async () => ({
         ok: true,
@@ -73,8 +73,9 @@ describe('workbench-taskhome-surface', () => {
 
     await waitFor(() => expect(screen.getByText('产品任务')).toBeInTheDocument())
     expect(screen.queryByText('研发任务')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: '全部项目' }))
-    expect(await screen.findByText('研发任务')).toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: '任务项目范围' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '当前项目' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '全部项目' })).not.toBeInTheDocument()
     expect(useAppStore.getState().tasks.find((task) => task.id === 'task-p2')?.projectId).toBe('p2')
   })
 
@@ -288,7 +289,8 @@ describe('workbench-taskhome-surface', () => {
       const headerActions = document.getElementById('wbHeadDetailActions')
       expect(headerActions).toBeTruthy()
       expect(within(headerActions as HTMLElement).getByRole('button', { name: '返回专家协作' })).toBeInTheDocument()
-      expect(screen.getByPlaceholderText('搜索想要的结果')).not.toBeVisible()
+      expect(screen.getByRole('button', { name: '搜索：专家或任务' })).toBeVisible()
+      expect(screen.queryByRole('search')).not.toBeInTheDocument()
       expect(screen.getByRole('tab', { name: '专家协作', hidden: true })).not.toBeVisible()
       expect(screen.getByRole('tab', { name: '工作流', hidden: true })).not.toBeVisible()
       expect(screen.getByRole('tab', { name: '管线服务', hidden: true })).not.toBeVisible()

@@ -20,8 +20,8 @@ function expertIds() {
 }
 
 describe('bundled expert capability contracts', () => {
-  it('ships business insight methods through the retained data analyst', () => {
-    const id = 'data-analyst'
+  it('ships business insight methods through the retained 数据靓仔 Agent', () => {
+    const id = 'operations-data-analyst'
     const dir = path.join(expertsRoot, id)
     const source = fs.readFileSync(path.join(dir, 'EXPERT.md'), 'utf8')
     const parsed = parseExpertFrontmatter(source)
@@ -77,7 +77,7 @@ describe('bundled expert capability contracts', () => {
 
   it('gives every bundled expert a valid explicit v3 manifest and usable output contract', () => {
     const ids = expertIds()
-    assert.equal(ids.length, 7)
+    assert.equal(ids.length, 3)
     for (const id of ids) {
       const expertSource = fs.readFileSync(path.join(expertsRoot, id, 'EXPERT.md'), 'utf8')
       const parsedExpert = parseExpertFrontmatter(expertSource)

@@ -13,7 +13,7 @@ describe('platform capability import workflow tools', () => {
     const bundledRoot = path.resolve(__dirname, '../src/catalog')
     const catalog = loadBundledCatalog(bundledRoot)
     assert.equal(catalog.entries.some(item => item.id === 'external-capability-importer'), false)
-    assert.ok(catalog.entries.some(item => item.id === 'capability-import-assurance' && item.kind === 'skill'))
+    assert.equal(catalog.entries.some(item => item.id === 'capability-import-assurance'), false)
   })
 
   it('previews before write and preserves the opaque snapshot token', async () => {

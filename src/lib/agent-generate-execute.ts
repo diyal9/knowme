@@ -10,6 +10,14 @@ const { prepareAgentGenerate } = require('./agent-generate-prepare')
 const { buildRunToolSurface } = require('./agent-generate-tool-surface')
 const { createChildRunPortFactory, makeOrchestrationPort } = require('./agent-generate-child-ports')
 
+function yieldToEventLoop() {
+  // The production Electron main process always exposes setImmediate. Some
+  // deterministic unit-test sandboxes intentionally expose no timers; in
+  // that case preserve synchronous semantics instead of changing test order.
+  if (typeof setImmediate !== 'function') return Promise.resolve()
+  return new Promise(resolve => setImmediate(resolve))
+}
+
 /** IPC 壳传入的 env；返回流式结果或 `{ error, runId }`。 */
 async function executeAgentGenerate(env) {
   const {
@@ -18,16 +26,21 @@ async function executeAgentGenerate(env) {
     productMemory, brainService, app, normalizeAssistantOutput, agentProcessTools, logger, contextEngine,
   } = L
   const {
-    loadSettings, saveSettings_, loadAgentSessions, saveAgentSessions, getFeishuGroundingContext,
+    loadSettings, saveSettings_, loadAgentSessions, saveAgentSessions, saveAgentSessionsAsync, getFeishuGroundingContext,
     hasPriorFeishuFacts, MEMORY_DIR, agentRuntimePortFactories, agentRuntimeOutputBridges,
     activeAgentRuns,
   } = env.deps
   const { payload, runId, signal, stage, emit, fail, metrics, runStartedAt } = env
 
   try {
+    // IPC handlers enter the main process synchronously. Yield before each
+    // large orchestration phase so window messages, cancellation and paint
+    // events are serviced between CPU/file-system bursts.
+    await yieldToEventLoop()
     const prepared = await prepareAgentGenerate(env)
     if (prepared.early) return prepared.early
 
+    await yieldToEventLoop()
     const surface = await buildRunToolSurface(env, prepared)
     if (surface.early) return surface.early
     env.settleAdoptedRun = surface.settleAdoptedRun
@@ -86,6 +99,7 @@ async function executeAgentGenerate(env) {
       workbenchTaskId: payload.workbenchTaskId,
       loadAgentSessions,
       saveAgentSessions,
+      saveAgentSessionsAsync,
       productMemoryCapture: productMemory.capture,
       memoryDir: MEMORY_DIR,
       normalizeAssistantOutput,
@@ -173,6 +187,7 @@ async function executeAgentGenerate(env) {
       },
     })
     try {
+      await yieldToEventLoop()
       const kernelResult = await AgentRunExecutor.run({
         ...payload,
         providedMaterials: prepared.providedMaterials,

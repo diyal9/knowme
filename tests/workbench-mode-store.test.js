@@ -40,8 +40,13 @@ describe('workbench-mode-store', () => {
     const s = createStore({
       daemonProjector: () => ({ online: true }),
     })
-    const engineering = s.list().modes.find((item) => item.id === 'engineering')
+    const modes = s.list().modes
+    const office = modes.find((item) => item.id === 'office')
+    const engineering = modes.find((item) => item.id === 'engineering')
 
+    assert.ok(office)
+    assert.deepEqual(office.suggestedRoles, [])
+    assert.equal(office.providers[0].label, 'KnowMe 伙伴')
     assert.ok(engineering)
     assert.deepEqual(
       engineering.suggestedRoles.map((role) => role.id),

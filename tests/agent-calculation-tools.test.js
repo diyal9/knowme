@@ -293,7 +293,7 @@ test('calculate respects explicit run tool restrictions in the real registry', a
 
 // Build the real three-skill business snapshot without touching catalog/user data.
 // Only snapshot persistence is in memory; expert loading/normalization stays real.
-function businessCalculationSnapshot() {
+function operationsCalculationSnapshot() {
   const memory = new Map()
   const fsImpl = {
     ...fs,
@@ -306,36 +306,37 @@ function businessCalculationSnapshot() {
   const runtime = require('../src/lib/expert-runtime').createExpertRuntime({
     capabilitiesRoot: path.resolve(__dirname, '../src/catalog'), fsImpl,
   })
-  const created = runtime.createSessionSnapshot('calculate-permission-repro', 'data-analyst')
+  const created = runtime.createSessionSnapshot('calculate-permission-repro', 'operations-data-analyst')
   assert.equal(created.ok, true)
-  const snapshot = runtime.getSessionPersona('calculate-permission-repro', 'data-analyst')
+  const snapshot = runtime.getSessionPersona('calculate-permission-repro', 'operations-data-analyst')
   assert.equal(snapshot.source, 'snapshot')
   assert.deepEqual(snapshot.bindings.skills, [
-    'data-analysis-method', 'business-metrics-analysis', 'business-cause-analysis',
-    'business-insight-report', 'data-report-method', 'writing-polish',
+    'th-bi-analytics-assistant', 'data-analysis-method', 'business-metrics-analysis',
+    'business-cause-analysis', 'business-insight-report', 'data-report-method',
+    'lark-sheet-fill', 'te-report-playwright-export', 'writing-polish',
   ])
-  assert.deepEqual(snapshot.bindings.connectors, [])
+  assert.deepEqual(snapshot.bindings.connectors, ['pango-data-mcp', 'thinkingdata-analysis-mcp', 'feishu'])
   return snapshot
 }
 
-test('canonical business package grants calculate through snapshot permissions without test overrides', async () => {
+test('retained operations analysis package grants calculate through snapshot permissions', async () => {
   const { buildFullToolSurface } = require('../src/lib/tool-surface-builder')
-  const snapshot = businessCalculationSnapshot()
+  const snapshot = operationsCalculationSnapshot()
   const permissions = snapshot.capabilityManifest.permissions
-  assert.deepEqual(permissions.tools.allowlist, ['calculate'])
-  assert.equal(permissions.network, false)
-  assert.equal(permissions.write, false)
-  assert.equal(permissions.externalWrite, false)
+  assert.ok(permissions.tools.allowlist.includes('calculate'))
+  assert.equal(permissions.network, true)
+  assert.equal(permissions.write, true)
+  assert.equal(permissions.externalWrite, true)
   const { surface, registry, governancePolicy } = buildFullToolSurface({
     forceV1: true,
     expertSnapshot: snapshot,
     permissions,
     extraTools: calculationModule().buildCalculationTools(),
   })
-  assert.deepEqual(governancePolicy.allowlist, ['calculate'])
+  assert.ok(governancePolicy.allowlist.includes('calculate'))
   assert.deepEqual(registry.getRegistrationIssues(), [])
   assert.deepEqual(surface.getToolDefinitions().map(def => def.function.name),
-    ['calculate'])
+    ['search_knowledge', 'calculate'])
   const result = await surface.createToolExecutor().executeToolCall({
     name: 'calculate', arguments: '{"calculations":[{"label":"package permission regression","expression":"6*7"}]}',
   })
@@ -349,7 +350,7 @@ test('permission reproduction: real business snapshot and connector runtime, emp
   const { resolveToolSurfaceForRun, extractExpertToolNames } = require('../src/lib/tool-surface-builder')
   const { buildConnectorToolSurface } = require('../src/lib/connectors/tool-runtime')
   const { deriveCapabilityIdsFromToolRecords } = require('../src/lib/context-engine/tool-capabilities')
-  const snapshot = businessCalculationSnapshot()
+  const snapshot = operationsCalculationSnapshot()
   const savedMode = process.env.KNOWME_TOOL_SURFACE
   try {
     for (const mode of ['v1', 'legacy']) {
@@ -361,15 +362,15 @@ test('permission reproduction: real business snapshot and connector runtime, emp
           tools: { allowlist },
           orchestration: { allowDelegate: false, maxSubRuns: 0, maxParallel: 0 },
         }
-        assert.equal(permissions.network, false)
-        assert.equal(permissions.write, false)
+        assert.equal(permissions.network, true)
+        assert.equal(permissions.write, true)
         const resolved = await resolveToolSurfaceForRun({
           userData: __dirname, expertSnapshot: snapshot, permissions,
-          allowedConnectorIds: snapshot.bindings.connectors,
+          allowedConnectorIds: [],
           extraTools: calculationModule().buildCalculationTools(),
           connectorBuild: opts => buildConnectorToolSurface(__dirname, {
             extraTools: opts.extraTools, registry: opts.registry,
-            allowedConnectorIds: snapshot.bindings.connectors,
+            allowedConnectorIds: [],
             includeSystemFeishu: true,
             // Read-only store boundary; real collection/merging/projection runs.
             connectorStore: { migrateLegacy() {}, loadConnectors: () => [] },

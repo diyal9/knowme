@@ -2,20 +2,36 @@
  * 助手 composer：输入、附件、模型/知识库/快捷菜单与发送。
  * 不负责消息列表与流式气泡。
  */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ClipboardEvent as ReactClipboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from 'react'
 import { selectActiveAttachments, selectActiveComposer, useAppStore } from '../../app/store'
 import { getSessionSlice } from './store-session'
 import { buildContextUsageViewModel } from '../../../domain/agent-context-usage'
 import { Icon } from '../../app/Icon'
 import { getAtContext, insertAtReference } from './atContext'
+import { getSlashContext, insertSlashSkill, removeSlashSkillMarker } from './slashContext'
+import { getHashContext, insertHashAgent, removeHashAgentMarker } from './hashContext'
 import { fileTitle, recentFileSuggestions } from './fileSuggestions'
 import {
   AgentKnowledgeMenu,
   AgentModelMenu,
   AgentQuickMenu,
   AgentSlashMenu,
+  buildAgentSlashMenuGroups,
+  buildAgentSlashNavigationTargets,
+  type AgentSlashNavigationTarget,
 } from './AgentComposerMenus'
 import { buildKnowledgeSelectionOptions } from '../../../shared/knowledge-selection'
+import { SkillTokenEditor, type SkillTokenEditorHandle } from './SkillTokenEditor'
+import type { CapabilityItem, ManagedAgentTarget } from '../../../shared/api'
+
+const EMPTY_SKILL_REFS: string[] = []
 
 export function AgentComposer({
   extraClass = '',
@@ -25,6 +41,9 @@ export function AgentComposer({
   onSubmit,
   allowSubmitWhileGenerating = false,
   allowEmptySubmit = false,
+  agentTargets = [],
+  selectedAgentTarget = null,
+  onAgentTargetChange,
 }: {
   extraClass?: string
   /** 助理主列 vs 工作台 task-room 对话；后者不挂载 Ctrl+K 快捷任务 */
@@ -39,6 +58,10 @@ export function AgentComposer({
   allowSubmitWhileGenerating?: boolean
   /** 某些任务流需要把空提交交给业务层做即时校验（例如成果修改意见）。 */
   allowEmptySubmit?: boolean
+  /** 能力管家任务房通过 # 在输入区选择本次训练或优化的 Agent。 */
+  agentTargets?: ManagedAgentTarget[]
+  selectedAgentTarget?: ManagedAgentTarget | null
+  onAgentTargetChange?: (target: ManagedAgentTarget | null) => void | Promise<void>
 }) {
   const composer = useAppStore(surface === 'workbench'
     ? (s) => s.workbenchDialogue.composer
@@ -55,6 +78,12 @@ export function AgentComposer({
   const setComposer = useAppStore(surface === 'workbench'
     ? (s) => s.setWorkbenchComposer
     : (s) => s.setComposer)
+  const selectedSkillRefs = useAppStore(surface === 'workbench'
+    ? (s) => s.workbenchDialogue.skillRefs || EMPTY_SKILL_REFS
+    : (s) => getSessionSlice(s.sessionStates, s.activeSessionId).skillRefs || EMPTY_SKILL_REFS)
+  const setSelectedSkillRefs = useAppStore(surface === 'workbench'
+    ? (s) => s.setWorkbenchSkillRefs
+    : (s) => s.setComposerSkillRefs)
   const sendMessage = useAppStore(surface === 'workbench'
     ? (s) => s.sendWorkbenchMessage
     : (s) => s.sendMessage)
@@ -78,16 +107,24 @@ export function AgentComposer({
   })
   const setAssistantModel = useAppStore((s) => s.setAssistantModel)
   const skills = useAppStore((s) => s.assistantSkills)
+  const skillIdsByExpert = useAppStore((s) => s.assistantSkillIdsByExpert)
   const knowledgeProviders = useAppStore((s) => s.knowledgeProviders)
   const loadKnowledge = useAppStore((s) => s.loadKnowledge)
   const sessions = useAppStore((s) => s.sessions)
   const activeSessionId = useAppStore((s) => s.activeSessionId)
   const toggleSessionKnowledge = useAppStore((s) => s.toggleSessionKnowledge)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<SkillTokenEditorHandle>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [composerCaret, setComposerCaret] = useState<number | null>(null)
   const [atActive, setAtActive] = useState(0)
-  const [slashActive, setSlashActive] = useState(0)
+  const [slashActiveTarget, setSlashActiveTarget] = useState<AgentSlashNavigationTarget | null>(null)
+  const [slashExpandedCategory, setSlashExpandedCategory] = useState('')
   const [slashDismissedValue, setSlashDismissedValue] = useState<string | null>(null)
+  const [slashMenuQuery, setSlashMenuQuery] = useState<string | null>(null)
+  const [hashActiveTarget, setHashActiveTarget] = useState<AgentSlashNavigationTarget | null>(null)
+  const [hashExpandedCategory, setHashExpandedCategory] = useState('')
+  const [hashDismissedValue, setHashDismissedValue] = useState<string | null>(null)
+  const [hashMenuQuery, setHashMenuQuery] = useState<string | null>(null)
   const [menu, setMenu] = useState<'model' | 'knowledge' | 'quick' | null>(null)
   const [previewImage, setPreviewImage] = useState<{ name: string; dataUrl: string } | null>(null)
   const allowQuickMenu = surface === 'assistant'
@@ -116,19 +153,84 @@ export function AgentComposer({
     : '选择本次对话知识库'
 
   const atContext = useMemo(() => {
-    const caret = textareaRef.current?.selectionStart ?? composer.length
+    const caret = composerCaret ?? composer.length
     return getAtContext(composer, caret)
-  }, [composer])
+  }, [composer, composerCaret])
   const atSuggestions = useMemo(() => {
     if (!atContext) return []
     return recentFileSuggestions(fileCatalog, atContext.query)
   }, [atContext, fileCatalog])
-  const slashOpen = composer.trimStart().startsWith('/') && composer !== slashDismissedValue
-  const slashQuery = slashOpen ? composer.trimStart().slice(1).toLowerCase() : ''
-  const slashItems = skills.filter((item) => item.installed !== false && item.enabled !== false).filter((item) => {
-    if (!slashQuery) return true
-    return `${item.name || ''} ${item.id} ${item.description || ''}`.toLowerCase().includes(slashQuery)
+  const slashContext = useMemo(() => {
+    const caret = composerCaret ?? composer.length
+    return getSlashContext(composer, caret)
+  }, [composer, composerCaret])
+  const slashOpen = Boolean(slashContext) && composer !== slashDismissedValue
+  const slashQuery = slashOpen ? slashMenuQuery ?? slashContext?.query ?? '' : ''
+  const slashInstalledItems = skills.filter((item) => item.installed !== false && item.enabled !== false)
+  const selectedSkills = selectedSkillRefs.map((id) => {
+    const item = slashInstalledItems.find((candidate) => candidate.id === id)
+    return { id, name: item?.name || id }
   })
+  const activeExpertId = String(active?.expertId || '').trim()
+  const activeExpertSkillIds = new Set(activeExpertId ? skillIdsByExpert[activeExpertId] || [] : [])
+  const slashCategoryOrder = new Map<string, number>()
+  slashInstalledItems.forEach((item) => {
+    const category = String(item.category || '').trim() || '其他'
+    if (!slashCategoryOrder.has(category)) slashCategoryOrder.set(category, slashCategoryOrder.size)
+  })
+  const slashItems = slashInstalledItems.filter((item) => {
+    if (!slashQuery) return item.favorite === true || activeExpertSkillIds.has(item.id)
+    return `${item.name || ''} ${item.id} ${item.description || ''} ${item.category || ''}`.toLowerCase().includes(slashQuery)
+  }).sort((a, b) => {
+    const aCategory = String(a.category || '').trim() || '其他'
+    const bCategory = String(b.category || '').trim() || '其他'
+    return (slashCategoryOrder.get(aCategory) ?? 0) - (slashCategoryOrder.get(bCategory) ?? 0)
+  })
+  const slashGroups = buildAgentSlashMenuGroups(slashItems)
+  const slashDefaultCategory = slashGroups[0]?.category || ''
+  const effectiveSlashExpandedCategory = slashGroups.some((group) => group.category === slashExpandedCategory)
+    ? slashExpandedCategory
+    : slashDefaultCategory
+  const slashNavigationTargets = buildAgentSlashNavigationTargets(slashGroups, effectiveSlashExpandedCategory)
+  const slashResolvedActiveTarget = slashNavigationTargets.find((target) => (
+    target.kind === slashActiveTarget?.kind
+    && target.category === slashActiveTarget.category
+    && (target.kind === 'category' || target.itemIndex === (slashActiveTarget.kind === 'item' ? slashActiveTarget.itemIndex : -1))
+  )) || slashNavigationTargets[1] || slashNavigationTargets[0] || null
+  const slashItemsKey = slashItems.map((item) => `${item.id}:${String(item.category || '')}`).join('\u0000')
+  const hashContext = useMemo(() => {
+    if (!agentTargets.length) return null
+    const caret = composerCaret ?? composer.length
+    return getHashContext(composer, caret)
+  }, [agentTargets.length, composer, composerCaret])
+  const hashOpen = Boolean(hashContext) && composer !== hashDismissedValue
+  const hashQuery = hashOpen ? hashMenuQuery ?? hashContext?.query ?? '' : ''
+  const hashItems = useMemo<CapabilityItem[]>(() => agentTargets
+    .filter((item) => !hashQuery || `${item.name} ${item.id} ${item.source}`.toLowerCase().includes(hashQuery.toLowerCase()))
+    .map((item) => ({
+      id: item.id,
+      kind: 'expert',
+      name: item.name,
+      installed: true,
+      source: item.source,
+      version: item.version,
+      category: item.ownership === 'system' ? '系统 Agent'
+        : item.ownership === 'organization' ? '组织 Agent' : '我的 Agent',
+      description: `${item.id}${item.version ? ` · v${item.version}` : ''}`,
+    })), [agentTargets, hashQuery])
+  const hashGroups = buildAgentSlashMenuGroups(hashItems)
+  const hashDefaultCategory = hashGroups[0]?.category || ''
+  const effectiveHashExpandedCategory = hashGroups.some((group) => group.category === hashExpandedCategory)
+    ? hashExpandedCategory
+    : hashDefaultCategory
+  const hashNavigationTargets = buildAgentSlashNavigationTargets(hashGroups, effectiveHashExpandedCategory)
+  const hashResolvedActiveTarget = hashNavigationTargets.find((target) => (
+    target.kind === hashActiveTarget?.kind
+    && target.category === hashActiveTarget.category
+    && (target.kind === 'category' || target.itemIndex === (hashActiveTarget.kind === 'item' ? hashActiveTarget.itemIndex : -1))
+  )) || hashNavigationTargets[1] || hashNavigationTargets[0] || null
+  const hashItemsKey = hashItems.map((item) => `${item.id}:${String(item.category || '')}`).join('\u0000')
+  const selectedAgentTokens = selectedAgentTarget ? [{ id: selectedAgentTarget.id, name: selectedAgentTarget.name }] : []
   const activeModel = models.find((item) => item.id === modelId)
   const contextUsage = buildContextUsageViewModel(
     assistantContextInfo,
@@ -146,18 +248,30 @@ export function AgentComposer({
         : ' usage-safe'
 
   useEffect(() => { setAtActive(0) }, [atContext?.query])
-  useEffect(() => { setSlashActive(0) }, [slashQuery])
+  useEffect(() => { setSlashMenuQuery(null) }, [slashContext?.start, slashContext?.end, slashContext?.query])
+  useEffect(() => { setHashMenuQuery(null) }, [hashContext?.start, hashContext?.end, hashContext?.query])
   useEffect(() => {
-    // `/技能` 是输入驱动的弹窗；一旦出现，关闭智能推荐/模型/知识库菜单，保持单弹窗。
-    if (slashOpen && menu) setMenu(null)
-  }, [slashOpen, menu])
-
-  useLayoutEffect(() => {
-    const node = textareaRef.current
-    if (!node) return
-    node.style.height = 'auto'
-    node.style.height = `${Math.max(48, Math.min(node.scrollHeight, 180))}px`
-  }, [composer])
+    const firstGroup = slashGroups[0]
+    setSlashExpandedCategory(firstGroup?.category || '')
+    setSlashActiveTarget(firstGroup?.items[0]
+      ? { kind: 'item', category: firstGroup.category, itemIndex: firstGroup.items[0].index }
+      : firstGroup
+        ? { kind: 'category', category: firstGroup.category }
+        : null)
+  }, [slashQuery, slashItemsKey])
+  useEffect(() => {
+    const firstGroup = hashGroups[0]
+    setHashExpandedCategory(firstGroup?.category || '')
+    setHashActiveTarget(firstGroup?.items[0]
+      ? { kind: 'item', category: firstGroup.category, itemIndex: firstGroup.items[0].index }
+      : firstGroup
+        ? { kind: 'category', category: firstGroup.category }
+        : null)
+  }, [hashQuery, hashItemsKey])
+  useEffect(() => {
+    // `/技能` 与 `#Agent` 都由输入驱动；出现时关闭其他菜单，保持单弹窗。
+    if ((slashOpen || hashOpen) && menu) setMenu(null)
+  }, [slashOpen, hashOpen, menu])
 
   // @ 选文件时再拉目录，避免助理 mount 扫盘
   useEffect(() => {
@@ -192,21 +306,23 @@ export function AgentComposer({
   }, [menu])
 
   useEffect(() => {
-    if (!slashOpen) return
+    if (!slashOpen && !hashOpen) return
     function onPointerDown(event: PointerEvent) {
       const target = event.target
       if (!(target instanceof Element)) return
       if (target.closest('.agent-slash-menu') || target.closest('#agentInput')) return
-      setSlashDismissedValue(composer)
+      if (slashOpen) setSlashDismissedValue(composer)
+      if (hashOpen) setHashDismissedValue(composer)
     }
     document.addEventListener('pointerdown', onPointerDown)
     return () => document.removeEventListener('pointerdown', onPointerDown)
-  }, [slashOpen, composer])
+  }, [slashOpen, hashOpen, composer])
 
   function pickFile(note: { id: string; title?: string; preview?: string }) {
     if (!atContext) return
     const title = fileTitle(note)
     const { next, caret } = insertAtReference(composer, atContext, title)
+    setComposerCaret(caret)
     setComposer(next)
     requestAnimationFrame(() => {
       const el = textareaRef.current
@@ -217,8 +333,172 @@ export function AgentComposer({
   }
 
   function insertSkill(item: { id: string; name?: string }) {
-    setComposer(`/${item.name || item.id} `)
+    if (!slashContext) return
+    const id = String(item.id || '').trim()
+    if (!id) return
+    const name = String(item.name || id).trim()
+    const { next, caret } = insertSlashSkill(composer, slashContext, name)
+    if (!selectedSkillRefs.includes(id)) setSelectedSkillRefs([...selectedSkillRefs, id])
+    setComposerCaret(caret)
+    setComposer(next)
+    setSlashDismissedValue(null)
+    setSlashMenuQuery(null)
     setMenu(null)
+    requestAnimationFrame(() => {
+      const node = textareaRef.current
+      node?.focus()
+      node?.setSelectionRange(caret, caret)
+    })
+  }
+
+  function removeSkill(skill: { id: string; name: string }) {
+    setSelectedSkillRefs(selectedSkillRefs.filter((id) => id !== skill.id))
+    const { next, caret } = removeSlashSkillMarker(composer, skill.name)
+    setComposerCaret(caret)
+    if (next !== composer) setComposer(next)
+    setSlashDismissedValue(null)
+    setSlashMenuQuery(null)
+    requestAnimationFrame(() => {
+      const node = textareaRef.current
+      node?.focus()
+      node?.setSelectionRange(caret, caret)
+    })
+  }
+
+  function insertAgentTarget(item: CapabilityItem) {
+    if (!hashContext) return
+    const target = agentTargets.find((candidate) => candidate.id === item.id)
+    if (!target) return
+    const { next, caret } = insertHashAgent(composer, hashContext, target.name)
+    setComposerCaret(caret)
+    setComposer(next)
+    setHashDismissedValue(null)
+    setHashMenuQuery(null)
+    setMenu(null)
+    void onAgentTargetChange?.(target)
+    requestAnimationFrame(() => {
+      const node = textareaRef.current
+      node?.focus()
+      node?.setSelectionRange(caret, caret)
+    })
+  }
+
+  function removeAgentTarget(agent: { id: string; name: string }) {
+    const { next, caret } = removeHashAgentMarker(composer, agent.name)
+    setComposerCaret(caret)
+    if (next !== composer) setComposer(next)
+    setHashDismissedValue(null)
+    setHashMenuQuery(null)
+    void onAgentTargetChange?.(null)
+    requestAnimationFrame(() => {
+      const node = textareaRef.current
+      node?.focus()
+      node?.setSelectionRange(caret, caret)
+    })
+  }
+
+  function activateSlashCategory(category: string) {
+    setSlashExpandedCategory(category)
+    setSlashActiveTarget({ kind: 'category', category })
+  }
+
+  function handleSlashNavigationKey(key: string): boolean {
+    if (!slashOpen || !slashResolvedActiveTarget || !slashNavigationTargets.length) return false
+    const currentIndex = Math.max(0, slashNavigationTargets.findIndex((target) => (
+      target.kind === slashResolvedActiveTarget.kind
+      && target.category === slashResolvedActiveTarget.category
+      && (target.kind === 'category' || target.itemIndex === (slashResolvedActiveTarget.kind === 'item' ? slashResolvedActiveTarget.itemIndex : -1))
+    )))
+
+    if (key === 'ArrowDown' || key === 'ArrowUp') {
+      const delta = key === 'ArrowDown' ? 1 : -1
+      const nextIndex = (currentIndex + delta + slashNavigationTargets.length) % slashNavigationTargets.length
+      setSlashActiveTarget(slashNavigationTargets[nextIndex])
+      return true
+    }
+
+    if (key === 'ArrowRight') {
+      if (slashResolvedActiveTarget.kind === 'category') {
+        if (effectiveSlashExpandedCategory !== slashResolvedActiveTarget.category) {
+          activateSlashCategory(slashResolvedActiveTarget.category)
+        } else {
+          const firstItem = slashGroups.find((group) => group.category === slashResolvedActiveTarget.category)?.items[0]
+          if (firstItem) setSlashActiveTarget({ kind: 'item', category: slashResolvedActiveTarget.category, itemIndex: firstItem.index })
+        }
+      }
+      return true
+    }
+
+    if (key === 'ArrowLeft') {
+      if (slashResolvedActiveTarget.kind === 'item') {
+        setSlashActiveTarget({ kind: 'category', category: slashResolvedActiveTarget.category })
+      }
+      return true
+    }
+
+    if (key === 'Enter') {
+      if (slashResolvedActiveTarget.kind === 'category') {
+        activateSlashCategory(slashResolvedActiveTarget.category)
+      } else {
+        const item = slashItems[slashResolvedActiveTarget.itemIndex]
+        if (item) insertSkill(item)
+      }
+      return true
+    }
+
+    return false
+  }
+
+  function activateHashCategory(category: string) {
+    setHashExpandedCategory(category)
+    setHashActiveTarget({ kind: 'category', category })
+  }
+
+  function handleHashNavigationKey(key: string): boolean {
+    if (!hashOpen || !hashResolvedActiveTarget || !hashNavigationTargets.length) return false
+    const currentIndex = Math.max(0, hashNavigationTargets.findIndex((target) => (
+      target.kind === hashResolvedActiveTarget.kind
+      && target.category === hashResolvedActiveTarget.category
+      && (target.kind === 'category' || target.itemIndex === (hashResolvedActiveTarget.kind === 'item' ? hashResolvedActiveTarget.itemIndex : -1))
+    )))
+
+    if (key === 'ArrowDown' || key === 'ArrowUp') {
+      const delta = key === 'ArrowDown' ? 1 : -1
+      const nextIndex = (currentIndex + delta + hashNavigationTargets.length) % hashNavigationTargets.length
+      setHashActiveTarget(hashNavigationTargets[nextIndex])
+      return true
+    }
+
+    if (key === 'ArrowRight') {
+      if (hashResolvedActiveTarget.kind === 'category') {
+        if (effectiveHashExpandedCategory !== hashResolvedActiveTarget.category) {
+          activateHashCategory(hashResolvedActiveTarget.category)
+        } else {
+          const firstItem = hashGroups.find((group) => group.category === hashResolvedActiveTarget.category)?.items[0]
+          if (firstItem) setHashActiveTarget({ kind: 'item', category: hashResolvedActiveTarget.category, itemIndex: firstItem.index })
+        }
+      }
+      return true
+    }
+
+    if (key === 'ArrowLeft') {
+      if (hashResolvedActiveTarget.kind === 'item') {
+        setHashActiveTarget({ kind: 'category', category: hashResolvedActiveTarget.category })
+      }
+      return true
+    }
+
+    if (key === 'Enter') {
+      if (hashResolvedActiveTarget.kind === 'category') {
+        activateHashCategory(hashResolvedActiveTarget.category)
+      } else {
+        const item = hashItems[hashResolvedActiveTarget.itemIndex]
+        if (item) insertAgentTarget(item)
+      }
+      return true
+    }
+
+    return false
   }
 
   function sendAndRefocus() {
@@ -251,6 +531,55 @@ export function AgentComposer({
       text: typeof reader.result === 'string' ? reader.result.slice(0, 12000) : undefined,
     })
     reader.readAsText(file)
+  }
+
+  function handleComposerChange(nextComposer: string, caret = nextComposer.length) {
+    setSlashDismissedValue(null)
+    setSlashMenuQuery(null)
+    setHashDismissedValue(null)
+    setHashMenuQuery(null)
+    setComposerCaret(caret)
+    setComposer(nextComposer)
+  }
+
+  function handleComposerPaste(event: ReactClipboardEvent<HTMLElement>) {
+    const item = [...(event.clipboardData?.items || [])].find((entry) => entry.type.startsWith('image/'))
+    const file = item?.getAsFile()
+    if (!file) return
+    event.preventDefault()
+    readAttachment(file)
+  }
+
+  function handleComposerKeyDown(event: ReactKeyboardEvent<HTMLElement>) {
+    if (atContext && atSuggestions.length > 0) {
+      if (event.key === 'ArrowDown') { event.preventDefault(); setAtActive((i) => (i + 1) % atSuggestions.length); return }
+      if (event.key === 'ArrowUp') { event.preventDefault(); setAtActive((i) => (i - 1 + atSuggestions.length) % atSuggestions.length); return }
+      if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); pickFile(atSuggestions[atActive]); return }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setComposer(composer.slice(0, atContext.start) + composer.slice(atContext.end))
+        return
+      }
+    }
+    if (event.key === 'Escape' && slashOpen) {
+      event.preventDefault()
+      setSlashDismissedValue(composer)
+      return
+    }
+    if (event.key === 'Escape' && hashOpen) {
+      event.preventDefault()
+      setHashDismissedValue(composer)
+      return
+    }
+    if (hashOpen && (event.key !== 'Enter' || !event.shiftKey) && handleHashNavigationKey(event.key)) {
+      event.preventDefault()
+      return
+    }
+    if (slashOpen && (event.key !== 'Enter' || !event.shiftKey) && handleSlashNavigationKey(event.key)) {
+      event.preventDefault()
+      return
+    }
+    if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendAndRefocus() }
   }
 
   useEffect(() => {
@@ -311,55 +640,40 @@ export function AgentComposer({
           <AgentSlashMenu
             items={slashItems}
             query={slashQuery}
-            activeIndex={slashActive}
-            onActiveChange={setSlashActive}
-            onQueryChange={(value) => {
-              setComposer(`/${value}`)
-            }}
+            activeTarget={slashResolvedActiveTarget}
+            expandedCategory={effectiveSlashExpandedCategory}
+            onActiveTargetChange={setSlashActiveTarget}
+            onExpandedCategoryChange={activateSlashCategory}
+            onNavigateKey={handleSlashNavigationKey}
+            onQueryChange={setSlashMenuQuery}
             onPick={insertSkill}
           />
         ) : null}
-        <textarea
+        {hashOpen ? (
+          <AgentSlashMenu
+            mode="agent"
+            items={hashItems}
+            query={hashQuery}
+            activeTarget={hashResolvedActiveTarget}
+            expandedCategory={effectiveHashExpandedCategory}
+            onActiveTargetChange={setHashActiveTarget}
+            onExpandedCategoryChange={activateHashCategory}
+            onNavigateKey={handleHashNavigationKey}
+            onQueryChange={setHashMenuQuery}
+            onPick={insertAgentTarget}
+          />
+        ) : null}
+        <SkillTokenEditor
           ref={textareaRef}
-          id="agentInput"
-          rows={2}
-          placeholder={placeholder}
-          spellCheck={false}
           value={composer}
-          onPaste={(e) => {
-            const item = [...(e.clipboardData?.items || [])].find((entry) => entry.type.startsWith('image/'))
-            const file = item?.getAsFile()
-            if (!file) return
-            e.preventDefault()
-            readAttachment(file)
-          }}
-          onChange={(e) => {
-            setSlashDismissedValue(null)
-            setComposer(e.target.value)
-          }}
-          onKeyDown={(e) => {
-            if (atContext && atSuggestions.length > 0) {
-              if (e.key === 'ArrowDown') { e.preventDefault(); setAtActive((i) => (i + 1) % atSuggestions.length); return }
-              if (e.key === 'ArrowUp') { e.preventDefault(); setAtActive((i) => (i - 1 + atSuggestions.length) % atSuggestions.length); return }
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); pickFile(atSuggestions[atActive]); return }
-              if (e.key === 'Escape') {
-                e.preventDefault()
-                setComposer(composer.slice(0, atContext.start) + composer.slice(atContext.end))
-                return
-              }
-            }
-            if (e.key === 'Escape' && slashOpen) {
-              e.preventDefault()
-              setSlashDismissedValue(composer)
-              return
-            }
-            if (slashOpen && slashItems.length > 0) {
-              if (e.key === 'ArrowDown') { e.preventDefault(); setSlashActive((i) => (i + 1) % slashItems.length); return }
-              if (e.key === 'ArrowUp') { e.preventDefault(); setSlashActive((i) => (i - 1 + slashItems.length) % slashItems.length); return }
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); insertSkill(slashItems[slashActive]); return }
-            }
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAndRefocus() }
-          }}
+          skills={selectedSkills}
+          agents={selectedAgentTokens}
+          placeholder={placeholder}
+          onChange={handleComposerChange}
+          onKeyDown={handleComposerKeyDown}
+          onPaste={handleComposerPaste}
+          onRemoveSkill={removeSkill}
+          onRemoveAgent={removeAgentTarget}
         />
       </div>
       <div className="agent-toolbar">
@@ -388,7 +702,11 @@ export function AgentComposer({
               aria-expanded={menu === 'quick'}
               aria-controls="agentQuickMenu"
               onClick={() => {
-                if (slashOpen) setComposer('')
+                if (slashOpen && slashContext) {
+                  setComposerCaret(slashContext.start)
+                  setComposer(composer.slice(0, slashContext.start) + composer.slice(slashContext.end))
+                  setSlashMenuQuery(null)
+                }
                 setMenu(menu === 'quick' ? null : 'quick')
               }}
             >

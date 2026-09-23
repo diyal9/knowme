@@ -12,7 +12,6 @@ const { contentHash } = require('./skill-runtime')
 const {
   SIDECAR_FILE,
   adaptLegacyCapability,
-  serializeSidecar,
   validateAndNormalizeManifest,
 } = require('./capability-manifest-v2')
 const {
@@ -102,7 +101,7 @@ function parseExpertFrontmatter(content) {
     if (idx < 0) continue
     const key = trimmed.slice(0, idx).trim()
     const val = trimmed.slice(idx + 1).trim()
-    if (['skills', 'connectors', 'optionalConnectors', 'useCases', 'boundaries', 'inputContract', 'outputContract'].includes(key)) {
+    if (['skills', 'connectors', 'optionalConnectors', 'knowledgeRefs', 'useCases', 'boundaries', 'inputContract', 'outputContract'].includes(key)) {
       frontmatter[key] = parseInlineList(val)
       if (!val) listKey = key
     } else if (key === 'orchestrationEnabled') {
@@ -135,12 +134,14 @@ function parseExpertFrontmatter(content) {
     frontmatter,
     body,
     name: String(frontmatter.name || '').trim(),
+    version: String(frontmatter.version || '1.0.0').trim() || '1.0.0',
     originName: String(frontmatter.originName || '').trim(),
     description: String(frontmatter.description || '').trim(),
     avatar: String(frontmatter.avatar || '').trim(),
     skills: Array.isArray(frontmatter.skills) ? frontmatter.skills.map(String) : [],
     connectors: Array.isArray(frontmatter.connectors) ? frontmatter.connectors.map(String) : [],
     optionalConnectors: Array.isArray(frontmatter.optionalConnectors) ? frontmatter.optionalConnectors.map(String) : [],
+    knowledgeRefs: Array.isArray(frontmatter.knowledgeRefs) ? frontmatter.knowledgeRefs.map(String) : [],
     useCases: Array.isArray(frontmatter.useCases) ? frontmatter.useCases.map(String) : [],
     boundaries: Array.isArray(frontmatter.boundaries) ? frontmatter.boundaries.map(String) : [],
     inputContract: Array.isArray(frontmatter.inputContract) ? frontmatter.inputContract.map(String) : [],
@@ -170,12 +171,13 @@ function parseManifestJson(text) {
 
 function buildManifest(expertParsed, expertMdContent) {
   return {
-    version: '1.0.0',
+    version: String(expertParsed.version || '1.0.0').trim() || '1.0.0',
     contentHash: contentHash(expertMdContent),
     name: expertParsed.name,
     skills: expertParsed.skills,
     connectors: expertParsed.connectors,
     optionalConnectors: expertParsed.optionalConnectors,
+    knowledgeRefs: expertParsed.knowledgeRefs || [],
     updatedAt: new Date().toISOString(),
   }
 }
@@ -451,9 +453,13 @@ function createExpertRuntime(deps = {}) {
         originName: loaded.originName,
         description: loaded.description,
         avatar: loaded.avatar,
+        version: loaded.capabilityManifest?.version || loaded.manifest.version || loaded.version,
         skills: loaded.skills,
         connectors: loaded.connectors,
         optionalConnectors: loaded.optionalConnectors,
+        knowledgeRefs: loaded.capabilityManifest?.metadata?.knowledgeRefs || loaded.knowledgeRefs || [],
+        useCases: loaded.capabilityManifest?.metadata?.knowme?.useCases || loaded.useCases || [],
+        boundaries: loaded.capabilityManifest?.metadata?.knowme?.boundaries || loaded.boundaries || [],
         soul: loaded.soul,
         sop: loaded.sop,
         agenticType: loaded.agenticType,
@@ -516,12 +522,20 @@ function createExpertRuntime(deps = {}) {
     }
     const parsed = {
       name: String(payload.name || '').trim(),
+      version: String(payload.version || payload.capabilityManifest?.version || '1.0.0').trim() || '1.0.0',
       originName: String(payload.originName || '').trim(),
       description: String(payload.description || '').trim(),
       avatar: String(payload.avatar || '').trim(),
       skills: Array.isArray(payload.skills) ? payload.skills.map(String) : [],
       connectors: Array.isArray(payload.connectors) ? payload.connectors.map(String) : [],
       optionalConnectors: Array.isArray(payload.optionalConnectors) ? payload.optionalConnectors.map(String) : [],
+      knowledgeRefs: Array.isArray(payload.knowledgeRefs) ? payload.knowledgeRefs.map(String) : [],
+      useCases: Array.isArray(payload.useCases) ? payload.useCases.map(String) : [],
+      boundaries: Array.isArray(payload.boundaries) ? payload.boundaries.map(String) : [],
+      inputContract: (Array.isArray(payload.inputs) ? payload.inputs : payload.inputContract || [])
+        .map(item => String(item?.name || item || '').trim()).filter(Boolean),
+      outputContract: (Array.isArray(payload.outputs) ? payload.outputs : payload.outputContract || [])
+        .map(item => String(item?.name || item || '').trim()).filter(Boolean),
       soul: resolved.soul,
       sop: resolved.sop,
       agenticType: resolved.agenticType,
@@ -537,12 +551,18 @@ function createExpertRuntime(deps = {}) {
     const lines = [
       '---',
       `name: ${JSON.stringify(parsed.name)}`,
+      `version: ${JSON.stringify(parsed.version)}`,
       ...(parsed.originName ? [`originName: ${JSON.stringify(parsed.originName)}`] : []),
       `description: ${JSON.stringify(parsed.description)}`,
       `avatar: ${JSON.stringify(parsed.avatar)}`,
       `skills: [${parsed.skills.map((s) => JSON.stringify(s)).join(', ')}]`,
       `connectors: [${parsed.connectors.map((c) => JSON.stringify(c)).join(', ')}]`,
       ...(parsed.optionalConnectors.length ? [`optionalConnectors: [${parsed.optionalConnectors.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
+      ...(parsed.knowledgeRefs.length ? [`knowledgeRefs: [${parsed.knowledgeRefs.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
+      ...(parsed.useCases.length ? [`useCases: [${parsed.useCases.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
+      ...(parsed.boundaries.length ? [`boundaries: [${parsed.boundaries.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
+      ...(parsed.inputContract.length ? [`inputContract: [${parsed.inputContract.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
+      ...(parsed.outputContract.length ? [`outputContract: [${parsed.outputContract.map((c) => JSON.stringify(c)).join(', ')}]`] : []),
       `agenticType: ${JSON.stringify(parsed.agenticType)}`,
       `agenticConfig: ${JSON.stringify(parsed.agenticConfig)}`,
       `soul: ${JSON.stringify(parsed.soul)}`,
@@ -552,30 +572,43 @@ function createExpertRuntime(deps = {}) {
       '',
     ]
     const mdContent = lines.join('\n')
+    const manifest = buildManifest(parsed, mdContent)
+    const provenance = {
+      source: 'custom',
+      trust: 'user',
+      ref: path.join('experts', id, 'EXPERT.md').replace(/\\/g, '/'),
+      contentHash: manifest.contentHash,
+    }
+    const adapted = payload.capabilityManifest && typeof payload.capabilityManifest === 'object'
+      ? validateAndNormalizeManifest({
+          ...payload.capabilityManifest,
+          id,
+          kind: 'expert',
+          name: parsed.name,
+          description: parsed.description,
+          version: parsed.version,
+          provenance: { ...(payload.capabilityManifest.provenance || {}), ...provenance },
+        }, { id, kind: 'expert' })
+      : adaptLegacyCapability('expert', parsed, {
+          id,
+          name: parsed.name,
+          description: parsed.description,
+          version: manifest.version,
+          ...provenance,
+        })
+    if (!adapted.ok) {
+      return { ok: false, code: 'invalid_capability_manifest', message: adapted.issues?.[0]?.message || '能力合同无效', issues: adapted.issues || [] }
+    }
     const dir = expertDir(id)
     fsImpl.mkdirSync(dir, { recursive: true })
     fsImpl.writeFileSync(path.join(dir, 'EXPERT.md'), mdContent, 'utf8')
-
-    const manifest = buildManifest(parsed, mdContent)
     atomicWriteJson(path.join(dir, 'manifest.json'), manifest, fsImpl)
-    const adapted = adaptLegacyCapability('expert', parsed, {
-      id,
-      name: parsed.name,
-      description: parsed.description,
-      version: manifest.version,
-      source: 'custom',
-      ref: path.join('experts', id, 'EXPERT.md').replace(/\\/g, '/'),
-      contentHash: manifest.contentHash,
-    })
-    if (adapted.ok) {
-      const sidecar = serializeSidecar(adapted.manifest)
-      if (sidecar.ok) fsImpl.writeFileSync(path.join(dir, SIDECAR_FILE), sidecar.content, 'utf8')
-    }
+    atomicWriteJson(path.join(dir, SIDECAR_FILE), adapted.manifest, fsImpl)
     return {
       ok: true,
       id,
       manifest,
-      capabilityManifest: adapted.ok ? adapted.manifest : null,
+      capabilityManifest: adapted.manifest,
       contentHash: manifest.contentHash,
       soul: parsed.soul,
       sop: parsed.sop,

@@ -35,7 +35,7 @@
   --red: var(--state-danger);
   --rail-width: 132px;
   /* Typography contract: one native, ClearType-friendly stack for every surface. */
-  --font-family-ui: 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
+  --font-family-ui: 'Segoe UI Variable Text', 'Microsoft YaHei UI', 'Segoe UI', system-ui, sans-serif;
   --font-family-display: var(--font-family-ui);
   --font-family-mono: 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
   --ui: var(--font-family-ui);
@@ -67,35 +67,55 @@
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  /* Density profiles: reading/creation, general surfaces, and high-frequency chrome. */
+  --density-relaxed-gap: var(--space-5);
+  --density-standard-gap: var(--space-4);
+  --density-compact-gap: var(--space-3);
+  --density-relaxed-padding: var(--space-6);
+  --density-standard-padding: var(--space-4);
+  --density-compact-padding: var(--space-3);
   --control-sm: 28px;
   --control-md: 32px;
   --control-lg: 36px;
+  --control-xl: 40px;
   /* 主模块顶部 Tab 共用紧凑高度，避免跨页面切换时产生纵向跳动。 */
   --surface-tab-height: 46px;
   --radius-sm: 5px;
   --radius-md: 7px;
   --radius-lg: 10px;
+  --radius-panel: 12px;
+  --radius-pill: 999px;
+  --radius-circle: 50%;
   /* 交互时长：微交互 / 面板开合 */
   --motion-micro: 160ms;
   --motion-panel: 280ms;
   --focus-ring: color-mix(in srgb, var(--action-primary) 30%, transparent);
-  --surface-shadow: 0 1px 2px color-mix(in srgb, var(--brand-ink) 3%, transparent), 0 8px 24px color-mix(in srgb, var(--brand-ink) 4%, transparent);
+  /* Elevation follows one light direction; legacy aliases preserve computed styles. */
+  --shadow-rest: 0 1px 2px color-mix(in srgb, var(--brand-ink) 3%, transparent);
+  --shadow-raised: var(--shadow-rest), 0 8px 24px color-mix(in srgb, var(--brand-ink) 4%, transparent);
+  --shadow-overlay: 0 12px 32px color-mix(in srgb, var(--brand-ink) 10%, transparent);
+  --surface-shadow: var(--shadow-raised);
   --radius-control: 7px;
 
   /* Semantic colors come from brand-tokens.css; layout and motion stay here. */
-  --shadow-float: 0 12px 32px color-mix(in srgb, var(--brand-ink) 10%, transparent);
+  --shadow-float: var(--shadow-overlay);
   --page-max: 1120px;
   --page-gutter: 24px;
   --toolbar-height: 44px;
   /* Conversation contract: shared by personal, expert, workflow and pipeline chat. */
-  --conversation-track-max: 920px;
-  /* 对话正文采用窄于输入框的阅读轨，避免回复呈现成长文档。 */
-  --conversation-reading-max: 840px;
-  --conversation-body-size: 15px;
-  --conversation-user-size: 15px;
+  --conversation-track-max: 760px;
+  /* 消息正文与输入框共用同一轨道；保留旧 token 供兼容引用。 */
+  --conversation-reading-max: var(--conversation-track-max);
+  --conversation-task-track-max: var(--conversation-track-max);
+  --conversation-task-reading-max: var(--conversation-track-max);
+  --conversation-body-size: 14px;
+  --conversation-user-size: 14px;
   --conversation-composer-size: 14px;
-  --conversation-body-leading: 1.68;
-  --conversation-turn-gap: 18px;
+  --conversation-body-leading: 1.72;
+  --conversation-turn-gap: 20px;
   --conversation-composer-min: 88px;
   --conversation-composer-input-min: 48px;
   --conversation-composer-input-max: 180px;

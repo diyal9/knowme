@@ -114,4 +114,28 @@ describe('workspace overlays', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     await waitFor(() => expect(screen.queryByTestId('workspace-drawer')).not.toBeInTheDocument())
   })
+
+  it('keeps context menus inside the viewport when opened near an edge', () => {
+    useAppStore.getState().openContextMenu({
+      x: Number.MAX_SAFE_INTEGER,
+      y: Number.MAX_SAFE_INTEGER,
+      items: [{ id: 'edge', label: '边缘菜单', onClick: vi.fn() }],
+    })
+    const menu = useAppStore.getState().overlayContextMenu
+    expect(menu?.x).toBeLessThan(window.innerWidth)
+    expect(menu?.y).toBeLessThan(window.innerHeight)
+    expect(menu?.x).toBeGreaterThanOrEqual(8)
+    expect(menu?.y).toBeGreaterThanOrEqual(8)
+  })
+
+  it('surfaces a fallback toast when a confirmation action rejects', async () => {
+    render(<AppShell />)
+    useAppStore.getState().openConfirm({
+      title: '需要确认',
+      body: '测试失败反馈',
+      onConfirm: async () => { throw new Error('boom') },
+    })
+    fireEvent.click(await screen.findByRole('button', { name: '确认' }))
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('操作失败，请重试'))
+  })
 })

@@ -17,6 +17,7 @@ import { AgentGroundingMeta, AgentStructuredUi } from './AgentMessageExtras'
 import { AgentExecutionTimeline } from './AgentExecutionTimeline'
 import { AgentMessageActions } from './AgentMessageActions'
 import { AgentPlanChecklist } from './AgentPlanChecklist'
+import { tokenizeSkillText } from './SkillTokenEditor'
 
 const LazyContentView = lazy(() =>
   import('../content-view/ContentView').then((m) => ({ default: m.ContentView })),
@@ -38,7 +39,7 @@ function useLiveNow(active: boolean) {
 /** lazy 加载前以纯文本占位，避免长对话首屏阻塞 Markdown 解析 */
 function PlainContentFallback({ text, caret }: { text: string; caret?: ReactNode }) {
   return (
-    <div className="agent-md-fallback" data-testid="content-view-fallback">
+    <div className="agent-md-fallback is-conversation" data-testid="content-view-fallback">
       {text}
       {caret}
     </div>
@@ -73,8 +74,10 @@ function UserMessageContent({ text }: { text: string }) {
   const openLinkPreview = useAppStore((state) => state.openLinkPreview)
   const titleCache = useAppStore((state) => state.linkTitleCache)
   const cacheLinkTitle = useAppStore((state) => state.cacheLinkTitle)
+  const skills = useAppStore((state) => state.assistantSkills)
   const attemptedTitles = useRef(new Set<string>())
-  const segments = splitMessageLinks(text)
+  const parts = tokenizeSkillText(text, skills.map((skill) => ({ id: skill.id, name: skill.name || skill.id })))
+  const segments = parts.flatMap((part) => part.kind === 'text' ? splitMessageLinks(part.text) : [])
   const urls = segments.flatMap((segment) => segment.kind === 'link' ? [segment.href] : [])
   const urlKey = urls.join('\n')
   useEffect(() => {
@@ -92,24 +95,39 @@ function UserMessageContent({ text }: { text: string }) {
   }, [cacheLinkTitle, titleCache, urlKey])
   return (
     <>
-      {segments.map((segment, index) => {
-        if (segment.kind === 'text') return <span key={`text-${index}`}>{segment.text}</span>
-        const href = segment.href
-        const label = titleCache[href] || readableUrlLabel(href)
-        return (
-          <a
-            key={`link-${index}-${href}`}
-            className="agent-user-link"
-            href={href}
-            title={href}
-            onClick={(event) => {
-              event.preventDefault()
-              openLinkPreview(href, label, { resolveTitle: true })
-            }}
-          >
-            {label}
-          </a>
-        )
+      {parts.map((part) => {
+        if (part.kind === 'skill') {
+          return (
+            <span key={part.key} className="agent-user-skill-ref" aria-label={`技能 ${part.skill.name}`}>
+              <span className="agent-user-skill-marker" aria-hidden="true">/</span>
+              <svg className="agent-skill-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m12 2.75 7 4.05v8.4l-7 4.05-7-4.05V6.8l7-4.05Z" />
+                <path d="m5.4 6.95 6.6 3.8 6.6-3.8M12 10.75v8.05" />
+              </svg>
+              <strong>{part.skill.name}</strong>
+            </span>
+          )
+        }
+        if (part.kind !== 'text') return null
+        return splitMessageLinks(part.text).map((segment, index) => {
+          if (segment.kind === 'text') return <span key={`${part.key}-text-${index}`}>{segment.text}</span>
+          const href = segment.href
+          const label = titleCache[href] || readableUrlLabel(href)
+          return (
+            <a
+              key={`${part.key}-link-${index}-${href}`}
+              className="agent-user-link"
+              href={href}
+              title={href}
+              onClick={(event) => {
+                event.preventDefault()
+                openLinkPreview(href, label, { resolveTitle: true })
+              }}
+            >
+              {label}
+            </a>
+          )
+        })
       })}
     </>
   )
@@ -135,7 +153,7 @@ function AssistantBodyContent({
 
   return (
     <Suspense fallback={<ContentPendingFallback />}>
-      <LazyContentView source={body} streaming={false} />
+      <LazyContentView source={body} presentation="conversation" streaming={false} />
     </Suspense>
   )
 }
@@ -218,12 +236,13 @@ function AgentMessageBubbleImpl({
     error ? 'err' : '',
   ].filter(Boolean).join(' ')
   const rawTimeline = message ? buildExecutionTimelineView(message, now) : null
-  // Stage-only events are internal lifecycle details. Keep ordinary chat on
-  // one stable reply surface; show the expandable process view only for real
-  // tool/sub-run activity or an explicit task plan.
+  // While a run is live, expose stage progress immediately instead of leaving
+  // the renderer on a generic spinner. Completed stage-only traces stay hidden
+  // so ordinary chat remains compact after the answer arrives.
   const hasRealExecution = Boolean(message?.trace?.some((item) => item.kind === 'tool' || item.kind === 'subrun'))
   const hasExplicitPlan = Boolean(message?.plan?.items?.length)
-  const timeline = rawTimeline && (hasRealExecution || hasExplicitPlan) ? rawTimeline : null
+  const hasLiveProgress = Boolean(live && rawTimeline?.rows?.length)
+  const timeline = rawTimeline && (hasLiveProgress || hasRealExecution || hasExplicitPlan) ? rawTimeline : null
   const elapsed = Number.isFinite(message?.elapsedMs)
     ? Number(message?.elapsedMs)
     : (live && Number(message?.startedAt) ? now - Number(message?.startedAt) : 0)

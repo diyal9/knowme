@@ -167,24 +167,11 @@ version: 1.0.0
   })
 
   it('installs an expert in persona-only mode when bindings are unavailable', () => {
-    const result = importLib.installCurated(userData, 'office-partner', { bundledRoot: BUNDLED_ROOT })
+    const result = importLib.installCurated(userData, 'agent-operations', { bundledRoot: BUNDLED_ROOT })
     assert.equal(result.ok, true)
     assert.equal(result.entry.kind, 'expert')
-    assert.deepEqual(
-      result.manifest.dependencies.map(dep => [dep.id, dep.kind]),
-      [
-        ['office-collaboration-method', 'skill'],
-        ['meeting-evidence-method', 'skill'],
-        ['action-extraction', 'skill'],
-        ['writing-polish', 'skill'],
-        ['feishu-meeting-summary', 'skill'],
-        ['feishu-related-chats', 'skill'],
-        ['feishu-today-priority', 'skill'],
-        ['feishu-doc-kb', 'skill'],
-        ['feishu', 'connector'],
-      ],
-    )
-    assert.equal(result.warnings.length, 9)
+    assert.ok(result.manifest.dependencies.every(dep => dep.kind === 'skill'))
+    assert.equal(result.warnings.length, result.manifest.dependencies.length)
   })
 
   it('extracts stored zip and installs through external adapter hook', () => {

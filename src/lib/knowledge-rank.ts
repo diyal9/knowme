@@ -136,6 +136,49 @@ function rankHits(queryText, docs, opts = {}) {
   return scored.slice(0, topK)
 }
 
+/**
+ * 与 rankHits 保持相同结果的可协作版本。
+ *
+ * 本地 qmd 不可用时，知识检索会回退到这里。文档内容可能来自整棵
+ * Wiki/知识库，逐篇全文扫描和关键行提取如果一次性完成，会长时间占用
+ * Electron 主进程事件循环，表现为窗口“未响应”。按固定批次让出一次
+ * setImmediate，保持检索语义不变，同时允许渲染、取消和 IPC 继续处理。
+ */
+async function rankHitsAsync(queryText, docs, opts = {}) {
+  const query = parseQuery(queryText)
+  if (!query.terms.length) return []
+  const list = Array.isArray(docs) ? docs : []
+  const scored = []
+  const topK = Number.isFinite(opts.topK) && opts.topK > 0 ? opts.topK : DEFAULT_TOPK
+  const yieldEvery = Math.max(1, Number(opts.yieldEvery) || 32)
+  const signal = opts.signal
+  const yieldToEventLoop = () => new Promise(resolve => {
+    if (typeof setImmediate === 'function') setImmediate(resolve)
+    else setTimeout(resolve, 0)
+  })
+
+  for (let index = 0; index < list.length; index += 1) {
+    if (signal?.aborted) {
+      const error = new Error('知识检索已取消')
+      error.code = 'aborted'
+      throw error
+    }
+    const doc = list[index]
+    const { score, matchedTerms } = scoreDocument(query, doc)
+    if (score > 0 && matchedTerms > 0) {
+      scored.push({
+        title: String(doc.title || '').slice(0, 120),
+        path: String(doc.path || ''),
+        snippet: extractKeyLines(doc.content, query),
+        score: Number(score.toFixed(4)),
+      })
+    }
+    if ((index + 1) % yieldEvery === 0) await yieldToEventLoop()
+  }
+  scored.sort((a, b) => b.score - a.score)
+  return scored.slice(0, topK)
+}
+
 /** 余弦相似度；维度不一致或零向量返回 0。 */
 function cosineSimilarity(a, b) {
   if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length || !a.length) return 0
@@ -208,6 +251,7 @@ module.exports = {
   scoreDocument,
   extractKeyLines,
   rankHits,
+  rankHitsAsync,
   cosineSimilarity,
   normalizeLexical,
   blendScores,

@@ -135,6 +135,54 @@ systemPrompt: |
     assert.equal(result.issues.length, 2)
   })
 
+  it('persists the full professional manifest instead of degrading it to legacy fields', () => {
+    const runtime = createExpertRuntime({ capabilitiesRoot })
+    const capabilityManifest = {
+      schemaVersion: 3,
+      id: 'runtime-professional',
+      kind: 'expert',
+      name: '运行时专业专家',
+      description: '负责验证完整运行时定义可以无损持久化。',
+      version: '2.1.0',
+      dependencies: [{ id: 'review-method', kind: 'skill', required: true }],
+      permissions: { tools: { allowlist: ['read_file'] }, write: false },
+      inputs: [{ name: '资料', required: true }],
+      outputs: [{ name: '报告', required: true }],
+      risk: { level: 'low', reasons: [] },
+      metadata: {
+        knowledgeRefs: ['knowledge:review'],
+        sop: '先核对资料，再形成报告。',
+        knowme: {
+          useCases: ['运行时创建'],
+          boundaries: ['不执行外部写入'],
+          execution: { routes: [{ id: 'review', label: '复核' }] },
+          qualification: { state: 'ready', assessedAtImport: false },
+        },
+      },
+    }
+    const saved = runtime.saveExpert('runtime-professional', {
+      name: capabilityManifest.name,
+      description: capabilityManifest.description,
+      version: '2.1.0',
+      skills: ['review-method'],
+      knowledgeRefs: ['knowledge:review'],
+      useCases: ['运行时创建'],
+      boundaries: ['不执行外部写入'],
+      inputs: capabilityManifest.inputs,
+      outputs: capabilityManifest.outputs,
+      soul: '只依据证据判断。',
+      sop: '先核对资料，再形成报告。',
+      agenticType: 'planning',
+      capabilityManifest,
+    })
+    assert.equal(saved.ok, true, JSON.stringify(saved))
+    const loaded = runtime.loadExpert('runtime-professional')
+    assert.equal(loaded.manifest.version, '2.1.0')
+    assert.deepEqual(loaded.knowledgeRefs, ['knowledge:review'])
+    assert.deepEqual(loaded.capabilityManifest.inputs, [{ name: '资料', required: true }])
+    assert.equal(loaded.capabilityManifest.metadata.knowme.execution.routes[0].id, 'review')
+  })
+
   it('keeps optional connectors available without making them a required binding', () => {
     const runtime = createExpertRuntime({
       capabilitiesRoot,

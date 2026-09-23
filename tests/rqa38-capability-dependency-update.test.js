@@ -8,6 +8,12 @@ const path = require('node:path')
 const { createCapabilityHubService } = require('../src/lib/capability-hub-service')
 
 const bundledRoot = path.join(__dirname, '../src/catalog')
+const retainedAnalysisExpertId = 'operations-data-analyst'
+const requiredAnalysisSkills = [
+  'th-bi-analytics-assistant', 'data-analysis-method', 'business-metrics-analysis',
+  'business-cause-analysis', 'business-insight-report', 'data-report-method',
+  'lark-sheet-fill', 'te-report-playwright-export',
+]
 
 function createFixture(t) {
   const userData = fs.mkdtempSync(path.join(os.tmpdir(), 'knowme-rqa38-'))
@@ -34,16 +40,13 @@ it('RQA38 updating an expert upgrades its declared bundled Skill dependencies', 
   const { userData, hub, storePath } = createFixture(t)
 
   assert.equal((await hub.installCapability({ id: 'data-analysis-method', enabled: true })).ok, true)
-  assert.equal((await hub.installCapability({ id: 'data-analyst', enabled: true })).ok, true)
+  assert.equal((await hub.installCapability({ id: retainedAnalysisExpertId, enabled: true, riskConfirmed: true })).ok, true)
 
   const installedSkill = mutateInstalled(userData, 'data-analysis-method', { version: '1.0.0' }, 'STALE-RQA38')
 
-  const updated = await hub.updateCapability({ id: 'data-analyst' })
+  const updated = await hub.updateCapability({ id: retainedAnalysisExpertId, riskConfirmed: true })
   assert.equal(updated.ok, true)
-  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), [
-    'business-cause-analysis', 'business-insight-report', 'business-metrics-analysis',
-    'data-analysis-method', 'data-report-method',
-  ].sort())
+  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), requiredAnalysisSkills.slice().sort())
 
   const refreshedStore = JSON.parse(fs.readFileSync(storePath, 'utf8'))
   assert.equal(refreshedStore.entries['data-analysis-method'].version, '1.1.0')
@@ -54,18 +57,15 @@ it('RQA38 updating an expert upgrades its declared bundled Skill dependencies', 
 
 it('RQA38 updating an expert installs a missing required bundled Skill', async t => {
   const { hub, storePath } = createFixture(t)
-  assert.equal((await hub.installCapability({ id: 'data-analyst', enabled: true })).ok, true)
+  assert.equal((await hub.installCapability({ id: retainedAnalysisExpertId, enabled: true, riskConfirmed: true })).ok, true)
   const state = JSON.parse(fs.readFileSync(storePath, 'utf8'))
   assert.ok(state.entries['data-analysis-method'])
   delete state.entries['data-analysis-method']
   fs.writeFileSync(storePath, JSON.stringify(state, null, 2), 'utf8')
 
-  const updated = await hub.updateCapability({ id: 'data-analyst' })
+  const updated = await hub.updateCapability({ id: retainedAnalysisExpertId, riskConfirmed: true })
   assert.equal(updated.ok, true)
-  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), [
-    'business-cause-analysis', 'business-insight-report', 'business-metrics-analysis',
-    'data-analysis-method', 'data-report-method',
-  ].sort())
+  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), requiredAnalysisSkills.slice().sort())
   const installed = JSON.parse(fs.readFileSync(storePath, 'utf8')).entries['data-analysis-method']
   assert.equal(installed.version, '1.1.0')
   assert.equal(installed.enabled, true)
@@ -73,17 +73,17 @@ it('RQA38 updating an expert installs a missing required bundled Skill', async t
 
 it('RQA38 updates an already installed optional Skill but never downgrades a newer dependency', async t => {
   const { userData, hub } = createFixture(t)
-  for (const id of ['data-analysis-method', 'writing-polish', 'data-analyst']) {
-    assert.equal((await hub.installCapability({ id, enabled: true })).ok, true)
+  for (const id of ['data-analysis-method', 'writing-polish', retainedAnalysisExpertId]) {
+    assert.equal((await hub.installCapability({ id, enabled: true, riskConfirmed: true })).ok, true)
   }
   const newerSkill = mutateInstalled(userData, 'data-analysis-method', { version: '9.0.0' }, 'KEEP-NEWER-RQA38')
   const staleOptional = mutateInstalled(userData, 'writing-polish', { version: '0.9.0' }, 'STALE-OPTIONAL-RQA38')
 
-  const updated = await hub.updateCapability({ id: 'data-analyst' })
+  const updated = await hub.updateCapability({ id: retainedAnalysisExpertId, riskConfirmed: true })
   assert.equal(updated.ok, true)
   assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), [
-    'business-cause-analysis', 'business-insight-report', 'business-metrics-analysis',
-    'data-report-method', 'writing-polish',
+    ...requiredAnalysisSkills.filter(id => id !== 'data-analysis-method'),
+    'writing-polish',
   ].sort())
   assert.match(fs.readFileSync(newerSkill, 'utf8'), /KEEP-NEWER-RQA38/)
   assert.doesNotMatch(fs.readFileSync(staleOptional, 'utf8'), /STALE-OPTIONAL-RQA38/)
@@ -91,19 +91,17 @@ it('RQA38 updates an already installed optional Skill but never downgrades a new
 
 it('RQA38 never overwrites a user-managed Skill that shares a dependency id', async t => {
   const { userData, hub } = createFixture(t)
-  for (const id of ['data-analysis-method', 'data-analyst']) {
-    assert.equal((await hub.installCapability({ id, enabled: true })).ok, true)
+  for (const id of ['data-analysis-method', retainedAnalysisExpertId]) {
+    assert.equal((await hub.installCapability({ id, enabled: true, riskConfirmed: true })).ok, true)
   }
   const userManaged = mutateInstalled(userData, 'data-analysis-method', {
     version: '0.1.0', source: 'custom', trust: 'user_confirmed',
   }, 'KEEP-USER-RQA38')
 
-  const updated = await hub.updateCapability({ id: 'data-analyst' })
+  const updated = await hub.updateCapability({ id: retainedAnalysisExpertId, riskConfirmed: true })
   assert.equal(updated.ok, true)
-  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(), [
-    'business-cause-analysis', 'business-insight-report', 'business-metrics-analysis',
-    'data-report-method',
-  ].sort())
+  assert.deepEqual(updated.dependencyUpdates.map(item => item.id).sort(),
+    requiredAnalysisSkills.filter(id => id !== 'data-analysis-method').sort())
   assert.ok(updated.warnings.some(item => item.code === 'dependency_update_not_managed'))
   assert.match(fs.readFileSync(userManaged, 'utf8'), /KEEP-USER-RQA38/)
 })

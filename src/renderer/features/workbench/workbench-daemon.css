@@ -1,4 +1,24 @@
 /* 管线/Run 对话与 Daemon 嵌入样式；run/manage 时懒加载。 */
+.wb-daemon-project-context {
+  min-width: 150px;
+  max-width: 240px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--action-primary) 15%, var(--border-default));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--action-primary) 4.5%, var(--surface-panel));
+}
+.wb-daemon-project-context > .ico { width: 16px; height: 16px; flex: 0 0 auto; color: var(--action-primary); }
+.wb-daemon-project-context > span { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.wb-daemon-project-context small { color: var(--text-faint); font: 500 12px/1 var(--ui); letter-spacing: .06em; }
+.wb-daemon-project-context strong { overflow: hidden; color: var(--text-primary); font: 600 12px/1.2 var(--ui); text-overflow: ellipsis; white-space: nowrap; }
+.wb-daemon-project-context.is-missing { border-color: color-mix(in srgb, var(--danger) 28%, var(--border-default)); }
+.wb-daemon-project-context.is-missing > .ico,
+.wb-daemon-project-context.is-missing strong { color: var(--danger); }
+.wb-daemon-task-tools > .project-scope-switch { flex: 0 0 auto; }
+
 /* ── 代码工作区：二级弹窗（对齐 Daemon WebUI） ───────────────── */
 .wb-ws-mask {
   z-index: 2000;

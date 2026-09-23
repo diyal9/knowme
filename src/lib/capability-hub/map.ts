@@ -322,6 +322,7 @@ function createMinimalPackage(kind, payload = {}) {
   if (!id || !name) return fail('invalid_args', '缺少 id 或 name')
 
   if (kind === 'skill') {
+    const instructions = String(payload.instructions || payload.body || description).trim()
     return {
       ok: true,
       files: {
@@ -334,7 +335,7 @@ function createMinimalPackage(kind, payload = {}) {
           '',
           `# ${name}`,
           '',
-          description,
+          instructions,
           '',
         ].join('\n'),
       },
@@ -410,7 +411,10 @@ function stageMinimalPackage(userData, kind, payload) {
   const built = createMinimalPackage(kind, payload)
   if (!built.ok) return built
   const paths = resolvePaths(userData)
-  const stageRoot = path.join(paths.staging, `custom-${kind}-${Date.now()}`)
+  // importFromFolder clears its own staging directory before copying. Keep the
+  // generated source beside that directory so it survives the copy step.
+  const sourceRoot = path.join(paths.root, 'imports', 'custom-sources')
+  const stageRoot = path.join(sourceRoot, `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`)
   fs.mkdirSync(stageRoot, { recursive: true })
   for (const [name, content] of Object.entries(built.files)) {
     fs.writeFileSync(path.join(stageRoot, name), content, 'utf8')

@@ -62,7 +62,8 @@ function createCapabilityExperts(deps) {
       result.contentHash || existing?.contentHash || (loaded.ok ? loaded.manifest?.contentHash : '') || '',
     ).trim()
     const version = String(
-      existing?.version || catalogBase?.version || (loaded.ok ? loaded.manifest?.version : '') || '1.0.0',
+      payload.version || payload.capabilityManifest?.version || result.capabilityManifest?.version
+      || (loaded.ok ? loaded.manifest?.version : '') || existing?.version || catalogBase?.version || '1.0.0',
     ).trim() || '1.0.0'
     const now = new Date().toISOString()
     const capabilityManifest = result.capabilityManifest
@@ -73,10 +74,22 @@ function createCapabilityExperts(deps) {
     // A saved custom expert passed structural validation, but has not yet
     // completed an isolated professional qualification run. Persist that
     // distinction so the Hub never presents it as verified by omission.
-    const qualification = existing?.qualification
-      || catalogBase?.qualification
-      || capabilityManifest?.metadata?.knowme?.qualification
-      || { state: 'ready', issues: [], limitedSkills: [], assessedAtImport: false }
+    const unverifiedQualification = {
+      state: 'ready',
+      issues: [],
+      limitedSkills: [],
+      assessedAtImport: false,
+      verification: 'definition-only',
+    }
+    const contentChanged = !!existing?.contentHash && existing.contentHash !== contentHash
+    const manifestQualification = capabilityManifest?.metadata?.knowme?.qualification
+    const initialQualification = manifestQualification?.state === 'limited'
+      ? manifestQualification
+      : unverifiedQualification
+    const qualification = payload.qualification
+      || (contentChanged
+        ? unverifiedQualification
+        : (existing?.qualification || catalogBase?.qualification || initialQualification))
     const nameSource = String(
       payload.nameSource || existing?.nameSource || catalogBase?.nameSource || 'user',
     ).trim() || 'user'
@@ -99,6 +112,15 @@ function createCapabilityExperts(deps) {
       updatedAt: now,
       manifest: capabilityManifest,
       qualification,
+      avatar: payload.avatar || (loaded.ok ? loaded.avatar : '') || existing?.avatar || '',
+      skills: payload.skills || (loaded.ok ? loaded.skills : []) || existing?.skills || [],
+      connectors: payload.connectors || (loaded.ok ? loaded.connectors : []) || existing?.connectors || [],
+      optionalConnectors: payload.optionalConnectors || (loaded.ok ? loaded.optionalConnectors : []) || existing?.optionalConnectors || [],
+      knowledgeRefs: payload.knowledgeRefs || capabilityManifest?.metadata?.knowledgeRefs || existing?.knowledgeRefs || [],
+      sop: payload.sop || capabilityManifest?.metadata?.sop || existing?.sop || '',
+      useCases: payload.useCases || capabilityManifest?.metadata?.knowme?.useCases || existing?.useCases || [],
+      boundaries: payload.boundaries || capabilityManifest?.metadata?.knowme?.boundaries || existing?.boundaries || [],
+      lifecycle: payload.lifecycle || existing?.lifecycle || catalogBase?.lifecycle,
       dependencies: capabilityManifest?.dependencies || existing?.dependencies || [],
       permissions: capabilityManifest?.permissions || existing?.permissions || {},
       inputs: capabilityManifest?.inputs || existing?.inputs || [],
@@ -132,6 +154,15 @@ function createCapabilityExperts(deps) {
       contentHash,
       manifest: capabilityManifest,
       qualification,
+      avatar: payload.avatar || (loaded.ok ? loaded.avatar : '') || catalogBase?.avatar || '',
+      skills: payload.skills || (loaded.ok ? loaded.skills : []) || catalogBase?.skills || [],
+      connectors: payload.connectors || (loaded.ok ? loaded.connectors : []) || catalogBase?.connectors || [],
+      optionalConnectors: payload.optionalConnectors || (loaded.ok ? loaded.optionalConnectors : []) || catalogBase?.optionalConnectors || [],
+      knowledgeRefs: payload.knowledgeRefs || capabilityManifest?.metadata?.knowledgeRefs || catalogBase?.knowledgeRefs || [],
+      sop: payload.sop || capabilityManifest?.metadata?.sop || catalogBase?.sop || '',
+      useCases: payload.useCases || capabilityManifest?.metadata?.knowme?.useCases || catalogBase?.useCases || [],
+      boundaries: payload.boundaries || capabilityManifest?.metadata?.knowme?.boundaries || catalogBase?.boundaries || [],
+      lifecycle: payload.lifecycle || catalogBase?.lifecycle,
       dependencies: capabilityManifest?.dependencies || catalogBase?.dependencies || [],
       permissions: capabilityManifest?.permissions || catalogBase?.permissions || {},
       inputs: capabilityManifest?.inputs || catalogBase?.inputs || [],

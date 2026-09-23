@@ -142,6 +142,45 @@ describe('agent-grounding-runtime', () => {
     assert.ok(verification.violations.some(item => item.code === 'unsupported_execution_claim'))
   })
 
+  it('accepts a successful artifact write after earlier malformed retries', () => {
+    const merged = ledger.mergeToolResultsIntoLedgers({
+      toolMessages: [
+        {
+          toolName: 'create_artifact',
+          toolCallId: 'call-malformed-1',
+          status: 'error',
+          text: '工具参数不是合法 JSON。该调用尚未执行。',
+        },
+        {
+          toolName: 'create_artifact',
+          toolCallId: 'call-malformed-2',
+          status: 'error',
+          text: '工具参数不是合法 JSON。该调用尚未执行。',
+        },
+        {
+          toolName: 'create_artifact',
+          toolCallId: 'call-created',
+          status: 'done',
+          text: '已创建 markdown artifact「产品需求文档」',
+          artifactRefs: [{ id: 'artifact-prd', kind: 'markdown', title: '产品需求文档' }],
+        },
+      ],
+    })
+    const verification = grounding.verifyClaims({
+      text: '产品需求文档已写入并保存为交付物。',
+      evidenceLedger: merged.evidenceLedger,
+      toolLedger: merged.toolLedger,
+      taskFrame: {
+        requiredTools: ['create_artifact'],
+        requiredEvidence: [{ kind: 'tool_result', tool: 'create_artifact' }],
+        completionConditions: [{ type: 'tool_success', tool: 'create_artifact' }],
+      },
+    })
+
+    assert.equal(verification.passed, true, JSON.stringify(verification.violations))
+    assert.deepEqual(merged.toolLedger.calls.map(call => call.status), ['fail', 'fail', 'ok'])
+  })
+
   it('does not let search or candidate results support concrete facts', () => {
     const evidenceLedger = grounding.appendEvidence(
       grounding.createEvidenceLedger(),

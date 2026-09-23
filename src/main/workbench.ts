@@ -1,6 +1,7 @@
 'use strict'
 
 const bundledKnowledgePacks = require('../lib/bundled-knowledge-packs')
+const { FEISHU_FACT_TOOLS, hasPriorFeishuFacts } = require('../lib/prior-feishu-facts')
 
 /**
  * 工作台货架/mode、管线投影与 app.whenReady。
@@ -87,14 +88,8 @@ ctx.normalizeAutomationTargetName = function normalizeAutomationTargetName(item 
         fallback ||
         '').trim();
 };
-ctx.FEISHU_FACT_TOOLS = ['feishu.related_chats', 'feishu.today_priority', 'feishu.doc_kb_suggest'];
-ctx.hasPriorFeishuFacts = function hasPriorFeishuFacts(session) {
-    const list = Array.isArray(session?.messages) ? session.messages : [];
-    return list.some(item => item
-        && item.role === 'tool'
-        && item.status === 'done'
-        && ctx.FEISHU_FACT_TOOLS.includes(item.toolName));
-};
+ctx.FEISHU_FACT_TOOLS = [...FEISHU_FACT_TOOLS];
+ctx.hasPriorFeishuFacts = hasPriorFeishuFacts;
 ctx.getFeishuGroundingContext = 
 /** Unknown status counts as ready: never invent an auth problem the user cannot verify. */
 async function getFeishuGroundingContext() {

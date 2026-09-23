@@ -149,9 +149,11 @@ describe('agent session helpers', () => {
       'https://x.test/b.jpg',
     ])
     expect(extractImageUrls('打开 [候选图](https://x.test/c.webp)')).toEqual(['https://x.test/c.webp'])
+    expect(extractImageUrls('打开 [审批](https://applink.feishu.cn/client/chat/open?openChatId=oc_1)')).toEqual([])
   })
 
   it('removes image references after the message layer renders thumbnails', () => {
     expect(removeExtractedImageReferences('结果如下：\n\n![图](https://x.test/a.png)\n\n[候选图](https://x.test/c.webp)\n\nhttps://x.test/b.jpg\n\n请确认。')).toBe('结果如下：\n\n请确认。')
+    expect(removeExtractedImageReferences('会话：[审批](https://applink.feishu.cn/client/chat/open?openChatId=oc_1)')).toBe('会话：[审批](https://applink.feishu.cn/client/chat/open?openChatId=oc_1)')
   })
 })

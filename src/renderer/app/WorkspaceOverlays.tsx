@@ -15,6 +15,7 @@ export function WorkspaceOverlays() {
   const closeDrawer = useAppStore((s) => s.closeDrawer)
   const closeContextMenu = useAppStore((s) => s.closeContextMenu)
   const closeConfirm = useAppStore((s) => s.closeConfirm)
+  const showToast = useAppStore((s) => s.showToast)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -28,6 +29,14 @@ export function WorkspaceOverlays() {
   }, [closeDrawer, closeContextMenu, closeConfirm])
 
   const isLeaveConfirm = Boolean(confirmModal?.altLabel)
+
+  function runConfirmAction(action?: () => void | Promise<void>) {
+    closeConfirm()
+    if (!action) return
+    void Promise.resolve()
+      .then(action)
+      .catch(() => showToast('操作失败，请重试'))
+  }
 
   return (
     <>
@@ -113,10 +122,7 @@ export function WorkspaceOverlays() {
                       type="button"
                       className="wb-modal-btn"
                       data-leave-choice="discard"
-                      onClick={() => {
-                        void confirmModal.onConfirm()
-                        closeConfirm()
-                      }}
+                      onClick={() => runConfirmAction(confirmModal.onConfirm)}
                     >
                       {confirmModal.confirmLabel || '确认'}
                     </button>
@@ -124,10 +130,7 @@ export function WorkspaceOverlays() {
                       type="button"
                       className="wb-modal-btn primary"
                       data-leave-choice="save"
-                      onClick={() => {
-                        void confirmModal.onAlt?.()
-                        closeConfirm()
-                      }}
+                      onClick={() => runConfirmAction(confirmModal.onAlt)}
                     >
                       {confirmModal.altLabel}
                     </button>
@@ -136,10 +139,7 @@ export function WorkspaceOverlays() {
                   <button
                     type="button"
                     className={`wb-modal-btn${confirmModal.danger ? ' danger' : ' primary'}`}
-                    onClick={() => {
-                      void confirmModal.onConfirm()
-                      closeConfirm()
-                    }}
+                    onClick={() => runConfirmAction(confirmModal.onConfirm)}
                   >
                     {confirmModal.confirmLabel || '确认'}
                   </button>

@@ -189,6 +189,10 @@
 @media (prefers-reduced-motion: reduce) {
   .agent-dialogue-status-state.tone-running::before { animation: none; }
 }
+.agent-dialogue-status-context {
+  min-width: 0;
+  flex: 0 1 auto;
+}
 .agent-dialogue-status-bar .app-back-button,
 .agent-dialogue-status-bar .wb-task-back {
   flex-shrink: 0;
@@ -209,13 +213,13 @@
   display: none !important;
 }
 
-/* 任务间左栏：舒适阅读宽，不要跟助理全宽页同一套 1080 轨 */
+/* 所有对话入口共享消息、正文和输入框的同一条轨道。 */
 .app.mode-workbench[data-workbench-layout="task-room"] .agent-chat-log,
 .app.mode-workbench[data-workbench-layout="task-room"] .agent-col-foot,
 .app.mode-workbench.workbench-task-active .agent-chat-log,
 .app.mode-workbench.workbench-task-active .agent-col-foot {
-  --agent-message-track: min(720px, 100%);
-  --agent-reading-track: min(680px, 100%);
+  --agent-message-track: min(var(--conversation-track-max, 760px), 100%);
+  --agent-reading-track: var(--agent-message-track);
   width: 100%;
   max-width: none;
   align-self: stretch;
@@ -233,20 +237,26 @@
   padding-right: 22px;
 }
 .app.mode-workbench.workbench-task-active .agent-bubble.user {
-  margin-left: 0;
-  align-self: flex-start;
-  font: 400 var(--conversation-user-size, 15px)/var(--conversation-body-leading, 1.68) var(--ui);
+  margin-left: auto;
+  align-self: flex-end;
+  font: 400 var(--conversation-user-size, 14px)/var(--conversation-body-leading, 1.72) var(--ui);
   letter-spacing: 0;
 }
 .app.mode-workbench.workbench-task-active .agent-bubble.assistant {
   padding: 6px 0 8px;
-  font: var(--conversation-body-size, 15px)/var(--conversation-body-leading, 1.68) var(--ui);
+  font: var(--conversation-body-size, 14px)/var(--conversation-body-leading, 1.72) var(--ui);
 }
 .app.mode-workbench.workbench-task-active .agent-response-body,
 .app.mode-workbench.workbench-task-active .km-content {
-  font-size: var(--conversation-body-size, 15px);
-  line-height: var(--conversation-body-leading, 1.68);
+  font-size: var(--conversation-body-size, 14px);
+  line-height: var(--conversation-body-leading, 1.72);
   letter-spacing: 0;
+}
+.app.mode-workbench[data-workbench-layout="task-room"] .agent-virtuoso-row,
+.app.mode-workbench.workbench-task-active .agent-virtuoso-row,
+.app.mode-workbench[data-workbench-layout="task-room"] .agent-col-foot .agent-composer,
+.app.mode-workbench.workbench-task-active .agent-col-foot .agent-composer {
+  margin-inline: auto;
 }
 .app.mode-workbench.workbench-task-active .agent-workflow-hitl,
 .app.mode-workbench.workbench-task-active .task-dialogue-recovery,

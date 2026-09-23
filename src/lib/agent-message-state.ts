@@ -392,7 +392,7 @@
     const subRunId = String(payload.subRunId || '')
     if (!subRunId) {
       pushDiagnostic(state, 'subrun_missing_id', { type })
-      return false
+      return { changed: false, decision: 'invalid' }
     }
 
     const node = ensureSubRunNode(state, subRunId, {
@@ -408,7 +408,14 @@
       if (state.frozen && seqCheck.code !== 'duplicate_subrun_seq') {
         node.diagnostics = [...(node.diagnostics || []), { at: Date.now(), code: seqCheck.code, detail: seqCheck }]
       }
-      return false
+      const decision = seqCheck.code === 'duplicate_subrun_seq'
+        ? 'duplicate'
+        : seqCheck.code === 'late_subrun_seq'
+          ? 'late'
+          : seqCheck.code === 'subrun_frozen'
+            ? 'frozen'
+            : 'invalid'
+      return { changed: false, decision }
     }
     if (seqCheck.subRunSeq) node.lastSeq = seqCheck.subRunSeq
 
@@ -433,7 +440,7 @@
         summary: safePayload.summary || '',
       })
       state.activity = subRunTimelineTitle(node, 'running')
-      return true
+      return { changed: true, decision: 'applied' }
     }
 
     if (type === 'subrun.progress' || type === 'subrun.waiting') {
@@ -464,7 +471,7 @@
         stopReason: safePayload.waitingFor || null,
       })
       state.activity = subRunTimelineTitle(node, node.status)
-      return true
+      return { changed: true, decision: 'applied' }
     }
 
     if (SUBRUN_TERMINAL_TYPES.has(type)) {
@@ -493,10 +500,10 @@
       if (!state.frozen) {
         state.activity = subRunTimelineTitle(node, rowStatus)
       }
-      return true
+      return { changed: true, decision: 'applied' }
     }
 
-    return false
+    return { changed: false, decision: 'invalid' }
   }
 
   function cascadeCancelSubRuns(state) {
@@ -531,7 +538,7 @@
 
     if (base.frozen && !isSubRun) {
       pushDiagnostic(base, 'ignored_after_terminal', { type: event?.type, seq: event?.seq })
-      return { state: base, changed: false, ignored: 'frozen' }
+      return { state: base, changed: false, ignored: 'frozen', decision: 'frozen' }
     }
 
     const valid = validateIncoming(base, event)
@@ -541,16 +548,17 @@
         base.status = 'failed'
         base.frozen = true
         base.activity = '输出协议不受支持'
-        return { state: base, changed: true, ignored: valid.code }
+        return { state: base, changed: true, ignored: valid.code, decision: 'unsupported_version' }
       }
-      return { state: base, changed: false, ignored: valid.code }
+      return { state: base, changed: false, ignored: valid.code, decision: 'invalid' }
     }
 
     if (event.seq <= base.lastSeq) {
       if (event.seq === base.lastSeq) base.counters.duplicate += 1
       else base.counters.late += 1
       pushDiagnostic(base, event.seq === base.lastSeq ? 'duplicate_seq' : 'late_seq', { seq: event.seq, lastSeq: base.lastSeq })
-      return { state: base, changed: false, ignored: 'seq' }
+      const decision = event.seq === base.lastSeq ? 'duplicate' : 'late'
+      return { state: base, changed: false, ignored: 'seq', decision }
     }
 
     if (event.seq > base.lastSeq + 1) {
@@ -587,8 +595,8 @@
     const payload = redactSensitiveFields(event.payload || {})
 
     if (isSubRun) {
-      const changed = reduceSubRunEvent(next, event, payload, type)
-      return { state: next, changed, eventType: type, subRun: true }
+      const subRunResult = reduceSubRunEvent(next, event, payload, type)
+      return { state: next, ...subRunResult, eventType: type, subRun: true }
     }
 
     if (type === 'stage' || type === 'grounding-status' || type === 'plan.updated') {
@@ -666,7 +674,7 @@
       pushDiagnostic(next, 'unknown_type', { type })
     }
 
-    return { state: next, changed: true, eventType: type }
+    return { state: next, changed: true, eventType: type, decision: 'applied' }
   }
 
   function applyStateToMessage(message, state) {

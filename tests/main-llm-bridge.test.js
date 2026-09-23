@@ -106,6 +106,45 @@ describe('main-llm-bridge', () => {
     }
   })
 
+  it('coalesces high-frequency SSE snapshots without losing the final answer', async () => {
+    const http = require('http')
+    const chunks = 120
+    const server = http.createServer((_req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/event-stream' })
+      let index = 0
+      const timer = setInterval(() => {
+        if (index >= chunks) {
+          clearInterval(timer)
+          res.end('data: [DONE]\n\n')
+          return
+        }
+        res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: 'x' } }] })}\n\n`)
+        index += 1
+      }, 1)
+    })
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const { port } = server.address()
+    try {
+      const snapshots = []
+      const result = await requestAgentCompletion({
+        url: new URL(`http://127.0.0.1:${port}/chat/completions`),
+        settings: { apiKey: 'test-key', llmProvider: 'openai' },
+        body: { model: 'test-model', messages: [], stream: true },
+        onSnapshot: (snapshot) => snapshots.push(snapshot),
+        firstByteMs: 1000,
+        idleMs: 3000,
+      })
+      assert.equal(result.error, undefined)
+      assert.equal(result.snapshot?.content, 'x'.repeat(chunks))
+      assert.ok(snapshots.length > 0)
+      assert.ok(snapshots.length < chunks, `expected coalesced snapshots, got ${snapshots.length}`)
+    } finally {
+      await new Promise((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()))
+      })
+    }
+  })
+
   it('routes once-shot and workbench-dispatch through the same HTTP client', () => {
     const fs = require('fs')
     const path = require('path')

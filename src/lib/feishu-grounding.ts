@@ -393,9 +393,9 @@ function analyzeFeishuToolEvidence(entries = []) {
   const relatedChatsSuccess = success.filter(item => item.toolName === 'feishu.related_chats')
   const todayPrioritySuccess = success.filter(item => item.toolName === 'feishu.today_priority')
   const docKbSuggestSuccess = success.filter(item => item.toolName === 'feishu.doc_kb_suggest')
-  const readSuccess = success.filter(item => ['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read'].includes(item.toolName))
+  const readSuccess = success.filter(item => ['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read', 'feishu.meeting_inventory'].includes(item.toolName))
   const readFailures = feishuList.filter(item =>
-    item.status === 'error' && ['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read'].includes(item.toolName)
+    item.status === 'error' && ['feishu.read_doc', 'feishu.get_wiki_node', 'feishu.meeting_read', 'feishu.meeting_inventory'].includes(item.toolName)
   )
   let bestSearchHitCount = null
   for (const item of searchSuccess) {
@@ -521,7 +521,7 @@ function requiredFeishuToolsForIntent(intent = {}) {
   if (intent.asksTodayPriority) return ['feishu.today_priority']
   if (intent.asksDocKbSuggest) return ['feishu.doc_kb_suggest']
   if (intent.directDocRead) return ['feishu.read_doc']
-  if (intent.asksMinutes) return ['feishu.meeting_candidates', 'feishu.meeting_read']
+  if (intent.asksMinutes) return ['feishu.meeting_inventory']
   const required = []
   if (intent.needsSearch) required.push('feishu.search_docs')
   if (intent.needsContentRead) required.push('feishu.read_doc')

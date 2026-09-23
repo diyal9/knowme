@@ -455,7 +455,11 @@ async function queryProviderLegacy(def, text, ctx = {}) {
     }
     if (typeof ctx.loadProviderDocuments === 'function') {
       const docs = await ctx.loadProviderDocuments(p)
-      const ranked = require('./knowledge-rank').rankHits(q, Array.isArray(docs) ? docs : [], { topK: p.topK })
+      const ranked = await require('./knowledge-rank').rankHitsAsync(
+        q,
+        Array.isArray(docs) ? docs : [],
+        { topK: p.topK, signal: ctx.signal },
+      )
       return { ok: true, hits: ranked.map(hit => ({ ...hit, source: p.kind, kbId: p.id })), message: ranked.length ? null : `${p.displayName} 未命中` }
     }
     return llmwikiService.query(ctx.userData, q, ctx)

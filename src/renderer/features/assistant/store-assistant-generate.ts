@@ -17,6 +17,7 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
   const slice = getSessionSlice(get().sessionStates, sessionId)
   const text = String(overrideText ?? slice.composer).trim()
   const attachment = slice.attachments[0]
+  const skillRefs = [...new Set((slice.skillRefs || []).map((item) => String(item || '').trim()).filter(Boolean))]
   if ((!text && !attachment) || get().isGenerating) return
 
   const bridge = api()
@@ -53,6 +54,7 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
     sessionStates: patchSession(state.sessionStates, sessionId, {
       composer: '',
       attachments: [],
+      skillRefs: [],
       messages: [...slice.messages, user, assistant],
     }),
   }))
@@ -75,6 +77,7 @@ export function startAssistantGenerate(set: StoreSet, get: StoreGet, overrideTex
         userCreatedAt,
       },
       attachment,
+      skillRefs,
     })
     if (get().generateRunId !== runId) return
 

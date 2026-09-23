@@ -1,5 +1,5 @@
 import { BackButton } from '../../app/BackButton'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 
 export function DialogueStatusBar({
   mode,
@@ -7,6 +7,7 @@ export function DialogueStatusBar({
   meta,
   state,
   stateTone,
+  context,
   onBack,
   onTitleChange,
   backLabel = '返回',
@@ -16,6 +17,7 @@ export function DialogueStatusBar({
   meta?: string
   state?: string
   stateTone?: string
+  context?: ReactNode
   onBack: () => void
   onTitleChange?: (title: string) => void | Promise<void>
   backLabel?: string
@@ -74,6 +76,7 @@ export function DialogueStatusBar({
       ) : (
         <span className="agent-dialogue-status-state" id="agentDialogueStatusState" hidden />
       )}
+      {context ? <div className="agent-dialogue-status-context">{context}</div> : null}
       <BackButton label={backLabel} compact onClick={onBack} />
     </header>
   )

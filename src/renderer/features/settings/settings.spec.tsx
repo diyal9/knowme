@@ -207,6 +207,23 @@ describe('settings-surface', () => {
     expect(screen.queryByRole('tab', { name: '智能伙伴' })).not.toBeInTheDocument()
   })
 
+  it('does not report memory clearing as successful when the bridge rejects', async () => {
+    const clearMemory = vi.fn(async () => { throw new Error('记忆存储暂时不可用') })
+    mockApi({
+      sourcesList: async () => ({ sources: [] }),
+      memoryOverview: async () => ({ patterns: [], recent: [], stats: {} }),
+      personalAgentGet: async () => ({ ok: true }),
+      memoryClear: clearMemory,
+    })
+    render(<SettingsSurface />)
+    fireEvent.click(screen.getByRole('tab', { name: '记忆与隐私' }))
+    fireEvent.click(screen.getByRole('button', { name: '清除全部记忆' }))
+
+    await waitFor(() => expect(clearMemory).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(screen.getByText('记忆存储暂时不可用')).toBeInTheDocument())
+    expect(screen.queryByText('协作记忆已清除')).not.toBeInTheDocument()
+  })
+
   it('owns user identity and linked industry occupation in personal profile settings', async () => {
     const saveSettings = vi.fn(async () => ({ ok: true }))
     mockApi({

@@ -313,6 +313,9 @@ async function collectConnectorTools(userData, opts = {}) {
             ...(opts.feishu || {}),
             memoryDir: opts.feishu?.memoryDir || path.join(String(userData || ''), 'memory'),
           }
+          if (def.function.name === 'feishu.meeting_inventory') {
+            return feishuCli.executeMeetingInventory(args, feishuOpts)
+          }
           if (def.function.name === 'feishu.meeting_candidates') {
             return feishuCli.executeMeetingCandidates(args, feishuOpts)
           }
@@ -480,7 +483,7 @@ async function approveToolDraft(userData, draftId, opts = {}) {
       const scope = await validatePreparedDraftScope(userData, draft, opts)
       if (!scope.ok) {
         toolDrafts.finishApply(userData, draftId, { failed: true })
-        return scope
+        return { ...scope, executionStarted: false }
       }
     }
     if (draft.kind === 'tool-execution') {

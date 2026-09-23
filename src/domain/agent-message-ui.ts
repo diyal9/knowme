@@ -1,6 +1,30 @@
 import type { ChatMessage, StructuredChoiceBar, StructuredChoiceItem } from '../shared/api'
+import * as suggestionNs from '@knowme-lib/agent-suggestion'
 
 const STRUCTURED_CHOICE_ACTIONS = new Set(['fill', 'send', 'copy', 'open_link', 'open_knowledge'])
+
+type PlainChoiceResult = {
+  bodyWithoutBlock?: string
+  bar?: unknown
+} | null
+
+function resolvePlainChoiceParser(mod: unknown): ((text: string) => PlainChoiceResult) | null {
+  const queue: unknown[] = [mod]
+  const seen = new Set<unknown>()
+  while (queue.length) {
+    const current = queue.shift()
+    if (!current || typeof current !== 'object' || seen.has(current)) continue
+    seen.add(current)
+    const rec = current as Record<string, unknown>
+    if (typeof rec.inferPlainTextChoice === 'function') {
+      return rec.inferPlainTextChoice as (text: string) => PlainChoiceResult
+    }
+    if (rec.default !== undefined) queue.push(rec.default)
+  }
+  return null
+}
+
+const inferPlainTextChoice = resolvePlainChoiceParser(suggestionNs)
 
 function asRecord(raw: unknown): Record<string, unknown> {
   return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {}
@@ -14,8 +38,8 @@ function parseChoiceItem(raw: unknown): StructuredChoiceItem | null {
     id: String(rec.id || '').trim() || undefined,
     label,
     description: String(rec.description || '').trim() || undefined,
-    action: String(rec.action || 'send').trim() || 'send',
-    payload: String(rec.payload || ''),
+    action: String(rec.action || rec.kind || 'send').trim() || 'send',
+    payload: String(rec.payload ?? rec.value ?? ''),
   }
 }
 
@@ -24,6 +48,18 @@ export function parseStructuredChoiceBars(raw: unknown): StructuredChoiceBar[] {
     const record = asRecord(raw)
     if (Array.isArray(record.items)) {
       return parseStructuredChoiceBars([record])
+    }
+    const choiceType = String(record.type || '').toLowerCase()
+    if (['choices', 'suggest'].includes(choiceType) && Array.isArray(record.options)) {
+      // The renderer currently exposes single-pick buttons. Do not silently
+      // turn a model-declared multi-select payload into a single-choice bar.
+      if (record.multiple === true || record.multi === true) return []
+      return parseStructuredChoiceBars([{
+        ...record,
+        kind: 'choice',
+        title: String(record.title || '').trim() || '下一步建议',
+        items: record.options,
+      }])
     }
     return []
   }
@@ -90,8 +126,8 @@ function hasSuggestionContext(source: string, start: number): boolean {
 }
 
 /**
- * 兼容旧会话中未拆出 ui 字段的 assistant 消息。
- * 只接受行首的 JSON，且必须是白名单 action 的建议项，避免把普通配置 JSON 变成按钮。
+ * 兼容未拆出 ui 字段的 assistant 消息。优先恢复白名单 suggestion JSON；
+ * 对明确的“问题 + 选项 + 连续编号”单选正文也做保守恢复，普通步骤清单保持原样。
  */
 export function extractStructuredChoiceFromText(text: string): {
   text: string
@@ -112,12 +148,28 @@ export function extractStructuredChoiceFromText(text: string): {
     const bars = parseStructuredChoiceBars(parsed.value)
     if (!bars.length) continue
     if (bars.some((bar) => bar.items.some((item) => !STRUCTURED_CHOICE_ACTIONS.has(String(item.action || ''))))) continue
-    const trailing = source.slice(parsed.end).trim()
-    if (start !== 0 && trailing && !hasSuggestionContext(source, start)) continue
-    const body = `${source.slice(0, start)}\n${source.slice(parsed.end)}`
+    let before = source.slice(0, start)
+    let after = source.slice(parsed.end)
+    const openingFence = before.match(/```(?:json)?[ \t]*\n[ \t]*$/i)
+    const closingFence = after.match(/^[ \t]*\n?[ \t]*```[ \t]*(?:\n|$)/)
+    const isFencedChoice = openingFence?.index != null && Boolean(closingFence)
+    const trailing = after.trim()
+    if (start !== 0 && trailing && !isFencedChoice && !hasSuggestionContext(source, start)) continue
+    if (isFencedChoice && openingFence?.index != null && closingFence) {
+      before = before.slice(0, openingFence.index)
+      after = after.slice(closingFence[0].length)
+    }
+    const body = `${before}\n${after}`
       .replace(/\n{3,}/g, '\n\n')
       .trim()
     return { text: body, bars }
+  }
+  const inferred = inferPlainTextChoice?.(source)
+  if (inferred?.bar) {
+    const bars = parseStructuredChoiceBars(inferred.bar)
+    if (bars.length && bars.every((bar) => bar.items.every((item) => STRUCTURED_CHOICE_ACTIONS.has(String(item.action || ''))))) {
+      return { text: String(inferred.bodyWithoutBlock || ''), bars }
+    }
   }
   return null
 }

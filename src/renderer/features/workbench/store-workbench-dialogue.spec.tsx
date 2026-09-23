@@ -91,6 +91,36 @@ describe('workbench dialogue send', () => {
     expect(startTask).not.toHaveBeenCalled()
   })
 
+  it('releases the shared composer when stream listener cleanup fails', async () => {
+    const generate = vi.fn(async () => ({ text: '第一轮已完成', streamed: true }))
+    const unsubscribeChunk = vi.fn(() => { throw new Error('chunk cleanup failed') })
+    const unsubscribeEvent = vi.fn(() => { throw new Error('event cleanup failed') })
+    mockApi({
+      aiGenerate: generate,
+      onAiStreamChunk: () => unsubscribeChunk,
+      onAiStreamEvent: () => unsubscribeEvent,
+    })
+    useAppStore.setState({
+      expertRoom: {
+        id: 'action-owner', expertId: 'action-owner', name: '行动推进专家', goal: '', log: [],
+        messages: [], skills: [], connectors: [], knowledgeRefs: [],
+      },
+      workbenchDialogue: { composer: '第一轮', attachments: [] },
+      isGenerating: false,
+    })
+
+    useAppStore.getState().sendWorkbenchMessage()
+
+    await waitFor(() => expect(useAppStore.getState().isGenerating).toBe(false))
+    expect(unsubscribeChunk).toHaveBeenCalledOnce()
+    expect(unsubscribeEvent).toHaveBeenCalledOnce()
+
+    useAppStore.getState().setWorkbenchComposer('第二轮')
+    useAppStore.getState().sendWorkbenchMessage()
+    await waitFor(() => expect(generate).toHaveBeenCalledTimes(2))
+    await waitFor(() => expect(useAppStore.getState().isGenerating).toBe(false))
+  })
+
   it('uses a discussion-only lane for messages inside a formal expert task', async () => {
     const generate = vi.fn(async () => ({ text: '这份结果缺少两项工具证据，可以先补充连接器授权。', streamed: true }))
     mockApi({ aiGenerate: generate })

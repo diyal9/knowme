@@ -22,6 +22,28 @@ interface PickedMaterial {
   name: string
 }
 
+function productProjectIdFromDaemonTask(item: unknown) {
+  const task = item && typeof item === 'object' ? item as Record<string, unknown> : {}
+  const metadata = task.metadata && typeof task.metadata === 'object' ? task.metadata as Record<string, unknown> : {}
+  const context = task.context && typeof task.context === 'object' ? task.context as Record<string, unknown> : {}
+  const launchIntent = task.launchIntent && typeof task.launchIntent === 'object' ? task.launchIntent as Record<string, unknown> : {}
+  const directReturnState = task.returnState && typeof task.returnState === 'object' ? task.returnState as Record<string, unknown> : {}
+  const intentReturnState = launchIntent.returnState && typeof launchIntent.returnState === 'object' ? launchIntent.returnState as Record<string, unknown> : {}
+  const contextReturnState = context.returnState && typeof context.returnState === 'object' ? context.returnState as Record<string, unknown> : {}
+  return String(
+    task.productProjectId
+      || task.product_project_id
+      || metadata.productProjectId
+      || metadata.knowmeProjectId
+      || metadata.knowme_project_id
+      || context.productProjectId
+      || directReturnState.projectId
+      || intentReturnState.projectId
+      || contextReturnState.projectId
+      || '',
+  ).trim()
+}
+
 export function DaemonComposePanel() {
   const loadWorkbench = useAppStore((s) => s.loadWorkbench)
   const daemonOnline = useAppStore((s) => s.shelfDaemonOnline)
@@ -33,12 +55,15 @@ export function DaemonComposePanel() {
   const cacheLinkTitle = useAppStore((s) => s.cacheLinkTitle)
   const daemonOverviewCache = useAppStore((s) => s.daemonOverviewCache)
   const setDaemonOverviewCache = useAppStore((s) => s.setDaemonOverviewCache)
+  const projects = useAppStore((s) => s.projects)
+  const activeProjectId = useAppStore((s) => s.activeProjectId)
   const cacheAtMountRef = useRef(daemonOverviewCache)
   const cacheAtMount = cacheAtMountRef.current
   const [intent, setIntent] = useState('')
   const [pathId, setPathId] = useState('')
   const [pathOpen, setPathOpen] = useState(false)
   const [runFilter, setRunFilter] = useState<DaemonRunFilterId>('all')
+  const [projectScope, setProjectScope] = useState<'current' | 'all'>('current')
   const [query, setQuery] = useState('')
   const [materials, setMaterials] = useState<PickedMaterial[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -54,11 +79,16 @@ export function DaemonComposePanel() {
   const paths = useMemo(() => selectableDaemonPaths(overviewWorkflows), [overviewWorkflows])
   const pathGroups = useMemo(() => groupDaemonPaths(paths), [paths])
   const selected = paths.find((item) => item.id === pathId) || paths[0]
+  const activeProject = projects.find((project) => project.id === activeProjectId) || null
+  const projectReady = activeProject?.status === 'active'
   const hasLaunchInput = intent.trim().length >= DAEMON_MIN_INTENT_CHARS || materials.length > 0
-  const canSubmit = daemonComposeCanAttempt(!offline, selected, submitting) && hasLaunchInput
+  const canSubmit = daemonComposeCanAttempt(!offline, selected, submitting) && hasLaunchInput && projectReady
+  const projectTasks = useMemo(() => overviewTasks.filter((task) => (
+    projectScope === 'all' || !activeProjectId || productProjectIdFromDaemonTask(task) === activeProjectId
+  )), [activeProjectId, overviewTasks, projectScope])
   const records = useMemo(
-    () => daemonRunCards(overviewTasks, overviewWorkflows, runFilter, query),
-    [overviewTasks, overviewWorkflows, runFilter, query],
+    () => daemonRunCards(projectTasks, overviewWorkflows, runFilter, query),
+    [overviewWorkflows, projectTasks, runFilter, query],
   )
   const titleResolverUrl = useMemo(() => {
     if (activeLinkPreview) return ''
@@ -137,6 +167,14 @@ export function DaemonComposePanel() {
 
   async function submit() {
     if (!selected) return
+    if (!activeProjectId) {
+      showToast('请先选择一个项目，再创建管线任务。')
+      return
+    }
+    if (!projectReady) {
+      showToast('当前项目不可写，请先恢复或重新定位工作目录。')
+      return
+    }
     if (intent.trim().length < DAEMON_MIN_INTENT_CHARS && materials.length === 0) {
       showToast(`请填写不少于 ${DAEMON_MIN_INTENT_CHARS} 字的需求说明，或上传至少 1 个附件后再创建任务。`)
       return
@@ -149,6 +187,7 @@ export function DaemonComposePanel() {
           resourceId: selected.id,
           brief: intent.trim(),
           materials: materials.map((file) => file.path),
+          returnState: { projectId: activeProjectId },
         },
         allowRelaunch: false,
       })
@@ -189,6 +228,13 @@ export function DaemonComposePanel() {
                   <div>
                     <h1 id="wbDaemonComposeTitle">创建开发任务</h1>
                     <p className="wb-daemon-compose-lead">选择交付路径，补充目标与材料，管线会按流程持续推进。</p>
+                  </div>
+                  <div className={`wb-daemon-project-context${projectReady ? '' : ' is-missing'}`} aria-label="管线任务项目">
+                    <Icon name="folder" />
+                    <span>
+                      <small>{projectReady ? '项目空间' : '项目空间 · 不可写'}</small>
+                      <strong>{activeProject?.name || '请先选择项目'}</strong>
+                    </span>
                   </div>
                 </header>
                 <div className="wb-daemon-compose-body">
@@ -354,6 +400,13 @@ export function DaemonComposePanel() {
               </header>
               <div className="wb-daemon-run-browser">
                 <div className="wb-daemon-task-tools">
+                  {activeProject ? (
+                    <div className="project-scope-switch" role="group" aria-label="管线任务项目范围">
+                      <span title={activeProject.name}><Icon name="folder" />{activeProject.name}</span>
+                      <button type="button" className={projectScope === 'current' ? 'active' : ''} aria-pressed={projectScope === 'current'} onClick={() => setProjectScope('current')}>当前项目</button>
+                      <button type="button" className={projectScope === 'all' ? 'active' : ''} aria-pressed={projectScope === 'all'} onClick={() => setProjectScope('all')}>全部项目</button>
+                    </div>
+                  ) : null}
                   <label className="wb-daemon-task-search">
                     <Icon name="searchLine" />
                     <input

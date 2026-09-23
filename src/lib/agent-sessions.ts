@@ -8,6 +8,7 @@ const {
   projectConversationHistory,
   reconcileConversationLog,
   withConversationIdentity,
+  MAX_ASSISTANT_MESSAGE_CHARS,
 } = require('./agent-conversation-log')
 
 const AGENTS = [
@@ -161,7 +162,7 @@ function normalizeMessage(raw, options = {}) {
   if (!raw || typeof raw !== 'object') return null
   const role = raw.role
   if (!['user', 'assistant', 'tool'].includes(role)) return null
-  const text = String(raw.text || '').slice(0, role === 'tool' ? 24000 : 12000)
+  const text = String(raw.text || '').slice(0, role === 'tool' ? 24000 : MAX_ASSISTANT_MESSAGE_CHARS)
   const trace = Array.isArray(raw.trace)
     ? raw.trace.map(normalizeTraceEvent).filter(Boolean).slice(-MAX_TRACE_EVENTS)
     : []
@@ -185,6 +186,12 @@ function normalizeMessage(raw, options = {}) {
     const protocolVersion = Number(raw.protocolVersion)
     if (Number.isInteger(protocolVersion) && protocolVersion > 0) message.protocolVersion = protocolVersion
     if (raw.answerHash) message.answerHash = String(raw.answerHash).slice(0, 128)
+    // A persisted V2 answer is already canonical. Keep this marker available
+    // after reload so replayed answer.committed events cannot create a second
+    // visible answer before the in-memory reducer state is rebuilt.
+    if (message.protocolVersion === 2 && message.answerHash && text.trim()) {
+      message.v2AnswerCommitted = true
+    }
   }
   if (role === 'tool') {
     message.toolCallId = String(raw.toolCallId || '').slice(0, 160)

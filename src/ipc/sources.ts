@@ -40,8 +40,8 @@ function registerSourcesIpc(ipcMain, deps) {
   ipcMain.handle('sources-add-local', async (e) => {
     const parent = BrowserWindow.fromWebContents(e.sender)
     const opts = {
-      title: '选择本地内容文件夹',
-      properties: ['openDirectory'],
+      title: '打开或新建本地项目',
+      properties: ['openDirectory', 'createDirectory'],
     }
     const { canceled, filePaths } = parent
       ? await dialog.showOpenDialog(parent, opts)

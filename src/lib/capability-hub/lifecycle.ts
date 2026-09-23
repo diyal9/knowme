@@ -850,13 +850,17 @@ function createCapabilityLifecycle(deps) {
       const kind = String(payload.kind || 'skill').trim()
       const staged = stageMinimalPackage(getUserData(), kind, payload)
       if (!staged.ok) return staged
-      const result = importApi.importFromFolder(staged.stagingPath, {
-        source: 'custom',
-        id: payload.id,
-        trustConfirmed: true,
-        riskConfirmed,
-      })
-      return publishImportedEntry(result)
+      try {
+        const result = importApi.importFromFolder(staged.stagingPath, {
+          source: 'custom',
+          id: payload.id,
+          trustConfirmed: true,
+          riskConfirmed,
+        })
+        return publishImportedEntry(result)
+      } finally {
+        try { fs.rmSync(staged.stagingPath, { recursive: true, force: true }) } catch { /* best effort */ }
+      }
     }
 
     return fail('unsupported_source', `不支持的导入来源: ${source}`)

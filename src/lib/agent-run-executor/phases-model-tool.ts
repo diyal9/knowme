@@ -29,6 +29,7 @@ const { MAX_ACTIVE_SKILLS, MAX_RESOURCE_PAGES, MAX_RESOURCE_CHARS, REACTIVATION_
   readSkillActivationRefs, skillActivationRef, revalidateSkillActivations } = require('./skill-checkpoint')
 const { approvalRecoveryContext } = require('./approval-recovery')
 const { buildGroundingRepairContext } = require('../agent-grounding-repair')
+const logger = require('../logger')
 const {
   buildQualityAuditInstruction,
   parseQualityAudit,
@@ -43,6 +44,11 @@ const {
 // bounded capacity for audit -> rewrite -> independent re-audit after that
 // recovery, without reopening the ordinary model/tool loop.
 const MAX_FINALIZATION_MODEL_CALLS = 4
+
+function yieldToEventLoop() {
+  if (typeof setImmediate !== 'function') return Promise.resolve()
+  return new Promise(resolve => setImmediate(resolve))
+}
 
 function artifactType(value) {
   if (!value || typeof value !== 'object') return ''
@@ -174,9 +180,14 @@ async function runModelToolLoop(deps) {
   ].filter(Boolean).join('\n')
   // Keep the raw execution log and its actual user anchor stable. Only provider
   // copies are compacted; internal observations never become a new user turn.
-  const completeWithinBudget = (request, additionalInstructions = []) => {
+  const completeWithinBudget = async (request, additionalInstructions = []) => {
+    // Context fitting is synchronous by design, but it can scan a large
+    // transcript and tool-result payload. Give Electron one scheduling turn
+    // before doing that work so the window can repaint and process input.
+    await yieldToEventLoop()
     let fitted
     try {
+      const fitStartedAt = Date.now()
       fitted = fitToolRoundRequest(request, {
       currentInput,
       protectedToolCallIds,
@@ -189,6 +200,19 @@ async function runModelToolLoop(deps) {
         calibrationFactor: llmUsage.getCalibration(tokenCalKey).factor,
       }),
       })
+      const fitDurationMs = Date.now() - fitStartedAt
+      if (fitDurationMs >= 250) {
+        try {
+          logger.warn('llm', 'context-fit-slow', '模型上下文整理耗时过长', {
+            durationMs: fitDurationMs,
+            inputMessages: Array.isArray(request.messages) ? request.messages.length : 0,
+            fittedMessages: Array.isArray(fitted.messages) ? fitted.messages.length : 0,
+            inputChars: Array.isArray(request.messages)
+              ? request.messages.reduce((sum, item) => sum + String(item?.content || '').length, 0)
+              : 0,
+          })
+        } catch { /* diagnostics must not affect generation */ }
+      }
     } catch (error) {
       if (!/budget_exceeded$|current_input_anchor_missing/.test(error?.code || '')) throw error
       metrics.contextBudgetError = { code: error.code, message: error.message, details: error.details || null }
@@ -199,7 +223,12 @@ async function runModelToolLoop(deps) {
       loaded: fitted.tools.length, loadedNames: fitted.tools.map(tool => tool.function.name),
       omitted: Math.max(0, (metrics.toolSurface?.available || 0) + 1 - fitted.tools.length),
       schemaTokens: fitted.schemaTokens }
-    if (JSON.stringify(fitted.messages) !== JSON.stringify(request.messages)) {
+    // Do not stringify both full message arrays just to update an advisory
+    // metric. Large retrieved documents made this comparison itself a major
+    // main-process pause; a length/compaction signal is sufficient here.
+    if (fitted.messages.length !== request.messages.length
+      || fitted.omittedMessages > 0
+      || fitted.historyCompaction) {
       metrics.contextCompactions = (metrics.contextCompactions || 0) + 1
     }
     for (const activation of activeSkills.values()) activation.delivered = true

@@ -2,6 +2,33 @@
   "version": 1,
   "updatedAt": "2026-08-19T00:00:00.000Z",
   "entries": [
+    {
+      "id": "agent-registry-operations",
+      "kind": "skill",
+      "name": "能力治理",
+      "description": "统一创建、优化、评估和治理 KnowMe 的 Agent 与 Skill。",
+      "version": "1.5.0",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["能力治理"],
+      "tags": ["agent", "skill", "registry", "evaluation", "governance"],
+      "featured": false,
+      "bundlePath": "skills/agent-registry-operations"
+    },
+    {
+      "id": "agent-operations",
+      "kind": "expert",
+      "name": "能力管家",
+      "description": "负责 KnowMe Agent 与 Skill 的创建、优化、测试、评估、发布和生命周期治理。",
+      "version": "1.4.1",
+      "avatar": "office/agent-operations",
+      "source": "curated",
+      "trust": "bundled",
+      "categories": ["软件研发"],
+      "tags": ["agent", "skill", "operations", "evaluation", "governance"],
+      "featured": true,
+      "bundlePath": "experts/agent-operations"
+    },
 {
   "id": "frontend-design",
   "kind": "skill",
@@ -40,12 +67,6 @@
   "featured": false,
   "bundlePath": "skills/imagegen-frontend-web"
 },
-    {
-      "id": "content-strategy-method", "kind": "skill", "name": "内容策略与效果验证",
-      "description": "将受众证据转成内容承诺、受资源约束的安排和可复核的效果判断。",
-      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
-      "tags": ["content", "strategy", "verification"], "featured": false, "bundlePath": "skills/content-strategy-method"
-    },
     {
       "id": "creative-concept-method", "kind": "skill", "name": "创意机制与媒介验证",
       "description": "比较有实质差异的表达机制，形成适合指定媒介的创意交接和阅读验证。",
@@ -148,22 +169,10 @@
       "tags": ["data", "report", "verification"], "featured": false, "bundlePath": "skills/data-report-method"
     },
     {
-      "id": "longform-editing-method", "kind": "skill", "name": "长文结构与事实编辑",
-      "description": "将草稿与素材编辑成论证完整、事实受控、语气一致的长文，并保持引语、篇幅与修订连续性。",
-      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
-      "tags": ["writing", "editing", "evidence"], "featured": false, "bundlePath": "skills/longform-editing-method"
-    },
-    {
       "id": "meeting-evidence-method", "kind": "skill", "name": "会议证据与纪要整理",
       "description": "从会议正文中区分提议、决议、分歧与行动项，保留时间位置、材料缺口和原文依据。",
       "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["日常办公"],
       "tags": ["meeting", "minutes", "evidence"], "featured": false, "bundlePath": "skills/meeting-evidence-method"
-    },
-    {
-      "id": "decision-presentation-method", "kind": "skill", "name": "决策型汇报设计",
-      "description": "围绕决策动作组织汇报主线、逐页大纲与讲解要点，控制证据、备选、页数和时间预算。",
-      "version": "1.0.0", "source": "curated", "trust": "bundled", "categories": ["内容写作"],
-      "tags": ["presentation", "decision", "evidence"], "featured": false, "bundlePath": "skills/decision-presentation-method"
     },
     {
       "id": "product-definition-method", "kind": "skill", "name": "产品定义与验收设计",
@@ -182,64 +191,6 @@
       "description": "建立来源台账、稳定标识、去重冲突规则、生命周期和真实检索验证。",
       "version": "1.1.0", "source": "curated", "trust": "bundled", "categories": ["知识研究"],
       "tags": ["knowledge", "curation", "retrieval"], "featured": false, "bundlePath": "skills/knowledge-curation-method"
-    },
-    {
-      "id": "capability-import-assurance", "kind": "skill", "name": "外部能力导入与就绪验证",
-      "description": "控制来源完整性、依赖闭包、权限差异、确认、安装回执、运行就绪度和回滚。",
-      "version": "1.1.0", "source": "curated", "trust": "bundled", "categories": ["软件研发"],
-      "tags": ["import", "migration", "readiness"], "featured": false, "bundlePath": "skills/capability-import-assurance"
-    },
-    {
-      "id": "office-requirement-doc",
-      "kind": "skill",
-      "name": "写需求文档",
-      "description": "根据用户材料撰写结构化需求文档初稿，包含背景、范围、验收标准与风险。",
-      "version": "1.0.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["产品与研究", "内容写作"],
-      "tags": ["office", "requirement", "prd"],
-      "featured": true,
-      "bundlePath": "skills/office-requirement-doc"
-    },
-    {
-      "id": "office-document",
-      "kind": "skill",
-      "name": "写办公文档",
-      "description": "根据场景和材料撰写通知、汇报、周报、纪要等可发送办公文稿。",
-      "version": "1.0.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["日常办公", "内容写作"],
-      "tags": ["office", "document", "writing"],
-      "featured": true,
-      "bundlePath": "skills/office-document"
-    },
-    {
-      "id": "office-document-finalize",
-      "kind": "skill",
-      "name": "排版定稿",
-      "description": "统一文档结构、列表、行动项并整理为可直接发送或评审的定稿。",
-      "version": "1.0.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["日常办公", "内容写作"],
-      "tags": ["office", "document", "finalize"],
-      "featured": false,
-      "bundlePath": "skills/office-document-finalize"
-    },
-    {
-      "id": "office-outline-draft",
-      "kind": "skill",
-      "name": "按提纲成稿",
-      "description": "根据标题、提纲和要点扩写为完整文稿，并补齐段落与过渡。",
-      "version": "1.0.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["日常办公", "内容写作"],
-      "tags": ["office", "outline", "draft"],
-      "featured": false,
-      "bundlePath": "skills/office-outline-draft"
     },
     {
       "id": "feishu-meeting-summary",
@@ -307,36 +258,6 @@
       "bundlePath": "skills/code-review"
     },
     {
-      "id": "office-partner",
-      "kind": "expert",
-      "name": "办公协作专家",
-      "description": "以办公写作、会议纪要和行动项三种模式完成可追溯的协作交付。",
-      "version": "2.4.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["日常办公"],
-      "tags": ["office", "partner"],
-      "skills": ["office-collaboration-method", "meeting-evidence-method", "action-extraction", "writing-polish", "feishu-meeting-summary", "feishu-related-chats", "feishu-today-priority", "feishu-doc-kb"],
-      "connectors": ["feishu"],
-      "knowledgeRefs": ["feishu.meetings", "feishu.im", "feishu.docs", "feishu.wiki"],
-      "featured": true,
-      "bundlePath": "experts/office-partner"
-    },
-    {
-      "id": "product-manager",
-      "kind": "expert",
-      "name": "产品经理",
-      "description": "以产品定义、用户研究和需求评审三种模式推进产品决策与交付。",
-      "version": "2.6.0",
-      "source": "curated",
-      "trust": "bundled",
-      "categories": ["产品与研究"],
-      "tags": ["product", "requirement", "research", "review"],
-      "skills": ["product-definition-method", "requirement-review", "research-evidence-analysis", "writing-polish"],
-      "featured": true,
-      "bundlePath": "experts/product-manager"
-    },
-    {
       "id": "image-producer",
       "kind": "expert",
       "name": "生图执行专家",
@@ -348,12 +269,6 @@
       "tags": ["visual", "image", "production"],
       "featured": true,
       "bundlePath": "experts/image-producer"
-    },
-    {
-      "id": "data-analyst", "kind": "expert", "name": "数据分析师",
-      "description": "以数据分析、商业洞察和数据报告三种模式交付可复核的分析与决策依据。",
-      "version": "2.4.3", "source": "curated", "trust": "bundled", "categories": ["数据分析"],
-      "tags": ["data", "analysis", "business", "insight", "report"], "skills": ["data-analysis-method", "business-metrics-analysis", "business-cause-analysis", "business-insight-report", "data-report-method", "writing-polish"], "featured": true, "bundlePath": "experts/data-analyst"
     },
     {
       "id": "business-metrics-analysis", "kind": "skill", "name": "业务指标分析",
@@ -372,43 +287,6 @@
       "description": "将业务指标分析整理为可追溯的商业洞察报告，包含结论、证据、限制、优先级和行动建议。",
       "version": "1.1.0", "source": "curated", "trust": "bundled", "categories": ["数据分析", "内容写作"],
       "tags": ["business", "insight", "report"], "featured": true, "bundlePath": "skills/business-insight-report"
-    },
-    {
-  "id": "software-engineer",
-  "kind": "expert",
-  "name": "Web 开发专家",
-  "description": "聚焦网站与 Web 系统，以 HTML/CSS、Vue、React、TypeScript 完成前端设计、实现方案、代码审查与质量验证。",
-  "version": "3.2.7",
-  "source": "curated",
-  "trust": "bundled",
-  "categories": [
-    "软件研发"
-  ],
-  "tags": [
-    "web",
-    "html",
-    "css",
-    "vue",
-    "react",
-    "typescript",
-    "frontend"
-  ],
-  "skills": [
-    "frontend-design",
-    "imagegen-frontend-web",
-    "software-change-verification",
-    "architecture-decision",
-    "qa-test-design",
-    "code-review"
-  ],
-  "featured": true,
-  "bundlePath": "experts/software-engineer"
-},
-    {
-      "id": "research-analyst", "kind": "expert", "name": "研究分析师",
-      "description": "以研究综合、事实核查和知识策展三种模式产出可追溯、可维护的知识结论。",
-      "version": "2.4.0", "source": "curated", "trust": "bundled", "categories": ["知识研究"],
-      "tags": ["research", "evidence", "fact-check", "knowledge", "curation"], "skills": ["research-synthesis-method", "evidence-verification", "knowledge-curation-method", "knowledge-steward", "writing-polish"], "featured": true, "bundlePath": "experts/research-analyst"
     },
     {
       "id": "evidence-verification", "kind": "skill", "name": "证据核查",
@@ -713,7 +591,7 @@
     {
       "id": "operations-data-analyst",
       "kind": "expert",
-      "name": "运营数据分析专家·数据靓仔",
+      "name": "数据靓仔",
       "description": "复刻 th-BI 的运营分析协作体验，统一完成手游指标口径、埋点校验、数数查数、经营归因、报告导出和飞书填表。",
       "version": "1.1.1",
       "source": "curated",

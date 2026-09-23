@@ -10,12 +10,16 @@ const { mapCatalogItemToHub } = require('../src/lib/capability-hub/map')
 const { importFromFolder } = require('../src/lib/capability-import')
 
 const root = path.join(__dirname, '../src/catalog/experts')
+const activeExpertIds = new Set(JSON.parse(fs.readFileSync(path.join(__dirname, '../src/catalog/catalog.json'), 'utf8'))
+  .entries.filter(entry => entry.kind === 'expert')
+  .map(entry => entry.id))
 const manifest = routes => ({ schemaVersion: 3, id: 'display-example', kind: 'expert', name: '导入专家', version: '1.0.0', metadata: { knowme: { execution: { routes } } } })
 
 describe('expert display contract at authoring and import boundaries', () => {
   it('projects every real bundled route consistently without IDs or silent truncation', () => {
     let count = 0
     for (const directory of fs.readdirSync(root)) {
+      if (!activeExpertIds.has(directory)) continue
       const file = path.join(root, directory, 'capability.manifest.json')
       if (!fs.existsSync(file)) continue
       const raw = JSON.parse(fs.readFileSync(file, 'utf8'))
@@ -35,7 +39,7 @@ describe('expert display contract at authoring and import boundaries', () => {
       }
       count += declared.length
     }
-    assert.ok(count >= 26)
+    assert.ok(count >= 7)
   })
 
   it('normalizes legacy labels idempotently while preserving custom labels and execution fields', () => {

@@ -2,6 +2,7 @@
 
 const externalWorkflowRecipes = require('../lib/external-workflow-recipes')
 const { createAgentToolRuntime } = require('../lib/agent-tool-runtime')
+const { createAgentSessionStore } = require('../lib/agent-session-store')
 
 /**
  * 本机专家团队运行时、Agent Package 解析与会话 store。
@@ -18,6 +19,7 @@ ctx.ensureAgentTeamRuntime = function ensureAgentTeamRuntime() {
     const store = new ctx.AgentRunStore({
         rootDir: ctx.path.join(ctx.app.getPath('userData'), 'agent-runs'),
         strictSecrets: true,
+        asyncWrites: true,
     });
     let manager = null;
     const messageBus = new ctx.AgentMessageBus({
@@ -55,6 +57,9 @@ ctx.ensureAgentTeamRuntime = function ensureAgentTeamRuntime() {
             const expertId = String(spec.expertId || '').trim();
             if (!expertId)
                 return { ok: false, code: 'unknown_agent', message: '缺少子 Agent/Expert 标识' };
+            const lifecycleGate = ctx.ensureCapabilityHub().canStartExpert?.(expertId);
+            if (lifecycleGate && !lifecycleGate.ok)
+                return { ok: false, code: lifecycleGate.code || 'agent_unavailable', message: lifecycleGate.error || lifecycleGate.message || `Agent 当前不可用: ${expertId}` };
             const loaded = ctx.ensureCapabilityHub().expertRuntime().loadExpert(expertId);
             return loaded.ok
                 ? { ok: true }
@@ -399,6 +404,9 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
     const factory = async (childCtx) => {
         const childRunId = String(childCtx.runId || '');
         const expertId = String(childCtx.expertId || '').trim();
+        const lifecycleGate = ctx.ensureCapabilityHub().canStartExpert?.(expertId);
+        if (lifecycleGate && !lifecycleGate.ok)
+            throw new Error(lifecycleGate.error || lifecycleGate.message || `Agent 当前不可用: ${expertId}`);
         const expert = ctx.ensureCapabilityHub().expertRuntime().loadExpert(expertId);
         if (!expert.ok)
             throw new Error(expert.message || `未知 Agent: ${expertId}`);
@@ -534,6 +542,7 @@ ctx.createWorkbenchAgentPortFactory = function createWorkbenchAgentPortFactory({
             },
             loadAgentSessions: ctx.loadAgentSessions,
             saveAgentSessions: ctx.saveAgentSessions,
+            saveAgentSessionsAsync: ctx.saveAgentSessionsAsync,
             productMemoryCapture: () => { },
             memoryDir: ctx.MEMORY_DIR,
             normalizeAssistantOutput: ctx.normalizeAssistantOutput,
@@ -599,27 +608,35 @@ ctx.loadSettings = () => {
     };
 };
 ctx.saveSettings_ = s => ctx.settingsSecure.save(ctx.SETTINGS_FILE, s);
+const agentSessionStore = createAgentSessionStore({
+    fs: ctx.fs,
+    path: ctx.path,
+    legacyFile: ctx.AGENT_SESSIONS_FILE,
+    rootDir: ctx.path.join(ctx.app.getPath('userData'), 'agent-sessions'),
+    taskFile: ctx.WORKBENCH_TASKS_FILE,
+    agentSessions: ctx.agentSessions,
+});
 ctx.loadAgentStore = function loadAgentStore() {
-    try {
-        const raw = JSON.parse(ctx.fs.readFileSync(ctx.AGENT_SESSIONS_FILE, 'utf8'));
-        return ctx.agentSessions.migrateStore(raw);
-    }
-    catch {
-        return ctx.agentSessions.migrateStore({ sessions: [], ui: {} });
-    }
+    return agentSessionStore.load();
 };
 ctx.loadAgentSessions = function loadAgentSessions() {
     return ctx.loadAgentStore().sessions;
 };
 ctx.saveAgentStore = function saveAgentStore(sessions, ui) {
-    const normalized = sessions.map((s, i) => ctx.agentSessions.compactSession(s, i + 1).session);
-    const nextUi = ctx.agentSessions.normalizeUi(ui, normalized);
-    ctx.fs.writeFileSync(ctx.AGENT_SESSIONS_FILE, JSON.stringify({ sessions: normalized, ui: nextUi }, null, 2), 'utf8');
-    return { sessions: normalized, ui: nextUi };
+    return agentSessionStore.save(sessions, ui);
 };
 ctx.saveAgentSessions = function saveAgentSessions(sessions) {
     const { ui } = ctx.loadAgentStore();
     ctx.saveAgentStore(sessions, ui);
+};
+ctx.saveAgentSessionsAsync = async function saveAgentSessionsAsync(sessions) {
+    const { ui } = ctx.loadAgentStore();
+    // The session store exposes an async checkpoint path specifically for the
+    // model loop. Legacy IPC and startup callers keep the synchronous API.
+    if (typeof agentSessionStore.saveAsync === 'function') {
+        return agentSessionStore.saveAsync(sessions, ui);
+    }
+    return ctx.saveAgentStore(sessions, ui);
 };
 ctx.ensureAgentSession = function ensureAgentSession(sessionId, agentId = 'general', opts = {}) {
     const { sessions, ui } = ctx.loadAgentStore();

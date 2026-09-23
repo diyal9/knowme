@@ -121,7 +121,7 @@ describe('workflow supply collection', () => {
       verticals: official,
       agents: experts,
     })
-    assert.equal(result.packages.filter(item => item.source === 'official').length, 3)
+    assert.equal(result.packages.filter(item => item.source === 'official').length, 1)
     assert.ok(result.packages.every(item => !['office-meeting-to-actions', 'engineering-delivery', 'visual-brief-to-export'].includes(item.id)))
   })
 
@@ -172,6 +172,27 @@ describe('workflow supply collection', () => {
     assert.equal(pkg.origin, 'daemon')
     assert.equal(pkg.readiness.runnable, true)
     assert.equal(pkg.readiness.backend, 'daemon')
+  })
+
+  it('retires the daemon daily Feishu summary while leaving personal workflows untouched', () => {
+    const result = supply({
+      daemon: {
+        online: true,
+        workflows: [
+          { id: 'daily-summary', name: '飞书日常总结', agentIds: ['office-partner'] },
+          { id: 'daemon-flow', name: '专业流程', agentIds: ['producer'] },
+        ],
+      },
+      personal: [{
+        id: 'my-daily-summary', name: '飞书日常总结', source: 'personal', status: 'published',
+        executionBackends: ['local-team'], agentRefs: [{ id: 'producer' }],
+        graph: { nodes: [{ id: 'run', type: 'agent', agentPackageId: 'producer' }], edges: [] },
+      }],
+      agents: [{ id: 'producer' }],
+    })
+    assert.equal(result.packages.some(item => item.id === 'daily-summary'), false)
+    assert.ok(result.packages.some(item => item.id === 'daemon-flow'))
+    assert.ok(result.packages.some(item => item.id === 'my-daily-summary'))
   })
 
   it('reports daemon workflows as unavailable while offline', () => {

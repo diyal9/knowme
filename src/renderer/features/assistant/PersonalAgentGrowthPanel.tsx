@@ -141,61 +141,90 @@ export function PersonalAgentGrowthPanel({
   async function saveProfile() {
     if (!profile || saving) return
     setSaving(true)
-    const result = await window.api?.personalAgentSave?.({
-      identity: { displayName, avatar }, roleOverlay: soul, promptOverlay: collaborationPreference,
-      taskPreferences: {
-        ...(profile.taskPreferences || {}),
-        domainCapabilities,
-        selfDriveLevel,
-        selfDriveRules,
-      },
-    })
-    setSaving(false)
-    if (!result?.ok) {
-      setNotice(result?.error || '保存失败')
-      return
+    try {
+      const result = await window.api?.personalAgentSave?.({
+        identity: { displayName, avatar }, roleOverlay: soul, promptOverlay: collaborationPreference,
+        taskPreferences: {
+          ...(profile.taskPreferences || {}),
+          domainCapabilities,
+          selfDriveLevel,
+          selfDriveRules,
+        },
+      })
+      if (!result?.ok) {
+        setNotice(result?.error || '保存失败')
+        return
+      }
+      setEditingField(null)
+      setProfile(result.profile || profile)
+      setNotice('伙伴档案已保存')
+      void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '保存失败')
+    } finally {
+      setSaving(false)
     }
-    setEditingField(null)
-    setProfile(result.profile || profile)
-    setNotice('伙伴档案已保存')
-    void load()
   }
 
   async function teach() {
     const text = teaching.trim()
     if (!text) return
-    const result = await window.api?.personalAgentTeach?.({ text })
-    if (!result?.ok) {
-      setNotice(result?.error || '教导失败')
-      return
+    try {
+      const result = await window.api?.personalAgentTeach?.({ text })
+      if (!result?.ok) {
+        setNotice(result?.error || '教导失败')
+        return
+      }
+      setTeaching('')
+      setNotice(result.requiresConfirmation ? '已放入变更确认列表' : '已经记住，可在记录中撤销')
+      void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '教导失败')
     }
-    setTeaching('')
-    setNotice(result.requiresConfirmation ? '已放入变更确认列表' : '已经记住，可在记录中撤销')
-    void load()
   }
 
   async function reviewProposal(proposalId: string, action: 'apply' | 'reject') {
-    const result = await window.api?.personalAgentApplyProposal?.({ proposalId, action, confirmedRisk: action === 'apply' })
-    setNotice(result?.ok ? (action === 'apply' ? '变更已应用' : '变更已忽略') : (result?.error || '处理失败'))
-    void load()
+    try {
+      const result = await window.api?.personalAgentApplyProposal?.({ proposalId, action, confirmedRisk: action === 'apply' })
+      setNotice(result?.ok ? (action === 'apply' ? '变更已应用' : '变更已忽略') : (result?.error || '处理失败'))
+      if (result?.ok) void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '处理失败')
+    }
   }
 
   async function undo(eventId: string) {
-    const result = await window.api?.personalAgentTeach?.({ undoEventId: eventId })
-    setNotice(result?.ok ? '已撤销这条记忆' : (result?.error || '撤销失败'))
-    void load()
+    try {
+      const result = await window.api?.personalAgentTeach?.({ undoEventId: eventId })
+      setNotice(result?.ok ? '已撤销这条记忆' : (result?.error || '撤销失败'))
+      if (result?.ok) void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '撤销失败')
+    }
   }
 
   async function reviewMemoryPattern(id: string, action: 'accepted' | 'dismissed') {
-    const result = await window.api?.memoryReviewPattern?.({ id, action })
-    setNotice(result?.ok === false ? (result.error || '处理失败') : (action === 'accepted' ? '已记住这项协作偏好' : '不会记住这项推测'))
-    void load()
+    try {
+      const result = await window.api?.memoryReviewPattern?.({ id, action })
+      if (!result?.ok) {
+        setNotice(result?.error || '处理失败')
+        return
+      }
+      setNotice(action === 'accepted' ? '已记住这项协作偏好' : '不会记住这项推测')
+      void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '处理失败')
+    }
   }
 
   async function removeGlobalMemory(id: string) {
-    const result = await window.api?.memoryGlobalRemove?.(id)
-    setNotice(result?.ok ? '已删除这条记忆' : (result?.error || '删除失败'))
-    if (result?.ok) void load()
+    try {
+      const result = await window.api?.memoryGlobalRemove?.(id)
+      setNotice(result?.ok ? '已删除这条记忆' : (result?.error || '删除失败'))
+      if (result?.ok) void load()
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : '删除失败')
+    }
   }
 
   function openGrowthAction(action: 'assistant' | 'workbench' | 'knowledge' | 'skill' | 'connector') {

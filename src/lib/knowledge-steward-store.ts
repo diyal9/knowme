@@ -29,19 +29,8 @@ function load(userData) {
   }
 }
 
-function waitForFileHandleRelease(milliseconds) {
-  const delay = Math.max(1, Number(milliseconds) || 1)
-  try {
-    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay)
-  } catch {
-    // Atomics.wait is an optional synchronous backoff; the next rename attempt
-    // still provides the useful fallback on runtimes without SharedArrayBuffer.
-  }
-}
-
 function renameWithRetry(source, target, options = {}) {
   const attempts = Math.max(1, Number(options.attempts) || 5)
-  const delayMs = Math.max(1, Number(options.delayMs) || 25)
   let lastError
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {
@@ -52,7 +41,8 @@ function renameWithRetry(source, target, options = {}) {
       const retryable = process.platform === 'win32'
         && ['EPERM', 'EACCES', 'EBUSY'].includes(String(error?.code || ''))
       if (!retryable || attempt === attempts - 1) throw error
-      waitForFileHandleRelease(delayMs * (attempt + 1))
+      // Do not use a synchronous sleep here: this runs on the Electron main
+      // thread. Retry immediately; callers already have a bounded attempt cap.
     }
   }
   throw lastError

@@ -41,6 +41,19 @@ describe('agent-output-assembler', () => {
     assert.equal(out.ui[0].items.length, 1)
   })
 
+  it('canonicalizes an explicit prose single-choice question into ui', () => {
+    const raw = [
+      '为了继续，我需要先确认范围。',
+      '问题：本次先聚焦哪个阶段？',
+      '选项：1. 定义与调优（完善已有草稿）；2. 测试与评估（验证失败场景）；3. 发布治理（上架或回滚）',
+    ].join('\n')
+    const out = canonicalize(raw, createAssembler())
+    assert.equal(out.text, '为了继续，我需要先确认范围。')
+    assert.equal(out.ui.length, 1)
+    assert.equal(out.ui[0].title, '本次先聚焦哪个阶段？')
+    assert.deepEqual(out.ui[0].items.map(item => item.label), ['定义与调优', '测试与评估', '发布治理'])
+  })
+
   it('strips invalid suggestion fences without leaking raw json', () => {
     const raw = '可见正文\n\n```suggestion\n{not json}\n```\n'
     const state = createAssembler()

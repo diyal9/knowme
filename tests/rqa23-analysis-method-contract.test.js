@@ -10,12 +10,10 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { createHash } = require('node:crypto')
 const { parseSkillFrontmatter, createSkillRuntime } = require('../src/lib/skill-runtime')
-const { createExpertRuntime } = require('../src/lib/expert-runtime')
 const { validateAndNormalizeManifest } = require('../src/lib/capability-manifest-v2')
 const { loadBundledCatalog } = require('../src/lib/capability-catalog')
 const { assembleCapabilityContext } = require('../src/lib/agent-context-assembly')
 const { buildSkillTools } = require('../src/lib/agent-skill-tools')
-const { resolveOutputSpec } = require('../src/lib/expert-execution-profile')
 
 const root = path.resolve(__dirname, '../src/catalog')
 const id = 'data-analysis-method'
@@ -109,28 +107,19 @@ it('RQA23 real L1 loads the entire method below existing 2400-char contract with
   assert.equal(deniedBudget.body, undefined)
 })
 
-it('RQA23 expert 2.4.3 selects core through ordinary route and assembles complete L1', () => {
-  const experts = createExpertRuntime({ capabilitiesRoot: root })
+it('RQA23 partner can explicitly invoke the downgraded method and assemble complete L1', () => {
   const skills = createSkillRuntime({ capabilitiesRoot: root })
-  const session = { id: 'rqa23-source-contract', expertId: 'data-analyst' }
-  const persona = experts.getSessionPersona(session.id, session.expertId)
-  assert.equal(persona.ok, true, persona.message)
-  assert.equal(persona.capabilityManifest.version, '2.4.3')
-  const dependencies = persona.capabilityManifest.dependencies.filter(item => item.kind === 'skill')
-  assert.deepEqual(dependencies.map(({ id, required }) => ({ id, required })), [
-    { id, required: true },
-    { id: 'business-metrics-analysis', required: true },
-    { id: 'business-cause-analysis', required: true },
-    { id: 'business-insight-report', required: true },
-    { id: 'data-report-method', required: true },
-    { id: 'writing-polish', required: false },
-  ])
-  const primary = { id: 'user-owned-output', title: 'Requested analysis', type: 'answer', required: true }
-  const spec = resolveOutputSpec({ brief: { goal: 'Analyze supplied records.', deliverables: [primary] } }, persona)
-  assert.deepEqual(spec.requiredSkills, [id])
-  assert.equal(spec.id, primary.id)
+  const session = { id: 'rqa23-source-contract', agentId: 'general', expertId: '' }
+  const expertRuntime = {
+    getSessionPersona: () => ({
+      ok: true,
+      persona: { name: 'KnowMe 伙伴' },
+      bindings: { skills: [id], connectors: [] },
+      capabilityManifest: {},
+    }),
+  }
   const context = assembleCapabilityContext({ session, prompt: 'Analyze supplied records.', tier: 'assist',
-    slashRefs: spec.requiredSkills, expertRuntime: experts, skillRuntime: skills })
+    slashRefs: [id], expertRuntime, skillRuntime: skills })
   assert.deepEqual(context.resolvedSlashIds, [id])
   assert.ok(context.skillL1Block.includes(parsed.body))
   assert.ok(context.skillL1Block.length < 2400, `wrapped L1=${context.skillL1Block.length}; do not expand budget`)

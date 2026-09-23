@@ -10,6 +10,7 @@ const grounding = require('../src/lib/agent-grounding-runtime')
 const feishu = require('../src/lib/feishu-grounding')
 const adapter = require('../src/lib/agent-grounding-feishu-adapter')
 const policy = require('../src/lib/context-engine/policy')
+const { buildConversationOutputStyleBlock } = require('../src/lib/assistant-prompt-router')
 
 const batch = JSON.parse(fs.readFileSync(path.join(__dirname,
   '../openspec/changes/production-qualify-all-experts/evidence/professional-batch2-inputs.json'), 'utf8'))
@@ -39,9 +40,9 @@ function loadEntry(name, libs) {
   return module.exports
 }
 
-function fixture({ prompt = meetingInput, conversationMode = 'expert-execution',
+function fixture({ prompt = meetingInput, conversationMode = 'expert-execution', agentId = 'custom-agent',
   contract = neutralContract, capabilityContract, referenceState, history = [] } = {}) {
-  let persisted = [{ id: 'intent-test', agentId: 'custom-agent', expertId: 'arbitrary-expert',
+  let persisted = [{ id: 'intent-test', agentId, expertId: 'arbitrary-expert',
     summary: '上轮上下文锚点：只核对已经提供的原文', referenceState, run: {}, messages: history }]
   let closed = 0
   const allowed = new Set()
@@ -60,7 +61,8 @@ function fixture({ prompt = meetingInput, conversationMode = 'expert-execution',
   const libs = {
     path, app: { getPath: () => __dirname },
     promptRouter: { normalizeMode: () => 'general', resolveScene: () => 'work',
-      buildScenePrompt: () => 'test scene', buildUserPrompt: () => '', buildSkillPrompt: () => '' },
+      buildScenePrompt: () => 'test scene', buildConversationOutputStyleBlock,
+      buildUserPrompt: () => '', buildSkillPrompt: () => '' },
     contextEngine: { ...policy,
       resolveContextPolicy: input => input,
       prepareContextSemanticSelection: async () => ({ telemetry: {}, vectorScores: {} }),
@@ -118,6 +120,19 @@ function fixture({ prompt = meetingInput, conversationMode = 'expert-execution',
     prepare: () => loadEntry('agent-generate-prepare', libs).prepareAgentGenerate(env),
     surface: prepared => loadEntry('agent-generate-tool-surface', libs).buildRunToolSurface(env, prepared) }
 }
+
+test('runtime adds the same formatting guidance to partner and expert conversations', async () => {
+  const partnerRun = fixture({ agentId: 'personal', conversationMode: '', prompt: '你好' })
+  const partnerPrepared = await partnerRun.prepare()
+  const partnerBlocks = partnerPrepared.contextDraft.blocks.filter(block => block.id === 'scene.conversation-output-style')
+  assert.equal(partnerBlocks.length, 1)
+  assert.match(partnerBlocks[0].content, /简短回答通常不加标题/)
+
+  const expertPrepared = await fixture().prepare()
+  const expertBlocks = expertPrepared.contextDraft.blocks.filter(block => block.id === 'scene.conversation-output-style')
+  assert.equal(expertBlocks.length, 1)
+  assert.match(expertBlocks[0].content, /简短回答通常不加标题/)
+})
 
 test('RQA10 frozen full input reaches the model boundary without an inferred external tool', async () => {
   assert.equal(feishu.detectFeishuIntent(meetingInput).asksRelatedChats, true, 'reproduce the original keyword collision')

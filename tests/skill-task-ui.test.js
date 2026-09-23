@@ -101,7 +101,7 @@ describe('skill-task-ui catalog fallback & precedence', () => {
       surfaces: ['empty', 'quick-menu'],
       prompt: 'skill prompt',
       ownerPackId: 'game-studio',
-      skillId: 'office-document',
+      skillId: 'writing-polish',
     }])
 
     const cards = ui.resolveEmptyStateCards('writing', writingPresets, map)
@@ -109,7 +109,7 @@ describe('skill-task-ui catalog fallback & precedence', () => {
     assert.equal(cards.length, 1)
     assert.equal(cards[0].title, 'Skill 办公文档')
     assert.equal(cards[0].dynamic, true)
-    assert.equal(cards[0].task.skillId, 'office-document')
+    assert.equal(cards[0].task.skillId, 'writing-polish')
   })
 
   it('quick menu merges dynamic tasks by group and overrides same id', () => {

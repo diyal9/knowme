@@ -13,6 +13,11 @@
   const ALLOWED = new Set(['fill', 'send', 'copy', 'open_link', 'open_knowledge'])
   const MAX_ITEMS = 6
   const OPEN_URL_RE = /^(?:https?:\/\/|mailto:|file:\/\/|knowme:\/\/)/i
+  const PLAIN_CHOICE_CUE_RE = /(?:^|\n)[ \t]*(?:#{1,6}[ \t]*)?(?:选项|可选项|候选项|options?|choices?)[ \t]*[:：][ \t]*/gim
+  const PLAIN_CHOICE_MARKER_RE = /(^|[\n；;])[ \t]*(\d{1,2})[.)、．][ \t]*/gm
+  const PLAIN_CHOICE_QUESTION_RE = /(?:问题|请问|请选择|请选|选择一项|选一个|您希望|你希望|哪一个|哪个|哪项|聚焦于哪|question|which|choose|select)/i
+  const PLAIN_MULTI_CHOICE_RE = /(?:多选|可选多项|选择(?:所有|全部|多个|两项|两种)|select all|choose all|multiple choice)/i
+  const PLAIN_CHOICE_INPUT_RE = /(?:其他|其它|自定义|补充|自行输入|手动输入|另行说明|以上都不是|other|custom)/i
 
   function normalizeSuggestionShape(data) {
     if (!data || typeof data !== 'object') return null
@@ -204,6 +209,142 @@
     return null
   }
 
+  function stripInlineMarkdown(text) {
+    return String(text || '')
+      .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/^[ \t]*[-*+][ \t]+/, '')
+      .replace(/[ \t]+/g, ' ')
+      .trim()
+  }
+
+  function questionBeforeChoice(source, cueStart) {
+    const before = source.slice(0, cueStart)
+    const lineStart = before.lastIndexOf('\n') + 1
+    const sameLine = before.slice(lineStart).trim()
+    if (sameLine && PLAIN_CHOICE_QUESTION_RE.test(sameLine)) {
+      const title = stripInlineMarkdown(sameLine)
+        .replace(/^(?:#{1,6}\s*)?(?:问题|请问|question)\s*[:：]\s*/i, '')
+        .trim()
+      return title ? { title, start: lineStart, end: cueStart } : null
+    }
+
+    const lines = [...before.matchAll(/(^|\n)([^\n]*)/g)]
+    for (let index = lines.length - 1; index >= 0; index--) {
+      const match = lines[index]
+      const raw = String(match[2] || '').trim()
+      if (!raw) continue
+      if (!PLAIN_CHOICE_QUESTION_RE.test(raw) && !/[?？]\s*$/.test(raw)) break
+      const title = stripInlineMarkdown(raw)
+        .replace(/^(?:#{1,6}\s*)?(?:问题|请问|question)\s*[:：]\s*/i, '')
+        .trim()
+      if (!title) return null
+      const start = Number(match.index || 0) + String(match[1] || '').length
+      return { title, start, end: start + String(match[2] || '').length }
+    }
+    return null
+  }
+
+  function choiceItemFromPlainText(raw, index) {
+    const source = String(raw || '').replace(/\s*(?:；|;)\s*$/, '').trim()
+    if (!source || source.length > 420) return null
+
+    let label = ''
+    let description = ''
+    const strong = source.match(/^(?:\*\*|__)(.+?)(?:\*\*|__)[ \t]*([\s\S]*)$/)
+    if (strong) {
+      label = stripInlineMarkdown(strong[1])
+      description = stripInlineMarkdown(strong[2])
+    } else {
+      const cleaned = stripInlineMarkdown(source)
+      const parenthetical = cleaned.match(/^(.{1,80}?)[ \t]*[（(]([\s\S]{2,})[）)]\s*$/)
+      const separated = cleaned.match(/^(.{1,80}?)[ \t]*(?:[:：]|[—–]\s+)[ \t]*([\s\S]{2,})$/)
+      if (parenthetical) {
+        label = parenthetical[1].trim()
+        description = parenthetical[2].trim()
+      } else if (separated) {
+        label = separated[1].trim()
+        description = separated[2].trim()
+      } else {
+        label = cleaned
+      }
+    }
+
+    label = label.replace(/[。；;]+$/, '').trim().slice(0, 100)
+    description = description.replace(/^[（(]|[）)]$/g, '').trim().slice(0, 240)
+    if (!label || label.length > 100) return null
+    const needsInput = PLAIN_CHOICE_INPUT_RE.test(`${label} ${description}`)
+    const selected = `我选择「${label}」${description ? `，即${description}` : ''}`
+    return {
+      id: `plain-choice-${index + 1}`,
+      label,
+      description,
+      action: needsInput ? 'fill' : 'send',
+      payload: needsInput ? `${selected}：` : `${selected}。请基于这个选择继续。`,
+    }
+  }
+
+  /**
+   * Recover a model-authored single-choice question that was emitted as prose
+   * instead of the suggestion protocol. Requiring an explicit option cue, a
+   * nearby question, and a contiguous 1..N sequence keeps ordinary numbered
+   * explanations as Markdown.
+   */
+  function inferPlainTextChoice(text) {
+    const source = String(text || '').replace(/\r\n/g, '\n')
+    const cues = [...source.matchAll(PLAIN_CHOICE_CUE_RE)]
+    for (let cueIndex = cues.length - 1; cueIndex >= 0; cueIndex--) {
+      const cue = cues[cueIndex]
+      const cueStart = Number(cue.index || 0)
+      const cueEnd = cueStart + String(cue[0] || '').length
+      const fencesBefore = source.slice(0, cueStart).match(/```/g)?.length || 0
+      if (fencesBefore % 2 === 1) continue
+
+      const question = questionBeforeChoice(source, cueStart)
+      const nearby = source.slice(Math.max(0, cueStart - 320), cueStart)
+      if (!question && !PLAIN_CHOICE_QUESTION_RE.test(nearby)) continue
+      if (PLAIN_MULTI_CHOICE_RE.test(`${question?.title || ''} ${nearby}`)) continue
+
+      const optionSource = source.slice(cueEnd)
+      const answerExample = optionSource.search(/(?:^|\n)[ \t]*(?:回答示例|回复示例|示例回答|answer(?: example)?|example)[ \t]*[:：]/im)
+      const paragraphBreak = optionSource.search(/\n[ \t]*\n/)
+      let optionEnd = optionSource.length
+      if (answerExample >= 0) optionEnd = Math.min(optionEnd, answerExample)
+      if (paragraphBreak >= 0) optionEnd = Math.min(optionEnd, paragraphBreak)
+      const optionBlock = optionSource.slice(0, optionEnd)
+      const markers = [...optionBlock.matchAll(PLAIN_CHOICE_MARKER_RE)]
+      if (markers.length < 2 || markers.length > MAX_ITEMS) continue
+      if (markers.some((marker, index) => Number(marker[2]) !== index + 1)) continue
+
+      const items = markers.map((marker, index) => {
+        const start = Number(marker.index || 0) + String(marker[0] || '').length
+        const end = index + 1 < markers.length ? Number(markers[index + 1].index || optionBlock.length) : optionBlock.length
+        return choiceItemFromPlainText(optionBlock.slice(start, end), index)
+      })
+      if (items.some(item => !item)) continue
+
+      let removeEnd = cueEnd + optionEnd
+      const afterOptions = source.slice(removeEnd)
+      const exampleLine = afterOptions.match(/^[\s\r\n]*(?:回答示例|回复示例|示例回答|answer(?: example)?|example)[ \t]*[:：][^\n]*(?:\n|$)/i)
+      if (exampleLine) removeEnd += exampleLine[0].length
+      const removeStart = question?.start ?? cueStart
+      const bodyWithoutBlock = `${source.slice(0, removeStart)}${source.slice(removeEnd)}`
+        .replace(/\n{3,}/g, '\n\n')
+        .trim()
+      return {
+        bodyWithoutBlock,
+        bar: {
+          title: question?.title || '请选择一项',
+          items,
+        },
+      }
+    }
+    return null
+  }
+
   function parseSuggestionBlock(text) {
     const src = String(text || '')
     const fence = findSuggestionFence(src)
@@ -236,6 +377,9 @@
     if (bare) {
       return { bodyWithoutBlock: stripRange(src, bare.start, bare.end), bar: bare.bar }
     }
+
+    const inferred = inferPlainTextChoice(src)
+    if (inferred) return inferred
 
     return { bodyWithoutBlock: src, bar: null }
   }
@@ -403,6 +547,7 @@
     ALLOWED,
     MAX_ITEMS,
     parseSuggestionBlock,
+    inferPlainTextChoice,
     hasIncompleteSuggestionFence,
     resolveOpenTarget,
     payloadNeedsUserEdit,

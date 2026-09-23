@@ -13,7 +13,6 @@ const DEFAULT_TERMINAL_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const DEFAULT_MAX_RUNS = 500
 const DEFAULT_RECEIPT_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const MAX_EVENT_LOG_BYTES = 50 * 1024 * 1024
-const RENAME_DELAYS_MS = [50, 100, 200]
 
 const SECRET_KEY_PATTERN = /token|authorization|password|secret|apikey|api_key|credential|bearer/i
 
@@ -37,8 +36,8 @@ function renameWithRetry(src, dest, fsImpl = fs, retries = 3) {
     } catch (err) {
       lastErr = err
       if (['EPERM', 'EACCES', 'EBUSY'].includes(err.code) && i < retries) {
-        const start = Date.now()
-        while (Date.now() - start < RENAME_DELAYS_MS[i]) { /* spin */ }
+        // Never spin on the Electron main process while a checkpoint file is locked.
+        // Persistent locks are returned to the caller instead of freezing the window.
         continue
       }
       break
@@ -125,6 +124,7 @@ class AgentRunStore {
    * @param {number} [opts.terminalTtlMs]
    * @param {number} [opts.maxRuns]
    * @param {number} [opts.receiptTtlMs]
+   * @param {boolean} [opts.asyncWrites] - queue event-log appends off the main thread
    */
   constructor(opts = {}) {
     if (!opts.rootDir) throw new Error('AgentRunStore requires rootDir')
@@ -135,9 +135,12 @@ class AgentRunStore {
     this.terminalTtlMs = Number.isFinite(opts.terminalTtlMs) ? opts.terminalTtlMs : DEFAULT_TERMINAL_TTL_MS
     this.maxRuns = Number.isFinite(opts.maxRuns) ? opts.maxRuns : DEFAULT_MAX_RUNS
     this.receiptTtlMs = Number.isFinite(opts.receiptTtlMs) ? opts.receiptTtlMs : DEFAULT_RECEIPT_TTL_MS
+    this.asyncWrites = opts.asyncWrites === true
     this.metrics = opts.metrics || createAgentRuntimeMetrics()
     this._seqCache = new Map()
     this._lastHashCache = new Map()
+    this._eventLogSizeCache = new Map()
+    this._pendingEventWrites = new Map()
   }
 
   runDir(runId) {
@@ -383,16 +386,41 @@ class AgentRunStore {
     if (!type) return { ok: false, code: 'missing_event_type', message: '事件缺少 type' }
 
     this.ensureRunDir(runId)
-    const existing = this.inspectEventLog(runId, { tolerateTruncatedTail: true })
-    if (!existing.ok) return existing
-    if (existing.tailTruncated) {
-      return {
-        ok: false,
-        code: 'event_log_tail_truncated',
-        message: 'Event log 尾部截断，须恢复/修复后才能继续追加',
+    const file = this.eventsPath(runId)
+    let cacheValid = Number.isFinite(this._seqCache.get(runId))
+      && this._lastHashCache.has(runId)
+      && Number.isFinite(this._eventLogSizeCache.get(runId))
+    if (cacheValid && !this._pendingEventWrites.has(runId)) {
+      try {
+        const stat = this.fs.existsSync(file) ? this.fs.statSync(file) : null
+        cacheValid = Number(stat?.size || 0) === this._eventLogSizeCache.get(runId)
+      } catch {
+        cacheValid = false
       }
     }
-    const expectedSeq = (this.readMaxSeq(runId) || 0) + 1
+    if (!cacheValid) {
+      // The first append (or an externally modified file) validates the chain
+      // once. Subsequent appends use the in-memory seq/hash/size cache instead
+      // of reparsing the whole JSONL file, which otherwise grows O(n^2).
+      const existing = this.inspectEventLog(runId, { tolerateTruncatedTail: true })
+      if (!existing.ok) return existing
+      if (existing.tailTruncated) {
+        return {
+          ok: false,
+          code: 'event_log_tail_truncated',
+          message: 'Event log 尾部截断，须恢复/修复后才能继续追加',
+        }
+      }
+      this._seqCache.set(runId, existing.lastGoodSeq || 0)
+      this._lastHashCache.set(runId, String(existing.lastHash || ''))
+      try {
+        const stat = this.fs.existsSync(file) ? this.fs.statSync(file) : null
+        this._eventLogSizeCache.set(runId, Number(stat?.size || 0))
+      } catch {
+        this._eventLogSizeCache.delete(runId)
+      }
+    }
+    const expectedSeq = (this._seqCache.get(runId) || 0) + 1
     const seq = Number.isFinite(event.seq) ? Number(event.seq) : expectedSeq
     if (seq !== expectedSeq) {
       return {
@@ -407,7 +435,7 @@ class AgentRunStore {
     const sanitized = sanitizePayload(event.payload, { strict: this.strictSecrets })
     if (!sanitized.ok) return sanitized
 
-    const prevHash = this.readLastEventHash(runId)
+    const prevHash = String(this._lastHashCache.get(runId) || '')
     const ts = event.ts || new Date().toISOString()
     const body = {
       v: STORE_VERSION,
@@ -426,20 +454,32 @@ class AgentRunStore {
     const record = { ...body, prevHash, recordHash }
 
     const line = `${JSON.stringify(record)}\n`
-    const file = this.eventsPath(runId)
     try {
-      const stat = this.fs.existsSync(file) ? this.fs.statSync(file) : null
-      if (stat && stat.size + line.length > MAX_EVENT_LOG_BYTES) {
+      const currentSize = Number(this._eventLogSizeCache.get(runId) || 0)
+      if (currentSize + line.length > MAX_EVENT_LOG_BYTES) {
         return { ok: false, code: 'log_truncated_cap', message: 'Event log 已达上限' }
       }
-      this.fs.appendFileSync(file, line, 'utf8')
+      if (this.asyncWrites && this.fs.promises?.appendFile) {
+        const previous = this._pendingEventWrites.get(runId) || Promise.resolve()
+        const write = previous.then(() => this.fs.promises.appendFile(file, line, 'utf8'))
+        // Keep the chain alive after an I/O failure; the in-memory run can
+        // still finish and the next append will retry instead of deadlocking.
+        this._pendingEventWrites.set(runId, write.catch(() => {}))
+      } else {
+        this.fs.appendFileSync(file, line, 'utf8')
+      }
     } catch (err) {
       return { ok: false, code: 'append_failed', message: String(err?.message || err) }
     }
 
     this._seqCache.set(runId, seq)
     this._lastHashCache.set(runId, recordHash)
+    this._eventLogSizeCache.set(runId, Number(this._eventLogSizeCache.get(runId) || 0) + line.length)
     return { ok: true, seq, recordHash, record }
+  }
+
+  async flush() {
+    await Promise.all([...this._pendingEventWrites.values()])
   }
 
   readState(runId) {
@@ -670,6 +710,7 @@ class AgentRunStore {
           evicted.push(item.runId)
           this._seqCache.delete(item.runId)
           this._lastHashCache.delete(item.runId)
+          this._eventLogSizeCache.delete(item.runId)
         } catch { /* skip */ }
       }
     }

@@ -66,7 +66,7 @@ export function ExpertDeliverableArtifact({
         <>
           {summaryFallback ? <p className="wb-artifact-fallback-note">完整产物暂时不可用，以下显示任务摘要。</p> : null}
           <article className={isReply ? 'wb-artifact-answer' : 'wb-artifact-sheet'} aria-label={`${isReply ? '回复' : expertArtifactKindLabel(artifactType)}内容`}>
-            <ContentView source={body} className="wb-artifact-content" />
+            <ContentView source={body} presentation={isReply ? 'conversation' : 'document'} className="wb-artifact-content" />
           </article>
         </>
       ) : (
