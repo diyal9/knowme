@@ -9,10 +9,11 @@ const FEISHU_READ_TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'feishu.meeting_inventory',
-      description: 'List the authorized user\'s recent meetings and read a bounded set of their Smart Minutes bodies in one call. Use this for requests that summarize or compare multiple recent meetings; it replaces repeated meeting_candidates + meeting_read calls and returns explicit partial failures.',
+      description: 'List the authorized user\'s meetings and read a bounded set of their Smart Minutes bodies in one call. For an explicitly requested calendar date (including yesterday), pass date as YYYY-MM-DD; date overrides days and searches only that day. Use days only for a rolling recent-day range. This replaces repeated meeting_candidates + meeting_read calls and returns explicit partial failures.',
       parameters: {
         type: 'object',
         properties: {
+          date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'Exact local calendar date to query. Use this for yesterday or any named date; takes precedence over days.' },
           days: { type: 'number', minimum: 1, maximum: 30 },
           max_meetings: { type: 'number', minimum: 1, maximum: 10 },
         },
@@ -25,10 +26,13 @@ const FEISHU_READ_TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'feishu.meeting_candidates',
-      description: 'Deterministic Feishu meeting workflow: list meetings the authorized user attended in the recent 3 natural days via vc +search (already identity-scoped), then hydrate each via vc +detail to get topic/time/minute_token. Returns candidates only; does not summarize bodies.',
+      description: 'List meetings the authorized user attended via vc +search, then hydrate each via vc +detail to get topic/time/minute_token. For an explicitly requested calendar date (including yesterday), pass date as YYYY-MM-DD to search only that date; use days only for a rolling recent-day range. Returns candidates only; does not summarize bodies.',
       parameters: {
         type: 'object',
-        properties: { days: { type: 'number', minimum: 1, maximum: 30 } },
+        properties: {
+          date: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$', description: 'Exact local calendar date to query. Use this for yesterday or any named date; takes precedence over days.' },
+          days: { type: 'number', minimum: 1, maximum: 30, description: 'Rolling recent-day window; ignored when date is supplied.' },
+        },
         additionalProperties: false,
       },
     },

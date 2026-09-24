@@ -27,6 +27,44 @@ describe('agent-stream', () => {
     }])
   })
 
+  it('recovers provider XML tool calls with arguments and hides their control markup', () => {
+    const raw = '<tool_call><function=feishu.meeting_candidates><parameter=date>2026-09-23</parameter></function></tool_call>'
+    const calls = parseTextToolCalls(raw)
+    assert.deepEqual(calls, [{
+      index: 0,
+      id: 'text_tool_1',
+      name: 'feishu.meeting_candidates',
+      arguments: JSON.stringify({ date: '2026-09-23' }),
+    }])
+    const snap = getStreamSnapshot({ content: raw, toolCalls: {}, hasReasoning: false, finishReason: 'stop', usage: null })
+    assert.equal(snap.content, '')
+    assert.deepEqual(snap.toolCalls, calls)
+  })
+
+  it('recovers an empty-argument XML call but never executes ordinary tool-like prose', () => {
+    const raw = '<tool_call><function=provider.tool></function></tool_call>'
+    assert.deepEqual(parseTextToolCalls(raw).map(call => [call.name, call.arguments]), [['provider.tool', '{}']])
+    assert.deepEqual(parseTextToolCalls('<function=provider.tool></function>'), [])
+  })
+
+  it('suppresses malformed provider tool markup rather than displaying raw control syntax', () => {
+    const snap = getStreamSnapshot({ content: '<tool_call><function=provider.tool>', toolCalls: {}, hasReasoning: false, finishReason: 'stop', usage: null })
+    assert.equal(snap.content.includes('<tool_call>'), false)
+    assert.match(snap.content, /无法识别的工具调用格式/)
+  })
+
+  it('hides tool control markup from interim stream snapshots before execution', () => {
+    const snap = getStreamSnapshot({
+      content: '<tool_call><function=provider.tool>',
+      toolCalls: {},
+      hasReasoning: false,
+      finishReason: null,
+      usage: null,
+    }, { parseTextTools: false })
+    assert.equal(snap.content, '')
+    assert.deepEqual(snap.toolCalls, [])
+  })
+
   it('does not recover ordinary code outside the explicit tool_code envelope', () => {
     assert.deepEqual(parseTextToolCalls('print(search_web(query="not a call"))'), [])
   })
@@ -115,6 +153,16 @@ describe('agent-stream', () => {
     feedSse(acc, payload.slice(8))
     flushSse(acc)
     assert.equal(getStreamSnapshot(acc).content, 'partial')
+  })
+
+  it('rejects an unterminated frame and oversized answer or tool arguments', () => {
+    assert.throws(() => feedSse(createStreamAccumulator(), 'x'.repeat(300 * 1024)), /单行事件超过安全上限/)
+    assert.throws(() => applySsePayload(createStreamAccumulator(), {
+      choices: [{ delta: { content: 'x'.repeat(1024 * 1024 + 1) } }],
+    }), /正文超过安全上限/)
+    assert.throws(() => applySsePayload(createStreamAccumulator(), {
+      choices: [{ delta: { tool_calls: [{ index: 0, function: { name: 'test', arguments: 'x'.repeat(300 * 1024) } }] } }],
+    }), /工具参数超过安全上限/)
   })
 
   it('applyCompletionJson supports non-SSE full response', () => {

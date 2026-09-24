@@ -41,6 +41,32 @@ function buildNoteDetailArgs(noteId) {
   return ['note', '+detail', '--note-id', String(noteId), '--as', 'user', '--format', 'json']
 }
 
+function nextIsoDate(value) {
+  const [year, month, day] = value.split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day + 1))
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+}
+
+function resolveMeetingDateRange({ date, days } = {}, now = new Date()) {
+  const requestedDate = String(date || '').trim()
+  if (requestedDate) {
+    const match = requestedDate.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (!match) return { ok: false, code: 'invalid_date', message: '会议日期必须使用 YYYY-MM-DD 格式。' }
+    const parsed = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])))
+    const normalized = `${parsed.getUTCFullYear()}-${String(parsed.getUTCMonth() + 1).padStart(2, '0')}-${String(parsed.getUTCDate()).padStart(2, '0')}`
+    if (normalized !== requestedDate) return { ok: false, code: 'invalid_date', message: '会议日期不是有效的自然日。' }
+    return { ok: true, date: requestedDate, days: 1, start: requestedDate, end: nextIsoDate(requestedDate) }
+  }
+  const count = Math.max(1, Math.min(30, Math.floor(Number(days || 3) || 3)))
+  return {
+    ok: true,
+    date: '',
+    days: count,
+    start: formatLocalDate(addDays(now, -(count - 1))),
+    end: formatLocalDate(addDays(now, 1)),
+  }
+}
+
 /** Parse the human-readable display_info blob returned by vc +search. */
 function parseMeetingDisplayInfo(info = '') {
   const lines = String(info || '').split(/\n+/).map(l => l.trim()).filter(Boolean)
@@ -111,13 +137,14 @@ function pickVcItems(payload) {
   return Array.isArray(list) ? list : []
 }
 
-function formatMeetingCandidates(items = [], days = 3, identity = null) {
+function formatMeetingCandidates(items = [], days = 3, identity = null, date = '') {
   const who = identity && identity.userName ? `（授权用户：${identity.userName}）` : ''
   const list = Array.isArray(items) ? items : []
+  const period = date ? `${date} 当天` : `最近 ${days} 个自然日内`
   if (!list.length) {
-    return `最近 ${days} 个自然日内未找到你参与的会议记录${who}。`
+    return `${period}未找到你参与的会议记录${who}。`
   }
-  const lines = [`最近 **${days}** 个自然日内找到 **${list.length}** 场你参与的会议${who}：`, '']
+  const lines = [`${date ? `**${date}** 当天` : `最近 **${days}** 个自然日内`}找到 **${list.length}** 场你参与的会议${who}：`, '']
   list.forEach((item, index) => {
     const time = item.meetingTime || '时间未知'
     const cardLabel = [
@@ -127,7 +154,11 @@ function formatMeetingCandidates(items = [], days = 3, identity = null) {
     ].filter(Boolean).join('｜')
     const card = item.url
       ? `[${cardLabel}](${item.url})`
-      : `${cardLabel}｜该会议未生成智能纪要`
+      : `${cardLabel}｜${item.locatorStatus === 'lookup_failed'
+        ? '飞书纪要详情查询失败，未能获得可读取链接'
+        : item.locatorStatus === 'document_missing'
+          ? '会议纪要详情未返回可读取的文档'
+          : '该会议没有可读取的智能纪要'}`
     lines.push(card)
     lines.push('')
   })
@@ -151,10 +182,18 @@ async function mapLimit(items = [], limit = 3, mapper) {
 
 async function resolveAssociatedNoteDocToken(noteId, opts = {}) {
   const id = String(noteId || '').trim()
-  if (!id) return ''
+  if (!id) return { token: '', status: 'not_requested' }
   const detail = await runLarkCliWithRetry(buildNoteDetailArgs(id), opts, { retries: 1 })
-  if (!detail.ok) return ''
-  return extractNoteDocToken(parseCliJsonOutput(detail.text))
+  if (!detail.ok) return {
+    token: '',
+    status: 'lookup_failed',
+    code: 'note_detail_failed',
+    message: normalizeCliErrorMessage(detail.message, detail.text, 'feishu.note_detail'),
+  }
+  const token = extractNoteDocToken(parseCliJsonOutput(detail.text))
+  return token
+    ? { token, status: 'resolved' }
+    : { token: '', status: 'document_missing', code: 'note_document_missing' }
 }
 
 function extractDocParticipants(content = '') {
@@ -180,10 +219,9 @@ function docContainsParticipant(content, identity) {
 }
 
 async function executeMeetingCandidates(args = {}, opts = {}) {
-  const days = Math.max(1, Math.min(30, Math.floor(Number(args.days || 3) || 3)))
-  const now = new Date()
-  const start = formatLocalDate(addDays(now, -(days - 1)))
-  const end = formatLocalDate(addDays(now, 1))
+  const range = resolveMeetingDateRange(args, opts.now instanceof Date ? opts.now : new Date())
+  if (!range.ok) return { ok: false, code: range.code, message: range.message, text: range.message }
+  const { date, days, start, end } = range
   const identity = await resolveCurrentUserIdentity(opts)
 
   // Feishu doc search does NOT index Smart Minutes meeting docs, and the
@@ -238,7 +276,8 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
     // VC meetings may have both a recording and a separate AI meeting-notes
     // Docx. Resolve note_id -> note_doc_token while building candidates so the
     // displayed link points to the actual meeting record when it exists.
-    const noteDocToken = noteId ? await resolveAssociatedNoteDocToken(noteId, opts) : ''
+    const noteLookup = await resolveAssociatedNoteDocToken(noteId, opts)
+    const noteDocToken = noteLookup.token
     return {
       meetingId: meeting.id,
       title: String(row.topic || meeting.topic || '').trim() || '(未命名会议)',
@@ -247,6 +286,10 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
       minuteToken,
       noteId,
       noteDocToken,
+      locatorStatus: minuteToken ? 'minute_token'
+        : ['lookup_failed', 'document_missing'].includes(noteLookup.status) ? noteLookup.status : 'no_artifact',
+      locatorErrorCode: noteLookup.code || '',
+      locatorErrorMessage: noteLookup.message || '',
       // The vc app_link is not a stable readable source and must never be
       // shown. Prefer the associated Docx; fall back to the minutes page.
       url: noteDocToken ? `${DOC_DOMAIN}${noteDocToken}` : (minuteToken ? `${MINUTES_DOMAIN}${minuteToken}` : ''),
@@ -257,12 +300,13 @@ async function executeMeetingCandidates(args = {}, opts = {}) {
   const top = candidates.slice(0, 10)
   return {
     ok: true,
-    text: formatMeetingCandidates(top, days, identity),
+    text: formatMeetingCandidates(top, days, identity, date),
     // `turnComplete` is a generic host-runtime contract: the tool has already
     // produced the complete user-facing result for this turn. Zero candidates
     // cannot feed the later read stage, so another model/tool round would only
     // duplicate work or invent a locator.
-    meta: { workflow: 'meeting_candidates', days, candidates: top, identity, turnComplete: top.length === 0 },
+    meta: { workflow: 'meeting_candidates', days, date: date || undefined, start, end,
+      candidates: top, identity, turnComplete: top.length === 0 },
   }
 }
 
@@ -435,9 +479,11 @@ async function executeMeetingRead(args = {}, opts = {}) {
 
 /** Enumerate and read a bounded meeting set in one host tool call. */
 async function executeMeetingInventory(args = {}, opts = {}) {
-  const days = Math.max(1, Math.min(30, Math.floor(Number(args.days || 3) || 3)))
+  const range = resolveMeetingDateRange(args, opts.now instanceof Date ? opts.now : new Date())
+  if (!range.ok) return { ok: false, code: range.code, message: range.message, text: range.message }
+  const { days, date } = range
   const maxMeetings = Math.max(1, Math.min(10, Math.floor(Number(args.max_meetings || 5) || 5)))
-  const discovered = await executeMeetingCandidates({ days }, opts)
+  const discovered = await executeMeetingCandidates({ days, date }, opts)
   if (!discovered.ok) return discovered
   const candidates = Array.isArray(discovered.meta?.candidates)
     ? discovered.meta.candidates.slice(0, maxMeetings)
@@ -458,7 +504,13 @@ async function executeMeetingInventory(args = {}, opts = {}) {
           ? { url: candidate.url }
           : null
     if (!locator) {
-      return { index, candidate, result: { ok: false, code: 'missing_locator', text: '该会议没有可读取的纪要链接。' } }
+      const code = candidate.locatorErrorCode || 'missing_locator'
+      const message = candidate.locatorStatus === 'lookup_failed'
+        ? `已找到会议，但飞书纪要详情查询失败，未能获得可读取链接。${candidate.locatorErrorMessage ? `原因：${candidate.locatorErrorMessage}` : ''}`
+        : candidate.locatorStatus === 'document_missing'
+          ? '已找到会议关联纪要，但飞书未返回可读取的纪要文档。'
+          : '已找到会议，但会议未生成可读取的智能纪要或纪要文档。'
+      return { index, candidate, result: { ok: false, code, message, text: message } }
     }
     return { index, candidate, result: await executeMeetingRead(locator, opts) }
   })
@@ -474,7 +526,7 @@ async function executeMeetingInventory(args = {}, opts = {}) {
     return [heading, meta, body].filter(Boolean).join('\n')
   })
   const text = [
-    `# 最近 ${days} 个自然日会议正文（${successful.length}/${candidates.length} 场读取成功）`,
+    `# ${date ? `${date} 当天` : `最近 ${days} 个自然日`}会议正文（${successful.length}/${candidates.length} 场读取成功）`,
     '',
     ...sections.flatMap(section => [section, '']),
   ].join('\n').trim()
@@ -484,7 +536,7 @@ async function executeMeetingInventory(args = {}, opts = {}) {
       code: failures[0]?.result?.code || 'meeting_inventory_read_failed',
       message: failures[0]?.result?.message || '已找到会议，但未能读取任何会议正文。',
       text,
-      meta: { workflow: 'meeting_inventory', days, candidates, readCount: 0, failureCount: failures.length },
+      meta: { workflow: 'meeting_inventory', days, date: date || undefined, candidates, readCount: 0, failureCount: failures.length },
     }
   }
   return {
@@ -493,6 +545,7 @@ async function executeMeetingInventory(args = {}, opts = {}) {
     meta: {
       workflow: 'meeting_inventory',
       days,
+      date: date || undefined,
       candidates,
       readCount: successful.length,
       failureCount: failures.length,
@@ -514,6 +567,7 @@ module.exports = {
   extractDocParticipants,
   docContainsParticipant,
   mapLimit,
+  resolveMeetingDateRange,
   executeMeetingCandidates,
   executeMeetingRead,
   executeMeetingInventory,

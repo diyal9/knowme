@@ -703,6 +703,33 @@ describe('feishu-cli allowlist builders', () => {
     assert.ok(searches.some(argv => argv.includes('--start') && argv.includes('--end')))
   })
 
+  it('queries only an explicitly requested calendar date, even when days=1', async () => {
+    const searches = []
+    const result = await executeMeetingCandidates({ date: '2026-09-23', days: 1 }, {
+      now: new Date('2026-09-24T12:00:00'),
+      spawnImpl: meetingWorkflowSpawn({
+        onVcSearch: argv => { searches.push(argv.slice()); return { data: { items: [] } } },
+      }),
+    })
+    assert.equal(result.ok, true)
+    assert.equal(result.meta.date, '2026-09-23')
+    assert.equal(result.meta.start, '2026-09-23')
+    assert.equal(result.meta.end, '2026-09-24')
+    assert.ok(result.text.includes('2026-09-23'))
+    assert.ok(searches.some(argv => argv.includes('--start') && argv[argv.indexOf('--start') + 1] === '2026-09-23'))
+    assert.ok(searches.some(argv => argv.includes('--end') && argv[argv.indexOf('--end') + 1] === '2026-09-24'))
+  })
+
+  it('rejects invalid explicit meeting dates before contacting Feishu', async () => {
+    let called = false
+    const result = await executeMeetingCandidates({ date: '2026-02-30' }, {
+      spawnImpl: () => { called = true; throw new Error('must not run') },
+    })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'invalid_date')
+    assert.equal(called, false)
+  })
+
   it('paginates meeting workflow with the CLI page-token flag', async () => {
     const seen = []
     const result = await executeMeetingCandidates({ days: 7 }, {
@@ -764,7 +791,23 @@ describe('feishu-cli allowlist builders', () => {
     assert.equal(result.ok, true)
     assert.equal(result.meta.candidates[0].url, '')
     assert.equal(result.text.includes('applink.feishu.cn'), false)
-    assert.ok(result.text.includes('未生成智能纪要'))
+    assert.ok(result.text.includes('没有可读取的智能纪要'))
+  })
+
+  it('distinguishes a meeting note record without a readable document locator', async () => {
+    const result = await executeMeetingInventory({ date: '2026-09-23' }, {
+      spawnImpl: spawnJson((argv) => {
+        if (argv.includes('auth') && argv.includes('status')) return IDENTITY_ME
+        if (argv[0] === 'vc' && argv[1] === '+search') return { data: { items: [{ id: 'm-note-missing', display_info: '项目会\n昨天 09:00 | 组织者：A', meta_data: {} }] } }
+        if (argv[0] === 'vc' && argv[1] === '+detail') return vcDetail({ meeting_id: 'm-note-missing', topic: '项目会', start_time: '2026-09-23 09:00', note_id: 'note-without-doc' })
+        if (argv[0] === 'note' && argv[1] === '+detail') return { data: { note: { note_id: 'note-without-doc' } } }
+        return { data: {} }
+      }),
+    })
+    assert.equal(result.ok, false)
+    assert.equal(result.code, 'note_document_missing')
+    assert.match(result.text, /未返回可读取的纪要文档/)
+    assert.equal(result.meta.date, '2026-09-23')
   })
 
   it('reads a meeting body via minute_token', async () => {

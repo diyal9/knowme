@@ -324,6 +324,9 @@ function normalizeCliErrorMessage(message, stdoutText = '', toolName = '') {
     if (/meeting_read|minutes|minute_token/i.test(out)) {
       return '飞书权限不足：请补齐妙记/会议纪要读取权限（minutes:minutes.search:read）后重试。'
     }
+    if (/note_detail|note \+detail|note_id/i.test(out)) {
+      return '飞书权限不足：当前用户无法读取这场会议关联的纪要详情或文档，请确认纪要/文档的访问权限。'
+    }
     return '飞书权限不足：请补齐 docs/wiki 搜索读取权限后重试。'
   }
   if (/internal error|please retry|try again|服务器繁忙|系统繁忙|\b50[0-3]\b/i.test(out)) {
