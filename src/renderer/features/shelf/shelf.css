@@ -1060,7 +1060,7 @@
   padding:var(--space-4) var(--space-6) var(--space-6) var(--space-4);
   border-color:var(--border-subtle);
 }
-.wb-workflow-detail-head { padding-bottom:var(--space-5); border-bottom:0; }
+.wb-workflow-detail-head { padding-bottom:var(--space-7); border-bottom:0; }
 .wb-workflow-detail-mark { background:var(--surface-subtle); color:var(--text-secondary); }
 .wb-workflow-detail-title { gap:var(--space-3); }
 .wb-workflow-detail-title h1 { overflow-wrap:anywhere; }
@@ -1082,7 +1082,7 @@
 .wb-workflow-detail .wb-workflow-contract-flow > div:last-child { border-bottom:0; }
 .wb-workflow-detail .wb-workflow-contract-flow > div > .ico { color:var(--text-muted); }
 .wb-workflow-detail .wb-workflow-contract-flow span { color:var(--text-secondary); font:var(--type-support); }
-.wb-workflow-detail .wb-workflow-contract-flow strong { font:var(--type-support); overflow-wrap:anywhere; }
+.wb-workflow-detail .wb-workflow-contract-flow strong { font:var(--type-body); overflow-wrap:anywhere; }
 .wb-workflow-detail .is-contract > dl { margin-top:var(--space-4); }
 .wb-workflow-detail .is-contract > dl > div {
   padding:var(--space-2) 0;
@@ -1095,6 +1095,33 @@
 .wb-workflow-detail-actions .wb-modal-btn { min-height:var(--control-xl); justify-content:center; }
 .wb-workflow-detail-actions .wb-modal-btn.primary { width:100%; }
 .wb-workflow-detail .is-path { padding:var(--space-4) 0 0 var(--space-6); }
+.wb-workflow-path-caption { margin:var(--space-2) 0 0; color:var(--text-muted); font:var(--type-support); }
+.wb-workflow-layout-toggle {
+  min-height:var(--control-lg); padding-inline:var(--space-2); border:0;
+  border-radius:var(--radius-md); background:transparent; color:var(--text-secondary);
+  font:var(--type-support); cursor:pointer;
+}
+.wb-workflow-layout-toggle:hover { background:var(--surface-hover); color:var(--text-primary); }
+.wb-workflow-layout-toggle:focus-visible { outline:2px solid var(--action-primary); outline-offset:2px; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-scroll {
+  background-image:none;
+  background-color:var(--surface-subtle);
+}
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node-head strong { font:var(--type-card); }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node-body > b { font:var(--type-support); }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node.is-idle .wb-workflow-dag-state { visibility:hidden; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node.is-idle .wb-workflow-dag-node-head { grid-template-columns:24px minmax(0,1fr); }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node.is-idle .wb-workflow-dag-state { position:absolute; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-port { display:none; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-node-sequence {
+  left:calc(-1 * var(--space-3)); top:calc(50% - var(--space-3)); background:var(--surface-page);
+  color:var(--text-secondary); font-weight:var(--weight-medium);
+}
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node > button { box-shadow:var(--shadow-raised); }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node:is(:hover, :focus-within, .is-selected) { z-index:6; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node.is-boundary > button { box-shadow:var(--shadow-rest); }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node.is-current { transform:none; }
+.wb-workflow-detail.is-reading-layout .wb-workflow-dag-node-head { background:var(--surface-page); }
 .wb-workflow-detail .wb-workflow-preview-btn { min-height:var(--control-lg); }
 .wb-workflow-detail .wb-workflow-canvas-toolbar > span:first-child { color:var(--text-muted); }
 .wb-workflow-detail .wb-workflow-dag-scroll {
@@ -1211,29 +1238,6 @@
   flex-wrap:wrap;
   gap:var(--space-3);
   margin-bottom:var(--space-3);
-}
-.wb-shelf .project-scope-switch { flex-wrap:wrap; row-gap:var(--space-2); }
-.wb-shelf .project-scope-switch > span {
-  font:var(--type-meta);
-  margin-right:var(--space-2);
-  color:var(--text-muted);
-}
-.wb-shelf .project-scope-switch button {
-  min-height:var(--control-md);
-  border-color:var(--border-default);
-  background:var(--surface-page);
-  color:var(--text-secondary);
-  font-weight:var(--weight-medium);
-}
-.wb-shelf .project-scope-switch button.active {
-  border-color:var(--border-strong);
-  background:var(--action-primary-soft);
-  color:var(--action-primary);
-}
-.wb-shelf .project-scope-switch button:hover { background:var(--surface-hover); }
-.wb-shelf .project-scope-switch button:focus-visible {
-  outline:2px solid var(--action-primary);
-  outline-offset:2px;
 }
 .wb-shelf .wb-task-inbox-empty {
   min-height:144px;

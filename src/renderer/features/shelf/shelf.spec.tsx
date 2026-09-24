@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '../../app/AppShell'
 import { useAppStore } from '../../app/store'
@@ -152,7 +152,7 @@ describe('workbench-workflow-shelf', () => {
     expect(within(board).getByText('视觉产物运行')).toBeInTheDocument()
   })
 
-  it('uses the active project for workflow history and keeps all projects as a history-only scope', async () => {
+  it('follows the global active project without a duplicate history scope control', async () => {
     mockApi({
       workbenchLoad: async () => fixture,
       projectsList: async () => ({
@@ -183,10 +183,9 @@ describe('workbench-workflow-shelf', () => {
     await waitFor(() => expect(within(board).getByText('产品需求流')).toBeInTheDocument())
     expect(within(board).queryByText('研发交付流')).not.toBeInTheDocument()
 
-    const projectScope = screen.getByRole('group', { name: '工作流项目范围' })
-    expect(within(projectScope).getByText('产品项目')).toBeInTheDocument()
-    fireEvent.click(within(projectScope).getByRole('button', { name: '全部项目' }))
-    expect(within(board).getByText('产品需求流')).toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: '工作流项目范围' })).not.toBeInTheDocument()
+    act(() => useAppStore.setState({ activeProjectId: 'p2' }))
+    expect(within(board).queryByText('产品需求流')).not.toBeInTheDocument()
     expect(within(board).getByText('研发交付流')).toBeInTheDocument()
   })
 
@@ -294,7 +293,11 @@ describe('workbench-workflow-shelf', () => {
     expect(within(path).getByTestId('workflow-dag')).toBeInTheDocument()
     expect(within(path).getByTestId('workflow-canvas-start')).toHaveTextContent('开始节点')
     expect(within(path).getByTestId('workflow-canvas-end')).toHaveTextContent('结束节点')
+    expect(screen.getByTestId('workflow-detail')).toHaveClass('is-reading-layout')
+    fireEvent.click(within(path).getByRole('button', { name: '切换到原始布局' }))
     expect(within(path).getByTestId('workflow-canvas-node-producer')).toHaveStyle({ left: '92px', top: '174px' })
+    fireEvent.click(within(path).getByRole('button', { name: '切换到阅读布局' }))
+    expect(screen.getByTestId('workflow-detail')).toHaveClass('is-reading-layout')
     expect(screen.getAllByTestId('workflow-dag-edge')).toHaveLength(3)
     fireEvent.click(within(path).getByRole('button', { name: '预览流转' }))
     expect(within(path).getByTestId('workflow-canvas-start')).toHaveClass('is-current')
